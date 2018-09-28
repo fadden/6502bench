@@ -1,0 +1,47 @@
+; Copyright 2018 David Schmidt. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Source: SOS programmer's guide
+
+*SYNOPSIS SOS public addresses and constants.
+
+; SOS MLI function codes.
+*TAG SOS-MLI-Functions 
+
+SOS_REQUEST_SEG		= $40
+SOS_FIND_SEG		= $41
+SOS_CHANGE_SEG		= $42
+SOS_GET_SEG_INFO	= $43
+SOS_GET_SEG_NUM		= $44
+SOS_RELEASE_SEG		= $45
+
+SOS_QUIT		= $65
+
+SOS_READBLOCK		= $80
+SOS_WRITEBLOCK		= $81
+SOS_GET_TIME		= $82
+SOS_D_STATUS		= $82
+SOS_D_CONTROL		= $83
+SOS_GET_DEV_NUM		= $84
+SOS_D_INFO		= $85
+
+SOS_CREATE		= $C0
+SOS_DESTROY		= $C1
+SOS_RENAME		= $C2
+SOS_SET_FILE_INFO	= $C3
+SOS_GET_FILE_INFO	= $C4
+SOS_VOLUME		= $C5
+SOS_SET_PREFIX		= $C6
+SOS_GET_PREFIX		= $C7
+SOS_OPEN		= $C8
+SOS_NEWLINE		= $C9
+SOS_READFILE		= $CA
+SOS_WRITEFILE		= $CB
+SOS_CLOSE		= $CC
+SOS_FLUSH		= $CD
+SOS_SET_MARK		= $CE
+SOS_GET_MARK		= $CF
+SOS_SET_EOF		= $D0
+SOS_GET_EOF		= $D1
+SOS_SET_LEVEL		= $D2
+SOS_GET_LEVEL		= $D3

@@ -79,6 +79,23 @@
       }
     },
     {
+      "Name" : "Apple ///",
+      "GroupName" : "Apple",
+      "Cpu" : "6502",
+      "Speed" : "2",
+      "Description" : "Apple /// system, configured for SOS.",
+      "SymbolFiles" : [
+        "RT:Apple/A3-ROM.sym65",
+        "RT:Apple/A3-IO.sym65",
+        "RT:Apple/SOS.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+        "load-address":"0x2000"
+      }
+    },
+    {
       "Name" : "Atari 800",
       "GroupName" : "Atari",
       "Cpu" : "6502B",
