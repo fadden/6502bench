@@ -1,0 +1,40 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Source: Beneath Apple ProDOS
+
+*SYNOPSIS ProDOS 8 public addresses and constants.
+
+P8_MLI          @ $BF00     ;ProDOS MLI entry point
+
+; ProDOS 8 MLI function codes.
+*TAG ProDOS8-MLI-Functions 
+
+P8_ALLOC_INTERRUPT = $40
+P8_DEALLOC_INTERRUPT = $41
+P8_QUIT         = $65
+
+P8_READ_BLOCK   = $80
+P8_WRITE_BLOCK  = $81
+P8_GET_TIME     = $82
+
+P8_CREATE       = $C0
+P8_DESTROY      = $C1
+P8_RENAME       = $C2
+P8_SET_FILE_INFO = $C3
+P8_GET_FILE_INFO = $C4
+P8_ONLINE       = $C5
+P8_SET_PREFIX   = $C6
+P8_GET_PREFIX   = $C7
+P8_OPEN         = $C8
+P8_NEWLINE      = $C9
+P8_READ         = $CA
+P8_WRITE        = $CB
+P8_CLOSE        = $CC
+P8_FLUSH        = $CD
+P8_SET_MARK     = $CE
+P8_GET_MARK     = $CF
+P8_SET_EOF      = $D0
+P8_GET_EOF      = $D1
+P8_SET_BUF      = $D2
+P8_GET_BUF      = $D3

@@ -1,0 +1,1177 @@
+********************************
+*                              *
+* ZipGS Control Program        *
+* By Andy McFadden             *
+* v1.0  11-Dec-91              *
+* v1.1  14-Dec-91              *
+*                              *
+* Merlin assembler format      *
+*                              *
+* This program is in the       *
+* public domain.               *
+*                              *
+********************************
+         lst   off
+
+*
+* This program uses the "lean & mean" approach to
+* screen displays.  Not much choice if we want to
+* split the colors; we have to do all processing in
+* the vbl period.  Tough to modify, but hey, that's
+* life in the big city.
+*
+
+         XC               ;allow 65c02 opcodes
+         XC               ;allow 65c816 opcodes
+
+*
+* Zero page
+*
+tmp      equ   $00
+ptr      equ   $02
+ptr2     equ   $04
+
+*
+* Firmware equates
+*
+kbd      equ   $c000
+clr80col equ   $c000      ;disable 80-column store
+clr80vid equ   $c00c      ;disable 80-column hardware
+clraltchar equ $c00e      ;normal lc, flashing UC
+clrkbd   equ   $c010
+tbcolor  equ   $c022      ;low 4 are bkgnd, hi 4 are text
+vertcnt  equ   $c02e      ;vertical line counter
+click    equ   $c030
+cyareg   equ   $c036      ;controls speed, shadowing
+rom      equ   $c082
+
+*
+* ZipGS equates
+* (the choice of names is arbitrary and occasionally misleading)
+*
+reset    equ   $c058      ;R=nop, W=force reset
+options  equ   $c059      ;R/W=bit options
+lock     equ   $c05a      ;R=get speed, W=lock/unlock
+enable   equ   $c05b      ;R=bit options, W=enable card
+slotenab equ   $c05c      ;R/W=slot/speaker enable
+speed    equ   $c05d      ;R=bank, W=set speed
+tag1     equ   $c05e      ;(stuff)
+tag2     equ   $c05f      ;(stuff)
+
+*
+* Monitor equates
+*
+setreset equ   $fb6f
+bell     equ   $fbdd
+home     equ   $fc58
+wait     equ   $fca8
+prbyte   equ   $fdda
+setkbd   equ   $fe89
+setvid   equ   $fe93
+monitor  equ   $ff59
+
+
+*
+* Program
+*
+         org   $2000      ;this is a SYS file
+         jmp   startup
+
+         dfb   $ee        ;ProDOS startup protocol
+         dfb   $ee
+         dfb   $41        ;65 bytes of space
+stval    dfb   $00        ;we look here+1 (this is len)
+         ds    $40
+
+startup
+         lda   rom
+         sta   clr80col   ;disable 80-col store
+         sta   clr80vid   ;disable 80-col hardware
+         sta   clraltchar ;disable MouseText
+         lda   clrkbd
+         jsr   setkbd
+         jsr   setvid
+         jsr   home
+
+* unlock the ZipGS registers
+         lda   #$50
+         sta   lock
+         sta   lock
+         sta   lock
+         sta   lock
+
+* check the startup protocol stuff
+         lda   stval+1
+         beq   :nostartup
+         ora   #$80       ;set hi bit
+         cmp   #$e0
+         blt   :isupper1
+         sec
+         sbc   #$20       ;convert to upper case
+:isupper1
+         cmp   #"E"       ;enable?
+         bne   :noten
+         stz   enable
+         brl   quit
+:noten
+         cmp   #"D"       ;disable?
+         bne   :notdi
+         stz   lock
+         brl   quit
+:notdi                    ;unknown; ignore it
+:nostartup
+
+
+* initialize variables and the screen
+         lda   lock
+         and   #$f0
+         lsr   A
+         lsr   A
+         lsr   A
+         lsr   A
+         sta   zip_lock
+         sta   ent_lock
+         lda   enable
+         sta   zip_enb
+         sta   ent_enb
+         lda   slotenab
+         sta   zip_slot
+         sta   ent_slot
+         lda   options
+         sta   zip_opts
+         sta   ent_opts
+
+* enable the zip, and set it to max speed
+         stz   enable     ;enable
+         stz   speed      ;100%
+
+* draw initial screen
+         lda   tbcolor
+         sta   cc1
+         sta   cc2
+
+         jsr   calc_speed
+         jsr   draw_scrn
+         jsr   draw_speed
+         jsr   draw_opts
+         jsr   draw_slot
+
+:loop
+         jsr   color_scrn
+         lda   kbd
+         cmp   #$e0
+         blt   :isupper
+         sec
+         sbc   #$20       ;convert to upper case
+:isupper
+         cmp   #"!"       ;secret option
+         bne   :notbang
+         lda   zip_cyc+1
+         jsr   prbyte
+         lda   zip_cyc
+         jsr   prbyte
+         bra   :loop
+:notbang
+         cmp   #"D"
+         bne   :notD
+         lda   #$10
+         tsb   zip_enb    ;mark as disabled (1)
+         jsr   draw_opts  ;update options
+         bra   :loop
+:notD
+         cmp   #"E"
+         bne   :notE
+         lda   #$10
+         trb   zip_enb    ;mark as enabled (0)
+         jsr   draw_opts  ;update options
+         bra   :loop
+:notE
+         cmp   #$8a       ;down arrow
+         beq   :isslow
+         cmp   #$88       ;left arrow
+         bne   :notslow
+:isslow  lda   zip_lock
+         inc   A
+         cmp   #$10       ;at max?
+         beq   :loop      ;yes, don't update
+         sta   zip_lock
+         jsr   draw_speed
+         bra   :loop
+:notslow
+         cmp   #$8b       ;up arrow
+         beq   :isfast
+         cmp   #$95       ;right arrow
+         bne   :notfast
+:isfast  lda   zip_lock
+         dec   A
+         bmi   :loop      ;under 0, don't update
+         sta   zip_lock
+         jsr   draw_speed
+         bra   :loop
+:notfast
+         cmp   #"B"
+         bne   :notb
+         lda   zip_opts
+         eor   #$80
+         sta   zip_opts
+         jsr   draw_opts
+         bra   :loop
+:notb
+         cmp   #"P"
+         bne   :notp
+         lda   zip_opts
+         eor   #$40
+         sta   zip_opts
+         jsr   draw_opts
+         brl   :loop
+:notp
+         cmp   #"A"
+         bne   :nota
+         lda   zip_opts
+         eor   #$20
+         sta   zip_opts
+         jsr   draw_opts
+         brl   :loop
+:nota
+         cmp   #"C"
+         bne   :notc
+         lda   zip_opts
+         eor   #$10
+         sta   zip_opts
+         jsr   draw_opts
+         brl   :loop
+:notc
+         cmp   #"F"
+         bne   :notf
+         lda   zip_opts
+         eor   #$08
+         sta   zip_opts
+         jsr   draw_opts
+         brl   :loop
+:notf
+         cmp   #"S"
+         bne   :nots
+         lda   zip_slot
+         eor   #$01
+         sta   zip_slot
+         jsr   draw_slot
+         brl   :loop
+:nots
+         cmp   #"1"
+         blt   :notnum
+         cmp   #"8"
+         bge   :notnum
+         sec
+         sbc   #"0"       ;convert "1"-"7" to 1-7
+         tax
+         lda   #$01
+:sloop   asl   A          ;want bits 1-7 in mask
+         dex
+         bne   :sloop
+         sta   tmp
+         lda   zip_slot   ;no toggle the slot status
+         eor   tmp
+         sta   zip_slot
+         jsr   draw_slot
+         brl   :loop
+:notnum
+         cmp   #$8d       ;carriage return
+         bne   :notret
+         jsr   update_zip ;write stuff to zip
+         bra   quit
+:notret
+         cmp   #$9b       ;escape
+         bne   :notesc
+         lda   ent_enb    ;restore entry values
+         sta   zip_enb
+         lda   ent_lock
+         sta   zip_lock
+         lda   ent_slot
+         sta   zip_slot
+         lda   ent_opts
+         sta   zip_opts
+         jsr   update_zip
+         bra   quit
+:notesc
+* unknown key; make a tiny noise
+* (don't forget, we're still in the vbl!)
+         lda   click
+         lda   #$01
+         jsr   wait
+         lda   click
+
+         brl   :loop
+
+*
+* Quit to ProDOS
+*
+quit
+         lda   #$a0
+         sta   lock       ;lock the registers
+         sta   clrkbd
+         jsr   home
+
+         jsr   $bf00      ;execute MLI Quit call
+         dfb   $65
+         dw    Quit_p
+Quit_p   dfb   $04
+         dfb   0,0,0,0,0,0,0,0
+
+*
+* Make changes
+*
+update_zip
+         lda   zip_enb
+         and   #$10       ;clear all but board disable
+         beq   :enab
+         stz   lock       ;disable board
+         bra   :cont
+:enab    stz   enable     ;enable board
+
+:cont    lda   zip_lock   ;get current speed
+         asl   A          ;shift it back
+         asl   A
+         asl   A
+         asl   A
+         sta   speed      ;set speed
+
+         lda   zip_opts
+         sta   options
+         lda   zip_slot
+         sta   slotenab
+         rts
+
+
+*
+* Draw the initial screen
+*
+draw_scrn
+* Embed the cache size in the static string
+         lda   enable
+         and   #$03       ;only want low two bits
+         asl   A
+         tay              ;two bytes/entry
+         lda   :cache_tab,y
+         sta   statline+12
+         iny
+         lda   :cache_tab,y
+         sta   statline+13
+
+* draw the rest of the display
+:drawit
+         lda   #<:screen_data
+         sta   ptr
+         lda   #>:screen_data
+         sta   ptr+1
+
+:loop
+         lda   (ptr)
+         sta   ptr2
+         ldy   #$01
+         lda   (ptr),y
+         sta   ptr2+1
+         beq   :done
+
+         clc              ;need Y-reg to start at 0
+         lda   ptr
+         adc   #$02
+         sta   ptr
+         lda   ptr+1
+         adc   #$00
+         sta   ptr+1
+         dey              ;back to zero
+
+:txtloop
+         lda   (ptr),y
+         beq   :txtdone
+         sta   (ptr2),y
+         iny
+         bra   :txtloop
+:txtdone
+         iny              ;advance ptr according to Y
+         tya              ;(could have >256 bytes of data)
+         clc
+         adc   ptr
+         sta   ptr
+         lda   ptr+1
+         adc   #$00
+         sta   ptr+1
+         bra   :loop
+
+:done
+         rts
+
+* table of cache sizes
+:cache_tab
+         asc   " 8163264"
+
+* initial screen data
+:screen_data
+         dw    $500+1     ;line 1, column 1
+         asc   "ZipGS Control  v1.1   By Andy McFadden",00
+         dw    $680+1     ;line 5, column 1
+statline asc   "Your    MHz/  K ZipGS is ",00
+dr_enab  equ   $680+26
+         dw    $780+5
+         asc   "Slot 1:",00
+         dw    $428+5
+         asc   "Slot 2:",00
+         dw    $4a8+5
+         asc   "Slot 3:",00
+         dw    $528+5
+         asc   "Slot 4:",00
+         dw    $780+21
+         asc   "Slot 5:",00
+         dw    $428+21
+         asc   "Slot 6:",00
+         dw    $4a8+21
+         asc   "Slot 7:",00
+         dw    $528+21
+         asc   "Speakr:",00
+         dw    $628+1
+         asc   "Bank Switch LC cache:",00
+dr_optb  equ   $628+23
+         dw    $6a8+1
+         asc   "Paddle Delay:",00
+dr_optp  equ   $6a8+15
+         dw    $6a8+21
+         asc   "AppleTalk Dl:",00
+dr_opta  equ   $6a8+35
+         dw    $728+1
+         asc   "Counter Del :",00
+dr_optc  equ   $728+15
+         dw    $728+21
+         asc   "Follow CPS  :",00
+dr_optf  equ   $728+35
+         dw    $4d0+3
+         asc   "[                                ]",00
+dr_spdbar equ  $4d0+4
+         dw    $550+0
+         asc   "________________________________________",00
+         dw    $650+3     ;line 19, column 2
+         asc   "E:Enable  D:Disable  Arrows:Speed",00
+         dw    $6d0+3     ;line 20, column 2
+         asc   "1-7:Slot  S:Speaker  BPACF:Option",00
+         dw    $750+1     ;line 22, column 1
+         asc   "Return stores and exits, Escape aborts",00
+
+         dw    0          ;end of list
+
+*
+* Draw speed-related info
+* (percent, MHz, the speed bar, etc)
+*
+draw_speed
+* insert percent of max into speed bar
+         lda   zip_lock   ;get current zip speed
+         asl   A
+         asl   A
+         asl   A          ;want it x8
+         tay
+         ldx   #$00
+:ploop   lda   :perc_tab,y
+         sta   :speed+5,x
+         iny
+         inx
+         cpx   #$06       ;6 chars each
+         blt   :ploop
+
+* print MHz
+         clc
+         xce
+         rep   #$30       ;16 bits for both
+         mx    %00
+         lda   zip_mhz
+         and   #$00ff     ;ignore zip_mhz+1
+         xba              ;mult * 256
+         sta   tmp
+         lsr   A
+         lsr   A
+         lsr   A
+         lsr   A          ;now only x16
+         sta   ptr
+
+         lda   zip_lock   ;for each tick, drop 1/16th
+         and   #$00ff
+         tax
+         inx
+         lda   tmp
+:subloop dex
+         beq   :subdone   ;don't subtract on 100%
+         sec
+         sbc   ptr
+         bra   :subloop
+
+:subdone sta   tmp        ;now result = MHz * 256
+         ldx   #$00a0
+         stx   ptr        ;leftmost char
+         and   #$ff00
+         cmp   #$0a00
+         blt   :ok
+         sec
+         sbc   #$0a00     ;subtract 10
+         ldx   #"1"
+         stx   ptr
+:ok
+         clc
+         adc   #"0"*256
+         ora   ptr        ;put space or 1 on left
+         sta   :speed+18  ;(16-bit store)
+
+* We got the whole number okay, now we need the
+* fractional percentage.  This burns a few cycles
+* here...  not pretty neither.  What we want to do
+* is convert 0-255 in the low byte of tmp to 0-99.
+*
+* We count 0-255 or less, incrementing twice every five,
+* and subtracting one every 64.  We get roughly 0-99.
+* This is reasonably accurate, within +/- .02.
+
+         sep   #$30       ;short acc, short xy
+         mx    %11
+         sec              ;return to emulation mode
+         xce
+
+         stz   ptr
+         lda   tmp        ;exactly zero?
+         beq   :iszero
+
+         ldy   #$05       ;counting 5-1, from first
+         lda   #$02
+         sta   ptr        ;result; start at two
+         lda   #$00
+         sed              ;how often do you see this?
+:xloop
+         inc   A
+         sta   ptr+1      ;save counter
+         and   #$3f       ;divisible by 64?
+         bne   :not64     ;nope
+         lda   ptr
+         sec
+         sbc   #$01       ;have to sbc for decimal mode
+         sta   ptr
+:not64
+         dey
+         bne   :not5
+         lda   ptr
+         clc
+         adc   #$02       ;add two
+         sta   ptr
+         ldy   #$05       ;reset Y
+:not5
+         lda   ptr+1
+         cmp   tmp        ;the base 16 fraction
+         blt   :xloop
+
+         cld              ;very important!
+
+:iszero
+         lda   ptr        ;now that we've got it,
+         tax              ; store it.
+         and   #$f0
+         lsr   A
+         lsr   A
+         lsr   A
+         lsr   A
+         clc
+         adc   #"0"
+         sta   :speed+21
+         txa
+         and   #$0f
+         clc
+         adc   #"0"
+         sta   :speed+22
+
+* draw the speed thermometer bar
+         lda   #$10
+         sec
+         sbc   zip_lock
+         tax              ;now x has 1=6.25%, 10=100%
+         lda   #$3f       ;inverse mode AND mask
+         sta   tmp        ;AND mask
+         ldy   #$00
+:bloop
+         lda   :speed,y
+         and   tmp
+         sta   dr_spdbar,y
+         iny
+         lda   :speed,y
+         and   tmp
+         sta   dr_spdbar,y
+         iny
+         dex
+         bne   :not0
+         lda   #$ff       ;X hit 0, so switch to normal
+         sta   tmp
+:not0    cpy   #32        ;2 * 16 settings
+         blt   :bloop
+         rts
+
+* table of percentages, padded to 8 bytes each
+:perc_tab
+         asc   "100.00",0000
+         asc   " 93.75",0000
+         asc   " 87.50",0000
+         asc   " 81.25",0000
+         asc   " 75.00",0000
+         asc   " 68.75",0000
+         asc   " 62.50",0000
+         asc   " 56.25",0000
+         asc   " 50.00",0000
+         asc   " 43.75",0000
+         asc   " 37.50",0000
+         asc   " 31.25",0000
+         asc   " 25.00",0000
+         asc   " 18.75",0000
+         asc   " 12.50",0000
+         asc   "  6.25",0000
+
+* text for speed bar
+:speed   asc   "     xxx.xx%      xx.xx MHZ     ",00
+
+
+*
+* Draw options
+* (enabled/disabled, external delay, etc)
+*
+draw_opts
+* Start with board enable/disable.  We do this one
+* specially (print "enabled." instead of "enab").
+* Easier to special case than do "right".
+         lda   zip_enb
+         and   #$10       ;want bit 4
+         beq   :enb
+
+         lda   #<:disabled_txt
+         sta   ptr
+         lda   #>:disabled_txt
+         sta   ptr+1
+         bra   :copy
+:enb
+         lda   #<:enabled_txt
+         sta   ptr
+         lda   #>:enabled_txt
+         sta   ptr+1
+
+:copy    ldy   #$00
+:loop    lda   (ptr),y
+         beq   :done
+         sta   dr_enab,y
+         iny
+         bra   :loop
+:done
+
+* now do each of the other five (bpacf)
+         lda   #<dr_optb
+         sta   ptr2
+         lda   #>dr_optb
+         sta   ptr2+1
+         lda   #$80
+         jsr   draw_enab
+
+         lda   #<dr_optp
+         sta   ptr2
+         lda   #>dr_optp
+         sta   ptr2+1
+         lda   #$40
+         jsr   draw_enab
+
+         lda   #<dr_opta
+         sta   ptr2
+         lda   #>dr_opta
+         sta   ptr2+1
+         lda   #$20
+         jsr   draw_enab
+
+         lda   #<dr_optc
+         sta   ptr2
+         lda   #>dr_optc
+         sta   ptr2+1
+         lda   #$10
+         jsr   draw_enab
+
+         lda   #<dr_optf
+         sta   ptr2
+         lda   #>dr_optf
+         sta   ptr2+1
+         lda   #$08
+         jmp   draw_enab
+
+:disabled_txt
+         asc   "disabled.",00
+:enabled_txt
+         asc   "enabled. ",00
+
+* draw_opts subroutine
+draw_enab
+         sta   tmp        ;save the mask
+         lda   zip_opts   ;get ZipGS options register
+         and   tmp        ;strip off the boring ones
+         bne   :enb       ;note: reverse of board enb
+
+         lda   #<:disb_txt
+         sta   ptr
+         lda   #>:disb_txt
+         sta   ptr+1
+         bra   :copy
+:enb
+         lda   #<:enab_txt
+         sta   ptr
+         lda   #>:enab_txt
+         sta   ptr+1
+
+:copy    ldy   #$03
+:loop    lda   (ptr),y
+         sta   (ptr2),y
+         dey
+         bpl   :loop
+
+         rts
+
+:enab_txt asc  "enab"
+:disb_txt asc  "disb"
+
+*
+* Draw slot info
+*
+draw_slot
+         ldx   #$00
+         lda   #$02       ;bit 2 = slot 1
+
+:loop
+         sta   tmp
+         lda   :dr_slot,x
+         sta   ptr
+         lda   :dr_slot+1,x
+         sta   ptr+1
+         lda   zip_slot
+         and   tmp
+         beq   :disb
+
+:enb     lda   #<:slow_txt
+         sta   ptr2
+         lda   #>:slow_txt
+         sta   ptr2+1
+         bra   :copy
+
+:disb    lda   #<:fast_txt
+         sta   ptr2
+         lda   #>:fast_txt
+         sta   ptr2+1
+
+:copy    ldy   #$03
+:cloop   lda   (ptr2),y
+         sta   (ptr),y
+         dey
+         bpl   :cloop
+         inx
+         inx
+         cpx   #16
+         bge   :done
+         lda   tmp
+         asl   A
+         bcc   :loop
+         lda   #$01       ;go back and do speaker delay
+         bra   :loop
+
+:done
+         rts
+
+:dr_slot
+         dw    $780+13    ;slot 1
+         dw    $428+13
+         dw    $4a8+13
+         dw    $528+13    ;...
+         dw    $780+29
+         dw    $428+29
+         dw    $4a8+29    ;slot 7
+         dw    $528+29    ;speaker delay
+
+:slow_txt asc  "Slow"
+:fast_txt asc  "Fast"
+
+
+*
+* Calculate the max ZipGS speed
+*
+* I pulled this out of the source for the Zip S16
+* program.  I don't pretend to understand most of
+* what this does.  If you figure it out, send me a
+* note...
+*
+calc_speed
+         clc
+         xce              ;set native mode
+         rep   #$30       ;16 bits
+         mx    %00
+
+         stz   :ascii     ;clear the output buffer
+         stz   :ascii+2
+         stz   :ascii+4
+         stz   :ascii+6
+         jsr   getspeed   ;do the actual speed calc
+
+         lda   result     ;result is decimal speed,
+         sta   zip_cyc    ; so convert to a decimal
+         pha              ; string
+         pea   $0000      ;hiaddr
+         pea   :ascii     ;loaddr
+         pea   $0006      ;length
+         pea   $0000      ;unsigned
+         ldx   #$260b     ;_Int2Dec
+         jsl   $e10000
+
+         sep   #$30       ;back to emulation mode
+         mx    %11
+         sec
+         xce
+
+* at this point, the buffer would contain "8005" for
+* a speed of 8.005.  This reduces it to "8.00".
+         ldy   #$ff
+:loop    iny
+         lda   :ascii,y   ;seek to end
+         cmp   #$00
+         bne   :loop
+
+         lda   #$20
+         sta   :ascii-1,y ;kill last char
+         sta   :ascii,y   ;extend length by one
+         lda   #$00
+         sta   :ascii+2,y
+
+         dey              ;now scoot the two decimal
+         ldx   #$02       ; places over by one to make
+:loop2   dey              ; room for the period
+         lda   :ascii,y
+         sta   :ascii+1,y
+         dex
+         bne   :loop2
+
+         lda   #$2e       ;stuff the decimal point in
+         sta   :ascii,y
+
+* now it's in a format which makes output nice.  We
+* want it in a numeric format too, so...
+         stz   zip_mhz    ;init to zero
+         lda   :ascii-2,y ;10s column
+         ora   #$80       ;set hi bit
+         sta   statline+5 ;stuff it into static string
+         cmp   #"1"       ;is it a 1 (not expecting 25)
+         bne   :lt10      ;yes, we're less than 10
+         lda   #10
+         sta   zip_mhz
+:lt10
+         lda   :ascii-1,y ;1s column
+         ora   #$80       ;set hi bit
+         sta   statline+6 ;stuff it
+         sec
+         sbc   #"0"       ;convert to numeric
+         clc
+         adc   zip_mhz    ;add to what we got already
+         sta   zip_mhz
+
+* (this was confusing... the speed bar assumes a max
+* speed of x.00, and goes from there.  If this showed
+* 9.10 MHz and the speed bar said 9.00 MHz, it wouldn't
+* make much sense.  Easier to omit it than explain it.)
+*
+* lda :ascii+1,y ;0.1 column
+* ora #$80
+* sta statline+8
+* lda :ascii+2,y :0.01 column
+* ora #$80
+* sta statline+9
+
+         rts
+
+:ascii   ds    10
+
+
+*
+* This is the meat of the speed calculator.
+*
+getspeed
+         mx    %00        ;still 16 bits on entry
+         stz   result
+
+* I think this forces the card to cache us
+         ldy   #$00ae
+:loop    lda   :loop,y
+         dey
+         bne   :loop
+
+         php
+         sei
+         sep   #$30
+         mx    %11        ;back to 8 bits
+
+* set up the board and /gs firmware
+         lda   cyareg
+         sta   :save_cya
+         and   #$7f       ;set slow mode (!)
+         sta   cyareg
+
+* lda #$5a
+* sta lock
+* sta lock
+* sta lock
+* sta lock
+         lda   #$00       ;FIX me
+         sta   speed      ;set 100% speed
+         sta   enable     ;enable board
+         lda   options
+         sta   :save_opts
+         and   #$d7       ;disable ext del, CPS
+         sta   options
+
+* now we do something weird
+         lda   #$80
+         sta   tag1       ;this is a no-op?
+         lda   #$00
+         sta   tag1       ; (should clear cshupd)
+
+* now we get down and get funky
+         rep   #$30
+         mx    %00
+         ldy   #$0064
+         ldx   #$0000
+
+:loop1   ldal  lock
+         bpl   :loop1
+:loop2   ldal  lock
+         bmi   :loop2
+:loop3   ldal  lock
+         bpl   :loop3
+
+:loop4   txa
+         ldx   #$0005
+:delay1  dex
+         bne   :delay1
+         nop
+         nop
+
+         clc
+         adc   #$0001
+         tax
+         ldal  lock
+         bmi   :loop4
+
+         dey
+         bne   :loop3
+
+         txa
+         clc
+         adc   #$0005
+         sta   result     ;ta-da!
+
+         sep   #$20
+         mx    %10        ;short a, long x
+         lda   :save_opts
+         sta   options
+         lda   :save_cya
+         sta   cyareg
+* lda #$a5
+* sta lock
+         rep   #$20
+         plp
+
+         rts
+
+:save_cya dfb  $00
+:save_opts dfb $00
+result   dw    $0000
+         mx    %11        ;short acc/regs after this
+
+
+*
+* Variable data stash
+*
+zip_mhz  dfb   $00        ;6-10 MHz
+zip_cyc  dw    $0000      ;raw #of cycles counted
+zip_enb  dfb   $00        ;what ENABLE should be
+zip_lock dfb   $00        ;what LOCK should look like (/16)
+zip_slot dfb   $00        ;what SLOTENAB should look like
+zip_opts dfb   $00        ;what OPTIONS should look like
+ent_enb  dfb   $00        ;ENABLE on entry
+ent_lock dfb   $00        ;LOCK on entry
+ent_slot dfb   $00        ;SLOTENAB on entry
+ent_opts dfb   $00        ;OPTIONS on entry
+
+
+********************************
+*                              *
+* Fancy text routines          *
+* (See FancyText demo for doc) *
+*                              *
+********************************
+color_scrn
+
+*
+* Colors are:
+*   $00 - Black              $08 - Brown
+*   $01 - Deep red           $09 - Orange
+*   $02 - Deep blue          $0a - Light gray
+*   $03 - Purple             $0b - Pink
+*   $04 - Dark green         $0c - Green
+*   $05 - Dark gray          $0d - Yellow
+*   $06 - Medium blue        $0e - Aquamarine
+*   $07 - Light blue         $0f - White
+*
+
+* setup
+         lda   #<color_data
+         sta   ptr
+         lda   #>color_data
+         sta   ptr+1
+         lda   tbcolor    ;save current text/background color
+         pha
+
+         lda   clrkbd     ;clear keyboard status
+
+* main loop
+:main_loop
+         lda   kbd        ;key hit?
+         bmi   :done      ;yup, exit
+
+         ldy   #$00
+         lda   (ptr),y    ;get count
+         beq   :main_loop ;count == 0, so wait for key
+
+         tax
+         iny
+
+* this is important part... shift bits around,
+* wait for right time, and change.
+
+:color_loop
+         lda   (ptr),y    ;get color
+         pha              ;save for later
+         iny
+
+         lda   (ptr),y    ;get line
+         asl   A          ;mult x4
+         asl   A          ;8 lines per, but one bit in horicnt
+         clc
+         adc   #$80       ;add 128, just because
+         iny
+
+:wait_loop                ;wait until scanner reaches line
+         cmp   vertcnt    ;4
+         bne   :wait_loop ;3
+
+         pla              ;3 found it, so change color
+         sta   tbcolor    ;4
+
+         dex              ;all done with changes?
+         bne   :color_loop ;nope, keep going
+
+* done with colors, so branch back to top of main loop
+         bra   :main_loop
+
+* all done, so restore color and exit
+:done
+         pla
+         sta   tbcolor
+         rts
+
+*
+* Data
+*
+color_data
+         dfb   $07        ;7 regions
+cc1      dfb   $00        ;to be set to current color
+         dfb   0          ;starting at line 0
+         dfb   $0f        ;black text/white bkgnd
+         dfb   1          ;starting at line 1
+         dfb   $f6        ;white text/blue bkgnd
+         dfb   4          ;starting at line 4
+         dfb   $d6        ;yellow text/blue bkgnd
+         dfb   17         ;starting at line 9
+         dfb   $c6        ;green text/blue bkgnd
+         dfb   18         ;starting at line 18
+         dfb   $f6        ;white text/blue bkgnd
+         dfb   19         ;starting at line 19
+cc2      dfb   $00        ;current color
+         dfb   23         ;line 23 (one up from bottom)
+
+*
+* Save the object file
+*
+         lst   on
+         typ   $ff        ;make it a SYS file
+         sav   ZIPPY
+         lst   off        ;suppress symbol table
+
+
+         END              ;ignore everything else
+
+*
+* Zip GS tech info
+*
+* I got this from David Empson, who get it from Zip Technologies.
+*
+
+* ZipChip GS Special Registers       Ex ZIP Technology, 12 October 1990
+*
+* Registers must be unlocked before they can be accessed (see $C05A).
+* Locking them will re-enable the annunciators.
+*
+* Writing to any I/O location $C058-$C05F (whether registers are locked or
+* unlocked) will reset delay in progress.
+*
+* $C058 R   No operation
+*
+* $C058 W   Write any value to force poweron/reset bit to COLD (forces next
+* reset to restore ZIP registers to defaults/switch settings).
+*
+* $C059 R/W 76543210
+*           *.......  Bank Switch Language Card cache disable=1/enable=0?
+*           .*......  Paddle delay (5 ms) disable=0/enable=1  $C070/$C020
+*           ..*.....  External delay (5 ms) disable=0/enable=1
+*           ...*....  Counter delay (5 ms) disable=0/enable=1 $C02E/$C07E
+*           ....*...  CPS follow disable=0/enable=1
+*           .....*..  Last Reset warm?              READ ONLY
+*           ......*.  Hardware DMA                  READ ONLY
+*           .......*  non-GS (0)/GS (1)             READ ONLY
+*
+* $C05A R   76543210
+*           ****....  Current ZIP Speed, 0=100%, F=6.25%, in 6.25% increments
+*           ....1111
+*
+* $C05A W   Write values as follows:
+*           $5x       Unlock ZIP registers (must write 4 times)
+*           $Ax       Lock ZIP registers
+*           other     Force ZIP to follow system clock (i.e. disable card)
+*
+* $C05B R   76543210
+*           *.......  1msclk - clock with 1 ms period
+*           .*......  cshupd - Tag data at $C05F updated (read $C05F to reset)
+*           ..*.....  Bank Switch Language Card cache (0), don't (1)
+*           ...*....  Board disable - 0=enabled, 1=disabled
+*           ....*...  delay in effect (0=ZIP, 1=Slow)
+*           .....*..  rombank (0/1) - not in development version
+*           ......**  Cache RAM size (00=8k, 01=16k, 10=32k, 11=64k)
+*
+* $C05B W   Write any value to force ZIP to current speed (i.e. enable card)
+*
+* $C05C R/W 76543210
+*           *******.  Slot 7-1 delay enable (all slots 52-54 ms)
+*           .......*  Speaker delay enable (5 ms)
+*
+* $C05D R   Current 65816 bank
+*
+* $C05D W   76543210
+*           ****....  Set ZIP speed, 0=100%, F=6.25%, in 6.25% increments
+*           ....****  Don't care
+*
+* $C05E R   Read last Tag data written and force the next write to
+* create a trash tag value.
+*
+* $C05E W   No operation
+*
+* $C05F R   Read last Tag data written and reset cshupd.  Note: apparently
+* any write to a ZIP register (unlocked) will clear cshupd, but cshupd says
+* that this location must be read.
+*
+* $C05F W   No operation

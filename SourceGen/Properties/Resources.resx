@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ABBREV_ADDRESS" xml:space="preserve">
+    <value>Addr</value>
+  </data>
+  <data name="ABBREV_CONSTANT" xml:space="preserve">
+    <value>Const</value>
+  </data>
+  <data name="ASM_LATEST_VERSION" xml:space="preserve">
+    <value>[latest version]</value>
+  </data>
+  <data name="ASM_MATCH_FAILURE" xml:space="preserve">
+    <value>output DOES NOT match data file</value>
+  </data>
+  <data name="ASM_MATCH_SUCCESS" xml:space="preserve">
+    <value>output matches data file</value>
+  </data>
+  <data name="ASM_MISMATCH_CAPTION" xml:space="preserve">
+    <value>Output Mismatch</value>
+  </data>
+  <data name="ASM_MISMATCH_DATA_FMT" xml:space="preserve">
+    <value>Assembled output does not match: offset +{0:x6} has value ${1:x2}, expected ${2:x2}.</value>
+  </data>
+  <data name="ASM_MISMATCH_LENGTH_FMT" xml:space="preserve">
+    <value>Assembled output does not match: length is {0}, expected {1}.</value>
+  </data>
+  <data name="ASM_OUTPUT_NOT_FOUND" xml:space="preserve">
+    <value>Expected output file wasn't created</value>
+  </data>
+  <data name="DEFAULT_VALUE" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="ERR_ASCII_ONLY" xml:space="preserve">
+    <value>Only plain ASCII is allowed</value>
+  </data>
+  <data name="ERR_BAD_FD" xml:space="preserve">
+    <value>Bad format descriptor at +{0:x6}.</value>
+  </data>
+  <data name="ERR_BAD_FD_FORMAT" xml:space="preserve">
+    <value>Bad format descriptor type</value>
+  </data>
+  <data name="ERR_BAD_FILE_LENGTH" xml:space="preserve">
+    <value>Bad file length</value>
+  </data>
+  <data name="ERR_BAD_IDENT" xml:space="preserve">
+    <value>Invalid file identifier</value>
+  </data>
+  <data name="ERR_BAD_RANGE" xml:space="preserve">
+    <value>Bad range</value>
+  </data>
+  <data name="ERR_BAD_SYMBOL_ST" xml:space="preserve">
+    <value>Unknown Source or Type in symbol</value>
+  </data>
+  <data name="ERR_BAD_SYMREF_PART" xml:space="preserve">
+    <value>Bad symbol reference part</value>
+  </data>
+  <data name="ERR_BAD_TYPE_HINT" xml:space="preserve">
+    <value>Type hint not recognized</value>
+  </data>
+  <data name="ERR_DUPLICATE_LABEL" xml:space="preserve">
+    <value>Removing duplicate label '{0}' (offset +{1:x6})</value>
+  </data>
+  <data name="ERR_FILE_EXISTS_NOT_DIR" xml:space="preserve">
+    <value>The file {0} exists, but is not a directory.</value>
+  </data>
+  <data name="ERR_FILE_GENERIC_CAPTION" xml:space="preserve">
+    <value>File Error</value>
+  </data>
+  <data name="ERR_FILE_NOT_FOUND" xml:space="preserve">
+    <value>File not found: {0}</value>
+  </data>
+  <data name="ERR_FILE_READ_ONLY" xml:space="preserve">
+    <value>Cannot write to read-only file {0}.</value>
+  </data>
+  <data name="ERR_FILE_TOO_LARGE" xml:space="preserve">
+    <value>File exceeds maximum length ({0} bytes).</value>
+  </data>
+  <data name="ERR_INVALID_INT_VALUE" xml:space="preserve">
+    <value>Could not convert value to integer</value>
+  </data>
+  <data name="ERR_INVALID_KEY_VALUE" xml:space="preserve">
+    <value>Key value is out of range</value>
+  </data>
+  <data name="ERR_INVALID_SYSDEF" xml:space="preserve">
+    <value> - INVALID DEFINITION</value>
+  </data>
+  <data name="ERR_LOAD_CONFIG_FILE" xml:space="preserve">
+    <value>Unable to load config file</value>
+  </data>
+  <data name="ERR_NOT_PROJECT_FILE" xml:space="preserve">
+    <value>This does not appear to be a valid .dis65 project file</value>
+  </data>
+  <data name="ERR_PROJECT_FILE_CORRUPT" xml:space="preserve">
+    <value>Project file may be corrupt</value>
+  </data>
+  <data name="ERR_PROJECT_LOAD_FAIL" xml:space="preserve">
+    <value>Unable to load project file</value>
+  </data>
+  <data name="ERR_PROJECT_SAVE_FAIL" xml:space="preserve">
+    <value>Unable to save project file</value>
+  </data>
+  <data name="ERR_TOO_LARGE_FOR_PREVIEW" xml:space="preserve">
+    <value>[File was too large for preview window]</value>
+  </data>
+  <data name="EXTERNAL_FILE_BAD_DIR" xml:space="preserve">
+    <value>Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).  File {2} lives elsewhere.</value>
+  </data>
+  <data name="EXTERNAL_FILE_BAD_DIR_CAPTION" xml:space="preserve">
+    <value>File Not In Runtime Directory</value>
+  </data>
+  <data name="FILE_FILTER_ALL" xml:space="preserve">
+    <value>All files (*.*)|*.*</value>
+  </data>
+  <data name="FILE_FILTER_CS" xml:space="preserve">
+    <value>C# Source Files(*.cs)|*.cs</value>
+  </data>
+  <data name="FILE_FILTER_DIS65" xml:space="preserve">
+    <value>SourceGen projects(*.dis65)|*.dis65</value>
+  </data>
+  <data name="FILE_FILTER_SYM65" xml:space="preserve">
+    <value>SourceGen symbols (*.sym65)|*.sym65</value>
+  </data>
+  <data name="FIND_REACHED_START" xml:space="preserve">
+    <value>Find reached the starting point of the search</value>
+  </data>
+  <data name="FIND_REACHED_START_CAPTION" xml:space="preserve">
+    <value>Find...</value>
+  </data>
+  <data name="FMT_FILE_INFO" xml:space="preserve">
+    <value>File is {0:N1} KB of raw data.</value>
+  </data>
+  <data name="FMT_FORMAT_MULTIPLE_GROUPS" xml:space="preserve">
+    <value>Select data format ({0} bytes selected in {1} groups):</value>
+  </data>
+  <data name="FMT_FORMAT_SINGLE_GROUP" xml:space="preserve">
+    <value>Select data format ({0} byte(s) selected):</value>
+  </data>
+  <data name="FMT_INFO_FD_SUM" xml:space="preserve">
+    <value>•Operand format is {0}</value>
+  </data>
+  <data name="FMT_INFO_LINE_SUM_NON" xml:space="preserve">
+    <value>Line {0}: {1}</value>
+  </data>
+  <data name="FMT_INFO_LINE_SUM_PLURAL" xml:space="preserve">
+    <value>Line {0}: {1} bytes of {2}</value>
+  </data>
+  <data name="FMT_INFO_LINE_SUM_SINGULAR" xml:space="preserve">
+    <value>Line {0}: {1} byte of {2}</value>
+  </data>
+  <data name="FMT_LINES_SELECTED" xml:space="preserve">
+    <value>{0} lines selected</value>
+  </data>
+  <data name="FMT_SYMBOL_VALUE" xml:space="preserve">
+    <value>Symbol value: {0}</value>
+  </data>
+  <data name="GENERATED_FOR_LATEST" xml:space="preserve">
+    <value>Assembler: {0} (latest)</value>
+  </data>
+  <data name="GENERATED_FOR_VERSION" xml:space="preserve">
+    <value>Assembler: {0} v{1}</value>
+  </data>
+  <data name="HIDE_COL" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="HIGH_ASCII" xml:space="preserve">
+    <value>high-ASCII</value>
+  </data>
+  <data name="INITIAL_EXTENSION_SCRIPTS" xml:space="preserve">
+    <value>Extension scripts:</value>
+  </data>
+  <data name="INITIAL_PARAMETERS" xml:space="preserve">
+    <value>Default settings:</value>
+  </data>
+  <data name="INITIAL_SYMBOL_FILES" xml:space="preserve">
+    <value>Symbol files:</value>
+  </data>
+  <data name="LEGAL_STUFF_TITLE" xml:space="preserve">
+    <value>Legal Stuff</value>
+  </data>
+  <data name="LOW_ASCII" xml:space="preserve">
+    <value>low-ASCII</value>
+  </data>
+  <data name="MSG_SYMBOL_IS_AUTO" xml:space="preserve">
+    <value>Symbol is auto-generated</value>
+  </data>
+  <data name="MSG_SYMBOL_NOT_FOUND" xml:space="preserve">
+    <value>Symbol not found</value>
+  </data>
+  <data name="NO_FILES_AVAILABLE" xml:space="preserve">
+    <value>no files available</value>
+  </data>
+  <data name="OPEN_DATA_DOESNT_EXIST" xml:space="preserve">
+    <value>The file doesn't exist.</value>
+  </data>
+  <data name="OPEN_DATA_EMPTY" xml:space="preserve">
+    <value>File is empty</value>
+  </data>
+  <data name="OPEN_DATA_FAIL_CAPTION" xml:space="preserve">
+    <value>Unable to load data file</value>
+  </data>
+  <data name="OPEN_DATA_FAIL_MESSAGE" xml:space="preserve">
+    <value>Unable to load contents of data file</value>
+  </data>
+  <data name="OPEN_DATA_LOAD_FAILED" xml:space="preserve">
+    <value>The file could not be opened: {0}.</value>
+  </data>
+  <data name="OPEN_DATA_PARTIAL_READ" xml:space="preserve">
+    <value>Unable to read the entire file</value>
+  </data>
+  <data name="OPEN_DATA_SELECT_OTHER" xml:space="preserve">
+    <value>UNUSED:Would you like to select a different file?</value>
+  </data>
+  <data name="OPEN_DATA_TOO_LARGE" xml:space="preserve">
+    <value>File is too large ({0:N0} KiB, {1:N0} KiB max).</value>
+  </data>
+  <data name="OPEN_DATA_WRONG_CRC" xml:space="preserve">
+    <value>The file has CRC {0}, but the project expected {1}.</value>
+  </data>
+  <data name="OPEN_DATA_WRONG_LENGTH" xml:space="preserve">
+    <value>The file is {0:N0} bytes long, but the project expected {1:N0}.</value>
+  </data>
+  <data name="OPERATION_FAILED" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="PLUGIN_DIR_FAIL" xml:space="preserve">
+    <value>Failed while preparing the plugin directory {0}</value>
+  </data>
+  <data name="PLUGIN_DIR_FAIL_CAPTION" xml:space="preserve">
+    <value>Failed Preparing Plugin Directory</value>
+  </data>
+  <data name="PROGRESS_GENERATING_FMT" xml:space="preserve">
+    <value>Generating {0}...</value>
+  </data>
+  <data name="PROJECT_FIELD_COMMENT" xml:space="preserve">
+    <value>comment</value>
+  </data>
+  <data name="PROJECT_FIELD_LONG_COMMENT" xml:space="preserve">
+    <value>long comment</value>
+  </data>
+  <data name="PROJECT_FIELD_NOTE" xml:space="preserve">
+    <value>note</value>
+  </data>
+  <data name="PROJECT_FIELD_OPERAND_FORMAT" xml:space="preserve">
+    <value>operand format</value>
+  </data>
+  <data name="PROJECT_FIELD_STATUS_FLAGS" xml:space="preserve">
+    <value>status flag override</value>
+  </data>
+  <data name="PROJECT_FIELD_TYPE_HINT" xml:space="preserve">
+    <value>type hint</value>
+  </data>
+  <data name="PROJECT_FIELD_USER_LABEL" xml:space="preserve">
+    <value>user-defined label</value>
+  </data>
+  <data name="PROJECT_FROM_NEWER_APP" xml:space="preserve">
+    <value>This project was created by a newer version of SourceGen. It may contain data that will be lost if the project is edited.</value>
+  </data>
+  <data name="RECENT_PROJECT_LINK" xml:space="preserve">
+    <value>#{0}: {1}</value>
+  </data>
+  <data name="RUNTIME_DIR_NOT_FOUND" xml:space="preserve">
+    <value>The RuntimeData directory was not found. It should be in the same directory as the executable.</value>
+  </data>
+  <data name="RUNTIME_DIR_NOT_FOUND_CAPTION" xml:space="preserve">
+    <value>RuntimeData Not Found</value>
+  </data>
+  <data name="SAVE_BEFORE_ASM_CAPTION" xml:space="preserve">
+    <value>Save Project First</value>
+  </data>
+  <data name="SAVE_BEFORE_ASM_TEXT" xml:space="preserve">
+    <value>Please save your project before assembling. The generated source code will be placed in the same directory as the project file.</value>
+  </data>
+  <data name="SETUP_SYSTEM_SUMMARY" xml:space="preserve">
+    <value>{1} CPU @ {2} MHz</value>
+  </data>
+  <data name="SHOW_COL" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="STATUS_READY" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="STATUS_RECALCULATING" xml:space="preserve">
+    <value>Recalculating...</value>
+  </data>
+  <data name="STATUS_SELECTING" xml:space="preserve">
+    <value>Selecting ({0}%)...</value>
+  </data>
+  <data name="SYMBOL_IMPORT_CAPTION" xml:space="preserve">
+    <value>Symbol Import</value>
+  </data>
+  <data name="SYMBOL_IMPORT_GOOD" xml:space="preserve">
+    <value>Imported {0} global symbols.</value>
+  </data>
+  <data name="SYMBOL_IMPORT_NONE" xml:space="preserve">
+    <value>No global+export symbols were found.</value>
+  </data>
+  <data name="TITLE_BASE" xml:space="preserve">
+    <value>6502bench SourceGen</value>
+  </data>
+  <data name="TITLE_MODIFIED" xml:space="preserve">
+    <value>(save needed)</value>
+  </data>
+  <data name="TITLE_NEW_PROJECT" xml:space="preserve">
+    <value>[new project]</value>
+  </data>
+  <data name="UNSAVED_CHANGES" xml:space="preserve">
+    <value>The current project has unsaved changes that will be lost. Are you sure you wish to continue?</value>
+  </data>
+  <data name="UNSAVED_CHANGES_CAPTION" xml:space="preserve">
+    <value>Unsaved Changes</value>
+  </data>
+  <data name="UNSET" xml:space="preserve">
+    <value>[unset]</value>
+  </data>
+  <data name="VERSION_FMT" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+</root>

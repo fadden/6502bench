@@ -1,0 +1,44 @@
+********************************
+*                              *
+* Definitions for fdraw v0.3   *
+*                              *
+* Use "PUT" to include these   *
+* definitions in code that     *
+* uses fdraw.                  *
+*                              *
+********************************
+
+fdraw_start equ $6000
+
+f_Init equ fdraw_start+0
+f_majvers equ fdraw_start+3
+f_minvers equ fdraw_start+4
+
+f_in_arg equ fdraw_start+5
+f_in_x0l equ fdraw_start+6
+f_in_x0h equ fdraw_start+7
+f_in_y0 equ fdraw_start+8
+f_in_x1l equ fdraw_start+9
+f_in_x1h equ fdraw_start+10
+f_in_y1 equ fdraw_start+11
+f_in_rad equ fdraw_start+12
+
+f_SetColor equ fdraw_start+16
+f_SetPage equ fdraw_start+19
+f_Clear equ fdraw_start+22
+f_DrawPoint equ fdraw_start+25
+f_DrawLine equ fdraw_start+28
+f_DrawRect equ fdraw_start+31
+f_FillRect equ fdraw_start+34
+f_DrawCircle equ fdraw_start+37
+f_FillCircle equ fdraw_start+40
+f_SetLineMode equ fdraw_start+43
+
+f_FillRaster equ fdraw_start+49
+f_rast_top equ fdraw_start+52
+f_rast_bottom equ fdraw_start+53
+
+f_rastx0l equ fdraw_start+54
+f_rastx0h equ fdraw_start+56
+f_rastx1l equ fdraw_start+58
+f_rastx1h equ fdraw_start+60

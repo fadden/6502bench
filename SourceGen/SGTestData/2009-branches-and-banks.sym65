@@ -1,0 +1,8 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Symbols for test 2009-branches-and-banks
+
+zero        @ $00
+longsym     @ $123456
+

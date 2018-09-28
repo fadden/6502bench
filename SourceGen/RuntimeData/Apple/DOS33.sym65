@@ -1,0 +1,13 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Source: Beneath Apple DOS
+
+*SYNOPSIS DOS 3.3 public addresses and constants.
+
+DOSWRM      @ $3d0      ;DOS warmstart entry point
+DOSCLD      @ $3d3      ;DOS coldstart entry point
+FM          @ $3d6      ;DOS file manager entry point
+RWTS        @ $3d9      ;RWTS entry point
+LOCFPL      @ $3dc      ;loads Y/A with address of FM param list
+LOCRPL      @ $3e3      ;loads Y/A with address of RWTS IOB

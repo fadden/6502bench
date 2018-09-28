@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Tools - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Tools</h1>
+
+<h2><a name="hexdump">Hex Dump Viewer</a></h2>
+
+<p>You can use this to view the contents of the project data file
+by double-clicking the "bytes" column, or with Actions &gt; Show Hex Dump.
+The viewer is displayed in a "modeless" dialog that does not
+prevent you from continuing to work with the project.  If you
+double-click a different line in the project, the viewer will automatically
+highlight those bytes.</p>
+
+<p>You can also use this to view the contents of arbitrary files by
+using Tools &gt; Hex Dump.  There is no fixed limit on the number of
+viewers you can have open simultaneously.  (Be aware that the viewer
+currently loads the entire file into memory, and you will run out of room
+eventually.  Not coincidentally, the viewer has a size limit of 16MiB
+per file.)</p>
+
+<p>You can select lines with the mouse as you would in any other list
+view.  Ctrl+A selects all lines.  Ctrl+C copies the selected lines to
+the system clipboard.</p>
+
+<p>The "character conversion" drop list allows you to choose between
+basic ASCII and low/high ASCII.  The latter just means that bytes have
+their high bits stripped before a decision is made is to whether they
+should appear in the ASCII dump on the right.</p>
+
+<p>If "ASCII-only dump" is not checked, non-printable bytes are shown in
+the ASCII dump as a middle dot ('&#183;').  If the box is checked,
+non-printable bytes are represented by a period ('.') instead.  The
+use of non-ASCII characters makes the dump unambiguous when unprintable
+characters are mixed with periods, but the lines may be unsuitable for
+pasting in some situations.</p>
+
+<p>If "always on top" is checked, the window will stay above all other
+windows that don't also declare that they should always be on top.  By
+default this box is checked for the project dump, and not checked for
+external files.</p>
+
+
+<h2><a name="ascii-chart">ASCII Chart</a></h2>
+
+<p>This opens a window with the ASCII character set.  Each character is
+displayed next to its numeric value in decimal and hexadecimal.  The
+drop list at the bottom allows you to flip between standard and "high"
+ASCII.</p>
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

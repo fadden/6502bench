@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Instruction and Data Analysis - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Instruction and Data Analysis</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="analysis-process">Analysis Process</a></h2>
+<p>Analysis of the file data is a complex multi-step process.  Some
+changes to the project, such as adding a code entry point hint or
+changing the CPU selection, require a full re-analysis of instructions
+and data.  Other changes, such as adding or removing a label, don't
+affect the code tracing and only require a re-analysis of the data areas.
+And some changes, such as editing a comment, only require a refresh
+of the displayed lines.</p>
+<p>It should be noted that none of the analysis results are stored in
+the project file.  Only user-supplied data, such as the locations of
+code entry points and label definitions, is written to the file.  This
+does create the possibility that two different users might get different
+results when opening the same project file with different versions of
+SourceGen, but these effects are expected to be minor.</p>
+
+<p>The analyzer has the following steps (see the <code>Analyze</code>
+method in <code>DisasmProject.cs</code>):</p>
+<ul>
+  <li>Reset the symbol table.</li>
+  <li>Merge platform symbols into the symbol table, loading the files
+    in order.</li>
+  <li>Merge project symbols into the symbol table, stomping on any
+    platform symbols that conflict.</li>
+  <li>Merge user label symbols into the table, stomping any previous
+    entries.</li>
+  <li>Run the code analyzer.  The outcome of this is an array of analysis
+    attributes, or "anattribs", with one entry per byte in the file.
+    The Anattrib array tracks most of the state from here on.  If we're
+    doing a partial re-analysis, this step will just clone a copy of the
+    Anattrib array that was made at this point in a previous run.  (This
+    step is described in more detail <a href="code-analysis">below</a>.)</li>
+  <li>Apply user-specified labels to Anattribs.</li>
+  <li>Apply user-specified format descriptors.  These are the instruction
+    and data operand formats.</li>
+  <li>Run the data analyzer.  This looks for patterns in uncategorized
+    data, and connects instruction and data operands to target offsets.
+    The "nearby label" stuff is handled here.  All of the results are
+    stored in the Anattribs array.  (This step is described in more
+    detail <a href="data-analysis">below</a>.)</li>
+  <li>Remove hidden labels from the symbol table.  These are user-specified
+    labels that have been placed on offsets that are in the middle of an
+    instruction or multi-byte data item.  They can't be referenced, so we
+    want to pull them out of the symbol table.  (Remember, symbolic
+    operands use "weak references", so a missing symbol just means the
+    operand is shown as a hex value.)</li>
+  <li>Resolve references to platform and project external symbols>
+    This sets the operand symbol in Anattrib, and adds the symbol to
+    the list that is displayed in .EQ directives.</li>
+  <li>Generate cross-reference lists.  This is done for file data and
+    for any platform/project symbols that are referenced.</li>
+  <li>In a debug build, some validity checks are performed.</li>
+</ul>
+
+<p>Once analysis is complete, a line-by-line display list is generated
+by walking through the annotated file data.  Most of the actual strings
+aren't rendered until they're needed.</p>
+
+
+<h2><a name="code-analysis">Code Analysis</a></h2>
+
+<p>The code tracer walks through the instructions, examining them to
+determine where execution will proceed next.  There are five possibilities
+for every instruction:</p>
+<ol>
+  <li>Continue.  Execution always continues at the next instruction.
+    Examples: <code>LDA</code>, <code>STA</code>, <code>AND</code>,
+    <code>NOP</code>.
+  <li>Don't continue.  The next instruction to be executed can't be
+    determined from the file data, unless you're disassembling the
+    system ROM.  Examples: <code>RTS</code>, <code>BRK</code>.
+  <li>Branch always.  The operand specifies the next instruction address.
+    Examples: <code>JMP</code>, <code>BRA</code>, <code>BRL</code>.
+  <li>Branch sometimes.  Execution may continue at the operand address,
+    or may execute the following instruction.  If we know the value of
+    the flags in the processor status register, we can eliminate one
+    possibility.  Examples: <code>BCC</code>, <code>BEQ</code>,
+    <code>BVS</code>.
+  <li>Call subroutine.  Execution will continue at the operand address,
+    and is expected to also continue at the following instruction.
+    Examples: <code>JSR</code>, <code>JSL</code>.
+</ol>
+
+<p>Branch targets are added to a list.  When the current run of instructions
+is exhausted (i.e. a "don't continue" instruction is reached), the next
+target is pulled off of the list.</p>
+
+<p>The state of the processor status flags is recorded for every
+instruction.  When execution proceeds to the next instruction or branches
+to a new address, the flags are merged with the flags at the new
+location.  If one execution path through a given address has the flags
+in one state (say, the carry is clear), while another execution path
+sees a different state (carry is set), the merged flag is
+"indeterminate".  Indeterminate values cannot become determinate through
+a merge, but can be set by an instruction.</p>
+
+<p>There can be multiple paths to a single address.  If the analyzer
+sees that an instruction has been visited before, with an identical set
+of status flags, the analyzer stops pursuing that path.</p>
+
+<p>The analyzer must always know the width of immediate load instructions
+when examining 65816 code, but it's possible for the status flag values
+to be indeterminate.  In such a situation, short registers are assumed.
+Similarly, if the carry flag is unknown when an <code>XCE</code> is
+performed, we assume a transition to emulation mode.</p>
+
+<p>There are three ways to set a definite value in a status flags:</p>
+<ol>
+  <li>By specific instructions, like <code>SEC</code> or
+    <code>CLD</code>.</li>
+  <li>By immediate instructions.  <code>LDA #$00</code> sets Z=1 and N=0.
+    <code>ORA #$80</code> sets Z=0 and N=1.</li>
+  <li>By inference.  For example, if we see a <code>BCC</code> instruction,
+    we know that the carry will be clear at the branch target address, and
+    set at the following instruction.  The instruction doesn't affect the
+    value of the flag, but we know what the value is at either address.</li>
+</ol>
+<p>Self-modifying code can render spoil any of these, possibly requiring a
+status flag override to get correct disassembly.</p>
+
+<p>The instruction that is most likely to cause problems is <code>PLP</code>,
+which pulls the processor status flags off of the stack.  SourceGen
+doesn't try to track stack contents, so it can't know what values may
+be pulled.  In many cases the PLP appears not long after a PHP, so
+SourceGen will scan backward through the file to find the nearest PHP,
+and use the status flags from that.  If no PHP can be found, then all
+flags are set to "indeterminate".  (The boot loader in the Apple II 5.25"
+floppy disk controller is an example where SourceGen gets it wrong. The
+code does <code>CLC</code>/<code>PHP</code>, followed a bit later by the
+<code>PLP</code>, but it's actually using the stack to pass the carry
+flag around.  Flagging the carry bit as indeterminate with a status flag
+override on the instruction following the PLP fixes things.)</p>
+
+<p>Some other things that the code analyzer can't handle:</p>
+<ul>
+  <li>Jumping indirectly through an address outside the file, e.g.
+    storing an address in zero-page memory and jumping through it.
+  <li>Jumping to an address by pushing the location onto the stack,
+    then executing an <code>RTS</code>.
+  <li>Self-modifying code, e.g. overwriting a <code>JMP</code> instruction.
+</ul>
+<p>Sometimes the indirect jump targets are coming from a table of
+addresses in the file.  If so, these can be formatted as addresses,
+and then the target locations hinted as code entry points.</p>
+<p>The 65816 adds an additional twist: 16-bit data access instructions
+use the data bank register ("B") to determine which bank to load from.
+SourceGen can't determine what the value is, so it currently assumes
+that it's equal to the program bank register ("K").  Handling this
+correctly will require improvements to the user interface.</p>
+
+
+<h2><a name="data-analysis">Data Analysis</a></h2>
+<p>The data analyzer performs two tasks.  It matches operands with
+offsets, and it analyzes uncategorized data.  Either or both of
+these can be disabled from the
+<a href="settings.html#project-props">project properties</a></p>
+
+<p>The data target analyzer examines every instruction and data operand
+to see if it's referring to an offset within the data file.  If the
+target is within the file, and has a label, a weak symbolic reference
+to that label is added to the Anattrib array.  If the target doesn't
+have a label, the analyzer will either use a nearby label, or generate
+a unique label and use that.</p>
+<p>While most of the "nearby label" logic can be disabled, targets that
+land in the middle of an instruction are always adjusted backward to
+the instruction start.  This is necessary because labels are only visible
+if they're associated with the first (opcode) byte of an instruction.</p>
+
+<p>The uncategorized data analyzer tries to find ASCII strings and
+opportunities to use the ".FILL" instruction.  It breaks the file into
+pieces, where contiguous regions hold nothing but data, are not split
+across a ".ORG" directive, are not interrupted by data, and do not
+contain anything that the user has chosen to format.  Each region is
+scanned for matching patterns.  If a match is found, a format entry
+is added to the Anattrib array.  Otherwise, data is added as independent
+byte values.</p>
+
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

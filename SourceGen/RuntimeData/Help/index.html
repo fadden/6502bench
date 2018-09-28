@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Contents - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen</h1>
+<p>SourceGen is an interactive disassembler for 6502, 65C02, 65802,
+and 65816 code.  The official web site is
+<a href="https://6502bench.com/">https://6502bench.com/</a>.</p>
+
+<h2>Contents</h2>
+<ul>
+  <li><a href="intro.html">Overview</a></li>
+  <ul>
+    <li><a href="intro.html#fundamental-concepts">Fundamental Concepts</a></li>
+    <li><a href="intro.html#begin">About 6502 Code</a></li>
+    <li><a href="intro.html#sgintro">How SourceGen Works</a></li>
+    <ul>
+      <li><a href="intro.html#scripts">Extension Scripts</a></li>
+      <li><a href="intro.html#hints">Analyzer Hints</a></li>
+    </ul>
+    <li><a href="intro.html#sgconcepts">SourceGen Concepts</a></li>
+    <li><a href="intro.html#about-symbols">All About Symbols</a></li>
+    <ul>
+      <li><a href="intro.html#weak-refs">Weak References</a></li>
+      <li><a href="intro.html#symbol-parts">Parts and Adjustments</a></li>
+      <li><a href="intro.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
+    </ul>
+    <li><a href="intro.html#width-disambiguation">Width Disambiguation</a></li>
+    <li><a href="intro.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
+  </ul>
+
+  <li><a href="mainwin.html">Using SourceGen</a></li>
+  <ul>
+    <li><a href="mainwin.html#starting-new">Starting a New Project</a></li>
+    <li><a href="mainwin.html#opening">Opening an Existing Project</a></li>
+    <li><a href="mainwin.html#working">Working With a Project</a></li>
+    <ul>
+      <li><a href="mainwin.html#code-list">Code List</a></li>
+      <li><a href="mainwin.html#undo">Undo &amp; Redo</a></li>
+      <li><a href="mainwin.html#references">References Window</a></li>
+      <li><a href="mainwin.html#notes">Notes Window</a></li>
+      <li><a href="mainwin.html#symbols">Symbols Window</a></li>
+      <li><a href="mainwin.html#info">Info Window</a></li>
+      <li><a href="mainwin.html#navigation">Navigation</a></li>
+      <li><a href="mainwin.html#hints">Adding and Removing Hints</a></li>
+      <li><a href="mainwin.html#clipboard">Copying to Clipboard</a></li>
+    </ul>
+  </ul>
+
+  <li><a href="editors.html">Editors</a></li>
+  <ul>
+    <li><a href="editors.html#address">Edit Address</a></li>
+    <li><a href="editors.html#flags">Edit Status Flags</a></li>
+    <li><a href="editors.html#label">Edit Label</a></li>
+    <li><a href="editors.html#operand">Edit Operand</a></li>
+    <li><a href="editors.html#data">Edit Data Format</a></li>
+    <li><a href="editors.html#comment">Edit Comment</a></li>
+    <li><a href="editors.html#long-comment">Edit Long Comment</a></li>
+    <li><a href="editors.html#note">Edit Note</a></li>
+    <li><a href="editors.html#project-symbol">Edit Project Symbol</a></li>
+  </ul>
+
+  <li><a href="codegen.html">Code Generation &amp; Assembly</a></li>
+  <ul>
+    <li><a href="codegen.html#supported">Supported Assemblers</a></li>
+    <ul>
+      <li><a href="codegen.html#version">Version-Specific Code Generation</a></li>
+    </ul>
+    <li><a href="codegen.html#generate">Generating Source Code</a></li>
+    <ul>
+      <li><a href="codegen.html#localizer">Label Localizer</a></li>
+    </ul>
+    <li><a href="codegen.html#assemble">Cross-Assembling Generated Code</a></li>
+  </ul>
+
+  <li><a href="settings.html">Properties &amp; Settings</a></li>
+  <ul>
+    <li><a href="settings.html#app-settings">Application Settings</a></li>
+    <ul>
+      <li><a href="settings.html#appset-codeview">Code View</a></li>
+      <li><a href="settings.html#appset-asmconfig">Asm Config</a></li>
+      <li><a href="settings.html#appset-displayformat">Display Format</a></li>
+      <li><a href="settings.html#appset-pseudoop">Pseudo-Op</a></li>
+    </ul>
+    <li><a href="settings.html#project-properties">Project Properties</a></li>
+    <ul>
+      <li><a href="settings.html#projprop-general">General</a></li>
+      <li><a href="settings.html#projprop-projsym">Project Symbols</a></li>
+      <li><a href="settings.html#projprop-symfiles">Symbol Files</a></li>
+      <li><a href="settings.html#projprop-extscripts">Extension Scripts</a></li>
+    </ul>
+  </ul>
+
+  <li><a href="tools.html">Tools</a></li>
+  <ul>
+    <li><a href="tools.html#hexdump">Hex Dump Viewer</a></li>
+    <li><a href="tools.html#ascii-chart">ASCII Chart</a></li>
+  </ul>
+
+  <li><a href="tutorials.html">Tutorials</a></li>
+  <ul>
+    <li><a href="tutorials.html#basic-features">Basic Features</a></li>
+  </ul>
+
+  <li><a href="advanced.html">Advanced Topics</a></li>
+  <ul>
+    <li><a href="advanced.html#multi-bin">Working With Multiple Binaries</a></li>
+    <li><a href="advanced.html#overlap">Overlapping Address Spaces</a></li>
+    <li><a href="advanced.html#debug">Debug Menu Options</a></li>
+  </ul>
+
+  <li><a href="analysis.html">Appendix: Instruction and Data Analysis</a></li>
+  <ul>
+    <li><a href="analysis.html#analysis-process">Analysis Process</a></li>
+    <li><a href="analysis.html#code-analysis">Code Analysis</a></li>
+    <li><a href="analysis.html#data-analysis">Data Analysis</a></li>
+  </ul>
+
+  <li><a href="end-notes.html">End Notes</a></li>
+
+</ul>
+
+
+
+</div>
+
+<div id=footer>
+<hr>
+<p>Copyright 2018 faddenSoft</p>
+</div>
+</body>
+</html>

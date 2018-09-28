@@ -1,0 +1,40 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Addresses exported from fdraw
+
+; These come from FDRAW.DEFS.S, which would be included as a source
+; file in any code that wanted to use the fdraw library.
+
+fdraw_start     = $6000
+f_Init          @ $6000     ;init library; sets color=0 page=$20
+f_majvers       @ $6003     ;library major version
+f_minvers       @ $6004     ;library minor version
+f_in_arg        @ $6005     ;arg for misc functions
+f_in_x0l        @ $6006     ;low part of X0 coord (0-279)
+f_in_x0h        @ $6007     ;high part of X0 coord (0-279)
+f_in_y0         @ $6008     ;Y0 coord (0-191)
+f_in_x1l        @ $6009     ;low part of X1 coord (0-279)
+f_in_x1h        @ $600a     ;high part of X1 coord (0-279)
+f_in_y1         @ $600b     ;Y1 coord (0-191)
+f_in_rad        @ $600c     ;circle radius (0-255)
+
+f_SetColor      @ $6010     ;set color used for drawing (0-7)
+f_SetPage       @ $6013     ;set page to value in arg ($20 or $40)
+f_Clear         @ $6016     ;erase current page to current color
+f_DrawPoint     @ $6019     ;plot a single point at X0,Y0
+f_DrawLine      @ $601c     ;draw line from X0,Y0 to X1,Y1 (inclusive)
+f_DrawRect      @ $601f     ;draw rect w/corners X0,Y0 and X1,Y1
+f_FillRect      @ $6022     ;draw filled rect w/corners X0,Y0 and X1,Y1
+f_DrawCircle    @ $6025     ;draw circle at X0,Y0 with radius=rad
+f_FillCircle    @ $6028     ;draw filled circle at X0,Y0 with radius=rad
+f_SetLineMode   @ $602b     ;set line mode from arg (0=normal, 1=xdraw)
+
+f_FillRaster    @ $6031     ;draw shape from raster table
+f_rast_top      @ $6034     ;top line (0-191)
+f_rast_bottom   @ $6035     ;bottom line (inclusive) (0-191)
+
+f_rastx0l       @ $6036     ;address of rastx1l table (read-only)
+f_rastx0h       @ $6038     ;address of rastx1h table (read-only)
+f_rastx1l       @ $603a     ;address of rastx2l table (read-only)
+f_rastx1h       @ $603c     ;address of rastx2h table (read-only)

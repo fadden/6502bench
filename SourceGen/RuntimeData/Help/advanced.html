@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Advanced Topics - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Advanced Topics</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="multi-bin">Working With Multiple Binaries</a></h2>
+<p>Sometimes a program is split into multiple files on disk.  They
+may be all loaded at once, or some may be loaded into the same place
+at different times.  In such situations it's not uncommon for one
+file to provide a set of interfaces that other files use.  It's
+useful to have symbols for these interfaces be available to all
+projects.</p>
+<p>There are two ways to do this: (1) define a common platform symbol
+file with the relevant addresses, and keep it up to date as you work;
+or (2) declare the labels as global and exported, and import them
+as project symbols into the other projects.</p>
+<p>Support for this is currently somewhat weak, requiring a manual
+symbol-import step in every interested project.  This step must be
+repeated whenever the labels are updated.</p>
+<p>A different but related problem is typified by arcade ROM sets,
+where files are split apart because each file must be flashed to a
+separate chip.  All files are expected to be present in memory at
+once, so there's no reason to treat them as separate projects. Currently,
+the best way to deal with this is to concatenate the files into a single
+file, and operate on that.</p>
+
+<h2><a name="overlap">Overlapping Address Spaces</a></h2>
+<p>Some programs use memory overlays, where multiple parts of the
+code run in the same address in RAM.  Others use bank switching to access
+parts of the program that reside in separate physical RAM, but appear at
+the same address.</p>
+<p>SourceGen allows you to set the same address on multiple parts of
+a file.  Branches to a given address are resolved against the current
+segment first.  For example, consider this:</p>
+<pre>
+         .ORG    $1000
+         JMP     L1100
+
+         .ORG    $1100
+L1100    BIT     L1100
+L1103    LDA     #$11
+         BRA     L1103
+
+         .ORG    $1100
+L1100_0  BIT     L1100_0
+L1103_0  LDA     #$22
+         JMP     L1103_0
+</pre>
+
+<p>Both sections start at $1100, and have branches to $1103.  The branch
+in the first section resolves to the label in the first version of
+that address chunk, while the branch in the second section resolves to
+the label in the second chunk.  When branches are outside the current
+address chunk, the first chunk that includes that address is used, as
+it is with the <code>JMP $1000</code> at the start of the file.</p>
+
+
+<h2><a name="debug">Debug Menu Options</a></h2>
+
+<p>The DEBUG menu is hidden by default in release builds, but can be
+exposed by checking the "enable DEBUG menu" box in the application
+settings.  These features are used for debugging SourceGen.  They will
+not help you debug 6502 projects.</p>
+
+<p>Features:</p>
+<ul>
+  <li>Re-analyze (F5).  Causes a full re-analysis.  Useful if you think
+    the display is out of sync.</li>
+  <li>Show Undo/Redo History.  Opens a floating window that lets you
+    watch the contents of the undo buffer while you work.</li>
+  <li>Show Analyzer Output.  Opens a floating window with a text log from
+    the most recent analysis pass.  The exact contents will vary depending
+    on how the verbosity level is configured internally.  Debug messages
+    from extension scripts appear here.</li>
+  <li>Show Analysis Timers.  Opens a floating window with a dump of
+    timer results from the most recent analysis pass.  Times for individual
+    stages are noted, as are times for groups of functions.  This
+    provides a crude sense of where time is being spent.</li>
+  <li>Extension Script Info.  Shows a bit about the currently-loaded
+    extension scripts.</li>
+  <li>Toggle OwnerDraw.  The code list and Notes windows use a ListView
+    control whose contents are drawn by the application.  This menu item
+    toggles the OwnerDraw flag on and off.  Useful for comparing the
+    owner-drawn output to the system-drawn output.</li>
+  <li>Toggle Comment Rulers.  Adds a string of digits above every
+    multi-line comment (long comment, note).  Useful for confirming that
+    the width limitation is being obeyed.  These are added exactly
+    as shown, without comment delimiters, into generated assembly output,
+    which doesn't work out well.</li>
+  <li>Use Keep-Alive Hack.  If set, a "ping" is sent to the extension
+    script sandbox every 60 seconds.  This seems to be required to avoid
+    an infrequently-encountered Windows bug.  (See code for notes and
+    stackoverflow.com links.)</li>
+  <li>Source Generation Tests.  Opens the regression test harness.  See
+    the README.md in the SGTestData directory for more information.  If
+    the regression tests weren't included in the SourceGen distribution,
+    this will have nothing to do.</li>
+</ul>
+
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

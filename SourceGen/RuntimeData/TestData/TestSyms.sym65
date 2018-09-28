@@ -1,0 +1,13 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Platform symbols for test cases
+
+; define a symbol that will be overwritten by a subsequent symbol
+plataddr    @ $1234     ;should not see this
+
+; 2007-labels-and-symbols
+plataddr    @ $3000     ;address only in platform file
+projover    @ $3100     ;replaced by proj symbol w/same name, diff addr (no match)
+projalso    @ $3200     ;also in project, twice w/different name +/- alpha
+

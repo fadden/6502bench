@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Properties &amp; Settings - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Properties &amp; Settings</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="overview">Settings Overview</a></h2>
+
+<p>There are two classes of settings: application settings, and
+project properties.</p>
+
+<p>Application settings are stored in a file called "SourceGen-settings"
+in the SourceGen installation directory.  If the file is missing or
+corrupted, some default settings will be used.  These settings are local
+to your system, and include everything from window sizes to whether you
+prefer hexadecimal values to be shown in upper case.  None of them
+affect the way the project analyzes code and data, though they may affect
+the way generated assembly sources look.</p>
+
+<p>Project properties are stored in each individual .dis65 project file.
+They specify which CPU to use, which extension scripts to load, and a
+variety of other things that directly impact how SourceGen processes
+the project.  Because of the way it impacts the project, all changes to
+the project properties are made through the undo/redo buffer.</p>
+
+
+<h2><a name="app-settings">Application Settings</a></h2>
+
+<p>The settings editor is divided into four tabs.  Changes aren't pushed
+out to the main application until you hit Apply or OK.</p>
+
+
+<h3><a name="appset-codeview">Code View</a></h3>
+
+<p>These settings change the way the code looks.</p>
+
+<p>Click the Column Visibility buttons to hide columns.  Click them
+again to restore the column to a default width.  A "hidden" column just
+has a width of zero, so with careful mouse positioning you can show and
+hide columns from the code list.  The buttons may be more convenient
+though.</p>
+
+<p>You can select a different font for the code list.  Make it as large
+or small as you want.  Monospace fonts like Courier or Consolas are
+recommended.</p>
+
+<p>You can choose to display different parts of the display in upper or
+lower case, using the "all lower" and "all upper" buttons as a quick way
+to set all values.  These values are also used for generated assembly
+code.  Note that labels are case-sensitive and can't be forced one way
+or the other.</p>
+
+<p>The Clipboard drop-down menu lets you choose the format for text
+<a href="mainwin.html#clipboard">copied to the clipboard</a>.  The
+"Assembler Source" format includes the rightmost columns (label,
+opcode, operand, and comment), like assembly source code does.  The
+"Disassembly" format adds the address and bytes on the left.
+
+
+<h3><a name="appset-asmconfig">Asm Config</a></h3>
+
+<p>These settings configure cross-assemblers and modify the output in
+various ways.</p>
+<p>For cc65, locate <code>bin/cl65.exe</code>.  Note you need a full
+installation of cc65, with configuration files and libraries, not just
+the cl65 binary.</p>
+<p>For Merlin 32, locate <code>Merlin32.exe</code>.  The executable
+is stand-alone.</p>
+
+<p>If you enable "identify assembler in output", a comment will be
+added to the top of the generated assembly output that identifies the
+target assembler and version.  This can be very helpful if the source
+file is sent to other people, since it may not otherwise be obvious from
+the source file what the intended target assembler is.</p>
+
+<p>"Disable label localization" turns off the
+<a href="codegen.html#localizer">label localizer</a>.</p>
+
+<p>If "put long labels on separate line" is checked, labels that are
+longer than the label column are placed on their own line.  This looks
+a bit nicer because otherwise the opcode gets pushed out of alignment.
+(Some assemblers get bent out of shape if you split an equate
+directive, so those might stay on one line.)</p>
+
+<p>When "show cycle counts" is checked, every instruction line will have
+an end-of-line comment that indicates the number of cycles required for
+that instruction.  This is shown in the code list and included in
+generated assembly output.  If the cycle count can't be determined solely
+from a static analysis, e.g. an extra cycle is required if
+<code>LDA (dp),Y</code> crosses a page boundary, a '+' will be shown.
+In some cases the variability can be factored out if the state of
+certain status flags is known, e.g. 65C02 instructions that take longer
+in decimal mode won't be shown as variable if the analyzer can determine
+that D=0 or D=1.</p>
+
+
+<h3><a name="appset-displayformat">Display Format</a></h3>
+
+<p>These options change the way the code list looks on screen.  They
+do not affect generated code.</p>
+
+<p>The
+<a href="intro.html#width-disambiguation">operand width disambiguator</a>
+strings are used when the width of an instruction operand is unclear.
+You may specify values for all of them or none of them.</p>
+
+<p>The Merlin assembler uses an expression syntax that is compact but
+different from many other cross-assemblers.  Notably, the byte-selection
+operators ('&lt;', '&gt;', '^') act like shift operators, yielding
+16-bit values when wide registers are enabled on the 65816.</p>
+
+<p>The "quick set" buttons configure the fields on this tab to match
+the conventions of the specified assembler.</p>
+
+
+<h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
+
+<p>These options change the way the code list looks on screen.  They
+do not affect generated code.</p>
+
+<p>Enter the string you want to use for the various data formats.  If
+a field is left blank, a default value is used.</p>
+
+<p>The "quick set" buttons configure the fields on this tab to match
+the conventions of the specified assembler.</p>
+
+
+<h2><a name="project-properties">Project Properties</a></h2>
+
+<p>The properties editor is divided into four tabs.  Changes aren't pushed
+out to the main application until you close the dialog.  Clicking Apply
+will "latch" the current changes, ensuring that they're applied even if
+you later hit Cancel, but the changes are not applied immediately.</p>
+<p>All changes are subject to undo/redo.</p>
+
+
+<h3><a name="projprop-general">General</a></h3>
+
+<p>The choice of CPU determines the set of available instructions, as
+well as cycle costs and register widths.  There are many variations
+on the 6502, but from the perspective of a disassembler only three
+matter:
+<ol>
+  <li>MOS 6502.  The original 8-bit instruction set.</li>
+  <li>WDC W65C02S.  Expanded the instruction set and smoothed
+    some rough edges.</li>
+  <li>WDC W65C816S.  Expanded instruction set, 24-bit address space,
+    and 16-bit registers.</li>
+</ol>
+<p>The Rockwell R65C02 features an expanded instruction set that is
+compatible with the WDC 65C02 but incompatible with the 65816.  It's
+not currently supported by SourceGen.</p>
+
+<p>If "enable undocumented instructions" is checked, some additional
+opcodes are recognized on the 6502 and 65C02.  These instructions are
+not part of the chip specification, but most of them have consistent
+behavior and can be used.  If the box is not checked, the instructions
+are treated as invalid and cause the code analyzer to assume that it
+has run into a data area.</p>
+
+<p>The entry flags determine the initial value for the processor status
+flag register.  Code that is unreachable internally (requiring a code
+entry point hint) will use this value.  This is chiefly of use for
+65816 code, where the initial value of the M/X/E flags is significant.</p>
+
+<p>If "analyze uncategorized data" is checked, SourceGen will attempt to
+identify strings and regions filled with a single byte value.  If it's
+not checked, anything that isn't detected as code or explicitly formatted
+will simply be shown as a byte value.</p>
+<p>If "seek alternate targets" is checked, the analyzer will try to use
+nearby labels for data loads and stores.</p>
+<p>The "minimum characters for string" setting determines how many
+ASCII characters need to appear consecutively for the data analyzer to
+declare it a string.  Shorter values are prone to false-positive
+identifications, longer values miss out on short strings.  You can also
+set it to "none" to disable automatic string identification.</p>
+
+
+<h3><a name="projprop-projsym">Project Symbols</a></h3>
+<p>You can add, edit, and delete individual symbols and constants.
+See the <a href="intro.html#about-symbols">symbols</a> section for an
+explanation of how project symbols work.</p>
+
+<p>The Edit Symbol button opens the
+<a href="editors.html#project-symbol">Edit Project Symbol</a> dialog, which
+allows changing any part of a symbol definition.  You're not allowed to
+create two symbols with the same label.</p>
+
+<p>The Import button allows you to import symbols from another project.
+Only labels that have been tagged as global and exported will be imported.
+Existing symbols with identical labels will be replaced, so it's okay to
+run the importer multiple times.</p>
+
+
+<h3><a name="projprop-symfiles">Symbol Files</a></h3>
+<p>From here, you can add and remove platform symbol files, or change
+the order in which they are loaded.
+See the <a href="intro.html#about-symbols">symbols</a> section for an
+explanation of how platform symbols work.</p>
+
+<p>Platform symbol files must live in the RuntimeData directory that comes
+with SourceGen, or in the directory where the project file lives.  This
+is mostly to keep things manageable when projects are distributed to
+other people, but also acts as a minor security check, to prevent a
+wayward project from trying to open files it shouldn't.</p>
+<p>In the list, files loaded from the RuntimeData directory will be
+prefixed with <code>RT:</code>.  Files loaded from the project directory
+will be prefixed with <code>PROJ:</code>.</p>
+<p>If a platform symbol file can't be found when the project is opened,
+you will receive a warning.</p>
+
+
+<h3><a name="projprop-extscripts">Extension Scripts</a></h3>
+<p>From here, you can add and remove extension script files.
+See the <a href="intro.html#scripts">extension scripts</a> section for
+an explanation of how extension scripts work.</p>
+
+
+<p>Extension script files must live in the RuntimeData directory that comes
+with SourceGen, or in the directory where the project file lives.  This
+is mostly to keep things manageable when projects are distributed to
+other people, but also acts as a minor security check, to prevent a
+wayward project from trying to open files it shouldn't.</p>
+<p>In the list, files loaded from the RuntimeData directory will be
+prefixed with <code>RT:</code>.  Files loaded from the project directory
+will be prefixed with <code>PROJ:</code>.</p>
+<p>If an extension script file can't be found when the project is opened,
+you will receive a warning.</p>
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

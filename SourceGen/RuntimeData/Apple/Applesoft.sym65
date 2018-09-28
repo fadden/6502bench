@@ -1,0 +1,65 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Sources:
+;  What's Where in the Apple, by William F. Luebbert
+
+*SYNOPSIS Applesoft BASIC addresses and constants
+
+HCOLOR1     @ $1C       ;hi-res color mask
+COUNTH      @ $1D       ;hi-res high-order byte of step for line
+HBASL       @ $26       ;base address for hi-res drawing
+
+LINNUM      @ $50       ;line number ($50-51)
+TEXTTAB     @ $67       ;pointer to start of Applesoft program ($67-68)
+VARTAB      @ $69       ;pointer to start of Applesoft variables ($69-6A)
+FACMO       @ $A0       ;middle-order byte of mantissa of FAC
+FACLO       @ $A1       ;low-order byte of mantissa of FAC
+FACSIGN     @ $A2       ;single byte sign of FAC
+CHRGET      @ $B1       ;get next character or Applesoft token
+CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
+TXTPTR      @ $B8       ;points at next char or token
+
+AUTORUN     @ $D6       ;set to $80 to auto-run
+ERRFLG      @ $D8       ;$80 if onerr active
+
+HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
+SCALE       @ $E7       ;hi-res graphics scale factor
+
+AMPERV      @ $03F5     ;jump to function that handles Applesoft '&' cmds
+
+;
+; Useful Applesoft routines.
+; TODO: there are many more
+;
+ERROR       @ $D412     ;print error based on X-reg
+FRMNUM      @ $DD67     ;evalute expression at TXTPTR, result into FAC
+SYN_ERROR   @ $DEC9     ;throw SYNTAX ERROR
+CHKCOM      @ $DEBE     ;checks TXTPTR for comma
+ILLQ_ERROR  @ $E199     ;throw ILLEGAL QUANTITY ERROR
+GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
+GETBYT      @ $E6F8     ;gets byte, in X/FACLO
+HFNS        @ $F6B9     ;get hi-res x/y for hplot
+
+;
+; Applesoft BASIC tokens.
+; TODO: this is a partial set
+;
+*TAG Applesoft-Tokens
+TOK_PLOT    = $8d
+TOK_HGR2    = $90
+TOK_HGR     = $91
+TOK_HCOLOR  = $92
+TOK_HPLOT   = $93
+TOK_DRAW    = $94
+TOK_XDRAW   = $95
+TOK_INVERSE = $9e
+TOK_CLEAR   = $bd
+TOK_NEW     = $bf
+TOK_TO      = $c1
+TOK_AT      = $c5
+TOK_SGN     = $d2
+TOK_SCRN    = $d7
+TOK_EXP     = $dd
+TOK_COS     = $de
+TOK_SIN     = $df

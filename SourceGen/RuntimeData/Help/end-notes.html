@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>End notes - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: End Notes</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="origins">Origins</a></h2>
+<p>The inspiration for SourceGen goes a long way back.  While in high
+school in the late 1980s, I read Don Lancaster's
+<i>Enhancing Your Apple II, Vol. 1</i> (available for download
+<a href="https://www.tinaja.com/ebksamp1.shtml">here</a>).  This
+included a very detailed methodology for disassembling 6502 software.
+I decided to give it a try, so I dumped a monitor listing of the
+operating system from an SSI game ("RDOS") to paper with my Epson
+RX-80 -- tractor feed paper was helpful for this sort of thing -- and
+set to work.</p>
+
+<p>Lancaster's methodology involved highlighting different types of
+instructions with different colors, making notes, and adding labels.
+All this being done with felt-tip and colored highlighter pens.  The
+process worked remarkably well: by the time I was finished marking
+things up, I knew how everything in the code worked.</p>
+
+<p>I really wanted a better system though.  The disassembler built into
+the Apple II could get out of sync when it walked through a data area,
+so sometimes you had to hand-write in the correct instruction.  Applying
+a label to every place that referenced it was tedious.  When you got to
+the end, you had a colorful print out, but you can't run that through
+an assembler.</p>
+
+<p>There were commercially-available disassemblers that generated source
+code and removed some of the tedium from the process, and for many tasks
+they solved the problem nicely.  What I really wanted, though, looked more
+like a modern IDE, because I didn't just want it to translate machine code
+into readable form.  I wanted it to help me with the process of
+understanding the code, by providing cross-reference tables and symbol
+lists and giving me a place to scribble notes to myself while I worked.
+Especially the note-scribbling.</p>
+
+<p>In 2002, while writing the 6502/65816 disassembler for CiderPress, I
+ran into the same problems I had with the original Apple II monitor: it
+blundered through data sections and got lost briefly when a new code
+section started.  This made it annoying to use for even small binaries.  I
+jotted down some notes on what I thought the core features of a good
+6502 diassembler should be, then went back to work on other features.  It
+was another 15 years before I picked up the idea again.</p>
+
+<p>More recently, I disassembled some code by dumping it to a text
+file with CiderPress and then fiddling with it in a text editor.  I could
+leave free-form notes, but when I found some code that I wanted to
+exercise a bit I realized that getting it into an assembler was going
+to take some effort.  Raw addresses needed to be converted to labels,
+the address and byte dump in the left column needed to be stripped out --
+really just some basic text and string replace operations, but tedious
+to do by hand.</p>
+
+<p>The original design for SourceGen was substantially less feature-rich
+than the final result.  I kept discovering opportunities for features
+that I wanted to have, or at least wanted to write.  The result is
+something of a monument to creeping featurism.  Hopefully the core features
+are solid enough to excuse the excesses.</p>
+
+<p>-- Andy McFadden, September 2018</p>
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

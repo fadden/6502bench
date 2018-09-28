@@ -1,0 +1,44 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Adapted from various online references, notably https://wiki.nesdev.com/
+
+*SYNOPSIS Nintendo Entertainment System registers
+
+; PPU registers ($2000-2007, repeating every 8 bytes)
+; (see https://wiki.nesdev.com/w/index.php/PPU_registers)
+PPUCTRL     @   $2000   ;VPHB SINN  various
+PPUMASK     @   $2001   ;BGRs bMmG  various
+PPUSTATUS   @   $2002   ;VSO- ----  various
+OAMADDR     @   $2003   ;OAM read/write address
+OAMDATA     @   $2004   ;OAM data read/write
+PPUSCROLL   @   $2005   ;fine scroll position (two writes: X,Y)
+PPUADDR     @   $2006   ;PPU read/write address (two writes: MSB, LSB)
+PPUDATA     @   $2007   ;PPU data read/write
+
+; APU and I/O registers
+; (see https://wiki.nesdev.com/w/index.php/2A03)
+SQ1_VOL     @   $4000   ;DDLC VVVV
+SQ1_SWEEP   @   $4001   ;EPPP NSSS
+SQ1_LO      @   $4002   ;TTTT TTTT
+SQ1_HI      @   $4003   ;LLLL LTTT
+SQ2_VOL     @   $4004   ;DDLC VVVV
+SQ2_SWEEP   @   $4005   ;EPPP NSSS
+SQ2_LO      @   $4006   ;TTTT TTTT
+SQ2_HI      @   $4007   ;LLLL LTTT
+TRI_LINEAR  @   $4008   ;CRRR RRRR
+TRI_UNU     @   $4009
+TRI_LO      @   $400a   ;TTTT TTTT
+TRI_HI      @   $400b   ;LLLL LTTT
+NOISE_VOL   @   $400c   ;--LC VVVV
+NOISE_UNU   @   $400d
+NOISE_LO    @   $400e   ;L--- PPPP
+NOISE_HI    @   $400f   ;LLLL L---
+DMC_FREQ    @   $4010   ;IL-- RRRR
+DMC_RAW     @   $4011   ;-DDD DDDD
+DMC_START   @   $4012   ;AAAA AAAA
+DMC_LEN     @   $4013   ;LLLL LLLL
+OAMDMA      @   $4014
+SND_CHN     @   $4015   ;W:---D NT21 R:IF-D NT21
+JOY1        @   $4016   ;joystick 1 data (R) and joystick strobe (W)
+JOY2        @   $4017   ;joystick 2 data (R) and frame counter (W)

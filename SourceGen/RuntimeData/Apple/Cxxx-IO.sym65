@@ -1,0 +1,153 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Adapted from NiftyList, by Dave Lyons, and Apple II reference materials
+; found online.
+
+*SYNOPSIS Symbols from the Cxxx I/O area, common to most Apple II models.
+
+_hex = $4321
+_dec = 1234
+_bin = %011011
+
+; There's a lot here that you wouldn't find on an Apple ][+, but since
+; this is for a disassembler it's okay to have extra stuff so long as it
+; doesn't conflict.
+KBD             @ $C000     ;R last key pressed + 128
+CLR80COL        = $c000     ;W use $C002-C005 for aux mem (80STOREOFF)
+SET80COL        @ $C001     ;W use PAGE2 for aux mem (80STOREON)
+RDMAINRAM       @ $C002     ;W if 80STORE off: read main mem $0200-BFFF
+RDCARDRAM       @ $C003     ;W if 80STORE off: read aux mem $0200-BFFF
+WRMAINRAM       @ $C004     ;W if 80STORE off: write main mem $0200-BFFF
+WRCARDRAM       @ $C005     ;W if 80STORE off: write aux mem $0200-BFFF
+SETSLOTCXROM    @ $C006     ;W peripheral ROM ($C100-CFFF)
+SETINTCXROM     @ $C007     ;W internal ROM ($C100-CFFF)
+SETSTDZP        @ $C008     ;W main stack and zero page
+SETALTZP        @ $C009     ;W aux stack and zero page
+SETINTC3ROM     @ $C00A     ;W ROM in slot 3
+SETSLOTC3ROM    @ $C00B     ;W ROM in aux slot
+CLR80VID        @ $C00C     ;W 40 columns
+SET80VID        @ $C00D     ;W 80 columns
+CLRALTCHAR      @ $C00E     ;W primary char set
+SETALTCHAR      @ $C00F     ;W alternate char set
+KBDSTRB         @ $C010     ;WR keyboard strobe
+RDLCBNK2        @ $C011     ;R status of selected $Dx bank
+RDLCRAM         @ $C012     ;R status of $Dx ROM / $Dx RAM
+RDRAMRD         @ $C013     ;R status of main/aux RAM reading
+RDRAMWRT        @ $C014     ;R status of main/aux RAM writing
+RDCXROM         @ $C015     ;R status of periph/ROM access
+RDALTZP         @ $C016     ;R status of main/aux stack and zero page
+RDC3ROM         @ $C017     ;R status of slot 3 / aux slot ROM
+RD80COL         @ $C018     ;R status of $C002-C005/PAGE2 for aux mem
+RDVBLBAR        @ $C019     ;R vertical blanking state
+RDTEXT          @ $C01A     ;R status of text/graphics
+RDMIX           @ $C01B     ;R status of full screen / mixed graphics
+RDPAGE2         @ $C01C     ;R status of page 1 / page 2
+RDHIRES         @ $C01D     ;R status of lo-res / hi-res
+ALTCHARSET      @ $C01E     ;R status of primary / alternate char set
+RD80VID         @ $C01F     ;R status of 40/80 columns
+TAPEOUT         @ $C020     ;RW toggle caseette tape output
+MONOCOLOR       @ $C021     ;W color/mono
+TBCOLOR         @ $C022     ;RW screen color (low is BG, high is FG)
+VGCINT          @ $C023     ;R VGC interrupts
+MOUSEDATA       @ $C024     ;R mouse data: high bit is button
+KEYMODREG       @ $C025     ;R modifier key state
+DATAREG         @ $C026     ;RW ADB command/data
+KMSTATUS        @ $C027     ;RW ADB status
+ROMBANK         @ $C028     ;RW ROM bank select (IIc Plus)
+NEWVIDEO        @ $C029     ;RW video select (SHR)
+LANGSEL         @ $C02B     ;RW ROM bank select
+CHARROM         @ $C02C     ;R addr for character ROM test
+SLTROMSEL       @ $C02D     ;RW slot vs. ROM selection
+VERTCNT         @ $C02E     ;R read video counter bits (V5-VB)
+HORIZCNT        @ $C02F     ;R read video counter bits (VA-H0)
+SPKR            @ $C030     ;RW toggle speaker
+DISKREG         @ $C031     ;RW disk interface
+SCANINT         @ $C032     ;W VGC interrupt clear
+CLOCKDATA       @ $C033     ;RW battery RAM interface
+CLOCKCTL        @ $C034     ;RW bits 0-3 = border color
+SHADOW          @ $C035     ;RW inhibit shadowing
+CYAREG          @ $C036     ;RW Configure Your Apple
+DMAREG          @ $C037     ;RW
+SCCBREG         @ $C038     ;RW SCC command channel B
+SCCAREG         @ $C039     ;RW SCC command channel A
+SCCBDATA        @ $C03A     ;RW SCC data channel B
+SCCADATA        @ $C03B     ;RW SCC data channel A
+SOUNDCTL        @ $C03C     ;RW sound settings (0-3=volume)
+SOUNDDATA       @ $C03D     ;RW sound data
+SOUNDADRL       @ $C03E     ;RW low pointer
+SOUNDADRH       @ $C03F     ;RW high pointer
+STROBE          @ $C040     ;R game I/O strobe
+INTEN           @ $C041     ;RW read VBL interrupt
+
+MMDELTAX        @ $C044     ;R mouse delta movement X
+MMDELTAY        @ $C045     ;R mouse delta movement Y
+DIAGTYPE        @ $C046     ;W self-test diagnostics
+CLRVBLINT       @ $C047     ;W clear VBL interrupt
+CLRXYINT        @ $C048     ;W clear XY interrupt
+
+EMUBYTE         @ $C04F     ;WR used by emulators to identify themselves
+
+TXTCLR          @ $C050     ;RW display graphics
+TXTSET          @ $C051     ;RW display text
+MIXCLR          @ $C052     ;RW display full screen
+MIXSET          @ $C053     ;RW display split screen
+TXTPAGE1        @ $C054     ;RW display page 1
+TXTPAGE2        @ $C055     ;RW display page 2 (or read/write aux mem)
+LORES           @ $C056     ;RW display lo-res graphics
+HIRES           @ $C057     ;RW display hi-res graphics
+SETAN0          @ $C058     ;RW annunciator 0 off
+CLRAN0          @ $C059     ;RW annunciator 0 on
+SETAN1          @ $C05A     ;RW annunciator 1 off
+CLRAN1          @ $C05B     ;RW annunciator 1 on
+SETAN2          @ $C05C     ;RW annunciator 2 off
+CLRAN2          @ $C05D     ;RW annunciator 2 on
+SETAN3          @ $C05E     ;RW annunciator 3 off
+CLRAN3          @ $C05F     ;RW annunciator 3 on
+TAPEIN          = $C060     ;R read cassette input
+BUTN3           @ $C060     ;R switch input 3
+BUTN0           @ $C061     ;R switch input 0 / open-apple
+BUTN1           @ $C062     ;R switch input 1 / closed-apple
+BUTN2           @ $C063     ;R switch input 2 / shift key
+PADDL0          @ $C064     ;R analog input 0
+PADDL1          @ $C065     ;R analog input 1
+PADDL2          @ $C066     ;R analog input 2
+PADDL3          @ $C067     ;R analog input 3
+STATEREG        @ $C068     ;RW address state
+
+TESTREG         @ $C06D     ;test mode
+CLTRM           @ $C06E     ;clear test mode
+ENTM            @ $C06F     ;enable test mode
+PTRIG           @ $C070     ;RW analog input reset
+
+;                 $C080     ;RW read RAM, write off, bank 2
+ROMIN           @ $C081     ;RW read ROM, write on, bank 2
+ROMIN_RO        @ $C082     ;RW read ROM, write off, bank 2
+LCBANK2         @ $C083     ;RW read RAM, write on, bank 2
+;                 $C088     ;RW read RAM, write off, bank 1
+;                 $C089     ;RW read ROM, write on, bank 1
+;                 $C08A     ;RW read ROM, write off, bank 1
+LCBANK1         @ $C08B     ;RW read RAM, write on, bank 1
+
+CLRROM          @ $CFFF
+
+;IWM:PH0 off @ C0E0
+;IWM:PH0 on @ C0E1
+;IWM:PH1 off @ C0E2
+;IWM:PH1 on @ C0E3
+;IWM:PH2 off @ C0E4
+;IWM:PH2 on @ C0E5
+;IWM:PH3 off @ C0E6
+;IWM:PH3 on @ C0E7
+;IWM:motor off @ C0E8
+;IWM:motor on @ C0E9
+;IWM:drive 1 @ C0EA
+;IWM:drive 2 @ C0EB
+;IWM:Q6 OFF (Read) @ C0EC
+;IWM:Q6 ON  (WP-sense) @ C0ED
+;IWM:Q7 OFF (WP-sense/Read) @ C0EE
+;IWM:Q7 ON  (Write) @ C0EF
+
+; Not strictly I/O locations, but they're in the neighborhood.
+ROM_AUXMOVE     @ $C311
+ROM_XFER        @ $C314

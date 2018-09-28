@@ -1,0 +1,978 @@
+﻿/*
+ * Copyright 2018 faddenSoft
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+using System;
+using System.Diagnostics;
+
+using Asm65;
+using CommonUtil;
+
+namespace SourceGen {
+    /// <summary>
+    /// Auto-detection of structured data.
+    /// 
+    /// This class doesn't really hold any state.  It's just a convenient place to collect
+    /// the items needed by the analyzer methods.
+    /// </summary>
+    public class DataAnalysis {
+        // Minimum number of consecutive identical bytes for something to be called a "run".
+        private const int MIN_RUN_LENGTH = 5;
+        // Minimum length for treating data as a run if the byte is a valid ASCII value.
+        // (Alternatively, the maximum length of an ASCII string composed of single characters.)
+        // Anything shorter than this is handled with a string directive, anything this long or
+        // longer becomes FILL.  This should be larger than the MinCharsForString parameter.
+        private const int MIN_RUN_LENGTH_ASCII = 62;
+
+        // Minimum length for an ASCII string.  Anything shorter is just output as bytes.
+        public const int DEFAULT_MIN_STRING_LENGTH = 4;
+        // Set min chars to this to disable string detection.
+        public const int MIN_CHARS_FOR_STRING_DISABLED = int.MaxValue;
+
+        /// <summary>
+        /// Project with which we are associated.
+        /// </summary>
+        private DisasmProject mProject;
+
+        /// <summary>
+        /// Reference to 65xx data.
+        /// </summary>
+        private byte[] mFileData;
+
+        /// <summary>
+        /// Attributes, one per byte in input file.
+        /// </summary>
+        private Anattrib[] mAnattribs;
+
+        /// <summary>
+        /// Configurable parameters.
+        /// </summary>
+        private ProjectProperties.AnalysisParameters mAnalysisParams;
+
+
+        /// <summary>
+        /// Debug trace log.
+        /// </summary>
+        private DebugLog mDebugLog = new DebugLog(DebugLog.Priority.Silent);
+        public DebugLog DebugLog {
+            set {
+                mDebugLog = value;
+            }
+        }
+
+
+        public DataAnalysis(DisasmProject proj, Anattrib[] anattribs) {
+            mProject = proj;
+            mAnattribs = anattribs;
+
+            mFileData = proj.FileData;
+            mAnalysisParams = proj.ProjectProps.AnalysisParams;
+        }
+
+        // Internal log functions. If we're concerned about performance overhead due to
+        // call-site string concatenation, we can #ifdef these to nothing in release builds,
+        // which should allow the compiler to elide the concat.
+#if false
+        private void LogV(int offset, string msg) {
+            if (mDebugLog.IsLoggable(DebugLog.Priority.Verbose)) {
+                mDebugLog.LogV("+" + offset.ToString("x6") + " " + msg);
+            }
+        }
+#else
+        private void LogV(int offset, string msg) { }
+#endif
+        private void LogD(int offset, string msg) {
+            if (mDebugLog.IsLoggable(DebugLog.Priority.Debug)) {
+                mDebugLog.LogD("+" + offset.ToString("x6") + " " + msg);
+            }
+        }
+        private void LogI(int offset, string msg) {
+            if (mDebugLog.IsLoggable(DebugLog.Priority.Info)) {
+                mDebugLog.LogI("+" + offset.ToString("x6") + " " + msg);
+            }
+        }
+        private void LogW(int offset, string msg) {
+            if (mDebugLog.IsLoggable(DebugLog.Priority.Warning)) {
+                mDebugLog.LogW("+" + offset.ToString("x6") + " " + msg);
+            }
+        }
+        private void LogE(int offset, string msg) {
+            if (mDebugLog.IsLoggable(DebugLog.Priority.Error)) {
+                mDebugLog.LogE("+" + offset.ToString("x6") + " " + msg);
+            }
+        }
+
+        /// <summary>
+        /// Analyzes instruction operands and Address data descriptors to identify references
+        /// to offsets within the file.
+        /// 
+        /// Instructions with format descriptors are left alone.  Instructions with
+        /// operand offsets but no descriptor will have a descriptor generated
+        /// using the label at the target offset; if the target offset is unlabeled,
+        /// a unique label will be generated.  Data descriptors with type=Address are
+        /// handled the same way.
+        /// 
+        /// In some cases, such as a reference to the middle of an instruction, we will
+        /// label a nearby location instead.
+        /// 
+        /// This should be called after code analysis has run, user labels and format
+        /// descriptors have been applied, and platform/project symbols have been merged
+        /// into the symbol table.
+        /// </summary>
+        /// <returns>True on success.</returns>
+        public void AnalyzeDataTargets() {
+            mDebugLog.LogI("Analyzing data targets...");
+
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                Anattrib attr = mAnattribs[offset];
+                if (attr.IsInstructionStart) {
+                    if (attr.DataDescriptor != null) {
+                        // It's being shown as numeric, or as a reference to some other symbol.
+                        // Either way there's nothing further for us to do.  (Technically we
+                        // would want to treat it like the no-descriptor case if the type was
+                        // numeric/Address, but we don't allow that for instructions.)
+                        Debug.Assert(attr.DataDescriptor.FormatSubType !=
+                            FormatDescriptor.SubType.Address);
+                        continue;
+                    }
+                    int operandOffset = attr.OperandOffset;
+                    if (operandOffset >= 0) {
+                        // This is an offset reference: a branch or data access instruction whose
+                        // target is inside the file.  Create a FormatDescriptor for it, and
+                        // generate a label at the target if one is not already present.
+                        SetDataTarget(offset, attr.Length, operandOffset);
+                    }
+
+                    // We advance by a single byte, rather than .Length, in case there's
+                    // an instruction embedded inside another one.
+                } else if (attr.DataDescriptor != null) {
+                    // We can't check IsDataStart / IsInlineDataStart because the bytes might
+                    // still be uncategorized.  If there's a user-specified format, check it
+                    // to see if it's an address.
+                    FormatDescriptor dfd = attr.DataDescriptor;
+
+                    // Is this numeric/Address?
+                    if ((dfd.FormatType == FormatDescriptor.Type.NumericLE ||
+                            dfd.FormatType == FormatDescriptor.Type.NumericBE) &&
+                            dfd.FormatSubType == FormatDescriptor.SubType.Address) {
+                        // Treat like an absolute address.  Convert the operand
+                        // to an address, then resolve the file offset.
+                        int address = RawData.GetWord(mFileData, offset, dfd.Length,
+                                (dfd.FormatType == FormatDescriptor.Type.NumericBE));
+                        if (dfd.Length < 3) {
+                            // Bank not specified by data, add current program bank.  Not always
+                            // correct, but should be often enough.  In most cases we'd just
+                            // assume a correct data bank register, but here we need to find
+                            // a file offset, so we have to assume data bank == program bank
+                            // (unless we find a good way to track the data bank register).
+                            address |= attr.Address & 0x7fff0000;
+                        }
+                        int operandOffset = mProject.AddrMap.AddressToOffset(offset, address);
+                        if (operandOffset >= 0) {
+                            SetDataTarget(offset, dfd.Length, operandOffset);
+                        }
+                    }
+
+                    // For other formats, we don't need to do anything.  Numeric/Address is
+                    // the only one that represents an offset reference.  Numeric/Symbol
+                    // is a name reference.  The others are just data.
+
+                    // There shouldn't be any data items inside other data items, so we
+                    // can just skip forward.
+                    offset += mAnattribs[offset].DataDescriptor.Length - 1;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Extracts the operand offset from a data item.
+        /// </summary>
+        /// <param name="proj">Project reference.</param>
+        /// <param name="offset">Offset of data item.</param>
+        /// <returns>Operand offset, or -1 if not applicable.</returns>
+        public static int GetDataOperandOffset(DisasmProject proj, int offset) {
+            Anattrib attr = proj.GetAnattrib(offset);
+            if (!attr.IsDataStart && !attr.IsInlineDataStart) {
+                return -1;
+            }
+            FormatDescriptor dfd = attr.DataDescriptor;
+
+            // Is this numeric/Address or numeric/Symbol?
+            if ((dfd.FormatType != FormatDescriptor.Type.NumericLE &&
+                    dfd.FormatType != FormatDescriptor.Type.NumericBE) ||
+                    (dfd.FormatSubType != FormatDescriptor.SubType.Address &&
+                    dfd.FormatSubType != FormatDescriptor.SubType.Symbol)) {
+                return -1;
+            }
+
+            // Treat like an absolute address.  Convert the operand
+            // to an address, then resolve the file offset.
+            int address = RawData.GetWord(proj.FileData, offset, dfd.Length,
+                    (dfd.FormatType == FormatDescriptor.Type.NumericBE));
+            if (dfd.Length < 3) {
+                // Add the program bank where the data bank should go.  Not perfect but
+                // we don't have anything better at the moment.
+                address |= attr.Address & 0x7fff0000;
+            }
+            int operandOffset = proj.AddrMap.AddressToOffset(offset, address);
+            return operandOffset;
+        }
+
+        /// <summary>
+        /// Creates a FormatDescriptor in the Anattrib array at srcOffset that links to
+        /// targetOffset, or a nearby label.  If targetOffset doesn't have a useful label,
+        /// one will be generated.
+        /// 
+        /// This is used for both instruction and data operands.
+        /// </summary>
+        /// <param name="srcOffset">Offset of instruction or address data.</param>
+        /// <param name="srcLen">Length of instruction or data item.</param>
+        /// <param name="targetOffset">Offset of target.</param>
+        private void SetDataTarget(int srcOffset, int srcLen, int targetOffset) {
+            // NOTE: don't try to cache mAnattribs[targetOffset] -- we may be changing
+            // targetOffset and/or altering the Anattrib entry, so grabbing a copy of the
+            // struct may lead to problems.
+
+            // If the target offset has a symbol assigned, use it.  Otherwise, try to
+            // find something nearby that might be more appropriate.
+            int origTargetOffset = targetOffset;
+            if (mAnattribs[targetOffset].Symbol == null) {
+                if (mAnalysisParams.SeekNearbyTargets) {
+                    targetOffset = FindAlternateTarget(srcOffset, targetOffset);
+                }
+
+                // If we're not interested in seeking nearby targets, or we are but we failed
+                // to find something useful, we need to make sure that we're not pointing
+                // into the middle of the instruction.  The assembler will only see labels on
+                // the opcode bytes, so if we're pointing at the middle we need to back up.
+                if (mAnattribs[targetOffset].IsInstruction &&
+                        !mAnattribs[targetOffset].IsInstructionStart) {
+                    while (!mAnattribs[--targetOffset].IsInstructionStart) {
+                        // Should not be possible to move past the start of the file,
+                        // since we know we're in the middle of an instruction.
+                        Debug.Assert(targetOffset > 0);
+                    }
+                } else if (!mAnattribs[targetOffset].IsInstruction &&
+                            !mAnattribs[targetOffset].IsStart) {
+                    // This is not part of an instruction, and is not the start of a formatted
+                    // data area.  However, it might be part of a formatted data area, in which
+                    // case we need to avoid creating an auto label in the middle.  So we seek
+                    // backward, looking for the first offset with a descriptor.  If that
+                    // descriptor includes this offset, we set the target offset to that.
+                    // (Note the uncategorized data pass hasn't run yet, so only instructions
+                    // and offsets identified by users or scripts have been categorized.)
+                    int scanOffset = targetOffset;
+                    while (--scanOffset > 0) {
+                        FormatDescriptor dfd = mAnattribs[scanOffset].DataDescriptor;
+                        if (dfd != null && scanOffset + dfd.Length > targetOffset) {
+                            // Descriptor encompasses target offset.  Adjust target.
+                            targetOffset = scanOffset;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (mAnattribs[targetOffset].Symbol == null) {
+                // No label at target offset, generate one.
+                //
+                // Generally speaking, the label we generate will be unique, because it
+                // incorporates the address.  It's possible through various means to end
+                // up with a user or platform label that matches an auto label, so we
+                // need to do some renaming in that case.  Shouldn't happen often.
+                Symbol sym = SymbolTable.GenerateUniqueForAddress(mAnattribs[targetOffset].Address,
+                    mProject.SymbolTable);
+                mAnattribs[targetOffset].Symbol = sym;
+                // This will throw if the symbol already exists.  That is the desired
+                // behavior, as that would be a bug.
+                mProject.SymbolTable.Add(sym);
+            }
+
+            // Create a Numeric/Symbol descriptor that references the target label.  If the
+            // source offset already had a descriptor (e.g. Numeric/Address data item),
+            // this will replace it in the Anattrib array.  (The user-specified format
+            // is unaffected.)
+            //
+            // Doing this by target symbol, rather than offset in a Numeric/Address item,
+            // allows us to avoid carrying the adjustment stuff everywhere.  OTOH we have
+            // to manually refactor label renames in the display list if we don't want to
+            // redo the data analysis.
+            bool isBigEndian = false;
+            if (mAnattribs[srcOffset].DataDescriptor != null) {
+                LogD(srcOffset, "Replacing " + mAnattribs[srcOffset].DataDescriptor +
+                    " with reference to " + mAnattribs[targetOffset].Symbol.Label +
+                    ", adj=" + (origTargetOffset - targetOffset));
+                if (mAnattribs[srcOffset].DataDescriptor.FormatType ==
+                        FormatDescriptor.Type.NumericBE) {
+                    isBigEndian = true;
+                }
+            } else {
+                LogV(srcOffset, "Creating weak reference to label " +
+                    mAnattribs[targetOffset].Symbol.Label +
+                    ", adj=" + (origTargetOffset - targetOffset));
+            }
+            mAnattribs[srcOffset].DataDescriptor = FormatDescriptor.Create(srcLen,
+                new WeakSymbolRef(mAnattribs[targetOffset].Symbol.Label, WeakSymbolRef.Part.Low),
+                isBigEndian);
+        }
+
+        private int FindAlternateTarget(int srcOffset, int targetOffset) {
+            int origTargetOffset = targetOffset;
+
+            // Is the target outside the instruction stream?  If it's just referencing data,
+            // do a simple check and move on.
+            if (!mAnattribs[targetOffset].IsInstruction) {
+                // We want to use user-defined labels whenever possible.  If they're accessing
+                // memory within a few bytes, use that.  We don't want to do this for
+                // code references, though, or our branches will get all weird.
+                // TODO(someday): make MAX user-configurable?  Seek forward as well as backward?
+                const int MAX = 4;
+                for (int probeOffset = targetOffset - 1;
+                        probeOffset >= 0 && probeOffset != targetOffset - MAX; probeOffset--) {
+                    Symbol sym = mAnattribs[probeOffset].Symbol;
+                    if (sym != null && sym.SymbolSource == Symbol.Source.User) {
+                        // Found a nearby user label.  Make sure it's actually nearby.
+                        int addrDiff = mAnattribs[targetOffset].Address -
+                            mAnattribs[probeOffset].Address;
+                        if (addrDiff == targetOffset - probeOffset) {
+                            targetOffset = probeOffset;
+                        } else {
+                            Debug.WriteLine("NOT probing past address boundary change");
+                        }
+                        break;
+                    }
+                }
+                return targetOffset;
+            }
+
+            // Target is an instruction.  Is the source an instruction or data element
+            // (e.g. ".dd2 <addr>").
+            if (!mAnattribs[srcOffset].IsInstructionStart) {
+                // Might be address-1 to set up an RTS.  If the target address isn't
+                // an instruction start, check to see if the following byte is.
+                if (!mAnattribs[targetOffset].IsInstructionStart &&
+                        targetOffset + 1 < mAnattribs.Length &&
+                        mAnattribs[targetOffset + 1].IsInstructionStart) {
+                    LogD(srcOffset, "Offsetting address reference");
+                    targetOffset++;
+                }
+                return targetOffset;
+            }
+
+            // Source is an instruction, so we have an instruction referencing an instruction.
+            // Could be a branch, an address push, or self-modifying code.
+            OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[srcOffset]);
+            if (op.IsBranch) {
+                // Don't mess with jumps and branches -- always go directly to the
+                // target address.
+            } else if (op == OpDef.OpPEA_StackAbs || op == OpDef.OpPER_StackPCRelLong) {
+                // They might be pushing address-1 to set up an RTS.  If the target address isn't
+                // an instruction start, check to see if the following byte is.
+                if (!mAnattribs[targetOffset].IsInstructionStart &&
+                        targetOffset + 1 < mAnattribs.Length &&
+                        mAnattribs[targetOffset + 1].IsInstructionStart) {
+                    LogD(srcOffset, "Offsetting PEA/PER");
+                    targetOffset++;
+                }
+            } else {
+                // Data operation (LDA, STA, etc).  This could be self-modifying code, or
+                // an indexed access with an offset base address (LDA addr-1,Y) to an
+                // adjacent data area.  Check to see if there's data right after this.
+                bool nearbyData = false;
+                for (int i = targetOffset + 1; i <= targetOffset + 2; i++) {
+                    if (i < mAnattribs.Length && !mAnattribs[i].IsInstruction) {
+                        targetOffset = i;
+                        nearbyData = true;
+                        break;
+                    }
+                }
+                if (!nearbyData && !mAnattribs[targetOffset].IsInstructionStart) {
+                    // There's no data nearby, and the target is not the start of the
+                    // instruction, so this is probably self-modifying code.  We want
+                    // the label to be on the opcode, so back up to the instruction start.
+                    while (!mAnattribs[--targetOffset].IsInstructionStart) {
+                        // Should not be possible to move past the start of the file,
+                        // since we know we're in the middle of an instruction.
+                        Debug.Assert(targetOffset > 0);
+                    }
+                }
+            }
+
+            if (targetOffset != origTargetOffset) {
+                LogV(srcOffset, "Creating instruction ref adj=" +
+                    (origTargetOffset - targetOffset));
+            }
+
+            return targetOffset;
+        }
+
+        /// <summary>
+        /// Analyzes uncategorized regions of the file to see if they fit common patterns.
+        /// 
+        /// This is re-run after most changes to the project, so we don't want to do anything
+        /// crazily expensive.
+        /// </summary>
+        /// <returns>True on success.</returns>
+        public void AnalyzeUncategorized() {
+            // TODO(someday): we can make this faster.  The data doesn't change, so we
+            // only need to do a full scan once, when the file is first loaded.  We can
+            // create a TypedRangeSet for runs of identical bytes, using the byte value
+            // as the type.  A second TypedRangeSet would identify runs of ASCII chars,
+            // with different types for high/low ASCII (and PETSCII?).  AnalyzeRange() would
+            // then just need to find the intersection with the sets, which should be
+            // significantly faster.  We would need to re-do the scan if the parameters
+            // for things like min match length change.
+
+            FormatDescriptor oneByteDefault = FormatDescriptor.Create(1,
+                FormatDescriptor.Type.Default, FormatDescriptor.SubType.None);
+            FormatDescriptor.DebugPrefabBump(-1);
+
+            // If it hasn't been identified as code or data, set the "data" flag to
+            // give it a positive identification as data.  (This should be the only
+            // place outside of CodeAnalysis that sets this flag.)  This isn't strictly
+            // necessary, but it helps us assert things when pieces start moving around.
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                Anattrib attr = mAnattribs[offset];
+                if (attr.IsInlineData) {
+                    // While we're here, add a default format descriptor for inline data
+                    // that doesn't have one.  We don't try to analyze it otherwise.
+                    if (attr.DataDescriptor == null) {
+                        mAnattribs[offset].DataDescriptor = oneByteDefault;
+                        FormatDescriptor.DebugPrefabBump();
+                    }
+                } else if (!attr.IsInstruction) {
+                    mAnattribs[offset].IsData = true;
+                }
+            }
+
+            mDebugLog.LogI("Analyzing uncategorized data...");
+
+            int startOffset = -1;
+            for (int offset = 0; offset < mAnattribs.Length; ) {
+                // We want to find a contiguous series of offsets which are not known
+                // to hold code or data.  We stop if we encounter a user-defined label
+                // or format descriptor.
+                Anattrib attr = mAnattribs[offset];
+
+                if (attr.IsInstruction || attr.IsInlineData || attr.IsDataStart) {
+                    // Instruction, inline data, or formatted data known to be here.  Analyze
+                    // previous chunk, then advance past this.
+                    if (startOffset >= 0) {
+                        AnalyzeRange(startOffset, offset - 1);
+                        startOffset = -1;
+                    }
+                    if (attr.IsInstruction) {
+                        // Because of embedded instructions, we can't simply leap forward.
+                        offset++;
+                    } else {
+                        Debug.Assert(attr.Length > 0);
+                        offset += attr.Length;
+                    }
+                } else if (attr.Symbol != null || mProject.HasCommentOrNote(offset)) {
+                    // In an uncategorized area, but we want to break at this byte
+                    // so the user or auto label doesn't get buried in the middle of
+                    // a large chunk.
+                    //
+                    // This is similar to, but independent of, GroupedOffsetSetFromSelected()
+                    // in ProjectView.  This is for auto-detection, the other is for user
+                    // selection.  It's best if the two behave similarly though.
+                    if (startOffset >= 0) {
+                        AnalyzeRange(startOffset, offset - 1);
+                    }
+                    startOffset = offset;
+                    offset++;
+                } else {
+                    // This offset is uncategorized, keep gathering.
+                    if (startOffset < 0) {
+                        startOffset = offset;
+                    }
+                    offset++;
+
+                    // Check to see if the address has changed from the previous entry.
+                    if (offset < mAnattribs.Length &&
+                            mAnattribs[offset-1].Address + 1 != mAnattribs[offset].Address) {
+                        // Must be an ORG here.  Scan previous region.
+                        AnalyzeRange(startOffset, offset - 1);
+                        startOffset = -1;
+                    }
+                }
+            }
+            if (startOffset >= 0) {
+                AnalyzeRange(startOffset, mAnattribs.Length - 1);
+            }
+        }
+
+        /// <summary>
+        /// Analyzes a range of bytes, looking for opportunities to promote uncategorized
+        /// data to a more structured form.
+        /// </summary>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        private void AnalyzeRange(int start, int end) {
+            // TODO(someday): consider copying the buffer into a string and using Regex.  This
+            //   can be done fairly quickly with "unsafe" code, e.g.:
+            //   https://stackoverflow.com/questions/3028768/net-regular-expressions-on-bytes-instead-of-chars
+            //   Could be useful for ASCII stuff and the repeated-byte detector, e.g.:
+            //   https://stackoverflow.com/questions/1660694/regular-expression-to-match-any-character-being-repeated-more-than-10-times
+
+            mDebugLog.LogI("Analyzing  +" + start.ToString("x6") + " - +" + end.ToString("x6"));
+
+            int minStringChars = mAnalysisParams.MinCharsForString;
+            bool doAnalysis = mAnalysisParams.AnalyzeUncategorizedData;
+            FormatDescriptor oneByteDefault = FormatDescriptor.Create(1,
+                        FormatDescriptor.Type.Default, FormatDescriptor.SubType.None);
+            FormatDescriptor.DebugPrefabBump(-1);
+
+            while (start <= end) {
+                if (!doAnalysis) {
+                    // Analysis is disabled, so just mark everything as single-byte data.
+                    mAnattribs[start].DataDescriptor = oneByteDefault;
+                    FormatDescriptor.DebugPrefabBump();
+                    start++;
+                    continue;
+                }
+
+                // Check for block of repeated values.
+                int length = RecognizeRun(mFileData, start, end);
+                bool isAscii = TextUtil.IsPrintableAscii((char)(mFileData[start] & 0x7f));
+                if (length >= MIN_RUN_LENGTH) {
+                    // Output as run or ASCII string.  Prefer ASCII if the string is short
+                    // enough to fit on one line (e.g. 64 chars including delimiters) and
+                    // meets the minimum string length threshold.
+                    if (isAscii && length <= MIN_RUN_LENGTH_ASCII && length >= minStringChars) {
+                        // string -- if we create the descriptor here, we save a little time,
+                        //  but strings like "*****hello" turn into two separate strings.
+                        //LogV(start, "String from run of '" + (char)(mFileData[start] & 0x7f) +
+                        //    "': " + length + " bytes");
+                        //mAnattribs[start].DataDescriptor = FormatDescriptor.CreateDescriptor(
+                        //    length, FormatDescriptor.Type.String,
+                        //    FormatDescriptor.SubType.None);
+                        //start += length;
+                        //continue;
+                    } else {
+                        // run
+                        LogV(start, "Run of 0x" + mFileData[start].ToString("x2") + ": " +
+                            length + " bytes");
+                        mAnattribs[start].DataDescriptor = FormatDescriptor.Create(
+                            length, FormatDescriptor.Type.Fill,
+                            FormatDescriptor.SubType.None);
+                        start += length;
+                        continue;
+                    }
+                }
+
+                length = RecognizeAscii(mFileData, start, end);
+                if (length >= minStringChars) {
+                    LogV(start, "ASCII string, len=" + length + " bytes");
+                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(length,
+                        FormatDescriptor.Type.String, FormatDescriptor.SubType.None);
+                    start += length;
+                    continue;
+                }
+
+                // Nothing found, output as single byte.  This is the easiest form for users
+                // to edit.
+                mAnattribs[start].DataDescriptor = oneByteDefault;
+                FormatDescriptor.DebugPrefabBump();
+
+                // It's tempting to advance by the "length" result from RecognizeRun, and if
+                // we were just looking for runs of identical bytes we could.  However, that
+                // would lose short ASCII strings that began with repeated bytes, e.g. "---%".
+
+                start++;
+            }
+        }
+
+        #region Static analyzer methods
+
+        /// <summary>
+        /// Checks for a repeated run of the same byte.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Length of run.</returns>
+        public static int RecognizeRun(byte[] fileData, int start, int end) {
+            byte first = fileData[start];
+            int index = start;
+            while (++index <= end) {
+                if (fileData[index] != first) {
+                    break;
+                }
+            }
+            return index - start;
+        }
+
+        /// <summary>
+        /// Checks for a run of ASCII values.  Both high and low ASCII are recognized,
+        /// but the entire run must be one or the other.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Length of run.</returns>
+        public static int RecognizeAscii(byte[] fileData, int start, int end) {
+            // This won't find a mix of Apple II high/inverse/flashing text.
+            byte firstHi = (byte)(fileData[start] & 0x80);
+
+            int index;
+            for (index = start; index <= end; index++) {
+                char ch = (char)fileData[index];
+                if (!TextUtil.IsPrintableAscii((char)(ch & 0x7f)) || (ch & 0x80) != firstHi) {
+                    break;
+                }
+            }
+
+            return index - start;
+        }
+
+        /// <summary>
+        /// Counts the number of low-ASCII, high-ASCII, and non-ASCII values in the
+        /// specified region.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range</param>
+        /// <param name="lowAscii">Set to the number of low-ASCII bytes found.</param>
+        /// <param name="highAscii">Set to the number of high-ASCII bytes found.</param>
+        /// <param name="nonAscii">Set to the number of non-ASCII bytes found.</param>
+        public static void CountAsciiBytes(byte[] fileData, int start, int end,
+                out int lowAscii, out int highAscii, out int nonAscii) {
+            lowAscii = highAscii = nonAscii = 0;
+
+            for (int i = start; i <= end; i++) {
+                byte val = fileData[i];
+                if (val < 0x20) {
+                    nonAscii++;
+                } else if (val < 0x7f) {
+                    lowAscii++;
+                } else if (val < 0xa0) {
+                    nonAscii++;
+                } else if (val < 0xff) {
+                    highAscii++;
+                } else {
+                    nonAscii++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Counts the number of null-terminated strings in the buffer.
+        /// 
+        /// Zero-length strings are allowed but not included in the count.
+        /// 
+        /// Each string must be either high-ASCII or low-ASCII, not a mix.
+        /// 
+        /// If any bad data is found, the scan aborts and returns -1.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Number of strings found, or -1 if bad data identified.</returns>
+        public static int RecognizeNullTerminatedStrings(byte[] fileData, int start, int end) {
+            // Quick test.
+            if (fileData[end] != 0x00) {
+                return -1;
+            }
+
+            int stringCount = 0;
+            int expectedHiBit = -1;
+            int stringLen = 0;
+            for (int i = start; i <= end; i++) {
+                byte val = fileData[i];
+                if (val == 0x00) {
+                    // End of string.  Only update count if string wasn't empty.
+                    if (stringLen != 0) {
+                        stringCount++;
+                    }
+                    stringLen = 0;
+                    expectedHiBit = -1;
+                } else {
+                    if (expectedHiBit == -1) {
+                        // First byte in string, set hi/lo expectation.
+                        expectedHiBit = val & 0x80;
+                    } else if ((val & 0x80) != expectedHiBit) {
+                        // Mixed ASCII or non-ASCII, fail.
+                        return -1;
+                    }
+                    val &= 0x7f;
+                    if (val < 0x20 || val == 0x7f) {
+                        // Non-ASCII, fail.
+                        return -1;
+                    }
+                    stringLen++;
+                }
+            }
+
+            return stringCount;
+        }
+
+        /// <summary>
+        /// Counts strings prefixed with an 8-bit length.
+        /// 
+        /// Each string must be either high-ASCII or low-ASCII, not a mix.
+        ///
+        /// Zero-length strings are allowed but not counted.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Number of strings found, or -1 if bad data identified.</returns>
+        public static int RecognizeLen8Strings(byte[] fileData, int start, int end) {
+            int posn = start;
+            int remaining = end - start + 1;
+            int stringCount = 0;
+
+            while (remaining > 0) {
+                int strLen = fileData[posn++];
+                if (strLen > --remaining) {
+                    // Buffer doesn't hold entire string, fail.
+                    return -1;
+                }
+
+                if (strLen == 0) {
+                    continue;
+                }
+                stringCount++;
+                remaining -= strLen;
+
+                int expectedHiBit = fileData[posn] & 0x80;
+
+                while (strLen-- != 0) {
+                    byte val = fileData[posn++];
+                    if ((val & 0x80) != expectedHiBit) {
+                        // Mixed ASCII, fail.
+                        return -1;
+                    }
+                    val &= 0x7f;
+                    if (val < 0x20 || val == 0x7f) {
+                        // Non-ASCII, fail.
+                        return -1;
+                    }
+                }
+            }
+
+            return stringCount;
+        }
+
+        /// <summary>
+        /// Counts strings prefixed with a 16-bit length.
+        /// 
+        /// Each string must be either high-ASCII or low-ASCII, not a mix.
+        ///
+        /// Zero-length strings are allowed but not counted.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Number of strings found, or -1 if bad data identified.</returns>
+        public static int RecognizeLen16Strings(byte[] fileData, int start, int end) {
+            int posn = start;
+            int remaining = end - start + 1;
+            int stringCount = 0;
+
+            while (remaining > 0) {
+                if (remaining < 2) {
+                    // Not enough bytes for length, fail.
+                    return -1;
+                }
+                int strLen = fileData[posn++];
+                strLen |= fileData[posn++] << 8;
+                remaining -= 2;
+                if (strLen > remaining) {
+                    // Buffer doesn't hold entire string, fail.
+                    return -1;
+                }
+
+                if (strLen == 0) {
+                    continue;
+                }
+                stringCount++;
+                remaining -= strLen;
+
+                int expectedHiBit = fileData[posn] & 0x80;
+
+                while (strLen-- != 0) {
+                    byte val = fileData[posn++];
+                    if ((val & 0x80) != expectedHiBit) {
+                        // Mixed ASCII, fail.
+                        return -1;
+                    }
+                    val &= 0x7f;
+                    if (val < 0x20 || val == 0x7f) {
+                        // Non-ASCII, fail.
+                        return -1;
+                    }
+                }
+            }
+
+            return stringCount;
+        }
+
+        /// <summary>
+        /// Counts strings in Dextral Character Inverted format, meaning the high bit on the
+        /// last byte is the opposite of the preceding.
+        /// 
+        /// Each string must be at least two bytes.  To reduce false-positives, we require
+        /// that all strings have the same hi/lo pattern.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Number of strings found, or -1 if bad data identified.</returns>
+        public static int RecognizeDciStrings(byte[] fileData, int start, int end) {
+            int expectedHiBit = fileData[start] & 0x80;
+            int stringCount = 0;
+            int stringLen = 0;
+
+            // Quick test on last byte.
+            if ((fileData[end] & 0x80) == expectedHiBit) {
+                return -1;
+            }
+
+            for (int i = start; i <= end; i++) {
+                byte val = fileData[i];
+                if ((val & 0x80) != expectedHiBit) {
+                    // end of string
+                    if (stringLen == 0) {
+                        // Got two consecutive bytes with end-marker polarity... fail.
+                        return -1;
+                    }
+                    stringCount++;
+                    stringLen = 0;
+                } else {
+                    stringLen++;
+                }
+
+                val &= 0x7f;
+                if (val < 0x20 || val == 0x7f) {
+                    // Non-ASCII, fail.
+                    return -1;
+                }
+            }
+
+            return stringCount;
+        }
+
+        /// <summary>
+        /// Counts strings in reverse Dextral Character Inverted format, meaning the string is
+        /// stored in reverse order in memory, and the high bit on the first (last) byte is
+        /// the opposite of the rest.
+        /// 
+        /// Each string must be at least two bytes.  To reduce false-positives, we require
+        /// that all strings have the same hi/lo pattern.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <returns>Number of strings found, or -1 if bad data identified.</returns>
+        public static int RecognizeReverseDciStrings(byte[] fileData, int start, int end) {
+            int expectedHiBit = fileData[end] & 0x80;
+            int stringCount = 0;
+            int stringLen = 0;
+
+            // Quick test on last (first) byte.
+            if ((fileData[start] & 0x80) == expectedHiBit) {
+                return -1;
+            }
+
+            for (int i = end; i >= start; i--) {
+                byte val = fileData[i];
+                if ((val & 0x80) != expectedHiBit) {
+                    // end of string
+                    if (stringLen == 0) {
+                        // Got two consecutive bytes with end-marker polarity... fail.
+                        return -1;
+                    }
+                    stringCount++;
+                    stringLen = 0;
+                } else {
+                    stringLen++;
+                }
+
+                val &= 0x7f;
+                if (val < 0x20 || val == 0x7f) {
+                    // Non-ASCII, fail.
+                    return -1;
+                }
+            }
+
+            return stringCount;
+        }
+
+        #endregion // Static analyzers
+    }
+}
+
+
+
+#if false
+        /// <summary>
+        /// Iterator that generates a list of offsets which are not known to hold code or data.
+        /// 
+        /// Generates a set of integers in ascending order.
+        /// </summary>
+        private class UndeterminedValueIterator : IEnumerator {
+            /// <summary>
+            /// Index of current item, or -1 if we're not started yet.
+            /// </summary>
+            private int mCurIndex;
+
+            /// <summary>
+            /// Reference to Anattrib array we're iterating over.
+            /// </summary>
+            private Anattrib[] mAnattribs;
+
+
+            /// <summary>
+            /// Constructor.
+            /// </summary>
+            public UndeterminedValueIterator(Anattrib[] anattribs) {
+                mAnattribs = anattribs;
+                Reset();
+            }
+
+            // IEnumerator: current element
+            public object Current {
+                get {
+                    if (mCurIndex < 0) {
+                        // not started
+                        return null;
+                    }
+                    return mCurIndex;
+                }
+            }
+
+            // IEnumerator: move to the next element, returning false if there isn't one
+            public bool MoveNext() {
+                while (++mCurIndex < mAnattribs.Length) {
+                    Anattrib attr = mAnattribs[mCurIndex];
+                    if (attr.IsInstructionStart) {
+                        // skip past instruction
+                        mCurIndex += attr.Length - 1;
+                    } else if (attr.IsUncategorized) {
+                        // got one
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            // IEnumerator: reset state
+            public void Reset() {
+                mCurIndex = -1;
+            }
+        }
+#endif

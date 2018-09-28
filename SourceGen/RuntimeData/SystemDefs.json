@@ -1,0 +1,255 @@
+{
+  "_copyright" : "Copyright 2018 faddenSoft. All rights reserved.",
+  "_license" : "Apache 2.0; see LICENSE.txt for details",
+  "Contents" : "6502bench SourceGen sysdef v1",
+  "Defs" : [
+    {
+      "Name" : "Apple //e",
+      "GroupName" : "Apple",
+      "Cpu" : "65C02",
+      "Speed" : "1.023",
+      "Description" : "Deluxe 8-bit Apple II system, configured for ProDOS.",
+      "SymbolFiles" : [
+        "RT:Apple/F8-ROM.sym65",
+        "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/ProDOS8.sym65"
+      ],
+      "ExtensionScripts" : [
+        "RT:Apple/ProDOS8.cs"
+      ],
+      "Parameters" : {
+        "load-address":"0x2000"
+      }
+    },
+    {
+      "Name" : "Apple ][+",
+      "GroupName" : "Apple",
+      "Cpu" : "6502",
+      "Speed" : "1.023",
+      "Description" : "Early 8-bit Apple II system, configured for DOS 3.3.",
+      "SymbolFiles" : [
+        "RT:Apple/F8-ROM.sym65",
+        "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/DOS33.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+        "load-address":"0x2000"
+      }
+    },
+    {
+      "Name" : "Apple IIgs (P8)",
+      "GroupName" : "Apple",
+      "Cpu" : "65816",
+      "Speed" : "2.8",
+      "Description" : "Apple IIgs, configured for ProDOS 8.",
+      "SymbolFiles" : [
+        "RT:Apple/F8-ROM.sym65",
+        "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/ProDOS8.sym65",
+        "RT:Apple/IIgs-ROM.sym65"
+      ],
+      "ExtensionScripts" : [
+        "RT:Apple/ProDOS8.cs"
+      ],
+      "Parameters" : {
+        "load-address":"0x2000",
+        "entry-flags":"emulation"
+      }
+    },
+    {
+      "Name" : "Apple IIgs (GS/OS)",
+      "GroupName" : "Apple",
+      "Cpu" : "65816",
+      "Speed" : "2.8",
+      "Description" : "Apple IIgs, configured for GS/OS.",
+      "SymbolFiles" : [
+        "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/IIgs-ROM.sym65",
+        "RT:Apple/GSOS.sym65"
+      ],
+      "ExtensionScripts" : [
+        "RT:Apple/GSOS.cs",
+        "RT:Apple/IIgs-Toolbox.cs"
+      ],
+      "Parameters" : {
+        "load-address":"0x2000",
+        "entry-flags":"native-long"
+      }
+    },
+    {
+      "Name" : "Atari 800",
+      "GroupName" : "Atari",
+      "Cpu" : "6502B",
+      "Speed" : "1.79",
+      "Description" : "Atari 800 [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Atari 2600",
+      "GroupName" : "Atari",
+      "Cpu" : "6507",
+      "Speed" : "1.19",
+      "Description" : "Atari 2600 video game system.",
+      "SymbolFiles" : [
+        "RT:Atari/2600.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+        "load-address":"0xf000"
+      }
+    },
+    {
+      "Name" : "Atari 5200",
+      "GroupName" : "Atari",
+      "Cpu" : "6502C",
+      "Speed" : "1.79",
+      "Description" : "Atari 5200 [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Atari Arcade Cabinet",
+      "GroupName" : "Atari",
+      "Cpu" : "6502",
+      "Speed" : "1.512",
+      "Description" : "Atari arcade cabinet, e.g. Battlezone [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Commodore 64",
+      "GroupName" : "Commodore",
+      "Cpu" : "6510",
+      "Speed" : "1.023",
+      "Description" : "Commodore 64 [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Commodore 128",
+      "GroupName" : "Commodore",
+      "Cpu" : "8502",
+      "Speed" : "2",
+      "Description" : "Commodore 128 [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Commodore Pet 2001",
+      "GroupName" : "Commodore",
+      "Cpu" : "6502",
+      "Speed" : "1",
+      "Description" : "Commodore Pet [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "NES",
+      "GroupName" : "Nintendo",
+      "Cpu" : "2A03",
+      "Speed" : "1.79",
+      "Description" : "Nintendo Entertainment System.",
+      "SymbolFiles" : [
+        "RT:Nintendo/NES.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Super NES",
+      "GroupName" : "Nintendo",
+      "Cpu" : "5A22",
+      "Speed" : "3.58",
+      "Description" : "Super Nintendo Entertainment System [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Generic 6502",
+      "GroupName" : "Generic",
+      "Cpu" : "6502",
+      "Speed" : "1",
+      "Description" : "Generic 6502-based system.",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Generic 6502 + Undoc",
+      "GroupName" : "Generic",
+      "Cpu" : "6502",
+      "Speed" : "1",
+      "Description" : "Generic 6502-based system, with undocumented opcodes enabled.",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+        "undocumented-opcodes":"true"
+      }
+    },
+    {
+      "Name" : "Generic 65C02",
+      "GroupName" : "Generic",
+      "Cpu" : "65C02",
+      "Speed" : "1",
+      "Description" : "Generic 65C02-based system.",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
+      "Name" : "Generic 65816",
+      "GroupName" : "Generic",
+      "Cpu" : "65816",
+      "Speed" : "1",
+      "Description" : "Generic 65816-based system.",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    }
+  ]
+}

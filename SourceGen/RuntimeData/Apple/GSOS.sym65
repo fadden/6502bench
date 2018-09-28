@@ -1,0 +1,67 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Source: GS/OS Reference Manual
+
+*SYNOPSIS GS/OS public addresses and constants.
+
+inline_entry    @ $e100a8       ;GS/OS inline call entry point
+stack_entry     @ $e100b0       ;GS/OS stack call entry point
+
+*TAG AppleIIgs-GSOS-Functions
+
+; Class 1 GS/OS calls
+AddNotifyProc   = $2034
+BeginSession    = $201D
+BindInt         = $2031
+ChangePath      = $2004
+ClearBackupBit  = $200B
+Close           = $2014
+Create          = $2001
+DControl        = $202E
+DelNotifyProc   = $2035
+Destroy         = $2002
+DInfo           = $202C
+DRead           = $202F
+DRename         = $2036
+DStatus         = $202D
+DWrite          = $2030
+EndSession      = $201E
+EraseDisk       = $2025
+ExpandPath      = $200E
+Flush           = $2015
+Format          = $2024
+FSTSpecific     = $2033
+GetBootVol      = $2028
+GetDevNumber    = $2020
+GetDirEntry     = $201C
+GetEOF          = $2019
+GetFileInfo     = $2006
+GetFSTInfo      = $202B
+GetLevel        = $201B
+GetMark         = $2017
+GetName         = $2027
+GetPrefix       = $200A
+GetRefInfo      = $2039
+GetRefNum       = $2038
+GetStdRefNum    = $2037
+GetSysPrefs     = $200F
+GetVersion      = $202A
+NewLine         = $2011
+Null            = $200D
+Open            = $2010
+OSShutdown      = $2003
+Quit            = $2029
+Read            = $2012
+RestCache       = $2026
+SessionStatus   = $201F
+SetEOF          = $2018
+SetFileInfo     = $2005
+SetLevel        = $201A
+SetMark         = $2016
+SetPrefix       = $2009
+SetSysPrefs     = $200C
+UnbindInt       = $2032
+Volume          = $2008
+Write           = $2013
+

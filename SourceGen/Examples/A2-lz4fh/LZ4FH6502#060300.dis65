@@ -1,0 +1,166 @@
+﻿### 6502bench SourceGen dis65 v1.0 ###
+{
+"_ContentVersion":1,"FileDataLength":194,"FileDataCrc32":177347202,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AnalysisParams":{
+"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"PlatformSymbolFileIdentifiers":["RT:Apple/F8-ROM.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
+"A1H":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"hide platform def","Label":"A1H","Value":-1,"Source":"Project","Type":"Constant"},
+"copyptr":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b","Label":"copyptr","Value":0,"Source":"Project","Type":"ExternalAddr"},
+"dstptr":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b A1H","Label":"dstptr","Value":62,"Source":"Project","Type":"ExternalAddr"},
+"in_dst":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","Label":"in_dst","Value":766,"Source":"Project","Type":"ExternalAddr"},
+"in_src":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","Label":"in_src","Value":764,"Source":"Project","Type":"ExternalAddr"},
+"lz4fh_magic":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"ascii \u0027f\u0027","Label":"lz4fh_magic","Value":102,"Source":"Project","Type":"Constant"},
+"savlen":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"1b","Label":"savlen","Value":3,"Source":"Project","Type":"ExternalAddr"},
+"savmix":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"1b","Label":"savmix","Value":2,"Source":"Project","Type":"ExternalAddr"},
+"srcptr":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b A1L","Label":"srcptr","Value":60,"Source":"Project","Type":"ExternalAddr"},
+"tok_empty":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"Comment":"","Label":"tok_empty","Value":253,"Source":"Project","Type":"Constant"},
+"tok_eod":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"Comment":"","Label":"tok_eod","Value":254,"Source":"Project","Type":"Constant"}}},
+"AddressMap":[{
+"Offset":0,"Addr":768}],"TypeHints":[{
+"Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
+"39":2,"48":2},
+"Comments":{
+"0":"copy source address to zero page","15":"copy destination address to zero page","27":"does magic match?","54":"success!","83":"get mixed-length byte","87":"get the literal length","93":"sets carry for \u003e= 15","101":"get length extension","103":"(carry set) add 15 - will not exceed 255","109":"if len is 255, copy 0-254","112":"16 cycles/byte","115":"this gets us the +1","122":"carry cleared by hi3","129":"Y=0; DEY so next INY goes to 0","139":"get length extension","141":"\"normal\" values are 0-236","145":"will not exceed 255","147":"min match; won\u0027t exceed 255","149":"save match len for later","151":"and keep it in X","153":"match offset, lo","158":"match offset, hi","160":"OR in hi-res page","172":"hi5 clears carry","180":"18 cycles/byte"},
+"LongComments":{
+"-2147483647":{
+"Text":"LZ4FH uncompression for 6502\r\nBy Andy McFadden\r\nVersion 1.0.1, August 2015\r\n*\r\nRefactored for size \u0026 speed by Peter Ferrie.\r\n","BoxMode":true,"MaxWidth":40,"BackgroundColor":0},
+"0":{
+"Text":"\r\nThe parameters (in_src and in_dst) are stashed at the top of the text input buffer.  We use this, rather than having them poked directly into the code, so that the 6502 and 65816 implementations work the same way without either getting weird.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"37":{
+"Text":"\r\nThese stubs increment the high byte and then jump back.  This saves a cycle because branch-not-taken becomes the common case.  We assume that we\u0027re not unpacking data at $FFxx, so BNE is branch-always.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"55":{
+"Text":"Handle \"special\" match values (value in A)\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"81":{
+"Text":"Get the mixed-length byte and handle the literal.\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"105":{
+"Text":"\r\nAt this point, srcptr holds the address of the \"mix\" word or the length extension, and dstptr holds the address of the next output location.  So we want to read from (srcptr),y+1 and write to (dstptr),y.  We can do this by sticking the DEY between the LDA and STA.\r\n\r\nWe could save a couple of cycles by substituting addr,y in place of (dp),y, but the added setup cost would only benefit longer literal strings.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"114":{
+"Text":"Advance srcptr by savlen+1, and dstptr by savlen\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"130":{
+"Text":"\r\nHandle match.  Y holds an offset into srcptr such taht we need to increment it once to get the next interesting byte.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"147":{
+"Text":"Put the destination address into copyptr.\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"164":{
+"Text":"\r\nAdvance srcptr past the encoded match while we still remember how many bytes it took to encode.  Y is indexing the last value used, so we want to go advance srcptr by Y+1.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"172":{
+"Text":"\r\nCopy the match.  The length is in X.  Note this must be a forward copy so overlapped data works.\r\n\r\nWe know the match is at least 4 bytes long, so we could save a few cycles by not doing the ADC #4 earlier, and unrolling the first 4 load/store operations here.\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"182":{
+"Text":"Advance dstptr past copied data.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+"Notes":{
+},
+"UserLabels":{
+"0":{
+"Label":"entry","Value":768,"Source":"User","Type":"LocalOrGlobalAddr"},
+"31":{
+"Label":"fail","Value":799,"Source":"User","Type":"LocalOrGlobalAddr"},
+"75":{
+"Label":"goodmagic","Value":843,"Source":"User","Type":"LocalOrGlobalAddr"},
+"37":{
+"Label":"hi2","Value":805,"Source":"User","Type":"LocalOrGlobalAddr"},
+"41":{
+"Label":"hi3","Value":809,"Source":"User","Type":"LocalOrGlobalAddr"},
+"46":{
+"Label":"hi4","Value":814,"Source":"User","Type":"LocalOrGlobalAddr"},
+"50":{
+"Label":"notempty","Value":818,"Source":"User","Type":"LocalOrGlobalAddr"},
+"55":{
+"Label":"specialmatch","Value":823,"Source":"User","Type":"LocalOrGlobalAddr"},
+"101":{
+"Label":"nohi2","Value":869,"Source":"User","Type":"LocalOrGlobalAddr"},
+"122":{
+"Label":"nohi3","Value":890,"Source":"User","Type":"LocalOrGlobalAddr"},
+"129":{
+"Label":"nohi4","Value":897,"Source":"User","Type":"LocalOrGlobalAddr"},
+"81":{
+"Label":"mainloop","Value":849,"Source":"User","Type":"LocalOrGlobalAddr"},
+"70":{
+"Label":"hi5","Value":838,"Source":"User","Type":"LocalOrGlobalAddr"},
+"172":{
+"Label":"nohi5","Value":940,"Source":"User","Type":"LocalOrGlobalAddr"},
+"130":{
+"Label":"noliteral","Value":898,"Source":"User","Type":"LocalOrGlobalAddr"},
+"105":{
+"Label":"shortlit","Value":873,"Source":"User","Type":"LocalOrGlobalAddr"},
+"107":{
+"Label":"litloop","Value":875,"Source":"User","Type":"LocalOrGlobalAddr"},
+"147":{
+"Label":"shortmatch","Value":915,"Source":"User","Type":"LocalOrGlobalAddr"},
+"160":{
+"Label":"_desthi","Value":928,"Source":"User","Type":"LocalOrGlobalAddr"},
+"174":{
+"Label":"copyloop","Value":942,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"OperandFormats":{
+"27":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"lz4fh_magic","Part":"Low"}},
+"37":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"srcptr","Part":"Low"}},
+"41":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"srcptr","Part":"Low"}},
+"46":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"dstptr","Part":"Low"}},
+"50":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"tok_eod","Part":"Low"}},
+"55":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"tok_empty","Part":"Low"}},
+"66":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"srcptr","Part":"Low"}},
+"70":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"srcptr","Part":"Low"}},
+"79":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"srcptr","Part":"Low"}},
+"103":{
+"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"141":{
+"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"145":{
+"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"147":{
+"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"162":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"copyptr","Part":"Low"}},
+"190":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"dstptr","Part":"Low"}}}}

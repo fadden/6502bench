@@ -1,0 +1,147 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Sources:
+;  NiftyList, by Dave Lyons
+;  What's Where in the Apple, by William F. Luebbert
+
+*SYNOPSIS Symbols from the Apple II monitor ROM
+
+WNDLEFT     @ $20       ;left column of scroll window
+WNDWDTH     @ $21       ;width of scroll window
+WNDTOP      @ $22       ;top of scroll window
+WNDBTM      @ $23       ;bottom of scsroll window
+CH          @ $24       ;cursor horizontal displacement
+CV          @ $25       ;cursor vertical displacement
+GBASL       @ $26       ;base address for lo-res drawing
+INVFLAG     @ $32       ;text mask (255=normal, 127=flash, 63=inv)
+PROMPT      @ $33       ;prompt character
+CSWL        @ $36       ;character output hook (lo)
+CSWH        @ $37       ;character output hook (hi)
+KSWL        @ $38       ;character input hook (lo)
+KSWH        @ $39       ;character input hook (hi)
+PCL         @ $3A       ;program counter save
+PCH         @ $3B       ;program counter save
+A1L         @ $3C       ;general purpose
+A1H         @ $3D       ;general purpose
+
+SPDBYT      @ $E7       ;text output speed limiter
+
+BRKV        @ $03f0     ;address of BRK handler
+SOFTEVEC    @ $03f2     ;address of RESET handler
+PWREDUP     @ $03f4     ;power-up RESET checksum
+USRADDR     @ $03F8     ;jump to function that handles monitor Ctrl-Y
+NMIVEC      @ $03FB     ;jump to function that handles NMI
+IRQADDR     @ $03FE     ;address of IRQ handler
+
+PLOT        @ $F800     ;lo-res plot at X=Y-reg, Y=Acc
+PLOT1       @ $F80E     ;lo-res plot at X=Y-reg, Y per GBASL/H
+HLINE       @ $F819     ;lo-res horiz line at Y=Acc with X from $2c
+VLINE       @ $F828     ;lo-res vert line at X=Y-reg and Y from Acc to $2b
+CLRSCR      @ $F832     ;clear lo-res screen to black
+CLRTOP      @ $F836     ;clear top part of lo-res screen to black
+GBASCALC    @ $F847     ;compute gfx base addr for line in Acc
+NXTCOL      @ $F85F     ;change lo-res color to (color)+3
+SETCOL      @ $F864     ;set lo-res color to Acc
+SCRN        @ $F871     ;load Acc with lo-res value at Y=Acc, X=X-reg
+INSDS1_2    @ $F88C
+INSDS2      @ $F88E
+GET816LEN   @ $F890
+INSTDSP     @ $F8D0     ;monitor/mini-asm display
+PRNTYX      @ $F940     ;print Y-reg/X-reg as 4 hex digits
+PRNTAX      @ $F941     ;print Acc/X-reg as 4 hex digits
+PRNTX       @ $F944     ;print X-reg as 2 hex digits
+PRBLNK      @ $F948     ;print 3 spaces
+PRBL2       @ $F94A
+PCADJ       @ $F953     ;monitor/mini-asm PC adjust
+TEXT2COPY   @ $F962
+OLDIRQ      @ $FA40     ;autostart ROM IRQ handler
+BREAK       @ $FA4C
+OLDBRK      @ $FA59
+RESET       @ $FA62
+PWRUP       @ $FAA6
+SLOOP       @ $FABA
+REGDSP      @ $FAD7     ;display register contents
+RTBL        @ $FB19
+PREAD       @ $FB1E     ;read paddle specifed by X-reg, return in Y-reg
+PREAD4      @ $FB21
+INIT        @ $FB2F     ;screen initialization
+SETTXT      @ $FB39     ;set screen to text mode
+SETGR       @ $FB40     ;set screen to graphics mode
+SETWND      @ $FB4B     ;set normal low-res graphics window
+SETWND2     @ $FB51
+TABV        @ $FB5B     ;place cursor at line (A-reg) and column (ch)
+APPLEII     @ $FB60     ;clear screen and put "Apple II" into first line
+SETPWRC     @ $FB6F
+VIDWAIT     @ $FB78
+KBDWAIT     @ $FB88
+VERSION     @ $FBB3
+ZIDBYTE2    @ $FBBF
+ZIDBYTE     @ $FBC0
+BASCALC     @ $FBC1     ;calculate text base address
+BELL1       @ $FBDD     ;sound bell regardless of output device
+BELL1_2     @ $FBE2
+BELL2       @ $FBE4     ;sound bell
+STORADV     @ $FBF0
+ADVANCE     @ $FBF4     ;move cursor right
+VIDOUT      @ $FBFD     ;output Acc as text
+BS          @ $FC10     ;move cursor left
+UP          @ $FC1A     ;move cursor up
+VTAB        @ $FC22     ;tab to row specified in Acc
+VTABZ       @ $FC24
+CLREOP      @ $FC42     ;clear screen from cursor to end of page
+HOME        @ $FC58     ;clear screen and reset text output to top-left
+CR          @ $FC62     ;perform a carriage return
+LF          @ $FC66     ;perform a line feed
+SCROLL      @ $FC70     ;scroll up 1 line
+CLREOL      @ $FC9C     ;clear to end of line
+CLREOLZ     @ $FC9E
+WAIT        @ $FCA8     ;delay for (26 + 27*Acc + 5*(Acc*Acc))/2 cycles
+NXTA4       @ $FCB4     ;increment A4
+NXTA1       @ $FCBA     ;increment A1
+HEADR       @ $FCC9     ;write cassette sync
+WRTAPE      @ $FCE5     ;casssette write
+RDKEY       @ $FD0C     ;read key
+FD10        @ $FD10
+RDKEY1      @ $FD18
+KEYIN       @ $FD1B     ;get next key input from keyboard hardware
+RDCHAR      @ $FD35     ;calls RDKEY to get next char
+GETLNZ      @ $FD67     ;get a line of input
+GETLN       @ $FD6A     ;get a lint of input
+GETLN0      @ $FD6C
+GETLN1      @ $FD6F
+CROUT1      @ $FD8B
+CROUT       @ $FD8E     ;print a carriage return
+PRA1        @ $FD92     ;print CR, then hex of A1H/A1L, then minus sign
+PRBYTE      @ $FDDA     ;print Acc as two-digit hex number
+PRHEX       @ $FDE3     ;print right nibble of Acc as single hex digit
+COUT        @ $FDED     ;print Acc to output device
+COUT1       @ $FDF0
+COUTZ       @ $FDF6
+IDROUTINE   @ $FE1F
+MOVE        @ $FE2C     ;memory move A1/A2 to A4
+LIST        @ $FE5E     ;disassemble 20 instructions (not on GS)
+SETINV      @ $FE80     ;set video mode to inverse
+SETNORM     @ $FE84     ;set video mode to normal
+SETKBD      @ $FE89     ;reset char input handler to ROM
+INPORT      @ $FE8B
+SETVID      @ $FE93     ;reset char output handler to ROM
+OUTPORT     @ $FE95
+GO          @ $FEB6
+WRITE       @ $FECD     ;write data to cassette
+READ        @ $FEFD     ;read data from cassette
+PRERR       @ $FF2D     ;print "ERR" and sound bell
+BELL        @ $FF3A     ;sound bell
+RESTORE     @ $FF3F     ;restore 6502 registers from $45-48
+SAVE        @ $FF4A     ;save 6502 registers to $45-49
+IORTS       @ $FF58     ;JSR here to find out where one is
+OLDRST      @ $FF59     ;RESET entry point
+MON         @ $FF65     ;normal entry to monitor
+MONZ        @ $FF69     ;reset and enter monitor
+MONZ2       @ $FF6C
+MONZ4       @ $FF70
+DIG         @ $FF8A
+GETNUM      @ $FFA7
+NXTCHR      @ $FFAD     ;part of GETLN input loop
+TOSUB       @ $FFBE
+ZMODE       @ $FFC7

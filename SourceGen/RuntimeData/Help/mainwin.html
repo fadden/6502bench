@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Main Window - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Main Window</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="starting-new">Starting a New Project</a></h2>
+
+<p>Select File &gt; New, or if no project is open, click "Start new project".
+This opens the Create New Project window.</p>
+<p>Start by selecting your target system from the tree on the left.
+The panel on the right will show the CPU that will be selected, as well
+as the symbol files and extension scripts that will be loaded by default.
+All of these may be overridden later from the project properties.</p>
+
+<p>Next, click the "Select File..." button.  Pick the file you wish to
+disassemble.  The dialog will update with the pathname and some notes
+about the file's size.  Click "OK" if all looks good to create the
+project.</p>
+<p><strong>NOTE:</strong> Support for large 65816 programs is
+incomplete.  The maximum size for a data file is currently 1 MiB.</p>
+
+<p>The first time you save the project (with File &gt; Save), you will be
+prompted for the project name.  It's best to use the data file's name
+with ".dis65" added.  This will be configured automatically.  The data
+file's name is not stored in the project file, so if you pick a different
+name, or save the project in a different directory, you will have to
+select the data file manually whenever you open the project.</p>
+
+
+<h2><a name="opening">Opening an Existing Project</a></h2>
+
+<p>Select File &gt; Open, or if no project is open, click "Open
+existing project".  Select the .dis65 project file from the standard
+file dialog.</p>
+<p>SourceGen will try to open a data file with the project's name,
+minus the ".dis65".  If it can't find a file with that name, or if there's
+something wrong with it (e.g. the CRC doesn't match), you will be given
+the opportunity to specify the location of the data file to use.</p>
+
+<p>If non-fatal problems with the file are detected, a warning will be
+shown.  If it's something simple, like a missing .sym65 or extension
+script file, you'll be notified.  If it's something more complicated,
+e.g. the project has a comment on an offset that doesn't exist, you
+will be warned that the problematic data has been deleted, and will be
+lost if the project is saved.  You will also be given the opportunity
+to cancel the loading of the project.</p>
+
+<p>The locations of the last few projects you've worked with are saved
+in the application settings.  You can access them from
+File &gt; Recent Projects.  If no project is open, links to the two
+most-recently opened projects will be available.</p>
+
+
+<h2><a name="working">Working With a Project</a></h2>
+
+<p>The main project window is divided into five areas:</p>
+<ol>
+  <li>Center: the code list.  If no project is open, this will instead
+    have clickable links to open a new or existing project.
+  <li>Top left: cross-reference list.
+  <li>Bottom left: notes list.
+  <li>Top right: symbols list.
+  <li>Bottom right: line info.
+</ol>
+
+<p>Most of the action takes place in the center code list.</p>
+
+
+<h3><a name="code-list">Code List</a></h3>
+
+<p>The code list provides a view of the code being disassembled.  Each
+line may be an instruction, data item, long comment, note, or
+assembler directive.</p>
+<p>The list is divided into columns:</p>
+<ul>
+  <li><b>Offset</b>. The offset within the file where the instruction
+    or data item starts.  Always shown as a six-digit hex value
+    with a leading '+'.</li>
+  <li><b>Address</b>.  The address where the assembled code will execute.
+    For 8-bit CPUs this is shown as a 4-digit hex number, for 16-bit
+    CPUs the bank is shown as well.  Double-click on this field to open the
+    <a href="editors.html#address">Edit Address</a> dialog.</li>
+  <li><b>Bytes</b>.  Shows up to four bytes from the data file that
+    correspond to the instruction or data.  To see the full dump of
+    a longer item, such as an ASCII string, double-click on the field
+    to open the
+    <a href="tools.html#hexdump">Hex Dump Viewer</a>.  (Note this is
+    a floating window, so you can keep it open while you work.)</li>
+  <li><b>Flags</b>.  This shows the state of the status flags as they
+    were before the instruction was executed.  Double-click on this
+    field to open the
+    <a href="editors.html#flags">Edit Status Flag Override</a> dialog.</li>
+  <li><b>Attributes</b>.  Some instructions and data items have
+    interesting attributes.  '@' indicates an entry point, 'H' means
+    one or more bytes has a hint, '#' means execution will not continue
+    to the following instruction, '>' is shown for branch targets, and
+    '!' appears when a conditional branch is never taken.  (This
+    column is rarely useful and can be hidden.)</li>
+  <li><b>Label</b>.  If a label has been defined for this offset, by
+    the user or generated automatically, it will appear here.  Also,
+    full-line items like long comments and notes will start in this
+    field.  Double-click on this field to open the
+    <a href="editors.html#label">Edit Label</a> dialog.</li>
+  <li><b>Opcode</b>.  The instruction or pseudo-opcode mnemonic.
+    If an instruction is embedded inside this one, a &#9193; symbol
+    will appear.
+    If you double-click this field for an instruction or data item
+    whose operand refers to an address in the file, the view will jump to
+    that location.</li>
+  <li><b>Operand</b>.  The instruction or data operand.  Data operands
+    may span a large number of bytes.  Double-click on this field to
+    open the
+    <a href="editors.html#operand">Edit Operand</a> or
+    <a href="editors.html#data">Edit Data Format</a> dialog, as
+    appropriate.  (Note you can shift-double-click on data items to
+    edit multiple lines.)</li>
+  <li><b>Comment</b>.  End-of-line comment, generally shown with a ';'
+    prefix.  If enabled, cycle counts will appear here.  Double-click
+    on this field to open the
+    <a href="editors.html#comment">Edit Comment</a> dialog.</li>
+</ul>
+
+<p>Double-clicking anywhere on a line with a note or long comment will
+open the
+<a href="editors.html#note">Edit Note</a> or
+<a href="editors.html#long-comment">Edit Long Comment</a> dialog,
+respectively.</p>
+
+<p>The code list is a standard Windows list view.  You can left-click
+to select an item, ctrl-left-click to toggle individual items on and
+off, and shift-left-click to select a range.  You can select all lines
+with Edit &gt; Select All.  Resize columns by
+left-clicking on the divider in the header and dragging it.</p>
+<p>Multi-line items, such as long comments or ASCII strings, are
+selected as a whole when any part is selected.</p>
+
+<p>Right-clicking opens a menu.  The contents are the same as those in
+the Actions menu item in the menu bar.  The set of options that are
+enabled will depend on what you have selected in the main window.</p>
+<ul>
+  <li><a href="editors.html#address">Set Address</a>.  Sets the
+    target address at that offset.  Enabled when a single instruction or
+    data line is selected.</li>
+  <li><a href="editors.html#flags">Override Status Flags</a>.  Changes
+    the status flags at that offset.  Enabled when a single instruction
+    line is selected.</li>
+  <li><a href="editors.html#label">Edit Label</a>.  Sets the label
+    at that offset.  Enabled when a single instruction or data line is
+    selected.</li>
+  <li><a href="editors.html#operand">Edit Operand</a>.  Sets the
+    operand format for that instruction.  Enabled when a single instruction
+    line is selected.</li>
+  <li><a href="editors.html#data">Edit Data Format</a>.  Sets the
+    format for data operands.  Enabled when one or more data
+    lines are selected.</li>
+  <li><a href="editors.html#comment">Edit Comment</a>.  Sets the
+    comment at that offset.  Enabled when a single instruction or data
+    line is selected.</li>
+  <li><a href="editors.html#long-comment">Edit Long Comment</a>.  Sets
+    the long comment at that offset.  Enabled when a single instruction
+    or data line, or an existing long comment, is selected.</li>
+  <li><a href="editors.html#note">Edit Note</a>.  Sets the note at
+    that offset.  Enabled when a single instruction or data line, or
+    an existing note, is selected.</li>
+  <li><a href="editors.html#project-symbol">Edit Project Symbol</a>.
+    Sets the name, value, and comment of the project symbol.  Enabled
+    when a single equate directive, generated from a project symbol, is
+    selected.</li>
+
+  <li><a href="#hinting">Hinting</a> (Hint As Code Entry Point, Hint As
+    Data Start, Hint As Inline Data, Remove Hints).  Enabled when one or more
+    code and data lines are selected.  Remove Hints is only enabled when
+    at least one line has hints.</li>
+  <li><a href="#toggle-single">Toggle Single-Byte Format</a>.  Toggles
+    a range of lines between default format and single-byte format.  Enabled
+    when one or more data lines are selected.</li>
+  <li>Delete Note / Long Comment.  Deletes the selected note or long
+    comment.  Enabled when a single note or long comment is selected.</li>
+  <li><a href="tools.html#hexdump">Show Hex Dump</a>.  Opens the hex dump
+    viewer with the current selection highlighted.  Always enabled.</li>
+</ul>
+
+
+<h3><a name="undo">Undo &amp; Redo</a></h3>
+
+<p>You can undo a change with Edit &gt; Undo, or Ctrl+Z.  You can redo a
+change with Edit &gt; Redo, Ctrl+Y, or Ctrl+Shift+Z.</p>
+<p>All changes to the project, including changes to the project properties,
+are added to the undo/redo buffer.  This has no fixed size limit, so no
+matter how much you change, you can always undo back to the point where
+the project was opened.</p>
+<p>The undo buffer is not saved as part of the project, so closing and
+reopening the project resets the buffer.</p>
+
+
+<h3><a name="references">References Window</a></h3>
+
+<p>When a single instruction or data line is selected in the main window,
+all references to that offset will be shown in the References window.
+For each reference, the file offset, address, and some details about the
+type of reference will be shown.</p>
+
+<p>The reference type indicates whether the origin is an instruction or
+data operand.  Branch instructions are called out separately.  In
+addition, it will be identified as a numeric or symbolic reference.
+Symbolic references may be offset from the actual operand value; if this
+is the case, the adjustment will be shown as well.</p>
+
+<p>Double-clicking on a reference moves the code list selection to that
+reference, and adds the previous selection to the navigation stack.</p>
+
+
+<h3><a name="notes">Notes Window</a></h3>
+
+<p>When you add a note, it will also be added to this window.
+Double-clicking on a note will jump directly to it, and add the previous
+selection to the navigation stack.  This makes notes useful as bookmarks.</p>
+
+
+<h3><a name="symbols">Symbols Window</a></h3>
+
+<p>All known <a href="intro.html#about-symbols">symbols</a> are shown
+here.  The filter buttons allow you to screen out symbols you're not
+interested in, such as platform symbols or constants.</p>
+
+<p>Clicking on one of the column headers will sort the list on that
+field.  Click a second time to reverse the sort direction.</p>
+
+<p>Double-clicking on an auto or user label will jump to that label, and
+add the previous selection to the navigation stack.  This can be a handy
+way to move around the file, jumping from label to label.</p>
+
+
+<h3><a name="info">Info Window</a></h3>
+
+<p>Some additional information about the currently-selected line is
+shown, such as the formatting applied to the operand.  If the operand
+has a default format, any automatically-generated format will be noted.
+For an instruction,
+a summary is shown that includes the cycle count, flags affected, and a
+brief description of what the instruction does.  The latter can be
+especially handy for undocumented instructions.</p>
+
+
+<h3><a name="navigation">Navigation</a></h3>
+
+<p>The simplest way to move through the code list is with the scroll wheel
+on your mouse, or by left-clicking and dragging the scroll bar.  You
+can also use PgUp/PgDn and the arrow keys.</p>
+
+<p>Use Edit &gt; Find to search for text.  This performs a case-insensitive
+text search on the label, opcode, operand, and comment fields.
+Use Edit &gt; Find Next to find the next match.</p>
+
+<p>Use Edit &gt; Go To to jump to an offset, address, or label.  Remember
+that offsets and addresses are always hexadecimal, and offsets start
+with a '+'.</p>
+
+<p>When you jump around, by double-clicking on an opcode or an entry
+in one of the side windows, the currently-selected line is added to
+a navigation stack.  You can use the arrows on the toolbar to navigate
+forward or backward.  (You can use Alt+Left/Right Arrow, or
+Ctrl+- / Ctrl+Shift+-, as keyboard shortcuts.)</p>
+
+
+<h3><a name="hints">Adding and Removing Hints</a></h3>
+
+<p>To add code entry or data hints, select the offsets with the instruction
+opcodes, and then use the "Hint as Code Entry Point" or "Hint as Data"
+menu item.  Remember to avoid hinting additional bytes, especially with
+code entry points, as that can lead to unwanted embedded instructions.</p>
+<p>For inline data, select all of the data that the code analyzer should
+skip, and use the "Hint as Inline Data" menu item.</p>
+
+<p>If you're having a hard time selecting just the right bytes because
+the instructions are caught up in a multi-byte data item, such as an
+auto-detected ASCII string, you can use the "Toggle Single-Byte Format"
+menu item to "flatten" the item.  Apply the hint, then toggle the bytes
+back to default format.  You can also disable uncategorized data analysis
+entirely from the
+<a href="settings.html#project-properties">project properties</a> editor.
+
+
+<h3><a name="clipboard">Copying to Clipboard</a></h3>
+
+<p>When you use Edit &gt; Copy, all lines selected in the code list are
+copied to the system clipboard.  This can be a convenient way to post
+code snippets into forum postings or documentation.  The text is
+copied from the data shown on screen, so your chosen capitalization
+and pseudo-ops will appear in the copy.</p>
+<p>A copy of all of the fields is also written to the clipboard, in
+CSV format.  If you open a program like Excel, you can use Paste Special
+to put the data into individual cells.</p>
+
+<p>By default, the label, opcode, operand, and comment fields are included
+in the text form.  From the
+<a href="settings.html#app-settings">app settings</a> you can select
+a different format that also includes the address and byte columns.</p>
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>

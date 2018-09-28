@@ -1,0 +1,227 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Assembler: Merlin 32
+
+        org     $1000
+        clc
+        xce
+        sep     #$ff        ;set all flags
+        mx      %11
+
+; clear individual flags with instructions
+; (this has no effect on the assembled output, but you can see the
+; effects on the "status" column in the display list)
+        clv
+        cld
+        cli
+        clc
+        lda     #$80        ;clear Z
+        lda     #$01        ;clear N
+
+        sed
+        sei
+        sec
+        lda     #$ff        ;set N
+        adc     #$00        ;set V, Z (actually scrambles NVZC)
+
+; clear individual flags with REP
+        sep     #$ff
+        rep     #$80
+        rep     #$40
+        rep     #$20
+        rep     #$10
+        rep     #$08
+        rep     #$04
+        rep     #$02
+        rep     #$01
+
+; exercise SEP/REP with #$00
+        sep     #$00
+        sep     #$ff
+        rep     #$00
+        rep     #$ff
+
+; confirm emulation behavior
+        mx      %00         ;long regs
+        lda     #$feed      ;check it
+        sec
+        xce                 ;emulation mode
+        lda     #$ff        ;check it
+        rep     #$30        ;should have no effect...
+        mx      %11         ;...but Merlin32 doesn't know that
+        lda     #$ff
+        clc
+        xce                 ;back to native, should set M/X=1
+        lda     #$ff        ;check it
+
+; try one long, one short
+        rep     #$20        ;long a
+        sep     #$10        ;short x/y
+        mx      %01
+        lda     #$0000
+        ldx     #$01
+        ldy     #$02
+
+        sep     #$20        ;short a
+        rep     #$10        ;long x/y
+        mx      %10
+        lda     #$01
+        ldx     #$0000
+        ldy     #$0000
+
+; check branch instructions; NVMXDIZC
+        sep     #$30
+        mx      %11
+        lda     #$00
+        pha
+        plp                 ;without a nearby PHP, flags will be scrambled
+
+        rep     #$80
+        bpl     ok_bpl
+        brk     $00
+
+ok_bpl  sep     #$80
+        bpl     :bad        ;branch never taken
+        bmi     ok_bmi
+:bad    brk     $00
+
+ok_bmi  rep     #$40
+        bvc     ok_bvc
+        brk     $00
+
+ok_bvc  sep     #$40
+        bvs     ok_bvs
+        brk     $00
+
+ok_bvs  rep     #$01
+        bcc     ok_bcc
+        brk     $00
+
+ok_bcc  sep     #$01
+        bcs     ok_bcs
+        brk     $00
+
+ok_bcs  rep     #$02
+        bne     ok_bne
+        brk     $00
+
+ok_bne  sep     #$02
+        beq     ok_beq
+        brk     $00
+
+ok_beq
+
+; check NZ flags set by immediate load
+        sep     #$ff        ;set all
+        mx      %11
+        lda     #$01
+        bne     ok_nzero
+        brk     $db
+ok_nzero
+        lda     #$00
+        beq     ok_zero
+        brk     $db
+ok_zero
+        bpl     ok_pos
+        brk     $db
+ok_pos
+        lda     #$80
+        bmi     ok_neg
+        brk     $db
+ok_neg
+
+; check NZ flags set by immediate AND
+        lda     #$ff
+        and     #$00
+        beq     ok_andZ1
+        brk     $db
+ok_andZ1
+        lda     #$00
+        and     #$ff
+        beq     ok_andZ1A
+        brk     $db
+ok_andZ1A
+        lda     #$ff
+        and     #$7f
+        bne     ok_andZ0
+        brk     $db
+ok_andZ0
+        bpl     ok_andN0
+        brk     $db
+ok_andN0
+        lda     #$ff
+        and     #$80
+        bmi     ok_andN1
+        brk     $db
+ok_andN1
+
+; check NZ flags set by immediate ORA
+        lda     #$00
+        ora     #$00
+        beq     ok_oraZ1
+        brk     $db
+ok_oraZ1
+        ora     #$01
+        bne     ok_oraZ0
+        brk     $db
+ok_oraZ0
+        lda     #$00
+        ora     #$7f
+        bpl     ok_oraN0
+        brk     $db
+ok_oraN0
+        ora     #$80
+        bmi     ok_oraN1
+        brk     $db
+ok_oraN1
+
+; simple php/plp pair test
+        clc
+        php
+        sec
+        plp                 ;should restore cleared carry
+        bcc     ok_plp
+        brk     $00
+ok_plp
+
+        rep     #$20        ;long a
+        sep     #$10        ;short x/y
+        mx      %01
+        jsr     long_subr   ;confirm flag propagation
+
+        rep     #$30
+        mx      %00
+        jsr     ambig_subr
+
+        sep     #$30
+        mx      %11
+        jsr     ambig_subr
+
+        rep     #$20        ;long a
+        sep     #$10        ;short x/y
+        mx      %01
+        jsr     long_subr   ;call it again
+
+
+; leave the main routine with short flags set
+        sep     #$30
+        mx      %11
+        rts
+
+
+; only called with longm/shortx
+        mx      %01
+long_subr
+        lda     #$1234
+        ldx     #$ff
+        rts
+
+; this is called with different values for M/X, so it defaults to short
+        mx      %11
+ambig_subr
+        lda     #$ff
+        ldx     #$ee
+        ldy     #$dd
+        rts
+

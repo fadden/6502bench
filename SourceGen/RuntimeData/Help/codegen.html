@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Code Generation &amp; Assembly - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id=content>
+<h1>6502bench SourceGen: Code Generation &amp; Assembly</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<p>SourceGen can generate an assembly source file that, when fed into
+the target assembler, will recreate the original data file exactly.
+Every assembler is different, so code must be written especially for
+each.<p>
+<p>The generation / assembly dialog can be opened with File &gt; Assemble.</p>
+
+
+<h2><a name="supported">Supported Assemblers</a></h2>
+
+<p>SourceGen currently supports the following cross-assemblers:</p>
+<ul>
+  <li><a href="https://cc65.github.io/">cc65</a> v2.17 or later</li>
+  <li><a href="https://www.brutaldeluxe.fr/products/crossdevtools/merlin/">Merlin 32</a> v1.0.0 or later</li>
+</ul>
+
+
+<h3><a name="version">Version-Specific Code Generation</a></h3>
+
+<p>Code generation must be tailored to the specific version of the
+assembler.  This is most easily understood with an example.</p>
+<p>If you write <code>MVN $01,$02</code>, the assembler is expected to output
+<code>54 02 01</code>, with the arguments reversed.  cc65 v2.17 doesn't
+do that; this is a bug that was fixed in a later version.  So if you're
+generating code for v2.17, you want to create source code with the
+arguments the other way around.</p>
+<p>Having version-dependent source code is a bad idea, so SourceGen
+just outputs raw hex bytes for MVN/MVP instructions.  This yields the
+correct code for all versions of the assembler, but is ugly and
+annoying.  So we want to output actual MVN/MVP instructions when producing
+code for newer versions of the assembler.</p>
+<p>When you configure a cross-assembler, SourceGen executes it and
+extracts the version information from the command-line output stream.
+This is used by the generator to ensure that the output will compile.
+If no assembler is configured, SourceGen will produce code optimized
+for the latest version of the assembler.</p>
+
+<h2><a name="generate">Generating Source Code</a></h2>
+
+<p>Cross assemblers tend to generate additional files, either compiler
+intermediaries ("file.o") or metadata ("_FileInformation.txt").  Some
+generators may produce multiple source files, perhaps a link script or
+symbol definition header to go with the assembly source.  To avoid
+spreading files across the filesystem, SourceGen does all of its work
+in the same directory where the project lives.  So before you can generate
+code, you have to have given your project a name by saving it.</p>
+
+<p>The Generate and Assemble dialog has a drop-down list near the top
+that lets you pick which assembler to target.  The name of the assembler
+will be shown with the detected version number.  If the assembler
+executable isn't configured, "[latest version]" will be shown instead
+of a version number.</p>
+<p>The Settings button will take you directly to the assembler configuration
+tab in the application settings dialog.
+<p>Hit the Generate button to generate the source code into a file on disk.
+The file will use the project name, with the ".dis65" replaced by
+"_&lt;assembler&gt;.S".</p>
+<p>The first 64KiB of each generated file will be shown in the preview
+window.  If multiple files were generated, you can use the "preview file"
+drop-down to select between them.  Line numbers are
+prepended to each line to make it easier to track down errors.</p>
+
+
+
+<h3><a name="localizer">Label Localizer</a></h3>
+<p>The label localizer is an optional feature that automatically converts
+some labels to an assembler-specific less-than-global label format.  Local
+labels may be reusable (e.g. using "]LOOP" for multiple consecutive
+loops is easier to understand than giving each one a unique label) or
+reduce the size of a generated link table.  There are usually restrictions
+on local labels, e.g. references to them may not be allowed to cross a
+global label definition, which the localizer factors in automatically.</p>
+<p>The localizer is somewhat experimental at this time, and can be
+disabled from the
+<a href="settings.html#app-settings">application settings</a>.</p>
+
+
+<h2><a name="assemble">Cross-Assembling Generated Code</a></h2>
+
+<p>After generating sources, if you have a cross-assembler executable
+configured, you can run it by clicking the "Run Assembler" button.  The
+command-line output will be displayed, with stdout and stderr separated.
+(I'd prefer them to be interleaved, but that's not what the system
+provides.)</p>
+
+<p>The output will show the assembler's exit code, which will be zero
+on success (note: sometimes they lie.)  If it did, SourceGen will then
+compare the assembler's output to the original file, and report any
+differences.</p>
+<p>Failures here may be due to bugs in the cross-assembler or in
+SourceGen.  However, SourceGen can generally work around assembler bugs,
+so any failure here is an opportunity for improvement.</p>
+
+</div>
+
+<div id=footer>
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>
