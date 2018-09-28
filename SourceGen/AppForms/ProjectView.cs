@@ -3536,6 +3536,7 @@ namespace SourceGen.AppForms {
             UpdateLastSymbolColumnWidth();
         }
         private void UpdateLastSymbolColumnWidth() {
+#if false
             const int ADJ = 4;  // fudge factor needed to prevent horizontal scrollbar
             int leftWidths = symbolListView.Columns[0].Width + symbolListView.Columns[1].Width;
             int lastWidth = symbolListView.Size.Width - leftWidths - ADJ;
@@ -3543,6 +3544,7 @@ namespace SourceGen.AppForms {
                 lastWidth = 0;
             }
             symbolListView.Columns[2].Width = lastWidth;
+#endif
             AppSettings.Global.Dirty = true;
         }
 
@@ -3709,6 +3711,7 @@ namespace SourceGen.AppForms {
             UpdateLastReferencesColumnWidth();
         }
         private void UpdateLastReferencesColumnWidth() {
+#if false
             const int ADJ = 4;  // fudge factor needed to prevent horizontal scrollbar
             int leftWidths = referencesListView.Columns[0].Width +
                 referencesListView.Columns[1].Width;
@@ -3717,6 +3720,7 @@ namespace SourceGen.AppForms {
                 lastWidth = 0;
             }
             referencesListView.Columns[2].Width = lastWidth;
+#endif
             AppSettings.Global.Dirty = true;
         }
 
