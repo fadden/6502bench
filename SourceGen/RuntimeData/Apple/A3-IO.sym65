@@ -2,23 +2,39 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Adapted from Apple /// reference materials
-; 
+;
 
 *SYNOPSIS Symbols from hardware I/O areas
 
-KBD             @ $C000     ;last key pressed + 128
+KBD             @ $C000 ;last key pressed 
+KBDFLG          @ $C008 ;
+KBDSTRB         @ $C010 ;RW keyboard strobe
+SPKR            @ $C030 ;RW toggle speaker (Apple II type)
+SPKRIII         @ $C040 ;RW beeps speaker (Apple /// type)
+JOYRDY          @ $C066 ;
+CLOCK           @ $C070 ;clock
+PHASOFF         @ $C080 ;
+PHASON          @ $C081 ;
+MOTOROFF        @ $C088 ;
+MOTORON         @ $C089 ;
+DRV0EN          @ $C08A ;
+DRV1EN          @ $C08B ;
+Q6L             @ $C08C ;
+Q6H             @ $C08D ;
+Q7L             @ $C08E ;
+ACIASTAT        @ $C0F1 ;status of ACIA
 
 ; Other hardware registers
-Z_REG    @ $FFD0
-D_DDRB   @ $FFD2
-D_DDRA   @ $FFD3
+Z_REG    @ $FFD0 ;zero page register
+D_DDRB   @ $FFD2 ;data direction register B
+D_DDRA   @ $FFD3 ;data direction register A
 TIMER1L  @ $FFD8
 TIMLATCH @ $FFD9
 D_ACR    @ $FFDB
 D_PCR    @ $FFDC
 D_IFR    @ $FFDD
 D_IER    @ $FFDE
-E_REG    @ $FFDF ;environment register (r/w)
+E_REG    @ $FFDF ;environment register
 E_IORB   @ $FFE0
 E_DDRB   @ $FFE2
 E_DDRA   @ $FFE3
@@ -26,4 +42,4 @@ E_ACR    @ $FFEB
 E_PCR    @ $FFEC
 E_IFR    @ $FFED
 E_IER    @ $FFEE
-B_REG    @ $FFEF
+B_REG    @ $FFEF ;bank switch register
