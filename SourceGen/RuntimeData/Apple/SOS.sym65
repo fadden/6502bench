@@ -3,7 +3,7 @@
 ;
 ; Source: SOS programmer's guide
 
-*SYNOPSIS SOS public addresses and constants.
+*SYNOPSIS SOS constants.
 
 ; SOS MLI function codes.
 *TAG SOS-MLI-Functions 

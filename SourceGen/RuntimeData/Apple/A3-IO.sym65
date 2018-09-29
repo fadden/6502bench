@@ -10,7 +10,7 @@ KBD             @ $C000 ;last key pressed
 KBDFLG          @ $C008 ;
 KBDSTRB         @ $C010 ;RW keyboard strobe
 SPKR            @ $C030 ;RW toggle speaker (Apple II type)
-SPKRIII         @ $C040 ;WR beeps speaker (Apple /// type)
+SPKRIII         @ $C040 ;RW beeps speaker (Apple /// type)
 JOYRDY          @ $C066 ;
 CLOCK           @ $C070 ;clock
 PHASOFF         @ $C080 ;
