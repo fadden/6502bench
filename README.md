@@ -26,7 +26,7 @@ as well as many less-common ones.
   processor status flags are tracked, allowing identification of branches
   that are always/never taken, accurate cycle count listings, and correct
   analysis of 65816 code with variable-width registers.
-- Easy generation of assembly source code in populate formats (currently
+- Easy generation of assembly source code in popular formats (currently
   cc65 and Merlin 32). Cross-assemblers can be invoked from the GUI to
   verify correctness.
 - Symbols and constants are provided for ROM and operating system entry
@@ -74,7 +74,7 @@ Code generation:
   facilitate multi-binary disassembly.
 
 Miscellaneous:
-- All data files are stored in text formats (primarly JSON).
+- All data files are stored in text formats (primarily JSON).
 - The project file includes nothing from the data file but a CRC. This may
   allow the project to be shared without violating copyrights (subject to
   local laws).
