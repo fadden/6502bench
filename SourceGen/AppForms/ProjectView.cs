@@ -200,15 +200,21 @@ namespace SourceGen.AppForms {
                     Properties.Resources.RUNTIME_DIR_NOT_FOUND_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
+                return;
             }
             try {
                 PluginDllCache.PreparePluginDir();
             } catch (Exception ex) {
+                string pluginPath = PluginDllCache.GetPluginDirPath();
+                if (pluginPath == null) {
+                    pluginPath = "<???>";
+                }
                 string msg = string.Format(Properties.Resources.PLUGIN_DIR_FAIL,
-                    PluginDllCache.GetPluginDirPath() + ": " + ex.Message);
+                    pluginPath + ": " + ex.Message);
                 MessageBox.Show(msg, Properties.Resources.PLUGIN_DIR_FAIL_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
+                return;
             }
 
             logoPictureBox.ImageLocation = RuntimeDataAccess.GetPathName(LOGO_FILE_NAME);

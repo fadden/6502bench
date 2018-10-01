@@ -63,10 +63,14 @@ namespace SourceGen.Sandbox {
         /// <summary>
         /// Computes the path to the plugin directory.  Does not attempt to verify that it exists.
         /// </summary>
-        /// <returns>Plugin directory path.</returns>
+        /// <returns>Plugin directory path, or null if we can't find the application data
+        ///   area.</returns>
         public static string GetPluginDirPath() {
             if (sPluginDirPath == null) {
                 string runtimeUp = Path.GetDirectoryName(RuntimeDataAccess.GetDirectory());
+                if (runtimeUp == null) {
+                    return null;
+                }
                 sPluginDirPath = Path.Combine(runtimeUp, PLUGIN_DIR_NAME);
             }
             return sPluginDirPath;

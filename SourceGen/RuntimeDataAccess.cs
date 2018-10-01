@@ -38,7 +38,10 @@ namespace SourceGen {
                 return sBasePath;
             }
 
-            string exeName = Process.GetCurrentProcess().MainModule.FileName;
+            // Process.GetCurrentProcess().MainModule.FileName returns "/usr/bin/mono-sgen"
+            // under Linux, which is not what we want.  Since this class is part of the main
+            // executable, we can use our own assembly location to get the desired answer.
+            string exeName = typeof(RuntimeDataAccess).Assembly.Location;
             string baseDir = Path.GetDirectoryName(exeName);
             if (string.IsNullOrEmpty(baseDir)) {
                 return null;
