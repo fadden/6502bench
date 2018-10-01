@@ -1411,6 +1411,12 @@ namespace SourceGen.AppForms {
         // App is closing.
         private void ProjectView_FormClosing(object sender, FormClosingEventArgs e) {
             Debug.WriteLine("Main app form closing (reason=" + e.CloseReason + ")");
+            if (mProjectControl == null) {
+                // This can be null if something failed during startup, so we're exiting
+                // the application before the UI is fully up.
+                return;
+            }
+
             if (!DoClose()) {
                 e.Cancel = true;
                 return;

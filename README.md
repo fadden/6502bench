@@ -2,8 +2,9 @@
 
 [Features](#key-features) - [Getting Started](#getting-started) - [About the Code](#about-the-code)
 
-6502bench is a code development "workbench" for 6502, 65C02, and 65802/65816
-code.  It currently features one tool, the SourceGen disassembler.
+[6502bench](https://6502bench.com/) is a code development "workbench"
+for 6502, 65C02, and 65802/65816 code.  It currently features one tool,
+the SourceGen disassembler.
 
 You can download the source code and build it yourself, or click the
 ["Releases" tab](https://github.com/fadden/6502bench/releases) for
@@ -79,9 +80,10 @@ Miscellaneous:
   allow the project to be shared without violating copyrights (subject to
   local laws).
 
-There are a couple of significant areas where support is currently lacking:
-- Poor support for multi-bank 65816 files (IIgs OMF, SNES).
-- No support for alternate character sets (e.g. PETSCII).
+Some planned features are not yet implemented.  Notable among them are
+support for multi-bank 65816 files (IIgs OMF, SNES), and alternate
+character sets (e.g. PETSCII).  Visit the wiki section for the
+[current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
 
 ## Getting Started ##
