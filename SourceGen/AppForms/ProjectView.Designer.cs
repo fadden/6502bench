@@ -984,6 +984,7 @@ namespace SourceGen.AppForms
             // typeColumnHeader
             // 
             this.typeColumnHeader.Text = "Type";
+            this.typeColumnHeader.Width = 116;
             // 
             // notesGroupBox
             // 
@@ -1401,10 +1402,12 @@ namespace SourceGen.AppForms
             // symbolNameColumnHeader
             // 
             this.symbolNameColumnHeader.Text = "Name";
+            this.symbolNameColumnHeader.Width = 84;
             // 
             // symbolValueColumnHeader
             // 
             this.symbolValueColumnHeader.Text = "Value";
+            this.symbolValueColumnHeader.Width = 68;
             // 
             // infoGroupBox
             // 
