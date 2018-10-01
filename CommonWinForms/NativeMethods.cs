@@ -17,7 +17,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-#if BUILD_FOR_WINDOWS   // I don't know if other platforms will emulate the LVITEM stuff
 namespace CommonWinForms {
     // From https://stackoverflow.com/questions/1019388/
 
@@ -82,4 +81,3 @@ namespace CommonWinForms {
         }
     }
 }
-#endif //BUILD_FOR_WINDOWS

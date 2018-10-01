@@ -37,6 +37,26 @@ namespace CommonWinForms {
     /// Add functions to select and deselect all items.
     /// </summary>
     public static class ListViewExtensions {
+        // I don't know if NativeMethods is going to work on other platforms, but I assume
+        // not.  I'm not sure how expensive the runtime check is, so cache the result.
+        private enum DNY { Dunno = 0, No, Yes };
+        private static DNY IsPlatformWindows;
+        private static bool IsWindows {
+            get {
+                if (IsPlatformWindows == DNY.Dunno) {
+                    // This is the .NET framework 4.6 way.  Later versions (4.7, netcommon)
+                    // prefer the RuntimeInformation.IsOSPlatform() approach.
+                    OperatingSystem os = Environment.OSVersion;
+                    if (os.Platform == PlatformID.Win32NT) {
+                        IsPlatformWindows = DNY.Yes;
+                    } else {
+                        IsPlatformWindows = DNY.No;
+                    }
+                }
+                return (IsPlatformWindows == DNY.Yes);
+            }
+        }
+
         /// <summary>
         /// Selects all items in the list view.
         /// </summary>
@@ -50,23 +70,23 @@ namespace CommonWinForms {
             // https://stackoverflow.com/questions/9039989/
             // https://stackoverflow.com/questions/1019388/
 
-#if BUILD_FOR_WINDOWS   // defined in our project properties
-            NativeMethods.SelectAllItems(listView);
-#else
-            try {
-                Application.UseWaitCursor = true;
-                Cursor.Current = Cursors.WaitCursor;
-                listView.BeginUpdate();
-                int max = listView.VirtualListSize;
-                for (int i = 0; i < max; i++) {
-                    //codeListView.Items[i].Selected = true;
-                    listView.SelectedIndices.Add(i);
+            if (IsWindows) {
+                NativeMethods.SelectAllItems(listView);
+            } else {
+                try {
+                    Application.UseWaitCursor = true;
+                    Cursor.Current = Cursors.WaitCursor;
+                    listView.BeginUpdate();
+                    int max = listView.VirtualListSize;
+                    for (int i = 0; i < max; i++) {
+                        //codeListView.Items[i].Selected = true;
+                        listView.SelectedIndices.Add(i);
+                    }
+                } finally {
+                    listView.EndUpdate();
+                    Application.UseWaitCursor = false;
                 }
-            } finally {
-                listView.EndUpdate();
-                Application.UseWaitCursor = false;
             }
-#endif
         }
 
         /// <summary>
