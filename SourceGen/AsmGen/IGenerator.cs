@@ -58,6 +58,9 @@ namespace SourceGen.AsmGen {
         /// </summary>
         AssemblerQuirks Quirks { get; }
 
+        /// <summary>
+        /// Label localization object.  Behavior is assembler-specific.
+        /// </summary>
         LabelLocalizer Localizer { get; }
 
         /// <summary>
@@ -73,8 +76,7 @@ namespace SourceGen.AsmGen {
         /// is primarily intended for undocumented ops, which don't have standard mnemonics,
         /// and hence can vary between assemblers.
         /// </summary>
-        /// <param name="op"></param>
-        /// <param name="mnemonic"></param>
+        /// <param name="op">Opcode to replace.</param>
         /// <returns>Replacement mnemonic, an empty string if the original is fine, or
         ///   null if the op is not supported at all and should be emitted as hex.</returns>
         string ReplaceMnemonic(OpDef op);
@@ -83,10 +85,10 @@ namespace SourceGen.AsmGen {
         /// Generates an opcode/operand pair for a short sequence of bytes (1-4 bytes).
         /// Does not produce any source output.
         /// </summary>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <param name="opcode"></param>
-        /// <param name="operand"></param>
+        /// <param name="offset">Offset to data.</param>
+        /// <param name="count">Number of bytes (1-4).</param>
+        /// <param name="opcode">Opcode mnemonic.</param>
+        /// <param name="operand">Formatted operand.</param>
         void GenerateShortSequence(int offset, int length, out string opcode, out string operand);
 
         /// <summary>
@@ -99,21 +101,21 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// Outputs one or more lines of data for the specified offset.
         /// </summary>
-        /// <param name="offset"></param>
+        /// <param name="offset">Offset to data.</param>
         void OutputDataOp(int offset);
 
         /// <summary>
         /// Outputs an equate directive.  The numeric value is already formatted.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="valueStr"></param>
-        /// <param name="comment"></param>
+        /// <param name="name">Symbol label.</param>
+        /// <param name="valueStr">Formatted value.</param>
+        /// <param name="comment">End-of-line comment.</param>
         void OutputEquDirective(string name, string valueStr, string comment);
 
         /// <summary>
         /// Outputs a code origin directive.
         /// </summary>
-        /// <param name="address"></param>
+        /// <param name="address">24-bit address.</param>
         void OutputOrgDirective(int address);
 
         /// <summary>
@@ -122,33 +124,47 @@ namespace SourceGen.AsmGen {
         /// Merlin32 always sets both values (e.g. "MX %00"), cc65 sets each register
         /// individually (".A16", ".I8").  We need to accommodate both styles.
         /// </summary>
-        /// <param name="offset"></param>
-        /// <param name="prevM"></param>
-        /// <param name="prevX"></param>
-        /// <param name="newM"></param>
-        /// <param name="newX"></param>
+        /// <param name="offset">Offset of change.</param>
+        /// <param name="prevM">Previous value for M flag.</param>
+        /// <param name="prevX">Previous value for X flag.</param>
+        /// <param name="newM">New value for M flag.</param>
+        /// <param name="newX">New value for X flag.</param>
         void OutputRegWidthDirective(int offset, int prevM, int prevX, int newM, int newX);
 
         /// <summary>
-        /// Output a line of source code.  All elements must be fully formatted.  The
-        /// items will be padded with spaces to fit specific column widths.
+        /// Output a line of source code.  All elements must be fully formatted, except for
+        /// certain assembler-specific things like ':' on labels.  The items will be padded
+        /// with spaces to fit specific column widths.
         /// </summary>
-        /// <param name="label"></param>
-        /// <param name="opcode"></param>
-        /// <param name="operand"></param>
-        /// <param name="comment"></param>
+        /// <param name="label">Optional label.</param>
+        /// <param name="opcode">Opcode mnemonic.</param>
+        /// <param name="operand">Operand; may be empty.</param>
+        /// <param name="comment">Optional comment.</param>
         void OutputLine(string label, string opcode, string operand, string comment);
 
         /// <summary>
-        /// Output a line of source code.
+        /// Output a line of source code.  This will be output as-is.
         /// </summary>
-        /// <param name="fullLine"></param>
+        /// <param name="fullLine">Full text of line to outut.</param>
         void OutputLine(string fullLine);
     }
 
     public class AssemblerQuirks {
+        /// <summary>
+        /// Are the arguments to MVN/MVP reversed?
+        /// </summary>
         public bool BlockMoveArgsReversed { get; set; }
+
+        /// <summary>
+        /// Does the assembler configure assembler widths based on SEP/REP, but doesn't
+        /// track the emulation bit?
+        /// </summary>
         public bool TracksSepRepNotEmu { get; set; }
+
+        /// <summary>
+        /// Is the assembler unable to generate relative branches that wrap around banks?
+        /// (Note this affects long-distance BRLs that don't appear to wrap.)
+        /// </summary>
         public bool NoPcRelBankWrap { get; set; }
     }
 }

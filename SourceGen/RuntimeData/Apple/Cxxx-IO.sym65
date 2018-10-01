@@ -30,7 +30,7 @@ CLR80VID        @ $C00C     ;W 40 columns
 SET80VID        @ $C00D     ;W 80 columns
 CLRALTCHAR      @ $C00E     ;W primary char set
 SETALTCHAR      @ $C00F     ;W alternate char set
-KBDSTRB         @ $C010     ;WR keyboard strobe
+KBDSTRB         @ $C010     ;RW keyboard strobe
 RDLCBNK2        @ $C011     ;R status of selected $Dx bank
 RDLCRAM         @ $C012     ;R status of $Dx ROM / $Dx RAM
 RDRAMRD         @ $C013     ;R status of main/aux RAM reading
@@ -86,7 +86,7 @@ DIAGTYPE        @ $C046     ;W self-test diagnostics
 CLRVBLINT       @ $C047     ;W clear VBL interrupt
 CLRXYINT        @ $C048     ;W clear XY interrupt
 
-EMUBYTE         @ $C04F     ;WR used by emulators to identify themselves
+EMUBYTE         @ $C04F     ;RW used by emulators to identify themselves
 
 TXTCLR          @ $C050     ;RW display graphics
 TXTSET          @ $C051     ;RW display text
