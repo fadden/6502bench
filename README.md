@@ -1,13 +1,13 @@
 # 6502bench #
 
-[Features](#key-features) - [Getting Started](#getting-started) - [About the Code](#about-the-code)
+[Features](#key-features) - [Installation](#installation) - [Getting Started](#getting-started) - [About the Code](#about-the-code)
 
 [6502bench](https://6502bench.com/) is a code development "workbench"
 for 6502, 65C02, and 65802/65816 code.  It currently features one tool,
 the SourceGen disassembler.
 
 You can download the source code and build it yourself, or click the
-["Releases" tab](https://github.com/fadden/6502bench/releases) for
+[Releases tab](https://github.com/fadden/6502bench/releases) for
 pre-built downloads.
 
 
@@ -86,12 +86,31 @@ character sets (e.g. PETSCII).  Visit the wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
 
+## Installation ##
+
+There is currently no installer -- just unzip the archive and run the
+executable.  The data files used by the program are found automatically
+based on the path to the .EXE file.
+
+SourceGen relies on the .NET Framework.  For Windows, you need to have
+Microsoft .NET Framework v4.6.2 or later installed.  Many people will already
+have this installed.  If SourceGen doesn't seem to want to start, download
+the latest version (v4.7.2)
+[directly from Microsoft](https://www.microsoft.com/net/download/dotnet-framework-runtime).
+The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
+the Anniversary Update (1607).
+
+In theory, SourceGen can work with Mono under Linux and Mac OS X.  It
+currently crashes on startup with Mono 5.14.0 on Ubuntu, so it's uncertain
+when or if this will work.
+
+
 ## Getting Started ##
 
 The best way to get started is by working through the tutorial.  Launch
-SourceGen, hit F1 to open the user manual in your web browser, then scroll
-down near the bottom of the index page.  Click on "Tutorials", and follow
-the instructions.
+SourceGen, hit F1 to open the user manual in your web browser, then look
+for the Tutorial link in the index.  Click it and follow the instructions
+there.
 
 The tutorial is one of several examples included in the SourceGen
 distribution.  The other directories contain project and data files for
@@ -105,11 +124,11 @@ display it.
 All of the code is written in C# .NET, using the (free to download) Visual
 Studio Community 2017 IDE as the primary development environment.  The user
 interface uses the WinForms API.  Efforts have been made to avoid doing
-anything Windows-specific, in the hope that the applications will be
-straightforward to port to other platforms.
+anything Windows-specific, in the hope of running it under Mono.
 
-The solution is called "WorkBench.sln" rather than "6502bench.sln" because
-some things in Visual Studio got weird when it didn't start with a letter.
+The Solution file is called "WorkBench.sln" rather than "6502bench.sln"
+because some things in Visual Studio got weird when it didn't start with a
+letter.
 
 The code style is closer to what Android uses than "standard" C#.  Lines
 are folded to fit 100 columns.
