@@ -1443,7 +1443,8 @@ namespace SourceGen.AppForms
             this.Text = "6502bench SourceGen";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ProjectView_FormClosing);
             this.Load += new System.EventHandler(this.ProjectView_Load);
-            this.SizeChanged += new System.EventHandler(this.ProjectView_SizeChanged);
+            this.LocationChanged += new System.EventHandler(this.ProjectView_SizeOrLocChanged);
+            this.SizeChanged += new System.EventHandler(this.ProjectView_SizeOrLocChanged);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);

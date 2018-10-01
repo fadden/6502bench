@@ -241,6 +241,7 @@ namespace SourceGen.AppForms {
             InitSymbolListView();
 
             LoadAppSettings();
+            SetAppWindowLocation();
             ApplyAppSettings();
 
             // Init References ListView (non-virtual, non-ownerdraw)
@@ -337,20 +338,39 @@ namespace SourceGen.AppForms {
                 return;
             }
 
-            // Collect some window and column widths.  Don't grab the window size if we're
+            // Collect some window widths.  Don't grab the main window size if we're
             // maximized or minimized.
-            if (this.WindowState == FormWindowState.Normal) {
-                AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_WIDTH, this.Size.Width);
-                AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_HEIGHT, this.Size.Height);
-                AppSettings.Global.SetInt(AppSettings.MAIN_LEFT_SPLITTER_DIST,
+            if (this.WindowState == FormWindowState.Normal ||
+                    this.WindowState == FormWindowState.Maximized) {
+                if (this.WindowState == FormWindowState.Normal) {
+                    AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_LOC_X, this.Location.X);
+                    AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_LOC_Y, this.Location.Y);
+                    AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_WIDTH, this.Size.Width);
+                    AppSettings.Global.SetInt(AppSettings.MAIN_WINDOW_HEIGHT, this.Size.Height);
+                }
+                AppSettings.Global.SetBool(AppSettings.MAIN_WINDOW_MAXIMIZED,
+                    this.WindowState == FormWindowState.Maximized);
+
+                // Horizontal splitters.  We want to record the panel widths, rather than the
+                // splitter distance, because otherwise the right panel doesn't keep its size
+                // when the middle section changes during maximization.
+                AppSettings.Global.SetInt(AppSettings.MAIN_LEFT_PANEL_WIDTH,
                     mainSplitterLeft.SplitterDistance);
-                AppSettings.Global.SetInt(AppSettings.MAIN_RIGHT_SPLITTER_DIST,
-                    mainSplitterRight.SplitterDistance);
+                AppSettings.Global.SetInt(AppSettings.MAIN_RIGHT_PANEL_WIDTH,
+                    this.Size.Width - (mainSplitterLeft.SplitterDistance +
+                                       mainSplitterRight.SplitterDistance));
+
+                // Vertical splitters.
                 AppSettings.Global.SetInt(AppSettings.MAIN_LEFT_SIDE_SPLITTER_DIST,
                     leftPanelSplitter.SplitterDistance);
                 AppSettings.Global.SetInt(AppSettings.MAIN_RIGHT_SIDE_SPLITTER_DIST,
                     rightPanelSplitter.SplitterDistance);
+            } else {
+                // VisualStudio appears to un-minimize its window before closing it.  We
+                // could probably do that and grab the size values on the way out.
+                AppSettings.Global.SetBool(AppSettings.MAIN_WINDOW_MAXIMIZED, false);
             }
+
             SerializeReferencesColumnWidths();
             SerializeNotesColumnWidths();
             SerializeSymbolColumnWidths();
@@ -382,28 +402,73 @@ namespace SourceGen.AppForms {
         }
 
         /// <summary>
-        /// Applies "actionable" settings to the ProjectView, pulling them out of the global
-        /// settings object.  If a project is open, refreshes the display list and all sub-windows.
+        /// Sets the app window's location and size.
         /// </summary>
-        private void ApplyAppSettings() {
-            Debug.WriteLine("ApplyAppSettings...");
+        private void SetAppWindowLocation() {
+            const int DEFAULT_WIDTH = 1280;
+            const int DEFAULT_HEIGHT = 720;
+            const int DEFAULT_SPLIT = 250;
+
             AppSettings settings = AppSettings.Global;
 
             // Main window size.
             this.Size = new Size(
-                settings.GetInt(AppSettings.MAIN_WINDOW_WIDTH, 1280),
-                settings.GetInt(AppSettings.MAIN_WINDOW_HEIGHT, 720));
-            // Left splitter with is distance from left edge of window.
+                settings.GetInt(AppSettings.MAIN_WINDOW_WIDTH, DEFAULT_WIDTH),
+                settings.GetInt(AppSettings.MAIN_WINDOW_HEIGHT, DEFAULT_HEIGHT));
+            // Left splitter width is distance from left edge of window.
             mainSplitterLeft.SplitterDistance =
-                settings.GetInt(AppSettings.MAIN_LEFT_SPLITTER_DIST, 250);
-            // Right splitter posn is distance from right edge of left splitter.
+                settings.GetInt(AppSettings.MAIN_LEFT_PANEL_WIDTH, DEFAULT_SPLIT);
+            // Right splitter distance is distance from right edge of left splitter, i.e.
+            // the width of the middle section, *not* the width of the right panel.
+            // --> splitter_distance = main_width - (left_width + right_width)
+            int rightSplitWidth = settings.GetInt(AppSettings.MAIN_RIGHT_PANEL_WIDTH,
+                DEFAULT_SPLIT);
             mainSplitterRight.SplitterDistance =
-                settings.GetInt(AppSettings.MAIN_RIGHT_SPLITTER_DIST, (1280 - 250) - 250);
+                this.Size.Width - (mainSplitterLeft.SplitterDistance + rightSplitWidth);
 
+            // Vertical splits, e.g. References vs. Notes.
             leftPanelSplitter.SplitterDistance =
                 settings.GetInt(AppSettings.MAIN_LEFT_SIDE_SPLITTER_DIST, 350);
             rightPanelSplitter.SplitterDistance =
                 settings.GetInt(AppSettings.MAIN_RIGHT_SIDE_SPLITTER_DIST, 400);
+
+            // Get working area of screen the system is going to display us on.  Note that,
+            // with multiple displays, the X/Y coordinates for the display's upper left may
+            // be negative.
+            Screen myScreen = Screen.FromControl(this);
+            Rectangle scrArea = myScreen.WorkingArea;
+
+            // Upper-left corner of our window that positions us in the center.
+            Point centered = new Point(scrArea.X + (scrArea.Width - this.Size.Width) / 2,
+                scrArea.Y + (scrArea.Height - this.Size.Height) / 2);
+
+            // Get requested location (if any).
+            Point loc = new Point();
+            loc.X = settings.GetInt(AppSettings.MAIN_WINDOW_LOC_X, int.MinValue);
+            loc.Y = settings.GetInt(AppSettings.MAIN_WINDOW_LOC_Y, int.MinValue);
+            if (loc.X == int.MinValue || loc.Y == int.MinValue) {
+                // No setting exists; center it on the screen.
+                loc = centered;
+            } else {
+                // See if this location makes sense.  As a quick sanity check we test to see
+                // if the top-center part of the window is visible.  If not, it may not be
+                // possible to reposition the window because the title bar won't be visible.
+                //
+                // Win10 seems to be okay with dragging a window below the icon bar at the
+                // bottom, which makes it hard to get at.  We offset the Y position by a few
+                // pixels to give us some wiggle room.
+                Point checkPoint = new Point(loc.X + this.Size.Width / 2, loc.Y + 8);
+                if (!scrArea.Contains(checkPoint)) {
+                    Debug.WriteLine("Titlebar " + checkPoint + " not inside " + scrArea);
+                    loc = centered;
+                }
+            }
+
+            this.Location = loc;
+
+            if (settings.GetBool(AppSettings.MAIN_WINDOW_MAXIMIZED, false)) {
+                this.WindowState = FormWindowState.Maximized;
+            }
 
             // Configure column widths.
             string widthStr = settings.GetString(AppSettings.CDLV_COL_WIDTHS, null);
@@ -416,6 +481,15 @@ namespace SourceGen.AppForms {
             DeserializeReferencesColumnWidths();
             DeserializeNotesColumnWidths();
             DeserializeSymbolColumnWidths();
+        }
+
+        /// <summary>
+        /// Applies "actionable" settings to the ProjectView, pulling them out of the global
+        /// settings object.  If a project is open, refreshes the display list and all sub-windows.
+        /// </summary>
+        private void ApplyAppSettings() {
+            Debug.WriteLine("ApplyAppSettings...");
+            AppSettings settings = AppSettings.Global;
 
             // Set up the formatter.
             mFormatterConfig = new Formatter.FormatConfig();
@@ -486,9 +560,10 @@ namespace SourceGen.AppForms {
             }
         }
 
-        // Make sure we pick up changes to the window size.  We don't catch size-chage events
-        // for the left/right splitter widths because that should be picked up by the sub-windows.
-        private void ProjectView_SizeChanged(object sender, EventArgs e) {
+        // Make sure we pick up changes to the window size or position.  We don't catch
+        // size-chage events for the left/right splitter widths because that should be picked
+        // up by events on sub-windows.
+        private void ProjectView_SizeOrLocChanged(object sender, EventArgs e) {
             AppSettings.Global.Dirty = true;
         }
 
