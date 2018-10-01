@@ -62,7 +62,7 @@ namespace SourceGen.Tools {
         /// Subscribe to this to be notified when the dialog closes.
         /// </summary>
         public event WindowClosing OnWindowClosing;
-        public delegate void WindowClosing(object sender);
+        public delegate void WindowClosing(object sender, EventArgs e);
 
 
         public HexDumpViewer(byte[] data, Formatter formatter) {
@@ -127,7 +127,7 @@ namespace SourceGen.Tools {
 
         private void HexDumpViewer_FormClosed(object sender, FormClosedEventArgs e) {
             if (OnWindowClosing != null) {
-                OnWindowClosing(this);
+                OnWindowClosing(this, e);
             }
         }
 

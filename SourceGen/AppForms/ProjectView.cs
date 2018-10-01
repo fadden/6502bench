@@ -2805,7 +2805,7 @@ namespace SourceGen.AppForms {
                 // Create and show modeless dialog.  This one is "always on top" by default,
                 // to allow the user to click around to various points.
                 mHexDumpDialog = new Tools.HexDumpViewer(mProject.FileData, mOutputFormatter);
-                mHexDumpDialog.OnWindowClosing += (arg) => {
+                mHexDumpDialog.OnWindowClosing += (sender1, e1) => {
                     Debug.WriteLine("Hex dump dialog closed");
                     //showHexDumpToolStripMenuItem.Checked = false;
                     mHexDumpDialog = null;
@@ -2836,7 +2836,7 @@ namespace SourceGen.AppForms {
             // Show or hide the modeless dialog.
             if (mAsciiChartDialog == null) {
                 Tools.AsciiChart dlg = new Tools.AsciiChart();
-                dlg.OnWindowClosing += (arg) => {
+                dlg.OnWindowClosing += (sender1, e1) => {
                     Debug.WriteLine("ASCII chart closed");
                     aSCIIChartToolStripMenuItem.Checked = false;
                     mAsciiChartDialog = null;
@@ -4259,7 +4259,7 @@ namespace SourceGen.AppForms {
                 Tools.ShowText dlg = new Tools.ShowText();
                 dlg.Title = "Undo/Redo History";
                 dlg.BodyText = mProject.DebugGetUndoRedoHistory();
-                dlg.OnWindowClosing += (arg) => {
+                dlg.OnWindowClosing += (sender1, e1) => {
                     Debug.WriteLine("Undo/redo dialog closed");
                     showUndoRedoHistoryToolStripMenuItem.Checked = false;
                     mShowUndoRedoHistoryDialog = null;
@@ -4285,7 +4285,7 @@ namespace SourceGen.AppForms {
                 } else {
                     dlg.BodyText = mGenerationLog.WriteToString();
                 }
-                dlg.OnWindowClosing += (arg) => {
+                dlg.OnWindowClosing += (sender1, e1) => {
                         Debug.WriteLine("Analyzer output dialog closed");
                         showAnalyzerOutputToolStripMenuItem.Checked = false;
                         mShowAnalyzerOutputDialog = null;
@@ -4307,7 +4307,7 @@ namespace SourceGen.AppForms {
                 Tools.ShowText dlg = new Tools.ShowText();
                 dlg.Title = "Analysis Timers";
                 dlg.BodyText = "(no data yet)";
-                dlg.OnWindowClosing += (arg) => {
+                dlg.OnWindowClosing += (sender1, e1) => {
                     Debug.WriteLine("Analysis timers dialog closed");
                     showAnalysisTimersToolStripMenuItem.Checked = false;
                     mShowAnalysisTimersDialog = null;
