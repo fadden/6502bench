@@ -51,7 +51,7 @@ namespace SourceGen.AppForms {
         /// Symbol subset, used to supply data to the symbol ListView.  Initialized with
         /// an empty symbol table.
         /// </summary>
-        private SymbolTableSubset mSymbolSubset = new SymbolTableSubset(new SymbolTable());
+        private SymbolTableSubset mSymbolSubset;
 
         /// <summary>
         /// Current code list view selection.  The length will match the DisplayList Count.
@@ -233,19 +233,25 @@ namespace SourceGen.AppForms {
                 mActionsMenuItems[i] = actionsToolStripMenuItem.DropDownItems[i];
             }
 
+            // Load the settings from the file.  Some things (like the symbol subset) need
+            // these.  The general "apply settings" doesn't happen until a bit later, after
+            // the sub-windows have been initialized.
+            LoadAppSettings();
+
             // Init primary ListView (virtual, ownerdraw)
             InitCodeListView();
 
             // Init Symbols ListView (virtual, non-ownerdraw)
+            mSymbolSubset = new SymbolTableSubset(new SymbolTable());
             symbolListView.SetDoubleBuffered(true);
             InitSymbolListView();
 
-            LoadAppSettings();
-            SetAppWindowLocation();
-            ApplyAppSettings();
-
             // Init References ListView (non-virtual, non-ownerdraw)
             referencesListView.SetDoubleBuffered(true);
+
+            // Place the main window and apply the various settings.
+            SetAppWindowLocation();
+            ApplyAppSettings();
 
             UpdateActionMenu();
             UpdateMenuItemsAndTitle();
@@ -3490,8 +3496,8 @@ namespace SourceGen.AppForms {
             // Save a copy of the column header names as entered in the designer.
             mSymbolColumnHeaderNames = new string[3];
             mSymbolColumnHeaderNames[0] = symbolTypeColumnHeader.Text;
-            mSymbolColumnHeaderNames[1] = symbolNameColumnHeader.Text;
-            mSymbolColumnHeaderNames[2] = symbolValueColumnHeader.Text;
+            mSymbolColumnHeaderNames[1] = symbolValueColumnHeader.Text;
+            mSymbolColumnHeaderNames[2] = symbolNameColumnHeader.Text;
             SetSymbolColumnHeaders();
         }
 
@@ -3540,9 +3546,9 @@ namespace SourceGen.AppForms {
             ListViewItem lvi = new ListViewItem();
 
             lvi.Text = sym.SourceTypeString;
-            mSymbolSubArray[0] = new ListViewItem.ListViewSubItem(lvi, sym.Label);
-            mSymbolSubArray[1] = new ListViewItem.ListViewSubItem(lvi,
+            mSymbolSubArray[0] = new ListViewItem.ListViewSubItem(lvi,
                 mOutputFormatter.FormatHexValue(sym.Value, 0));
+            mSymbolSubArray[1] = new ListViewItem.ListViewSubItem(lvi, sym.Label);
             lvi.SubItems.AddRange(mSymbolSubArray);
             return lvi;
         }
@@ -3607,11 +3613,11 @@ namespace SourceGen.AppForms {
             symbolTypeColumnHeader.Text =
                 (sortCol == SymbolTableSubset.SortCol.Type ? sortStr : "") +
                 mSymbolColumnHeaderNames[0];
-            symbolNameColumnHeader.Text =
-                (sortCol == SymbolTableSubset.SortCol.Name ? sortStr : "") +
-                mSymbolColumnHeaderNames[1];
             symbolValueColumnHeader.Text =
                 (sortCol == SymbolTableSubset.SortCol.Value ? sortStr : "") +
+                mSymbolColumnHeaderNames[1];
+            symbolNameColumnHeader.Text =
+                (sortCol == SymbolTableSubset.SortCol.Name ? sortStr : "") +
                 mSymbolColumnHeaderNames[2];
         }
 

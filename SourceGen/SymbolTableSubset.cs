@@ -21,6 +21,9 @@ using System.Text;
 
 namespace SourceGen {
     public class SymbolTableSubset {
+        // Sort: which column?  Note we store the int value in the app settings.
+        public enum SortCol { Type = 0, Value = 1, Name = 2 };
+
         private SymbolTable mSymbolTable;
 
         // Internal dirty flag.
@@ -155,8 +158,6 @@ namespace SourceGen {
                 }
             }
         }
-        // Sort: which column?  Note we store the int value in the app settings.
-        public enum SortCol { Type = 0, Name = 1, Value = 2 };
         private SortCol mSortColumn = SortCol.Name;
         public SortCol SortColumn {
             get {

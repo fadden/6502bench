@@ -170,8 +170,8 @@ namespace SourceGen.AppForms
             this.symbolPlatformCheckBox = new System.Windows.Forms.CheckBox();
             this.symbolListView = new System.Windows.Forms.ListView();
             this.symbolTypeColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.symbolValueColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
             this.mainMenuStrip.SuspendLayout();
@@ -1374,8 +1374,8 @@ namespace SourceGen.AppForms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.symbolListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.symbolTypeColumnHeader,
-            this.symbolNameColumnHeader,
-            this.symbolValueColumnHeader});
+            this.symbolValueColumnHeader,
+            this.symbolNameColumnHeader});
             this.symbolListView.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.symbolListView.FullRowSelect = true;
             this.symbolListView.GridLines = true;
@@ -1399,15 +1399,15 @@ namespace SourceGen.AppForms
             this.symbolTypeColumnHeader.Text = "Type";
             this.symbolTypeColumnHeader.Width = 44;
             // 
-            // symbolNameColumnHeader
-            // 
-            this.symbolNameColumnHeader.Text = "Name";
-            this.symbolNameColumnHeader.Width = 84;
-            // 
             // symbolValueColumnHeader
             // 
             this.symbolValueColumnHeader.Text = "Value";
-            this.symbolValueColumnHeader.Width = 68;
+            this.symbolValueColumnHeader.Width = 54;
+            // 
+            // symbolNameColumnHeader
+            // 
+            this.symbolNameColumnHeader.Text = "Name";
+            this.symbolNameColumnHeader.Width = 100;
             // 
             // infoGroupBox
             // 
@@ -1527,8 +1527,8 @@ namespace SourceGen.AppForms
         private System.Windows.Forms.CheckBox symbolAutoCheckBox;
         private System.Windows.Forms.GroupBox symbolsGroupBox;
         private System.Windows.Forms.ListView symbolListView;
-        private System.Windows.Forms.ColumnHeader symbolNameColumnHeader;
         private System.Windows.Forms.ColumnHeader symbolValueColumnHeader;
+        private System.Windows.Forms.ColumnHeader symbolNameColumnHeader;
         private System.Windows.Forms.ColumnHeader symbolTypeColumnHeader;
         private System.Windows.Forms.ColumnHeader offsetColumnHeader;
         private System.Windows.Forms.ColumnHeader addressColumnHeader;
