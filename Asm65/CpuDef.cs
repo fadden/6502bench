@@ -82,7 +82,10 @@ namespace Asm65 {
             Cpu6510,    // Commodore 64
             Cpu8502,    // Commodore 128
             Cpu2A03,    // NES
+
             Cpu65C02,   // Apple //e
+            Cpu65SC02,  // Atari Lynx
+
             Cpu65802,   // ?
             Cpu65816,   // Apple IIgs
             Cpu5A22     // SNES
@@ -103,6 +106,7 @@ namespace Asm65 {
                 case "8502":        return CpuType.Cpu8502;
                 case "2A03":        return CpuType.Cpu2A03;
                 case "65C02":       return CpuType.Cpu65C02;
+                case "65SC02":      return CpuType.Cpu65SC02;
                 case "65802":       return CpuType.Cpu65802;
                 case "65816":       return CpuType.Cpu65816;
                 case "5A22":        return CpuType.Cpu5A22;
@@ -126,6 +130,7 @@ namespace Asm65 {
                 case CpuType.Cpu8502:   return "8502";
                 case CpuType.Cpu2A03:   return "2A03";
                 case CpuType.Cpu65C02:  return "65C02";
+                case CpuType.Cpu65SC02: return "65SC02";
                 case CpuType.Cpu65802:  return "65802";
                 case CpuType.Cpu65816:  return "65816";
                 case CpuType.Cpu5A22:   return "5A22";
@@ -142,9 +147,17 @@ namespace Asm65 {
         ///   be included in the definition.</param>
         /// <returns>Best CpuDef.</returns>
         public static CpuDef GetBestMatch(CpuType type, bool includeUndocumented) {
-            // Pretty much everything boils down to a 6502, 65C02, or 65816.
-            // The Rockwell R65C02, described in an appendix in Eyes & Lichty, doesn't,
-            // and would need its own CpuDef.
+            // Many 65xx variants boil down to a 6502, 65C02, or 65816, at least as far as
+            // a disassembler needs to know.  These do not, and would need full definitions:
+            //
+            //  Hudson Soft HuC6280 (PC Engine / TurboGrafx)
+            //  Commodore CSG 4510 / CSG 65CE02 (Amiga A2232 serial port; 4510 has one
+            //   additional instruction, so use that as archetype)
+            //  Rockwell R65C02 (used in ???)
+            //  Jeri's 65DTV02 (used in C64DTV single-chip computer); same as 6502 with
+            //   some differences in illegal opcodes
+            //  Eloraam 65EL02 (defined in a Minecraft-based emulator)
+
             CpuDef cpuDef;
             switch (type) {
                 case CpuType.Cpu65802:
@@ -153,6 +166,7 @@ namespace Asm65 {
                     cpuDef = Cpu65816;
                     break;
                 case CpuType.Cpu65C02:
+                case CpuType.Cpu65SC02:
                     cpuDef = Cpu65C02;
                     break;
                 default:

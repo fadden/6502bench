@@ -137,6 +137,19 @@
       }
     },
     {
+      "Name" : "Atari Lynx",
+      "GroupName" : "Atari",
+      "Cpu" : "65SC02",
+      "Speed" : "4.00",
+      "Description" : "Atari Lynx [placeholder].",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
       "Name" : "Atari Arcade Cabinet",
       "GroupName" : "Atari",
       "Cpu" : "6502",
