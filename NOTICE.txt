@@ -1,0 +1,6 @@
+[This is the "NOTICE" text file, mentioned in part 4(d) of the Apache 2.0
+license.  The text below must be included in Derivative Works per the terms.]
+----------
+
+This product contains source code or data files from 6502bench.  You can
+visit the project web page at https://6502bench.com/ .
