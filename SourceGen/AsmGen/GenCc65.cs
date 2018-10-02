@@ -124,13 +124,18 @@ namespace SourceGen.AsmGen {
             Project = project;
             Quirks = new AssemblerQuirks();
             if (asmVersion != null) {
+                // Use the actual version.  If it's > 2.17 we'll try to take advantage of
+                // bug fixes.
                 mAsmVersion = asmVersion.Version;
-                if (mAsmVersion <= V2_17) {
-                    // cc65 v2.17: https://github.com/cc65/cc65/issues/717
-                    Quirks.BlockMoveArgsReversed = true;
-                    // cc65 v2.17: https://github.com/cc65/cc65/issues/754
-                    Quirks.NoPcRelBankWrap = true;
-                }
+            } else {
+                // No assembler installed.  Use 2.17.
+                mAsmVersion = V2_17;
+            }
+            if (mAsmVersion <= V2_17) {
+                // cc65 v2.17: https://github.com/cc65/cc65/issues/717
+                Quirks.BlockMoveArgsReversed = true;
+                // cc65 v2.17: https://github.com/cc65/cc65/issues/754
+                Quirks.NoPcRelBankWrap = true;
             }
 
             mWorkDirectory = workDirectory;
@@ -175,14 +180,19 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    if (mAsmVersion.IsValid && mAsmVersion <= V2_17) {
-                        OutputLine(SourceFormatter.FullLineCommentDelimiter +
-                            string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                            "cc65", mAsmVersion.ToString()));
-                    } else {
-                        OutputLine(SourceFormatter.FullLineCommentDelimiter +
-                            string.Format(Properties.Resources.GENERATED_FOR_LATEST, "cc65"));
-                    }
+                    //if (mAsmVersion.IsValid && mAsmVersion <= V2_17) {
+                    //    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    //        string.Format(Properties.Resources.GENERATED_FOR_VERSION,
+                    //        "cc65", mAsmVersion.ToString()));
+                    //} else {
+                    //    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    //        string.Format(Properties.Resources.GENERATED_FOR_LATEST, "cc65"));
+                    //}
+
+                    // Currently generating code for v2.17.
+                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                        string.Format(Properties.Resources.GENERATED_FOR_VERSION,
+                        "cc65", V2_17));
                 }
 
                 GenCommon.Generate(this, sw, worker);

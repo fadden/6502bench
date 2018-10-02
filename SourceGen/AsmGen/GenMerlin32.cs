@@ -169,9 +169,10 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    // No version-specific stuff yet.
+                    // No version-specific stuff yet.  We're generating code for v1.0.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
-                        string.Format(Properties.Resources.GENERATED_FOR_LATEST, "Merlin 32"));
+                        string.Format(Properties.Resources.GENERATED_FOR_VERSION,
+                            "Merlin 32", new CommonUtil.Version(1, 0)));
                 }
 
                 GenCommon.Generate(this, sw, worker);
