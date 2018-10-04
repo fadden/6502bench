@@ -40,7 +40,7 @@ namespace SourceGen.Sandbox {
         /// <summary>
         /// Reference to DomainManager, if we're using one.
         /// </summary>
-        public DomainManager DomainManager { get; private set; }
+        public DomainManager DomainMgr { get; private set; }
 
         /// <summary>
         /// Collection of loaded plugins, if we're not using a DomainManager.
@@ -60,9 +60,9 @@ namespace SourceGen.Sandbox {
             mProject = proj;
 
             if (!proj.UseMainAppDomainForPlugins) {
-                DomainManager = new DomainManager(UseKeepAliveHack);
-                DomainManager.CreateDomain("Plugin Domain", PluginDllCache.GetPluginDirPath());
-                DomainManager.PluginMgr.SetFileData(proj.FileData);
+                DomainMgr = new DomainManager(UseKeepAliveHack);
+                DomainMgr.CreateDomain("Plugin Domain", PluginDllCache.GetPluginDirPath());
+                DomainMgr.PluginMgr.SetFileData(proj.FileData);
             } else {
                 mActivePlugins = new Dictionary<string, IPlugin>();
             }
@@ -73,9 +73,9 @@ namespace SourceGen.Sandbox {
         /// the object after calling this.
         /// </summary>
         public void Cleanup() {
-            if (DomainManager != null) {
-                DomainManager.Dispose();
-                DomainManager = null;
+            if (DomainMgr != null) {
+                DomainMgr.Dispose();
+                DomainMgr = null;
             }
             mActivePlugins = null;
             mProject = null;
@@ -86,16 +86,16 @@ namespace SourceGen.Sandbox {
         /// the list of extension scripts configured into the project has changed.
         /// </summary>
         public void Clear() {
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 mActivePlugins.Clear();
             } else {
-                DomainManager.PluginMgr.ClearPluginList();
+                DomainMgr.PluginMgr.ClearPluginList();
             }
         }
 
         /// <summary>
         /// Attempts to load the specified plugin.  If the plugin is already loaded, this
-        /// does nothing.  If not, the assembly is loaded an an instance is created.
+        /// does nothing.  If not, the assembly is loaded and an instance is created.
         /// </summary>
         /// <param name="scriptIdent">Script identifier.</param>
         /// <param name="report">Report with errors and warnings.</param>
@@ -108,7 +108,7 @@ namespace SourceGen.Sandbox {
                 return false;
             }
 
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 if (mActivePlugins.TryGetValue(scriptIdent, out IPlugin plugin)) {
                     return true;
                 }
@@ -118,20 +118,20 @@ namespace SourceGen.Sandbox {
                 report = new FileLoadReport(dllPath);       // empty report
                 return true;
             } else {
-                IPlugin plugin = DomainManager.PluginMgr.LoadPlugin(dllPath, scriptIdent);
+                IPlugin plugin = DomainMgr.PluginMgr.LoadPlugin(dllPath, scriptIdent);
                 return plugin != null;
             }
         }
 
         public IPlugin GetInstance(string scriptIdent) {
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 if (mActivePlugins.TryGetValue(scriptIdent, out IPlugin plugin)) {
                     return plugin;
                 }
                 Debug.Assert(false);
                 return null;
             } else {
-                return DomainManager.PluginMgr.GetPlugin(scriptIdent);
+                return DomainMgr.PluginMgr.GetPlugin(scriptIdent);
             }
         }
 
@@ -140,14 +140,14 @@ namespace SourceGen.Sandbox {
         /// </summary>
         /// <returns>Newly-created list of plugin references.</returns>
         public List<IPlugin> GetAllInstances() {
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 List<IPlugin> list = new List<IPlugin>(mActivePlugins.Count);
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
                     list.Add(kvp.Value);
                 }
                 return list;
             } else {
-                return DomainManager.PluginMgr.GetActivePlugins();
+                return DomainMgr.PluginMgr.GetActivePlugins();
             }
         }
 
@@ -158,12 +158,12 @@ namespace SourceGen.Sandbox {
         public void PrepareScripts(IApplication appRef) {
             List<PlatSym> platSyms = GeneratePlatSymList();
 
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
                     kvp.Value.Prepare(appRef, mProject.FileData, platSyms);
                 }
             } else {
-                DomainManager.PluginMgr.PreparePlugins(appRef, platSyms);
+                DomainMgr.PluginMgr.PreparePlugins(appRef, platSyms);
             }
         }
 
@@ -197,7 +197,7 @@ namespace SourceGen.Sandbox {
         /// </summary>
         public string DebugGetLoadedScriptInfo() {
             StringBuilder sb = new StringBuilder();
-            if (DomainManager == null) {
+            if (DomainMgr == null) {
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
                     string loc = kvp.Value.GetType().Assembly.Location;
                     sb.Append("[main] ");
@@ -206,10 +206,10 @@ namespace SourceGen.Sandbox {
                     DebugGetScriptInfo(kvp.Value, sb);
                 }
             } else {
-                List<IPlugin> plugins = DomainManager.PluginMgr.GetActivePlugins();
+                List<IPlugin> plugins = DomainMgr.PluginMgr.GetActivePlugins();
                 foreach (IPlugin plugin in plugins) {
-                    string loc = DomainManager.PluginMgr.GetPluginAssemblyLocation(plugin);
-                    sb.AppendFormat("[sub {0}] ", DomainManager.Id);
+                    string loc = DomainMgr.PluginMgr.GetPluginAssemblyLocation(plugin);
+                    sb.AppendFormat("[sub {0}] ", DomainMgr.Id);
                     sb.Append(loc);
                     sb.Append("\r\n  ");
                     DebugGetScriptInfo(plugin, sb);

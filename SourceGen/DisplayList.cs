@@ -154,7 +154,7 @@ namespace SourceGen {
 
             /// <summary>
             /// Numeric offset value.  Used to map a line item to the Anattrib.  Note this is
-            /// set for all lines, and is the the same for all lines in a multi-line sequence,
+            /// set for all lines, and is the same for all lines in a multi-line sequence,
             /// e.g. every line in a long comment has the file offset with which it is associated.
             /// </summary>
             public int FileOffset { get; private set; }
