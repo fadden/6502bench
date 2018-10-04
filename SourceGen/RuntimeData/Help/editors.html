@@ -16,13 +16,13 @@
 
 <h2><a name="address">Edit Address</a></h2>
 <p>This adds a target address directive (".ORG") to the current offset.
-If you leave the field blank, the directive will be removed.</p>
+If you leave the text field blank, the directive will be removed.</p>
 <p>Addresses are always interpreted as hexadecimal.  You can prefix
-it with a '$', but that's not necessary.</p>
-<p>24-bit addresses may be written with a bank separator, e.g. "12/3456"
+it with a '$', but that's not required.
+24-bit addresses may be written with a bank separator, e.g. "12/3456"
 would resolve to address $123456.</p>
 
-<p>There will always be an address directive at the start of the list.
+<p>There will always be an address directive at the start of the file.
 Attempts to remove it will be ignored.</p>
 
 
@@ -34,14 +34,15 @@ that instruction.  You can override the value of individual flags.</p>
 <p>The 65816 emulation bit, which is not part of the processor status
 register, may also be set in the editor.</p>
 <p>The M, X, and E flags will not be editable unless your CPU configuration
-is set to a 16-bit CPU.</p>
+is set to 65816.</p>
 
 
 <h2><a name="label">Edit Label</a></h2>
 <p>Sets or clears a label at the selected offset.  The label must have
-the proper form, and not have the same name as another symbol.</p>
+the proper form, and not have the same name as another symbol.  If
+you edit an auto-generated label you will be required to change the name.</p>
 <p>The label may be marked as local, global, or global and exported.
-Local labels may be generated in the assembler output in a
+Local labels may be modified by the assembly code generator to have a more
 convenient form, such as a local loop identifier.  Global labels are
 always output as-is.  Exported labels are added to a table that may
 be imported by other projects.</p>
@@ -51,16 +52,17 @@ be imported by other projects.</p>
 <p>Operands can be displayed in a variety of numeric formats, or as a
 symbol.  The ASCII character format is only available for operands
 whose value falls into the range of low- or high-ASCII characters.</p>
-<p>Symbols may be used in their entirety, or offset by a byte or two.
+<p>Symbols may be used in their entirety, or shifted and masked.
 The low / high / bank selector determines which byte is used as the
 low byte.  For 16-bit operands, this acts as a shift rather than a byte
-select.</p>
+select.  If the symbol is wider than the operand field, a mask will be
+applied automatically.</p>
 
 <p>A few shortcuts are provided when specifying a symbol.  As noted in
 the introductory sections, operand symbols are weak references.  If the
 symbol hasn't been defined as a label yet, the operand will be formatted
 as hex, which is probably not what you want.</p>
-<p>The default behavior is to just set the operand's symbol.</p>
+<p>The default behavior is just to set the operand's symbol.</p>
 <p>For operands that target an offset inside the file, if the target
 address does not yet have a label, and the symbol doesn't exist, you may
 set the symbol as the label on the target address as well.  You can do
@@ -84,24 +86,35 @@ future release.)</p>
 
 <h2><a name="data">Edit Data Format</a></h2>
 <p>This dialog offers a variety of choices, and can be used to apply a
-format to a range of offsets.  If the range crosses a visual boundary,
+format to a range of offsets.  You must select all of the bytes you want
+to format.  For example, to format two bytes as a 16-bit word, you must
+select both bytes in the editor.  (If you click on the first item, then
+Shift+double-click on the operand field of the last item, you can do
+this very quickly.)  The selection does not need to be contiguous: you
+can use Control+click to select scattered items.)
+<p>If the range is discontiguous, or crosses a visual boundary
 such as a change in address, a user-specified label, or a long comment
-or note, the region will be split.  The top of the dialog indicates how
-many bytes have been selected, and how many regions they have been
-divided into.</p>
+or note, the selection will be split into smaller regions.  A message at the
+top of the dialog indicates how many bytes have been selected, and how
+many regions they have been divided into.</p>
 <p>(End-of-line comments do <i>not</i> split a region, and will
 disappear if they end up inside a multi-byte data item.)</p>
 
 <p>The "Simple Data" items behave the same as their equivalents in the
 Edit Operand dialog.  However, because the width is not determined by
-an instruction opcode, you will need to specify how wide each item is,
-and the byte order.</p>
-<p>Suppose you find a table of 16-bit addresses in the code.  Click on
+an instruction opcode, and multiple items can be selected, you will need
+to specify how wide each item is and what its byte order is.  For data
+you also have the option of setting the format to "Address", which marks
+the selected bytes as a numeric reference.</p>
+
+<p>Consider a simple example: suppose you find a table of 16-bit
+addresses in the code.  Click on
 the first byte, shift-click the last byte, then select the Edit Data menu
 item.  The number of bytes selected should be even.  Select
-"16-bit words, little-endian", then to the right "Address".  When you
-click OK, the selected data will be formatted as a series of 16-bit
-address values.</p>
+"16-bit words, little-endian", then over to the right click on
+"Address".  When you click OK, the selected data will be formatted as a
+series of 16-bit address values.  If the addresses can be resolved inside
+the data file, each address will be assigned a label.</p>
 
 <p>The "Bulk Data" items can represent large chunks of data compactly.
 The "fill" option is only available if all selected bytes have the
@@ -161,8 +174,8 @@ want to limit the overall length if you're hoping to create 80-column
 output.  Some retro assemblers may have hard line length limitations,
 which could result in the comment being truncated in generated sources.</p>
 <p>A semicolon (';') is placed at the start of the line.  If an assembler
-has different conventions, a different character may be used.  You don't
-need to include a delimiter in the comment field.</p>
+has different conventions, a different delimiter character may be used.  You
+don't need to include a semicolon in the comment field.</p>
 
 <p>Comments on platform symbols are read from the platform symbol file, and
 cannot be edited from within SourceGen.  Comments on project symbols are
@@ -176,11 +189,11 @@ will be word-wrapped at a line width of your choosing.  They're always
 drawn with a fixed-width font, so you can create ASCII-art diagrams.
 Comment delimiters are added automatically at the start of each line.</p>
 <p>For a true retro look you can "box" the comment with asterisks.  You
-can create a fill-width row of asterisks by putting a '*' on a line by
+can create a full-width row of asterisks by putting a '*' on a line by
 itself.  (Assembly source generators are allowed to use a character
 other than '*' for the output, e.g. they might use a full set of
 box outline characters, though that's somewhat against the spirit of
-the thing.)</p>
+the thing.  Regardless, a solo '*' results in a line.)</p>
 <p>The bottom window will update automatically as you type, showing what
 the output is expected to look like.  The actual assembler source output
 will depend on features of the target assembler, such as comment
@@ -226,7 +239,7 @@ the same way when used in a .EQ directive.</p>
 the .EQ directive.</p>
 <p>Symbols marked as "address" will be applied automatically when an
 operand references an address outside the scope of the data file.  Symbols
-marked as "constant" will not, though you can still specify it manually.</p>
+marked as "constant" will not, though you can still specify them manually.</p>
 
 </div>
 

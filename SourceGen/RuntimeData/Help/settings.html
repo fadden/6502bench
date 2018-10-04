@@ -21,15 +21,15 @@ project properties.</p>
 <p>Application settings are stored in a file called "SourceGen-settings"
 in the SourceGen installation directory.  If the file is missing or
 corrupted, some default settings will be used.  These settings are local
-to your system, and include everything from window sizes to whether you
-prefer hexadecimal values to be shown in upper case.  None of them
+to your system, and include everything from window sizes to whether or not
+you prefer hexadecimal values to be shown in upper case.  None of them
 affect the way the project analyzes code and data, though they may affect
 the way generated assembly sources look.</p>
 
 <p>Project properties are stored in each individual .dis65 project file.
 They specify which CPU to use, which extension scripts to load, and a
 variety of other things that directly impact how SourceGen processes
-the project.  Because of the way it impacts the project, all changes to
+the project.  Because of the potential impact, all changes to
 the project properties are made through the undo/redo buffer.</p>
 
 
@@ -50,7 +50,7 @@ hide columns from the code list.  The buttons may be more convenient
 though.</p>
 
 <p>You can select a different font for the code list.  Make it as large
-or small as you want.  Monospace fonts like Courier or Consolas are
+or small as you want.  Mono-space fonts like Courier or Consolas are
 recommended.</p>
 
 <p>You can choose to display different parts of the display in upper or
@@ -147,8 +147,8 @@ you later hit Cancel, but the changes are not applied immediately.</p>
 
 <p>The choice of CPU determines the set of available instructions, as
 well as cycle costs and register widths.  There are many variations
-on the 6502, but from the perspective of a disassembler only three
-matter:
+on the 6502, but from the perspective of a disassembler most can be
+treated as one of these three:
 <ol>
   <li>MOS 6502.  The original 8-bit instruction set.</li>
   <li>WDC W65C02S.  Expanded the instruction set and smoothed
@@ -156,9 +156,9 @@ matter:
   <li>WDC W65C816S.  Expanded instruction set, 24-bit address space,
     and 16-bit registers.</li>
 </ol>
-<p>The Rockwell R65C02 features an expanded instruction set that is
-compatible with the WDC 65C02 but incompatible with the 65816.  It's
-not currently supported by SourceGen.</p>
+<p>The Rockwell R65C02, Hudson Soft HuC6280, and Commodore CSG 4510 / 65CE02
+have instruction sets that expand on the 6502/65C02, but aren't compatible
+with the 65816.  These are not yet supported by SourceGen.</p>
 
 <p>If "enable undocumented instructions" is checked, some additional
 opcodes are recognized on the 6502 and 65C02.  These instructions are
@@ -198,14 +198,18 @@ create two symbols with the same label.</p>
 <p>The Import button allows you to import symbols from another project.
 Only labels that have been tagged as global and exported will be imported.
 Existing symbols with identical labels will be replaced, so it's okay to
-run the importer multiple times.</p>
+run the importer multiple times.  Labels that aren't found will not be
+removed, so you can safely import from multiple projects, but will need
+to manually delete any symbols that are no longer being exported.</p>
 
 
 <h3><a name="projprop-symfiles">Symbol Files</a></h3>
 <p>From here, you can add and remove platform symbol files, or change
 the order in which they are loaded.
 See the <a href="intro.html#about-symbols">symbols</a> section for an
-explanation of how platform symbols work.</p>
+explanation of how platform symbols work.
+See "README.md" in the RuntimeData directory for a description of the
+file syntax.</p>
 
 <p>Platform symbol files must live in the RuntimeData directory that comes
 with SourceGen, or in the directory where the project file lives.  This
@@ -222,7 +226,9 @@ you will receive a warning.</p>
 <h3><a name="projprop-extscripts">Extension Scripts</a></h3>
 <p>From here, you can add and remove extension script files.
 See the <a href="intro.html#scripts">extension scripts</a> section for
-an explanation of how extension scripts work.</p>
+an overview of how extension scripts work.
+There's a more detailed document in the RuntimeData directory
+("ExtensionScripts.md").</p>
 
 
 <p>Extension script files must live in the RuntimeData directory that comes

@@ -19,10 +19,10 @@ school in the late 1980s, I read Don Lancaster's
 <i>Enhancing Your Apple II, Vol. 1</i> (available for download
 <a href="https://www.tinaja.com/ebksamp1.shtml">here</a>).  This
 included a very detailed methodology for disassembling 6502 software.
-I decided to give it a try, so I dumped a monitor listing of the
-operating system from an SSI game ("RDOS") to paper with my Epson
-RX-80 -- tractor feed paper was helpful for this sort of thing -- and
-set to work.</p>
+I wanted to give it a try, so I generated a monitor listing of an
+operating system (called "RDOS") that SSI used on their games, and
+printed it out on my Epson RX-80 -- tractor feed paper was helpful for
+this sort of thing -- then set to work.</p>
 
 <p>Lancaster's methodology involved highlighting different types of
 instructions with different colors, making notes, and adding labels.
@@ -44,14 +44,17 @@ like a modern IDE, because I didn't just want it to translate machine code
 into readable form.  I wanted it to help me with the process of
 understanding the code, by providing cross-reference tables and symbol
 lists and giving me a place to scribble notes to myself while I worked.
-Especially the note-scribbling.</p>
+I especially wanted the note-scribbling, because learning how something
+works is usually an iterative process, where the function of a chunk of
+code gradually reveals itself over time.</p>
 
 <p>In 2002, while writing the 6502/65816 disassembler for CiderPress, I
 ran into the same problems I had with the original Apple II monitor: it
 blundered through data sections and got lost briefly when a new code
-section started.  This made it annoying to use for even small binaries.  I
+section started.  You had to pick long or short registers for the entire
+diassembly, which made 65816 code something of a disaster.  I
 jotted down some notes on what I thought the core features of a good
-6502 diassembler should be, then went back to work on other features.  It
+6502 disassembler should be, then moved on to work on other features.  It
 was another 15 years before I picked up the idea again.</p>
 
 <p>More recently, I disassembled some code by dumping it to a text

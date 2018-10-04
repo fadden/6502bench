@@ -70,15 +70,18 @@ these distracting, collapse the column.</p>
 <p>Click on the fourth line down, which has address 1002.  The line has
 a label, "L1002", and is performing an indexed load from L1017.  Both
 of these labels were automatically generated, and are named for the
-address they appear.  When you clicked on the line, a few things happened:</p>
+address at which they appear.  When you clicked on the line, a few
+things happened:</p>
 <ul>
-  <li>The line was highlighted in the system selection color.</li>
+  <li>The line was highlighted in the system selection color (usually
+    blue).</li>
   <li>Address 1017 and label L1017 were highlighted.  When a line
-    with an in-file operand is selected, the target address is higlighted.</li>
-  <li>An entry appeared in the References window.  This notes that the only
-    reference to L1002 is a branch from address $100B.</li>
+    with an in-file operand is selected, the target address is
+    highlighted.</li>
+  <li>An entry appeared in the References window.  This tells you that the
+    only reference to L1002 is a branch from address $100B.</li>
   <li>The Info window filled with a bunch of text that describes the
-    line and the LDA instruction.</li>
+    line format and some details about the LDA instruction.</li>
 </ul>
 
 <p>Click some other lines, such as address $100B and $1014.  Note how the
@@ -91,17 +94,17 @@ the operand itself opens a format editor; more on that later.)</p>
 References window.  Note the selection jumps to L1002.  You can immediately
 jump to any reference.</p>
 <p>At the top of the Symbols window on the right side of the screen is a
-row of buttons.  Make sure "Auto" is highlighted.  You should see three
+row of buttons.  Make sure "Auto" is selected.  You should see three
 labels in the window (L1002, L1014, L1017).  Double-click on L1014.  The
 selection jumps to the appropriate line.</p>
 
 <p>Select Edit &gt; Find.  Type "hello", and hit Enter.  The selection will
 move to address $100E, which is a string that says "hello!".  You can use
 Edit &gt; Find Next to try to find the next occurrence (there isn't one).  You
-can search for text that appears in the rightmost columns (label, opcode,
+can search for any text that appears in the rightmost columns (label, opcode,
 operand, comment).</p>
 <p>Select Edit &gt; Go To.  You can enter a label, address, or file offset.
-Enter "100b" to jump the selection to $100B.</p>
+Enter "100b" to set the selection to $100B.</p>
 
 <p>Near the top-left of the SourceGen window is a set of toolbar icons.
 Click the left-arrow, and watch the selection moves.  Click it again.  Then
@@ -118,21 +121,21 @@ something like "6502bench SourceGen vX.Y.Z".  There are three ways to
 open the comment editor:</p>
 <ol>
   <li>Select Actions &gt; Edit Long Comment from the menu bar.</li>
-  <li>Right click, and select Actions &gt; Edit Long Comment from the
-    pop-up menu.  (The menus area exactly the same.)</li>
+  <li>Right click, and select Edit Long Comment from the
+    pop-up menu.  (This menu is exactly the same as the Actions menu.)</li>
   <li>Double-click the comment</li>
 </ol>
 <p>Most things in the code list will respond to a double-click.
 Double-clicking on addresses, flags, labels, operands, and comments will
 open editors for those things.  Double-clicking on a value in the "bytes"
 column will open a floating hex dump viewer.  This is usually the most
-convenient way to edit something.</p>
+convenient way to edit something: point and click.</p>
 <p>Double-click the comment to open the editor.  Type some words into the
 upper window, and note that a formatted version appears in the bottom
 window.  Experiment with the maximum line width and "render in box"
 settings to see what they do.  You can hit Enter to create line breaks,
 or let SourceGen wrap lines for you.  When you're done, click OK.  (Or
-hit Ctrl-Enter.</p>
+hit Ctrl+Enter.)</p>
 <p>When the dialog closes, you'll see your new comment in place at the
 top of the file.  If you typed enough words, your comment will span
 multiple lines.  You can select the comment by selecting any line in it.</p>
@@ -151,15 +154,17 @@ differences:</p>
 <ol>
   <li>You can't pick their line width, but you can pick their color.</li>
   <li>They don't appear in generated assembly sources, making them
-    useful for leaving notes to yourself.</li>
+    useful for leaving notes to yourself as you work.</li>
   <li>They're listed in the Notes window.  Double-clicking them jumps
     the selection to the note, making them useful as bookmarks.</li>
 </ol>
 
-<p>It's time to do something with the code.  It's copying the instructions
-from $1017 to $2000, then jumping to $2000, so it looks like it's
-relocating the code before executing it.  We want to do the same thing
-to our disassembled code, so select the line at address $1017 and then
+<p>It's time to do something with the code.  If you look at what the code
+does you'll see that it's copying several dozen bytes from $1017
+to $2000, then jumping to $2000.  It appears to be relocating the next
+part of the code before
+executing it.  We want to let the disassembler know what's going on, so
+select the line at address $1017 and then
 Edit &gt; Edit Address.  (Or double-click the "1017" in the addr column.)
 In the Edit Address dialog, type "2000", and hit Enter.)</p>
 
@@ -178,8 +183,8 @@ so you'll be forgiven if you reduce the offset column width to zero.)</p>
 <p>On the line at address $2000, select Actions &gt; Edit Label, or
 double-click on the label "L2000".  Change the label to "MAIN", and hit
 Enter.  The label changes on that line, and on the two lines that refer
-to address $2000.  (If you're not sure what refers to line $2000, check
-the References window.)</p>
+to address $2000.  (If you're not sure what refers to line $2000, select
+it and check the References window.)</p>
 <p>On that same line, select Actions &gt; Edit Comment.  Type a short
 comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
@@ -215,12 +220,12 @@ Actions &gt; Edit Label.  Enter "IS_OK", and hit Enter.  (NOTE: labels are
 case-sensitive, so it needs to match the operand at $2005 exactly.)  You'll
 see the new label appear, and the operand at line $2005 will use it.</p>
 <p>There's an easier way.  Use Edit &gt; Undo twice, to get back to the place
-where line $2005 is using "L2009" as it's operand.  Select that line and
+where line $2005 is using "L2009" as its operand.  Select that line and
 Actions &gt; Edit Operand.  Enter "IS_OK", then select "Create label at target
 address instead".  Hit "OK".</p>
 <p>You should now see that both the operand at $2005 and the label at
 $2009 have changed to IS_OK, accomplishing what we wanted to do in a
-single step.  (There's actually a sutble difference compared to the two-step
+single step.  (There's actually a subtle difference compared to the two-step
 process: the operand at $2005 is still a numeric reference.  It was
 automatically changed to match IS_OK in the same way that the references
 to MAIN were when we renamed "L2000" earlier.  If you actually do want the
@@ -248,7 +253,7 @@ label to "STR1".  Move up a bit and select address $2030, then scroll to
 the bottom and shift-click address $2070.  Select Actions &gt; Edit Data
 Format.  At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
-two separate regions.  Selected "mixed ASCII and non-ASCII", then click
+two separate regions.  Select "mixed ASCII and non-ASCII", then click
 "OK".</p>
 <p>We now have two ".STR" lines, one for "string zero  ", one with the
 STR1 label and the rest of the string data.  This is okay, but it's not
@@ -260,8 +265,8 @@ a single ".STR" line at the bottom, split across two lines with a '+'.</p>
 but that appears to be incorrect, so let's format it as individual bytes
 instead.  There's an easy way to do that: use Actions &gt; Toggle Single-Byte
 Format (or hit Ctrl+B).</p>
-<p>The data starting at $2025 appears to be 16-bit addresses into the
-table of strings, so let's format them appropriately.</p>
+<p>The data starting at $2025 appears to be 16-bit addresses that point
+into the table of strings, so let's format them appropriately.</p>
 <p>Select the line at $2025, then shift-click the line at $202E.  Select
 Actions &gt; Edit Data Format.  If you selected the correct set of bytes,
 the top should say, "10 bytes selected".  Click the
@@ -277,7 +282,7 @@ on their own line, so each string is now in a separate ".STR" statement.
 
 <h3>Generating Assembly Code</h3>
 
-<p>You can generate asssembly source code from the disassembled data.
+<p>You can generate assembly source code from the disassembled data.
 Select File &gt; Assembler (or hit Ctrl+Shift+A) to open the generation
 and assembly dialog.</p>
 <p>Pick your favorite assembler from the drop list at the top right,

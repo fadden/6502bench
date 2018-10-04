@@ -28,8 +28,8 @@ as project symbols into the other projects.</p>
 symbol-import step in every interested project.  This step must be
 repeated whenever the labels are updated.</p>
 <p>A different but related problem is typified by arcade ROM sets,
-where files are split apart because each file must be flashed to a
-separate chip.  All files are expected to be present in memory at
+where files are split apart because each file must be burned into a
+separate PROM.  All files are expected to be present in memory at
 once, so there's no reason to treat them as separate projects. Currently,
 the best way to deal with this is to concatenate the files into a single
 file, and operate on that.</p>
@@ -60,7 +60,7 @@ L1103_0  LDA     #$22
 <p>Both sections start at $1100, and have branches to $1103.  The branch
 in the first section resolves to the label in the first version of
 that address chunk, while the branch in the second section resolves to
-the label in the second chunk.  When branches are outside the current
+the label in the second chunk.  When branches originate outside the current
 address chunk, the first chunk that includes that address is used, as
 it is with the <code>JMP $1000</code> at the start of the file.</p>
 
@@ -96,7 +96,7 @@ not help you debug 6502 projects.</p>
     multi-line comment (long comment, note).  Useful for confirming that
     the width limitation is being obeyed.  These are added exactly
     as shown, without comment delimiters, into generated assembly output,
-    which doesn't work out well.</li>
+    which doesn't work out well if you run the assembler.</li>
   <li>Use Keep-Alive Hack.  If set, a "ping" is sent to the extension
     script sandbox every 60 seconds.  This seems to be required to avoid
     an infrequently-encountered Windows bug.  (See code for notes and

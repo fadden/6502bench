@@ -15,8 +15,8 @@
 
 <p>SourceGen can generate an assembly source file that, when fed into
 the target assembler, will recreate the original data file exactly.
-Every assembler is different, so code must be written especially for
-each.<p>
+Every assembler is different, so support must be added to SourceGen
+for each.</p>
 <p>The generation / assembly dialog can be opened with File &gt; Assemble.</p>
 
 
@@ -37,7 +37,7 @@ assembler.  This is most easily understood with an example.</p>
 <code>54 02 01</code>, with the arguments reversed.  cc65 v2.17 doesn't
 do that; this is a bug that was fixed in a later version.  So if you're
 generating code for v2.17, you want to create source code with the
-arguments the other way around.</p>
+arguments the wrong way around.</p>
 <p>Having version-dependent source code is a bad idea, so SourceGen
 just outputs raw hex bytes for MVN/MVP instructions.  This yields the
 correct code for all versions of the assembler, but is ugly and
@@ -56,7 +56,7 @@ intermediaries ("file.o") or metadata ("_FileInformation.txt").  Some
 generators may produce multiple source files, perhaps a link script or
 symbol definition header to go with the assembly source.  To avoid
 spreading files across the filesystem, SourceGen does all of its work
-in the same directory where the project lives.  So before you can generate
+in the same directory where the project lives.  Before you can generate
 code, you have to have given your project a name by saving it.</p>
 
 <p>The Generate and Assemble dialog has a drop-down list near the top
@@ -98,12 +98,12 @@ command-line output will be displayed, with stdout and stderr separated.
 provides.)</p>
 
 <p>The output will show the assembler's exit code, which will be zero
-on success (note: sometimes they lie.)  If it did, SourceGen will then
-compare the assembler's output to the original file, and report any
-differences.</p>
+on success (note: sometimes they lie.)  If it appeared to succeed,
+SourceGen will then compare the assembler's output to the original file,
+and report any differences.</p>
 <p>Failures here may be due to bugs in the cross-assembler or in
 SourceGen.  However, SourceGen can generally work around assembler bugs,
-so any failure here is an opportunity for improvement.</p>
+so any failure is an opportunity for improvement.</p>
 
 </div>
 

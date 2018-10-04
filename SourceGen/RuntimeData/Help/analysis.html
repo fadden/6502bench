@@ -43,7 +43,7 @@ method in <code>DisasmProject.cs</code>):</p>
     The Anattrib array tracks most of the state from here on.  If we're
     doing a partial re-analysis, this step will just clone a copy of the
     Anattrib array that was made at this point in a previous run.  (This
-    step is described in more detail <a href="code-analysis">below</a>.)</li>
+    step is described in more detail below.)</li>
   <li>Apply user-specified labels to Anattribs.</li>
   <li>Apply user-specified format descriptors.  These are the instruction
     and data operand formats.</li>
@@ -51,14 +51,14 @@ method in <code>DisasmProject.cs</code>):</p>
     data, and connects instruction and data operands to target offsets.
     The "nearby label" stuff is handled here.  All of the results are
     stored in the Anattribs array.  (This step is described in more
-    detail <a href="data-analysis">below</a>.)</li>
+    detail below.)</li>
   <li>Remove hidden labels from the symbol table.  These are user-specified
     labels that have been placed on offsets that are in the middle of an
     instruction or multi-byte data item.  They can't be referenced, so we
     want to pull them out of the symbol table.  (Remember, symbolic
     operands use "weak references", so a missing symbol just means the
     operand is shown as a hex value.)</li>
-  <li>Resolve references to platform and project external symbols>
+  <li>Resolve references to platform and project external symbols.
     This sets the operand symbol in Anattrib, and adds the symbol to
     the list that is displayed in .EQ directives.</li>
   <li>Generate cross-reference lists.  This is done for file data and
@@ -71,6 +71,103 @@ by walking through the annotated file data.  Most of the actual strings
 aren't rendered until they're needed.</p>
 
 
+<h3><a name="auto-format">Automatic Formatting</a></h3>
+
+<p>Every offset in the file is marked as an instruction byte, data byte, or
+inline data byte.  Some offsets are also marked as the start of an instruction
+or data area.  The start offsets may have a format descriptor associated
+with them.</p>
+<p>Format descriptors have a format (like "numeric" or "string") a
+sub-format (like "hexadecimal" or "null-terminated"), and a length.  For
+an instruction operand the length is redundant, but for a data operand it
+determines the width of the numeric value or length of the string.  For
+this reason, instructions do not need a format descriptor, but all
+data items do.</p>
+<p>Symbolic references are format descriptors with a symbol attached.
+The symbol reference also specifies low/high/bank.</p>
+<p>Every offset marked as a start point gets its own line in the on-screen
+display list.  Embedded instructions are identified internally by
+looking for instruction-start offsets inside instructions.</p>
+
+<p>The Anattrib array holds the post-analysis state for every offset,
+including comments and formatting, but any changes you make in the
+editors are applied to the data structures that are saved in the project
+file.  After a change is made, a full or partial re-analysis is done to
+fill out the Anattribs.</p>
+<p>Consider a simple example:</p>
+<pre>
+         .ORG    $1000
+         JMP     L1003
+L1003    NOP
+</pre>
+
+<p>We haven't formatted anything yet.  The data analyzer sees that the
+JMP operand is inside the file, and has no label, so it creates an
+auto-label at offset +000003 and a format descriptor with a symbolic
+operand reference to "L1003" at +000000.</p>
+<p>Now we edit the label, changing L1003 to "FOO".  This goes into the
+project's "user label" list.  The analyzer is
+run, and applies the new "user label" to the Anattrib array.  The
+data analyzer finds the numeric reference in the JMP operand, and finds
+a label at the target address, so it creates a symbolic operand reference
+to "FOO".  When the display list is generated, the symbol "FOO" appears
+in both places.</p>
+<p>Even though the JMP operand changed from "L1003" to "FOO", the only
+change actually written to the project file is the label edit.  The
+contents of the Anattrib array are disposable, so it can be used to
+add labels and "fix up" numeric references.  Generated labels and
+format descriptors are never added to the project file.</p>
+
+<p>If the JMP operand were edited, a format descriptor would be added
+to the user-specified descriptor list.  During the analysis pass it would
+be added to the Anattrib array at offset +000000.</p>
+
+
+<h3><a name="undo-redo">Interaction With Undo/Redo</a></h3>
+
+<p>The analysis pass always considers the current state of the user
+data structures.  Whether you're adding a label or removing one, the
+code runs through the same set of steps.  The advantage of this approach
+is that the act of doing a thing, undoing a thing, and redoing a thing
+are all handled the same way.</p>
+<p>None of the editors modify the project data structures directly.  All
+changes are added to a change set, which is processed by a single function.
+The change sets are kept in the undo/redo buffer indefinitely.  After
+the changes are made, the Anattrib array and other data structures are
+regenerated.</p>
+
+<p>Data format editing can create some tricky situations.  For example,
+suppose you have 8 bytes that have been formatted as two 32-bit words:
+
+<pre>
+1000: 68690074           .dd4    $74006968
+1004: 65737400           .dd4    $00747365
+</pre>
+
+You realize these are null-terminated strings, select both words, and
+reformat them:
+
+<pre>
+1000: 686900             .zstr   "hi"
+1003: 74657374+          .zstr   "test"
+</pre>
+
+Seems simple enough.  Under the hood, SourceGen created three changes:
+<ol>
+  <li>At offset +000000, replace the current format descriptor (4-byte
+    numeric) with a 3-byte null-terminated string descriptor.</li>
+  <li>At offset +000003, add a new 5-byte null-terminated string
+    descriptor.</li>
+  <li>At offset +000004, remove the 4-byte numeric descriptor.</li>
+</ol>
+
+<p>Each entry in the change set has "before" and "after" states for the
+format descriptor at a specific offset.  Only the state for the affected
+offsets is included -- the program doesn't take a complete state snapshot
+(even with the RAM on a modern system that would add up quickly).  When
+undoing a change, before and after are simply reversed.</p>
+
+
 <h2><a name="code-analysis">Code Analysis</a></h2>
 
 <p>The code tracer walks through the instructions, examining them to
@@ -81,8 +178,9 @@ for every instruction:</p>
     Examples: <code>LDA</code>, <code>STA</code>, <code>AND</code>,
     <code>NOP</code>.
   <li>Don't continue.  The next instruction to be executed can't be
-    determined from the file data, unless you're disassembling the
-    system ROM.  Examples: <code>RTS</code>, <code>BRK</code>.
+    determined from the file data (unless you're disassembling the
+    system ROM around the BRK vector).
+    Examples: <code>RTS</code>, <code>BRK</code>.
   <li>Branch always.  The operand specifies the next instruction address.
     Examples: <code>JMP</code>, <code>BRA</code>, <code>BRL</code>.
   <li>Branch sometimes.  Execution may continue at the operand address,
@@ -96,8 +194,8 @@ for every instruction:</p>
 </ol>
 
 <p>Branch targets are added to a list.  When the current run of instructions
-is exhausted (i.e. a "don't continue" instruction is reached), the next
-target is pulled off of the list.</p>
+is exhausted (i.e. a "don't continue" or "branch always" instruction is
+reached), the next target is pulled off of the list.</p>
 
 <p>The state of the processor status flags is recorded for every
 instruction.  When execution proceeds to the next instruction or branches
@@ -116,18 +214,19 @@ of status flags, the analyzer stops pursuing that path.</p>
 when examining 65816 code, but it's possible for the status flag values
 to be indeterminate.  In such a situation, short registers are assumed.
 Similarly, if the carry flag is unknown when an <code>XCE</code> is
-performed, we assume a transition to emulation mode.</p>
+performed, we assume a transition to emulation mode (E=1).</p>
 
-<p>There are three ways to set a definite value in a status flags:</p>
+<p>There are three ways in which code can set a flag to a definite value:</p>
 <ol>
-  <li>By specific instructions, like <code>SEC</code> or
+  <li>By explicit instructions, like <code>SEC</code> or
     <code>CLD</code>.</li>
-  <li>By immediate instructions.  <code>LDA #$00</code> sets Z=1 and N=0.
-    <code>ORA #$80</code> sets Z=0 and N=1.</li>
+  <li>By immediate-operand instructions.  <code>LDA #$00</code> sets Z=1
+    and N=0.  <code>ORA #$80</code> sets Z=0 and N=1.</li>
   <li>By inference.  For example, if we see a <code>BCC</code> instruction,
     we know that the carry will be clear at the branch target address, and
     set at the following instruction.  The instruction doesn't affect the
-    value of the flag, but we know what the value is at either address.</li>
+    value of the flag, but we know what the value will be at both
+    addresses.</li>
 </ol>
 <p>Self-modifying code can render spoil any of these, possibly requiring a
 status flag override to get correct disassembly.</p>
@@ -145,7 +244,7 @@ code does <code>CLC</code>/<code>PHP</code>, followed a bit later by the
 flag around.  Flagging the carry bit as indeterminate with a status flag
 override on the instruction following the PLP fixes things.)</p>
 
-<p>Some other things that the code analyzer can't handle:</p>
+<p>Some other things that the code analyzer can't recognize automatically:</p>
 <ul>
   <li>Jumping indirectly through an address outside the file, e.g.
     storing an address in zero-page memory and jumping through it.
@@ -163,6 +262,26 @@ that it's equal to the program bank register ("K").  Handling this
 correctly will require improvements to the user interface.</p>
 
 
+<h3><a name="extension-scripts">Extension Scripts</a></h3>
+
+<p>Extension scripts can mark data that follows a JSR or JSL as inline
+data, or change the format of nearby data or instructions.  The first
+time a JSR/JSL instruction is encountered, all loaded extension scripts
+are offered a chance to act.</p>
+
+<p>The first script that applies a format wins.  Attempts to re-format
+instructions or data will fail.  This rule ensure that anything explicitly
+formatted by the user will not be overridden by a script.</p>
+
+<p>If code jumps into a region that is marked as inline data, the
+branch will be ignored.  If an extension script tries to flag bytes
+as inline data that have already been executed, the script will be
+ignored.  This can lead to a race condition in the analyzer if
+an extension script is doing the wrong thing.  (The race doesn't exist
+with inline data hints specified by the user, because those are applied
+before code analysis starts.)</p>
+
+
 <h2><a name="data-analysis">Data Analysis</a></h2>
 <p>The data analyzer performs two tasks.  It matches operands with
 offsets, and it analyzes uncategorized data.  Either or both of
@@ -171,17 +290,17 @@ these can be disabled from the
 
 <p>The data target analyzer examines every instruction and data operand
 to see if it's referring to an offset within the data file.  If the
-target is within the file, and has a label, a weak symbolic reference
-to that label is added to the Anattrib array.  If the target doesn't
-have a label, the analyzer will either use a nearby label, or generate
-a unique label and use that.</p>
+target is within the file, and has a label, a format descriptor with a
+weak symbolic reference to that label is added to the Anattrib array.  If
+the target doesn't have a label, the analyzer will either use a nearby
+label, or generate a unique label and use that.</p>
 <p>While most of the "nearby label" logic can be disabled, targets that
 land in the middle of an instruction are always adjusted backward to
 the instruction start.  This is necessary because labels are only visible
 if they're associated with the first (opcode) byte of an instruction.</p>
 
 <p>The uncategorized data analyzer tries to find ASCII strings and
-opportunities to use the ".FILL" instruction.  It breaks the file into
+opportunities to use the ".FILL" operation.  It breaks the file into
 pieces, where contiguous regions hold nothing but data, are not split
 across a ".ORG" directive, are not interrupted by data, and do not
 contain anything that the user has chosen to format.  Each region is
