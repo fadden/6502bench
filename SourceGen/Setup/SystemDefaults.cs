@@ -20,10 +20,14 @@ using System.Diagnostics;
 using Asm65;
 
 namespace SourceGen.Setup {
-    public class SystemDefaults {
+    /// <summary>
+    /// Helper functions for extracting values from a SystemDef instance.
+    /// </summary>
+    public static class SystemDefaults {
         private const string LOAD_ADDRESS = "load-address";
         private const string ENTRY_FLAGS = "entry-flags";
         private const string UNDOCUMENTED_OPCODES = "undocumented-opcodes";
+        private const string FIRST_WORD_IS_LOAD_ADDR = "first-word-is-load-addr";
 
         private const string ENTRY_FLAG_EMULATION = "emulation";
         private const string ENTRY_FLAG_NATIVE_LONG = "native-long";
@@ -34,7 +38,7 @@ namespace SourceGen.Setup {
         /// Gets the default load address.
         /// </summary>
         /// <param name="sysDef">SystemDef instance.</param>
-        /// <returns>Load address.</returns>
+        /// <returns>Specified load address, or 0x1000 if nothing defined.</returns>
         public static int GetLoadAddress(SystemDef sysDef) {
             Dictionary<string, string> parms = sysDef.Parameters;
             int retVal = 0x1000;
@@ -94,15 +98,40 @@ namespace SourceGen.Setup {
         /// <param name="sysDef">SystemDef instance.</param>
         /// <returns>Enable/disable value.</returns>
         public static bool GetUndocumentedOpcodes(SystemDef sysDef) {
-            Dictionary<string, string> parms = sysDef.Parameters;
-            bool retVal = false;
+            return GetBoolParam(sysDef, UNDOCUMENTED_OPCODES, false);
+        }
 
-            if (parms.TryGetValue(UNDOCUMENTED_OPCODES, out string valueStr)) {
+        /// <summary>
+        /// Gets the default setting for using the first two bytes of the file as the
+        /// load address.
+        /// 
+        /// This is primarily for C64.  Apple II DOS 3.3 binary files also put the load
+        /// address first, followed by the length, but that's typically stripped out when
+        /// the file is extracted.
+        /// </summary>
+        /// <param name="sysDef"></param>
+        /// <returns></returns>
+        public static bool GetFirstWordIsLoadAddr(SystemDef sysDef) {
+            return GetBoolParam(sysDef, FIRST_WORD_IS_LOAD_ADDR, false);
+        }
+
+        /// <summary>
+        /// Looks for a parameter with a matching name and a boolean value.
+        /// </summary>
+        /// <param name="sysDef">SystemDef reference.</param>
+        /// <param name="paramName">Name of parameter to look for.</param>
+        /// <param name="defVal">Default value.</param>
+        /// <returns>Parsed value, or defVal if the parameter doesn't exist or the value is not
+        ///   a boolean string.</returns>
+        private static bool GetBoolParam(SystemDef sysDef, string paramName, bool defVal) {
+            Dictionary<string, string> parms = sysDef.Parameters;
+            bool retVal = defVal;
+
+            if (parms.TryGetValue(paramName, out string valueStr)) {
                 if (bool.TryParse(valueStr, out bool parseVal)) {
                     retVal = parseVal;
                 } else {
-                    Debug.WriteLine("WARNING: bad value for " + UNDOCUMENTED_OPCODES +
-                        ": " + valueStr);
+                    Debug.WriteLine("WARNING: bad value for " + paramName + ": " + valueStr);
                 }
             }
             return retVal;

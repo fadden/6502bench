@@ -173,6 +173,7 @@
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "first-word-is-load-addr":"true"
       }
     },
     {

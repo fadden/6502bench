@@ -227,7 +227,8 @@ namespace SourceGen {
             mDataFileName = dataFileName;
             FileDataCrc32 = CommonUtil.CRC32.OnWholeBuffer(0, mFileData);
 
-            // Mark the first byte as code so we have something to do.
+            // Mark the first byte as code so we have something to do.  This may get
+            // overridden later.
             TypeHints[0] = CodeAnalysis.TypeHint.Code;
         }
 
@@ -241,9 +242,6 @@ namespace SourceGen {
             bool includeUndoc = Setup.SystemDefaults.GetUndocumentedOpcodes(sysDef);
             CpuDef tmpDef = CpuDef.GetBestMatch(cpuType, includeUndoc);
 
-            int loadAddr = Setup.SystemDefaults.GetLoadAddress(sysDef);
-            mAddrMap.Set(0, loadAddr);
-
             // Store the best-matched CPU in properties, rather than whichever was originally
             // requested.  This way the behavior of the project is the same for everyone, even
             // if somebody has a newer app version with specialized handling for the
@@ -253,6 +251,23 @@ namespace SourceGen {
             UpdateCpuDef();
 
             ProjectProps.EntryFlags = Setup.SystemDefaults.GetEntryFlags(sysDef);
+
+            // Configure the load address.
+            int loadAddr;
+            if (Setup.SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
+                loadAddr = RawData.GetWord(mFileData, 0, 2, false);
+                loadAddr -= 2;
+                if (loadAddr < 0) {
+                    loadAddr += 65536;
+                }
+                OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
+                    FormatDescriptor.SubType.None);
+                TypeHints[0] = CodeAnalysis.TypeHint.NoHint;
+                TypeHints[2] = CodeAnalysis.TypeHint.Code;
+            } else {
+                loadAddr = Setup.SystemDefaults.GetLoadAddress(sysDef);
+            }
+            mAddrMap.Set(0, loadAddr);
 
             foreach (string str in sysDef.SymbolFiles) {
                 ProjectProps.PlatformSymbolFileIdentifiers.Add(str);
