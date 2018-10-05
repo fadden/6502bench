@@ -238,7 +238,6 @@ namespace SourceGen.AppForms
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.newToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
             this.newToolStripMenuItem.Text = "New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
@@ -269,7 +268,6 @@ namespace SourceGen.AppForms
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
@@ -491,6 +489,7 @@ namespace SourceGen.AppForms
             // editLabelToolStripMenuItem
             // 
             this.editLabelToolStripMenuItem.Name = "editLabelToolStripMenuItem";
+            this.editLabelToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
             this.editLabelToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
             this.editLabelToolStripMenuItem.Text = "Edit Label...";
             this.editLabelToolStripMenuItem.Click += new System.EventHandler(this.EditLabel_Click);
@@ -512,6 +511,7 @@ namespace SourceGen.AppForms
             // editCommentToolStripMenuItem
             // 
             this.editCommentToolStripMenuItem.Name = "editCommentToolStripMenuItem";
+            this.editCommentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Oem1)));
             this.editCommentToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
             this.editCommentToolStripMenuItem.Text = "Edit Comment...";
             this.editCommentToolStripMenuItem.Click += new System.EventHandler(this.EditComment_Click);
@@ -519,6 +519,7 @@ namespace SourceGen.AppForms
             // editLongCommentToolStripMenuItem
             // 
             this.editLongCommentToolStripMenuItem.Name = "editLongCommentToolStripMenuItem";
+            this.editLongCommentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
             this.editLongCommentToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
             this.editLongCommentToolStripMenuItem.Text = "Edit Long Comment...";
             this.editLongCommentToolStripMenuItem.Click += new System.EventHandler(this.EditLongComment_Click);
@@ -526,6 +527,7 @@ namespace SourceGen.AppForms
             // editNoteToolStripMenuItem
             // 
             this.editNoteToolStripMenuItem.Name = "editNoteToolStripMenuItem";
+            this.editNoteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.editNoteToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
             this.editNoteToolStripMenuItem.Text = "Edit Note...";
             this.editNoteToolStripMenuItem.Click += new System.EventHandler(this.EditNote_Click);
