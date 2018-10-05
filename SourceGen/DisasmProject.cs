@@ -532,10 +532,19 @@ namespace SourceGen {
                 }
 
                 if (mAnattribs[offset].IsInstructionStart) {
-                    // Check length for instruction formatters.
+                    // Check length for instruction formatters.  This can happen if you format
+                    // a bunch of bytes as single-byte data items and then add a code entry
+                    // point.
                     if (kvp.Value.Length != mAnattribs[offset].Length) {
-                        genLog.LogW("Unexpected length on instr format descriptor (" +
+                        genLog.LogW("+" + offset.ToString("x6") +
+                            ": unexpected length on instr format descriptor (" +
                             kvp.Value.Length + " vs " + mAnattribs[offset].Length + ")");
+                        continue;       // ignore this one
+                    }
+                    if (kvp.Value.Length == 1) {
+                        // No operand to format!
+                        genLog.LogW("+" + offset.ToString("x6") +
+                            ": unexpected format descriptor on single-byte op");
                         continue;       // ignore this one
                     }
                     if (!kvp.Value.IsValidForInstruction) {
@@ -544,8 +553,8 @@ namespace SourceGen {
                     }
                 } else if (mAnattribs[offset].IsInstruction) {
                     // Mid-instruction format.
-                    genLog.LogW("Unexpected mid-instruction format descriptor at +" +
-                        offset.ToString("x6"));
+                    genLog.LogW("+" + offset.ToString("x6") +
+                        ": unexpected mid-instruction format descriptor");
                     continue;       // ignore this one
                 }
 

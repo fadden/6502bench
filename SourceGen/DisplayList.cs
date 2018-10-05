@@ -1096,8 +1096,11 @@ namespace SourceGen {
                 operandForSymbol = attr.OperandAddress;
             }
 
-            // Check Length to watch for bogus descriptors (?)
+            // Check Length to watch for bogus descriptors.  ApplyFormatDescriptors() should
+            // have discarded anything appropriate, so we might be able to eliminate this test.
             if (attr.DataDescriptor != null && attr.Length == attr.DataDescriptor.Length) {
+                Debug.Assert(operandLen > 0);
+
                 // Format operand as directed.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     // Special handling for the double-operand block move.
