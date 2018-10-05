@@ -302,7 +302,8 @@ namespace Asm65 {
                         // and STX doesn't have AbsIndexY.  So this is only ambiguous for LDX.
                         // We want to compare by opcode instance, rather than the byte code
                         // numeric value, to manage different instruction sets.
-                        if (this == OpLDX_AbsIndexY) {
+                        // (This also applies to the undocumented LAX instruction.)
+                        if (this == OpLDX_AbsIndexY || this == OpLAX_AbsIndexY) {
                             return true;
                         }
                         return false;
@@ -2644,12 +2645,12 @@ namespace Asm65 {
         // most cases it's pretty stable, in others the behavior can differ between CPU
         // variants.
         //
-        // There is no generally agreed-upon set of mnemonics for these instructions.  The
-        // mnemonics "XAS" and "AXS" sometimes mean one thing and sometimes another.  I've
-        // chosen a set that seems reasonable.  If a consensus is reached, the mnemonics
-        // are easy enough to change throughout (yay Visual Studio refactoring).
+        // There is no universally agreed-upon set of mnemonics for these instructions.  The
+        // mnemonics "XAS" and "AXS" sometimes mean one thing and sometimes another.  The
+        // reference I've chosen to use as primary is "NMOS 6510 Unintended Opcodes":
+        //   https://csdb.dk/release/?id=161035
         //
-        // References:
+        // Other references:
         //   http://nesdev.com/undocumented_opcodes.txt
         //   http://visual6502.org/wiki/index.php?title=6502_all_256_Opcodes
         //   http://www.ffd2.com/fridge/docs/6502-NMOS.extra.opcodes
@@ -2667,19 +2668,19 @@ namespace Asm65 {
             Mnemonic = OpName.ANE,
             Effect = FlowEffect.Cont
         };
+        private static OpDef OpALR = new OpDef() {
+            IsUndocumented = true,
+            Mnemonic = OpName.ALR,
+            Effect = FlowEffect.Cont,
+            FlagsAffected = FlagsAffected_NZC,
+            StatusFlagUpdater = FlagUpdater_NZC
+        };
         private static OpDef OpARR = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.ARR,
             Effect = FlowEffect.Cont,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
-        };
-        private static OpDef OpASR = new OpDef() {
-            IsUndocumented = true,
-            Mnemonic = OpName.ASR,
-            Effect = FlowEffect.Cont,
-            FlagsAffected = FlagsAffected_NZC,
-            StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpDCP = new OpDef() {
             IsUndocumented = true,
@@ -2693,21 +2694,21 @@ namespace Asm65 {
             Mnemonic = OpName.DOP,
             Effect = FlowEffect.Cont
         };
-        private static OpDef OpHLT = new OpDef() {
+        private static OpDef OpJAM = new OpDef() {
             IsUndocumented = true,
-            Mnemonic = OpName.HLT,
+            Mnemonic = OpName.JAM,
             Effect = FlowEffect.NoCont
         };
-        private static OpDef OpISB = new OpDef() {
+        private static OpDef OpISC = new OpDef() {
             IsUndocumented = true,
-            Mnemonic = OpName.ISB,
+            Mnemonic = OpName.ISC,
             Effect = FlowEffect.Cont,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
-        private static OpDef OpLAE = new OpDef() {
+        private static OpDef OpLAS = new OpDef() {
             IsUndocumented = true,
-            Mnemonic = OpName.LAE,
+            Mnemonic = OpName.LAS,
             Effect = FlowEffect.Cont,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
@@ -2719,13 +2720,13 @@ namespace Asm65 {
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
-        private static OpDef OpLXA = new OpDef() {
-            IsUndocumented = true,
-            Mnemonic = OpName.LXA,
-            Effect = FlowEffect.Cont,
-            FlagsAffected = FlagsAffected_NZ,
-            StatusFlagUpdater = FlagUpdater_NZ
-        };
+        //private static OpDef OpLXA = new OpDef() {
+        //    IsUndocumented = true,
+        //    Mnemonic = OpName.LXA,
+        //    Effect = FlowEffect.Cont,
+        //    FlagsAffected = FlagsAffected_NZ,
+        //    StatusFlagUpdater = FlagUpdater_NZ
+        //};
         private static OpDef OpRLA = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.RLA,
@@ -2759,9 +2760,9 @@ namespace Asm65 {
             Mnemonic = OpName.SHA,
             Effect = FlowEffect.Cont
         };
-        private static OpDef OpSHS = new OpDef() {
+        private static OpDef OpTAS = new OpDef() {
             IsUndocumented = true,
-            Mnemonic = OpName.SHS,
+            Mnemonic = OpName.TAS,
             Effect = FlowEffect.Cont
         };
         private static OpDef OpSHX = new OpDef() {
@@ -3018,42 +3019,42 @@ namespace Asm65 {
             AddrMode = AddressMode.AbsIndexX,
             CycDef = 7
         };
-        public static readonly OpDef OpISB_DPIndexXInd = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_DPIndexXInd = new OpDef(OpISC) {
             Opcode = 0xe3,
             AddrMode = AddressMode.DPIndexXInd,
             CycDef = 8
         };
-        public static readonly OpDef OpISB_DP = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_DP = new OpDef(OpISC) {
             Opcode = 0xe7,
             AddrMode = AddressMode.DP,
             CycDef = 5
         };
-        public static readonly OpDef OpISB_Abs = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_Abs = new OpDef(OpISC) {
             Opcode = 0xef,
             AddrMode = AddressMode.Abs,
             CycDef = 6
         };
-        public static readonly OpDef OpISB_DPIndIndexY = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_DPIndIndexY = new OpDef(OpISC) {
             Opcode = 0xf3,
             AddrMode = AddressMode.DPIndIndexY,
             CycDef = 8
         };
-        public static readonly OpDef OpISB_DPIndexX = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_DPIndexX = new OpDef(OpISC) {
             Opcode = 0xf7,
             AddrMode = AddressMode.DPIndexX,
             CycDef = 6
         };
-        public static readonly OpDef OpISB_AbsIndexY = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_AbsIndexY = new OpDef(OpISC) {
             Opcode = 0xfb,
             AddrMode = AddressMode.AbsIndexY,
             CycDef = 7
         };
-        public static readonly OpDef OpISB_AbsIndexX = new OpDef(OpISB) {
+        public static readonly OpDef OpISC_AbsIndexX = new OpDef(OpISC) {
             Opcode = 0xff,
             AddrMode = AddressMode.AbsIndexX,
             CycDef = 7
         };
-        public static readonly OpDef OpASR_Imm = new OpDef(OpASR) {
+        public static readonly OpDef OpALR_Imm = new OpDef(OpALR) {
             Opcode = 0x4b,
             AddrMode = AddressMode.Imm,
             CycDef = 2
@@ -3068,7 +3069,7 @@ namespace Asm65 {
             AddrMode = AddressMode.Imm,
             CycDef = 2
         };
-        public static readonly OpDef OpLXA_Imm = new OpDef(OpLXA) {
+        public static readonly OpDef OpLAX_Imm = new OpDef(OpLAX) {
             Opcode = 0xab,
             AddrMode = AddressMode.Imm,
             CycDef = 2
@@ -3103,12 +3104,12 @@ namespace Asm65 {
             AddrMode = AddressMode.AbsIndexX,
             CycDef = 4 | (int)(CycleMod.OneIfIndexPage)
         };
-        public static readonly OpDef OpHLT_Implied = new OpDef(OpHLT) {
+        public static readonly OpDef OpJAM_Implied = new OpDef(OpJAM) {
             // multiple opcodes
             AddrMode = AddressMode.Implied,
             CycDef = 1
         };
-        public static readonly OpDef OpSHS_AbsIndexY  = new OpDef(OpSHS) {
+        public static readonly OpDef OpTAS_AbsIndexY  = new OpDef(OpTAS) {
             Opcode = 0x9b,
             AddrMode = AddressMode.AbsIndexY,
             CycDef = 5
@@ -3138,7 +3139,7 @@ namespace Asm65 {
             AddrMode = AddressMode.Imm,
             CycDef = 2
         };
-        public static readonly OpDef OpLAE_AbsIndexY = new OpDef(OpLAE) {
+        public static readonly OpDef OpLAS_AbsIndexY = new OpDef(OpLAS) {
             Opcode = 0xbb,
             AddrMode = AddressMode.AbsIndexY,
             CycDef = 4 | (int)(CycleMod.OneIfIndexPage)

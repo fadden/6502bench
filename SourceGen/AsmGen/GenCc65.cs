@@ -222,30 +222,31 @@ namespace SourceGen.AsmGen {
 
         /// <summary>
         /// Map the mnemonics we chose for undocumented opcodes to the cc65 mnemonics.
+        /// After switching to the Unintended Opcodes mnemonics there's almost no difference.
         /// 
         /// We don't include the double- and triple-byte NOPs here, as cc65 doesn't
         /// appear to have a definition for them (as of 2.17).
         /// </summary>
         private static Dictionary<string, string> sUndocMap = new Dictionary<string, string>() {
-            { OpName.ASR, "alr" },      // imm 0x4b
+            { OpName.ALR, "alr" },      // imm 0x4b
             { OpName.ANC, "anc" },      // imm 0x0b (and others)
             { OpName.ANE, "ane" },      // imm 0x8b
             { OpName.ARR, "arr" },      // imm 0x6b
-            { OpName.SBX, "axs" },      // imm 0xcb
             { OpName.DCP, "dcp" },      // abs 0xcf
-            { OpName.ISB, "isc" },      // abs 0xef
-            { OpName.HLT, "jam" },      // abs 0x02 (and others)
-            { OpName.LAE, "las" },      // abs,y 0xbb
-            { OpName.LXA, "lax" },      // imm 0xab
+            { OpName.ISC, "isc" },      // abs 0xef
+            { OpName.JAM, "jam" },      // abs 0x02 (and others)
+            { OpName.LAS, "las" },      // abs,y 0xbb
+            { OpName.LAX, "lax" },      // imm 0xab; abs 0xaf
             { OpName.RLA, "rla" },      // abs 0x2f
             { OpName.RRA, "rra" },      // abs 0x6f
             { OpName.SAX, "sax" },      // abs 0x8f
+            { OpName.SBX, "axs" },      //* imm 0xcb
             { OpName.SHA, "sha" },      // abs,y 0x9f
             { OpName.SHX, "shx" },      // abs,y 0x9e
             { OpName.SHY, "shy" },      // abs,x 0x9c
             { OpName.SLO, "slo" },      // abs 0x0f
             { OpName.SRE, "sre" },      // abs 0x4f
-            { OpName.SHS, "tas" },      // abs,y 0x9b
+            { OpName.TAS, "tas" },      // abs,y 0x9b
         };
 
         // IGenerator
@@ -258,7 +259,7 @@ namespace SourceGen.AsmGen {
             } else if (op.IsUndocumented) {
                 if (sUndocMap.TryGetValue(op.Mnemonic, out string newValue)) {
                     if ((op.Mnemonic == OpName.ANC && op.Opcode != 0x0b) ||
-                            (op.Mnemonic == OpName.HLT && op.Opcode != 0x02)) {
+                            (op.Mnemonic == OpName.JAM && op.Opcode != 0x02)) {
                         // There are multiple opcodes for the same thing.  cc65 outputs
                         // one specific thing, so we need to match that, and just do a hex
                         // dump for the others.

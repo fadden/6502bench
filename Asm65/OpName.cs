@@ -121,25 +121,24 @@ namespace Asm65 {
         // Undocumented 6502 instructions.
         public const string ANC = "anc";
         public const string ANE = "ane";
+        public const string ALR = "alr";
         public const string ARR = "arr";
-        public const string ASR = "asr";
         public const string DCP = "dcp";
         public const string DOP = "dop";
-        public const string HLT = "hlt";
-        public const string ISB = "isb";
-        public const string LAE = "lae";
+        public const string ISC = "isc";
+        public const string JAM = "jam";
+        public const string LAS = "las";
         public const string LAX = "lax";
-        public const string LXA = "lxa";
         public const string RLA = "rla";
         public const string RRA = "rra";
         public const string SAX = "sax";
         public const string SBX = "sbx";
         public const string SHA = "sha";
-        public const string SHS = "shs";
         public const string SHX = "shx";
         public const string SHY = "shy";
         public const string SLO = "slo";
         public const string SRE = "sre";
+        public const string TAS = "tas";
         public const string TOP = "top";
 
         // Undocumented 65C02 instructions.

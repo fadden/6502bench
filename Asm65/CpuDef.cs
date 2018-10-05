@@ -410,7 +410,7 @@ namespace Asm65 {
             mOpDefs = new OpDef[] {
                 OpDef.OpBRK_StackInt,           // 0x00
                 OpDef.OpORA_DPIndexXInd,
-                OpDef.GenerateUndoc(0x02, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x02, OpDef.OpJAM_Implied),
                 OpDef.OpSLO_DPIndexXInd,
                 OpDef.GenerateUndoc(0x04, OpDef.OpDOP_DP),
                 OpDef.OpORA_DP,
@@ -426,7 +426,7 @@ namespace Asm65 {
                 OpDef.OpSLO_Absolute,
                 OpDef.OpBPL_PCRel,              // 0x10
                 OpDef.OpORA_DPIndIndexY,
-                OpDef.GenerateUndoc(0x12, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x12, OpDef.OpJAM_Implied),
                 OpDef.OpSLO_DPIndIndexY,
                 OpDef.GenerateUndoc(0x14, OpDef.OpDOP_DPIndexX),
                 OpDef.OpORA_DPIndexX,
@@ -442,7 +442,7 @@ namespace Asm65 {
                 OpDef.OpSLO_AbsIndexX,
                 OpDef.OpJSR_Abs,                // 0x20
                 OpDef.OpAND_DPIndexXInd,
-                OpDef.GenerateUndoc(0x22, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x22, OpDef.OpJAM_Implied),
                 OpDef.OpRLA_DPIndexXInd,
                 OpDef.OpBIT_DP,
                 OpDef.OpAND_DP,
@@ -458,7 +458,7 @@ namespace Asm65 {
                 OpDef.OpRLA_Absolute,
                 OpDef.OpBMI_PCRel,              // 0x30
                 OpDef.OpAND_DPIndIndexY,
-                OpDef.GenerateUndoc(0x32, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x32, OpDef.OpJAM_Implied),
                 OpDef.OpRLA_DPIndIndexY,
                 OpDef.GenerateUndoc(0x34, OpDef.OpDOP_DPIndexX),
                 OpDef.OpAND_DPIndexX,
@@ -474,7 +474,7 @@ namespace Asm65 {
                 OpDef.OpRLA_AbsIndexX,
                 OpDef.OpRTI_StackRTI,           // 0x40
                 OpDef.OpEOR_DPIndexXInd,
-                OpDef.GenerateUndoc(0x42, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x42, OpDef.OpJAM_Implied),
                 OpDef.OpSRE_DPIndexXInd,
                 OpDef.GenerateUndoc(0x44, OpDef.OpDOP_DP),
                 OpDef.OpEOR_DP,
@@ -483,14 +483,14 @@ namespace Asm65 {
                 OpDef.OpPHA_StackPush,          // 0x48
                 OpDef.OpEOR_Imm,
                 OpDef.OpLSR_Acc,
-                OpDef.OpASR_Imm,
+                OpDef.OpALR_Imm,
                 OpDef.OpJMP_Abs,
                 OpDef.OpEOR_Abs,
                 OpDef.OpLSR_Abs,
                 OpDef.OpSRE_Absolute,
                 OpDef.OpBVC_PCRel,              // 0x50
                 OpDef.OpEOR_DPIndIndexY,
-                OpDef.GenerateUndoc(0x52, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x52, OpDef.OpJAM_Implied),
                 OpDef.OpSRE_DPIndIndexY,
                 OpDef.GenerateUndoc(0x54, OpDef.OpDOP_DPIndexX),
                 OpDef.OpEOR_DPIndexX,
@@ -506,7 +506,7 @@ namespace Asm65 {
                 OpDef.OpSRE_AbsIndexX,
                 OpDef.OpRTS_StackRTS,           // 0x60
                 OpDef.OpADC_DPIndexXInd,
-                OpDef.GenerateUndoc(0x62, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x62, OpDef.OpJAM_Implied),
                 OpDef.OpRRA_DPIndexXInd,
                 OpDef.GenerateUndoc(0x64, OpDef.OpDOP_DP),
                 OpDef.OpADC_DP,
@@ -522,7 +522,7 @@ namespace Asm65 {
                 OpDef.OpRRA_Absolute,
                 OpDef.OpBVS_PCRel,              // 0x70
                 OpDef.OpADC_DPIndIndexY,
-                OpDef.GenerateUndoc(0x72, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x72, OpDef.OpJAM_Implied),
                 OpDef.OpRRA_DPIndIndexY,
                 OpDef.GenerateUndoc(0x74, OpDef.OpDOP_DPIndexX),
                 OpDef.OpADC_DPIndexX,
@@ -554,7 +554,7 @@ namespace Asm65 {
                 OpDef.OpSAX_Absolute,
                 OpDef.OpBCC_PCRel,              // 0x90
                 OpDef.OpSTA_DPIndIndexY,
-                OpDef.GenerateUndoc(0x92, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0x92, OpDef.OpJAM_Implied),
                 OpDef.OpSHA_DPIndIndexY,
                 OpDef.OpSTY_DPIndexX,
                 OpDef.OpSTA_DPIndexX,
@@ -563,7 +563,7 @@ namespace Asm65 {
                 OpDef.OpTYA_Implied,            // 0x98
                 OpDef.OpSTA_AbsIndexY,
                 OpDef.OpTXS_Implied,
-                OpDef.OpSHS_AbsIndexY,
+                OpDef.OpTAS_AbsIndexY,
                 OpDef.OpSHY_AbsIndexX,
                 OpDef.OpSTA_AbsIndexX,
                 OpDef.OpSHX_AbsIndexY,
@@ -579,14 +579,14 @@ namespace Asm65 {
                 OpDef.OpTAY_Implied,            // 0xa8
                 OpDef.OpLDA_Imm,
                 OpDef.OpTAX_Implied,
-                OpDef.OpLXA_Imm,
+                OpDef.OpLAX_Imm,
                 OpDef.OpLDY_Abs,
                 OpDef.OpLDA_Abs,
                 OpDef.OpLDX_Abs,
                 OpDef.OpLAX_Absolute,
                 OpDef.OpBCS_PCRel,              // 0xb0
                 OpDef.OpLDA_DPIndIndexY,
-                OpDef.GenerateUndoc(0xb2, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0xb2, OpDef.OpJAM_Implied),
                 OpDef.OpLAX_DPIndIndexY,
                 OpDef.OpLDY_DPIndexX,
                 OpDef.OpLDA_DPIndexX,
@@ -595,7 +595,7 @@ namespace Asm65 {
                 OpDef.OpCLV_Implied,            // 0xb8
                 OpDef.OpLDA_AbsIndexY,
                 OpDef.OpTSX_Implied,
-                OpDef.OpLAE_AbsIndexY,
+                OpDef.OpLAS_AbsIndexY,
                 OpDef.OpLDY_AbsIndexX,
                 OpDef.OpLDA_AbsIndexX,
                 OpDef.OpLDX_AbsIndexY,
@@ -618,7 +618,7 @@ namespace Asm65 {
                 OpDef.OpDCP_Abs,
                 OpDef.OpBNE_PCRel,              // 0xd0
                 OpDef.OpCMP_DPIndIndexY,
-                OpDef.GenerateUndoc(0xd2, OpDef.OpHLT_Implied),
+                OpDef.GenerateUndoc(0xd2, OpDef.OpJAM_Implied),
                 OpDef.OpDCP_DPIndIndexY,
                 OpDef.GenerateUndoc(0xd4, OpDef.OpDOP_DPIndexX),
                 OpDef.OpCMP_DPIndexX,
@@ -635,11 +635,11 @@ namespace Asm65 {
                 OpDef.OpCPX_Imm,                // 0xe0
                 OpDef.OpSBC_DPIndexXInd,
                 OpDef.GenerateUndoc(0xe2, OpDef.OpDOP_Imm),
-                OpDef.OpISB_DPIndexXInd,
+                OpDef.OpISC_DPIndexXInd,
                 OpDef.OpCPX_DP,
                 OpDef.OpSBC_DP,
                 OpDef.OpINC_DP,
-                OpDef.OpISB_DP,
+                OpDef.OpISC_DP,
                 OpDef.OpINX_Implied,            // 0xe8
                 OpDef.OpSBC_Imm,
                 OpDef.OpNOP_Implied,
@@ -647,23 +647,23 @@ namespace Asm65 {
                 OpDef.OpCPX_Abs,
                 OpDef.OpSBC_Abs,
                 OpDef.OpINC_Abs,
-                OpDef.OpISB_Abs,
+                OpDef.OpISC_Abs,
                 OpDef.OpBEQ_PCRel,              // 0xf0
                 OpDef.OpSBC_DPIndIndexY,
-                OpDef.GenerateUndoc(0xf2, OpDef.OpHLT_Implied),
-                OpDef.OpISB_DPIndIndexY,
+                OpDef.GenerateUndoc(0xf2, OpDef.OpJAM_Implied),
+                OpDef.OpISC_DPIndIndexY,
                 OpDef.GenerateUndoc(0xf4, OpDef.OpDOP_DPIndexX),
                 OpDef.OpSBC_DPIndexX,
                 OpDef.OpINC_DPIndexX,
-                OpDef.OpISB_DPIndexX,
+                OpDef.OpISC_DPIndexX,
                 OpDef.OpSED_Implied,            // 0xf8
                 OpDef.OpSBC_AbsIndexY,
                 OpDef.GenerateUndoc(0xfa, OpDef.OpNOP_Implied),
-                OpDef.OpISB_AbsIndexY,
+                OpDef.OpISC_AbsIndexY,
                 OpDef.GenerateUndoc(0xfc, OpDef.OpTOP_AbsIndeX),
                 OpDef.OpSBC_AbsIndexX,
                 OpDef.OpINC_AbsIndexX,
-                OpDef.OpISB_AbsIndexX,
+                OpDef.OpISC_AbsIndexX,
             }
         };
 

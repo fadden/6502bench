@@ -196,11 +196,11 @@ L1169:   sha     ($00),y
          ldy     #$00
          lda     ($00,x)
          ldx     #$00
-         .byte   $a3,$00
+         lax     ($00,x)
          ldy     $00
          lda     $00
          ldx     $00
-         .byte   $a7,$00
+         lax     $00
          tay
          lda     #$00
          tax
@@ -208,16 +208,16 @@ L1169:   sha     ($00),y
          ldy     a:$0000
          lda     a:$0000
          ldx     a:$0000
-         .byte   $af,$00,$00
+         lax     a:$0000
          bcs     L11AB
 L11AB:   lda     ($00),y
          .byte   $b2
 
-L11AE:   .byte   $b3,$00
+L11AE:   lax     ($00),y
          ldy     $00,x
          lda     $00,x
          ldx     $00,y
-         .byte   $b7,$00
+         lax     $00,y
          clv
          lda     $0000,y
          tsx
@@ -225,7 +225,7 @@ L11AE:   .byte   $b3,$00
          ldy     a:$0000,x
          lda     a:$0000,x
          ldx     a:$0000,y
-         .byte   $bf,$00,$00
+         lax     a:$0000,y
          cpy     #$00
          cmp     ($00,x)
          .byte   $c2,$00

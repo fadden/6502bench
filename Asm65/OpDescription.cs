@@ -210,27 +210,27 @@ namespace Asm65 {
             { OpName.XCE, "Exchange Carry and Emulation Bits" },
 
             // MOS 6502 undocumented ops
+            { OpName.ALR, "AND and Shift Right" },
             { OpName.ANC, "AND Accumulator With Value and Set Carry" },
             { OpName.ANE, "Transfer Index X to Accumulator and AND" },
             { OpName.ARR, "AND and Rotate Right" },
-            { OpName.ASR, "AND and Shift Right" },
             { OpName.DCP, "Decrement and Compare" },
             { OpName.DOP, "Double-Byte NOP" },
-            { OpName.HLT, "Halt CPU" },
-            { OpName.ISB, "Increment and Subtract" },
-            { OpName.LAE, "Load Acc, X, and Stack Pointer with Memory AND Stack Pointer" },
+            { OpName.ISC, "Increment and Subtract" },
+            { OpName.JAM, "Halt CPU" },
+            { OpName.LAS, "Load Acc, X, and Stack Pointer with Memory AND Stack Pointer" },
             { OpName.LAX, "Load Accumulator and Index X" },
-            { OpName.LXA, "OR, AND, and Transfer to X" },
+            //{ OpName.LXA, "OR, AND, and Transfer to X" },
             { OpName.RLA, "Rotate Left and AND" },
             { OpName.RRA, "Rotate Right and Add" },
             { OpName.SAX, "Store Accumulator AND Index X" },                            // AXS
             { OpName.SBX, "AND Acc With Index X, Subtract, and Store in X" },           // SAX
             { OpName.SHA, "AND Acc With Index X and High Byte, and Store" },            // AXA
-            { OpName.SHS, "AND Acc with Index X, Transfer to Stack, AND High Byte" },   // TAS
             { OpName.SHX, "AND Acc With Index X and High Byte, and Store" },            // XAS
             { OpName.SHY, "AND Acc With Index Y and High Byte, and Store" },            // SAY
             { OpName.SLO, "Shift Left and OR" },
             { OpName.SRE, "Shift right and EOR" },
+            { OpName.TAS, "AND Acc with Index X, Transfer to Stack, AND High Byte" },
             { OpName.TOP, "Triple-Byte NOP" },
 
             // WDC 65C02 undocumented
@@ -561,25 +561,24 @@ namespace Asm65 {
             //
             // 6502 undocumented instructions.
             //
-            // References:
-            //  http://www.ffd2.com/fridge/docs/6502-NMOS.extra.opcodes
-            //  http://nesdev.com/undocumented_opcodes.txt
+            // (See OpDef for a list of references.)
             //
             { OpName.ANC,
                 "AND byte with accumulator. If result is negative then carry is set." +
                 "\r\n\r\nAlt mnemonic: AAC"
             },
             { OpName.ANE,
-                "Transfer X register to accumulator, then AND accumulator with value." +
+                "Transfer X register to accumulator, then AND accumulator with value.  " +
+                "This opcode is unstable." +
                 "\r\n\r\nAlt mnemonic: XAA"
             },
             { OpName.ARR,
                 "AND byte with accumulator, then rotate one bit right.  Equivalent to " +
                 "AND + ROR."
             },
-            { OpName.ASR,
+            { OpName.ALR,
                 "AND byte with accumulator, then shift right one bit.  Equivalent to AND + LSR." +
-                "\r\n\r\nAlt mnemonic: ALR"
+                "\r\n\r\nAlt mnemonic: ASR"
             },
             { OpName.DCP,
                 "Decrement memory location, then compare result to accumulator.  Equivalent " +
@@ -590,28 +589,29 @@ namespace Asm65 {
                 "Double-byte no-operation." +
                 "\r\n\r\nAlt mnemonic: NOP / SKB"
             },
-            { OpName.HLT,
-                "Crash the CPU, halting execution and ignoring interrupts." +
-                "\r\n\r\nAlt mnemonic: KIL / JAM"
-            },
-            { OpName.ISB,
+            { OpName.ISC,
                 "Increment memory, then subtract memory from accumulator with borrow.  " +
                 "Equivalent to INC + SBC." +
                 "\r\n\r\nAlt mnemonic: ISC / INS"
             },
-            { OpName.LAE,
+            { OpName.JAM,
+                "Crash the CPU, halting execution and ignoring interrupts." +
+                "\r\n\r\nAlt mnemonic: KIL / JAM"
+            },
+            { OpName.LAS,
                 "AND memory with stack pointer, then transfer result to accumulator, " +
                 "X register, and stack pointer.  (Note: possibly unreliable.)" +
-                "\r\n\r\nAlt mnemonic: LAR / LAS"
+                "\r\n\r\nAlt mnemonic: LAE / LAR"
             },
             { OpName.LAX,
-                "Load accumulator and X register from memory.  Equivalent to LDA + LDX."
-            },
-            { OpName.LXA,
+                "Load accumulator and X register from memory.  Equivalent to LDA + LDX." +
+                "\r\n\r\nThe immediate mode is unstable.  It " +
+            /*},
+            { OpName.LXA,*/
                 "ORs accumulator with a value, ANDs result with immediate value, then stores " +
-                "the result in accumulator and X register." +
+                "the result in accumulator and X register.  " +
                 "Equivalent to ORA + AND + TAX." +
-                "\r\n\r\nAlt mnemonic: ATX / OAL"
+                "\r\n\r\nAlt mnemonic: LXA / ATX / OAL"
             },
             { OpName.RLA,
                 "Rotate memory one bit left, then AND accumulator with memory.  Equivalent " +
@@ -633,13 +633,7 @@ namespace Asm65 {
             },
             { OpName.SHA,
                 "AND X register with accumulator, then AND result with 7 and store." +
-                "\r\n\r\nAlt mnemonic: AXA"
-            },
-            { OpName.SHS,
-                "AND X register with accumulator, without changing the contents of either" +
-                "register, and transfer to stack pointer.  Then " +
-                "AND stack pointer with high byte of operand + 1." +
-                "\r\n\r\nAlt mnemonic: XAS / TAS"
+                "\r\n\r\nAlt mnemonic: AHX, AXA"
             },
             { OpName.SHX,
                 "AND X register with the high byte of the argument + 1, and store the result." +
@@ -658,6 +652,12 @@ namespace Asm65 {
                 "Shift memory right one bit, then EOR accumulator with memory.  Equivalent to " +
                 "LSR + EOR." +
                 "\r\n\r\nAlt mnemonic: LSE"
+            },
+            { OpName.TAS,
+                "AND X register with accumulator, without changing the contents of either " +
+                "register, and transfer to stack pointer.  Then " +
+                "AND stack pointer with high byte of operand + 1." +
+                "\r\n\r\nAlt mnemonic: SHS / XAS"
             },
             { OpName.TOP,
                 "Triple-byte no-operation.  This actually performs a load." +
