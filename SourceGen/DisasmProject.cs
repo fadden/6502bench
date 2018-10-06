@@ -254,8 +254,13 @@ namespace SourceGen {
 
             // Configure the load address.
             if (Setup.SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
+                // First two bytes are the load address, code starts at offset +000002.  We
+                // need to put the load address into the stream, but don't want it to get
+                // picked up as an address for something else.  So we set it to the same
+                // address as the start of the file.  The overlapping-address code should do
+                // the right thing with it.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                mAddrMap.Set(0, 0);
+                mAddrMap.Set(0, loadAddr);
                 mAddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
