@@ -83,6 +83,12 @@
     <Compile Include="AppForms\FindBox.Designer.cs">
       <DependentUpon>FindBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="AppForms\FormatSplitAddress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppForms\FormatSplitAddress.Designer.cs">
+      <DependentUpon>FormatSplitAddress.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppForms\GotoBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -268,6 +274,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AppForms\FindBox.resx">
       <DependentUpon>FindBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AppForms\FormatSplitAddress.resx">
+      <DependentUpon>FormatSplitAddress.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AppForms\GotoBox.resx">
       <DependentUpon>GotoBox.cs</DependentUpon>

@@ -2224,8 +2224,11 @@ namespace SourceGen.AppForms {
                 }
             }
 
+            formatSplitAddressTableToolStripMenuItem.Enabled =
+                (entityCounts.mDataLines > 1 && entityCounts.mCodeLines == 0);
             toggleSingleBytesToolStripMenuItem.Enabled =
                 (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
+
 
             // So long as some code or data is highlighted, allow these.  Don't worry about
             // control lines.  Disable options that would have no effect.
@@ -2603,6 +2606,34 @@ namespace SourceGen.AppForms {
                 // set of ranges.
                 //
                 // If nothing actually changed, don't generate an undo record.
+                ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.Results);
+                if (cs.Count != 0) {
+                    ApplyUndoableChanges(cs);
+                } else {
+                    Debug.WriteLine("No change to data formats");
+                }
+            }
+
+            dlg.Dispose();
+        }
+
+        private void FormatSplitAddressTable_Click(object sender, EventArgs e) {
+            FormatSplitAddress dlg = new FormatSplitAddress(mProject.FileData,
+                mProject.SymbolTable, mOutputFormatter);
+
+            TypedRangeSet trs = dlg.Selection = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                // shouldn't happen
+                Debug.Assert(false, "FormatSplitAddressTable found nothing to edit");
+                dlg.Dispose();
+                return;
+            }
+
+            // TODO: check to see if the selection is eligible for treatment as a
+            //   split-address table.  If not, show a dialog explaining why.
+
+            dlg.ShowDialog();
+            if (dlg.DialogResult == DialogResult.OK) {
                 ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.Results);
                 if (cs.Count != 0) {
                     ApplyUndoableChanges(cs);

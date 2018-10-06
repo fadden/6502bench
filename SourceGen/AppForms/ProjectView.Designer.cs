@@ -174,6 +174,7 @@ namespace SourceGen.AppForms
             this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
+            this.formatSplitAddressTableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -463,6 +464,7 @@ namespace SourceGen.AppForms
             this.hintAsInlineDataToolStripMenuItem,
             this.removeHintToolStripMenuItem,
             this.toolStripMenuItem11,
+            this.formatSplitAddressTableToolStripMenuItem,
             this.toggleSingleBytesToolStripMenuItem,
             this.deleteNoteCommentToolStripMenuItem,
             this.toolStripMenuItem9,
@@ -1433,6 +1435,13 @@ namespace SourceGen.AppForms
             this.infoTextBox.Size = new System.Drawing.Size(177, 120);
             this.infoTextBox.TabIndex = 0;
             // 
+            // formatSplitAddressTableToolStripMenuItem
+            // 
+            this.formatSplitAddressTableToolStripMenuItem.Name = "formatSplitAddressTableToolStripMenuItem";
+            this.formatSplitAddressTableToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
+            this.formatSplitAddressTableToolStripMenuItem.Text = "Format Split-Address Table";
+            this.formatSplitAddressTableToolStripMenuItem.Click += new System.EventHandler(this.FormatSplitAddressTable_Click);
+            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1617,6 +1626,7 @@ namespace SourceGen.AppForms
         private System.Windows.Forms.ToolStripMenuItem toggleSingleBytesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editProjectSymbolToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteNoteCommentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem formatSplitAddressTableToolStripMenuItem;
     }
 }
 
