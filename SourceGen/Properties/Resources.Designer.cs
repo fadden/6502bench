@@ -583,6 +583,15 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to (unknown address).
+        /// </summary>
+        internal static string INVALID_ADDRESS {
+            get {
+                return ResourceManager.GetString("INVALID_ADDRESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Legal Stuff.
         /// </summary>
         internal static string LEGAL_STUFF_TITLE {

@@ -291,6 +291,9 @@
   <data name="INITIAL_SYMBOL_FILES" xml:space="preserve">
     <value>Symbol files:</value>
   </data>
+  <data name="INVALID_ADDRESS" xml:space="preserve">
+    <value>(unknown address)</value>
+  </data>
   <data name="LEGAL_STUFF_TITLE" xml:space="preserve">
     <value>Legal Stuff</value>
   </data>

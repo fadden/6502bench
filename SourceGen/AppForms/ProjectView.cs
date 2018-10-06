@@ -2225,7 +2225,7 @@ namespace SourceGen.AppForms {
             }
 
             formatSplitAddressTableToolStripMenuItem.Enabled =
-                (entityCounts.mDataLines > 1 && entityCounts.mCodeLines == 0);
+                (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
             toggleSingleBytesToolStripMenuItem.Enabled =
                 (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
 
@@ -2618,27 +2618,56 @@ namespace SourceGen.AppForms {
         }
 
         private void FormatSplitAddressTable_Click(object sender, EventArgs e) {
-            FormatSplitAddress dlg = new FormatSplitAddress(mProject.FileData,
-                mProject.SymbolTable, mOutputFormatter);
-
-            TypedRangeSet trs = dlg.Selection = GroupedOffsetSetFromSelected();
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
             if (trs.Count == 0) {
                 // shouldn't happen
                 Debug.Assert(false, "FormatSplitAddressTable found nothing to edit");
-                dlg.Dispose();
                 return;
             }
 
-            // TODO: check to see if the selection is eligible for treatment as a
-            //   split-address table.  If not, show a dialog explaining why.
+            FormatSplitAddress dlg = new FormatSplitAddress(mProject, trs, mOutputFormatter);
 
             dlg.ShowDialog();
             if (dlg.DialogResult == DialogResult.OK) {
-                ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.Results);
+                // Start with the format descriptors.
+                ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.NewFormatDescriptors);
+
+                // Add in the user labels.
+                foreach (KeyValuePair<int, Symbol> kvp in dlg.NewUserLabels) {
+                    Symbol oldUserValue = null;
+                    if (mProject.UserLabels.ContainsKey(kvp.Key)) {
+                        Debug.Assert(false, "should not be replacing label");
+                        oldUserValue = mProject.UserLabels[kvp.Key];
+                    }
+                    UndoableChange uc = UndoableChange.CreateLabelChange(kvp.Key,
+                        oldUserValue, kvp.Value);
+                    cs.Add(uc);
+                }
+
+
+                // Apply code hints.
+                TypedRangeSet newSet = new TypedRangeSet();
+                TypedRangeSet undoSet = new TypedRangeSet();
+
+                foreach (int offset in dlg.AllTargetOffsets) {
+                    if (!mProject.GetAnattrib(offset).IsInstruction) {
+                        CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
+                        if (oldType == CodeAnalysis.TypeHint.Code) {
+                            continue;       // already set
+                        }
+                        undoSet.Add(offset, (int)oldType);
+                        newSet.Add(offset, (int)CodeAnalysis.TypeHint.Code);
+                    }
+                }
+                if (newSet.Count != 0) {
+                    cs.Add(UndoableChange.CreateTypeHintChange(undoSet, newSet));
+                }
+
+                // Finally, apply the change.
                 if (cs.Count != 0) {
                     ApplyUndoableChanges(cs);
                 } else {
-                    Debug.WriteLine("No change to data formats");
+                    Debug.WriteLine("No changes found");
                 }
             }
 

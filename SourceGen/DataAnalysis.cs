@@ -292,7 +292,7 @@ namespace SourceGen {
                 // up with a user or platform label that matches an auto label, so we
                 // need to do some renaming in that case.  Shouldn't happen often.
                 Symbol sym = SymbolTable.GenerateUniqueForAddress(mAnattribs[targetOffset].Address,
-                    mProject.SymbolTable);
+                    mProject.SymbolTable, "L");
                 mAnattribs[targetOffset].Symbol = sym;
                 // This will throw if the symbol already exists.  That is the desired
                 // behavior, as that would be a bug.

@@ -216,10 +216,13 @@ namespace SourceGen {
         /// Generates a unique address symbol.  Does not add the symbol to the list.
         /// </summary>
         /// <param name="addr">Address label will be applied to</param>
+        /// <param name="symbols">Symbol table.</param>
+        /// <param name="prefix">Prefix to use; must start with a letter.</param>
         /// <returns>Newly-created, unique symbol.</returns>
-        public static Symbol GenerateUniqueForAddress(int addr, SymbolTable symbols) {
+        public static Symbol GenerateUniqueForAddress(int addr, SymbolTable symbols,
+                string prefix) {
             // $1234 == L1234, $05/1234 == L51234.
-            string label = "L" + addr.ToString("X4");
+            string label = prefix + addr.ToString("X4");    // always upper-case
             if (symbols.TryGetValue(label, out Symbol unused)) {
                 const int MAX_RENAME = 999;
                 string baseLabel = label;
