@@ -253,21 +253,18 @@ namespace SourceGen {
             ProjectProps.EntryFlags = Setup.SystemDefaults.GetEntryFlags(sysDef);
 
             // Configure the load address.
-            int loadAddr;
             if (Setup.SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
-                loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                loadAddr -= 2;
-                if (loadAddr < 0) {
-                    loadAddr += 65536;
-                }
+                int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
+                mAddrMap.Set(0, 0);
+                mAddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
                 TypeHints[0] = CodeAnalysis.TypeHint.NoHint;
                 TypeHints[2] = CodeAnalysis.TypeHint.Code;
             } else {
-                loadAddr = Setup.SystemDefaults.GetLoadAddress(sysDef);
+                int loadAddr = Setup.SystemDefaults.GetLoadAddress(sysDef);
+                mAddrMap.Set(0, loadAddr);
             }
-            mAddrMap.Set(0, loadAddr);
 
             foreach (string str in sysDef.SymbolFiles) {
                 ProjectProps.PlatformSymbolFileIdentifiers.Add(str);
