@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem(new string[] {
+            System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem(new string[] {
             "12/3456",
             "+123456",
             "(+) T_123456"}, -1);
@@ -114,9 +114,9 @@
             this.pushRtsCheckBox.AutoSize = true;
             this.pushRtsCheckBox.Location = new System.Drawing.Point(7, 68);
             this.pushRtsCheckBox.Name = "pushRtsCheckBox";
-            this.pushRtsCheckBox.Size = new System.Drawing.Size(167, 17);
+            this.pushRtsCheckBox.Size = new System.Drawing.Size(184, 17);
             this.pushRtsCheckBox.TabIndex = 2;
-            this.pushRtsCheckBox.Text = "Push for RTS/RTL (target - 1)";
+            this.pushRtsCheckBox.Text = "Adjusted for RTS/RTL (target - 1)";
             this.pushRtsCheckBox.UseVisualStyleBackColor = true;
             this.pushRtsCheckBox.CheckedChanged += new System.EventHandler(this.pushRtsCheckBox_CheckedChanged);
             // 
@@ -154,7 +154,7 @@
             this.lowByteGroupBox.Size = new System.Drawing.Size(207, 94);
             this.lowByteGroupBox.TabIndex = 2;
             this.lowByteGroupBox.TabStop = false;
-            this.lowByteGroupBox.Text = "Low Byte";
+            this.lowByteGroupBox.Text = "Low Bytes";
             // 
             // lowThirdPartRadio
             // 
@@ -204,7 +204,7 @@
             this.highByteGroupBox.Size = new System.Drawing.Size(207, 120);
             this.highByteGroupBox.TabIndex = 3;
             this.highByteGroupBox.TabStop = false;
-            this.highByteGroupBox.Text = "High Byte";
+            this.highByteGroupBox.Text = "High Bytes";
             // 
             // highConstantTextBox
             // 
@@ -273,7 +273,7 @@
             this.bankByteGroupBox.Size = new System.Drawing.Size(207, 70);
             this.bankByteGroupBox.TabIndex = 4;
             this.bankByteGroupBox.TabStop = false;
-            this.bankByteGroupBox.Text = "Bank Byte";
+            this.bankByteGroupBox.Text = "Bank Bytes";
             // 
             // bankConstantTextBox
             // 
@@ -320,7 +320,7 @@
             this.outputPreviewListView.FullRowSelect = true;
             this.outputPreviewListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.outputPreviewListView.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem5});
+            listViewItem8});
             this.outputPreviewListView.Location = new System.Drawing.Point(6, 19);
             this.outputPreviewListView.MultiSelect = false;
             this.outputPreviewListView.Name = "outputPreviewListView";

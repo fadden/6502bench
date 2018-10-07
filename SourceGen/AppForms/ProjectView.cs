@@ -2644,23 +2644,24 @@ namespace SourceGen.AppForms {
                     cs.Add(uc);
                 }
 
-
                 // Apply code hints.
-                TypedRangeSet newSet = new TypedRangeSet();
-                TypedRangeSet undoSet = new TypedRangeSet();
+                if (dlg.WantCodeHints) {
+                    TypedRangeSet newSet = new TypedRangeSet();
+                    TypedRangeSet undoSet = new TypedRangeSet();
 
-                foreach (int offset in dlg.AllTargetOffsets) {
-                    if (!mProject.GetAnattrib(offset).IsInstruction) {
-                        CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
-                        if (oldType == CodeAnalysis.TypeHint.Code) {
-                            continue;       // already set
+                    foreach (int offset in dlg.AllTargetOffsets) {
+                        if (!mProject.GetAnattrib(offset).IsInstruction) {
+                            CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
+                            if (oldType == CodeAnalysis.TypeHint.Code) {
+                                continue;       // already set
+                            }
+                            undoSet.Add(offset, (int)oldType);
+                            newSet.Add(offset, (int)CodeAnalysis.TypeHint.Code);
                         }
-                        undoSet.Add(offset, (int)oldType);
-                        newSet.Add(offset, (int)CodeAnalysis.TypeHint.Code);
                     }
-                }
-                if (newSet.Count != 0) {
-                    cs.Add(UndoableChange.CreateTypeHintChange(undoSet, newSet));
+                    if (newSet.Count != 0) {
+                        cs.Add(UndoableChange.CreateTypeHintChange(undoSet, newSet));
+                    }
                 }
 
                 // Finally, apply the change.

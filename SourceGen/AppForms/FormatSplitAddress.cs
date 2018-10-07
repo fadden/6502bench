@@ -39,6 +39,12 @@ namespace SourceGen.AppForms {
         /// </summary>
         public List<int> AllTargetOffsets { get; private set; }
 
+        public bool WantCodeHints {
+            get {
+                return addCodeHintCheckBox.Checked;
+            }
+        }
+
         /// <summary>
         /// Selected offsets.  An otherwise contiguous range of offsets can be broken up
         /// by user-specified labels and address discontinuities, so this needs to be
@@ -357,7 +363,6 @@ namespace SourceGen.AppForms {
                 }
 
                 int addr = ((bank << 16) | (high << 8) | low) + adj;
-                Debug.WriteLine("GOT " + i + ": " + addr.ToString("x6"));
 
                 int targetOffset = mProject.AddrMap.AddressToOffset(offsets[0], addr);
                 if (targetOffset < 0) {
@@ -409,7 +414,8 @@ namespace SourceGen.AppForms {
             NewUserLabels = newLabels;
             AllTargetOffsets = targetOffsets;
 
-            mOutputReady = true;
+            // Don't show ready if all addresses are invalid.
+            mOutputReady = (AllTargetOffsets.Count > 0);
         }
 
         private void AddPreviewItem(int addr, int offset, string label) {

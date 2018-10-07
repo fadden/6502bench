@@ -296,6 +296,90 @@ entirely from the
 <a href="settings.html#project-properties">project properties</a> editor.
 
 
+<h3><a name="split-address">Format Split-Address Table</a></h3>
+
+<p>Tables of addresses are fairly common.  Sometimes you'll find them as a
+series of 16-bit words, like this:</p>
+<pre>
+jmptab   .dd2    func1
+         .dd2    func2
+         .dd2    func3
+</pre>
+
+<p>While that's fairly common in 16-bit software, 8-bit software often splits
+the high and low bytes into separate arrays, like this:</p>
+<pre>
+jmptabl  .dd1    &lt;func1
+         .dd1    &lt;func2
+         .dd1    &lt;func3
+jmptabh  .dd1    &gt;func1
+         .dd1    &gt;func2
+         .dd1    &gt;func3
+</pre>
+
+<p>Sometimes the tables contain <code>address - 1</code>, because the
+values are to be pushed onto the stack for an RTS call.</p>
+
+<p>The split-address table formatter helps you associate symbols with the
+addresses in the table.  To use it, start by selecting the entire table.
+In the example above, you would select all 6 bytes.  The number of bytes
+in each part must be equal: here, it's 3 low bytes, followed by 3 high
+bytes.  If the number of bytes selected can't be evenly divided by the
+number of parts, the formatter will report an error.</p>
+<p>With the data selected, open the format dialog with
+Actions &gt; Format Split-Address Table.  The rather complicated dialog
+is split into sections.</p>
+<ul>
+  <li>Address Characteristics: select whether the table has 16-bit
+  addresses or 24-bit addresses.  (24-bit addresses are disabled if you
+  don't have the CPU set to 65816.)  If the address parts are being pushed
+  on the stack for an RTS/RTL, check the "Adjusted for RTS/RTL" box to
+  adjust them by 1.</li>
+  <li>Low Bytes: indicate which part of the table holds the low bytes.  In
+  the example above, the low bytes came first, followed by the high bytes,
+  so you would select "first part of selection".  If they were stored the
+  other way around, you would click "second part" instead.</li>
+  <li>High Bytes: indicate which part of the table holds the high bytes.  For
+  a 16-bit address this will be the part you didn't pick for the low bytes.
+  Sometimes, if all addresses land on the same 256-byte page, the high byte
+  will be a constant in the code, and only the low bytes will be stored in
+  a table.  If that's the case, select "Constant", and enter the high byte
+  in the text box.  (Decimal, hex, and binary are accepted.)</li>
+  <li>Bank Bytes: for 24-bit addresses, you can select "Nth part of
+  selection", which will just use whichever part you didn't specify for
+  the low and high bytes.  If the table holds 16-bit addresses, you can
+  use the "Constant" field to specify the data bank.</li>
+  <li>Options: if the table holds the addresses of instructions, check
+  the "Add code entry hint if needed" box to add a code entry point hint
+  to anything that isn't already marked as an instruction.</li>
+  <li>Generated Addresses: this shows the full list of addresses that are
+  generated with the current set of parameters.  Each address is shown with
+  a file offset and a symbol.  If the address can't be mapped within the
+  file, the offset is shown as dashes instead.  If the address can be
+  mapped, and it already has a user-specified label, the label will be
+  shown.  If no label was found, the table will show "(+)", indicating
+  that a permanent label will be added at the target offset.</li>
+</ul>
+
+<p>For a 16-bit address, you have three choices: low byte first, high byte
+first, or low byte only with a constant high byte.  For a 24-bit address
+the set of possibilities expands, but is essentially the same: pick the
+order in which things appear, using fixed constants if desired.</p>
+
+<p>A message at the top of the screen shows how many bytes are selected.
+It also tells you how many groups there are, but unlike the data operand
+formatter, the split-address table formatter doesn't care about group
+boundaries.  For this reason, tables do not have to be contiguous in
+memory.  The low bytes and high bytes could be on separate 256-byte
+pages.</p>
+
+<p>It should be mentioned that SourceGen does not record the fact that the
+data in question is part of a table.  The formatting, labels, and code hints
+are applied as if you entered them all individually by hand.  The formatter
+is just significantly more convenient.  It also does everything as a single
+undoable action, so if it comes out looking wrong, just hit "undo".</p>
+
+
 <h3><a name="toggle-format">Quick Format Toggle</a></h3>
 
 <p>The "Toggle Single-Byte Format" feature provides a quick way to
