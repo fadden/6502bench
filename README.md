@@ -85,6 +85,9 @@ support for multi-bank 65816 files (IIgs OMF, SNES), and alternate
 character sets (e.g. PETSCII).  Visit the wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
+To learn about the past, check the
+[change log](https://github.com/fadden/6502bench/wiki/Change-Log).
+
 
 ## Installation ##
 
@@ -98,7 +101,8 @@ have this installed.  If SourceGen doesn't seem to want to start, download
 the latest version (v4.7.2)
 [directly from Microsoft](https://www.microsoft.com/net/download/dotnet-framework-runtime).
 The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
-the Anniversary Update (1607).
+the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
+installer was able to get the 4.6.2 installer to work.)
 
 In theory, SourceGen can work with Mono under Linux and Mac OS X.  It
 currently crashes on startup with Mono 5.14.0 on Ubuntu, so it's uncertain
