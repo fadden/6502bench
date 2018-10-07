@@ -27,6 +27,7 @@ HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
 SCALE       @ $E7       ;hi-res graphics scale factor
 
 AMPERV      @ $03F5     ;jump to function that handles Applesoft '&' cmds
+AMPERV_     @ $03F6     ;vector to function that handles Applesoft '&' cmds
 
 ;
 ; Useful Applesoft routines.

@@ -377,10 +377,9 @@ namespace SourceGen.AppForms {
                     // need to generate one.
                     string targetLabel;
                     if (mProject.UserLabels.TryGetValue(targetOffset, out Symbol sym)) {
-                        AddPreviewItem(addr, targetOffset, sym.Label);
                         targetLabel = sym.Label;
+                        AddPreviewItem(addr, targetOffset, targetLabel);
                     } else {
-                        AddPreviewItem(addr, targetOffset, "(+)");
                         // Generate a symbol that's unique vs. the symbol table.  We don't need
                         // it to be unique vs. the labels we're generating here, because we
                         // won't generate identical labels for different addresses, and we do
@@ -393,6 +392,7 @@ namespace SourceGen.AppForms {
                             Symbol.Type.LocalOrGlobalAddr);
                         newLabels[targetOffset] = tmpSym;       // overwrites previous
                         targetLabel = tmpSym.Label;
+                        AddPreviewItem(addr, targetOffset, "(+) " + targetLabel);
                     }
 
                     // Now we need to create format descriptors for the addresses where we

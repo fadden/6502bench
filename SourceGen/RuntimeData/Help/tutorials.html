@@ -13,6 +13,12 @@
 <h1>6502bench SourceGen: Tutorials</h1>
 <p><a href="index.html">Back to index</a></p>
 
+<ul>
+  <li><a href="#basic-features">Basic Features</a></li>
+  <li><a href="#advanced-features">Advanced Features</a></li>
+</ul>
+
+
 <h2><a name="basic-features">Basic Features</a></h2>
 
 <p>This tutorial introduces SourceGen and covers some of the basic
@@ -303,10 +309,88 @@ it should always match exactly.)</p>
 
 <h3>Go Forth</h3>
 
-<p>That's it for this tutorial.  Play with the program some more to see
+<p>That's it for the basic tutorial.  Play with the program some more to see
 what it can do, or do something wild like read the manual.</p>
 <p>While you can do some fancy things, nothing you do will alter the
 data file.  The assembled output will always match the original.</p>
+
+
+<h2><a name="advanced-features">Advanced Features</a></h2>
+
+<p>This tutorial will walk you through some of the fancier things SourceGen
+can do.  We assume you've already finished the Basic Features tutorial.</p>
+
+
+<h3>Split-Address Table Formatting</h3>
+
+<p>Start a new project.  Select the Apple //e platform, click Select File
+and navigate to the Examples directory.  In A2-Amper-fdraw, select
+<code>AMPERFDRAW#061d60</code>.  Click OK to create the project.</p>
+<p>Not a lot to see here -- just half a dozen lines of loads and stores.
+We can make it a bit more meaningful by loading an additional platform
+symbol file.  Select Edit > Project Properties, then the Symbol Files
+tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
+directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
+click Open.  Click OK to close the project properties window.</p>
+<p>The STA instructions now reference <code>AMPERV_</code>, which is noted
+as a call vector.  We can see it setting up a call to $1d70.  As it happens,
+the start address of the code is $1d60 -- the last four digits of the
+filename -- so let's make that change.  Double-click the initial .ORG
+statement, and change it from $2000 to $1d60.  We can now see that $1d70
+starts right after this initial chunk of code.</p>
+
+<p>Select the line with address $1d70, then Actions > Hint As Code Entry Point.
+More code appears, but not much -- if you scroll down you'll see that most
+of the file is still data.  The code at $1d70 searches through a table at
+$1d88 for a match with the contents of the accumulator.  If it finds a match,
+it loads bytes from tables at $1da6 and $1d97, pushes them on the stack,
+and the JMPs away.  This code is pushing a return address onto the stack.
+When the code at CHRGET returns, it'll return to that address.  Because of
+a quirk of the 6502 architecture, the address pushed must be the target
+address minus one.</p>
+<p>The first byte in the first table at $1d97 (which has the auto-label
+L1D97) is $b4.  The first byte in the second table is $1d.  So the first
+address we want is $1db4 + 1 = $1db5.</p>
+<p>Select the line at $1db5, and use Actions > Hint As Code Entry Point.
+More code appears, but again it's only a few lines.  Let's dress this one
+up a bit.  Set a label on the code at $1db5 called "FUNC".  At $1d97, edit
+the data item (double-click on "$b4"), click "Single bytes", then type "FUNC"
+(note the text field gets focus immediately, and the radio button
+automatically switches to "symbolic reference" when you start typing).
+Click OK.  The operand at $1d97 should now say <code>&lt;FUNC-1</code>.
+Repeat the process at $1da6, this time clicking the "High" part button,
+to make the operand there say <code>&gt;FUNC</code>.  (If it says
+<code>&lt;FUNC-152</code>, you forgot to select the High part.)</p>
+
+<p>We've now changed the first entry in the table to symbolic references.
+You could repeat these steps for the remaining items, but there's a faster
+way.  Click on the line at address $1d97, then shift-click the line at
+address $1da9 (which should be <code>.FILL 12,$1e</code>).  Select
+Actions &gt; Format Split-Address Table.</p>
+<p>The message at the top should indicate that there are 30 bytes
+selected.  In Address Characteristics, click the "adjusted for RTS/RTL"
+checkbox.  As soon as you do, the first line of the Generated Addresses
+list should show the symbol "FUNC".  The rest of the addresses will look like
+<code>(+) T1DD0</code>.  The "(+)" means that a label was not found at
+that location, so a label will be generated automatically.</p>
+<p>Down near the bottom, check the "add code entry hint if needed" checkbox.
+Because we saw the table contents being pushed onto the stack for RTS,
+we know that they're all code entry points.</p>
+<p>Click OK.  The table of address bytes should now all be references to
+symbols -- 15 low parts followed by 15 high parts.  If you scroll down,
+you should see nothing but instructions until you get to the last dozen
+bytes at the end of the file.  (If this isn't the case, use Edit > Undo,
+then work through the steps again.)</p>
+<p>The formatter did the same steps you went through earlier -- set a
+label, apply the label to the low and high bytes in the table, add a
+code entry point hint -- but did several of them at once.</p>
+
+<p>We don't want to save this project, so select File > Close.  When
+SourceGen asks if you want to continue, click OK.</p>
+
+
+<h3>[to be continued]</h3>
+
 
 </div>
 
