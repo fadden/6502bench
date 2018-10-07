@@ -366,7 +366,7 @@ namespace SourceGen.AsmGen {
             if (results.ExitCode == 0) {
                 FileInfo fi = new FileInfo(results.OutputPathName);
                 if (!fi.Exists) {
-                    MessageBox.Show(Properties.Resources.ASM_OUTPUT_NOT_FOUND,
+                    MessageBox.Show(this, Properties.Resources.ASM_OUTPUT_NOT_FOUND,
                         Properties.Resources.ASM_MISMATCH_CAPTION,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     sb.Append(Properties.Resources.ASM_MATCH_FAILURE);
@@ -377,13 +377,13 @@ namespace SourceGen.AsmGen {
                         // The files matched up to the point where one ended.
                         string msg = string.Format(Properties.Resources.ASM_MISMATCH_LENGTH_FMT,
                             fi.Length, mProject.FileData.Length);
-                        MessageBox.Show(msg, Properties.Resources.ASM_MISMATCH_CAPTION,
+                        MessageBox.Show(this, msg, Properties.Resources.ASM_MISMATCH_CAPTION,
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                         sb.Append(msg);
                     } else {
                         string msg = string.Format(Properties.Resources.ASM_MISMATCH_DATA_FMT,
                             offset, fileVal, mProject.FileData[offset]);
-                        MessageBox.Show(msg, Properties.Resources.ASM_MISMATCH_CAPTION,
+                        MessageBox.Show(this, msg, Properties.Resources.ASM_MISMATCH_CAPTION,
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                         sb.Append(msg);
                     }

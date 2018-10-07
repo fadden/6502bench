@@ -99,7 +99,7 @@ namespace SourceGen.AsmGen {
             } else if (e.Error != null) {
                 // This should only happen on a file I/O error, e.g. out of disk space or
                 // unable to overwrite an existing file.
-                MessageBox.Show(e.Error.ToString(), Properties.Resources.OPERATION_FAILED,
+                MessageBox.Show(this, e.Error.ToString(), Properties.Resources.OPERATION_FAILED,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DialogResult = DialogResult.Cancel;
             } else {
@@ -108,7 +108,7 @@ namespace SourceGen.AsmGen {
 
                 if (Results == null || Results.Count == 0) {
                     // Shouldn't happen -- generator should have reported error.
-                    MessageBox.Show("Internal error: no files generated",
+                    MessageBox.Show(this, "Internal error: no files generated",
                          Properties.Resources.OPERATION_FAILED,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 } else {

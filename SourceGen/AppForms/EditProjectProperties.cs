@@ -422,7 +422,7 @@ namespace SourceGen.AppForms {
                     }
                     string msg = string.Format(Properties.Resources.EXTERNAL_FILE_BAD_DIR,
                             RuntimeDataAccess.GetDirectory(), projDir, pathName);
-                    MessageBox.Show(msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
+                    MessageBox.Show(this, msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -540,7 +540,7 @@ namespace SourceGen.AppForms {
             } else {
                 msg = string.Format(Properties.Resources.SYMBOL_IMPORT_GOOD, foundCount);
             }
-            MessageBox.Show(msg, Properties.Resources.SYMBOL_IMPORT_CAPTION,
+            MessageBox.Show(this, msg, Properties.Resources.SYMBOL_IMPORT_CAPTION,
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -591,7 +591,7 @@ namespace SourceGen.AppForms {
                     }
                     string msg = string.Format(Properties.Resources.EXTERNAL_FILE_BAD_DIR,
                             RuntimeDataAccess.GetDirectory(), projDir, pathName);
-                    MessageBox.Show(msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
+                    MessageBox.Show(this, msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }

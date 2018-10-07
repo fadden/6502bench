@@ -107,7 +107,7 @@ namespace SourceGen.AsmGen {
                 DialogResult = DialogResult.Cancel;
             } else if (e.Error != null) {
                 // Unexpected -- shell command execution shouldn't throw exceptions.
-                MessageBox.Show(e.Error.ToString(), Properties.Resources.OPERATION_FAILED,
+                MessageBox.Show(this, e.Error.ToString(), Properties.Resources.OPERATION_FAILED,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DialogResult = DialogResult.Cancel;
             } else {

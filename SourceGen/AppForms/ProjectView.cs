@@ -196,7 +196,7 @@ namespace SourceGen.AppForms {
 
         private void ProjectView_Load(object sender, EventArgs e) {
             if (RuntimeDataAccess.GetDirectory() == null) {
-                MessageBox.Show(Properties.Resources.RUNTIME_DIR_NOT_FOUND,
+                MessageBox.Show(this, Properties.Resources.RUNTIME_DIR_NOT_FOUND,
                     Properties.Resources.RUNTIME_DIR_NOT_FOUND_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
@@ -211,7 +211,7 @@ namespace SourceGen.AppForms {
                 }
                 string msg = string.Format(Properties.Resources.PLUGIN_DIR_FAIL,
                     pluginPath + ": " + ex.Message);
-                MessageBox.Show(msg, Properties.Resources.PLUGIN_DIR_FAIL_CAPTION,
+                MessageBox.Show(this, msg, Properties.Resources.PLUGIN_DIR_FAIL_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
                 return;
@@ -751,7 +751,8 @@ namespace SourceGen.AppForms {
                 Debug.WriteLine("PrepareNewProject exception: " + ex);
                 string message = Properties.Resources.OPEN_DATA_FAIL_CAPTION;
                 string caption = Properties.Resources.OPEN_DATA_FAIL_MESSAGE + ": " + ex.Message;
-                MessageBox.Show(caption, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, caption, message, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return false;
             }
             proj.UseMainAppDomainForPlugins = mUseMainAppDomainForPlugins;
@@ -1284,7 +1285,7 @@ namespace SourceGen.AppForms {
 
             if (!File.Exists(projPathName)) {
                 string msg = string.Format(Properties.Resources.ERR_FILE_NOT_FOUND, projPathName);
-                MessageBox.Show(msg, Properties.Resources.ERR_FILE_GENERIC_CAPTION,
+                MessageBox.Show(this, msg, Properties.Resources.ERR_FILE_GENERIC_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -1473,7 +1474,8 @@ namespace SourceGen.AppForms {
         private bool DoSave(string pathName) {
             Debug.WriteLine("SAVING " + pathName);
             if (!ProjectFile.SerializeToFile(mProject, pathName, out string errorMessage)) {
-                MessageBox.Show(Properties.Resources.ERR_PROJECT_SAVE_FAIL + ": " + errorMessage,
+                MessageBox.Show(this,
+                    Properties.Resources.ERR_PROJECT_SAVE_FAIL + ": " + errorMessage,
                     Properties.Resources.OPERATION_FAILED,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -1528,7 +1530,7 @@ namespace SourceGen.AppForms {
             Debug.WriteLine("ProjectView.DoClose() - dirty=" +
                 (mProject == null ? "N/A" : mProject.IsDirty.ToString()));
             if (mProject != null && mProject.IsDirty) {
-                DialogResult result = MessageBox.Show(Properties.Resources.UNSAVED_CHANGES,
+                DialogResult result = MessageBox.Show(this, Properties.Resources.UNSAVED_CHANGES,
                     Properties.Resources.UNSAVED_CHANGES_CAPTION, MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Cancel) {
@@ -1583,7 +1585,7 @@ namespace SourceGen.AppForms {
                 // an explanation, or have some annoying click-through.
                 //
                 // This only appears for never-saved projects, not projects with unsaved data.
-                MessageBox.Show(Properties.Resources.SAVE_BEFORE_ASM_TEXT,
+                MessageBox.Show(this, Properties.Resources.SAVE_BEFORE_ASM_TEXT,
                     Properties.Resources.SAVE_BEFORE_ASM_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -1824,7 +1826,7 @@ namespace SourceGen.AppForms {
             }
 
             // Announce that we've wrapped around, then clear the start index.
-            MessageBox.Show(Properties.Resources.FIND_REACHED_START,
+            MessageBox.Show(this, Properties.Resources.FIND_REACHED_START,
                 Properties.Resources.FIND_REACHED_START_CAPTION, MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
             mFindStartIndex = -1;
@@ -4367,7 +4369,7 @@ namespace SourceGen.AppForms {
             if (fi.Length > Tools.HexDumpViewer.MAX_LENGTH) {
                 string msg = string.Format(Properties.Resources.ERR_FILE_TOO_LARGE,
                     Tools.HexDumpViewer.MAX_LENGTH);
-                MessageBox.Show(msg, Properties.Resources.OPEN_DATA_FAIL_CAPTION,
+                MessageBox.Show(this, msg, Properties.Resources.OPEN_DATA_FAIL_CAPTION,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -4375,7 +4377,7 @@ namespace SourceGen.AppForms {
             try {
                 data = File.ReadAllBytes(fileName);
             } catch (Exception ex) {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(this, ex.Message);
                 return;
             }
 

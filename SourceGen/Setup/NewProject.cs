@@ -178,7 +178,7 @@ namespace SourceGen.Setup {
                 if (fi.Length > DisasmProject.MAX_DATA_FILE_SIZE) {
                     string msg = string.Format(Properties.Resources.OPEN_DATA_TOO_LARGE,
                             fi.Length / 1024, DisasmProject.MAX_DATA_FILE_SIZE / 1024);
-                    MessageBox.Show(msg, Properties.Resources.OPEN_DATA_FAIL_CAPTION,
+                    MessageBox.Show(this, msg, Properties.Resources.OPEN_DATA_FAIL_CAPTION,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
