@@ -281,20 +281,26 @@ Ctrl+- / Ctrl+Shift+-, as keyboard shortcuts.)</p>
 
 <h3><a name="hints">Adding and Removing Hints</a></h3>
 
-<p>To add code entry or data hints, select the offsets with the instruction
-opcodes, and then use the "Hint as Code Entry Point" or "Hint as Data"
-menu item.  Remember to avoid hinting additional bytes, especially with
-code entry points, as that can lead to unwanted embedded instructions.</p>
-<p>For inline data, select all of the data that the code analyzer should
-skip, and use the "Hint as Inline Data" menu item.</p>
+<p>To add code entry or data hints, select the desired offsets and
+use Actions &gt; Hint As Code Entry Point or Hint As Data.  Because code
+hints mean "the code analyzer should start here", and data hints mean
+"the code analyzer should stop here", there is rarely any reason to hint
+multiple consecutive bytes.  For this reason, only the first byte on each
+selected line will be hinted.</p>
+<p>For inline data, you need to hint every byte, so every byte in every
+selected line is hinted when you select Hint As Inline Data.  Similarly,
+the Remove Hints menu item will remove hints from every byte.</p>
 
 <p>If you're having a hard time selecting just the right bytes because
 the instructions are caught up in a multi-byte data item, such as an
-auto-detected ASCII string, you can use the "Toggle Single-Byte Format"
-menu item to "flatten" the item.  Apply the hint, then toggle the bytes
-back to default format.  You can also disable uncategorized data analysis
-entirely from the
-<a href="settings.html#project-properties">project properties</a> editor.
+auto-detected ASCII string, you can disable uncategorized data analysis
+(the thing that creates the .STR and .FILL ops for you).  You can do this
+from the
+<a href="settings.html#project-properties">project properties</a> editor,
+or simply by hitting Ctrl+D.  Hit that, apply the hint, then hit it
+again to re-enable the string &amp; fill analyzer.</p>
+<p>Another approach is to can use the "Toggle Single-Byte Format"
+menu item to "flatten" the item.</p>
 
 
 <h3><a name="split-address">Format Split-Address Table</a></h3>
@@ -390,6 +396,18 @@ Data Format dialog and selecting "Single bytes" displayed as hex, or
 selecting "Default".</p>
 <p>This can be handy if the default format for a range of bytes is a
 string, but you want to see it as bytes or set a label in the middle.</p>
+
+
+<h3><a name="toggle-data">Toggle Data Scan</a></h3>
+
+<p>This menu item is in the Edit menu, and acts as a shortcut to opening
+the Project Properties editor, and clicking on the "Analyze Uncategorized
+Data" checkbox.  When enabled, SourceGen will look for ASCII strings and
+regions of identical bytes, and generate .STR and .FILL directives.  When
+disabled, uncategorized data is presented as one byte per line, which can
+be handy if you're trying to get at a bit in the middle of a string.</p>
+<p>As with all other project properties changes, this is an undoable
+event.</p>
 
 
 <h3><a name="clipboard">Copying to Clipboard</a></h3>

@@ -241,7 +241,7 @@ L1009    CLC
 </pre>
 
 <p>Be careful that you only add hints to the instruction opcode.  If
-you selected the full range of bytes from $1003 to $1008, you would
+you applied hints to the full range of bytes from $1003 to $1008, you would
 end up with this:</p>
 <pre>
          .ORG    $1000
@@ -257,7 +257,9 @@ L1009    CLC
 The problem is that the bytes in the middle of the instruction have
 been marked as entry points, and SourceGen is treating them as
 embedded instructions.  $EF and $12 aren't valid 6502 opcodes, so
-they're being ignored, but $10 is BPL and $30 is BMI.</p>
+they're being ignored, but $10 is BPL and $30 is BMI.  Because hinting
+multiple consecutive bytes is rarely useful, SourceGen only applies code
+hints to the first byte in a selected line.</p>
 
 <p><b>Data hints</b> tell the analyzer when it should stop.  For example,
 suppose address $ff00 is known to always be nonzero, and the code uses
@@ -276,6 +278,8 @@ the BNE that sets Z=0, so the code tracer will know it's a branch-always
 and do the right thing.)  It's only necessary to place a hint on the
 very first (opcode) byte.  Placing a data hint in the middle of what
 SourceGen believes to be instruction will have no effect.</p>
+<p>As with code hints, only the first byte in each selected line will
+be hinted.</p>
 
 <p><b>Inline data hints</b> identify bytes as being part of the
 instruction stream, but not instructions.  A simple example of this
@@ -289,7 +293,8 @@ is the ProDOS 8 call interface on the Apple II, which looks like this:</p>
 
 <p>The three bytes following the <code>JSR $bf00</code> should be hinted
 as inline data, so that the code analyzer skips them and continues the
-analysis at the <code>BCS</code>.</p>
+analysis at the <code>BCS</code>.  Because you need to hint *every* byte
+of inline data, all bytes in a selected line will receive hints.</p>
 <p>If code branches into a region that is marked as inline data, the
 branch will be ignored.</p>
 

@@ -175,6 +175,7 @@ namespace SourceGen.AppForms
             this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
+            this.toggleDataScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -342,11 +343,13 @@ namespace SourceGen.AppForms
             this.toolStripMenuItem3,
             this.editHeaderCommentToolStripMenuItem,
             this.projectPropertiesToolStripMenuItem,
+            this.toggleDataScanToolStripMenuItem,
             this.toolStripMenuItem7,
             this.settingsToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
+            this.editToolStripMenuItem.DropDownOpening += new System.EventHandler(this.editToolStripMenuItem_DropDownOpening);
             // 
             // undoToolStripMenuItem
             // 
@@ -1446,6 +1449,14 @@ namespace SourceGen.AppForms
             this.infoTextBox.Size = new System.Drawing.Size(177, 120);
             this.infoTextBox.TabIndex = 0;
             // 
+            // toggleDataScanToolStripMenuItem
+            // 
+            this.toggleDataScanToolStripMenuItem.Name = "toggleDataScanToolStripMenuItem";
+            this.toggleDataScanToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
+            this.toggleDataScanToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.toggleDataScanToolStripMenuItem.Text = "Toggle Data Scan";
+            this.toggleDataScanToolStripMenuItem.Click += new System.EventHandler(this.toggleDataScanToolStripMenuItem_Click);
+            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1631,6 +1642,7 @@ namespace SourceGen.AppForms
         private System.Windows.Forms.ToolStripMenuItem editProjectSymbolToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteNoteCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem formatSplitAddressTableToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toggleDataScanToolStripMenuItem;
     }
 }
 

@@ -602,6 +602,7 @@ namespace SourceGen.AppForms {
             gotoToolStripMenuItem.Enabled = true;
             editHeaderCommentToolStripMenuItem.Enabled = true;
             projectPropertiesToolStripMenuItem.Enabled = true;
+            toggleDataScanToolStripMenuItem.Enabled = true;
 
             showUndoRedoHistoryToolStripMenuItem.Enabled = true;
             showAnalysisTimersToolStripMenuItem.Enabled = true;
@@ -633,6 +634,7 @@ namespace SourceGen.AppForms {
             gotoToolStripMenuItem.Enabled = false;
             editHeaderCommentToolStripMenuItem.Enabled = false;
             projectPropertiesToolStripMenuItem.Enabled = false;
+            toggleDataScanToolStripMenuItem.Enabled = false;
 
             showUndoRedoHistoryToolStripMenuItem.Enabled = false;
             showAnalysisTimersToolStripMenuItem.Enabled = false;
@@ -1896,6 +1898,16 @@ namespace SourceGen.AppForms {
             }
         }
 
+        // Edit > Toggle Data Scan
+        private void toggleDataScanToolStripMenuItem_Click(object sender, EventArgs e) {
+            ProjectProperties oldProps = mProject.ProjectProps;
+            ProjectProperties newProps = new ProjectProperties(oldProps);
+            newProps.AnalysisParams.AnalyzeUncategorizedData =
+                !newProps.AnalysisParams.AnalyzeUncategorizedData;
+            UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(oldProps, newProps);
+            ApplyUndoableChanges(new ChangeSet(uc));
+        }
+
         // Edit > Settings...
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e) {
             ShowAppSettings(EditAppSettings.Tab.Unknown);
@@ -2473,6 +2485,13 @@ namespace SourceGen.AppForms {
             return -1;
         }
 
+
+        private void editToolStripMenuItem_DropDownOpening(object sender, EventArgs e) {
+            // Set the checkmark on Toggle Data Scan.
+            toggleDataScanToolStripMenuItem.Checked = (mProject != null) &&
+                mProject.ProjectProps.AnalysisParams.AnalyzeUncategorizedData;
+        }
+
         /// <summary>
         /// Handles an "opening" event for the codeListView's ContextMenuStrip.
         /// 
@@ -2951,19 +2970,33 @@ namespace SourceGen.AppForms {
         }
 
         private void MarkAsCode_Click(Object sender, EventArgs e) {
-            MarkAsType(CodeAnalysis.TypeHint.Code);
+            MarkAsType(CodeAnalysis.TypeHint.Code, true);
         }
         private void MarkAsData_Click(Object sender, EventArgs e) {
-            MarkAsType(CodeAnalysis.TypeHint.Data);
+            MarkAsType(CodeAnalysis.TypeHint.Data, true);
         }
         private void MarkAsInlineData_Click(Object sender, EventArgs e) {
-            MarkAsType(CodeAnalysis.TypeHint.InlineData);
+            MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
         }
         private void MarkAsNoHint_Click(Object sender, EventArgs e) {
-            MarkAsType(CodeAnalysis.TypeHint.NoHint);
+            MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
         }
-        private void MarkAsType(CodeAnalysis.TypeHint hint) {
-            RangeSet sel = OffsetSetFromSelected();
+        private void MarkAsType(CodeAnalysis.TypeHint hint, bool firstByteOnly) {
+            RangeSet sel;
+
+            if (firstByteOnly) {
+                sel = new RangeSet();
+                foreach (int index in codeListView.SelectedIndices) {
+                    int offset = mDisplayList[index].FileOffset;
+                    if (offset >= 0) {
+                        // Not interested in the header stuff for hinting.
+                        sel.Add(offset);
+                    }
+                }
+            } else {
+                sel = OffsetSetFromSelected();
+            }
+
             TypedRangeSet newSet = new TypedRangeSet();
             TypedRangeSet undoSet = new TypedRangeSet();
 
