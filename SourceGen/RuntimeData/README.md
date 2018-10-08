@@ -50,47 +50,13 @@ All "RT:" identifier paths are relative to the RuntimeData directory. The
 Group Name is not automatically added.
 
 
-## Platform Symbol Files (.sym65) ##
+## Platform Symbol Files and Extension Scripts ##
 
-These contain lists of symbols, each of which has a label and a value.
-If two symbols have the same value, the older one is discarded.
-
-Blank lines, and lines that begin with a semicolon (';'), are ignored.
-
-Lines that begin with an asterisk are command lines.  Two commands are
-currently defined:
-
- - *SYNOPSIS - a short summary of the file contents.
- - *TAG - a tag string to apply to all following symbols.
- 
-Tags can be used by extension scripts to identify a subset of symbols.
-The symbols are still part of the global set; the tag just provides a
-way to extract a subset.  Tags should be comprised of non-whitespace ASCII
-characters.  Tags are global, so use a long descriptive string.  If *TAG
-is not followed by a string, the tag is cleared.
-
-All other lines are expected to have the form:
-
-  symbol {=|@} value [;comment]
-
-Symbols must be at least two characters long, begin with a letter or
-underscore, and consist entirely of alphanumeric ASCII characters
-(A-Z, a-z, 0-9) and the underscore.  Different assemblers have different
-limitations on symbols, but all reasonable assemblers will accept these.
-
-Use '@' for address values, and '=' for constants.  The only real difference
-is that address values will be applied automatically to operands that
-reference addresses outside the scope of the file.
-
-The value is a number in decimal, hexadecimal (with a leading '$'), or
-binary (with a leading '%').  The numeric base will be saved and used when
-formatting the symbol in the generated output, so use whichever form is
-most appropriate.  Values are unsigned 24-bit numbers.
-
-The comment is optional.  If present, it will be saved and used as the
-end-of-line comment on the equate directive if the symbol is used.
+These are described in the "Advanced Topics" section of the manual
+([here](Help/advanced.html)).
 
 
-## Extension Scripts ##
+## Misc Files ##
 
-See "ExtensionScripts.md".
+LegalStuff.txt, Logo.png, and AboutImage.png are displayed by SourceGen,
+on the start screen and the About box.

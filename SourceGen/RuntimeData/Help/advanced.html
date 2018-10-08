@@ -13,7 +13,160 @@
 <h1>6502bench SourceGen: Advanced Topics</h1>
 <p><a href="index.html">Back to index</a></p>
 
+
+<h2><a name="platform-symbols">Platform Symbol Files (.sym65)</a></h2>
+
+<p>Platform symbol files contain lists of symbols, each of which has a
+label and a value.  SourceGen comes with a collection of symbols for
+popular systems, but you can create your own.  This can be handy if a
+few different projects are coded against a common library.</p>
+
+<p>If two symbols have the same value, the older symbol is replaced by
+the newer one.  This is why the order in which symbols file are loaded
+matters.</p>
+
+<p>Platform symbol files consist of comments, commands, and symbols.
+Blank lines, and lines that begin with a semicolon (';'), are ignored.  Lines
+that begin with an asterisk ('*') are commands.  Two are currently
+defined:</p>
+<ul>
+  <li>*SYNOPSIS - a short summary of the file contents.</li>
+  <li>*TAG - a tag string to apply to all symbols that follow in this
+    file.</li>
+</ul>
+
+<p>Tags can be used by extension scripts to identify a subset of symbols.
+The symbols are still part of the global set; the tag just provides a
+way to extract a subset.  Tags should be comprised of non-whitespace ASCII
+characters.  Tags are global, so use a long, descriptive string.  If *TAG
+is not followed by a string, the symbols that follow are treated as
+untagged.</p>
+
+<p>All other lines are symbols, which have the form:</p>
+<pre>
+  label {=|@} value [;comment]
+</pre>
+
+<p>Labels must be at least two characters long, begin with a letter or
+underscore, and consist entirely of alphanumeric ASCII characters
+(A-Z, a-z, 0-9) and the underscore ('_').  (This is the same format
+required for line labels in SourceGen.)</p>
+<p>Use '@' for address values, and '=' for constants.  The only important
+difference between them is that address values will be applied automatically
+to operands that reference addresses outside the scope of the file.
+Constants are never applied automatically.</p>
+
+<p>The value is a number in decimal, hexadecimal (with a leading '$'), or
+binary (with a leading '%').  The numeric base will be recorded and used when
+formatting the symbol in generated output, so use whichever form is most
+appropriate.  Values are unsigned 24-bit numbers.</p>
+
+<p>The comment is optional.  If present, it will be saved and used as the
+end-of-line comment on the .EQ directive if the symbol is used.</p>
+
+<h3>Creating a Project-Specific Symbol File</h3>
+
+<p>To create a platform symbol file for your project, just create a new
+text file, named with a ".sym65" extension.  (If your text editor of choice
+doesn't like that, you can put a ".txt" on the end while you're editing.)
+Make sure you create it in the same directory where your project file
+(the file that ends with ".dis65") lives.  Add a *SYNOPSIS, then add
+the desired symbols.</p>
+<p>Finally, add it to your project.  Select Edit &gt; Project Properties,
+switch to the Symbol Files tab, click Add Symbol Files, and select your
+symbol file.  It should appear in the list with a "PROJ:" prefix.</p>
+
+<p>If an example helps, the A2-Amper-fdraw project in the Examples
+directory has a project-local symbol file, called "fdraw-exports".
+(Amper-fdraw provides an Applesoft BASIC interface to a machine-language
+library.)</p>
+
+<p>NOTE: in the current version of SourceGen, changes to .sym65 files are
+not detected automatically.  Closing and re-opening the project
+(File &gt; Close, then click on the first recent-file link) will reload
+them.</p>
+
+
+<h2><a name="extension-scripts">Extension Scripts</a></h2>
+
+<p>Extension scripts, also called "plugins", are C# programs with access to
+the full .NET Standard 2.0 APIs.  They're compiled at run time by SourceGen
+and executed in a sandbox with security restrictions.</p>
+
+<p>SourceGen defines an interface that plugins must implement, and an
+interface that plugins can use to interact with SourceGen.  See
+Interfaces.cs in the PluginCommon directory.  <b>Bear in mind that this
+feature is still evolving, and the interfaces may change significantly
+in the near future.</b></p>
+
+<p>The current interfaces can be used to identify inline data that follows
+JSR/JSL instructions, and to format operands.  The latter can be useful for
+replacing immediate load operands with symbolic constants.</p>
+
+<p>Scripts may be loaded from the RuntimeData directory, or from the directory
+where the project file lives.  Attempts to load them from other locations
+will fail.</p>
+
+<h4>Development</h4>
+
+<p>The easiest way to develop extension scripts is inside the 6502bench
+solution in Visual Studio.  This way you have the interfaces available
+for IntelliSense completion, and get all the usual syntax and compile
+checking in the editor.  (This is why there's a RuntimeData project for
+Visual Studio.)</p>
+
+<p>If you have the solution configured for debug builds, SourceGen will set
+the IncludeDebugInformation flag to true when compiling scripts.  This
+causes a .PDB file to be created.</p>
+
+<p>Some commonly useful functions are defined in the PluginCommon.Util class,
+which is available to plugins.  These call into the CommonUtil library,
+which is shared with SourceGen.</p>
+
+<p>While plugins can use CommonUtil directly, they should avoid doing so.  The
+APIs there are not guaranteed to be stable, so plugins that rely on them
+may break in a subsequent release of SourceGen.</p>
+
+<h4>PluginDll Directory</h4>
+
+<p>Extension scripts are compiled into .DLLs, and saved in the PluginDll
+directory, which lives next to the application executable and RuntimeData.
+If the extension script is the same age or older than the DLL, SourceGen
+will continue to use the existing DLL.</p>
+
+<p>The DLLs names are a combination of the script filename and script location.
+The compiled name for "MyPlatform/MyScript.cs" in the RuntimeData directory
+will be "RT_MyPlatform_MyScript.dll".  For a project-specific script, it
+would look like "PROJ_MyProject_MyScript.dll".</p>
+
+<p>The PluginCommon and CommonUtil DLLs will be copied into the directory, so
+that code in the sandbox has access to them.</p>
+
+<h4>Sandboxing</h4>
+
+<p>Extension scripts are executed in an App Domain sandbox.  App domains are
+a .NET feature that creates a partition inside the virtual machine, isolating
+code.  It still runs in the same address space, on the same threads, so the
+isolation is only effective for "partially trusted" code that has been
+declared safe by the bytecode verifier.</p>
+
+<p>SourceGen disallows most actions, notably file access.  An exception is
+made for reading files from the directory where the plugin DLLs live, but
+scripts are otherwise unable to read or write from the filesystem.  (A
+future version of SourceGen may provide an API that allows limited access
+to data files.)</p>
+
+<p>App domain security is not absolute.  I don't really expect SourceGen to
+be used as a malware vector, so there's no value in forcing scripts to
+execute in an isolated server process, or to jump through the other hoops
+required to really lock things down.  I do believe there's value in
+defining the API in such a way that we *could* implement full security if
+circumstances change, so I'm using app domains as a way to keep everybody
+honest.</p>
+
+
 <h2><a name="multi-bin">Working With Multiple Binaries</a></h2>
+
 <p>Sometimes a program is split into multiple files on disk.  They
 may be all loaded at once, or some may be loaded into the same place
 at different times.  In such situations it's not uncommon for one
