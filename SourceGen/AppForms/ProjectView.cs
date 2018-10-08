@@ -283,6 +283,9 @@ namespace SourceGen.AppForms {
 
             // When the Actions or context menu are opened, all menu items get transferred over.
             codeListView.ContextMenuStrip.Opening += codeListView_CmsOpening;
+            // When the context menu closes, move all the menu items back to the Actions menu,
+            // so that you can open it with Alt-A.
+            codeListView.ContextMenuStrip.Closed += ActionsMenuOpening;
 
             // Set default widths, in case we don't have a value for this in AppSettings.
             CodeListColumnWidths widths = GetDefaultCodeListColumnWidths();
@@ -2518,7 +2521,8 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// Handles an "opening" event for the ProjectView's Actions menu.
         /// 
-        /// This puts all of the Actions menu items in the Actions menu.
+        /// This puts all of the Actions menu items in the Actions menu.  We also want to call
+        /// this when the context menu closes, so that Alt-A will open the menu.
         /// </summary>
         private void ActionsMenuOpening(object sender, EventArgs e) {
             actionsToolStripMenuItem.DropDownItems.AddRange(mActionsMenuItems);
