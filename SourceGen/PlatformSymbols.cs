@@ -74,6 +74,7 @@ namespace SourceGen {
         /// Loads platform symbols.
         /// </summary>
         /// <param name="fileIdent">Relative pathname of file to open.</param>
+        /// <param name="projectDir">Full path to project directory.</param>
         /// <param name="report">Report of warnings and errors.</param>
         /// <returns>True on success (no errors), false on failure.</returns>
         public bool LoadFromFile(string fileIdent, string projectDir, out FileLoadReport report) {

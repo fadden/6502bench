@@ -263,6 +263,15 @@ namespace SourceGen.AppForms {
             UpdateRecentLinks();
 
             ShowNoProject();
+
+            ProcessCommandLine();
+        }
+
+        private void ProcessCommandLine() {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length == 2) {
+                DoOpenFile(Path.GetFullPath(args[1]));
+            }
         }
 
         private void InitCodeListView() {
