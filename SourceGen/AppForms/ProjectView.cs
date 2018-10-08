@@ -152,6 +152,11 @@ namespace SourceGen.AppForms {
         private int mTargetHighlightIndex = -1;
 
         /// <summary>
+        /// Set to true if the last key hit was Ctrl+H.
+        /// </summary>
+        private bool mCtrlHSeen;
+
+        /// <summary>
         /// CPU definition used when the Formatter was created.  If the CPU choice or
         /// inclusion of undocumented opcodes changes, we need to wipe the formatter.
         /// </summary>
@@ -1130,6 +1135,36 @@ namespace SourceGen.AppForms {
         // regardless of which has focus, making it useful for keyboard shortcuts.
         // Return true to indicate that we've handled the key.
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            // Handle the Ctrl+H chord.
+            if (mCtrlHSeen) {
+                if (keyData == (Keys.Control | Keys.C)) {
+                    if (hintAsCodeToolStripMenuItem.Enabled) {
+                        MarkAsCode_Click(null, null);
+                    }
+                } else if (keyData == (Keys.Control | Keys.D)) {
+                    if (hintAsDataToolStripMenuItem.Enabled) {
+                        MarkAsData_Click(null, null);
+                    }
+                } else if (keyData == (Keys.Control | Keys.I)) {
+                    if (hintAsInlineDataToolStripMenuItem.Enabled) {
+                        MarkAsInlineData_Click(null, null);
+                    }
+                } else if (keyData == (Keys.Control | Keys.R)) {
+                    if (removeHintToolStripMenuItem.Enabled) {
+                        MarkAsNoHint_Click(null, null);
+                    }
+                } else {
+                    System.Media.SystemSounds.Beep.Play();
+                }
+                mCtrlHSeen = false;
+                toolStripStatusLabel.Text = Properties.Resources.STATUS_READY;
+                return true;
+            } else if (keyData == (Keys.Control | Keys.H)) {
+                mCtrlHSeen = true;
+                toolStripStatusLabel.Text = Properties.Resources.STATUS_CTRL_H_HIT;
+                return true;
+            }
+
             // Ctrl-Shift-Z is an alias for Redo (Ctrl-Y).
             if (keyData == (Keys.Control | Keys.Shift | Keys.Z)) {
                 if (redoToolStripMenuItem.Enabled) {

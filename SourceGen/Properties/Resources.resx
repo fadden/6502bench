@@ -396,6 +396,9 @@
   <data name="SHOW_COL" xml:space="preserve">
     <value>Show</value>
   </data>
+  <data name="STATUS_CTRL_H_HIT" xml:space="preserve">
+    <value>Ctrl+H was pressed, waiting for second key of chord...</value>
+  </data>
   <data name="STATUS_READY" xml:space="preserve">
     <value>Ready</value>
   </data>

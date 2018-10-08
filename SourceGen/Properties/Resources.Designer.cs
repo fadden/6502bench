@@ -898,6 +898,15 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ctrl+H was pressed, waiting for second key of chord....
+        /// </summary>
+        internal static string STATUS_CTRL_H_HIT {
+            get {
+                return ResourceManager.GetString("STATUS_CTRL_H_HIT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ready.
         /// </summary>
         internal static string STATUS_READY {
