@@ -702,11 +702,14 @@ namespace SourceGen {
                     // address map split as well, since the first byte past is an external
                     // address, and a label at the end of the current region will be offset
                     // from by this.)
-                    if (sym == null && (attr.OperandAddress & 0xffff) != 0xffff && checkNearby) {
+                    if (sym == null && (attr.OperandAddress & 0xffff) > 0 && checkNearby) {
                         sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 1);
                     }
-                    // TODO(maybe): if this is a 65816, check for a symbol at addr-2, for the
-                    //   benefit of long pointers.
+                    // If that didn't work, try addr-2.  Good for 24-bit addresses and jump
+                    // vectors that start with a JMP instruction.
+                    if (sym == null && (attr.OperandAddress & 0xffff) > 1 && checkNearby) {
+                        sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 2);
+                    }
                     if (sym != null) {
                         mAnattribs[offset].DataDescriptor =
                             FormatDescriptor.Create(mAnattribs[offset].Length,

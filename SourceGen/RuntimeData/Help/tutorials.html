@@ -327,15 +327,16 @@ can do.  We assume you've already finished the Basic Features tutorial.</p>
 and navigate to the Examples directory.  In A2-Amper-fdraw, select
 <code>AMPERFDRAW#061d60</code>.  Click OK to create the project.</p>
 <p>Not a lot to see here -- just half a dozen lines of loads and stores.
-We can make it a bit more meaningful by loading an additional platform
+This particular program interfaces with Applesoft BASIC, so we can make it
+a bit more meaningful by loading an additional platform
 symbol file.  Select Edit > Project Properties, then the Symbol Files
 tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
 directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
 click Open.  Click OK to close the project properties window.</p>
-<p>The STA instructions now reference <code>AMPERV_</code>, which is noted
-as a call vector.  We can see it setting up a call to $1d70.  As it happens,
-the start address of the code is $1d60 -- the last four digits of the
-filename -- so let's make that change.  Double-click the initial .ORG
+<p>The STA instructions now reference <code>AMPERV</code>, which is noted
+as a call vector.  We can see the code setting up a jump to $1d70.  As it
+happens, the start address of the code is $1d60 -- the last four digits of
+the filename -- so let's make that change.  Double-click the initial .ORG
 statement, and change it from $2000 to $1d60.  We can now see that $1d70
 starts right after this initial chunk of code.</p>
 
