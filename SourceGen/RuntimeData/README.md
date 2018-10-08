@@ -33,6 +33,8 @@ The currently-supported parameters are:
    default is "emulation".
  * undocumented-opcodes={true|false} - Enable or disable undocumented
    opcodes.  They are disabled by default.
+ * first-word-is-load-addr={true|false} - If true, the first two bytes of
+   the file contain the load address.
 
 All of these things can be changed after the project has begun, but it's
 nice to have them configured in advance.

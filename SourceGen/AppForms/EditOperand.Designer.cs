@@ -340,7 +340,7 @@ namespace SourceGen.AppForms {
             this.Name = "EditOperand";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Edit Operand";
+            this.Text = "Edit Instruction Operand";
             this.Load += new System.EventHandler(this.EditOperand_Load);
             this.Shown += new System.EventHandler(this.EditOperand_Shown);
             this.mainRadioPanel.ResumeLayout(false);

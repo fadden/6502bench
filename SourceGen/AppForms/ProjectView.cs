@@ -1137,7 +1137,7 @@ namespace SourceGen.AppForms {
         // regardless of which has focus, making it useful for keyboard shortcuts.
         // Return true to indicate that we've handled the key.
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
-            // Handle the Ctrl+H chord.
+            // Handle the Ctrl+H sequence.
             if (mCtrlHSeen) {
                 if (keyData == (Keys.Control | Keys.C)) {
                     if (hintAsCodeToolStripMenuItem.Enabled) {
@@ -1167,7 +1167,7 @@ namespace SourceGen.AppForms {
                 return true;
             }
 
-            // Ctrl-Shift-Z is an alias for Redo (Ctrl-Y).
+            // Ctrl+Shift+Z is an alias for Redo (Ctrl+Y).
             if (keyData == (Keys.Control | Keys.Shift | Keys.Z)) {
                 if (redoToolStripMenuItem.Enabled) {
                     redoToolStripMenuItem_Click(null, null);
@@ -2054,9 +2054,7 @@ namespace SourceGen.AppForms {
                             break;
                         case ColumnIndex.Operand:
                             if (editOperandToolStripMenuItem.Enabled) {
-                                EditOperand_Click(sender, e);
-                            } else if (editDataFormatToolStripMenuItem.Enabled) {
-                                EditData_Click(sender, e);
+                                EditInstrDataOperand_Click(sender, e);
                             }
                             break;
                         case ColumnIndex.Comment:
@@ -2203,6 +2201,9 @@ namespace SourceGen.AppForms {
             ListView.SelectedIndexCollection sel = codeListView.SelectedIndices;
             EntityCounts entityCounts;
 
+            bool editDataOperandEnabled = false;
+            bool editInstrOperandEnabled = false;
+
             // Use IsSingleItemSelected(), rather than just checking sel.Count, because we
             // want the user to be able to e.g. EditData on a multi-line string even if all
             // lines in the string are selected.
@@ -2217,11 +2218,9 @@ namespace SourceGen.AppForms {
 
                 setAddressToolStripMenuItem.Enabled =
                     (isCodeOrData || lineType == DisplayList.Line.Type.OrgDirective);
-                editOperandToolStripMenuItem.Enabled =
-                    (lineType == DisplayList.Line.Type.Code &&
-                            mProject.GetAnattrib(line.FileOffset).IsInstructionWithOperand);
-                editDataFormatToolStripMenuItem.Enabled =
-                    (lineType == DisplayList.Line.Type.Data);
+                editInstrOperandEnabled = (lineType == DisplayList.Line.Type.Code &&
+                    mProject.GetAnattrib(line.FileOffset).IsInstructionWithOperand);
+                editDataOperandEnabled = (lineType == DisplayList.Line.Type.Data);
                 editLabelToolStripMenuItem.Enabled = isCodeOrData;
                 editCommentToolStripMenuItem.Enabled = isCodeOrData;
                 editLongCommentToolStripMenuItem.Enabled =
@@ -2249,7 +2248,7 @@ namespace SourceGen.AppForms {
 
                 // Disable all single-target-only items.
                 setAddressToolStripMenuItem.Enabled = false;
-                editOperandToolStripMenuItem.Enabled = false;
+                editInstrOperandEnabled = false;
                 editLabelToolStripMenuItem.Enabled = false;
                 editCommentToolStripMenuItem.Enabled = false;
                 editLongCommentToolStripMenuItem.Enabled = false;
@@ -2260,7 +2259,7 @@ namespace SourceGen.AppForms {
 
                 if (sel.Count == 0) {
                     // Disable everything else.
-                    editDataFormatToolStripMenuItem.Enabled = false;
+                    editDataOperandEnabled = false;
                     hintAsCodeToolStripMenuItem.Enabled = false;
                     hintAsDataToolStripMenuItem.Enabled = false;
                     hintAsInlineDataToolStripMenuItem.Enabled = false;
@@ -2268,10 +2267,15 @@ namespace SourceGen.AppForms {
                 } else {
                     // Must be all data items.  Blank lines are okay.  Currently allowing
                     // control lines as well.
-                    editDataFormatToolStripMenuItem.Enabled =
+                    editDataOperandEnabled =
                         (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
                 }
             }
+
+            // Enable the "edit operand" menu item if either instruction or data operand
+            // editing is allowed.
+            editOperandToolStripMenuItem.Enabled =
+                editDataOperandEnabled || editInstrOperandEnabled;
 
             formatSplitAddressTableToolStripMenuItem.Enabled =
                 (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
@@ -2547,6 +2551,16 @@ namespace SourceGen.AppForms {
             }
 
             dlg.Dispose();
+        }
+
+        // Convert generic "edit operand" request to instruction or data edit call.
+        private void EditInstrDataOperand_Click(object sender, EventArgs e) {
+            ListView.SelectedIndexCollection sel = codeListView.SelectedIndices;
+            if (mDisplayList[sel[0]].LineType == DisplayList.Line.Type.Code) {
+                EditOperand_Click(sender, e);
+            } else {
+                EditData_Click(sender, e);
+            }
         }
 
         private void EditOperand_Click(Object sender, EventArgs e) {

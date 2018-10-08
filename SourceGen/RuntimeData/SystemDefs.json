@@ -140,7 +140,7 @@
       "Name" : "Atari Lynx",
       "GroupName" : "Atari",
       "Cpu" : "65SC02",
-      "Speed" : "4.00",
+      "Speed" : "4",
       "Description" : "Atari Lynx [placeholder].",
       "SymbolFiles" : [
       ],

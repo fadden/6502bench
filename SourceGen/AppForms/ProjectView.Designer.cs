@@ -72,6 +72,7 @@ namespace SourceGen.AppForms
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.editHeaderCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.projectPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toggleDataScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.actionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -79,7 +80,6 @@ namespace SourceGen.AppForms
             this.overrideStatusFlagsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editLabelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editOperandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editDataFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editLongCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editNoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -175,7 +175,6 @@ namespace SourceGen.AppForms
             this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
-            this.toggleDataScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -247,7 +246,6 @@ namespace SourceGen.AppForms
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.openToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
@@ -356,7 +354,7 @@ namespace SourceGen.AppForms
             this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
             this.undoToolStripMenuItem.ShortcutKeyDisplayString = "";
             this.undoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.undoToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.undoToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.undoToolStripMenuItem.Text = "Undo";
             this.undoToolStripMenuItem.Click += new System.EventHandler(this.undoToolStripMenuItem_Click);
             // 
@@ -364,33 +362,33 @@ namespace SourceGen.AppForms
             // 
             this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
             this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.redoToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.redoToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.redoToolStripMenuItem.Text = "Redo";
             this.redoToolStripMenuItem.Click += new System.EventHandler(this.redoToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(198, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(204, 6);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(198, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(204, 6);
             // 
             // selectAllToolStripMenuItem
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.selectAllToolStripMenuItem.Text = "Select All";
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
@@ -398,7 +396,7 @@ namespace SourceGen.AppForms
             // 
             this.findToolStripMenuItem.Name = "findToolStripMenuItem";
             this.findToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.findToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.findToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.findToolStripMenuItem.Text = "Find...";
             this.findToolStripMenuItem.Click += new System.EventHandler(this.findToolStripMenuItem_Click);
             // 
@@ -406,7 +404,7 @@ namespace SourceGen.AppForms
             // 
             this.findNextToolStripMenuItem.Name = "findNextToolStripMenuItem";
             this.findNextToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.findNextToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.findNextToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.findNextToolStripMenuItem.Text = "Find Next";
             this.findNextToolStripMenuItem.Click += new System.EventHandler(this.findNextToolStripMenuItem_Click);
             // 
@@ -414,38 +412,46 @@ namespace SourceGen.AppForms
             // 
             this.gotoToolStripMenuItem.Name = "gotoToolStripMenuItem";
             this.gotoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G)));
-            this.gotoToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.gotoToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.gotoToolStripMenuItem.Text = "Go To...";
             this.gotoToolStripMenuItem.Click += new System.EventHandler(this.gotoToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(198, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(204, 6);
             // 
             // editHeaderCommentToolStripMenuItem
             // 
             this.editHeaderCommentToolStripMenuItem.Name = "editHeaderCommentToolStripMenuItem";
-            this.editHeaderCommentToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.editHeaderCommentToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.editHeaderCommentToolStripMenuItem.Text = "Edit Header Comment...";
             this.editHeaderCommentToolStripMenuItem.Click += new System.EventHandler(this.editHeaderCommentToolStripMenuItem_Click);
             // 
             // projectPropertiesToolStripMenuItem
             // 
             this.projectPropertiesToolStripMenuItem.Name = "projectPropertiesToolStripMenuItem";
-            this.projectPropertiesToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.projectPropertiesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.projectPropertiesToolStripMenuItem.Text = "Project Properties...";
             this.projectPropertiesToolStripMenuItem.Click += new System.EventHandler(this.projectPropertiesToolStripMenuItem_Click);
+            // 
+            // toggleDataScanToolStripMenuItem
+            // 
+            this.toggleDataScanToolStripMenuItem.Name = "toggleDataScanToolStripMenuItem";
+            this.toggleDataScanToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
+            this.toggleDataScanToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.toggleDataScanToolStripMenuItem.Text = "Toggle Data Scan";
+            this.toggleDataScanToolStripMenuItem.Click += new System.EventHandler(this.toggleDataScanToolStripMenuItem_Click);
             // 
             // toolStripMenuItem7
             // 
             this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(198, 6);
+            this.toolStripMenuItem7.Size = new System.Drawing.Size(204, 6);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -456,7 +462,6 @@ namespace SourceGen.AppForms
             this.overrideStatusFlagsToolStripMenuItem,
             this.editLabelToolStripMenuItem,
             this.editOperandToolStripMenuItem,
-            this.editDataFormatToolStripMenuItem,
             this.editCommentToolStripMenuItem,
             this.editLongCommentToolStripMenuItem,
             this.editNoteToolStripMenuItem,
@@ -502,20 +507,16 @@ namespace SourceGen.AppForms
             // editOperandToolStripMenuItem
             // 
             this.editOperandToolStripMenuItem.Name = "editOperandToolStripMenuItem";
+            this.editOperandToolStripMenuItem.ShortcutKeyDisplayString = "";
+            this.editOperandToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.editOperandToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
             this.editOperandToolStripMenuItem.Text = "Edit Operand...";
-            this.editOperandToolStripMenuItem.Click += new System.EventHandler(this.EditOperand_Click);
-            // 
-            // editDataFormatToolStripMenuItem
-            // 
-            this.editDataFormatToolStripMenuItem.Name = "editDataFormatToolStripMenuItem";
-            this.editDataFormatToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
-            this.editDataFormatToolStripMenuItem.Text = "Edit Data Format...";
-            this.editDataFormatToolStripMenuItem.Click += new System.EventHandler(this.EditData_Click);
+            this.editOperandToolStripMenuItem.Click += new System.EventHandler(this.EditInstrDataOperand_Click);
             // 
             // editCommentToolStripMenuItem
             // 
             this.editCommentToolStripMenuItem.Name = "editCommentToolStripMenuItem";
+            this.editCommentToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+;";
             this.editCommentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Oem1)));
             this.editCommentToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
             this.editCommentToolStripMenuItem.Text = "Edit Comment...";
@@ -1449,14 +1450,6 @@ namespace SourceGen.AppForms
             this.infoTextBox.Size = new System.Drawing.Size(177, 120);
             this.infoTextBox.TabIndex = 0;
             // 
-            // toggleDataScanToolStripMenuItem
-            // 
-            this.toggleDataScanToolStripMenuItem.Name = "toggleDataScanToolStripMenuItem";
-            this.toggleDataScanToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.toggleDataScanToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.toggleDataScanToolStripMenuItem.Text = "Toggle Data Scan";
-            this.toggleDataScanToolStripMenuItem.Click += new System.EventHandler(this.toggleDataScanToolStripMenuItem_Click);
-            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1573,7 +1566,6 @@ namespace SourceGen.AppForms
         private System.Windows.Forms.ToolStripMenuItem overrideStatusFlagsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editLabelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editOperandToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem editDataFormatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editLongCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editNoteToolStripMenuItem;

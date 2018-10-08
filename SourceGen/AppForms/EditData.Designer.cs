@@ -506,7 +506,7 @@ namespace SourceGen.AppForms {
             this.Name = "EditData";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Edit Data";
+            this.Text = "Edit Data Format";
             this.Load += new System.EventHandler(this.EditData_Load);
             this.Shown += new System.EventHandler(this.EditData_Shown);
             this.symbolPartPanel.ResumeLayout(false);
