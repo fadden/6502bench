@@ -108,8 +108,8 @@ the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
 installer was able to get the 4.6.2 installer to work.)
 
 In theory, SourceGen can work with Mono under Linux and Mac OS X.  It
-currently crashes on startup with Mono 5.14.0 on Ubuntu, so it's uncertain
-when or if this will work.
+currently crashes on startup with Mono 5.14.0 on Ubuntu, down in the
+WinForms code, so it's uncertain when or if this will work.
 
 
 ## Getting Started ##
