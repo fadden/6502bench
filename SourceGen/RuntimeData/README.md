@@ -25,9 +25,9 @@ The following fields are mandatory:
 
 The currently-supported parameters are:
 
- * load-address=<addr> - Specify the initial load address.  The default
+ * load-address=&lt;addr&gt; - Specify the initial load address.  The default
    is 0x1000.
- * entry-flags=<flag-set> - Specify the processor status flag values to
+ * entry-flags=&lt;flag-set&gt; - Specify the processor status flag values to
    use at entry points.  This is intended for use on the 65802/65816, and
    may be one of "emulation", "native-short", and "native-long".  The
    default is "emulation".
