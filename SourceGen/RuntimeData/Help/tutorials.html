@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id=content>
+<div id="content">
 <h1>6502bench SourceGen: Tutorials</h1>
 <p><a href="index.html">Back to index</a></p>
 
@@ -43,7 +43,7 @@ window will have some information about the data file, once we choose one.</p>
 open the Examples folder, then open the "Tutorial" folder.  Select the
 file named "Tutorial1", and click "Open".</p>
 <p>The filename now appears in the bottom window, along with an indication
-of the file's size.
+of the file's size.</p>
 <p>Click OK to create the project.</p>
 
 
@@ -176,7 +176,7 @@ In the Edit Address dialog, type "2000", and hit Enter.)</p>
 
 <p>Note the way the code list has changed.  When you changed the address,
 the "JMP $2000" at L1014 found a home inside the bounds of the file, so
-the code tracer was able to find the instructions there.<p>
+the code tracer was able to find the instructions there.</p>
 <p>From the menu, select Edit &gt; Undo.  Notice how everything reverts to
 the way it was.  Now, select Edit &gt; Redo.  You can undo any change you
 make to the project.  (The undo history is <strong>not</strong> saved in
@@ -281,7 +281,7 @@ the "Address" radio button.  Click "OK".</p>
 <p>We just told SourceGen that those 10 bytes are actually five numeric
 references.  SourceGen determined that the addresses are contained in the
 file, and created labels for each of them.  Labels only work if they're
-on their own line, so each string is now in a separate ".STR" statement.
+on their own line, so each string is now in a separate ".STR" statement.</p>
 
 <p>Use File &gt; Save (or hit Ctrl+S) to save your hard work.</p>
 
@@ -329,7 +329,7 @@ and navigate to the Examples directory.  In A2-Amper-fdraw, select
 <p>Not a lot to see here -- just half a dozen lines of loads and stores.
 This particular program interfaces with Applesoft BASIC, so we can make it
 a bit more meaningful by loading an additional platform
-symbol file.  Select Edit > Project Properties, then the Symbol Files
+symbol file.  Select Edit &gt; Project Properties, then the Symbol Files
 tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
 directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
 click Open.  Click OK to close the project properties window.</p>
@@ -340,7 +340,7 @@ the filename -- so let's make that change.  Double-click the initial .ORG
 statement, and change it from $2000 to $1d60.  We can now see that $1d70
 starts right after this initial chunk of code.</p>
 
-<p>Select the line with address $1d70, then Actions > Hint As Code Entry Point.
+<p>Select the line with address $1d70, then Actions &gt; Hint As Code Entry Point.
 More code appears, but not much -- if you scroll down you'll see that most
 of the file is still data.  The code at $1d70 searches through a table at
 $1d88 for a match with the contents of the accumulator.  If it finds a match,
@@ -352,7 +352,7 @@ address minus one.</p>
 <p>The first byte in the first table at $1d97 (which has the auto-label
 L1D97) is $b4.  The first byte in the second table is $1d.  So the first
 address we want is $1db4 + 1 = $1db5.</p>
-<p>Select the line at $1db5, and use Actions > Hint As Code Entry Point.
+<p>Select the line at $1db5, and use Actions &gt; Hint As Code Entry Point.
 More code appears, but again it's only a few lines.  Let's dress this one
 up a bit.  Set a label on the code at $1db5 called "FUNC".  At $1d97, edit
 the data item (double-click on "$b4"), click "Single bytes", then type "FUNC"
@@ -380,13 +380,13 @@ we know that they're all code entry points.</p>
 <p>Click OK.  The table of address bytes should now all be references to
 symbols -- 15 low parts followed by 15 high parts.  If you scroll down,
 you should see nothing but instructions until you get to the last dozen
-bytes at the end of the file.  (If this isn't the case, use Edit > Undo,
+bytes at the end of the file.  (If this isn't the case, use Edit &gt; Undo,
 then work through the steps again.)</p>
 <p>The formatter did the same steps you went through earlier -- set a
 label, apply the label to the low and high bytes in the table, add a
 code entry point hint -- but did several of them at once.</p>
 
-<p>We don't want to save this project, so select File > Close.  When
+<p>We don't want to save this project, so select File &gt; Close.  When
 SourceGen asks if you want to continue, click OK.</p>
 
 
@@ -395,7 +395,7 @@ SourceGen asks if you want to continue, click OK.</p>
 
 </div>
 
-<div id=footer>
+<div id="footer">
 <p><a href="index.html">Back to index</a></p>
 </div>
 </body>

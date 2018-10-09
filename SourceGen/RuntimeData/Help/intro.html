@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id=content>
+<div id="content">
 <h1>6502bench SourceGen: Intro</h1>
 <p><a href="index.html">Back to index</a></p>
 
@@ -148,7 +148,7 @@ disassembly of the instruction stream will come out wrong.</p>
 
 <p>SourceGen employs a partial emulation technique that traces the flow
 of execution.  Most of what a given instruction does isn't important;
-only its effect on the flow of execution matters.  
+only its effect on the flow of execution matters.</p>
 
 <p>The code tracing has to start somewhere, so SourceGen uses "code entry
 point hints" to identify places where execution may begin.  By default,
@@ -231,7 +231,7 @@ L1009    CLC
 assumes those are data.  Further, the functions at those addresses may
 also be considered data unless some bit of code reachable from L1009
 calls into them.  If you add a code hint to $1003 and $1006,
-you'll get better results:
+you'll get better results:</p>
 <pre>
          .ORG    $1000
          JMP     L1009
@@ -343,13 +343,13 @@ to add comments explaining it.  SourceGen projects have three kinds of
 comments:</p>
 <ol>
   <li>End-of-line comments.  As the name implies, these appear at the
-    end of a line, to the right of the opcode or operand.
+    end of a line, to the right of the opcode or operand.</li>
   <li>Long comments, also known as multi-line comments.  These get a
-    line all to themselves, and may span multiple lines.
+    line all to themselves, and may span multiple lines.</li>
   <li>Notes.  Like long comments, these get a line to themselves.  Unlike
     long comments, these do not appear in generated assembly code.  They
     are a way for you to leave notes to yourself, perhaps "don't forget
-    to figure this out" or "this is the cool part".
+    to figure this out" or "this is the cool part".</li>
 </ol>
 <p>Every file offset can have one of each.</p>
 
@@ -372,9 +372,9 @@ different ways.</p>
 <p>The label syntax is restricted to a format that should be compatible
 with most assemblers:</p>
 <ul>
-  <li>2-32 characters long.
-  <li>Starts with a letter or underscore.
-  <li>Comprised of ASCII letters, numbers, and the underscore.
+  <li>2-32 characters long.</li>
+  <li>Starts with a letter or underscore.</li>
+  <li>Comprised of ASCII letters, numbers, and the underscore.</li>
 </ul>
 <p>Label comparisons are case-sensitive, as is customary for programming
 languages.</p>
@@ -442,7 +442,7 @@ symbol exists, the reference is used.  If the symbol can't be found, the
 operand is formatted in hex instead.</p>
 
 <p>It's important to know this when editing a project.  Consider the
-following trivial chunk of code:
+following trivial chunk of code:</p>
 
 <pre>
 1000: 4c0310     JMP     $1003
@@ -596,7 +596,7 @@ L1012    .DD1    $00
 the code is actually setting up a single 24-bit address.  For clarity,
 you'd like the output to reflect the fact that it's a single, multi-byte
 variable.  So, if you set a label at $1010, SourceGen removes the
-nearby auto labels, and sets the numeric references to use your label:
+nearby auto labels, and sets the numeric references to use your label:</p>
 
 <pre>
          .ORG    $1000
@@ -684,7 +684,7 @@ represent hundreds of bytes and span multiple lines.</p>
   <li>.BULK - data packed in as compact a form as the assembler allows.
     Useful for chunks of graphics data.</li>
   <li>.FILL - a series of identical bytes.  The operand
-    is the byte count, followed by the byte value.
+    is the byte count, followed by the byte value.</li>
 </ul>
 
 <p>In addition, several pseudo-ops are defined for string constants:</p>
@@ -708,7 +708,7 @@ uses in the
 
 </div>
 
-<div id=footer>
+<div id="footer">
 <p><a href="index.html">Back to index</a></p>
 </div>
 </body>
