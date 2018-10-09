@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id=content>
+<div id="content">
 <h1>6502bench SourceGen: Instruction and Data Analysis</h1>
 <p><a href="index.html">Back to index</a></p>
 
@@ -137,22 +137,22 @@ the changes are made, the Anattrib array and other data structures are
 regenerated.</p>
 
 <p>Data format editing can create some tricky situations.  For example,
-suppose you have 8 bytes that have been formatted as two 32-bit words:
+suppose you have 8 bytes that have been formatted as two 32-bit words:</p>
 
 <pre>
 1000: 68690074           .dd4    $74006968
 1004: 65737400           .dd4    $00747365
 </pre>
 
-You realize these are null-terminated strings, select both words, and
-reformat them:
+<p>You realize these are null-terminated strings, select both words, and
+reformat them:</p>
 
 <pre>
 1000: 686900             .zstr   "hi"
 1003: 74657374+          .zstr   "test"
 </pre>
 
-Seems simple enough.  Under the hood, SourceGen created three changes:
+<p>Seems simple enough.  Under the hood, SourceGen created three changes:</p>
 <ol>
   <li>At offset +000000, replace the current format descriptor (4-byte
     numeric) with a 3-byte null-terminated string descriptor.</li>
@@ -176,21 +176,21 @@ for every instruction:</p>
 <ol>
   <li>Continue.  Execution always continues at the next instruction.
     Examples: <code>LDA</code>, <code>STA</code>, <code>AND</code>,
-    <code>NOP</code>.
+    <code>NOP</code>.</li>
   <li>Don't continue.  The next instruction to be executed can't be
     determined from the file data (unless you're disassembling the
     system ROM around the BRK vector).
-    Examples: <code>RTS</code>, <code>BRK</code>.
+    Examples: <code>RTS</code>, <code>BRK</code>.</li>
   <li>Branch always.  The operand specifies the next instruction address.
-    Examples: <code>JMP</code>, <code>BRA</code>, <code>BRL</code>.
+    Examples: <code>JMP</code>, <code>BRA</code>, <code>BRL</code>.</li>
   <li>Branch sometimes.  Execution may continue at the operand address,
     or may execute the following instruction.  If we know the value of
     the flags in the processor status register, we can eliminate one
     possibility.  Examples: <code>BCC</code>, <code>BEQ</code>,
-    <code>BVS</code>.
+    <code>BVS</code>.</li>
   <li>Call subroutine.  Execution will continue at the operand address,
     and is expected to also continue at the following instruction.
-    Examples: <code>JSR</code>, <code>JSL</code>.
+    Examples: <code>JSR</code>, <code>JSL</code>.</li>
 </ol>
 
 <p>Branch targets are added to a list.  When the current run of instructions
@@ -247,10 +247,10 @@ override on the instruction following the PLP fixes things.)</p>
 <p>Some other things that the code analyzer can't recognize automatically:</p>
 <ul>
   <li>Jumping indirectly through an address outside the file, e.g.
-    storing an address in zero-page memory and jumping through it.
+    storing an address in zero-page memory and jumping through it.</li>
   <li>Jumping to an address by pushing the location onto the stack,
-    then executing an <code>RTS</code>.
-  <li>Self-modifying code, e.g. overwriting a <code>JMP</code> instruction.
+    then executing an <code>RTS</code>.</li>
+  <li>Self-modifying code, e.g. overwriting a <code>JMP</code> instruction.</li>
 </ul>
 <p>Sometimes the indirect jump targets are coming from a table of
 addresses in the file.  If so, these can be formatted as addresses,
@@ -311,7 +311,7 @@ byte values.</p>
 
 </div>
 
-<div id=footer>
+<div id="footer">
 <p><a href="index.html">Back to index</a></p>
 </div>
 </body>

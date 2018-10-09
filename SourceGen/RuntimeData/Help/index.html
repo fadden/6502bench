@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id=content>
+<div id="content">
 <h1>6502bench SourceGen</h1>
 <p>SourceGen is an interactive disassembler for 6502, 65C02, 65802,
 and 65816 code.  The official web site is
@@ -20,31 +20,31 @@ and 65816 code.  The official web site is
 
 <h2>Contents</h2>
 <ul>
-  <li><a href="intro.html">Overview</a></li>
+  <li><a href="intro.html">Overview</a>
   <ul>
     <li><a href="intro.html#fundamental-concepts">Fundamental Concepts</a></li>
     <li><a href="intro.html#begin">About 6502 Code</a></li>
-    <li><a href="intro.html#sgintro">How SourceGen Works</a></li>
+    <li><a href="intro.html#sgintro">How SourceGen Works</a>
     <ul>
       <li><a href="intro.html#scripts">Extension Scripts</a></li>
       <li><a href="intro.html#hints">Analyzer Hints</a></li>
-    </ul>
+    </ul></li>
     <li><a href="intro.html#sgconcepts">SourceGen Concepts</a></li>
-    <li><a href="intro.html#about-symbols">All About Symbols</a></li>
+    <li><a href="intro.html#about-symbols">All About Symbols</a>
     <ul>
       <li><a href="intro.html#weak-refs">Weak References</a></li>
       <li><a href="intro.html#symbol-parts">Parts and Adjustments</a></li>
       <li><a href="intro.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
-    </ul>
+    </ul></li>
     <li><a href="intro.html#width-disambiguation">Width Disambiguation</a></li>
     <li><a href="intro.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="mainwin.html">Using SourceGen</a></li>
+  <li><a href="mainwin.html">Using SourceGen</a>
   <ul>
     <li><a href="mainwin.html#starting-new">Starting a New Project</a></li>
     <li><a href="mainwin.html#opening">Opening an Existing Project</a></li>
-    <li><a href="mainwin.html#working">Working With a Project</a></li>
+    <li><a href="mainwin.html#working">Working With a Project</a>
     <ul>
       <li><a href="mainwin.html#code-list">Code List</a></li>
       <li><a href="mainwin.html#undo">Undo &amp; Redo</a></li>
@@ -58,10 +58,10 @@ and 65816 code.  The official web site is
       <li><a href="mainwin.html#toggle-format">Quick Format Toggle</a></li>
       <li><a href="mainwin.html#toggle-data">Toggle Data Scan</a></li>
       <li><a href="mainwin.html#clipboard">Copying to Clipboard</a></li>
-    </ul>
-  </ul>
+    </ul></li>
+  </ul></li>
 
-  <li><a href="editors.html">Editors</a></li>
+  <li><a href="editors.html">Editors</a>
   <ul>
     <li><a href="editors.html#address">Edit Address</a></li>
     <li><a href="editors.html#flags">Edit Status Flags</a></li>
@@ -72,77 +72,77 @@ and 65816 code.  The official web site is
     <li><a href="editors.html#long-comment">Edit Long Comment</a></li>
     <li><a href="editors.html#note">Edit Note</a></li>
     <li><a href="editors.html#project-symbol">Edit Project Symbol</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="codegen.html">Code Generation &amp; Assembly</a></li>
+  <li><a href="codegen.html">Code Generation &amp; Assembly</a>
   <ul>
-    <li><a href="codegen.html#supported">Supported Assemblers</a></li>
+    <li><a href="codegen.html#supported">Supported Assemblers</a>
     <ul>
       <li><a href="codegen.html#version">Version-Specific Code Generation</a></li>
-    </ul>
-    <li><a href="codegen.html#generate">Generating Source Code</a></li>
+    </ul></li>
+    <li><a href="codegen.html#generate">Generating Source Code</a>
     <ul>
       <li><a href="codegen.html#localizer">Label Localizer</a></li>
-    </ul>
+    </ul></li>
     <li><a href="codegen.html#assemble">Cross-Assembling Generated Code</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="settings.html">Properties &amp; Settings</a></li>
+  <li><a href="settings.html">Properties &amp; Settings</a>
   <ul>
-    <li><a href="settings.html#app-settings">Application Settings</a></li>
+    <li><a href="settings.html#app-settings">Application Settings</a>
     <ul>
       <li><a href="settings.html#appset-codeview">Code View</a></li>
       <li><a href="settings.html#appset-asmconfig">Asm Config</a></li>
       <li><a href="settings.html#appset-displayformat">Display Format</a></li>
       <li><a href="settings.html#appset-pseudoop">Pseudo-Op</a></li>
-    </ul>
-    <li><a href="settings.html#project-properties">Project Properties</a></li>
+    </ul></li>
+    <li><a href="settings.html#project-properties">Project Properties</a>
     <ul>
       <li><a href="settings.html#projprop-general">General</a></li>
       <li><a href="settings.html#projprop-projsym">Project Symbols</a></li>
       <li><a href="settings.html#projprop-symfiles">Symbol Files</a></li>
       <li><a href="settings.html#projprop-extscripts">Extension Scripts</a></li>
-    </ul>
-  </ul>
+    </ul></li>
+  </ul></li>
 
-  <li><a href="tools.html">Tools</a></li>
+  <li><a href="tools.html">Tools</a>
   <ul>
     <li><a href="tools.html#hexdump">Hex Dump Viewer</a></li>
     <li><a href="tools.html#ascii-chart">ASCII Chart</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="advanced.html">Advanced Topics</a></li>
+  <li><a href="advanced.html">Advanced Topics</a>
   <ul>
     <li><a href="advanced.html#platform-symbols">Platform Symbol Files (.sym65)</a></li>
     <li><a href="advanced.html#extension-scripts">Extension Scripts</a></li>
     <li><a href="advanced.html#multi-bin">Working With Multiple Binaries</a></li>
     <li><a href="advanced.html#overlap">Overlapping Address Spaces</a></li>
     <li><a href="advanced.html#debug">Debug Menu Options</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="analysis.html">Appendix: Instruction and Data Analysis</a></li>
+  <li><a href="analysis.html">Appendix: Instruction and Data Analysis</a>
   <ul>
-    <li><a href="analysis.html#analysis-process">Analysis Process</a></li>
+    <li><a href="analysis.html#analysis-process">Analysis Process</a>
     <ul>
       <li><a href="analysis.html#auto-format">Automatic Formatting</a></li>
       <li><a href="analysis.html#undo-redo">Interaction With Undo/Redo</a></li>
-    </ul>
-    <li><a href="analysis.html#code-analysis">Code Analysis</a></li>
+    </ul></li>
+    <li><a href="analysis.html#code-analysis">Code Analysis</a>
     <ul>
       <li><a href="analysis.html#extension-scripts">Extension Scripts</a></li>
-    </ul>
+    </ul></li>
     <li><a href="analysis.html#data-analysis">Data Analysis</a></li>
-  </ul>
+  </ul></li>
 
-  <li><a href="end-notes.html">End Notes</a></li>
+  <li><a href="end-notes.html">End Notes</a> </li>
 
   <br/>
 
-  <li><a href="tutorials.html">Tutorials</a></li>
+  <li><a href="tutorials.html">Tutorials</a>
   <ul>
     <li><a href="tutorials.html#basic-features">Basic Features</a></li>
     <li><a href="tutorials.html#advanced-features">Advanced Features</a></li>
-  </ul>
+  </ul></li>
 
 </ul>
 
@@ -150,8 +150,8 @@ and 65816 code.  The official web site is
 
 </div>
 
-<div id=footer>
-<hr>
+<div id="footer">
+<hr/>
 <p>Copyright 2018 faddenSoft</p>
 </div>
 </body>
