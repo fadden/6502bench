@@ -82,7 +82,7 @@ L3100    dfb   $02
 fwd      bit   fwd
          lda   ulabel
          lda   ulabel+1
-         lda   $300e
+         lda   ulabel+2
          lda   $300f
          lda   L3100
          beq   L3182

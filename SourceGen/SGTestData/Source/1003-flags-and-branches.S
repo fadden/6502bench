@@ -176,6 +176,25 @@ ok_oraN0
         brk     $db
 ok_oraN1
 
+; check rol/ror
+:foo    lda     :foo        ;scramble N/V
+        sec
+        ror     A           ;rotates the carry into the hi bit (N)
+        bmi     ok_ror1
+        brk     $dc
+ok_ror1
+        clc
+        ror     A           ;now try with carry clear
+        bpl     ok_ror2
+        brk     $dc
+ok_ror2
+        lda     #$00        ;set Z=1
+        sec
+        rol     A           ;set Z=0 (could also set C=0)
+        bne     ok_rol1
+        brk     $dc
+ok_rol1
+
 ; simple php/plp pair test
         clc
         php

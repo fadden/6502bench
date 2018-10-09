@@ -518,6 +518,9 @@ namespace Asm65 {
             condBranchTakenFlags = curFlags;
             // Invoke the flag update delegate.
             newFlags = StatusFlagUpdater(curFlags, immVal, ref condBranchTakenFlags);
+
+            // TODO(maybe): there are some constraints we can impose: if Z=1 then
+            //  N=0, and if N=1 then Z=0.  I'm not sure this is actually useful though.
         }
 
         private static StatusFlags FlagUpdater_NoChange(StatusFlags flags, int immVal,
@@ -610,6 +613,40 @@ namespace Asm65 {
             }
             if (hiBitSet) {
                 flags.N = 1;
+            }
+            return flags;
+        }
+        private static StatusFlags FlagUpdater_ROL(StatusFlags flags, int immVal,
+                ref StatusFlags condBranchTakenFlags) {
+            // this rotates the N flag into C, so set C=N
+            // if carry is one, set Z=0; otherwise set Z/N=indeterminate
+            // (if Z=1 we should set Z=C, but this seems rare and I don't entirely trust Z)
+            if (flags.C == 1) {
+                flags.C = flags.N;
+                flags.Z = 0;
+                flags.N = TriState16.INDETERMINATE;
+            } else {
+                flags.C = flags.N;
+                flags.Z = flags.N = TriState16.INDETERMINATE;
+            }
+            return flags;
+        }
+        private static StatusFlags FlagUpdater_ROR(StatusFlags flags, int immVal,
+                ref StatusFlags condBranchTakenFlags) {
+            // if carry is set, set Z=0 and N=1;
+            // if carry is clear, set N=0;
+            // if carry is clear and Z=1, everything is zero and no flags change
+            //  (this seems unlikely, so I'm going to assume we've mis-read a flag and ignore this)
+            // otherwise, Z/N/C=indeterminate
+            if (flags.C == 1) {
+                flags.Z = 0;
+                flags.N = 1;
+                flags.C = TriState16.INDETERMINATE;
+            } else if (flags.C == 0) {
+                flags.N = 0;
+                flags.Z = flags.C = TriState16.INDETERMINATE;
+            } else {
+                flags.C = flags.Z = flags.N = TriState16.INDETERMINATE;
             }
             return flags;
         }
@@ -1077,13 +1114,13 @@ namespace Asm65 {
             Mnemonic = OpName.ROL,
             Effect = FlowEffect.Cont,
             FlagsAffected = FlagsAffected_NZC,
-            StatusFlagUpdater = FlagUpdater_NZC
+            StatusFlagUpdater = FlagUpdater_ROL
         };
         private static OpDef OpROR = new OpDef() {
             Mnemonic = OpName.ROR,
             Effect = FlowEffect.Cont,
             FlagsAffected = FlagsAffected_NZC,
-            StatusFlagUpdater = FlagUpdater_NZC
+            StatusFlagUpdater = FlagUpdater_ROR
         };
         private static OpDef OpRTI = new OpDef() {
             Mnemonic = OpName.RTI,

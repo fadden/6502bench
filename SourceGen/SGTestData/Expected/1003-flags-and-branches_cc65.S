@@ -196,41 +196,64 @@ L10DD:   ora     #$80
          .byte   $00
          .byte   $db
 
-L10E3:   clc
+L10E3:   lda     L10E3
+         sec
+         ror     A
+         bmi     L10EC
+
+         .byte   $00
+         .byte   $dc
+
+L10EC:   clc
+         ror     A
+         bpl     L10F2
+
+         .byte   $00
+         .byte   $dc
+
+L10F2:   lda     #$00
+         sec
+         rol     A
+         bne     L10FA
+
+         .byte   $00
+         .byte   $dc
+
+L10FA:   clc
          php
          sec
          plp
-         bcc     L10EB
+         bcc     L1102
 
          .byte   $00
          .byte   $00
 
-L10EB:   rep     #$20
+L1102:   rep     #$20
          .a16
          sep     #$10
-         jsr     L1106
+         jsr     L111D
          rep     #$30
          .i16
-         jsr     L110C
+         jsr     L1123
          sep     #$30
          .a8
          .i8
-         jsr     L110C
+         jsr     L1123
          rep     #$20
          .a16
          sep     #$10
-         jsr     L1106
+         jsr     L111D
          sep     #$30
          .a8
          rts
 
          .a16
-L1106:   lda     #$1234
+L111D:   lda     #$1234
          ldx     #$ff
          rts
 
          .a8
-L110C:   lda     #$ff
+L1123:   lda     #$ff
          ldx     #$ee
          ldy     #$dd
          rts

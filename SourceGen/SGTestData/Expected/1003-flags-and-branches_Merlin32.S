@@ -191,40 +191,63 @@ L10DD    ora   #$80
          dfb   $00
          dfb   $db
 
-L10E3    clc
+L10E3    lda   L10E3
+         sec
+         ror   A
+         bmi   L10EC
+
+         dfb   $00
+         dfb   $dc
+
+L10EC    clc
+         ror   A
+         bpl   L10F2
+
+         dfb   $00
+         dfb   $dc
+
+L10F2    lda   #$00
+         sec
+         rol   A
+         bne   L10FA
+
+         dfb   $00
+         dfb   $dc
+
+L10FA    clc
          php
          sec
          plp
-         bcc   L10EB
+         bcc   L1102
 
          dfb   $00
          dfb   $00
 
-L10EB    rep   #$20
+L1102    rep   #$20
          mx    %01
          sep   #$10
-         jsr   L1106
+         jsr   L111D
          rep   #$30
          mx    %00
-         jsr   L110C
+         jsr   L1123
          sep   #$30
          mx    %11
-         jsr   L110C
+         jsr   L1123
          rep   #$20
          mx    %01
          sep   #$10
-         jsr   L1106
+         jsr   L111D
          sep   #$30
          mx    %11
          rts
 
          mx    %01
-L1106    lda   #$1234
+L111D    lda   #$1234
          ldx   #$ff
          rts
 
          mx    %11
-L110C    lda   #$ff
+L1123    lda   #$ff
          ldx   #$ee
          ldy   #$dd
          rts
