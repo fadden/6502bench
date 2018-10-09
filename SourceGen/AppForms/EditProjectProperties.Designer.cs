@@ -141,9 +141,9 @@ namespace SourceGen.AppForms {
             this.seekAltTargetCheckBox.AutoSize = true;
             this.seekAltTargetCheckBox.Location = new System.Drawing.Point(7, 45);
             this.seekAltTargetCheckBox.Name = "seekAltTargetCheckBox";
-            this.seekAltTargetCheckBox.Size = new System.Drawing.Size(130, 17);
+            this.seekAltTargetCheckBox.Size = new System.Drawing.Size(121, 17);
             this.seekAltTargetCheckBox.TabIndex = 3;
-            this.seekAltTargetCheckBox.Text = "Seek alternate targets";
+            this.seekAltTargetCheckBox.Text = "Seek nearby targets";
             this.seekAltTargetCheckBox.UseVisualStyleBackColor = true;
             this.seekAltTargetCheckBox.CheckedChanged += new System.EventHandler(this.seekAltTargetCheckBox_CheckedChanged);
             // 

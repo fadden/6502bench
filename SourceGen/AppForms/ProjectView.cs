@@ -1021,6 +1021,7 @@ namespace SourceGen.AppForms {
             mReanalysisTimer.StartTask("Generate DisplayList");
             mDisplayList.GenerateAll();
             mReanalysisTimer.EndTask("Generate DisplayList");
+            UpdateSelectionHighlight();
         }
 
         #endregion Project management

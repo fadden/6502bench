@@ -195,7 +195,7 @@ it and check the References window.)</p>
 comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
 
-<h3>Editing Operands</h3>
+<h3>Editing Instruction Operands</h3>
 
 <p>The operand in the LDA instruction at line $2000 refers to an address
 ($3000) that isn't part of the file.  We want to create an equate directive to
@@ -239,7 +239,7 @@ symbolic reference, there's another option in the Edit Operand dialog that
 does it.)</p>
 
 
-<h3>Editing Data Formats</h3>
+<h3>Editing Data Operands</h3>
 
 <p>There's some string and numeric data down at the bottom of the file.  The
 final string appears to be multiple strings stuck together.  Notice that
@@ -247,8 +247,10 @@ the opcode for the very last line is '+', which means it's a continuation
 of the previous line.  Long data items can span multiple lines, split
 every 64 characters (including delimiters), but they are still single
 items: selecting any part selects the whole.</p>
-<p>Select the last line, then Edit &gt; Edit Data Format.  At the top of the
-dialog that appears, it will say "65 bytes selected".  You can format this
+<p>Select the last line, then Actions &gt; Edit Operand.  You'll notice
+that this dialog is much different from the one you got when editing the
+operand of an instruction.  At the top it will say "65 bytes selected".  You
+can format this
 as a single 65-byte string, as 65 individual items, or various things
 in between.  For now, select "Single bytes", and then on the right,
 select "ASCII".  Click "OK".</p>
@@ -256,8 +258,8 @@ select "ASCII".  Click "OK".</p>
 same set of addresses.</p>
 <p>Select address $203D on its own, then Actions &gt; Edit Label.  Set the
 label to "STR1".  Move up a bit and select address $2030, then scroll to
-the bottom and shift-click address $2070.  Select Actions &gt; Edit Data
-Format.  At the top it should now say, "65 bytes selected in 2 groups".
+the bottom and shift-click address $2070.  Select Actions &gt; Edit Operand.
+At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
 two separate regions.  Select "mixed ASCII and non-ASCII", then click
 "OK".</p>
@@ -274,7 +276,7 @@ Format (or hit Ctrl+B).</p>
 <p>The data starting at $2025 appears to be 16-bit addresses that point
 into the table of strings, so let's format them appropriately.</p>
 <p>Select the line at $2025, then shift-click the line at $202E.  Select
-Actions &gt; Edit Data Format.  If you selected the correct set of bytes,
+Actions &gt; Edit Operand.  If you selected the correct set of bytes,
 the top should say, "10 bytes selected".  Click the
 "16-bit words, little-endian" radio button, then over to the right, click
 the "Address" radio button.  Click "OK".</p>
@@ -307,12 +309,10 @@ it should always match exactly.)</p>
 <p>Click "Close" to close the window.</p>
 
 
-<h3>Go Forth</h3>
+<h3>End of Part One</h3>
 
-<p>That's it for the basic tutorial.  Play with the program some more to see
-what it can do, or do something wild like read the manual.</p>
-<p>While you can do some fancy things, nothing you do will alter the
-data file.  The assembled output will always match the original.</p>
+<p>At this point you know enough to work with a SourceGen project.  Continue
+on to the next tutorial to learn more.</p>
 
 
 <h2><a name="advanced-features">Advanced Features</a></h2>
@@ -390,8 +390,161 @@ code entry point hint -- but did several of them at once.</p>
 SourceGen asks if you want to continue, click OK.</p>
 
 
-<h3>[to be continued]</h3>
+<h3>Going Deeper</h3>
 
+<p>Start a new project.  Select "Generic 6502".  For the data file, navigate
+to the Examples directory, then from the Tutorials directory
+select "Tutorial2".</p>
+<p>The first thing you'll notice is that we immediately ran into a BRK,
+which is a pretty reliable sign that we're not in a code section.  The
+generic profile puts a code entry point hint on the first byte, but that's
+wrong here.  This particular file begins with <code>00 20</code>, which
+could be a load address (C64 binaries look like this).  So let's start
+with that assumption.</p>
+<p>Click on the first line of code at address $1000, and select
+Actions &gt; Remove Hints.  The $20 got absorbed into a string.  The string
+is making it hard to manipulate the next few bytes, so let's fix that by
+selecting Edit &gt; Toggle Data Scan.  This turns off the feature that
+looks for strings and .FILL regions, so now each uncategorized byte is
+on its own line.</p>
+<p>Select the first two lines, use Actions &gt; Edit Operand, and format
+it as a 16-bit little-endian word.  We're assuming this is the load
+address for the data that follows, so click on the line with address
+$1002, select Actions &gt; Set Address, and enter "2000".  With that
+line still selected, use Actions &gt; Hint As Code Entry Point to identify
+it as code.</p>
+<p>That looks better, but it's branching off the bottom of the screen
+(unless you have a really tall screen or small fonts) because of all the
+intervening data.  Use Edit &gt; Toggle Data Scan to turn the string
+finder back on.</p>
+
+<p>There are four strings starting at address $2004, each of which is
+followed by $00.  These look like null-terminated strings, so let's make
+it official.  But first, let's do it wrong.  Click on the line with
+address $2004 to select it.  Hold the shift key down, then double-click
+on the operand field of the line with address $2031 (i.e. click on
+"last string").</p>
+<p>The Edit Data Format dialog opens, but the null-terminated strings
+option is not available.  This is because we didn't include the null byte
+on the last string.  To be recognized as one of the "special" string types,
+every selected string must match the expected pattern.</p>
+<p>Cancel out of the dialog.  Hold the control key down, and double-click
+on the operand on line $203c ($00).  Control-clicking adds the line to
+the selection, and double-clicking the operand reopens the dialog.  You
+should see "Null-terminated strings (4)" as an available option now.  Click
+on that, then click OK.  The strings are now shown as .ZSTR.</p>
+
+<p>It's wise to save your work periodically.  Use File &gt; Save to create
+a project file for Tutorial2.</p>
+
+<h4>Pointers and Parts</h4>
+
+<p>Let's move on to the code at $203d.  It starts by storing a couple of
+values into direct page address $02/03.  This appears to be setting up a
+pointer to $2063, which is a data area inside the file.  So let's make it
+official.</p>
+<p>Select line $2063, and use Actions &gt; Edit Label to give it the
+label "XDATA".  Now edit the operand on line $203d, and set it to the
+symbol "XDATA", with the part "low".  Edit the operand on line $2043,
+and set it to "XDATA" with the part "high".  (Note the symbol text box
+gets focus immediately, so you can start typing the symbol name as soon
+as the dialog opens; you don't need to click around first.)  If all
+went well, the operands should now read <code>LDA #&lt;XDATA</code>
+and <code>LDA #&gt;XDATA</code>.</p>
+<p>Let's name the pointer.  Edit the operand on line $203f, enter the
+symbol "PTR1", and in the Symbol Shorcuts section, click "Set operand
+AND create project symbol".  Click OK.  Note that operand on line $2043
+has changed to "PTR1+1".</p>
+<p>Double-click on the JSR on line $2045 to jump to L209A.  This just
+loads a value from $3000 into the accumulator and returns, so not much
+to see here.  Hit the back-arrow in the toolbar to jump back to the JSR.</p>
+<p>The next bit of code masks the accumulator so it holds a value between
+0 and 3, then doubles it and uses it as an index into PTR1.  We know PTR1
+points to XDATA, which looks like it has some 16-bit addresses.  The
+values loaded are stored in two more zero-page locations, $04-05.</p>
+<p>$04 is being displayed as "PTR1+2", which isn't quite right, so let's
+fix that.  Double-click on the operand of address $204e, set the symbol
+to "PTR2", and again click "Set operand AND create project symbol".
+Click OK.  That looks better.</p>
+
+<p>The next bit of code copies bytes from PTR2 to $0400, stopping when it
+hits a zero byte.  Looks like this is copying null-terminated strings.
+This confirms our idea that XDATA holds 16-bit addresses, so let's
+format it.  Select lines $2063 to $2066, and Actions &gt; Edit Operand.
+It should say "8 bytes selected" at the top.  Select "16-bit words,
+little-endian", and then from the Display As box, select "Address".
+Click OK.  If you scroll up, you'll see that your .ZSTR strings now have
+labels that match the labels in XDATA.</p>
+<p>Now that we know what XDATA holds, let's rename it.  Change the label
+to STRADDR.  The symbol parts in the operands at $203d and $2041 update
+automatically.</p>
+
+<p>Let's pause briefly to look at the cycle-count feature.  Use
+Edit &gt; Settings to open the app settings panel, then select the
+Asm Config tab.  Click the "Show cycle counts" checkbox, then click OK.</p>
+<p>Every line with an instruction now has a cycle count on it.  The cycle
+counts are adjusted for everything SourceGen can figure out.  For example,
+the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
+cycles but might take more.  That's because conditional branches take an
+extra cycles if the branch is taken.  The BNE on line $2061" shows 3 cycles,
+because we know that the branch is always taken.</p>
+<p>The cycle-count comments are included in assembled output as well.  If
+you add an end-of-line comment, it appears after the cycle count.</p>
+<p>Hit Ctrl+S to save your project.  Make that a habit.</p>
+
+<h4>Odds &amp; Ends</h4>
+
+<p>The rest of the code isn't really intended to do anything useful.  It
+just exists to illustrate some odd situations.</p>
+<p>Look at the code starting at $206b.  It ends with a BRK at $2074, which
+as noted earlier is a bad sign.  If you look up two lines, you'll see that
+it's loading the accumulator with zero, then doing a BNE, which should never
+be taken (note the cycle count for the BNE is 2).  The trick is in the
+two lines before that, which use self-modifying code to change the LDA
+immediate operand from $00 to $ff.  The BNE is actually a branch-always.</p>
+<p>We can fix this by correcting the status flags.  Select line $2072,
+and then Actions &gt; Override Status Flags.  This lets us specify what
+the flags should be before the instruction is executed.  For each flag,
+we can override the default behavior and specify that the flag is
+clear (0), set (1), or indeterminate (could be 0 or 1).  In this case,
+we know that the self-modified code will be loading a non-zero value, so
+in the "Z" column click on the button in the "Zero" row.  Click OK.  The
+BNE is now an always-taken branch, and the code list rearranges itself
+appropriately (and the cycle count is now 3).</p>
+
+<p>Continuing on, the code at $2079 touches a few consecutive locations.  Edit
+the label on line $2074, setting it to "VAR".  Notice how the references
+to $2074 through $2077 have changed from auto-generated labels to
+references to VAR.  For some projects this may be undesirable.  Use
+Edit &gt; Project Properties, then in the Analysis Parameters box
+un-check "Seek nearby targets", and click OK.  You'll notice that the
+references to $2075 on have switched back to auto labels.  Furthermore, if
+you scroll up, you'll see that the stores to PTR1+1 and PTR2+1 are now
+just stores to $03 and $05.</p>
+<p>The nearby-target behavior is generally desirable, because it lets you
+avoid explicitly labeling every part of a multi-byte data item.  For now,
+use Edit &gt; Undo to turn it back on.</p>
+
+<p>The code at $2085 looks a bit strange.  LDX, then a BIT with a weird
+symbol, then another LDX.  If you look at the "bytes" column, you'll notice
+that the three-byte BIT instruction has only one byte on its line.  The
+trick here is that the <code>LDX #$01</code> is embedded inside the BIT
+instruction.  When the code runs through here, X is set to $00, then
+the BIT instruction sets some flags, then the STA runs.  Several lines
+down there's a BNE to $2088, which is in the middle of the BIT instruction.
+It loads X with $01, then also continues to the STA.</p>
+<p>Embedded instructions are unusual but not unheard-of.  When you see the
+extra symbol in the opcode field, you need to look closely at what's going
+on.</p>
+
+
+<h3>Go Forth</h3>
+
+<p>That's it for the tutorials.  There's significantly more detail on
+all aspects of SourceGen in the manual.</p>
+<p>While you can do some fancy things, nothing you do will alter the
+data file.  The assembled output will always match the original.  So
+don't be afraid to play around.</p>
 
 </div>
 
