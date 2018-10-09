@@ -10,7 +10,7 @@ You can download the source code and build it yourself, or click the
 [Releases tab](https://github.com/fadden/6502bench/releases) for
 pre-built downloads.
 
-**Wanted:** ROM/OS symbols for various systems, notably Commodore and Atari
+**NEEDED:** ROM/OS symbols for various systems, notably Commodore and Atari
 home computers.
 
 
