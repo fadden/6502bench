@@ -8,7 +8,7 @@
 
 ; It may be necessary to review the analyzer output to verify certain things.
 
-MAGIC   equ     $2456
+MAGIC   equ     $2456           ;recognized by extension script
 
         org     $1000
 
@@ -30,9 +30,9 @@ inneri  ldx     #$ff            ;EDIT: add inline data hint to middle byte (a2);
         nop
         jsr     inneri          ;analyzer should follow this path
 
-        jsr     MAGIC           ;next 4 bytes are inline data
-magic11 lda     #$11
-        ldx     #$22
+        jsr     MAGIC           ;next 4 bytes are inline data tagged by the
+magic11 lda     #$11            ; extension script -- if they show up as
+        ldx     #$22            ; LDA/LDX, the script isn't working
 
         jsr     magic11         ;analyzer should ignore this path
 

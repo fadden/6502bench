@@ -44,7 +44,7 @@ namespace SourceGen.Sandbox {
         /// List of assemblies for the CompilerParameters.ReferencedAssemblies argument.
         /// </summary>
         private static readonly string[] sRefAssem = new string[] {
-            // Need this for various things to work.
+            // Need this for various things to work, like System.Collections.Generic.
             "netstandard.dll",
 
             // Plugins are implemented in terms of interfaces defined here.
