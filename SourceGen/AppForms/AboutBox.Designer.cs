@@ -65,7 +65,7 @@ namespace SourceGen.AppForms {
             this.sourceGenLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.sourceGenLabel.Location = new System.Drawing.Point(340, 13);
             this.sourceGenLabel.Name = "sourceGenLabel";
-            this.sourceGenLabel.Size = new System.Drawing.Size(349, 37);
+            this.sourceGenLabel.Size = new System.Drawing.Size(346, 37);
             this.sourceGenLabel.TabIndex = 1;
             this.sourceGenLabel.Text = "6502bench SourceGen";
             // 
@@ -164,7 +164,7 @@ namespace SourceGen.AppForms {
             this.Name = "AboutBox";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "AboutBox";
+            this.Text = "About SourceGen";
             this.Load += new System.EventHandler(this.AboutBox_Load);
             ((System.ComponentModel.ISupportInitialize)(this.boardPictureBox)).EndInit();
             this.ResumeLayout(false);

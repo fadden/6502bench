@@ -276,7 +276,7 @@ namespace SourceGen.AppForms {
 
         private void InitCodeListView() {
             ListView cv = codeListView;
-            cv.View = View.Details;
+            //cv.View = View.Details;
 
             // Create an empty place-holder for the context menu.
             codeListView.ContextMenuStrip = new ContextMenuStrip();
@@ -1613,7 +1613,7 @@ namespace SourceGen.AppForms {
             mCodeViewSelection = new VirtualListViewSelection();
             mDisplayList = null;
             codeListView.VirtualListSize = 0;
-            codeListView.Items.Clear();
+            //codeListView.Items.Clear();
             ShowNoProject();
             InvalidateControls(null);
 

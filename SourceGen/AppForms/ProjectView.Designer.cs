@@ -1211,6 +1211,7 @@ namespace SourceGen.AppForms
             this.codeListView.Size = new System.Drawing.Size(446, 543);
             this.codeListView.TabIndex = 0;
             this.codeListView.UseCompatibleStateImageBehavior = false;
+            this.codeListView.View = System.Windows.Forms.View.Details;
             this.codeListView.VirtualMode = true;
             this.codeListView.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(this.codeListView_CacheVirtualItems);
             this.codeListView.ColumnWidthChanged += new System.Windows.Forms.ColumnWidthChangedEventHandler(this.codeListView_ColumnWidthChanged);
@@ -1227,47 +1228,47 @@ namespace SourceGen.AppForms
             // columnOffset
             // 
             this.columnOffset.Text = "offset";
-            this.columnOffset.Width = -2;
+            this.columnOffset.Width = 0;
             // 
             // columnAddr
             // 
             this.columnAddr.Text = "addr";
-            this.columnAddr.Width = -2;
+            this.columnAddr.Width = 0;
             // 
             // columnBytes
             // 
             this.columnBytes.Text = "bytes";
-            this.columnBytes.Width = -2;
+            this.columnBytes.Width = 0;
             // 
             // columnFlags
             // 
             this.columnFlags.Text = "flags";
-            this.columnFlags.Width = -2;
+            this.columnFlags.Width = 0;
             // 
             // columnAttr
             // 
             this.columnAttr.Text = "attr";
-            this.columnAttr.Width = -2;
+            this.columnAttr.Width = 0;
             // 
             // columnLabel
             // 
             this.columnLabel.Text = "label";
-            this.columnLabel.Width = -2;
+            this.columnLabel.Width = 0;
             // 
             // columnOpcode
             // 
             this.columnOpcode.Text = "opcode";
-            this.columnOpcode.Width = -2;
+            this.columnOpcode.Width = 0;
             // 
             // columnOperand
             // 
             this.columnOperand.Text = "operand";
-            this.columnOperand.Width = -2;
+            this.columnOperand.Width = 0;
             // 
             // columnComment
             // 
             this.columnComment.Text = "comment";
-            this.columnComment.Width = -2;
+            this.columnComment.Width = 0;
             // 
             // rightPanelSplitter
             // 
