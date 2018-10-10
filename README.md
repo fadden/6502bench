@@ -35,6 +35,7 @@ as well as many less-common ones.
   verify correctness.
 - Symbols and constants are provided for ROM and operating system entry
   points on several popular systems.
+- Project files are designed for sharing and collaboration.</li>
 
 A demo video is [available on YouTube](https://youtu.be/dalISyBPQq8).
 
