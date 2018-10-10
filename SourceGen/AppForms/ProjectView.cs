@@ -200,6 +200,14 @@ namespace SourceGen.AppForms {
         }
 
         private void ProjectView_Load(object sender, EventArgs e) {
+            // It's *really* unstable right now, so actively discourage its use.
+            if (Type.GetType("Mono.Runtime") != null) {
+                MessageBox.Show(this,
+                    "WARNING: SourceGen is currently unstable under Mono. " +
+                    "Many features are badly broken. Proceed at your own risk.",
+                    "Danger! Danger!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
             if (RuntimeDataAccess.GetDirectory() == null) {
                 MessageBox.Show(this, Properties.Resources.RUNTIME_DIR_NOT_FOUND,
                     Properties.Resources.RUNTIME_DIR_NOT_FOUND_CAPTION,
