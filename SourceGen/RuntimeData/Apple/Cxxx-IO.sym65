@@ -6,10 +6,6 @@
 
 *SYNOPSIS Symbols from the Cxxx I/O area, common to most Apple II models.
 
-_hex = $4321
-_dec = 1234
-_bin = %011011
-
 ; There's a lot here that you wouldn't find on an Apple ][+, but since
 ; this is for a disassembler it's okay to have extra stuff so long as it
 ; doesn't conflict.
