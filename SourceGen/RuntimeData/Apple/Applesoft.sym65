@@ -10,9 +10,16 @@ HCOLOR1     @ $1C       ;hi-res color mask
 COUNTH      @ $1D       ;hi-res high-order byte of step for line
 HBASL       @ $26       ;base address for hi-res drawing
 
+RNDL        @ $4E       ;low byte of KEYIN "random" value
+RNDH        @ $4F       ;high byte of KEYIN "random" value
 LINNUM      @ $50       ;line number ($50-51)
-TEXTTAB     @ $67       ;pointer to start of Applesoft program ($67-68)
-VARTAB      @ $69       ;pointer to start of Applesoft variables ($69-6A)
+TEXTTAB     @ $67       ;pointer to start of Applesoft program (2b)
+VARTAB      @ $69       ;pointer to start of Applesoft variables (2b)
+ARYTAB      @ $6B       ;pointer to start of Applesoft array space (2b)
+STREND      @ $6D       ;pointer to end of numeric storage (2b)
+FRETOP      @ $6F       ;pointer to end of string storage (2b)
+MEMSIZE     @ $73       ;Applesoft HIMEM (2b)
+CURLIN      @ $75       ;Applesoft current line number (2b)
 FACMO       @ $A0       ;middle-order byte of mantissa of FAC
 FACLO       @ $A1       ;low-order byte of mantissa of FAC
 FACSIGN     @ $A2       ;single byte sign of FAC
