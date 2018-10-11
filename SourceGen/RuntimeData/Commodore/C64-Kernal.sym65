@@ -1,0 +1,54 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts taken from multiple sources:
+;   cc65 2.17, libsrc/c65/kernal.s
+;    Copyright Ullrich von Bassewitz (BSD license)
+;   "Commodore 64 ROM Addresses", author unknown; found on web:
+;    http://commodore64.se/wiki/index.php/Commodore_64_ROM_Addresses
+;   "Important JSRs", by Vbas
+;    https://www.lemon64.com/forum/viewtopic.php?t=68960
+
+*SYNOPSIS C64 Kernal addresses and constants
+
+;
+; C64 Kernal jump table
+;
+CINT            @ $FF81     ;init editor & video chip
+IOINIT          @ $FF84     ;init I/O devices, ports, and timers
+RAMTAS          @ $FF87     ;init ram and buffers
+RESTOR          @ $FF8A     ;restore default I/O vectors
+VECTOR          @ $FF8D     ;read/set I/O vector table
+SETMSG          @ $FF90     ;set Kernal message control flag
+SECOND          @ $FF93     ;send SA after listen
+TKSA            @ $FF96     ;send SA after talk
+MEMTOP          @ $FF99     ;set/read system RAM top
+MEMBOT          @ $FF9C     ;set/read system RAM bottom
+SCNKEY          @ $FF9F     ;scan keyboard
+SETTMO          @ $FFA2     ;set timeout for IEEE bus
+ACPTR           @ $FFA5     ;handshake serial byte in
+CIOUT           @ $FFA8     ;handshake serial byte out
+UNTLK           @ $FFAB     ;command serial bus UNTALK
+UNLSN           @ $FFAE     ;command serial bus UNLISTEN
+LISTEN          @ $FFB1     ;command serial bus LISTEN
+TALK            @ $FFB4     ;command serial bus TALK
+READST          @ $FFB7     ;read I/O status word
+SETLFS          @ $FFBA     ;set logical file parameters
+SETNAM          @ $FFBD     ;set filename
+OPEN            @ $FFC0     ;($031A/iopen) open logical file
+CLOSE           @ $FFC3     ;($031C/iclose) close logical file
+CHKIN           @ $FFC6     ;($031E/ichkin) define input channel
+CKOUT           @ $FFC9     ;($0320/ichkout) define output channel
+CLRCH           @ $FFCC     ;($0322/iclrch) restore default devices
+BASIN           @ $FFCF     ;($0324/ichrin) input vector, chrin
+BSOUT           @ $FFD2     ;($0326/ichrout) output vector, chrout
+LOAD            @ $FFD5     ;load from device
+SAVE            @ $FFD8     ;save to device
+SETTIM          @ $FFDB     ;set real-time clock
+RDTIM           @ $FFDE     ;read real-time clock
+STOP            @ $FFE1     ;($0328/istop) check the STOP key
+GETIN           @ $FFE4     ;($032A/igetin) get from keyboard
+CLALL           @ $FFE7     ;($032C/iclall) close all channels and files
+UDTIM           @ $FFEA     ;update real-time clock
+SCREEN          @ $FFED     ;return screen organization
+PLOT            @ $FFF0     ;read/set cursor X/Y position
+IOBASE          @ $FFF3     ;return I/O base address

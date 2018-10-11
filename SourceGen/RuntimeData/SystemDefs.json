@@ -167,8 +167,9 @@
       "GroupName" : "Commodore",
       "Cpu" : "6510",
       "Speed" : "1.023",
-      "Description" : "Commodore 64 [placeholder].",
+      "Description" : "Commodore 64 home computer.",
       "SymbolFiles" : [
+        "RT:Commodore/C64-Kernal.sym65"
       ],
       "ExtensionScripts" : [
       ],
