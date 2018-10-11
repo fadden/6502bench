@@ -932,6 +932,11 @@ namespace SourceGen.AppForms {
                 string timerStr = mReanalysisTimer.DumpToString("ProjectView timers:");
                 mShowAnalysisTimersDialog.BodyText = timerStr;
             }
+
+            // Lines may have moved around.  Update the selection highlight.  It's important
+            // we do it here, and not down in DoRefreshProject(), because at that point the
+            // ListView's selection index could be referencing a line off the end.
+            UpdateSelectionHighlight();
         }
 
         /// <summary>
@@ -1029,7 +1034,6 @@ namespace SourceGen.AppForms {
             mReanalysisTimer.StartTask("Generate DisplayList");
             mDisplayList.GenerateAll();
             mReanalysisTimer.EndTask("Generate DisplayList");
-            UpdateSelectionHighlight();
         }
 
         #endregion Project management
