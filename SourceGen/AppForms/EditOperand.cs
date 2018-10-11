@@ -391,11 +391,13 @@ namespace SourceGen.AppForms {
 
             if (mAttr.OperandOffset >= 0) {
                 // Operand target is inside the file.  Does the target offset already have a label?
-                bool hasLabel = mProject.UserLabels.ContainsKey(mAttr.OperandOffset);
+                int targetOffset =
+                    DataAnalysis.GetBaseOperandOffset(mProject, mAttr.OperandOffset);
+                bool hasLabel = mProject.UserLabels.ContainsKey(targetOffset);
                 labelInsteadRadioButton.Enabled = operandAndLabelRadioButton.Enabled =
                     !hasLabel;
                 operandAndProjRadioButton.Enabled = false;
-                ShortcutArg = mAttr.OperandOffset;
+                ShortcutArg = targetOffset;
             } else if (mAttr.OperandAddress >= 0) {
                 // Operand target is outside the file.
                 labelInsteadRadioButton.Enabled = operandAndLabelRadioButton.Enabled = false;

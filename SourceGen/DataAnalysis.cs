@@ -230,6 +230,25 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Returns the "base" operand offset.  If the byte at the specified offset is not the
+        /// start of a code/data/inline-data item, walk backward until the start is found.
+        /// </summary>
+        /// <param name="proj">Project reference.</param>
+        /// <param name="offset">Start offset.</param>
+        /// <returns></returns>
+        public static int GetBaseOperandOffset(DisasmProject proj, int offset) {
+            Debug.Assert(offset >= 0 && offset < proj.FileDataLength);
+            while (!proj.GetAnattrib(offset).IsStart) {
+                offset--;
+
+                // Should not be possible to walk off the top of the list, since we're in
+                // the middle of something.
+                Debug.Assert(offset >= 0);
+            }
+            return offset;
+        }
+
+        /// <summary>
         /// Creates a FormatDescriptor in the Anattrib array at srcOffset that links to
         /// targetOffset, or a nearby label.  If targetOffset doesn't have a useful label,
         /// one will be generated.
