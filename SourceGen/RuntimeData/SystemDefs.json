@@ -141,8 +141,9 @@
       "GroupName" : "Atari",
       "Cpu" : "65SC02",
       "Speed" : "4",
-      "Description" : "Atari Lynx [placeholder].",
+      "Description" : "Atari Lynx handheld game console.",
       "SymbolFiles" : [
+        "RT:Atari/Lynx.sym65"
       ],
       "ExtensionScripts" : [
       ],
