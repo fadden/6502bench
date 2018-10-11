@@ -1,0 +1,31 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Source: https://www.pagetable.com/?p=926
+;
+; This does not include the C64 Kernal values, as those are common
+; to both platforms.
+
+*SYNOPSIS C128 Kernal addresses and constants
+
+;
+; C128 Kernal jump table
+;
+SPIN_SPOUT      @ $FF47     ;set up fast serial ports for I/O
+CLOSE_ALL       @ $FF4A     ;close all files on a device
+C64MODE         @ $FF4D     ;reconfigure system as C64
+DMA_CALL        @ $FF50     ;send command to DMA device
+BOOT_CALL       @ $FF53     ;boot-load program from disk
+PHOENIX         @ $FF56     ;init function cartridges
+LKUPLA          @ $FF59     ;search tables for given LA
+LKUPSA          @ $FF5C     ;search tables for given SA
+PFKEY           @ $FF65     ;program a function key
+SWAPPER         @ $FF5F     ;switch 40/80 columns
+DLCHR           @ $FF62     ;init 80-col character RAM
+SETBNK          @ $FF68     ;set bank for I/O operations
+GETCFG          @ $FF6B     ;lookup MMU data for given bank
+JSRFAR          @ $FF6E     ;gosub in another bank
+JMPFAR          @ $FF71     ;goto another bank
+INDFET          @ $FF74     ;LDA (fetvec),Y from any bank
+INDSTA          @ $FF77     ;STA (stavec),Y to any bank
+INDCMP          @ $FF7A     ;CMP (cmpvec),Y to any bank
+PRIMM           @ $FF7D     ;print string following

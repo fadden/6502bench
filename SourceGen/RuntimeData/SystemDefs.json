@@ -182,12 +182,15 @@
       "GroupName" : "Commodore",
       "Cpu" : "8502",
       "Speed" : "2",
-      "Description" : "Commodore 128 [placeholder].",
+      "Description" : "Commodore 128 home computer.",
       "SymbolFiles" : [
+        "RT:Commodore/C64-Kernal.sym65",
+        "RT:Commodore/C128-Kernal.sym65"
       ],
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "first-word-is-load-addr":"true"
       }
     },
     {
