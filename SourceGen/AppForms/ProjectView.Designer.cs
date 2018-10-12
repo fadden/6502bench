@@ -1222,8 +1222,8 @@ namespace SourceGen.AppForms
             this.codeListView.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.codeListView_RetrieveVirtualItem);
             this.codeListView.SelectedIndexChanged += new System.EventHandler(this.codeListView_SelectedIndexChanged);
             this.codeListView.VirtualItemsSelectionRangeChanged += new System.Windows.Forms.ListViewVirtualItemsSelectionRangeChangedEventHandler(this.codeListView_VirtualItemsSelectionRangeChanged);
-            this.codeListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.codeListView_MouseClick);
             this.codeListView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.codeListView_MouseDoubleClick);
+            this.codeListView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.codeListView_MouseDown);
             // 
             // columnOffset
             // 

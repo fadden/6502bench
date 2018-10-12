@@ -1963,15 +1963,12 @@ namespace SourceGen.AppForms {
             dlg.Dispose();
         }
 
-        private void codeListView_MouseClick(object sender, MouseEventArgs e) {
-            //if (e.Button == MouseButtons.Left) {
-            //    Debug.WriteLine("LEFT CLICK");
-            //} else if (e.Button == MouseButtons.Right) {
-            //    Debug.WriteLine("RIGHT CLICK");
-            //    //ShowRightClickMenu();
-            //} else {
-            //    Debug.WriteLine("CLICK " + e.Button);
-            //}
+        private void codeListView_MouseDown(object sender, MouseEventArgs e) {
+            // MouseClick only fires for certain buttons and certain locations.  MouseDown
+            // fires for all buttons so long as the pointer is in the codeListView area.
+            if (e.Button == MouseButtons.XButton1 && navigateBackToolStripButton.Enabled) {
+                navigateBackToolStripButton_Click(sender, e);
+            }
         }
 
         private void codeListView_MouseDoubleClick(object sender, MouseEventArgs e) {
