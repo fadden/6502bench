@@ -82,7 +82,7 @@ namespace SourceGen.AppForms {
             mInitialTab = initialTab;
 
             // Make a work copy, so we can discard changes if the user cancels out of the dialog.
-            projectView.SaveCodeListColumnWidths();
+            projectView.SerializeCodeListColumnWidths();
             mSettings = AppSettings.Global.GetCopy();
 
             // Put buttons in an array.

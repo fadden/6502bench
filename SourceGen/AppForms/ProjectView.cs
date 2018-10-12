@@ -402,6 +402,7 @@ namespace SourceGen.AppForms {
                 AppSettings.Global.SetBool(AppSettings.MAIN_WINDOW_MAXIMIZED, false);
             }
 
+            SerializeCodeListColumnWidths();
             SerializeReferencesColumnWidths();
             SerializeNotesColumnWidths();
             SerializeSymbolColumnWidths();
@@ -3369,7 +3370,7 @@ namespace SourceGen.AppForms {
         /// Saves the code list column widths into AppSettings.
         /// </summary>
         /// <returns></returns>
-        public void SaveCodeListColumnWidths() {
+        public void SerializeCodeListColumnWidths() {
             CodeListColumnWidths widths = new CodeListColumnWidths();
             for (int i = 0; i < CodeListColumnWidths.NUM_COLUMNS; i++) {
                 widths.Width[i] = codeListView.Columns[i].Width;
@@ -3391,11 +3392,7 @@ namespace SourceGen.AppForms {
 
         private void codeListView_ColumnWidthChanged(object sender,
                 ColumnWidthChangedEventArgs e) {
-            //Debug.WriteLine("Column width changed: " + e.ColumnIndex);
-            // This fires during initial setup when things don't have widths.  A little
-            // risky to save the widths off now; would be safer to do it right before we write
-            // the settings file.
-            SaveCodeListColumnWidths();
+            AppSettings.Global.Dirty = true;
         }
 
         private void codeListView_DrawColumnHeader(object sender,
