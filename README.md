@@ -108,9 +108,11 @@ The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
 the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
 installer was able to get the 4.6.2 installer to work.)
 
-In theory, SourceGen can work with Mono under Linux and Mac OS X.  It
-currently crashes on startup with Mono 5.14.0 on Ubuntu, down in the
-WinForms code, so it's uncertain when or if this will work.
+In theory, SourceGen can work with Mono under Linux and Mac OS X.  There
+appear to be many incompatibilities between .NET and Mono, which have to
+be worked around in SourceGen.  Sometimes these are straightforward,
+sometimes they're [a little weird](https://faddensoft.com/sgbug/).  Until
+these issues are handled, running SourceGen under Mono is not recommended.
 
 
 ## Getting Started ##
