@@ -4071,8 +4071,14 @@ namespace SourceGen.AppForms {
 
             lvi.Text = mOutputFormatter.FormatOffset24(offset);
             lvi.Tag = mlc;
-            mNotesSubArray[0] = new ListViewItem.ListViewSubItem(lvi,
-                mlc.Text.Replace("\r\n", " \u2022 "));
+            // Replace line break with bullet.  If there's a single CRLF at the end, strip it.
+            string nocrlfStr;
+            if (mlc.Text.EndsWith("\r\n")) {
+                nocrlfStr = mlc.Text.Substring(0, mlc.Text.Length - 1).Replace("\r\n", " \u2022 ");
+            } else {
+                nocrlfStr = mlc.Text.Replace("\r\n", " \u2022 ");
+            }
+            mNotesSubArray[0] = new ListViewItem.ListViewSubItem(lvi, nocrlfStr);
             lvi.SubItems.AddRange(mNotesSubArray);
             return lvi;
         }
