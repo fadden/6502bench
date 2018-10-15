@@ -4308,6 +4308,9 @@ namespace SourceGen.AppForms {
             if (line.OffsetSpan == 0) {
                 sb.AppendFormat(Properties.Resources.FMT_INFO_LINE_SUM_NON,
                     lineIndex, lineTypeStr);
+#if DEBUG
+                sb.Append(" [offset=+" + line.FileOffset.ToString("x6") + "]");
+#endif
                 if (!string.IsNullOrEmpty(extraStr)) {
                     sb.Append("\r\n\r\n");
                     sb.Append(extraStr);

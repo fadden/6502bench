@@ -875,6 +875,18 @@ namespace SourceGen {
                 }
             }
 
+            // Configure the initial value of addBlank.  The specific case we're handling is
+            // a no-continue instruction (e.g. JMP) followed by an instruction with a label.
+            // When we rename the label, we don't want the blank to disappear during the
+            // partial-list generation.
+            bool addBlank = false;
+            if (startOffset > 0) {
+                int baseOff = DataAnalysis.GetBaseOperandOffset(proj, startOffset - 1);
+                if (proj.GetAnattrib(baseOff).DoesNotContinue) {
+                    addBlank = true;
+                }
+            }
+
             int offset = startOffset;
             while (offset <= endOffset) {
                 Anattrib attr = proj.GetAnattrib(offset);
@@ -882,7 +894,11 @@ namespace SourceGen {
                         proj.GetAnattrib(offset - 1).IsData) {
                     // Transition from data to code.  (Don't add blank line for inline data.)
                     lines.Add(GenerateBlankLine(offset));
+                } else if (addBlank) {
+                    // Previous instruction wanted to be followed by a blank line.
+                    lines.Add(GenerateBlankLine(offset));
                 }
+                addBlank = false;
 
                 // Insert long comments and notes.  These may span multiple display lines,
                 // and require word-wrap, so it's easiest just to render them fully here.
@@ -953,8 +969,16 @@ namespace SourceGen {
                     // break in code, and before a data area.
                     // TODO(maybe): Might also want to do this if the next offset is data,
                     // to make things look nicer when code runs directly into data.
+                    //
+                    // We don't want to add it with the current line's offset.  If we do that,
+                    // the binary search will get confused, because blank lines have a span
+                    // of zero.  If the code is at offset 10 with length 3, and we search for
+                    // the byte at offset 11, then a blank line (with span=0) at offset 10 will
+                    // cause the binary search to assume that the target is farther down, when
+                    // it's actually one line up.  We deal with this by setting a flag and
+                    // generating the blank line on the next trip through the loop.
                     if (attr.DoesNotContinue) {
-                        lines.Add(GenerateBlankLine(offset));
+                        addBlank = true;
                     }
 
                     offset += len;
@@ -970,7 +994,7 @@ namespace SourceGen {
                 }
             }
 
-            // See if there were any address shifts in this section.  If so, add an ORG
+            // See if there were any address shifts in this section.  If so, insert an ORG
             // statement as the first entry for the offset.  We're expecting to have very
             // few AddressMap entries (usually just one), so it's more efficient to process
             // them here and walk through the sub-list than it is to ping the address map
