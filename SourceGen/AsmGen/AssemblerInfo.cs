@@ -16,6 +16,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SourceGen.AsmGen {
     /// <summary>
@@ -30,8 +31,19 @@ namespace SourceGen.AsmGen {
         public enum Id {
             Unknown = 0,
             Cc65,
-            Merlin32
+            Merlin32,
         }
+
+        /// <summary>
+        /// Static information for all known assemblers.
+        /// 
+        /// The AsmType argument may be null.  This is useful for non-cross assemblers.
+        /// </summary>
+        private static AssemblerInfo[] sInfo = new AssemblerInfo[] {
+            new AssemblerInfo(Id.Unknown, "???", null, null),
+            new AssemblerInfo(Id.Cc65, "cc65", typeof(GenCc65), typeof(AsmCc65)),
+            new AssemblerInfo(Id.Merlin32, "Merlin 32", typeof(GenMerlin32), typeof(AsmMerlin32)),
+        };
 
         /// <summary>
         /// Identifier.
@@ -43,18 +55,23 @@ namespace SourceGen.AsmGen {
         /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// Type of generator class.
+        /// </summary>
+        public Type GenType { get; private set; }
 
-        private AssemblerInfo(Id id, string name) {
+        /// <summary>
+        /// Type of assembler class.
+        /// </summary>
+        public Type AsmType { get; private set; }
+
+
+        private AssemblerInfo(Id id, string name, Type genType, Type asmType) {
             AssemblerId = id;
             Name = name;
+            GenType = genType;
+            AsmType = asmType;
         }
-
-        // For simplicity, this is 1:1 with the Id enum.
-        private static AssemblerInfo[] sInfo = new AssemblerInfo[] {
-            new AssemblerInfo(Id.Unknown, "???"),
-            new AssemblerInfo(Id.Cc65, "cc65"),
-            new AssemblerInfo(Id.Merlin32, "Merlin 32")
-        };
 
         /// <summary>
         /// Returns an AssemblerInfo object for the specified id.
@@ -68,32 +85,29 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// Generator factory method.
         /// </summary>
-        /// <param name="id">ID of assembler to return generator object for.</param>
+        /// <param name="id">ID of assembler to return generator instance for.</param>
         /// <returns>New source generator object.</returns>
-        public static IGenerator GetGenerator(AssemblerInfo.Id id) {
-            switch (id) {
-                case Id.Cc65:
-                    return new GenCc65();
-                case Id.Merlin32:
-                    return new GenMerlin32();
-                default:
-                    return null;
+        public static IGenerator GetGenerator(Id id) {
+            Type genType = sInfo[(int)id].GenType;
+            if (genType == null) {
+                Debug.Assert(false);    // unexpected for generator
+                return null;
+            } else {
+                return (IGenerator)Activator.CreateInstance(genType);
             }
         }
 
         /// <summary>
         /// Assembler factory method.
         /// </summary>
-        /// <param name="id">ID of assembler to return assembler object for.</param>
+        /// <param name="id">ID of assembler to return assembler instance for.</param>
         /// <returns>New assembler interface object.</returns>
-        public static IAssembler GetAssembler(AssemblerInfo.Id id) {
-            switch (id) {
-                case Id.Cc65:
-                    return new AsmCc65();
-                case Id.Merlin32:
-                    return new AsmMerlin32();
-                default:
-                    return null;
+        public static IAssembler GetAssembler(Id id) {
+            Type asmType = sInfo[(int)id].AsmType;
+            if (asmType == null) {
+                return null;
+            } else {
+                return (IAssembler)Activator.CreateInstance(asmType);
             }
         }
 

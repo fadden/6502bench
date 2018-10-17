@@ -112,7 +112,6 @@
     <Compile Include="AsmGen\AssemblerProgress.Designer.cs">
       <DependentUpon>AssemblerProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="AsmGen\GenCc65.cs" />
     <Compile Include="AsmGen\GenCommon.cs" />
     <Compile Include="AsmGen\GeneratorProgress.cs">
       <SubType>Form</SubType>
@@ -120,7 +119,6 @@
     <Compile Include="AsmGen\GeneratorProgress.Designer.cs">
       <DependentUpon>GeneratorProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="AsmGen\GenMerlin32.cs" />
     <Compile Include="AsmGen\IAssembler.cs" />
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
