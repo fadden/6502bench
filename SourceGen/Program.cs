@@ -21,7 +21,7 @@ namespace SourceGen {
     static class Program {
         // Version number applied to the program as a whole.
         public static readonly CommonUtil.Version ProgramVersion =
-            new CommonUtil.Version(1, 0, 0, CommonUtil.Version.PreRelType.Final, 0);
+            new CommonUtil.Version(1, 1, 0, CommonUtil.Version.PreRelType.Dev, 1);
 
         /// <summary>
         /// The main entry point for the application.
