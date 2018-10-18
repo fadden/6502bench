@@ -221,22 +221,12 @@ namespace SourceGen.AsmGen {
         }
 
         /// <summary>
-        /// Returns true if the selected assembler has been configured.
+        /// Returns true if the selected cross-assembler executable has been configured.
         /// </summary>
         private bool IsAssemblerConfigured() {
-            string settingStr;
-            switch (mSelectedAssemblerId) {
-                case AssemblerInfo.Id.Cc65:
-                    settingStr = AppSettings.ASM_CC65_EXECUTABLE;
-                    break;
-                case AssemblerInfo.Id.Merlin32:
-                    settingStr = AppSettings.ASM_MERLIN32_EXECUTABLE;
-                    break;
-                default:
-                    Debug.Assert(false);
-                    return false;
-            }
-            return !string.IsNullOrEmpty(AppSettings.Global.GetString(settingStr, null));
+            AssemblerConfig config =
+                AssemblerConfig.GetConfig(AppSettings.Global, mSelectedAssemblerId);
+            return !string.IsNullOrEmpty(config.ExecutablePath);
         }
 
         private void assemblerSettingsButton_Click(object sender, EventArgs e) {
@@ -254,7 +244,8 @@ namespace SourceGen.AsmGen {
         /// </summary>
         private void DoSettings() {
             // Pop open the app settings dialog, with the appropriate tab selected.
-            mProjView.ShowAppSettings(AppForms.EditAppSettings.Tab.Assembler);
+            mProjView.ShowAppSettings(AppForms.EditAppSettings.Tab.AsmConfig,
+                mSelectedAssemblerId);
 
             // Update the controls based on whether or not the assembler is now available.
             UpdateAssemblerControls();

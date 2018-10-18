@@ -71,20 +71,23 @@ namespace SourceGen.AppForms {
             this.showCol5 = new System.Windows.Forms.Button();
             this.showCol4 = new System.Windows.Forms.Button();
             this.asmConfigTabPage = new System.Windows.Forms.TabPage();
+            this.configureAsmGroupBox = new System.Windows.Forms.GroupBox();
+            this.asmColWidthIdLabel = new System.Windows.Forms.Label();
+            this.asmConfigAssemblerLabel = new System.Windows.Forms.Label();
+            this.asmCommentColWidthTextBox = new System.Windows.Forms.TextBox();
+            this.asmOperandColWidthTextBox = new System.Windows.Forms.TextBox();
+            this.asmOpcodeColWidthTextBox = new System.Windows.Forms.TextBox();
+            this.asmLabelColWidthTextBox = new System.Windows.Forms.TextBox();
+            this.asmColWidthLabel = new System.Windows.Forms.Label();
+            this.asmExeLabel = new System.Windows.Forms.Label();
+            this.asmConfigComboBox = new System.Windows.Forms.ComboBox();
+            this.asmExePathTextBox = new System.Windows.Forms.TextBox();
+            this.asmExeBrowseButton = new System.Windows.Forms.Button();
             this.showCycleCountsCheckBox = new System.Windows.Forms.CheckBox();
             this.configAsmGenLabel = new System.Windows.Forms.Label();
             this.longLabelNewLineCheckBox = new System.Windows.Forms.CheckBox();
             this.showAsmIdentCheckBox = new System.Windows.Forms.CheckBox();
             this.disableLabelLocalizationCheckBox = new System.Windows.Forms.CheckBox();
-            this.clearMerlin32Button = new System.Windows.Forms.Button();
-            this.clearCc65Button = new System.Windows.Forms.Button();
-            this.browseMerlin32Button = new System.Windows.Forms.Button();
-            this.browseCc65Button = new System.Windows.Forms.Button();
-            this.cc65PathTextBox = new System.Windows.Forms.TextBox();
-            this.merlin32PathTextBox = new System.Windows.Forms.TextBox();
-            this.asmMerln32Label = new System.Windows.Forms.Label();
-            this.asmCc65Label = new System.Windows.Forms.Label();
-            this.asmExplanationLabel = new System.Windows.Forms.Label();
             this.displayFormatTabPage = new System.Windows.Forms.TabPage();
             this.fmtExplanationLabel = new System.Windows.Forms.Label();
             this.quickDisplayFormatGroup = new System.Windows.Forms.GroupBox();
@@ -160,6 +163,7 @@ namespace SourceGen.AppForms {
             this.codeViewFontGroupBox.SuspendLayout();
             this.columnVisGroup.SuspendLayout();
             this.asmConfigTabPage.SuspendLayout();
+            this.configureAsmGroupBox.SuspendLayout();
             this.displayFormatTabPage.SuspendLayout();
             this.quickDisplayFormatGroup.SuspendLayout();
             this.operandWidthGroupBox.SuspendLayout();
@@ -519,20 +523,12 @@ namespace SourceGen.AppForms {
             // 
             // asmConfigTabPage
             // 
+            this.asmConfigTabPage.Controls.Add(this.configureAsmGroupBox);
             this.asmConfigTabPage.Controls.Add(this.showCycleCountsCheckBox);
             this.asmConfigTabPage.Controls.Add(this.configAsmGenLabel);
             this.asmConfigTabPage.Controls.Add(this.longLabelNewLineCheckBox);
             this.asmConfigTabPage.Controls.Add(this.showAsmIdentCheckBox);
             this.asmConfigTabPage.Controls.Add(this.disableLabelLocalizationCheckBox);
-            this.asmConfigTabPage.Controls.Add(this.clearMerlin32Button);
-            this.asmConfigTabPage.Controls.Add(this.clearCc65Button);
-            this.asmConfigTabPage.Controls.Add(this.browseMerlin32Button);
-            this.asmConfigTabPage.Controls.Add(this.browseCc65Button);
-            this.asmConfigTabPage.Controls.Add(this.cc65PathTextBox);
-            this.asmConfigTabPage.Controls.Add(this.merlin32PathTextBox);
-            this.asmConfigTabPage.Controls.Add(this.asmMerln32Label);
-            this.asmConfigTabPage.Controls.Add(this.asmCc65Label);
-            this.asmConfigTabPage.Controls.Add(this.asmExplanationLabel);
             this.asmConfigTabPage.Location = new System.Drawing.Point(4, 22);
             this.asmConfigTabPage.Name = "asmConfigTabPage";
             this.asmConfigTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -541,13 +537,138 @@ namespace SourceGen.AppForms {
             this.asmConfigTabPage.Text = "Asm Config";
             this.asmConfigTabPage.UseVisualStyleBackColor = true;
             // 
+            // configureAsmGroupBox
+            // 
+            this.configureAsmGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.configureAsmGroupBox.Controls.Add(this.asmColWidthIdLabel);
+            this.configureAsmGroupBox.Controls.Add(this.asmConfigAssemblerLabel);
+            this.configureAsmGroupBox.Controls.Add(this.asmCommentColWidthTextBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmOperandColWidthTextBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmOpcodeColWidthTextBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmLabelColWidthTextBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmColWidthLabel);
+            this.configureAsmGroupBox.Controls.Add(this.asmExeLabel);
+            this.configureAsmGroupBox.Controls.Add(this.asmConfigComboBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmExePathTextBox);
+            this.configureAsmGroupBox.Controls.Add(this.asmExeBrowseButton);
+            this.configureAsmGroupBox.Location = new System.Drawing.Point(6, 6);
+            this.configureAsmGroupBox.Name = "configureAsmGroupBox";
+            this.configureAsmGroupBox.Size = new System.Drawing.Size(602, 121);
+            this.configureAsmGroupBox.TabIndex = 0;
+            this.configureAsmGroupBox.TabStop = false;
+            this.configureAsmGroupBox.Text = "Assembler Configuration";
+            // 
+            // asmColWidthIdLabel
+            // 
+            this.asmColWidthIdLabel.AutoSize = true;
+            this.asmColWidthIdLabel.Location = new System.Drawing.Point(371, 88);
+            this.asmColWidthIdLabel.Name = "asmColWidthIdLabel";
+            this.asmColWidthIdLabel.Size = new System.Drawing.Size(171, 13);
+            this.asmColWidthIdLabel.TabIndex = 10;
+            this.asmColWidthIdLabel.Text = "(label, opcode, operand, comment)";
+            // 
+            // asmConfigAssemblerLabel
+            // 
+            this.asmConfigAssemblerLabel.AutoSize = true;
+            this.asmConfigAssemblerLabel.Location = new System.Drawing.Point(27, 22);
+            this.asmConfigAssemblerLabel.Name = "asmConfigAssemblerLabel";
+            this.asmConfigAssemblerLabel.Size = new System.Drawing.Size(58, 13);
+            this.asmConfigAssemblerLabel.TabIndex = 0;
+            this.asmConfigAssemblerLabel.Text = "Assembler:";
+            // 
+            // asmCommentColWidthTextBox
+            // 
+            this.asmCommentColWidthTextBox.Location = new System.Drawing.Point(301, 85);
+            this.asmCommentColWidthTextBox.Name = "asmCommentColWidthTextBox";
+            this.asmCommentColWidthTextBox.Size = new System.Drawing.Size(64, 20);
+            this.asmCommentColWidthTextBox.TabIndex = 9;
+            this.asmCommentColWidthTextBox.TextChanged += new System.EventHandler(this.AsmConfig_TextChanged);
+            // 
+            // asmOperandColWidthTextBox
+            // 
+            this.asmOperandColWidthTextBox.Location = new System.Drawing.Point(231, 85);
+            this.asmOperandColWidthTextBox.Name = "asmOperandColWidthTextBox";
+            this.asmOperandColWidthTextBox.Size = new System.Drawing.Size(64, 20);
+            this.asmOperandColWidthTextBox.TabIndex = 8;
+            this.asmOperandColWidthTextBox.TextChanged += new System.EventHandler(this.AsmConfig_TextChanged);
+            // 
+            // asmOpcodeColWidthTextBox
+            // 
+            this.asmOpcodeColWidthTextBox.Location = new System.Drawing.Point(161, 85);
+            this.asmOpcodeColWidthTextBox.Name = "asmOpcodeColWidthTextBox";
+            this.asmOpcodeColWidthTextBox.Size = new System.Drawing.Size(64, 20);
+            this.asmOpcodeColWidthTextBox.TabIndex = 7;
+            this.asmOpcodeColWidthTextBox.TextChanged += new System.EventHandler(this.AsmConfig_TextChanged);
+            // 
+            // asmLabelColWidthTextBox
+            // 
+            this.asmLabelColWidthTextBox.Location = new System.Drawing.Point(91, 85);
+            this.asmLabelColWidthTextBox.Name = "asmLabelColWidthTextBox";
+            this.asmLabelColWidthTextBox.Size = new System.Drawing.Size(64, 20);
+            this.asmLabelColWidthTextBox.TabIndex = 6;
+            this.asmLabelColWidthTextBox.TextChanged += new System.EventHandler(this.AsmConfig_TextChanged);
+            // 
+            // asmColWidthLabel
+            // 
+            this.asmColWidthLabel.AutoSize = true;
+            this.asmColWidthLabel.Location = new System.Drawing.Point(7, 88);
+            this.asmColWidthLabel.Name = "asmColWidthLabel";
+            this.asmColWidthLabel.Size = new System.Drawing.Size(78, 13);
+            this.asmColWidthLabel.TabIndex = 5;
+            this.asmColWidthLabel.Text = "Column widths:";
+            // 
+            // asmExeLabel
+            // 
+            this.asmExeLabel.AutoSize = true;
+            this.asmExeLabel.Location = new System.Drawing.Point(22, 61);
+            this.asmExeLabel.Name = "asmExeLabel";
+            this.asmExeLabel.Size = new System.Drawing.Size(63, 13);
+            this.asmExeLabel.TabIndex = 2;
+            this.asmExeLabel.Text = "Executable:";
+            // 
+            // asmConfigComboBox
+            // 
+            this.asmConfigComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.asmConfigComboBox.FormattingEnabled = true;
+            this.asmConfigComboBox.Items.AddRange(new object[] {
+            "cc65",
+            "Merlin32"});
+            this.asmConfigComboBox.Location = new System.Drawing.Point(91, 19);
+            this.asmConfigComboBox.Name = "asmConfigComboBox";
+            this.asmConfigComboBox.Size = new System.Drawing.Size(154, 21);
+            this.asmConfigComboBox.TabIndex = 1;
+            this.asmConfigComboBox.SelectedIndexChanged += new System.EventHandler(this.asmConfigComboBox_SelectedIndexChanged);
+            // 
+            // asmExePathTextBox
+            // 
+            this.asmExePathTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.asmExePathTextBox.Location = new System.Drawing.Point(91, 58);
+            this.asmExePathTextBox.Name = "asmExePathTextBox";
+            this.asmExePathTextBox.Size = new System.Drawing.Size(424, 20);
+            this.asmExePathTextBox.TabIndex = 3;
+            this.asmExePathTextBox.Text = "C:\\something";
+            this.asmExePathTextBox.TextChanged += new System.EventHandler(this.AsmConfig_TextChanged);
+            // 
+            // asmExeBrowseButton
+            // 
+            this.asmExeBrowseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.asmExeBrowseButton.Location = new System.Drawing.Point(521, 56);
+            this.asmExeBrowseButton.Name = "asmExeBrowseButton";
+            this.asmExeBrowseButton.Size = new System.Drawing.Size(75, 23);
+            this.asmExeBrowseButton.TabIndex = 4;
+            this.asmExeBrowseButton.Text = "Browse...";
+            this.asmExeBrowseButton.UseVisualStyleBackColor = true;
+            this.asmExeBrowseButton.Click += new System.EventHandler(this.asmExeBrowseButton_Click);
+            // 
             // showCycleCountsCheckBox
             // 
             this.showCycleCountsCheckBox.AutoSize = true;
-            this.showCycleCountsCheckBox.Location = new System.Drawing.Point(10, 217);
+            this.showCycleCountsCheckBox.Location = new System.Drawing.Point(6, 162);
             this.showCycleCountsCheckBox.Name = "showCycleCountsCheckBox";
             this.showCycleCountsCheckBox.Size = new System.Drawing.Size(116, 17);
-            this.showCycleCountsCheckBox.TabIndex = 53;
+            this.showCycleCountsCheckBox.TabIndex = 2;
             this.showCycleCountsCheckBox.Text = "Show cycle counts";
             this.showCycleCountsCheckBox.UseVisualStyleBackColor = true;
             this.showCycleCountsCheckBox.CheckedChanged += new System.EventHandler(this.showCycleCountsCheckBox_CheckedChanged);
@@ -555,29 +676,29 @@ namespace SourceGen.AppForms {
             // configAsmGenLabel
             // 
             this.configAsmGenLabel.AutoSize = true;
-            this.configAsmGenLabel.Location = new System.Drawing.Point(7, 128);
+            this.configAsmGenLabel.Location = new System.Drawing.Point(3, 143);
             this.configAsmGenLabel.Name = "configAsmGenLabel";
-            this.configAsmGenLabel.Size = new System.Drawing.Size(154, 13);
-            this.configAsmGenLabel.TabIndex = 52;
-            this.configAsmGenLabel.Text = "Configure assembly generation:";
+            this.configAsmGenLabel.Size = new System.Drawing.Size(127, 13);
+            this.configAsmGenLabel.TabIndex = 1;
+            this.configAsmGenLabel.Text = "General code generation:";
             // 
             // longLabelNewLineCheckBox
             // 
             this.longLabelNewLineCheckBox.AutoSize = true;
-            this.longLabelNewLineCheckBox.Location = new System.Drawing.Point(10, 193);
+            this.longLabelNewLineCheckBox.Location = new System.Drawing.Point(6, 185);
             this.longLabelNewLineCheckBox.Name = "longLabelNewLineCheckBox";
             this.longLabelNewLineCheckBox.Size = new System.Drawing.Size(173, 17);
-            this.longLabelNewLineCheckBox.TabIndex = 51;
+            this.longLabelNewLineCheckBox.TabIndex = 3;
             this.longLabelNewLineCheckBox.Text = "Put long labels on separate line";
             this.longLabelNewLineCheckBox.UseVisualStyleBackColor = true;
             // 
             // showAsmIdentCheckBox
             // 
             this.showAsmIdentCheckBox.AutoSize = true;
-            this.showAsmIdentCheckBox.Location = new System.Drawing.Point(10, 147);
+            this.showAsmIdentCheckBox.Location = new System.Drawing.Point(6, 208);
             this.showAsmIdentCheckBox.Name = "showAsmIdentCheckBox";
             this.showAsmIdentCheckBox.Size = new System.Drawing.Size(154, 17);
-            this.showAsmIdentCheckBox.TabIndex = 10;
+            this.showAsmIdentCheckBox.TabIndex = 4;
             this.showAsmIdentCheckBox.Text = "Identify assembler in output";
             this.showAsmIdentCheckBox.UseVisualStyleBackColor = true;
             this.showAsmIdentCheckBox.CheckedChanged += new System.EventHandler(this.showAsmIdentCheckBox_CheckedChanged);
@@ -585,98 +706,13 @@ namespace SourceGen.AppForms {
             // disableLabelLocalizationCheckBox
             // 
             this.disableLabelLocalizationCheckBox.AutoSize = true;
-            this.disableLabelLocalizationCheckBox.Location = new System.Drawing.Point(10, 170);
+            this.disableLabelLocalizationCheckBox.Location = new System.Drawing.Point(6, 231);
             this.disableLabelLocalizationCheckBox.Name = "disableLabelLocalizationCheckBox";
             this.disableLabelLocalizationCheckBox.Size = new System.Drawing.Size(141, 17);
-            this.disableLabelLocalizationCheckBox.TabIndex = 9;
+            this.disableLabelLocalizationCheckBox.TabIndex = 5;
             this.disableLabelLocalizationCheckBox.Text = "Disable label localization";
             this.disableLabelLocalizationCheckBox.UseVisualStyleBackColor = true;
             this.disableLabelLocalizationCheckBox.CheckedChanged += new System.EventHandler(this.disableLabelLocalizationCheckBox_CheckedChanged);
-            // 
-            // clearMerlin32Button
-            // 
-            this.clearMerlin32Button.Location = new System.Drawing.Point(531, 76);
-            this.clearMerlin32Button.Name = "clearMerlin32Button";
-            this.clearMerlin32Button.Size = new System.Drawing.Size(75, 23);
-            this.clearMerlin32Button.TabIndex = 8;
-            this.clearMerlin32Button.Text = "Clear";
-            this.clearMerlin32Button.UseVisualStyleBackColor = true;
-            this.clearMerlin32Button.Click += new System.EventHandler(this.clearMerlin32Button_Click);
-            // 
-            // clearCc65Button
-            // 
-            this.clearCc65Button.Location = new System.Drawing.Point(531, 35);
-            this.clearCc65Button.Name = "clearCc65Button";
-            this.clearCc65Button.Size = new System.Drawing.Size(75, 23);
-            this.clearCc65Button.TabIndex = 4;
-            this.clearCc65Button.Text = "Clear";
-            this.clearCc65Button.UseVisualStyleBackColor = true;
-            this.clearCc65Button.Click += new System.EventHandler(this.clearCc65Button_Click);
-            // 
-            // browseMerlin32Button
-            // 
-            this.browseMerlin32Button.Location = new System.Drawing.Point(450, 76);
-            this.browseMerlin32Button.Name = "browseMerlin32Button";
-            this.browseMerlin32Button.Size = new System.Drawing.Size(75, 23);
-            this.browseMerlin32Button.TabIndex = 7;
-            this.browseMerlin32Button.Text = "Browse...";
-            this.browseMerlin32Button.UseVisualStyleBackColor = true;
-            this.browseMerlin32Button.Click += new System.EventHandler(this.browseMerlin32Button_Click);
-            // 
-            // browseCc65Button
-            // 
-            this.browseCc65Button.Location = new System.Drawing.Point(450, 35);
-            this.browseCc65Button.Name = "browseCc65Button";
-            this.browseCc65Button.Size = new System.Drawing.Size(75, 23);
-            this.browseCc65Button.TabIndex = 3;
-            this.browseCc65Button.Text = "Browse...";
-            this.browseCc65Button.UseVisualStyleBackColor = true;
-            this.browseCc65Button.Click += new System.EventHandler(this.browseCc65Button_Click);
-            // 
-            // cc65PathTextBox
-            // 
-            this.cc65PathTextBox.Location = new System.Drawing.Point(65, 37);
-            this.cc65PathTextBox.Name = "cc65PathTextBox";
-            this.cc65PathTextBox.Size = new System.Drawing.Size(379, 20);
-            this.cc65PathTextBox.TabIndex = 2;
-            this.cc65PathTextBox.Text = "C:\\something";
-            this.cc65PathTextBox.TextChanged += new System.EventHandler(this.cc65PathTextBox_TextChanged);
-            // 
-            // merlin32PathTextBox
-            // 
-            this.merlin32PathTextBox.Location = new System.Drawing.Point(65, 78);
-            this.merlin32PathTextBox.Name = "merlin32PathTextBox";
-            this.merlin32PathTextBox.Size = new System.Drawing.Size(379, 20);
-            this.merlin32PathTextBox.TabIndex = 6;
-            this.merlin32PathTextBox.Text = "C:\\something";
-            this.merlin32PathTextBox.TextChanged += new System.EventHandler(this.merlin32PathTextBox_TextChanged);
-            // 
-            // asmMerln32Label
-            // 
-            this.asmMerln32Label.AutoSize = true;
-            this.asmMerln32Label.Location = new System.Drawing.Point(6, 81);
-            this.asmMerln32Label.Name = "asmMerln32Label";
-            this.asmMerln32Label.Size = new System.Drawing.Size(53, 13);
-            this.asmMerln32Label.TabIndex = 5;
-            this.asmMerln32Label.Text = "Merlin 32:";
-            // 
-            // asmCc65Label
-            // 
-            this.asmCc65Label.AutoSize = true;
-            this.asmCc65Label.Location = new System.Drawing.Point(25, 40);
-            this.asmCc65Label.Name = "asmCc65Label";
-            this.asmCc65Label.Size = new System.Drawing.Size(34, 13);
-            this.asmCc65Label.TabIndex = 1;
-            this.asmCc65Label.Text = "cc65:";
-            // 
-            // asmExplanationLabel
-            // 
-            this.asmExplanationLabel.AutoSize = true;
-            this.asmExplanationLabel.Location = new System.Drawing.Point(7, 7);
-            this.asmExplanationLabel.Name = "asmExplanationLabel";
-            this.asmExplanationLabel.Size = new System.Drawing.Size(179, 13);
-            this.asmExplanationLabel.TabIndex = 0;
-            this.asmExplanationLabel.Text = "Configure installed cross-assemblers:";
             // 
             // displayFormatTabPage
             // 
@@ -1450,6 +1486,8 @@ namespace SourceGen.AppForms {
             this.columnVisGroup.ResumeLayout(false);
             this.asmConfigTabPage.ResumeLayout(false);
             this.asmConfigTabPage.PerformLayout();
+            this.configureAsmGroupBox.ResumeLayout(false);
+            this.configureAsmGroupBox.PerformLayout();
             this.displayFormatTabPage.ResumeLayout(false);
             this.displayFormatTabPage.PerformLayout();
             this.quickDisplayFormatGroup.ResumeLayout(false);
@@ -1526,13 +1564,8 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.Label strReverseHiLabel;
         private System.Windows.Forms.TextBox strReverseTextBox;
         private System.Windows.Forms.Label strReverseLabel;
-        private System.Windows.Forms.Label asmExplanationLabel;
-        private System.Windows.Forms.TextBox cc65PathTextBox;
-        private System.Windows.Forms.TextBox merlin32PathTextBox;
-        private System.Windows.Forms.Label asmMerln32Label;
-        private System.Windows.Forms.Label asmCc65Label;
-        private System.Windows.Forms.Button browseMerlin32Button;
-        private System.Windows.Forms.Button browseCc65Button;
+        private System.Windows.Forms.TextBox asmExePathTextBox;
+        private System.Windows.Forms.Button asmExeBrowseButton;
         private System.Windows.Forms.GroupBox codeViewFontGroupBox;
         private System.Windows.Forms.Label currentFontLabel;
         private System.Windows.Forms.Button selectFontButton;
@@ -1550,8 +1583,6 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.CheckBox upperSCheckBox;
         private System.Windows.Forms.CheckBox upperACheckBox;
         private System.Windows.Forms.CheckBox upperPseudoOpCheckBox;
-        private System.Windows.Forms.Button clearMerlin32Button;
-        private System.Windows.Forms.Button clearCc65Button;
         private System.Windows.Forms.CheckBox disableLabelLocalizationCheckBox;
         private System.Windows.Forms.CheckBox enableDebugCheckBox;
         private System.Windows.Forms.CheckBox showAsmIdentCheckBox;
@@ -1579,5 +1610,15 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.GroupBox clipboardGroupBox;
         private System.Windows.Forms.ComboBox clipboardFormatComboBox;
         private System.Windows.Forms.Label clipboardFormatLabel;
+        private System.Windows.Forms.ComboBox asmConfigComboBox;
+        private System.Windows.Forms.GroupBox configureAsmGroupBox;
+        private System.Windows.Forms.Label asmExeLabel;
+        private System.Windows.Forms.Label asmColWidthLabel;
+        private System.Windows.Forms.TextBox asmCommentColWidthTextBox;
+        private System.Windows.Forms.TextBox asmOperandColWidthTextBox;
+        private System.Windows.Forms.TextBox asmOpcodeColWidthTextBox;
+        private System.Windows.Forms.TextBox asmLabelColWidthTextBox;
+        private System.Windows.Forms.Label asmConfigAssemblerLabel;
+        private System.Windows.Forms.Label asmColWidthIdLabel;
     }
 }

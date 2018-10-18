@@ -610,14 +610,26 @@ namespace SourceGen.AsmGen {
 
 
         // IAssembler
+        public void GetExeIdentifiers(out string humanName, out string exeName) {
+            humanName = "Merlin Assembler";
+            exeName = "Merlin32";
+        }
+
+        // IAssembler
+        public AssemblerConfig GetDefaultConfig() {
+            return new AssemblerConfig(string.Empty, new int[] { 9, 6, 11, 74 });
+        }
+
+        // IAssembler
         public AssemblerVersion QueryVersion() {
-            string exe = AppSettings.Global.GetString(AppSettings.ASM_MERLIN32_EXECUTABLE, null);
-            if (string.IsNullOrEmpty(exe)) {
+            AssemblerConfig config =
+                AssemblerConfig.GetConfig(AppSettings.Global, AssemblerInfo.Id.Merlin32);
+            if (config == null || string.IsNullOrEmpty(config.ExecutablePath)) {
                 return null;
             }
 
-            ShellCommand cmd = new ShellCommand(exe, string.Empty,
-                System.IO.Directory.GetCurrentDirectory(), null);
+            ShellCommand cmd = new ShellCommand(config.ExecutablePath, string.Empty,
+                Directory.GetCurrentDirectory(), null);
             cmd.Execute();
             if (string.IsNullOrEmpty(cmd.Stdout)) {
                 return null;
@@ -667,15 +679,16 @@ namespace SourceGen.AsmGen {
                 Debug.WriteLine("NOTE: source file is not in work directory");
             }
 
-            string exe = AppSettings.Global.GetString(AppSettings.ASM_MERLIN32_EXECUTABLE, null);
-            if (string.IsNullOrEmpty(exe)) {
+            AssemblerConfig config =
+                AssemblerConfig.GetConfig(AppSettings.Global, AssemblerInfo.Id.Merlin32);
+            if (string.IsNullOrEmpty(config.ExecutablePath)) {
                 Debug.WriteLine("Assembler not configured");
                 return null;
             }
 
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
-            ShellCommand cmd = new ShellCommand(exe, ". \"" + pathName + "\"",
+            ShellCommand cmd = new ShellCommand(config.ExecutablePath, ". \"" + pathName + "\"",
                 WorkDirectory, null);
             cmd.Execute();
 

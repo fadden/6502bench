@@ -1936,15 +1936,16 @@ namespace SourceGen.AppForms {
 
         // Edit > Settings...
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e) {
-            ShowAppSettings(EditAppSettings.Tab.Unknown);
+            ShowAppSettings(EditAppSettings.Tab.Unknown, AsmGen.AssemblerInfo.Id.Unknown);
         }
 
         /// <summary>
         /// Opens the app settings dialog.
         /// </summary>
         /// <param name="initialTab">Tab to present to the user.</param>
-        public void ShowAppSettings(EditAppSettings.Tab initialTab) {
-            EditAppSettings dlg = new EditAppSettings(this, initialTab);
+        public void ShowAppSettings(EditAppSettings.Tab initialTab,
+                AsmGen.AssemblerInfo.Id initialAsmId) {
+            EditAppSettings dlg = new EditAppSettings(this, initialTab, initialAsmId);
             dlg.ShowDialog();
             dlg.Dispose();
         }

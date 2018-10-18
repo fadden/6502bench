@@ -23,6 +23,20 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public interface IAssembler {
         /// <summary>
+        /// Gets identification strings for the executable.  These are used when browsing for
+        /// the assembler binary.
+        /// </summary>
+        /// <param name="humanName">Human-readable name to show in the "open" dialog.</param>
+        /// <param name="exeName">Name of executable to find, without ".exe".</param>
+        void GetExeIdentifiers(out string humanName, out string exeName);
+
+        /// <summary>
+        /// Queries the assembler for its default configuration.
+        /// </summary>
+        /// <returns>Config object with default values.</returns>
+        AssemblerConfig GetDefaultConfig();
+
+        /// <summary>
         /// Queries the assembler for its version.
         /// </summary>
         /// <returns>Assembler version info, or null if query failed.</returns>

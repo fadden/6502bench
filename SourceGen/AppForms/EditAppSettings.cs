@@ -21,6 +21,9 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
+using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
+using AssemblerConfig = SourceGen.AsmGen.AssemblerConfig;
+
 namespace SourceGen.AppForms {
     public partial class EditAppSettings : Form {
         /// <summary>
@@ -28,9 +31,9 @@ namespace SourceGen.AppForms {
         /// </summary>
         public enum Tab {
             Unknown = -1,
-            CodeList = 0,
-            Assembler = 1,
-            AsmFormat = 2,
+            CodeView = 0,
+            AsmConfig = 1,
+            DisplayFOrmat = 2,
             PseudoOp = 3
         }
 
@@ -57,12 +60,19 @@ namespace SourceGen.AppForms {
         /// </summary>
         private Tab mInitialTab;
 
+        /// <summary>
+        /// Assembler to initially select in combo boxes.
+        /// </summary>
+        private AssemblerInfo.Id mInitialAsmId;
+
         // Map buttons to column show/hide buttons.
         private const int NUM_COLUMNS = ProjectView.CodeListColumnWidths.NUM_COLUMNS;
         private string[] mColumnFormats = new string[NUM_COLUMNS];
         private Button[] mColButtons;
 
-        // Map pseudo-op text entry fields to PseudoOpName properties.
+        /// <summary>
+        /// Map pseudo-op text entry fields to PseudoOpName properties.
+        /// </summary>
         private struct TextBoxPropertyMap {
             public TextBox TextBox { get; private set; }
             public PropertyInfo PropInfo { get; private set; }
@@ -74,24 +84,42 @@ namespace SourceGen.AppForms {
         }
         private TextBoxPropertyMap[] mPseudoNameMap;
 
+        /// <summary>
+        /// Holds an item for the assembler-selection combox box.
+        /// </summary>
+        private class AsmComboItem {
+            // Enumerated ID.
+            public AssemblerInfo.Id AssemblerId { get; private set; }
 
-        public EditAppSettings(ProjectView projectView, Tab initialTab) {
+            // Human-readable name.
+            public string Name { get; private set; }
+
+            public AsmComboItem(AssemblerInfo info) {
+                AssemblerId = info.AssemblerId;
+                Name = info.Name;
+            }
+        }
+
+
+        public EditAppSettings(ProjectView projectView, Tab initialTab,
+                AssemblerInfo.Id initialAsmId) {
             InitializeComponent();
 
             mProjectView = projectView;
             mInitialTab = initialTab;
+            mInitialAsmId = initialAsmId;
 
             // Make a work copy, so we can discard changes if the user cancels out of the dialog.
             projectView.SerializeCodeListColumnWidths();
             mSettings = AppSettings.Global.GetCopy();
 
-            // Put buttons in an array.
+            // Put column-width buttons in an array.
             mColButtons = new Button[] {
                 showCol0, showCol1, showCol2, showCol3, showCol4,
                 showCol5, showCol6, showCol7, showCol8 };
             Debug.Assert(NUM_COLUMNS == 9);
 
-            // Extract formats from button labels.
+            // Extract formats from column-width button labels.
             for (int i = 0; i < NUM_COLUMNS; i++) {
                 mColButtons[i].Click += ColumnVisibilityButtonClick;
                 mColumnFormats[i] = mColButtons[i].Text;
@@ -122,6 +150,31 @@ namespace SourceGen.AppForms {
                 new TextBoxPropertyMap(strDciTextBox, "StrDci"),
                 new TextBoxPropertyMap(strDciHiTextBox, "StrDciHi"),
             };
+
+            ConfigureComboBox(asmConfigComboBox);
+        }
+
+        private void ConfigureComboBox(ComboBox cb) {
+            // Show the Name field.
+            cb.DisplayMember = "Name";
+
+
+            cb.Items.Clear();
+            IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
+            bool foundMatch = false;
+            while (iter.MoveNext()) {
+                AssemblerInfo info = iter.Current;
+                AsmComboItem item = new AsmComboItem(info);
+                cb.Items.Add(item);
+                if (item.AssemblerId == mInitialAsmId) {
+                    cb.SelectedItem = item;
+                    foundMatch = true;
+                }
+            }
+            if (!foundMatch) {
+                // Need to do this or box will show empty.
+                cb.SelectedIndex = 0;
+            }
         }
 
         private void EditAppSettings_Load(object sender, EventArgs e) {
@@ -158,10 +211,7 @@ namespace SourceGen.AppForms {
             enableDebugCheckBox.Checked = mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
 
             // Assemblers.
-            cc65PathTextBox.Text =
-                mSettings.GetString(AppSettings.ASM_CC65_EXECUTABLE, string.Empty);
-            merlin32PathTextBox.Text =
-                mSettings.GetString(AppSettings.ASM_MERLIN32_EXECUTABLE, string.Empty);
+            PopulateAsmConfigItems();
             showAsmIdentCheckBox.Checked =
                 mSettings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false);
             disableLabelLocalizationCheckBox.Checked =
@@ -202,9 +252,6 @@ namespace SourceGen.AppForms {
         /// </summary>
         private void UpdateControls() {
             applyButton.Enabled = mDirty;
-
-            clearMerlin32Button.Enabled = !string.IsNullOrEmpty(merlin32PathTextBox.Text);
-            clearCc65Button.Enabled = !string.IsNullOrEmpty(cc65PathTextBox.Text);
         }
 
         /// <summary>
@@ -358,41 +405,77 @@ namespace SourceGen.AppForms {
 
         #region Asm Config
 
-        private void browseCc65Button_Click(object sender, EventArgs e) {
-            string pathName = BrowseForExecutable("cc65 CL", "cl65.exe");
+        /// <summary>
+        /// Populates the UI elements from the asm config item in the settings.  If that doesn't
+        /// exist, use the default config.
+        /// </summary>
+        private void PopulateAsmConfigItems() {
+            AsmComboItem item = (AsmComboItem) asmConfigComboBox.SelectedItem;
+            AssemblerInfo.Id asmId = item.AssemblerId;
+
+            AssemblerConfig config = AssemblerConfig.GetConfig(mSettings, asmId);
+            if (config == null) {
+                AsmGen.IAssembler asm = AssemblerInfo.GetAssembler(asmId);
+                config = asm.GetDefaultConfig();
+            }
+
+            asmExePathTextBox.Text = config.ExecutablePath;
+            asmLabelColWidthTextBox.Text = config.ColumnWidths[0].ToString();
+            asmOpcodeColWidthTextBox.Text = config.ColumnWidths[1].ToString();
+            asmOperandColWidthTextBox.Text = config.ColumnWidths[2].ToString();
+            asmCommentColWidthTextBox.Text = config.ColumnWidths[3].ToString();
+        }
+
+        private AssemblerConfig GetAsmConfigFromUi() {
+            int[] widths = new int[4];
+            for (int i = 0; i < widths.Length; i++) {
+                widths[i] = 1;  // minimum width for all fields is 1
+            }
+
+            int result;
+            if (int.TryParse(asmLabelColWidthTextBox.Text, out result) && result > 0) {
+                widths[0] = result;
+            }
+            if (int.TryParse(asmOpcodeColWidthTextBox.Text, out result) && result > 0) {
+                widths[1] = result;
+            }
+            if (int.TryParse(asmOperandColWidthTextBox.Text, out result) && result > 0) {
+                widths[2] = result;
+            }
+            if (int.TryParse(asmCommentColWidthTextBox.Text, out result) && result > 0) {
+                widths[3] = result;
+            }
+
+            return new AssemblerConfig(asmExePathTextBox.Text, widths);
+        }
+
+        private void asmConfigComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            PopulateAsmConfigItems();
+        }
+
+        private void asmExeBrowseButton_Click(object sender, EventArgs e) {
+            AsmComboItem item = (AsmComboItem)asmConfigComboBox.SelectedItem;
+            AssemblerInfo.Id asmId = item.AssemblerId;
+
+            // Figure out what we're looking for.  For example, cc65 needs "cl65".
+            AsmGen.IAssembler asm = AssemblerInfo.GetAssembler(asmId);
+            asm.GetExeIdentifiers(out string humanName, out string exeName);
+
+            // Ask the user to find it.
+            string pathName = BrowseForExecutable(humanName, exeName);
             if (pathName != null) {
-                cc65PathTextBox.Text = pathName;
-                mSettings.SetString(AppSettings.ASM_CC65_EXECUTABLE, pathName);
+                asmExePathTextBox.Text = pathName;
+                AssemblerConfig.SetConfig(mSettings, asmId, GetAsmConfigFromUi());
+                SetDirty(true);
             }
         }
 
-        private void cc65PathTextBox_TextChanged(object sender, EventArgs e) {
-            mSettings.SetString(AppSettings.ASM_CC65_EXECUTABLE, cc65PathTextBox.Text);
-            SetDirty(true);
-        }
-
-        private void clearCc65Button_Click(object sender, EventArgs e) {
-            cc65PathTextBox.Text = string.Empty;
-            mSettings.SetString(AppSettings.ASM_CC65_EXECUTABLE, null);
-            SetDirty(true);
-        }
-
-        private void browseMerlin32Button_Click(object sender, EventArgs e) {
-            string pathName = BrowseForExecutable("Merlin Assembler", "Merlin32.exe");
-            if (pathName != null) {
-                merlin32PathTextBox.Text = pathName;
-                mSettings.SetString(AppSettings.ASM_MERLIN32_EXECUTABLE, pathName);
-            }
-        }
-
-        private void clearMerlin32Button_Click(object sender, EventArgs e) {
-            merlin32PathTextBox.Text = string.Empty;
-            mSettings.SetString(AppSettings.ASM_MERLIN32_EXECUTABLE, null);
-            SetDirty(true);
-        }
-
-        private void merlin32PathTextBox_TextChanged(object sender, EventArgs e) {
-            mSettings.SetString(AppSettings.ASM_MERLIN32_EXECUTABLE, merlin32PathTextBox.Text);
+        /// <summary>
+        /// Handles a text-changed event in the executable and column width text boxes.
+        /// </summary>
+        private void AsmConfig_TextChanged(object sender, EventArgs e) {
+            AsmComboItem item = (AsmComboItem)asmConfigComboBox.SelectedItem;
+            AssemblerConfig.SetConfig(mSettings, item.AssemblerId, GetAsmConfigFromUi());
             SetDirty(true);
         }
 
@@ -405,17 +488,32 @@ namespace SourceGen.AppForms {
         private string BrowseForExecutable(string prefix, string name) {
             string pathName = null;
 
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+                name += ".exe";
+            }
+
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.FileName = name;
             dlg.Filter = prefix + "|" + name;
             dlg.RestoreDirectory = true;
             if (dlg.ShowDialog() != DialogResult.Cancel) {
                 pathName = dlg.FileName;
-                SetDirty(true);
             }
             dlg.Dispose();
 
             return pathName;
+        }
+
+        private void showCycleCountsCheckBox_CheckedChanged(object sender, EventArgs e) {
+            mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
+                showCycleCountsCheckBox.Checked);
+            SetDirty(true);
+        }
+
+        private void longLabelNewLineCheckBox_CheckedChanged(object sender, EventArgs e) {
+            mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE,
+                longLabelNewLineCheckBox.Checked);
+            SetDirty(true);
         }
 
         private void showAsmIdentCheckBox_CheckedChanged(object sender, EventArgs e) {
@@ -426,18 +524,6 @@ namespace SourceGen.AppForms {
         private void disableLabelLocalizationCheckBox_CheckedChanged(object sender, EventArgs e) {
             mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION,
                 disableLabelLocalizationCheckBox.Checked);
-            SetDirty(true);
-        }
-
-        private void longLabelNewLineCheckBox_CheckedChanged(object sender, EventArgs e) {
-            mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE,
-                longLabelNewLineCheckBox.Checked);
-            SetDirty(true);
-        }
-
-        private void showCycleCountsCheckBox_CheckedChanged(object sender, EventArgs e) {
-            mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
-                showCycleCountsCheckBox.Checked);
             SetDirty(true);
         }
 

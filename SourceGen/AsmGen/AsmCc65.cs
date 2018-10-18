@@ -661,16 +661,27 @@ namespace SourceGen.AsmGen {
 
         private string WorkDirectory { get; set; }
 
+        // IAssembler
+        public void GetExeIdentifiers(out string humanName, out string exeName) {
+            humanName = "cc65 CL";
+            exeName = "cl65";
+        }
+
+        // IAssembler
+        public AssemblerConfig GetDefaultConfig() {
+            return new AssemblerConfig(string.Empty, new int[] { 9, 8, 11, 72 });
+        }
 
         // IAssembler
         public AssemblerVersion QueryVersion() {
-            string exe = AppSettings.Global.GetString(AppSettings.ASM_CC65_EXECUTABLE, null);
-            if (string.IsNullOrEmpty(exe)) {
+            AssemblerConfig config =
+                AssemblerConfig.GetConfig(AppSettings.Global, AssemblerInfo.Id.Cc65);
+            if (config == null || string.IsNullOrEmpty(config.ExecutablePath)) {
                 return null;
             }
 
-            ShellCommand cmd = new ShellCommand(exe, "--version",
-                System.IO.Directory.GetCurrentDirectory(), null);
+            ShellCommand cmd = new ShellCommand(config.ExecutablePath, "--version",
+                Directory.GetCurrentDirectory(), null);
             cmd.Execute();
             if (string.IsNullOrEmpty(cmd.Stdout)) {
                 return null;
@@ -721,25 +732,16 @@ namespace SourceGen.AsmGen {
                 Debug.WriteLine("NOTE: source file is not in work directory");
             }
 
-            //string home = AppSettings.Global.GetString(AppSettings.ASM_CC65_HOME, null);
-            //string cl65 = AppSettings.Global.GetString(AppSettings.ASM_CC65_EXECUTABLE, null);
-            //Debug.Assert(!string.IsNullOrEmpty(cl65));
-            //Debug.Assert(!string.IsNullOrEmpty(home));
-
-            //Dictionary<string, string> envVars = new Dictionary<string, string>(1);
-            //envVars.Add("CC65_HOME", home);
-
-            //string exePath = Path.Combine(home, cl65);
-
-            string cl65 = AppSettings.Global.GetString(AppSettings.ASM_CC65_EXECUTABLE, null);
-            if (string.IsNullOrEmpty(cl65)) {
+            AssemblerConfig config =
+                AssemblerConfig.GetConfig(AppSettings.Global, AssemblerInfo.Id.Cc65);
+            if (string.IsNullOrEmpty(config.ExecutablePath)) {
                 Debug.WriteLine("Assembler not configured");
                 return null;
             }
 
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
-            ShellCommand cmd = new ShellCommand(cl65,
+            ShellCommand cmd = new ShellCommand(config.ExecutablePath,
                 "--target none \"" + pathName + "\"", WorkDirectory, null);
             cmd.Execute();
 

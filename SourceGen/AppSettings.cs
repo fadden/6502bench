@@ -108,11 +108,8 @@ namespace SourceGen {
         // Main project view settings.
         public const string PRVW_RECENT_PROJECT_LIST = "prvw-recent-project-list";
 
-        // cc65 assembler settings
-        public const string ASM_CC65_EXECUTABLE = "asm-cc65-executable";
-
-        // Merlin 32 assembler settings.
-        public const string ASM_MERLIN32_EXECUTABLE = "asm-merlin32-executable";
+        // Assembler settings prefix
+        public const string ASM_CONFIG_PREFIX = "asm-config-";
 
         // Internal debugging features.
         public const string DEBUG_MENU_ENABLED = "debug-menu-enabled";
