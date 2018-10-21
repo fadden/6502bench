@@ -37,7 +37,8 @@ namespace SourceGen.AsmGen {
         AssemblerConfig GetDefaultConfig();
 
         /// <summary>
-        /// Queries the assembler for its version.
+        /// Queries the assembler for its version.  Assembler executable paths are queried from
+        /// the global settings object.
         /// </summary>
         /// <returns>Assembler version info, or null if query failed.</returns>
         AssemblerVersion QueryVersion();

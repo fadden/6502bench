@@ -387,10 +387,21 @@ namespace SourceGen.Tests {
             // it for the localization test.
             settings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, true);
 
-            // We will also want to define (or remove to get default behavior) any
-            // assembler-specific stuff that affects generated output, like column widths.
-            // We need to retain the assembler-specific configuration for things like
-            // where the assembler shell command lives.
+            IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
+            while (iter.MoveNext()) {
+                AssemblerInfo.Id asmId = iter.Current.AssemblerId;
+                AssemblerConfig curConfig =
+                    AssemblerConfig.GetConfig(settings, asmId);
+                AssemblerConfig defConfig =
+                    AssemblerInfo.GetAssembler(asmId).GetDefaultConfig();
+
+                // Merge the two together.  We want the default assembler config for most
+                // things, but the executable path from the current config.
+                defConfig.ExecutablePath = curConfig.ExecutablePath;
+
+                // Write it into the test settings.
+                AssemblerConfig.SetConfig(settings, asmId, defConfig);
+            }
 
             return settings;
         }
