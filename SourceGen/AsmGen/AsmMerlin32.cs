@@ -123,6 +123,40 @@ namespace SourceGen.AsmGen {
 
 
         // IGenerator
+        public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
+                out Formatter.FormatConfig formatConfig) {
+            // This is not intended to match up with the Merlin generator, which uses
+            // the same pseudo-op for low/high ASCII but different string delimiters.  We
+            // don't change the delimiters for the display list, so instead we tweak the
+            // opcode slightly.
+            char hiAscii = '\u2191';
+            pseudoOps = new PseudoOp.PseudoOpNames() {
+                EquDirective = "equ",
+                OrgDirective = "org",
+                DefineData1 = "dfb",
+                DefineData2 = "dw",
+                DefineData3 = "adr",
+                DefineData4 = "adrl",
+                DefineBigData2 = "ddb",
+                Fill = "ds",
+                Dense = "hex",
+                StrGeneric = "asc",
+                StrGenericHi = "asc" + hiAscii,
+                StrReverse = "rev",
+                StrReverseHi = "rev" + hiAscii,
+                StrLen8 = "str",
+                StrLen8Hi = "str" + hiAscii,
+                StrLen16 = "strl",
+                StrLen16Hi = "strl" + hiAscii,
+                StrDci = "dci",
+                StrDciHi = "dci" + hiAscii,
+            };
+
+            formatConfig = new Formatter.FormatConfig();
+            SetFormatConfigValues(ref formatConfig);
+        }
+
+        // IGenerator
         public void Configure(DisasmProject project, string workDirectory, string fileNameBase,
                 AssemblerVersion asmVersion, AppSettings settings) {
             Debug.Assert(project != null);
@@ -145,6 +179,21 @@ namespace SourceGen.AsmGen {
             mColumnWidths = (int[])config.ColumnWidths.Clone();
         }
 
+        /// <summary>
+        /// Configures the assembler-specific format items.
+        /// </summary>
+        private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            config.mForceAbsOpcodeSuffix = ":";
+            config.mForceLongOpcodeSuffix = "l";
+            config.mForceAbsOperandPrefix = string.Empty;
+            config.mForceLongOperandPrefix = string.Empty;
+            config.mEndOfLineCommentDelimiter = ";";
+            config.mFullLineCommentDelimiterBase = ";";
+            config.mBoxLineCommentDelimiter = string.Empty;
+            config.mAllowHighAsciiCharConst = true;
+            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
+        }
+
         // IGenerator; executes on background thread
         public List<string> GenerateSource(BackgroundWorker worker) {
             List<string> pathNames = new List<string>(1);
@@ -155,15 +204,7 @@ namespace SourceGen.AsmGen {
 
             Formatter.FormatConfig config = new Formatter.FormatConfig();
             GenCommon.ConfigureFormatterFromSettings(Settings, ref config);
-            config.mForceAbsOpcodeSuffix = ":";
-            config.mForceLongOpcodeSuffix = "l";
-            config.mForceAbsOperandPrefix = string.Empty;
-            config.mForceLongOperandPrefix = string.Empty;
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = string.Empty;
-            config.mAllowHighAsciiCharConst = true;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
+            SetFormatConfigValues(ref config);
             SourceFormatter = new Formatter(config);
 
             string msg = string.Format(Properties.Resources.PROGRESS_GENERATING_FMT, pathName);
@@ -353,7 +394,7 @@ namespace SourceGen.AsmGen {
         public void OutputLine(string label, string opcode, string operand, string comment) {
             // Split long label, but not on EQU directives (confuses the assembler).
             if (mLongLabelNewLine && label.Length >= mColumnWidths[0] &&
-                    !String.Equals(opcode, sDataOpNames.EquDirective,
+                    !string.Equals(opcode, sDataOpNames.EquDirective,
                         StringComparison.InvariantCultureIgnoreCase)) {
                 mOutStream.WriteLine(label);
                 label = string.Empty;

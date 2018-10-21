@@ -91,8 +91,8 @@ namespace SourceGen.AppForms {
             this.displayFormatTabPage = new System.Windows.Forms.TabPage();
             this.fmtExplanationLabel = new System.Windows.Forms.Label();
             this.quickDisplayFormatGroup = new System.Windows.Forms.GroupBox();
-            this.quickFmtMerlin32Button = new System.Windows.Forms.Button();
-            this.quickFmtCc65Button = new System.Windows.Forms.Button();
+            this.displayFmtQuickComboBox = new System.Windows.Forms.ComboBox();
+            this.displayFmtSetButton = new System.Windows.Forms.Button();
             this.quickFmtDefaultButton = new System.Windows.Forms.Button();
             this.useMerlinExpressions = new System.Windows.Forms.CheckBox();
             this.operandWidthGroupBox = new System.Windows.Forms.GroupBox();
@@ -108,8 +108,8 @@ namespace SourceGen.AppForms {
             this.disambSuffix16TextBox = new System.Windows.Forms.TextBox();
             this.pseudoOpTabPage = new System.Windows.Forms.TabPage();
             this.quickPseudoSetGroup = new System.Windows.Forms.GroupBox();
-            this.quickPseudoMerlin32 = new System.Windows.Forms.Button();
-            this.quickPseudoCc65Button = new System.Windows.Forms.Button();
+            this.pseudoOpSetButton = new System.Windows.Forms.Button();
+            this.pseudoOpQuickComboBox = new System.Windows.Forms.ComboBox();
             this.quickPseudoDefaultButton = new System.Windows.Forms.Button();
             this.strDciHiTextBox = new System.Windows.Forms.TextBox();
             this.strDciHiLabel = new System.Windows.Forms.Label();
@@ -178,7 +178,7 @@ namespace SourceGen.AppForms {
             this.cancelButton.Location = new System.Drawing.Point(537, 406);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 3;
+            this.cancelButton.TabIndex = 0;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
@@ -189,7 +189,7 @@ namespace SourceGen.AppForms {
             this.okButton.Location = new System.Drawing.Point(456, 406);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 2;
+            this.okButton.TabIndex = 3;
             this.okButton.Text = "OK";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
@@ -200,7 +200,7 @@ namespace SourceGen.AppForms {
             this.applyButton.Location = new System.Drawing.Point(354, 406);
             this.applyButton.Name = "applyButton";
             this.applyButton.Size = new System.Drawing.Size(75, 23);
-            this.applyButton.TabIndex = 1;
+            this.applyButton.TabIndex = 2;
             this.applyButton.Text = "Apply";
             this.applyButton.UseVisualStyleBackColor = true;
             this.applyButton.Click += new System.EventHandler(this.applyButton_Click);
@@ -218,7 +218,7 @@ namespace SourceGen.AppForms {
             this.settingsTabControl.Name = "settingsTabControl";
             this.settingsTabControl.SelectedIndex = 0;
             this.settingsTabControl.Size = new System.Drawing.Size(622, 398);
-            this.settingsTabControl.TabIndex = 0;
+            this.settingsTabControl.TabIndex = 1;
             // 
             // codeViewTabPage
             // 
@@ -631,9 +631,6 @@ namespace SourceGen.AppForms {
             // 
             this.asmConfigComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.asmConfigComboBox.FormattingEnabled = true;
-            this.asmConfigComboBox.Items.AddRange(new object[] {
-            "cc65",
-            "Merlin32"});
             this.asmConfigComboBox.Location = new System.Drawing.Point(91, 19);
             this.asmConfigComboBox.Name = "asmConfigComboBox";
             this.asmConfigComboBox.Size = new System.Drawing.Size(154, 21);
@@ -734,40 +731,41 @@ namespace SourceGen.AppForms {
             this.fmtExplanationLabel.Location = new System.Drawing.Point(7, 7);
             this.fmtExplanationLabel.Name = "fmtExplanationLabel";
             this.fmtExplanationLabel.Size = new System.Drawing.Size(374, 13);
-            this.fmtExplanationLabel.TabIndex = 52;
+            this.fmtExplanationLabel.TabIndex = 0;
             this.fmtExplanationLabel.Text = "Configure display format options. This does not affect source code generation.";
             // 
             // quickDisplayFormatGroup
             // 
-            this.quickDisplayFormatGroup.Controls.Add(this.quickFmtMerlin32Button);
-            this.quickDisplayFormatGroup.Controls.Add(this.quickFmtCc65Button);
+            this.quickDisplayFormatGroup.Controls.Add(this.displayFmtQuickComboBox);
+            this.quickDisplayFormatGroup.Controls.Add(this.displayFmtSetButton);
             this.quickDisplayFormatGroup.Controls.Add(this.quickFmtDefaultButton);
-            this.quickDisplayFormatGroup.Location = new System.Drawing.Point(348, 291);
+            this.quickDisplayFormatGroup.Location = new System.Drawing.Point(215, 291);
             this.quickDisplayFormatGroup.Name = "quickDisplayFormatGroup";
-            this.quickDisplayFormatGroup.Size = new System.Drawing.Size(258, 75);
-            this.quickDisplayFormatGroup.TabIndex = 51;
+            this.quickDisplayFormatGroup.Size = new System.Drawing.Size(391, 75);
+            this.quickDisplayFormatGroup.TabIndex = 3;
             this.quickDisplayFormatGroup.TabStop = false;
             this.quickDisplayFormatGroup.Text = "Quick Set";
             // 
-            // quickFmtMerlin32Button
+            // displayFmtQuickComboBox
             // 
-            this.quickFmtMerlin32Button.Location = new System.Drawing.Point(173, 30);
-            this.quickFmtMerlin32Button.Name = "quickFmtMerlin32Button";
-            this.quickFmtMerlin32Button.Size = new System.Drawing.Size(75, 23);
-            this.quickFmtMerlin32Button.TabIndex = 2;
-            this.quickFmtMerlin32Button.Text = "Merlin 32";
-            this.quickFmtMerlin32Button.UseVisualStyleBackColor = true;
-            this.quickFmtMerlin32Button.Click += new System.EventHandler(this.quickFmtMerlin32Button_Click);
+            this.displayFmtQuickComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.displayFmtQuickComboBox.FormattingEnabled = true;
+            this.displayFmtQuickComboBox.Items.AddRange(new object[] {
+            "MegaAsm"});
+            this.displayFmtQuickComboBox.Location = new System.Drawing.Point(136, 32);
+            this.displayFmtQuickComboBox.Name = "displayFmtQuickComboBox";
+            this.displayFmtQuickComboBox.Size = new System.Drawing.Size(168, 21);
+            this.displayFmtQuickComboBox.TabIndex = 1;
             // 
-            // quickFmtCc65Button
+            // displayFmtSetButton
             // 
-            this.quickFmtCc65Button.Location = new System.Drawing.Point(92, 30);
-            this.quickFmtCc65Button.Name = "quickFmtCc65Button";
-            this.quickFmtCc65Button.Size = new System.Drawing.Size(75, 23);
-            this.quickFmtCc65Button.TabIndex = 1;
-            this.quickFmtCc65Button.Text = "cc65";
-            this.quickFmtCc65Button.UseVisualStyleBackColor = true;
-            this.quickFmtCc65Button.Click += new System.EventHandler(this.quickFmtCc65Button_Click);
+            this.displayFmtSetButton.Location = new System.Drawing.Point(310, 30);
+            this.displayFmtSetButton.Name = "displayFmtSetButton";
+            this.displayFmtSetButton.Size = new System.Drawing.Size(75, 23);
+            this.displayFmtSetButton.TabIndex = 2;
+            this.displayFmtSetButton.Text = "Set";
+            this.displayFmtSetButton.UseVisualStyleBackColor = true;
+            this.displayFmtSetButton.Click += new System.EventHandler(this.displayFmtSetButton_Click);
             // 
             // quickFmtDefaultButton
             // 
@@ -785,7 +783,7 @@ namespace SourceGen.AppForms {
             this.useMerlinExpressions.Location = new System.Drawing.Point(6, 153);
             this.useMerlinExpressions.Name = "useMerlinExpressions";
             this.useMerlinExpressions.Size = new System.Drawing.Size(158, 17);
-            this.useMerlinExpressions.TabIndex = 49;
+            this.useMerlinExpressions.TabIndex = 2;
             this.useMerlinExpressions.Text = "Use Merlin-style expressions";
             this.useMerlinExpressions.UseVisualStyleBackColor = true;
             this.useMerlinExpressions.CheckedChanged += new System.EventHandler(this.shiftAfterAdjustCheckBox_CheckedChanged);
@@ -802,51 +800,51 @@ namespace SourceGen.AppForms {
             this.operandWidthGroupBox.Controls.Add(this.disambOpcodeSuffixLabel);
             this.operandWidthGroupBox.Controls.Add(this.disambSuffix24TextBox);
             this.operandWidthGroupBox.Controls.Add(this.disambSuffix16TextBox);
-            this.operandWidthGroupBox.Location = new System.Drawing.Point(6, 38);
+            this.operandWidthGroupBox.Location = new System.Drawing.Point(6, 40);
             this.operandWidthGroupBox.Name = "operandWidthGroupBox";
             this.operandWidthGroupBox.Size = new System.Drawing.Size(295, 98);
-            this.operandWidthGroupBox.TabIndex = 48;
+            this.operandWidthGroupBox.TabIndex = 1;
             this.operandWidthGroupBox.TabStop = false;
             this.operandWidthGroupBox.Text = "Operand Width Disambiguator";
             // 
             // disambPrefix24TextBox
             // 
             this.disambPrefix24TextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.disambPrefix24TextBox.Location = new System.Drawing.Point(220, 64);
+            this.disambPrefix24TextBox.Location = new System.Drawing.Point(220, 66);
             this.disambPrefix24TextBox.MaxLength = 8;
             this.disambPrefix24TextBox.Name = "disambPrefix24TextBox";
             this.disambPrefix24TextBox.Size = new System.Drawing.Size(62, 20);
-            this.disambPrefix24TextBox.TabIndex = 13;
+            this.disambPrefix24TextBox.TabIndex = 9;
             this.disambPrefix24TextBox.Text = ".placeho";
             this.disambPrefix24TextBox.TextChanged += new System.EventHandler(this.WidthDisamControlChanged);
             // 
             // disambPrefix16TextBox
             // 
             this.disambPrefix16TextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.disambPrefix16TextBox.Location = new System.Drawing.Point(220, 38);
+            this.disambPrefix16TextBox.Location = new System.Drawing.Point(220, 40);
             this.disambPrefix16TextBox.MaxLength = 8;
             this.disambPrefix16TextBox.Name = "disambPrefix16TextBox";
             this.disambPrefix16TextBox.Size = new System.Drawing.Size(62, 20);
-            this.disambPrefix16TextBox.TabIndex = 12;
+            this.disambPrefix16TextBox.TabIndex = 7;
             this.disambPrefix16TextBox.Text = ".placeho";
             this.disambPrefix16TextBox.TextChanged += new System.EventHandler(this.WidthDisamControlChanged);
             // 
             // disambPrefix24Label
             // 
             this.disambPrefix24Label.AutoSize = true;
-            this.disambPrefix24Label.Location = new System.Drawing.Point(171, 66);
+            this.disambPrefix24Label.Location = new System.Drawing.Point(171, 68);
             this.disambPrefix24Label.Name = "disambPrefix24Label";
             this.disambPrefix24Label.Size = new System.Drawing.Size(36, 13);
-            this.disambPrefix24Label.TabIndex = 11;
+            this.disambPrefix24Label.TabIndex = 8;
             this.disambPrefix24Label.Text = "24 bit:";
             // 
             // disambPrefix16Label
             // 
             this.disambPrefix16Label.AutoSize = true;
-            this.disambPrefix16Label.Location = new System.Drawing.Point(171, 40);
+            this.disambPrefix16Label.Location = new System.Drawing.Point(171, 42);
             this.disambPrefix16Label.Name = "disambPrefix16Label";
             this.disambPrefix16Label.Size = new System.Drawing.Size(36, 13);
-            this.disambPrefix16Label.TabIndex = 10;
+            this.disambPrefix16Label.TabIndex = 6;
             this.disambPrefix16Label.Text = "16 bit:";
             // 
             // disambOperandPrefixLabel
@@ -855,25 +853,25 @@ namespace SourceGen.AppForms {
             this.disambOperandPrefixLabel.Location = new System.Drawing.Point(171, 20);
             this.disambOperandPrefixLabel.Name = "disambOperandPrefixLabel";
             this.disambOperandPrefixLabel.Size = new System.Drawing.Size(79, 13);
-            this.disambOperandPrefixLabel.TabIndex = 9;
+            this.disambOperandPrefixLabel.TabIndex = 5;
             this.disambOperandPrefixLabel.Text = "Operand prefix:";
             // 
             // disambSuffix24Label
             // 
             this.disambSuffix24Label.AutoSize = true;
-            this.disambSuffix24Label.Location = new System.Drawing.Point(10, 66);
+            this.disambSuffix24Label.Location = new System.Drawing.Point(10, 68);
             this.disambSuffix24Label.Name = "disambSuffix24Label";
             this.disambSuffix24Label.Size = new System.Drawing.Size(36, 13);
-            this.disambSuffix24Label.TabIndex = 8;
+            this.disambSuffix24Label.TabIndex = 3;
             this.disambSuffix24Label.Text = "24 bit:";
             // 
             // disambSuffix16Label
             // 
             this.disambSuffix16Label.AutoSize = true;
-            this.disambSuffix16Label.Location = new System.Drawing.Point(10, 40);
+            this.disambSuffix16Label.Location = new System.Drawing.Point(10, 42);
             this.disambSuffix16Label.Name = "disambSuffix16Label";
             this.disambSuffix16Label.Size = new System.Drawing.Size(36, 13);
-            this.disambSuffix16Label.TabIndex = 7;
+            this.disambSuffix16Label.TabIndex = 1;
             this.disambSuffix16Label.Text = "16 bit:";
             // 
             // disambOpcodeSuffixLabel
@@ -882,28 +880,28 @@ namespace SourceGen.AppForms {
             this.disambOpcodeSuffixLabel.Location = new System.Drawing.Point(7, 20);
             this.disambOpcodeSuffixLabel.Name = "disambOpcodeSuffixLabel";
             this.disambOpcodeSuffixLabel.Size = new System.Drawing.Size(75, 13);
-            this.disambOpcodeSuffixLabel.TabIndex = 6;
+            this.disambOpcodeSuffixLabel.TabIndex = 0;
             this.disambOpcodeSuffixLabel.Text = "Opcode suffix:";
             // 
             // disambSuffix24TextBox
             // 
             this.disambSuffix24TextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.disambSuffix24TextBox.Location = new System.Drawing.Point(62, 64);
+            this.disambSuffix24TextBox.Location = new System.Drawing.Point(62, 66);
             this.disambSuffix24TextBox.MaxLength = 8;
             this.disambSuffix24TextBox.Name = "disambSuffix24TextBox";
             this.disambSuffix24TextBox.Size = new System.Drawing.Size(62, 20);
-            this.disambSuffix24TextBox.TabIndex = 5;
+            this.disambSuffix24TextBox.TabIndex = 4;
             this.disambSuffix24TextBox.Text = ".placeho";
             this.disambSuffix24TextBox.TextChanged += new System.EventHandler(this.WidthDisamControlChanged);
             // 
             // disambSuffix16TextBox
             // 
             this.disambSuffix16TextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.disambSuffix16TextBox.Location = new System.Drawing.Point(62, 38);
+            this.disambSuffix16TextBox.Location = new System.Drawing.Point(62, 40);
             this.disambSuffix16TextBox.MaxLength = 8;
             this.disambSuffix16TextBox.Name = "disambSuffix16TextBox";
             this.disambSuffix16TextBox.Size = new System.Drawing.Size(62, 20);
-            this.disambSuffix16TextBox.TabIndex = 3;
+            this.disambSuffix16TextBox.TabIndex = 2;
             this.disambSuffix16TextBox.Text = ".placeho";
             this.disambSuffix16TextBox.TextChanged += new System.EventHandler(this.WidthDisamControlChanged);
             // 
@@ -965,35 +963,34 @@ namespace SourceGen.AppForms {
             // 
             // quickPseudoSetGroup
             // 
-            this.quickPseudoSetGroup.Controls.Add(this.quickPseudoMerlin32);
-            this.quickPseudoSetGroup.Controls.Add(this.quickPseudoCc65Button);
+            this.quickPseudoSetGroup.Controls.Add(this.pseudoOpSetButton);
+            this.quickPseudoSetGroup.Controls.Add(this.pseudoOpQuickComboBox);
             this.quickPseudoSetGroup.Controls.Add(this.quickPseudoDefaultButton);
-            this.quickPseudoSetGroup.Location = new System.Drawing.Point(348, 291);
+            this.quickPseudoSetGroup.Location = new System.Drawing.Point(215, 291);
             this.quickPseudoSetGroup.Name = "quickPseudoSetGroup";
-            this.quickPseudoSetGroup.Size = new System.Drawing.Size(258, 75);
-            this.quickPseudoSetGroup.TabIndex = 46;
+            this.quickPseudoSetGroup.Size = new System.Drawing.Size(391, 75);
+            this.quickPseudoSetGroup.TabIndex = 45;
             this.quickPseudoSetGroup.TabStop = false;
             this.quickPseudoSetGroup.Text = "Quick Set";
             // 
-            // quickPseudoMerlin32
+            // pseudoOpSetButton
             // 
-            this.quickPseudoMerlin32.Location = new System.Drawing.Point(173, 30);
-            this.quickPseudoMerlin32.Name = "quickPseudoMerlin32";
-            this.quickPseudoMerlin32.Size = new System.Drawing.Size(75, 23);
-            this.quickPseudoMerlin32.TabIndex = 2;
-            this.quickPseudoMerlin32.Text = "Merlin 32";
-            this.quickPseudoMerlin32.UseVisualStyleBackColor = true;
-            this.quickPseudoMerlin32.Click += new System.EventHandler(this.quickPseudoMerlin32_Click);
+            this.pseudoOpSetButton.Location = new System.Drawing.Point(310, 30);
+            this.pseudoOpSetButton.Name = "pseudoOpSetButton";
+            this.pseudoOpSetButton.Size = new System.Drawing.Size(75, 23);
+            this.pseudoOpSetButton.TabIndex = 2;
+            this.pseudoOpSetButton.Text = "Set";
+            this.pseudoOpSetButton.UseVisualStyleBackColor = true;
+            this.pseudoOpSetButton.Click += new System.EventHandler(this.pseudoOpSetButton_Click);
             // 
-            // quickPseudoCc65Button
+            // pseudoOpQuickComboBox
             // 
-            this.quickPseudoCc65Button.Location = new System.Drawing.Point(92, 30);
-            this.quickPseudoCc65Button.Name = "quickPseudoCc65Button";
-            this.quickPseudoCc65Button.Size = new System.Drawing.Size(75, 23);
-            this.quickPseudoCc65Button.TabIndex = 1;
-            this.quickPseudoCc65Button.Text = "cc65";
-            this.quickPseudoCc65Button.UseVisualStyleBackColor = true;
-            this.quickPseudoCc65Button.Click += new System.EventHandler(this.quickPseudoCc65Button_Click);
+            this.pseudoOpQuickComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pseudoOpQuickComboBox.FormattingEnabled = true;
+            this.pseudoOpQuickComboBox.Location = new System.Drawing.Point(136, 32);
+            this.pseudoOpQuickComboBox.Name = "pseudoOpQuickComboBox";
+            this.pseudoOpQuickComboBox.Size = new System.Drawing.Size(168, 21);
+            this.pseudoOpQuickComboBox.TabIndex = 1;
             // 
             // quickPseudoDefaultButton
             // 
@@ -1250,10 +1247,10 @@ namespace SourceGen.AppForms {
             this.popExplanationLabel.AutoSize = true;
             this.popExplanationLabel.Location = new System.Drawing.Point(7, 7);
             this.popExplanationLabel.Name = "popExplanationLabel";
-            this.popExplanationLabel.Size = new System.Drawing.Size(541, 13);
+            this.popExplanationLabel.Size = new System.Drawing.Size(550, 13);
             this.popExplanationLabel.TabIndex = 0;
             this.popExplanationLabel.Text = "Select pseudo-op names for display. This does not affect source code generation. " +
-    "Blank entries get default value.";
+    "Blank entries get a default value.";
             // 
             // denseTextBox
             // 
@@ -1571,8 +1568,6 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.Button selectFontButton;
         private System.Windows.Forms.Label currentFontDisplayLabel;
         private System.Windows.Forms.GroupBox quickPseudoSetGroup;
-        private System.Windows.Forms.Button quickPseudoMerlin32;
-        private System.Windows.Forms.Button quickPseudoCc65Button;
         private System.Windows.Forms.Button quickPseudoDefaultButton;
         private System.Windows.Forms.GroupBox upperCaseGroupBox;
         private System.Windows.Forms.CheckBox upperOpcodeCheckBox;
@@ -1600,8 +1595,6 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.TextBox disambSuffix24TextBox;
         private System.Windows.Forms.TextBox disambSuffix16TextBox;
         private System.Windows.Forms.GroupBox quickDisplayFormatGroup;
-        private System.Windows.Forms.Button quickFmtMerlin32Button;
-        private System.Windows.Forms.Button quickFmtCc65Button;
         private System.Windows.Forms.Button quickFmtDefaultButton;
         private System.Windows.Forms.Label configAsmGenLabel;
         private System.Windows.Forms.CheckBox longLabelNewLineCheckBox;
@@ -1620,5 +1613,9 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.TextBox asmLabelColWidthTextBox;
         private System.Windows.Forms.Label asmConfigAssemblerLabel;
         private System.Windows.Forms.Label asmColWidthIdLabel;
+        private System.Windows.Forms.Button pseudoOpSetButton;
+        private System.Windows.Forms.ComboBox pseudoOpQuickComboBox;
+        private System.Windows.Forms.Button displayFmtSetButton;
+        private System.Windows.Forms.ComboBox displayFmtQuickComboBox;
     }
 }

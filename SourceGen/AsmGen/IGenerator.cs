@@ -25,8 +25,21 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public interface IGenerator {
         /// <summary>
+        /// Returns some strings and format options for use in for the display list, configurable
+        /// through the app settings "quick set" feature.  These are not used when generating
+        /// source code.
+        /// 
+        /// This may be called on an unconfigured IGenerator.
+        /// </summary>
+        /// <param name="pseudoOps">Table of pseudo-op names.</param>
+        /// <param name="formatConfig">Format configuration.</param>
+        void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
+            out Formatter.FormatConfig formatConfig);
+
+
+        /// <summary>
         /// Configure generator.  Must be called before calling any other method or using
-        /// properties.
+        /// properties, unless otherwise noted.
         /// </summary>
         /// <param name="project">Project to generate source for.</param>
         /// <param name="workDirectory">Directory in which to create output files.</param>

@@ -152,12 +152,13 @@ namespace SourceGen.AppForms {
             };
 
             ConfigureComboBox(asmConfigComboBox);
+            ConfigureComboBox(displayFmtQuickComboBox);
+            ConfigureComboBox(pseudoOpQuickComboBox);
         }
 
         private void ConfigureComboBox(ComboBox cb) {
             // Show the Name field.
             cb.DisplayMember = "Name";
-
 
             cb.Items.Clear();
             IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
@@ -450,7 +451,11 @@ namespace SourceGen.AppForms {
         }
 
         private void asmConfigComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            // They're switching to a different asm config.  Changing the boxes will cause
+            // the dirty flag to be raised, which isn't right, so we save/restore it.
+            bool oldDirty = mDirty;
             PopulateAsmConfigItems();
+            SetDirty(oldDirty);
         }
 
         private void asmExeBrowseButton_Click(object sender, EventArgs e) {
@@ -555,7 +560,7 @@ namespace SourceGen.AppForms {
         }
 
         /// <summary>
-        /// Sets all of the width disambiguation settings.  Used for the quick-set buttons.
+        /// Sets all of the width disambiguation settings.
         /// </summary>
         private void SetWidthDisamSettings(string opcodeSuffixAbs, string opcodeSuffixLong,
                 string operandPrefixAbs, string operandPrefixLong) {
@@ -596,22 +601,29 @@ namespace SourceGen.AppForms {
             SetDirty(true);
         }
 
+        private void displayFmtSetButton_Click(object sender, EventArgs e) {
+            AsmComboItem item = (AsmComboItem)displayFmtQuickComboBox.SelectedItem;
+            AssemblerInfo.Id asmId = item.AssemblerId;
+            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmId);
+
+            PseudoOp.PseudoOpNames opNames;
+            Asm65.Formatter.FormatConfig formatConfig;
+            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
+
+            SetWidthDisamSettings(formatConfig.mForceAbsOpcodeSuffix,
+                formatConfig.mForceLongOpcodeSuffix,
+                formatConfig.mForceAbsOperandPrefix,
+                formatConfig.mForceLongOperandPrefix);
+            useMerlinExpressions.Checked = (formatConfig.mExpressionMode ==
+                Asm65.Formatter.FormatConfig.ExpressionMode.Merlin);
+
+            // dirty flag set by change watchers if one or more fields have changed
+        }
+
         private void quickFmtDefaultButton_Click(object sender, EventArgs e) {
             SetWidthDisamSettings(null, "l", "a:", "f:");
             useMerlinExpressions.Checked = false;
-            // dirty flag set by change callbacks
-        }
-
-        private void quickFmtCc65Button_Click(object sender, EventArgs e) {
-            SetWidthDisamSettings(null, null, "a:", "f:");
-            useMerlinExpressions.Checked = false;
-            // dirty flag set by change callbacks
-        }
-
-        private void quickFmtMerlin32Button_Click(object sender, EventArgs e) {
-            SetWidthDisamSettings(":", "l", null, null);
-            useMerlinExpressions.Checked = true;
-            // dirty flag set by change callbacks
+            // dirty flag set by change watchers if one or more fields have changed
         }
 
         #endregion Display Format
@@ -653,49 +665,17 @@ namespace SourceGen.AppForms {
             ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
         }
 
-        private void quickPseudoCc65Button_Click(object sender, EventArgs e) {
-            ImportPseudoOpNames(new PseudoOp.PseudoOpNames() {
-                EquDirective = "=",
-                OrgDirective = ".org",
-                DefineData1 = ".byte",
-                DefineData2 = ".word",
-                DefineData3 = ".faraddr",
-                DefineData4 = ".dword",
-                DefineBigData2 = ".dbyt",
-                Fill = ".res",
-                StrGeneric = ".byte",
-                StrNullTerm = ".asciiz",
-            });
-        }
+        private void pseudoOpSetButton_Click(object sender, EventArgs e) {
+            AsmComboItem item = (AsmComboItem)pseudoOpQuickComboBox.SelectedItem;
+            AssemblerInfo.Id asmId = item.AssemblerId;
+            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmId);
 
-        private void quickPseudoMerlin32_Click(object sender, EventArgs e) {
-            // Note this doesn't quite match up with the Merlin generator, which uses
-            // the same pseudo-op for low/high ASCII but different string delimiters.  We
-            // don't change the delimiters for the display list, so we want to tweak the
-            // opcode slightly.
-            //char hiAscii = '\u21e1';
-            char hiAscii = '\u2191';
-            ImportPseudoOpNames(new PseudoOp.PseudoOpNames() {
-                EquDirective = "equ",
-                OrgDirective = "org",
-                DefineData1 = "dfb",
-                DefineData2 = "dw",
-                DefineData3 = "adr",
-                DefineData4 = "adrl",
-                DefineBigData2 = "ddb",
-                Fill = "ds",
-                Dense = "hex",
-                StrGeneric = "asc",
-                StrGenericHi = "asc" + hiAscii,
-                StrReverse = "rev",
-                StrReverseHi = "rev" + hiAscii,
-                StrLen8 = "str",
-                StrLen8Hi = "str" + hiAscii,
-                StrLen16 = "strl",
-                StrLen16Hi = "strl" + hiAscii,
-                StrDci = "dci",
-                StrDciHi = "dci" + hiAscii,
-            });
+            PseudoOp.PseudoOpNames opNames;
+            Asm65.Formatter.FormatConfig formatConfig;
+            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
+            ImportPseudoOpNames(opNames);
+
+            // dirty flag set by change watchers if one or more fields have changed
         }
 
         #endregion Pseudo-Op

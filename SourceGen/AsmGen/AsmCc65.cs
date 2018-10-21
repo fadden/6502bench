@@ -122,6 +122,26 @@ namespace SourceGen.AsmGen {
 
 
         // IGenerator
+        public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
+                out Formatter.FormatConfig formatConfig) {
+            pseudoOps = new PseudoOp.PseudoOpNames() {
+                EquDirective = "=",
+                OrgDirective = ".org",
+                DefineData1 = ".byte",
+                DefineData2 = ".word",
+                DefineData3 = ".faraddr",
+                DefineData4 = ".dword",
+                DefineBigData2 = ".dbyt",
+                Fill = ".res",
+                StrGeneric = ".byte",
+                StrNullTerm = ".asciiz",
+            };
+
+            formatConfig = new Formatter.FormatConfig();
+            SetFormatConfigValues(ref formatConfig);
+        }
+
+        // IGenerator
         public void Configure(DisasmProject project, string workDirectory, string fileNameBase,
                 AssemblerVersion asmVersion, AppSettings settings) {
             Debug.Assert(project != null);
@@ -156,6 +176,21 @@ namespace SourceGen.AsmGen {
             mColumnWidths = (int[])config.ColumnWidths.Clone();
         }
 
+        /// <summary>
+        /// Configures the assembler-specific format items.
+        /// </summary>
+        private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            config.mForceAbsOpcodeSuffix = string.Empty;
+            config.mForceLongOpcodeSuffix = string.Empty;
+            config.mForceAbsOperandPrefix = "a:";       // absolute
+            config.mForceLongOperandPrefix = "f:";      // far
+            config.mEndOfLineCommentDelimiter = ";";
+            config.mFullLineCommentDelimiterBase = ";";
+            config.mBoxLineCommentDelimiter = ";";
+            config.mAllowHighAsciiCharConst = false;
+            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Simple;
+        }
+
         // IGenerator
         public List<string> GenerateSource(BackgroundWorker worker) {
             List<string> pathNames = new List<string>(1);
@@ -166,15 +201,7 @@ namespace SourceGen.AsmGen {
 
             Formatter.FormatConfig config = new Formatter.FormatConfig();
             GenCommon.ConfigureFormatterFromSettings(Settings, ref config);
-            config.mForceAbsOpcodeSuffix = string.Empty;
-            config.mForceLongOpcodeSuffix = string.Empty;
-            config.mForceAbsOperandPrefix = "a:";       // absolute
-            config.mForceLongOperandPrefix = "f:";      // far
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = ";";
-            config.mAllowHighAsciiCharConst = false;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Simple;
+            SetFormatConfigValues(ref config);
             SourceFormatter = new Formatter(config);
 
             string msg = string.Format(Properties.Resources.PROGRESS_GENERATING_FMT, pathName);
@@ -465,7 +492,7 @@ namespace SourceGen.AsmGen {
             // just ".feature labels_without_colons", but I'm trying to do things the way
             // that cc65 users will expect.
             if (!string.IsNullOrEmpty(label) && label[0] != '.' &&
-                    !String.Equals(opcode, sDataOpNames.EquDirective,
+                    !string.Equals(opcode, sDataOpNames.EquDirective,
                         StringComparison.InvariantCultureIgnoreCase)) {
                 label += ':';
 

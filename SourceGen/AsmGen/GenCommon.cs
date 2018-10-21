@@ -292,7 +292,7 @@ namespace SourceGen.AsmGen {
 
         /// <summary>
         /// Configures some common format config items from the app settings.  Uses a
-        /// passed-in object, rather than the global settings.
+        /// passed-in settings object, rather than the global settings.
         /// </summary>
         /// <param name="settings">Application settings.</param>
         /// <param name="config">Format config struct.</param>
