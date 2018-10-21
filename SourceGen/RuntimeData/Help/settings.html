@@ -41,7 +41,7 @@ out to the main application until you hit Apply or OK.</p>
 
 <h3><a name="appset-codeview">Code View</a></h3>
 
-<p>These settings change the way the code looks.</p>
+<p>These settings change the way the code looks on screen.</p>
 
 <p>Click the Column Visibility buttons to hide columns.  Click them
 again to restore the column to a default width.  A "hidden" column just
@@ -68,28 +68,21 @@ opcode, operand, and comment), like assembly source code does.  The
 
 <h3><a name="appset-asmconfig">Asm Config</a></h3>
 
-<p>These settings configure cross-assemblers and modify the output in
-various ways.</p>
-<p>For cc65, locate <code>bin/cl65.exe</code>.  Note you need a full
-installation of cc65, with configuration files and libraries, not just
-the cl65 binary.</p>
-<p>For Merlin 32, locate <code>Merlin32.exe</code>.  The executable
-is stand-alone.</p>
-
-<p>If you enable "identify assembler in output", a comment will be
-added to the top of the generated assembly output that identifies the
-target assembler and version.  This can be very helpful if the source
-file is sent to other people, since it may not otherwise be obvious from
-the source file what the intended target assembler is.</p>
-
-<p>"Disable label localization" turns off the
-<a href="codegen.html#localizer">label localizer</a>.</p>
-
-<p>If "put long labels on separate line" is checked, labels that are
-longer than the label column are placed on their own line.  This looks
-a bit nicer because otherwise the opcode gets pushed out of alignment.
-(Some assemblers get bent out of shape if you split an equate
-directive, so those might stay on one line.)</p>
+<p>These settings configure cross-assemblers and modify assembly source
+generation in various ways.</p>
+<p>To configure an assembler, select it in the pop-up menu.  The fields
+will initially contain assembler-specific default values.  All of
+the values in the Assembler Configuration box may be configured
+differently for each assembler.</p>
+<p>The "executable" box holds the full path to the cross-assembler
+executable.  For cc65 this is <code>bin/cl65.exe</code>, for Merlin32
+you need <code>Merlin32.exe</code>.  (On non-Windows platforms, you
+won't need the ".exe".)  For cc65 you need a full installation, with
+the configuration files and libraries, not just the cl65 binary itself.</p>
+<p>The "column widths" section allows you to specify the width of the
+label, opcode, operand, and comment fields.  If the width is less than 1,
+or isn't a valid number, 1 will be used.  (Note: the comment width isn't
+used at this time.)</p>
 
 <p>When "show cycle counts" is checked, every instruction line will have
 an end-of-line comment that indicates the number of cycles required for
@@ -101,6 +94,21 @@ In some cases the variability can be factored out if the state of
 certain status flags is known, e.g. 65C02 instructions that take longer
 in decimal mode won't be shown as variable if the analyzer can determine
 that D=0 or D=1.</p>
+
+<p>If "put long labels on separate line" is checked, labels that are
+longer than the label column are placed on their own line.  This looks
+a bit nicer because otherwise the opcode gets pushed out of alignment.
+(Some assemblers get bent out of shape if you split an equate
+directive, so those might stay on one line.)</p>
+
+<p>If you enable "identify assembler in output", a comment will be
+added to the top of the generated assembly output that identifies the
+target assembler and version.  This can be very helpful if the source
+file is sent to other people, since it may not otherwise be obvious from
+the source file what the intended target assembler is.</p>
+
+<p>"Disable label localization" turns off the
+<a href="codegen.html#localizer">label localizer</a>.</p>
 
 
 <h3><a name="appset-displayformat">Display Format</a></h3>
@@ -119,19 +127,23 @@ operators ('&lt;', '&gt;', '^') act like shift operators, yielding
 16-bit values when wide registers are enabled on the 65816.</p>
 
 <p>The "quick set" buttons configure the fields on this tab to match
-the conventions of the specified assembler.</p>
+the conventions of the specified assembler.  Select your preferred assembler
+with the combox box, then click "set" to set the fields.</p>
 
 
 <h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
 
-<p>These options change the way the code list looks on screen.  They
-do not affect generated code.</p>
+<p>These options change the way the code list looks on screen.  Assembler
+directives and data pseudo-opcodes will use these values.  This does
+not affect generated source code, which always matches the conventions
+of the target assembler.</p>
 
 <p>Enter the string you want to use for the various data formats.  If
 a field is left blank, a default value is used.</p>
 
 <p>The "quick set" buttons configure the fields on this tab to match
-the conventions of the specified assembler.</p>
+the conventions of the specified assembler.  Select your preferred assembler
+with the combox box, then click "set" to set the fields.</p>
 
 
 <h2><a name="project-properties">Project Properties</a></h2>
