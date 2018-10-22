@@ -428,22 +428,29 @@ namespace SourceGen.AppForms {
         }
 
         private AssemblerConfig GetAsmConfigFromUi() {
+            const int MIN_WIDTH = 1;
+            const int MAX_WIDTH = 200;
+
             int[] widths = new int[4];
             for (int i = 0; i < widths.Length; i++) {
-                widths[i] = 1;  // minimum width for all fields is 1
+                widths[i] = MIN_WIDTH;
             }
 
             int result;
-            if (int.TryParse(asmLabelColWidthTextBox.Text, out result) && result > 0) {
+            if (int.TryParse(asmLabelColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
+                    result <= MAX_WIDTH) {
                 widths[0] = result;
             }
-            if (int.TryParse(asmOpcodeColWidthTextBox.Text, out result) && result > 0) {
+            if (int.TryParse(asmOpcodeColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
+                    result <= MAX_WIDTH) {
                 widths[1] = result;
             }
-            if (int.TryParse(asmOperandColWidthTextBox.Text, out result) && result > 0) {
+            if (int.TryParse(asmOperandColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
+                    result <= MAX_WIDTH) {
                 widths[2] = result;
             }
-            if (int.TryParse(asmCommentColWidthTextBox.Text, out result) && result > 0) {
+            if (int.TryParse(asmCommentColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
+                    result <= MAX_WIDTH) {
                 widths[3] = result;
             }
 
