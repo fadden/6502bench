@@ -1735,7 +1735,15 @@ namespace SourceGen.AppForms {
             StringBuilder sb = new StringBuilder(100);
 
             int addrAdj = mProject.CpuDef.HasAddr16 ? 6 : 9;
-            int disAdj = (format != Disassembly) ? 0 : addrAdj + 10;
+            int disAdj = 0;
+            int bytesWidth = 0;
+            if (format == Disassembly) {
+                // A limit of 8 gets us 4 bytes from dense display ("20edfd60") and 3 if spaces
+                // are included ("20 ed fd") with no excess.  We want to increase it to 11 so
+                // we can always show 4 bytes.
+                bytesWidth = (mFormatterConfig.mSpacesBetweenBytes ? 11 : 8);
+                disAdj = addrAdj + bytesWidth + 2;
+            }
 
             // Walking through the selected indices can be slow for a large file, so we
             // run through the full list and pick out the selected items with our parallel
@@ -1758,10 +1766,10 @@ namespace SourceGen.AppForms {
                                 sb.Append(": ");
                             }
 
-                            // shorten the "..."
+                            // Shorten the "...".
                             string bytesStr = parts.Bytes;
-                            if (bytesStr != null && bytesStr.Length > 8) {
-                                bytesStr = bytesStr.Substring(0, 8) + "+";
+                            if (bytesStr != null && bytesStr.Length > bytesWidth) {
+                                bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
                             }
                             TextUtil.AppendPaddedString(sb, bytesStr, disAdj);
                         }

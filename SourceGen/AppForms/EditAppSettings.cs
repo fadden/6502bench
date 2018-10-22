@@ -209,6 +209,8 @@ namespace SourceGen.AppForms {
                 clipboardFormatComboBox.SelectedIndex = clipIndex;
             }
 
+            spacesBetweenBytesCheckBox.Checked =
+                mSettings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false);
             enableDebugCheckBox.Checked = mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
 
             // Assemblers.
@@ -393,6 +395,12 @@ namespace SourceGen.AppForms {
 
         private void clipboardFormatComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             mSettings.SetInt(AppSettings.CLIP_LINE_FORMAT, clipboardFormatComboBox.SelectedIndex);
+            SetDirty(true);
+        }
+
+        private void spacesBetweenBytesCheckBox_CheckedChanged(object sender, EventArgs e) {
+            mSettings.SetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES,
+                spacesBetweenBytesCheckBox.Checked);
             SetDirty(true);
         }
 

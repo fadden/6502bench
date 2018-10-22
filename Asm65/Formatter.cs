@@ -74,6 +74,8 @@ namespace Asm65 {
             // miscellaneous
             public bool mHexDumpAsciiOnly;              // disallow non-ASCII chars in hex dumps?
 
+            public bool mSpacesBetweenBytes;    // "20edfd" vs. "20 ed fd"
+
             public enum CharConvMode { Unknown = 0, PlainAscii, HighLowAscii };
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
@@ -639,9 +641,12 @@ namespace Asm65 {
         private void GenerateByteFormat(int len) {
             Debug.Assert(len <= MAX_BYTE_DUMP);
 
-            StringBuilder sb = new StringBuilder(len * 6);
+            StringBuilder sb = new StringBuilder(len * 7);
             for (int i = 0; i < len; i++) {
-                //. e.g. "{0:x2}"
+                if (i != 0 && mFormatConfig.mSpacesBetweenBytes) {
+                    sb.Append(' ');
+                }
+                // e.g. "{0:x2}"
                 sb.Append("{" + i + ":" + mHexFmtChar + "2}");
             }
             mByteDumpFormats[len - 1] = sb.ToString();

@@ -156,6 +156,8 @@ namespace SourceGen.AppForms {
             this.defineData1Label = new System.Windows.Forms.Label();
             this.equDirectiveTextBox = new System.Windows.Forms.TextBox();
             this.equDirectiveLabel = new System.Windows.Forms.Label();
+            this.codeViewMiscGroupBox = new System.Windows.Forms.GroupBox();
+            this.spacesBetweenBytesCheckBox = new System.Windows.Forms.CheckBox();
             this.settingsTabControl.SuspendLayout();
             this.codeViewTabPage.SuspendLayout();
             this.clipboardGroupBox.SuspendLayout();
@@ -169,6 +171,7 @@ namespace SourceGen.AppForms {
             this.operandWidthGroupBox.SuspendLayout();
             this.pseudoOpTabPage.SuspendLayout();
             this.quickPseudoSetGroup.SuspendLayout();
+            this.codeViewMiscGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // cancelButton
@@ -222,6 +225,7 @@ namespace SourceGen.AppForms {
             // 
             // codeViewTabPage
             // 
+            this.codeViewTabPage.Controls.Add(this.codeViewMiscGroupBox);
             this.codeViewTabPage.Controls.Add(this.clipboardGroupBox);
             this.codeViewTabPage.Controls.Add(this.enableDebugCheckBox);
             this.codeViewTabPage.Controls.Add(this.upperCaseGroupBox);
@@ -405,7 +409,7 @@ namespace SourceGen.AppForms {
             // 
             // selectFontButton
             // 
-            this.selectFontButton.Location = new System.Drawing.Point(6, 60);
+            this.selectFontButton.Location = new System.Drawing.Point(6, 58);
             this.selectFontButton.Name = "selectFontButton";
             this.selectFontButton.Size = new System.Drawing.Size(125, 23);
             this.selectFontButton.TabIndex = 2;
@@ -1452,6 +1456,27 @@ namespace SourceGen.AppForms {
             this.equDirectiveLabel.Text = "Equate:";
             this.equDirectiveLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // codeViewMiscGroupBox
+            // 
+            this.codeViewMiscGroupBox.Controls.Add(this.spacesBetweenBytesCheckBox);
+            this.codeViewMiscGroupBox.Location = new System.Drawing.Point(406, 101);
+            this.codeViewMiscGroupBox.Name = "codeViewMiscGroupBox";
+            this.codeViewMiscGroupBox.Size = new System.Drawing.Size(200, 47);
+            this.codeViewMiscGroupBox.TabIndex = 5;
+            this.codeViewMiscGroupBox.TabStop = false;
+            this.codeViewMiscGroupBox.Text = "Miscellaneous";
+            // 
+            // spacesBetweenBytesCheckBox
+            // 
+            this.spacesBetweenBytesCheckBox.AutoSize = true;
+            this.spacesBetweenBytesCheckBox.Location = new System.Drawing.Point(7, 20);
+            this.spacesBetweenBytesCheckBox.Name = "spacesBetweenBytesCheckBox";
+            this.spacesBetweenBytesCheckBox.Size = new System.Drawing.Size(158, 17);
+            this.spacesBetweenBytesCheckBox.TabIndex = 0;
+            this.spacesBetweenBytesCheckBox.Text = "Add spaces in bytes column";
+            this.spacesBetweenBytesCheckBox.UseVisualStyleBackColor = true;
+            this.spacesBetweenBytesCheckBox.CheckedChanged += new System.EventHandler(this.spacesBetweenBytesCheckBox_CheckedChanged);
+            // 
             // EditAppSettings
             // 
             this.AcceptButton = this.okButton;
@@ -1493,6 +1518,8 @@ namespace SourceGen.AppForms {
             this.pseudoOpTabPage.ResumeLayout(false);
             this.pseudoOpTabPage.PerformLayout();
             this.quickPseudoSetGroup.ResumeLayout(false);
+            this.codeViewMiscGroupBox.ResumeLayout(false);
+            this.codeViewMiscGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1617,5 +1644,7 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.ComboBox pseudoOpQuickComboBox;
         private System.Windows.Forms.Button displayFmtSetButton;
         private System.Windows.Forms.ComboBox displayFmtQuickComboBox;
+        private System.Windows.Forms.GroupBox codeViewMiscGroupBox;
+        private System.Windows.Forms.CheckBox spacesBetweenBytesCheckBox;
     }
 }

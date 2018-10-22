@@ -310,6 +310,8 @@ namespace SourceGen.AsmGen {
                 settings.GetBool(AppSettings.FMT_UPPER_OPERAND_S, false);
             config.mUpperOperandXY =
                 settings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
+            config.mSpacesBetweenBytes =
+                settings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false);
             config.mAddSpaceLongComment =
                 settings.GetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
 
