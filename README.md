@@ -1,4 +1,4 @@
-# 6502bench #
+# 6502bench # 
 
 [Features](#key-features) - [Installation](#installation) - [Getting Started](#getting-started) - [About the Code](#about-the-code)
 
