@@ -1093,7 +1093,8 @@ namespace SourceGen {
                 // $00 is followed by actual code.  (But be a little freaked out that your
                 // code is running into a BRK.)
                 //opcodeStr = opcodeStr + " \u00bb";  // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-                opcodeStr = opcodeStr + " \u23e9";  // BLACK RIGHT-POINTING DOUBLE TRIANGLE
+                //opcodeStr = opcodeStr + " \u23e9";  // BLACK RIGHT-POINTING DOUBLE TRIANGLE
+                opcodeStr = opcodeStr + " \u25bc";  // BLACK DOWN-POINTING TRIANGLE
             }
 
             string formattedOperand = null;
