@@ -128,8 +128,9 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// Outputs a code origin directive.
         /// </summary>
+        /// <param name="offset">Offset of code targeted to new address.</param>
         /// <param name="address">24-bit address.</param>
-        void OutputOrgDirective(int address);
+        void OutputOrgDirective(int offset, int address);
 
         /// <summary>
         /// Notify the assembler of a change in register width.

@@ -520,7 +520,7 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assembler: {0} (latest).
+        ///   Looks up a localized string similar to Target assembler: {0} (latest).
         /// </summary>
         internal static string GENERATED_FOR_LATEST {
             get {
@@ -529,7 +529,7 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assembler: {0} v{1}.
+        ///   Looks up a localized string similar to Target assembler: {0} v{1}.
         /// </summary>
         internal static string GENERATED_FOR_VERSION {
             get {

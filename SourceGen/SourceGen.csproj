@@ -98,6 +98,7 @@
     <Compile Include="AppSettings.cs" />
     <Compile Include="AsmGen\AsmCc65.cs" />
     <Compile Include="AsmGen\AsmMerlin32.cs" />
+    <Compile Include="AsmGen\AsmTass64.cs" />
     <Compile Include="AsmGen\AssemblerConfig.cs" />
     <Compile Include="AsmGen\AssemblerVersion.cs" />
     <Compile Include="AsmGen\GenAndAsm.cs">

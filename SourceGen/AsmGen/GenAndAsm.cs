@@ -226,7 +226,7 @@ namespace SourceGen.AsmGen {
         private bool IsAssemblerConfigured() {
             AssemblerConfig config =
                 AssemblerConfig.GetConfig(AppSettings.Global, mSelectedAssemblerId);
-            return !string.IsNullOrEmpty(config.ExecutablePath);
+            return config != null && !string.IsNullOrEmpty(config.ExecutablePath);
         }
 
         private void assemblerSettingsButton_Click(object sender, EventArgs e) {

@@ -126,7 +126,7 @@ namespace SourceGen.AsmGen {
         public Dictionary<string, string> LabelMap { get; private set; }
 
         /// <summary>
-        /// String to prefix to local labels.
+        /// String to prefix to local labels.  Usually a single character, like ':' or '@'.
         /// </summary>
         public string LocalPrefix { get; set; }
 
@@ -306,6 +306,36 @@ namespace SourceGen.AsmGen {
                     // Carefully remove it from the list we're iterating through.
                     mOffsetPairs.RemoveAt(i);
                     i--;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adjusts the label map so that only local variables start with an underscore ('_').
+        /// This is necessary for assemblers like 64tass that use a leading underscore to
+        /// indicate that a label should be local.
+        /// 
+        /// This may be called even if label localization is disabled.  In that case we just
+        /// create an empty label map and populate as needed.
+        /// </summary>
+        public void MaskLeadingUnderscores() {
+            bool allGlobal = false;
+            if (LabelMap == null) {
+                allGlobal = true;
+                LabelMap = new Dictionary<string, string>();
+            }
+
+            for (int i = 0; i < mProject.FileDataLength; i++) {
+                Symbol sym = mProject.GetAnattrib(i).Symbol;
+                if (sym == null) {
+                    // No label at this offset.
+                    continue;
+                }
+
+                if (sym.Label.StartsWith("_") && (allGlobal || mGlobalFlags[i])) {
+                    Debug.WriteLine("Adjusting " + sym.Label);
+                    // TODO: uniquify
+                    LabelMap[sym.Label] = "X" + sym.Label;
                 }
             }
         }

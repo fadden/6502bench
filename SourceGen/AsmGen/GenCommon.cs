@@ -66,7 +66,7 @@ namespace SourceGen.AsmGen {
                 // Check for address change.
                 int orgAddr = proj.AddrMap.Get(offset);
                 if (orgAddr >= 0) {
-                    gen.OutputOrgDirective(orgAddr);
+                    gen.OutputOrgDirective(offset, orgAddr);
                 }
 
                 if (attr.IsInstructionStart) {

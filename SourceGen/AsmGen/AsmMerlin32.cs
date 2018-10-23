@@ -31,7 +31,7 @@ namespace SourceGen.AsmGen {
     /// (https://www.brutaldeluxe.fr/products/crossdevtools/merlin/).
     /// </summary>
     public class GenMerlin32 : IGenerator {
-        private const string ASM_FILE_SUFFIX = "_Merlin32.S";
+        private const string ASM_FILE_SUFFIX = "_Merlin32.S";   // must start with underscore
         private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
@@ -364,7 +364,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(int address) {
+        public void OutputOrgDirective(int offset, int address) {
             OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
                 SourceFormatter.FormatHexValue(address, 4), string.Empty);
         }

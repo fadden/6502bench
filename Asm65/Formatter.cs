@@ -582,7 +582,7 @@ namespace Asm65 {
                 case AddressMode.StackRTI:
                 case AddressMode.StackRTL:
                 case AddressMode.StackRTS:
-                    fmt = "";
+                    fmt = string.Empty;
                     break;
                 case AddressMode.StackRel:
                     fmt = "{0}," + mSregChar;
