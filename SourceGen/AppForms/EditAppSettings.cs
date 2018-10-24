@@ -611,7 +611,7 @@ namespace SourceGen.AppForms {
         private void shiftAfterAdjustCheckBox_CheckedChanged(object sender, EventArgs e) {
             string mode = useMerlinExpressions.Checked ?
                 Asm65.Formatter.FormatConfig.ExpressionMode.Merlin.ToString() :
-                Asm65.Formatter.FormatConfig.ExpressionMode.Simple.ToString();
+                Asm65.Formatter.FormatConfig.ExpressionMode.Cc65.ToString();
             mSettings.SetString(AppSettings.FMT_EXPRESSION_MODE, mode);
             SetDirty(true);
         }

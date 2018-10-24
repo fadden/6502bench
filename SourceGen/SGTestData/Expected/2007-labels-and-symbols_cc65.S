@@ -7,6 +7,7 @@ plataddr =       $3000      ;address only in platform file
 projalsa =       $3200      ;same val as projalso
 absh     =       $feed
 biggie   =       $123456
+thirty2  =       $12345678  ;32-bit constant test
 
          .org    $012345
          .a8
@@ -194,5 +195,14 @@ string:  .byte   "This is a long string. Put a label and comment on it to confir
          .byte   "m that the label and comment only appear on the first line.  T"
          .byte   "he quick brown fox jumps over the lazy dogs."
 
-L118E:   rts
+L118E:   lda     #<thirty2+2
+         lda     #>thirty2+3
+         lda     #^thirty2
+         rep     #$30
+         .a16
+         .i16
+         lda     #thirty2 & $ffff +3
+         lda     #thirty2 >> 8 & $ffff +4
+         lda     #thirty2 >> 16
+         rts
 

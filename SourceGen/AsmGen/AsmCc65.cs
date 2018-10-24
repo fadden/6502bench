@@ -188,7 +188,7 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mAllowHighAsciiCharConst = false;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Simple;
+            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Cc65;
         }
 
         // IGenerator

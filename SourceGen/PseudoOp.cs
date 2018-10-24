@@ -541,6 +541,10 @@ namespace SourceGen {
                                 FormatNumericSymbolSimple(formatter, sym, labelMap,
                                     dfd, operandValue, operandLen, isPcRel, sb);
                                 break;
+                            case Formatter.FormatConfig.ExpressionMode.Cc65:
+                                FormatNumericSymbolCc65(formatter, sym, labelMap,
+                                    dfd, operandValue, operandLen, isPcRel, sb);
+                                break;
                             case Formatter.FormatConfig.ExpressionMode.Merlin:
                                 FormatNumericSymbolMerlin(formatter, sym, labelMap,
                                     dfd, operandValue, operandLen, isPcRel, sb);
@@ -584,7 +588,11 @@ namespace SourceGen {
                 string selOp;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16) & 0xff;
-                    selOp = "^";
+                    if (formatter.Config.mBankSelectBackQuote) {
+                        selOp = "`";
+                    } else {
+                        selOp = "^";
+                    }
                 } else if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.High) {
                     symbolValue = (sym.Value >> 8) & 0xff;
                     selOp = ">";
@@ -652,15 +660,112 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Format the symbol and adjustment using cc65 expression syntax.
+        /// </summary>
+        private static void FormatNumericSymbolCc65(Formatter formatter, Symbol sym,
+                Dictionary<string, string> labelMap, FormatDescriptor dfd,
+                int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
+            // The key difference between cc65 and other assemblers with general expressions
+            // is that the bitwise shift and AND operators have higher precedence than the
+            // arithmetic ops like add and subtract.  (The bitwise ops are equal to multiply
+            // and divide.)  This means that, if we want to mask off the low 16 bits and add one
+            // to a label, we can write "start & $ffff + 1" rather than "(start & $ffff) + 1".
+            //
+            // This is particularly convenient for PEA, since "PEA (start & $ffff)" looks like
+            // we're trying to use a (non-existent) indirect form of PEA.  We can write things
+            // in a simpler way.
+
+            int adjustment, symbolValue;
+
+            string symLabel = sym.Label;
+            if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
+                symLabel = newLabel;
+            }
+
+            if (operandLen == 1) {
+                // Use the byte-selection operator to get the right piece.
+                string selOp;
+                if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
+                    symbolValue = (sym.Value >> 16) & 0xff;
+                    selOp = "^";
+                } else if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.High) {
+                    symbolValue = (sym.Value >> 8) & 0xff;
+                    selOp = ">";
+                } else {
+                    symbolValue = sym.Value & 0xff;
+                    if (symbolValue == sym.Value) {
+                        selOp = string.Empty;
+                    } else {
+                        selOp = "<";
+                    }
+                }
+                sb.Append(selOp);
+                sb.Append(symLabel);
+
+                operandValue &= 0xff;
+            } else if (operandLen <= 4) {
+                // Operands and values should be 8/16/24 bit unsigned quantities.  32-bit
+                // support is really there so you can have a 24-bit pointer in a 32-bit hole.
+                // Might need to adjust this if 32-bit signed quantities become interesting.
+                uint mask = 0xffffffff >> ((4 - operandLen) * 8);
+                string shOp;
+                if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
+                    symbolValue = (sym.Value >> 16);
+                    shOp = " >> 16";
+                } else if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.High) {
+                    symbolValue = (sym.Value >> 8);
+                    shOp = " >> 8";
+                } else {
+                    symbolValue = sym.Value;
+                    shOp = "";
+                }
+
+                if (isPcRel) {
+                    // PC-relative operands are funny, because an 8- or 16-bit value is always
+                    // expanded to 24 bits.  We output a 16-bit value that the assembler will
+                    // convert back to 8-bit or 16-bit.  In any event, the bank byte is never
+                    // relevant to our computations.
+                    operandValue &= 0xffff;
+                    symbolValue &= 0xffff;
+                }
+
+                sb.Append(symLabel);
+                sb.Append(shOp);
+                if (symbolValue > mask) {
+                    // Post-shift value won't fit in an operand-size box.
+                    symbolValue = (int)(symbolValue & mask);
+                    sb.Append(" & ");
+                    sb.Append(formatter.FormatHexValue((int)mask, 2));
+                }
+
+                if (sb.Length != symLabel.Length) {
+                    sb.Append(' ');
+                }
+
+                operandValue = (int)(operandValue & mask);
+            } else {
+                Debug.Assert(false, "bad numeric len");
+                sb.Append("?????");
+                symbolValue = 0;
+            }
+
+            adjustment = operandValue - symbolValue;
+
+            sb.Append(formatter.FormatAdjustment(adjustment));
+        }
+
+        /// <summary>
         /// Format the symbol and adjustment using Merlin expression syntax.
         /// </summary>
         private static void FormatNumericSymbolMerlin(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
                 int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
+            // Merlin expressions are compatible with the original 8-bit Merlin.  They're
+            // evaluated from left to right, with (almost) no regard for operator precedence.
+            //
             // The part-selection operators differ from "simple" in two ways:
-            //  (1) They always happen last.  If FOO=$10f0, "#>FOO+$18" == $11.  (Strangely,
-            //      all other operators are evaluated from left to right, with no concept
-            //      of operator precedence.)
+            //  (1) They always happen last.  If FOO=$10f0, "#>FOO+$18" == $11.  One of the
+            //      few cases where left-to-right evaluation is overridden.
             //  (2) They select words, not bytes.  If FOO=$123456, "#>FOO" is $1234.  This is
             //      best thought of as a shift operator, rather than byte-selection.  For
             //      8-bit code this doesn't matter.
@@ -676,13 +781,13 @@ namespace SourceGen {
 
             // If we add or subtract an adjustment, it will be done on the full value, which
             // is then shifted to the appropriate part.  So we need to left-shift the operand
-            // value to match.  We fill in the low bytes with the contes of the symbol, so
+            // value to match.  We fill in the low bytes with the contents of the symbol, so
             // that the adjustment doesn't include unnecessary values.  (For example, let
             // FOO=$10f0, with operand "#>FOO" ($10).  We shift the operand to get $1000, then
             // OR in the low byte to get $10f0, so that when we subtract we get adjustment==0.)
             int adjOperand, keepLen;
             if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
-                adjOperand = operandValue << 16 | (sym.Value & 0xffff);
+                adjOperand = operandValue << 16 | (int)(sym.Value & 0xff00ffff);
                 keepLen = 3;
             } else if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.High) {
                 adjOperand = (operandValue << 8) | (sym.Value & 0xff);
@@ -696,7 +801,7 @@ namespace SourceGen {
             adjustment = adjOperand - sym.Value;
             if (keepLen == 1) {
                 adjustment %= 256;
-                // Adjust for aesthetics.  The assembler implicitly appiles a modulo operation,
+                // Adjust for aesthetics.  The assembler implicitly applies a modulo operation,
                 // so we can use the value closest to zero.
                 if (adjustment > 127) {
                     adjustment = -(256 - adjustment) /*% 256*/;

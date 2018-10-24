@@ -54,6 +54,7 @@ namespace Asm65 {
             public bool mUpperOperandA;         // display acc operand in upper case?
             public bool mUpperOperandS;         // display stack operand in upper case?
             public bool mUpperOperandXY;        // display index register operand in upper case?
+            public bool mBankSelectBackQuote;   // use '`' rather than '^' for bank select?
             public bool mAddSpaceLongComment;   // insert space after delimiter for long comments?
 
             // functional changes to assembly output
@@ -79,7 +80,8 @@ namespace Asm65 {
             public enum CharConvMode { Unknown = 0, PlainAscii, HighLowAscii };
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
-            public enum ExpressionMode { Unknown = 0, Simple, Merlin };
+            // Hopefully we don't need a separate mode for every assembler in existence.
+            public enum ExpressionMode { Unknown = 0, Simple, Cc65, Merlin };
             public ExpressionMode mExpressionMode;      // symbol rendering mode
 
             // Deserialization helper.
@@ -602,22 +604,6 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Formats a pseudo-opcode.
-        /// </summary>
-        /// <param name="opstr">Pseudo-op string to format.</param>
-        /// <returns>Formatted string.</returns>
-        public string FormatPseudoOp(string opstr) {
-            if (!mPseudoOpStrings.TryGetValue(opstr, out string result)) {
-                if (mFormatConfig.mUpperPseudoOpcodes) {
-                    result = mPseudoOpStrings[opstr] = opstr.ToUpperInvariant();
-                } else {
-                    result = mPseudoOpStrings[opstr] = opstr;
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Formats the instruction operand.
         /// </summary>
         /// <param name="op">Opcode definition (needed for address mode).</param>
@@ -632,6 +618,22 @@ namespace Asm65 {
                 format = mOperandFormats[key] = GenerateOperandFormat(op.AddrMode, wdis);
             }
             return string.Format(format, contents);
+        }
+
+        /// <summary>
+        /// Formats a pseudo-opcode.
+        /// </summary>
+        /// <param name="opstr">Pseudo-op string to format.</param>
+        /// <returns>Formatted string.</returns>
+        public string FormatPseudoOp(string opstr) {
+            if (!mPseudoOpStrings.TryGetValue(opstr, out string result)) {
+                if (mFormatConfig.mUpperPseudoOpcodes) {
+                    result = mPseudoOpStrings[opstr] = opstr.ToUpperInvariant();
+                } else {
+                    result = mPseudoOpStrings[opstr] = opstr;
+                }
+            }
+            return result;
         }
 
         /// <summary>

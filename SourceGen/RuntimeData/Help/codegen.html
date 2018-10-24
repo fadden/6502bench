@@ -198,7 +198,7 @@ code, but also needs to know how to handle the corner cases.</p>
     left to right, with no operator precedence.</li>
   <li>The byte selection operators  ('&lt;', '&gt;', '^') are actually
     word-selection operators, yielding 16-bit values when wide registers
-    are enabled on the 65816.</p>
+    are enabled on the 65816.</li>
   <li>The assembler tracks register widths when it sees SEP/REP instructions,
     but doesn't attempt to track the emulation flag.  So if the registers
     are long when you switch to emulation, incorrect code is generated.

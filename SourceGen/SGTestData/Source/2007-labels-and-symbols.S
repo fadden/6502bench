@@ -7,6 +7,7 @@ absl    equ     $1029
 absh    equ     $feed
 zip     equ     $cd
 biggie  equ     $123456
+thirty2 equ     $12345678
 
         org     $012345
 
@@ -216,6 +217,16 @@ t4c     jml     target2
         asc     'jumps over the lazy dogs.'
 
 :skiphex
+
+; extract bytes from 32-bit value with short regs
+        lda     #<thirty2 + 2
+        lda     #>thirty2 + 768
+        lda     #^thirty2
+        rep     #$30
+        mx      %00
+        lda     #<thirty2 + 3
+        lda     #>thirty2 + 1024
+        lda     #^thirty2
 
         rts
 

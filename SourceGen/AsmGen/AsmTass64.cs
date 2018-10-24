@@ -168,6 +168,15 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            // Must be lower case when --case-sensitive is used.
+            config.mUpperOpcodes = false;
+            config.mUpperPseudoOpcodes = false;
+            config.mUpperOperandA = false;
+            config.mUpperOperandS = false;
+            config.mUpperOperandXY = false;
+
+            config.mBankSelectBackQuote = true;
+
             config.mForceAbsOpcodeSuffix = string.Empty;
             config.mForceLongOpcodeSuffix = string.Empty;
             config.mForceAbsOperandPrefix = "@w";       // word
@@ -176,11 +185,6 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mAllowHighAsciiCharConst = false;
-            config.mUpperOpcodes = false;
-            config.mUpperPseudoOpcodes = false;
-            config.mUpperOperandA = false;
-            config.mUpperOperandS = false;
-            config.mUpperOperandXY = false;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Simple;
         }
 

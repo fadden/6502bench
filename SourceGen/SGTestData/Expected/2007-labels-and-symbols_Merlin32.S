@@ -6,6 +6,7 @@ plataddr equ   $3000      ;address only in platform file
 projalsa equ   $3200      ;same val as projalso
 absh     equ   $feed
 biggie   equ   $123456
+thirty2  equ   $12345678  ;32-bit constant test
 
          org   $012345
 start    clc
@@ -186,5 +187,13 @@ string   asc   'This is a long string. Put a label and comment on it to confir' 
          asc   'm that the label and comment only appear on the first line.  T'
          asc   'he quick brown fox jumps over the lazy dogs.'
 
-L118E    rts
+L118E    lda   #<thirty2+2
+         lda   #>thirty2+768
+         lda   #^thirty2
+         rep   #$30
+         mx    %00
+         lda   #thirty2+3
+         lda   #>thirty2+1024
+         lda   #^thirty2
+         rts
 

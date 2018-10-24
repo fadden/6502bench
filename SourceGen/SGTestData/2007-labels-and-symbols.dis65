@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":678,"FileDataCrc32":1825804405,"ProjectProps":{
+"_ContentVersion":1,"FileDataLength":695,"FileDataCrc32":1242388944,"ProjectProps":{
 "CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AnalysisParams":{
 "AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
 "PlatformSymbolFileIdentifiers":["PROJ:2007-labels-and-symbols.sym65","RT:TestData/TestSyms.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
@@ -19,7 +19,11 @@
 "projover":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"replaces platform symbol","Label":"projover","Value":16384,"Source":"Project","Type":"ExternalAddr"}}},
+"Comment":"replaces platform symbol","Label":"projover","Value":16384,"Source":"Project","Type":"ExternalAddr"},
+"thirty2":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"32-bit constant test","Label":"thirty2","Value":305419896,"Source":"Project","Type":"Constant"}}},
 "AddressMap":[{
 "Offset":0,"Addr":74565},
 {
@@ -30,7 +34,7 @@
 "397":"bulky","509":"stringy"},
 "LongComments":{
 "-2147483647":{
-"Text":"Project was edited to add a label in the middle of a dense hex region, and add a duplicate label.","BoxMode":false,"MaxWidth":80}},
+"Text":"Project was edited to add a label in the middle of a dense hex region, and add a duplicate label.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
 },
 "UserLabels":{
@@ -381,4 +385,22 @@
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"badmid","Part":"Low"}},
 "397":{
-"Length":112,"Format":"Dense","SubFormat":"None","SymbolRef":null}}}
+"Length":112,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"677":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"Low"}},
+"679":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"High"}},
+"681":{
+"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"Bank"}},
+"685":{
+"Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"Low"}},
+"688":{
+"Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"High"}},
+"691":{
+"Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
+"Label":"thirty2","Part":"Bank"}}}}

@@ -202,7 +202,8 @@ namespace SourceGen.AsmGen {
                 operandForSymbol = attr.OperandAddress;
             }
 
-            // Check Length to watch for bogus descriptors (?)
+            // Check Length to watch for bogus descriptors.  (ApplyFormatDescriptors() should
+            // now be screening bad descriptors out, so we may not need the Length test.)
             if (attr.DataDescriptor != null && attr.Length == attr.DataDescriptor.Length) {
                 // Format operand as directed.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
