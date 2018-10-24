@@ -537,8 +537,8 @@ namespace SourceGen {
                         StringBuilder sb = new StringBuilder();
 
                         switch (formatter.ExpressionMode) {
-                            case Formatter.FormatConfig.ExpressionMode.Simple:
-                                FormatNumericSymbolSimple(formatter, sym, labelMap,
+                            case Formatter.FormatConfig.ExpressionMode.Common:
+                                FormatNumericSymbolCommon(formatter, sym, labelMap,
                                     dfd, operandValue, operandLen, isPcRel, sb);
                                 break;
                             case Formatter.FormatConfig.ExpressionMode.Cc65:
@@ -568,7 +568,7 @@ namespace SourceGen {
         /// <summary>
         /// Format the symbol and adjustment using common expression syntax.
         /// </summary>
-        private static void FormatNumericSymbolSimple(Formatter formatter, Symbol sym,
+        private static void FormatNumericSymbolCommon(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
                 int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
             // We could have some simple code that generated correct output, shifting and
@@ -584,7 +584,8 @@ namespace SourceGen {
             }
 
             if (operandLen == 1) {
-                // Use the byte-selection operator to get the right piece.
+                // Use the byte-selection operator to get the right piece.  In 64tass the
+                // selection operator has a very low precedence, similar to Merlin 32.
                 string selOp;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16) & 0xff;
@@ -604,25 +605,36 @@ namespace SourceGen {
                         selOp = "<";
                     }
                 }
-                sb.Append(selOp);
-                sb.Append(symLabel);
 
                 operandValue &= 0xff;
+
+                if (operandValue != symbolValue &&
+                        dfd.SymbolRef.ValuePart != WeakSymbolRef.Part.Low) {
+                    // Adjustment is required to an upper-byte part.
+                    sb.Append('(');
+                    sb.Append(selOp);
+                    sb.Append(symLabel);
+                    sb.Append(')');
+                } else {
+                    // no adjustment required
+                    sb.Append(selOp);
+                    sb.Append(symLabel);
+                }
             } else if (operandLen <= 4) {
                 // Operands and values should be 8/16/24 bit unsigned quantities.  32-bit
                 // support is really there so you can have a 24-bit pointer in a 32-bit hole.
                 // Might need to adjust this if 32-bit signed quantities become interesting.
                 uint mask = 0xffffffff >> ((4 - operandLen) * 8);
-                string shOp;
+                int rightShift;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16);
-                    shOp = " >> 16";
+                    rightShift = 16;
                 } else if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.High) {
                     symbolValue = (sym.Value >> 8);
-                    shOp = " >> 8";
+                    rightShift = 8;
                 } else {
                     symbolValue = sym.Value;
-                    shOp = "";
+                    rightShift = 0;
                 }
 
                 if (isPcRel) {
@@ -634,20 +646,41 @@ namespace SourceGen {
                     symbolValue &= 0xffff;
                 }
 
-                sb.Append(symLabel);
-                sb.Append(shOp);
+                bool needMask = false;
                 if (symbolValue > mask) {
                     // Post-shift value won't fit in an operand-size box.
                     symbolValue = (int) (symbolValue & mask);
-                    sb.Append(" & ");
-                    sb.Append(formatter.FormatHexValue((int)mask, 2));
-                }
-
-                if (sb.Length != symLabel.Length) {
-                    sb.Append(' ');
+                    needMask = true;
                 }
 
                 operandValue = (int)(operandValue & mask);
+
+                // Generate one of:
+                //  label [+ adj]
+                //  (label >> rightShift) [+ adj]
+                //  (label & mask) [+ adj]
+                //  ((label >> rightShift) & mask) [+ adj]
+
+                if (rightShift != 0 || needMask) {
+                    if (rightShift != 0 && needMask) {
+                        sb.Append("0+((");
+                    } else {
+                        sb.Append("0+(");
+                    }
+                }
+                sb.Append(symLabel);
+
+                if (rightShift != 0) {
+                    sb.Append(" >> ");
+                    sb.Append(rightShift.ToString());
+                    sb.Append(')');
+                }
+
+                if (needMask) {
+                    sb.Append(" & ");
+                    sb.Append(formatter.FormatHexValue((int)mask, 2));
+                    sb.Append(')');
+                }
             } else {
                 Debug.Assert(false, "bad numeric len");
                 sb.Append("?????");
@@ -704,9 +737,6 @@ namespace SourceGen {
 
                 operandValue &= 0xff;
             } else if (operandLen <= 4) {
-                // Operands and values should be 8/16/24 bit unsigned quantities.  32-bit
-                // support is really there so you can have a 24-bit pointer in a 32-bit hole.
-                // Might need to adjust this if 32-bit signed quantities become interesting.
                 uint mask = 0xffffffff >> ((4 - operandLen) * 8);
                 string shOp;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
@@ -737,12 +767,11 @@ namespace SourceGen {
                     sb.Append(" & ");
                     sb.Append(formatter.FormatHexValue((int)mask, 2));
                 }
+                operandValue = (int)(operandValue & mask);
 
                 if (sb.Length != symLabel.Length) {
                     sb.Append(' ');
                 }
-
-                operandValue = (int)(operandValue & mask);
             } else {
                 Debug.Assert(false, "bad numeric len");
                 sb.Append("?????");

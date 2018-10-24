@@ -81,12 +81,12 @@ namespace Asm65 {
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
             // Hopefully we don't need a separate mode for every assembler in existence.
-            public enum ExpressionMode { Unknown = 0, Simple, Cc65, Merlin };
+            public enum ExpressionMode { Unknown = 0, Common, Cc65, Merlin };
             public ExpressionMode mExpressionMode;      // symbol rendering mode
 
             // Deserialization helper.
             public static ExpressionMode ParseExpressionMode(string str) {
-                ExpressionMode em = ExpressionMode.Simple;
+                ExpressionMode em = ExpressionMode.Common;
                 if (!string.IsNullOrEmpty(str)) {
                     if (Enum.TryParse<ExpressionMode>(str, out ExpressionMode pem)) {
                         em = pem;

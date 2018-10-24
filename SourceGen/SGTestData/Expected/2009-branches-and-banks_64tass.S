@@ -40,14 +40,14 @@ LFFC3   brl     L0003
         .logical $440000
 L440000 cmp     L440000
 L440004 lda     L440000
-        lda     @wL440000 & $ffff
+        lda     @w0+(L440000 & $ffff)
         lda     L0000
         bmi     L440004
         per     high44
         bne     high44
         brl     L44FFC0
 
-dat44   .word   dat44 & $ffff
+dat44   .word   0+(dat44 & $ffff)
         .long   dat44
 
         .here
@@ -62,8 +62,8 @@ L44FFCB jml     L2000
         .here
         .logical $2000
 L2000   bit     L2000
-        pea     dat44 & $ffff
-        pea     dat44 >> 16
+        pea     0+(dat44 & $ffff)
+        pea     0+(dat44 >> 16)
         bne     L200E
         jml     [lodat]
 
