@@ -211,7 +211,7 @@ namespace SourceGen.AsmGen {
         /// </summary>
         private void UpdateAssemblerControls() {
             bool asmConf = IsAssemblerConfigured();
-            Debug.WriteLine("ID=" + mSelectedAssemblerId + " asmConf=" + asmConf);
+            //Debug.WriteLine("ID=" + mSelectedAssemblerId + " asmConf=" + asmConf);
             configureAsmLinkLabel.Visible = !asmConf;
             if (mGenerationResults == null || !asmConf) {
                 runAssemblerButton.Enabled = false;

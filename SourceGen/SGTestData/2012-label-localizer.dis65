@@ -30,7 +30,7 @@
 "16":{
 "Label":"pastglob","Value":4112,"Source":"User","Type":"LocalOrGlobalAddr"},
 "15":{
-"Label":"nextglob","Value":4111,"Source":"User","Type":"GlobalAddr"},
+"Label":"X_start","Value":4111,"Source":"User","Type":"GlobalAddr"},
 "20":{
 "Label":"nlocal","Value":4116,"Source":"User","Type":"GlobalAddr"},
 "22":{
@@ -40,9 +40,9 @@
 "30":{
 "Label":"reach3G","Value":4126,"Source":"User","Type":"GlobalAddr"},
 "31":{
-"Label":"reach4","Value":4127,"Source":"User","Type":"LocalOrGlobalAddr"},
+"Label":"_reach4","Value":4127,"Source":"User","Type":"LocalOrGlobalAddr"},
 "1":{
-"Label":"start","Value":4097,"Source":"User","Type":"LocalOrGlobalAddr"},
+"Label":"_start","Value":4097,"Source":"User","Type":"LocalOrGlobalAddr"},
 "50":{
 "Label":"gtest1","Value":4146,"Source":"User","Type":"GlobalAddr"},
 "54":{
@@ -52,7 +52,7 @@
 "61":{
 "Label":"topglob","Value":4157,"Source":"User","Type":"GlobalAddr"},
 "70":{
-"Label":"globalnm","Value":4166,"Source":"User","Type":"LocalOrGlobalAddr"},
+"Label":"globalnm","Value":4166,"Source":"User","Type":"GlobalAddr"},
 "76":{
 "Label":"nglobal","Value":4172,"Source":"User","Type":"LocalOrGlobalAddr"},
 "82":{
@@ -60,7 +60,11 @@
 "77":{
 "Label":"globlat","Value":4173,"Source":"User","Type":"GlobalAddr"},
 "83":{
-"Label":"EXCESSIVELY_LONG_LABEL","Value":4179,"Source":"User","Type":"GlobalAddr"}},
+"Label":"EXCESSIVELY_LONG_LABEL","Value":4179,"Source":"User","Type":"GlobalAddr"},
+"14":{
+"Label":"__nopped","Value":4110,"Source":"User","Type":"LocalOrGlobalAddr"},
+"13":{
+"Label":"start","Value":4109,"Source":"User","Type":"LocalOrGlobalAddr"}},
 "OperandFormats":{
 "23":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
@@ -70,6 +74,6 @@
 "Label":"reach2","Part":"Low"}},
 "32":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"reach4","Part":"Low"}},
+"Label":"_reach4","Part":"Low"}},
 "58":{
 "Length":3,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null}}}

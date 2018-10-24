@@ -167,6 +167,8 @@ namespace SourceGen.AsmGen {
         /// Analyzes labels to identify which ones may be treated as non-global.
         /// </summary>
         public void Analyze() {
+            Debug.Assert(LocalPrefix.Length > 0);
+
             mGlobalFlags.SetAll(false);
 
             // Currently we only support the "local labels have scope that ends at a global
@@ -317,6 +319,8 @@ namespace SourceGen.AsmGen {
         /// 
         /// This may be called even if label localization is disabled.  In that case we just
         /// create an empty label map and populate as needed.
+        /// 
+        /// Only call this if underscores are used to indicate local labels.
         /// </summary>
         public void MaskLeadingUnderscores() {
             bool allGlobal = false;
@@ -325,6 +329,14 @@ namespace SourceGen.AsmGen {
                 LabelMap = new Dictionary<string, string>();
             }
 
+            // Throw out the original local label generation.
+            LabelMap.Clear();
+
+            // Use this to test for uniqueness.  We add all labels here as we go, not just the
+            // ones being remapped.  For each label we either add the original or the localized
+            // form.
+            SortedList<string, string> allLabels = new SortedList<string, string>();
+
             for (int i = 0; i < mProject.FileDataLength; i++) {
                 Symbol sym = mProject.GetAnattrib(i).Symbol;
                 if (sym == null) {
@@ -332,12 +344,43 @@ namespace SourceGen.AsmGen {
                     continue;
                 }
 
-                if (sym.Label.StartsWith("_") && (allGlobal || mGlobalFlags[i])) {
-                    Debug.WriteLine("Adjusting " + sym.Label);
-                    // TODO: uniquify
-                    LabelMap[sym.Label] = "X" + sym.Label;
+                string newLabel;
+                if (allGlobal || mGlobalFlags[i]) {
+                    // Global symbol.  Don't let it start with '_'.
+                    if (sym.Label.StartsWith("_")) {
+                        // There's an underscore here that was added by the user.  Stick some
+                        // other character in front.
+                        newLabel = "X" + sym.Label;
+                    } else {
+                        // No change needed.
+                        newLabel = sym.Label;
+                    }
+                } else {
+                    // Local symbol.
+                    if (sym.Label.StartsWith("_")) {
+                        // The original starts with one or more underscores.  Adding another
+                        // will create a "__" label, which is reserved in 64tass.
+                        newLabel = "_X" + sym.Label;
+                    } else {
+                        newLabel = "_" + sym.Label;
+                    }
+                }
+
+                // Make sure it's unique.
+                string uniqueLabel = newLabel;
+                int uval = 1;
+                while (allLabels.ContainsKey(uniqueLabel)) {
+                    uniqueLabel = newLabel + uval.ToString();
+                }
+                allLabels.Add(uniqueLabel, uniqueLabel);
+
+                // If it's different, add it to the label map.
+                if (sym.Label != uniqueLabel) {
+                    LabelMap.Add(sym.Label, uniqueLabel);
                 }
             }
+
+            Debug.WriteLine("UMAP: allcount=" + allLabels.Count + " mapcount=" + LabelMap.Count);
         }
     }
 }

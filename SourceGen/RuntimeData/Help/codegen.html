@@ -139,6 +139,8 @@ code, but also needs to know how to handle the corner cases.</p>
     label is local.  If you create labels with leading underscores that
     are not local, the labels must be altered to start with some other
     character, and made unique.</li>
+  <li>Labels starting with two underscores are "reserved".  Trying to
+    use them causes an error.</li>
   <li>By default, 64tass sets the first two bytes of the output file to
     the load address.  The <code>--nostart</code> flag is used to
     suppress this.</li>

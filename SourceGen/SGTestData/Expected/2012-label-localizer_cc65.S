@@ -5,14 +5,14 @@ REALLYLONGLABELNAME = $8888 ;that's a long name
          .a8
          .i8
          nop
-start:   lda     @L100D
-         lda     nextglob
+_start:  lda     @start
+         lda     X_start
          lda     pastglob
-         lda     @L100E
-@L100D:  nop
-@L100E:  nop
-nextglob:
+         lda     @__nopped
+@start:  nop
+@__nopped:
          nop
+X_start: nop
 pastglob:
          nop
          lda     nlocal
@@ -22,12 +22,13 @@ reach1G: nop
          lda     @reach2+2
 @reach2: nop
 reach3G: nop
-@reach4: nop
-         lda     @reach4-2
+@_reach4:
+         nop
+         lda     @_reach4-2
          lda     $00
          beq     @L102D
-         jsr     @reach4
-         jsr     start
+         jsr     @_reach4
+         jsr     _start
 @L102D:  lda     #$22
          lda     gtest2
 gtest1:  nop
@@ -42,7 +43,7 @@ topglob: nop
          nop
 @L1043:  nop
          lda     #$44
-@globalnm:
+globalnm:
          jsr     @L104A
          nop
 @L104A:  nop
