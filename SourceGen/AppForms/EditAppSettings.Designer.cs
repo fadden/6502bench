@@ -43,6 +43,8 @@ namespace SourceGen.AppForms {
             this.applyButton = new System.Windows.Forms.Button();
             this.settingsTabControl = new System.Windows.Forms.TabControl();
             this.codeViewTabPage = new System.Windows.Forms.TabPage();
+            this.codeViewMiscGroupBox = new System.Windows.Forms.GroupBox();
+            this.spacesBetweenBytesCheckBox = new System.Windows.Forms.CheckBox();
             this.clipboardGroupBox = new System.Windows.Forms.GroupBox();
             this.clipboardFormatLabel = new System.Windows.Forms.Label();
             this.clipboardFormatComboBox = new System.Windows.Forms.ComboBox();
@@ -94,7 +96,6 @@ namespace SourceGen.AppForms {
             this.displayFmtQuickComboBox = new System.Windows.Forms.ComboBox();
             this.displayFmtSetButton = new System.Windows.Forms.Button();
             this.quickFmtDefaultButton = new System.Windows.Forms.Button();
-            this.useMerlinExpressions = new System.Windows.Forms.CheckBox();
             this.operandWidthGroupBox = new System.Windows.Forms.GroupBox();
             this.disambPrefix24TextBox = new System.Windows.Forms.TextBox();
             this.disambPrefix16TextBox = new System.Windows.Forms.TextBox();
@@ -156,10 +157,11 @@ namespace SourceGen.AppForms {
             this.defineData1Label = new System.Windows.Forms.Label();
             this.equDirectiveTextBox = new System.Windows.Forms.TextBox();
             this.equDirectiveLabel = new System.Windows.Forms.Label();
-            this.codeViewMiscGroupBox = new System.Windows.Forms.GroupBox();
-            this.spacesBetweenBytesCheckBox = new System.Windows.Forms.CheckBox();
+            this.expressionStyleLabel = new System.Windows.Forms.Label();
+            this.expressionStyleComboBox = new System.Windows.Forms.ComboBox();
             this.settingsTabControl.SuspendLayout();
             this.codeViewTabPage.SuspendLayout();
+            this.codeViewMiscGroupBox.SuspendLayout();
             this.clipboardGroupBox.SuspendLayout();
             this.upperCaseGroupBox.SuspendLayout();
             this.codeViewFontGroupBox.SuspendLayout();
@@ -171,7 +173,6 @@ namespace SourceGen.AppForms {
             this.operandWidthGroupBox.SuspendLayout();
             this.pseudoOpTabPage.SuspendLayout();
             this.quickPseudoSetGroup.SuspendLayout();
-            this.codeViewMiscGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // cancelButton
@@ -238,6 +239,27 @@ namespace SourceGen.AppForms {
             this.codeViewTabPage.TabIndex = 0;
             this.codeViewTabPage.Text = "Code View";
             this.codeViewTabPage.UseVisualStyleBackColor = true;
+            // 
+            // codeViewMiscGroupBox
+            // 
+            this.codeViewMiscGroupBox.Controls.Add(this.spacesBetweenBytesCheckBox);
+            this.codeViewMiscGroupBox.Location = new System.Drawing.Point(406, 101);
+            this.codeViewMiscGroupBox.Name = "codeViewMiscGroupBox";
+            this.codeViewMiscGroupBox.Size = new System.Drawing.Size(200, 47);
+            this.codeViewMiscGroupBox.TabIndex = 5;
+            this.codeViewMiscGroupBox.TabStop = false;
+            this.codeViewMiscGroupBox.Text = "Miscellaneous";
+            // 
+            // spacesBetweenBytesCheckBox
+            // 
+            this.spacesBetweenBytesCheckBox.AutoSize = true;
+            this.spacesBetweenBytesCheckBox.Location = new System.Drawing.Point(7, 20);
+            this.spacesBetweenBytesCheckBox.Name = "spacesBetweenBytesCheckBox";
+            this.spacesBetweenBytesCheckBox.Size = new System.Drawing.Size(158, 17);
+            this.spacesBetweenBytesCheckBox.TabIndex = 0;
+            this.spacesBetweenBytesCheckBox.Text = "Add spaces in bytes column";
+            this.spacesBetweenBytesCheckBox.UseVisualStyleBackColor = true;
+            this.spacesBetweenBytesCheckBox.CheckedChanged += new System.EventHandler(this.spacesBetweenBytesCheckBox_CheckedChanged);
             // 
             // clipboardGroupBox
             // 
@@ -717,9 +739,10 @@ namespace SourceGen.AppForms {
             // 
             // displayFormatTabPage
             // 
+            this.displayFormatTabPage.Controls.Add(this.expressionStyleComboBox);
+            this.displayFormatTabPage.Controls.Add(this.expressionStyleLabel);
             this.displayFormatTabPage.Controls.Add(this.fmtExplanationLabel);
             this.displayFormatTabPage.Controls.Add(this.quickDisplayFormatGroup);
-            this.displayFormatTabPage.Controls.Add(this.useMerlinExpressions);
             this.displayFormatTabPage.Controls.Add(this.operandWidthGroupBox);
             this.displayFormatTabPage.Location = new System.Drawing.Point(4, 22);
             this.displayFormatTabPage.Name = "displayFormatTabPage";
@@ -780,17 +803,6 @@ namespace SourceGen.AppForms {
             this.quickFmtDefaultButton.Text = "Default";
             this.quickFmtDefaultButton.UseVisualStyleBackColor = true;
             this.quickFmtDefaultButton.Click += new System.EventHandler(this.quickFmtDefaultButton_Click);
-            // 
-            // useMerlinExpressions
-            // 
-            this.useMerlinExpressions.AutoSize = true;
-            this.useMerlinExpressions.Location = new System.Drawing.Point(6, 153);
-            this.useMerlinExpressions.Name = "useMerlinExpressions";
-            this.useMerlinExpressions.Size = new System.Drawing.Size(158, 17);
-            this.useMerlinExpressions.TabIndex = 2;
-            this.useMerlinExpressions.Text = "Use Merlin-style expressions";
-            this.useMerlinExpressions.UseVisualStyleBackColor = true;
-            this.useMerlinExpressions.CheckedChanged += new System.EventHandler(this.shiftAfterAdjustCheckBox_CheckedChanged);
             // 
             // operandWidthGroupBox
             // 
@@ -1456,26 +1468,23 @@ namespace SourceGen.AppForms {
             this.equDirectiveLabel.Text = "Equate:";
             this.equDirectiveLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
-            // codeViewMiscGroupBox
+            // expressionStyleLabel
             // 
-            this.codeViewMiscGroupBox.Controls.Add(this.spacesBetweenBytesCheckBox);
-            this.codeViewMiscGroupBox.Location = new System.Drawing.Point(406, 101);
-            this.codeViewMiscGroupBox.Name = "codeViewMiscGroupBox";
-            this.codeViewMiscGroupBox.Size = new System.Drawing.Size(200, 47);
-            this.codeViewMiscGroupBox.TabIndex = 5;
-            this.codeViewMiscGroupBox.TabStop = false;
-            this.codeViewMiscGroupBox.Text = "Miscellaneous";
+            this.expressionStyleLabel.AutoSize = true;
+            this.expressionStyleLabel.Location = new System.Drawing.Point(7, 156);
+            this.expressionStyleLabel.Name = "expressionStyleLabel";
+            this.expressionStyleLabel.Size = new System.Drawing.Size(85, 13);
+            this.expressionStyleLabel.TabIndex = 4;
+            this.expressionStyleLabel.Text = "Expression style:";
             // 
-            // spacesBetweenBytesCheckBox
+            // expressionStyleComboBox
             // 
-            this.spacesBetweenBytesCheckBox.AutoSize = true;
-            this.spacesBetweenBytesCheckBox.Location = new System.Drawing.Point(7, 20);
-            this.spacesBetweenBytesCheckBox.Name = "spacesBetweenBytesCheckBox";
-            this.spacesBetweenBytesCheckBox.Size = new System.Drawing.Size(158, 17);
-            this.spacesBetweenBytesCheckBox.TabIndex = 0;
-            this.spacesBetweenBytesCheckBox.Text = "Add spaces in bytes column";
-            this.spacesBetweenBytesCheckBox.UseVisualStyleBackColor = true;
-            this.spacesBetweenBytesCheckBox.CheckedChanged += new System.EventHandler(this.spacesBetweenBytesCheckBox_CheckedChanged);
+            this.expressionStyleComboBox.FormattingEnabled = true;
+            this.expressionStyleComboBox.Location = new System.Drawing.Point(98, 153);
+            this.expressionStyleComboBox.Name = "expressionStyleComboBox";
+            this.expressionStyleComboBox.Size = new System.Drawing.Size(121, 21);
+            this.expressionStyleComboBox.TabIndex = 5;
+            this.expressionStyleComboBox.SelectedIndexChanged += new System.EventHandler(this.expressionStyleComboBox_SelectedIndexChanged);
             // 
             // EditAppSettings
             // 
@@ -1499,6 +1508,8 @@ namespace SourceGen.AppForms {
             this.settingsTabControl.ResumeLayout(false);
             this.codeViewTabPage.ResumeLayout(false);
             this.codeViewTabPage.PerformLayout();
+            this.codeViewMiscGroupBox.ResumeLayout(false);
+            this.codeViewMiscGroupBox.PerformLayout();
             this.clipboardGroupBox.ResumeLayout(false);
             this.clipboardGroupBox.PerformLayout();
             this.upperCaseGroupBox.ResumeLayout(false);
@@ -1518,8 +1529,6 @@ namespace SourceGen.AppForms {
             this.pseudoOpTabPage.ResumeLayout(false);
             this.pseudoOpTabPage.PerformLayout();
             this.quickPseudoSetGroup.ResumeLayout(false);
-            this.codeViewMiscGroupBox.ResumeLayout(false);
-            this.codeViewMiscGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1609,7 +1618,6 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.CheckBox enableDebugCheckBox;
         private System.Windows.Forms.CheckBox showAsmIdentCheckBox;
         private System.Windows.Forms.TabPage displayFormatTabPage;
-        private System.Windows.Forms.CheckBox useMerlinExpressions;
         private System.Windows.Forms.GroupBox operandWidthGroupBox;
         private System.Windows.Forms.TextBox disambPrefix24TextBox;
         private System.Windows.Forms.TextBox disambPrefix16TextBox;
@@ -1646,5 +1654,7 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.ComboBox displayFmtQuickComboBox;
         private System.Windows.Forms.GroupBox codeViewMiscGroupBox;
         private System.Windows.Forms.CheckBox spacesBetweenBytesCheckBox;
+        private System.Windows.Forms.ComboBox expressionStyleComboBox;
+        private System.Windows.Forms.Label expressionStyleLabel;
     }
 }

@@ -18,11 +18,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 
 using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
 using AssemblerConfig = SourceGen.AsmGen.AssemblerConfig;
+using ExpressionMode = Asm65.Formatter.FormatConfig.ExpressionMode;
 
 namespace SourceGen.AppForms {
     public partial class EditAppSettings : Form {
@@ -91,7 +91,7 @@ namespace SourceGen.AppForms {
             // Enumerated ID.
             public AssemblerInfo.Id AssemblerId { get; private set; }
 
-            // Human-readable name.
+            // Human-readable name for display.
             public string Name { get; private set; }
 
             public AsmComboItem(AssemblerInfo info) {
@@ -99,6 +99,27 @@ namespace SourceGen.AppForms {
                 Name = info.Name;
             }
         }
+
+        /// <summary>
+        /// Holds an item for the expression style selection combo box.
+        /// </summary>
+        private struct ExpressionStyleItem {
+            // Enumerated mode.
+            public ExpressionMode ExpMode { get; private set; }
+
+            // Human-readable name for display.
+            public string Name { get; private set; }
+
+            public ExpressionStyleItem(ExpressionMode expMode, string name) {
+                ExpMode = expMode;
+                Name = name;
+            }
+        }
+        private static ExpressionStyleItem[] sExpStyleItems = new ExpressionStyleItem[] {
+            new ExpressionStyleItem(ExpressionMode.Common, "Common"),
+            new ExpressionStyleItem(ExpressionMode.Cc65, "cc65"),
+            new ExpressionStyleItem(ExpressionMode.Merlin, "Merlin"),
+        };
 
 
         public EditAppSettings(ProjectView projectView, Tab initialTab,
@@ -154,6 +175,11 @@ namespace SourceGen.AppForms {
             ConfigureComboBox(asmConfigComboBox);
             ConfigureComboBox(displayFmtQuickComboBox);
             ConfigureComboBox(pseudoOpQuickComboBox);
+
+            expressionStyleComboBox.DisplayMember = "Name";
+            foreach (ExpressionStyleItem esi in sExpStyleItems) {
+                expressionStyleComboBox.Items.Add(esi);
+            }
         }
 
         private void ConfigureComboBox(ComboBox cb) {
@@ -238,9 +264,11 @@ namespace SourceGen.AppForms {
             PopulateWidthDisamSettings();
 
             string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
-            useMerlinExpressions.Checked =
-                (Asm65.Formatter.FormatConfig.ParseExpressionMode(exprMode) ==
-                    Asm65.Formatter.FormatConfig.ExpressionMode.Merlin);
+            ExpressionMode mode;
+            if (!Enum.TryParse<ExpressionMode>(exprMode, out mode)) {
+                mode = ExpressionMode.Common;
+            }
+            SetExpressionStyle(mode);
 
             if (mInitialTab != Tab.Unknown) {
                 settingsTabControl.SelectTab((int)mInitialTab);
@@ -608,11 +636,20 @@ namespace SourceGen.AppForms {
             //    mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG, string.Empty) + "'");
         }
 
-        private void shiftAfterAdjustCheckBox_CheckedChanged(object sender, EventArgs e) {
-            string mode = useMerlinExpressions.Checked ?
-                Asm65.Formatter.FormatConfig.ExpressionMode.Merlin.ToString() :
-                Asm65.Formatter.FormatConfig.ExpressionMode.Cc65.ToString();
-            mSettings.SetString(AppSettings.FMT_EXPRESSION_MODE, mode);
+        private void SetExpressionStyle(ExpressionMode mode) {
+            foreach (ExpressionStyleItem esi in expressionStyleComboBox.Items) {
+                if (esi.ExpMode == mode) {
+                    expressionStyleComboBox.SelectedItem = esi;
+                    return;
+                }
+            }
+            Debug.Assert(false, "Expression mode " + mode + " not found");
+            expressionStyleComboBox.SelectedIndex = 0;
+        }
+
+        private void expressionStyleComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            ExpressionStyleItem esi = (ExpressionStyleItem)expressionStyleComboBox.SelectedItem;
+            mSettings.SetString(AppSettings.FMT_EXPRESSION_MODE, esi.ExpMode.ToString());
             SetDirty(true);
         }
 
@@ -629,15 +666,13 @@ namespace SourceGen.AppForms {
                 formatConfig.mForceLongOpcodeSuffix,
                 formatConfig.mForceAbsOperandPrefix,
                 formatConfig.mForceLongOperandPrefix);
-            useMerlinExpressions.Checked = (formatConfig.mExpressionMode ==
-                Asm65.Formatter.FormatConfig.ExpressionMode.Merlin);
-
+            SetExpressionStyle(formatConfig.mExpressionMode);
             // dirty flag set by change watchers if one or more fields have changed
         }
 
         private void quickFmtDefaultButton_Click(object sender, EventArgs e) {
             SetWidthDisamSettings(null, "l", "a:", "f:");
-            useMerlinExpressions.Checked = false;
+            SetExpressionStyle(ExpressionMode.Common);
             // dirty flag set by change watchers if one or more fields have changed
         }
 
