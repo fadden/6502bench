@@ -813,7 +813,8 @@ namespace SourceGen {
                 line = new Line(DefSymOffsetFromIndex(index), 0, Line.Type.EquDirective);
                 // Use an operand length of 1 so things are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                    null, defSym.DataDescriptor, defSym.Value, 1, false);
+                    null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
                 string comment = formatter.FormatEolComment(defSym.Comment);
                 parts = FormattedParts.CreateEquDirective(defSym.Label,
                     formatter.FormatPseudoOp(opNames.EquDirective),
@@ -1099,7 +1100,7 @@ namespace SourceGen {
 
             string formattedOperand = null;
             int operandLen = instrLen - 1;
-            bool isPcRel = false;
+            PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.None;
 
             // Tweak branch instructions.  We want to show the absolute address rather
             // than the relative offset (which happens with the OperandAddress assignment
@@ -1107,10 +1108,14 @@ namespace SourceGen {
             if (op.AddrMode == OpDef.AddressMode.PCRel) {
                 Debug.Assert(attr.OperandAddress >= 0);
                 operandLen = 2;
-                isPcRel = true;
+                opFlags = PseudoOp.FormatNumericOpFlags.IsPcRel;
             } else if (op.AddrMode == OpDef.AddressMode.PCRelLong ||
                     op.AddrMode == OpDef.AddressMode.StackPCRelLong) {
-                isPcRel = true;
+                opFlags = PseudoOp.FormatNumericOpFlags.IsPcRel;
+            } else if (op.AddrMode == OpDef.AddressMode.Imm ||
+                    op.AddrMode == OpDef.AddressMode.ImmLongA ||
+                    op.AddrMode == OpDef.AddressMode.ImmLongXY) {
+                opFlags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
             }
 
             // Use the OperandAddress when available.  This is important for relative branch
@@ -1130,13 +1135,15 @@ namespace SourceGen {
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     // Special handling for the double-operand block move.
                     string opstr1 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        null, attr.DataDescriptor, operand >> 8, 1, false);
+                        null, attr.DataDescriptor, operand >> 8, 1,
+                        PseudoOp.FormatNumericOpFlags.None);
                     string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        null, attr.DataDescriptor, operand & 0xff, 1, false);
+                        null, attr.DataDescriptor, operand & 0xff, 1,
+                        PseudoOp.FormatNumericOpFlags.None);
                     formattedOperand = opstr1 + "," + opstr2;
                 } else {
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        null, attr.DataDescriptor, operandForSymbol, operandLen, isPcRel);
+                        null, attr.DataDescriptor, operandForSymbol, operandLen, opFlags);
                 }
             } else {
                 // Show operand value in hex.

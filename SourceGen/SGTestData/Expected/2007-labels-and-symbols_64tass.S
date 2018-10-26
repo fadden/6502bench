@@ -61,21 +61,21 @@ start   clc
         lda     #zip+16
         lda     #zip+64
         lda     #absl
-        lda     #0+(absl >> 8)
+        lda     #(absl >> 8)
         lda     #absl-4096
-        lda     #0+(absl >> 8)-16
-        lda     #0+(absl >> 16)
+        lda     #(absl >> 8)-16
+        lda     #(absl >> 16)
         lda     #absh
-        lda     #0+(absh >> 8)
+        lda     #(absh >> 8)
         lda     #absh-61440
-        lda     #0+(absh >> 8)+16
-        lda     #0+(absh >> 16)+1
-        lda     #0+(start & $ffff)
-        lda     #0+(start >> 8)
-        lda     #0+(start >> 16)
-        lda     #0+(biggie & $ffff)
-        lda     #0+(biggie >> 8)
-        lda     #0+(biggie >> 16)
+        lda     #(absh >> 8)+16
+        lda     #(absh >> 16)+1
+        lda     #(start & $ffff)
+        lda     #(start >> 8)
+        lda     #(start >> 16)
+        lda     #(biggie & $ffff)
+        lda     #(biggie >> 8)
+        lda     #(biggie >> 16)
         bra     skipdata
 
         .byte   zip
@@ -113,7 +113,7 @@ start   clc
         .dword  0+(start >> 8)
         .dword  0+(start >> 16)
 
-skipdata lda    #0+(biggie >> 16)-1
+skipdata lda    #(biggie >> 16)-1
         mvn     `biggie,(`biggie)-17
         mvp     `start,(`start)+17
         mvn     18,1
@@ -201,9 +201,9 @@ L118E   lda     #<thirty2+2
         rep     #$30
         .al
         .xl
-        lda     #0+(thirty2 & $ffff)+3
-        lda     #0+((thirty2 >> 8) & $ffff)+4
-        lda     #0+(thirty2 >> 16)
+        lda     #(thirty2 & $ffff)+3
+        lda     #((thirty2 >> 8) & $ffff)+4
+        lda     #(thirty2 >> 16)
         rts
 
         .here

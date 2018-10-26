@@ -289,13 +289,13 @@ namespace SourceGen {
                     po.Opcode = opNames.GetDefineData(length);
                     operand = RawData.GetWord(data, offset, length, false);
                     po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                        operand, length, false);
+                        operand, length, FormatNumericOpFlags.None);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     po.Opcode = opNames.GetDefineBigData(length);
                     operand = RawData.GetWord(data, offset, length, true);
                     po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                        operand, length, false);
+                        operand, length, FormatNumericOpFlags.None);
                     break;
                 case FormatDescriptor.Type.Fill:
                     po.Opcode = opNames.Fill;
@@ -510,6 +510,15 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Special formatting flags for the FormatNumericOperand() method.
+        /// </summary>
+        public enum FormatNumericOpFlags {
+            None = 0,
+            IsPcRel,            // opcode is PC relative, e.g. branch or PER
+            HasHashPrefix,      // operand has a leading '#', avoiding ambiguity in some cases
+        }
+
+        /// <summary>
         /// Format a numeric operand value according to the specified sub-format.
         /// </summary>
         /// <param name="formatter">Text formatter.</param>
@@ -521,11 +530,10 @@ namespace SourceGen {
         ///   out of the code, for relative branches it's a 24-bit absolute address.</param>
         /// <param name="operandLen">Length of operand, in bytes.  For an instruction, this
         ///   does not include the opcode byte.  For a relative branch, this will be 2.</param>
-        /// <param name="isPcRel">Set to true if the actual operand is a PC-relative value.
-        ///   These get slightly different treatment.</param>
+        /// <param name="flags">Special handling.</param>
         public static string FormatNumericOperand(Formatter formatter, SymbolTable symbolTable,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
-                int operandValue, int operandLen, bool isPcRel) {
+                int operandValue, int operandLen, FormatNumericOpFlags flags) {
             Debug.Assert(operandLen > 0);
             int hexMinLen = operandLen * 2;
 
@@ -547,15 +555,15 @@ namespace SourceGen {
                         switch (formatter.ExpressionMode) {
                             case Formatter.FormatConfig.ExpressionMode.Common:
                                 FormatNumericSymbolCommon(formatter, sym, labelMap,
-                                    dfd, operandValue, operandLen, isPcRel, sb);
+                                    dfd, operandValue, operandLen, flags, sb);
                                 break;
                             case Formatter.FormatConfig.ExpressionMode.Cc65:
                                 FormatNumericSymbolCc65(formatter, sym, labelMap,
-                                    dfd, operandValue, operandLen, isPcRel, sb);
+                                    dfd, operandValue, operandLen, flags, sb);
                                 break;
                             case Formatter.FormatConfig.ExpressionMode.Merlin:
                                 FormatNumericSymbolMerlin(formatter, sym, labelMap,
-                                    dfd, operandValue, operandLen, isPcRel, sb);
+                                    dfd, operandValue, operandLen, flags, sb);
                                 break;
                             default:
                                 Debug.Assert(false, "Unknown expression mode " +
@@ -578,7 +586,7 @@ namespace SourceGen {
         /// </summary>
         private static void FormatNumericSymbolCommon(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
-                int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
+                int operandValue, int operandLen, FormatNumericOpFlags flags, StringBuilder sb) {
             // We could have some simple code that generated correct output, shifting and
             // masking every time, but that's ugly and annoying.  For single-byte ops we can
             // just use the byte-select operators, for wider ops we get only as fancy as we
@@ -645,7 +653,7 @@ namespace SourceGen {
                     rightShift = 0;
                 }
 
-                if (isPcRel) {
+                if (flags == FormatNumericOpFlags.IsPcRel) {
                     // PC-relative operands are funny, because an 8- or 16-bit value is always
                     // expanded to 24 bits.  We output a 16-bit value that the assembler will
                     // convert back to 8-bit or 16-bit.  In any event, the bank byte is never
@@ -670,10 +678,13 @@ namespace SourceGen {
                 //  ((label >> rightShift) & mask) [+ adj]
 
                 if (rightShift != 0 || needMask) {
+                    if (flags != FormatNumericOpFlags.HasHashPrefix) {
+                        sb.Append("0+");
+                    }
                     if (rightShift != 0 && needMask) {
-                        sb.Append("0+((");
+                        sb.Append("((");
                     } else {
-                        sb.Append("0+(");
+                        sb.Append("(");
                     }
                 }
                 sb.Append(symLabel);
@@ -705,7 +716,7 @@ namespace SourceGen {
         /// </summary>
         private static void FormatNumericSymbolCc65(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
-                int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
+                int operandValue, int operandLen, FormatNumericOpFlags flags, StringBuilder sb) {
             // The key difference between cc65 and other assemblers with general expressions
             // is that the bitwise shift and AND operators have higher precedence than the
             // arithmetic ops like add and subtract.  (The bitwise ops are equal to multiply
@@ -758,7 +769,7 @@ namespace SourceGen {
                     shOp = "";
                 }
 
-                if (isPcRel) {
+                if (flags == FormatNumericOpFlags.IsPcRel) {
                     // PC-relative operands are funny, because an 8- or 16-bit value is always
                     // expanded to 24 bits.  We output a 16-bit value that the assembler will
                     // convert back to 8-bit or 16-bit.  In any event, the bank byte is never
@@ -796,7 +807,7 @@ namespace SourceGen {
         /// </summary>
         private static void FormatNumericSymbolMerlin(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
-                int operandValue, int operandLen, bool isPcRel, StringBuilder sb) {
+                int operandValue, int operandLen, FormatNumericOpFlags flags, StringBuilder sb) {
             // Merlin expressions are compatible with the original 8-bit Merlin.  They're
             // evaluated from left to right, with (almost) no regard for operator precedence.
             //

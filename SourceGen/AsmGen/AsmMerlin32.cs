@@ -268,7 +268,8 @@ namespace SourceGen.AsmGen {
                     opcodeStr = sDataOpNames.GetDefineData(length);
                     operand = RawData.GetWord(data, offset, length, false);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                        mLocalizer.LabelMap, dfd, operand, length, false);
+                        mLocalizer.LabelMap, dfd, operand, length,
+                        PseudoOp.FormatNumericOpFlags.None);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
@@ -278,7 +279,8 @@ namespace SourceGen.AsmGen {
                     } else {
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                            mLocalizer.LabelMap, dfd, operand, length, false);
+                            mLocalizer.LabelMap, dfd, operand, length,
+                            PseudoOp.FormatNumericOpFlags.None);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:

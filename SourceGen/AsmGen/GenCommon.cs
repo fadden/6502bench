@@ -141,7 +141,8 @@ namespace SourceGen.AsmGen {
             foreach (DefSymbol defSym in proj.ActiveDefSymbolList) {
                 // Use an operand length of 1 so things are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                    gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1, false);
+                    gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
                 gen.OutputEquDirective(defSym.Label, valueStr, defSym.Comment);
             }
 
@@ -176,7 +177,7 @@ namespace SourceGen.AsmGen {
 
             string formattedOperand = null;
             int operandLen = instrLen - 1;
-            bool isPcRel = false;
+            PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.None;
             bool isPcRelBankWrap = false;
 
             // Tweak branch instructions.  We want to show the absolute address rather
@@ -185,12 +186,16 @@ namespace SourceGen.AsmGen {
             if (op.AddrMode == OpDef.AddressMode.PCRel) {
                 Debug.Assert(attr.OperandAddress >= 0);
                 operandLen = 2;
-                isPcRel = true;
+                opFlags = PseudoOp.FormatNumericOpFlags.IsPcRel;
             } else if (op.AddrMode == OpDef.AddressMode.PCRelLong ||
                     op.AddrMode == OpDef.AddressMode.StackPCRelLong) {
-                isPcRel = true;
+                opFlags = PseudoOp.FormatNumericOpFlags.IsPcRel;
+            } else if (op.AddrMode == OpDef.AddressMode.Imm ||
+                    op.AddrMode == OpDef.AddressMode.ImmLongA ||
+                    op.AddrMode == OpDef.AddressMode.ImmLongXY) {
+                opFlags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
             }
-            if (isPcRel) {
+            if (opFlags == PseudoOp.FormatNumericOpFlags.IsPcRel) {
                 int branchDist = attr.Address - attr.OperandAddress;
                 isPcRelBankWrap = branchDist > 32767 || branchDist < -32768;
             }
@@ -209,9 +214,11 @@ namespace SourceGen.AsmGen {
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     // Special handling for the double-operand block move.
                     string opstr1 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        gen.Localizer.LabelMap, attr.DataDescriptor, operand >> 8, 1, false);
+                        gen.Localizer.LabelMap, attr.DataDescriptor, operand >> 8, 1,
+                        PseudoOp.FormatNumericOpFlags.None);
                     string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        gen.Localizer.LabelMap, attr.DataDescriptor, operand & 0xff, 1, false);
+                        gen.Localizer.LabelMap, attr.DataDescriptor, operand & 0xff, 1,
+                        PseudoOp.FormatNumericOpFlags.None);
                     if (gen.Quirks.BlockMoveArgsReversed) {
                         string tmp = opstr1;
                         opstr1 = opstr2;
@@ -221,7 +228,7 @@ namespace SourceGen.AsmGen {
                 } else {
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         gen.Localizer.LabelMap, attr.DataDescriptor,
-                        operandForSymbol, operandLen, isPcRel);
+                        operandForSymbol, operandLen, opFlags);
                 }
             } else {
                 // Show operand value in hex.

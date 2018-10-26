@@ -344,9 +344,17 @@ namespace SourceGen.AppForms {
                         if (operandLen == 1 && mIsPcRelative) {
                             operandLen = 2;
                         }
+                        PseudoOp.FormatNumericOpFlags flags;
+                        if (mIsPcRelative) {
+                            flags = PseudoOp.FormatNumericOpFlags.IsPcRel;
+                        } else if (mShowHashPrefix) {
+                            flags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
+                        } else {
+                            flags = PseudoOp.FormatNumericOpFlags.None;
+                        }
                         string str = PseudoOp.FormatNumericOperand(mFormatter,
                             mProject.SymbolTable, null, dfd,
-                            mOperandValue, operandLen, mIsPcRelative);
+                            mOperandValue, operandLen, flags);
                         preview.Append(str);
 
                         if (sym.SymbolSource == Symbol.Source.Auto) {
