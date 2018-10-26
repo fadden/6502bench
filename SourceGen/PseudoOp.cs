@@ -259,6 +259,14 @@ namespace SourceGen {
         public static PseudoOut FormatDataOp(Formatter formatter, PseudoOpNames opNames,
                 SymbolTable symbolTable, Dictionary<string, string> labelMap,
                 FormatDescriptor dfd, byte[] data, int offset, int subIndex) {
+            if (dfd == null) {
+                // should never happen
+                //Debug.Assert(false, "Null dfd at offset+" + offset.ToString("x6"));
+                PseudoOut failed = new PseudoOut();
+                failed.Opcode = failed.Operand = "!FAILED!+" + offset.ToString("x6");
+                return failed;
+            }
+
             int length = dfd.Length;
             Debug.Assert(length > 0);
 
