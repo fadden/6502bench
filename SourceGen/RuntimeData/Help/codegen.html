@@ -175,8 +175,8 @@ code, but also needs to know how to handle the corner cases.</p>
     and assemblers like 64tass do it the other way around.  So cc65
     regards the expression as <code>(label >> 8) - 16</code>, while the
     more common interpretation would be <code>label >> (8 - 16)</code>.
-    (This is actually somewhat convenient, since many common expressions
-    don't require parenthesis.)</li>
+    (This is actually somewhat convenient, since none of the expressions
+    SourceGen currently generates require parenthesis.)</li>
   <li>Undocumented opcodes: SBX ($cb) uses the mnemonic AXS.  All other
     opcodes match up with the "unintended opcodes" document.</li>
 </ul>
@@ -194,16 +194,20 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <p>Quirks:</p>
 <ul>
-  <li>Operator precedence is unusual.  Expressions are processed from
-    left to right, with no operator precedence.</li>
+  <li>Operator precedence is unusual.  Expressions are generally processed
+    from left to right.  The byte-selection operators have a lower
+    precedence than all of the others, and so are always processed last.</li>
   <li>The byte selection operators  ('&lt;', '&gt;', '^') are actually
     word-selection operators, yielding 16-bit values when wide registers
     are enabled on the 65816.</li>
+  <li>Values loaded into registers are implicitly mod 256 or 65536.  There
+    is no need to explicitly mask an expression.</li>
   <li>The assembler tracks register widths when it sees SEP/REP instructions,
-    but doesn't attempt to track the emulation flag.  So if the registers
-    are long when you switch to emulation, incorrect code is generated.
-    (Really I just want to be able to turn the auto-tracking off.)</li>
-  <li>Non-unique local labels don't cause an error.</li>
+    but doesn't attempt to track the emulation flag.  So if you issue a REP
+    while in emulation mode, the assembler will incorrectly assume long
+    registers.  (Really I just want to be able to turn the width-tracking
+    off, but there's no way to do that.)</li>
+  <li>Non-unique local labels should cause an error, but don't.</li>
 </ul>
 
 </div>
