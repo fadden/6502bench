@@ -28,10 +28,10 @@ namespace SourceGen.AsmGen {
         /// 
         /// This code is common to all generators.
         /// </summary>
-        /// <param name="project"></param>
-        /// <param name="formatter"></param>
-        /// <param name="sw"></param>
-        /// <param name="worker"></param>
+        /// <param name="gen">Reference to generator object (presumably the caller).</param>
+        /// <param name="sw">Text output sink.</param>
+        /// <param name="worker">Background worker object, for progress updates and
+        ///   cancelation requests.</param>
         public static void Generate(IGenerator gen, StreamWriter sw, BackgroundWorker worker) {
             DisasmProject proj = gen.Project;
             Formatter formatter = gen.SourceFormatter;

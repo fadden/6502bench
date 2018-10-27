@@ -514,22 +514,15 @@ namespace SourceGen.AsmGen {
         }
 
         private void OutputString(int offset, string labelStr, string commentStr) {
-            // Normal ASCII strings are straightforward: they're just part of a .byte
-            // directive, and can mix with anything else in the .byte.
+            // Normal ASCII strings are handled with a simple .text directive.
             //
-            // For CString we can use .asciiz, but only if the string fits on one line
-            // and doesn't include delimiters.  For L8String and L16String we can
-            // define simple macros, but their use has a similar restriction.  High-ASCII
-            // strings also require a macro.
+            // CString and L8String have directives (.null, .ptext), but we can only use
+            // them if the string fits on one line and doesn't include delimiters.
             //
-            // We might be able to define a macro for DCI and Reverse as well.
+            // We could probably do something fancy with the character encoding options to
+            // make high-ASCII work nicely.
             //
-            // The limitation on strings with delimiters arises because (1) I don't see a
-            // way to escape them within a string, and (2) the simple macro workarounds
-            // only take a single argument, not a comma-separated list of stuff.
-            //
-            // Some ideas here:
-            // https://groups.google.com/forum/#!topic/comp.sys.apple2.programmer/5Wkw8mUPcU0
+            // We might be able to define a macro for DCI and Reverse.
 
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
@@ -604,12 +597,12 @@ namespace SourceGen.AsmGen {
 
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.None:
-                    // TODO: something fancy with encodings to handle high-ASCII text?
+                    // TODO(someday): something fancy with encodings to handle high-ASCII text?
                     break;
                 case FormatDescriptor.SubType.Dci:
                 case FormatDescriptor.SubType.Reverse:
                 case FormatDescriptor.SubType.DciReverse:
-                    // Full configured above.
+                    // Fully configured above.
                     break;
                 case FormatDescriptor.SubType.CString:
                     if (gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
