@@ -21,9 +21,9 @@ using System.Windows.Forms;
 namespace SourceGen.AppForms {
     public partial class EditComment : Form {
         /// <summary>
-        /// Comment string being edited.
+        /// Edited comment string.  Will be empty if the comment is to be deleted.
         /// </summary>
-        public string Comment { get; set; }
+        public string Comment { get; private set; }
 
         private string mNumCharsFormat;
 
@@ -32,33 +32,36 @@ namespace SourceGen.AppForms {
         private const int RECOMMENDED_MAX_LENGTH = 52;
 
 
-        public EditComment() {
+        public EditComment(string comment) {
             InitializeComponent();
+
+            // The initial label string is used as the format arg.
+            mNumCharsFormat = numCharsLabel.Text;
+
+            // Remember the default color.
+            mDefaultLabelColor = asciiOnlyLabel.ForeColor;
+
+            Debug.Assert(comment != null);
+            commentTextBox.Text = comment;
         }
 
         private void EditComment_Load(object sender, EventArgs e) {
-            mDefaultLabelColor = asciiOnlyLabel.ForeColor;
-
-            // Extract the format string from the label.
-            mNumCharsFormat = numCharsLabel.Text;
-
-            textBox1.Text = Comment;
             UpdateLengthLabel();
         }
 
         private void UpdateLengthLabel() {
-            numCharsLabel.Text = string.Format(mNumCharsFormat, textBox1.Text.Length);
+            numCharsLabel.Text = string.Format(mNumCharsFormat, commentTextBox.Text.Length);
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e) {
+        private void commentTextBox_TextChanged(object sender, EventArgs e) {
             UpdateLengthLabel();
 
-            if (!CommonUtil.TextUtil.IsPrintableAscii(textBox1.Text)) {
+            if (!CommonUtil.TextUtil.IsPrintableAscii(commentTextBox.Text)) {
                 asciiOnlyLabel.ForeColor = Color.Red;
             } else {
                 asciiOnlyLabel.ForeColor = mDefaultLabelColor;
             }
-            if (textBox1.Text.Length > RECOMMENDED_MAX_LENGTH) {
+            if (commentTextBox.Text.Length > RECOMMENDED_MAX_LENGTH) {
                 maxLengthLabel.ForeColor = Color.Red;
             } else {
                 maxLengthLabel.ForeColor = mDefaultLabelColor;
@@ -66,7 +69,7 @@ namespace SourceGen.AppForms {
         }
 
         private void okButton_Click(object sender, EventArgs e) {
-            Comment = textBox1.Text;
+            Comment = commentTextBox.Text;
         }
     }
 }

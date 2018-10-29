@@ -167,11 +167,10 @@ namespace SourceGen.Setup {
         }
 
         private void selectFileButton_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog();
-
-            fileDlg.Filter = Properties.Resources.FILE_FILTER_ALL;
-
-            fileDlg.FilterIndex = 1;
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Properties.Resources.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
             if (fileDlg.ShowDialog() == DialogResult.OK) {
                 FileInfo fi = new FileInfo(fileDlg.FileName);
 

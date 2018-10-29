@@ -188,12 +188,7 @@ namespace SourceGen {
             public string SearchString { get; set; }
 
 
-            public Line(int offset, int span, Type type) {
-                FileOffset = offset;
-                OffsetSpan = span;
-                LineType = type;
-                SubLineIndex = 0;
-            }
+            public Line(int offset, int span, Type type) : this(offset, span, type, 0) { }
 
             public Line(int offset, int span, Type type, int subLineIndex) {
                 FileOffset = offset;

@@ -21,25 +21,30 @@ using System.Windows.Forms;
 namespace SourceGen.AppForms {
     public partial class EditLabel : Form {
         /// <summary>
-        /// Symbol object.  May initially be null.  When the dialog completes successfully,
+        /// Symbol object.  When the dialog completes successfully,
         /// this will have the new symbol, or null if the user deleted the label.
         /// </summary>
-        public Symbol LabelSym { get; set; }
+        public Symbol LabelSym { get; private set; }
 
         /// <summary>
         /// Address we are editing the label for.
         /// </summary>
-        public int Address { private get; set; }
+        private int mAddress;
 
-        // Saved off at dialog load time.
-        private Color mDefaultLabelColor;
-
-        // Reference to DisasmProject's SymbolTable.
+        /// <summary>
+        /// Reference to DisasmProject's SymbolTable.
+        /// </summary>
         private SymbolTable mSymbolTable;
 
+        // Dialog label text color, saved off at dialog load time.
+        private Color mDefaultLabelColor;
 
-        public EditLabel(SymbolTable symbolTable) {
+
+        public EditLabel(Symbol origSym, int address, SymbolTable symbolTable) {
             InitializeComponent();
+
+            LabelSym = origSym;
+            mAddress = address;
             mSymbolTable = symbolTable;
         }
 
@@ -140,7 +145,7 @@ namespace SourceGen.AppForms {
                     Debug.Assert(false);        // WTF
                     symbolType = Symbol.Type.LocalOrGlobalAddr;
                 }
-                LabelSym = new Symbol(labelTextBox.Text, Address, Symbol.Source.User, symbolType);
+                LabelSym = new Symbol(labelTextBox.Text, mAddress, Symbol.Source.User, symbolType);
             }
         }
     }

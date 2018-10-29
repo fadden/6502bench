@@ -19,12 +19,15 @@ using System.Windows.Forms;
 namespace SourceGen.AppForms {
     public partial class FindBox : Form {
         /// <summary>
-        /// Text to find.
+        /// Text to find.  On success, holds the string searched for.
         /// </summary>
-        public string TextToFind { get; set; }
+        public string TextToFind { get; private set; }
 
-        public FindBox() {
+
+        public FindBox(string findStr) {
             InitializeComponent();
+
+            TextToFind = findStr;
         }
 
         private void FindBox_Load(object sender, EventArgs e) {

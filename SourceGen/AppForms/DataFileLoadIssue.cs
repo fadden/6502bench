@@ -21,20 +21,24 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// Path name of problematic file.
         /// </summary>
-        public string PathName { get; set; }
+        private string mPathName;
 
         /// <summary>
         /// Message to show in the dialog.
         /// </summary>
-        public string Message { get; set; }
+        private string mMessage;
 
-        public DataFileLoadIssue() {
+
+        public DataFileLoadIssue(string pathName, string message) {
             InitializeComponent();
+
+            mPathName = pathName;
+            mMessage = message;
         }
 
         private void DataFileLoadIssue_Load(object sender, EventArgs e) {
-            pathNameTextBox.Text = PathName;
-            problemLabel.Text = Message;
+            pathNameTextBox.Text = mPathName;
+            problemLabel.Text = mMessage;
         }
     }
 }

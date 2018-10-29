@@ -41,7 +41,7 @@ namespace SourceGen.AppForms {
             this.cancelButton = new System.Windows.Forms.Button();
             this.okButton = new System.Windows.Forms.Button();
             this.instructionLabel = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.commentTextBox = new System.Windows.Forms.TextBox();
             this.asciiOnlyLabel = new System.Windows.Forms.Label();
             this.maxLengthLabel = new System.Windows.Forms.Label();
             this.numCharsLabel = new System.Windows.Forms.Label();
@@ -81,11 +81,11 @@ namespace SourceGen.AppForms {
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(13, 30);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(488, 20);
-            this.textBox1.TabIndex = 1;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.commentTextBox.Location = new System.Drawing.Point(13, 30);
+            this.commentTextBox.Name = "textBox1";
+            this.commentTextBox.Size = new System.Drawing.Size(488, 20);
+            this.commentTextBox.TabIndex = 1;
+            this.commentTextBox.TextChanged += new System.EventHandler(this.commentTextBox_TextChanged);
             // 
             // asciiOnlyLabel
             // 
@@ -124,7 +124,7 @@ namespace SourceGen.AppForms {
             this.Controls.Add(this.numCharsLabel);
             this.Controls.Add(this.maxLengthLabel);
             this.Controls.Add(this.asciiOnlyLabel);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.commentTextBox);
             this.Controls.Add(this.instructionLabel);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.cancelButton);
@@ -145,7 +145,7 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Label instructionLabel;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox commentTextBox;
         private System.Windows.Forms.Label asciiOnlyLabel;
         private System.Windows.Forms.Label maxLengthLabel;
         private System.Windows.Forms.Label numCharsLabel;

@@ -803,9 +803,8 @@ namespace SourceGen.AppForms {
             string messages = mProject.LoadExternalFiles();
             if (messages.Length != 0) {
                 // ProjectLoadIssues isn't quite the right dialog, but it'll do.
-                ProjectLoadIssues dlg = new ProjectLoadIssues();
-                dlg.CanCancel = false;
-                dlg.Messages = messages;
+                ProjectLoadIssues dlg = new ProjectLoadIssues(messages,
+                    ProjectLoadIssues.Buttons.Continue);
                 dlg.ShowDialog();
                 dlg.Dispose();
             }
@@ -1326,11 +1325,10 @@ namespace SourceGen.AppForms {
                 return;
             }
 
-            OpenFileDialog fileDlg = new OpenFileDialog();
-
-            fileDlg.Filter = ProjectFile.FILENAME_FILTER + "|" +
-                Properties.Resources.FILE_FILTER_ALL;
-            fileDlg.FilterIndex = 1;
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = ProjectFile.FILENAME_FILTER + "|" + Properties.Resources.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }
@@ -1365,9 +1363,8 @@ namespace SourceGen.AppForms {
                 // Should probably use a less-busy dialog for something simple like
                 // "permission denied", but the open file dialog handles most simple
                 // stuff directly.
-                ProjectLoadIssues dlg = new ProjectLoadIssues();
-                dlg.Messages = report.Format();
-                dlg.CanContinue = false;
+                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
+                    ProjectLoadIssues.Buttons.Cancel);
                 dlg.ShowDialog();
                 // ignore dlg.DialogResult
                 dlg.Dispose();
@@ -1397,8 +1394,8 @@ namespace SourceGen.AppForms {
 
             // If there were warnings, notify the user and give the a chance to cancel.
             if (report.Count != 0) {
-                ProjectLoadIssues dlg = new ProjectLoadIssues();
-                dlg.Messages = report.Format();
+                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
+                    ProjectLoadIssues.Buttons.ContinueOrCancel);
                 dlg.ShowDialog();
                 DialogResult result = dlg.DialogResult;
                 dlg.Dispose();
@@ -1476,9 +1473,7 @@ namespace SourceGen.AppForms {
         /// <param name="errorMsg">Message to display in the message box.</param>
         /// <returns>Full path of file to open.</returns>
         private string ChooseDataFile(string origPath, string errorMsg) {
-            DataFileLoadIssue dlg = new DataFileLoadIssue();
-            dlg.PathName = origPath;
-            dlg.Message = errorMsg;
+            DataFileLoadIssue dlg = new DataFileLoadIssue(origPath, errorMsg);
             dlg.ShowDialog();
             DialogResult result = dlg.DialogResult;
             dlg.Dispose();
@@ -1486,9 +1481,10 @@ namespace SourceGen.AppForms {
                 return null;
             }
 
-            OpenFileDialog fileDlg = new OpenFileDialog();
-            fileDlg.FileName = Path.GetFileName(origPath);
-            fileDlg.Filter = Properties.Resources.FILE_FILTER_ALL;
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                FileName = Path.GetFileName(origPath),
+                Filter = Properties.Resources.FILE_FILTER_ALL
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return null;
             }
@@ -1513,14 +1509,13 @@ namespace SourceGen.AppForms {
 
         // File > Save As...
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
-            SaveFileDialog fileDlg = new SaveFileDialog();
-
-            fileDlg.Filter = ProjectFile.FILENAME_FILTER + "|" +
-                Properties.Resources.FILE_FILTER_ALL;
-            fileDlg.FilterIndex = 1;
-            fileDlg.ValidateNames = true;
-            fileDlg.AddExtension = true;
-            fileDlg.FileName = Path.GetFileName(mDataPathName) + ProjectFile.FILENAME_EXT;
+            SaveFileDialog fileDlg = new SaveFileDialog() {
+                Filter = ProjectFile.FILENAME_FILTER + "|" + Properties.Resources.FILE_FILTER_ALL,
+                FilterIndex = 1,
+                ValidateNames = true,
+                AddExtension = true,
+                FileName = Path.GetFileName(mDataPathName) + ProjectFile.FILENAME_EXT
+            };
             if (fileDlg.ShowDialog() == DialogResult.OK) {
                 string pathName = Path.GetFullPath(fileDlg.FileName);
                 Debug.WriteLine("Project save path: " + pathName);
@@ -1839,8 +1834,7 @@ namespace SourceGen.AppForms {
 
         // Edit > Find... (Ctrl+F)
         private void findToolStripMenuItem_Click(object sender, EventArgs e) {
-            FindBox dlg = new FindBox();
-            dlg.TextToFind = mFindString;
+            FindBox dlg = new FindBox(mFindString);
             if (dlg.ShowDialog() == DialogResult.OK) {
                 mFindString = dlg.TextToFind;
                 mFindStartIndex = -1;
@@ -1918,13 +1912,14 @@ namespace SourceGen.AppForms {
             if (!string.IsNullOrEmpty(mProjectPathName)) {
                 projectDir = Path.GetDirectoryName(mProjectPathName);
             }
-            EditProjectProperties dlg = new EditProjectProperties(projectDir);
-            dlg.SetInitialProps(mProject.ProjectProps);
-            dlg.NumFormatter = mOutputFormatter;
+            EditProjectProperties dlg = new EditProjectProperties(mProject.ProjectProps,
+                projectDir, mOutputFormatter);
             dlg.ShowDialog();
             ProjectProperties newProps = dlg.NewProps;
             dlg.Dispose();
 
+            // The dialog result doesn't matter, because the user might have hit "apply"
+            // before hitting "cancel".
             if (newProps != null) {
                 UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
                     mProject.ProjectProps, newProps);
@@ -2553,13 +2548,9 @@ namespace SourceGen.AppForms {
             Debug.Assert(IsSingleItemSelected());
             int offset = mDisplayList[sel[0]].FileOffset;
 
-            EditAddress dlg = new EditAddress();
             Anattrib attr = mProject.GetAnattrib(offset);
-            dlg.MaxAddressValue = mProject.CpuDef.MaxAddressValue;
-            dlg.SetInitialAddress(attr.Address);
-            dlg.ShowDialog();
-
-            if (dlg.DialogResult == DialogResult.OK) {
+            EditAddress dlg = new EditAddress(attr.Address, mProject.CpuDef.MaxAddressValue);
+            if (dlg.ShowDialog() == DialogResult.OK) {
                 if (offset == 0 && dlg.Address < 0) {
                     // Not allowed.  The AddressMap will just put it back, which confuses
                     // the undo operation.
@@ -2860,13 +2851,10 @@ namespace SourceGen.AppForms {
             Debug.Assert(IsSingleItemSelected());
             int offset = mDisplayList[sel[0]].FileOffset;
 
-            EditLabel dlg = new EditLabel(mProject.SymbolTable);
             Anattrib attr = mProject.GetAnattrib(offset);
+            EditLabel dlg = new EditLabel(attr.Symbol, attr.Address, mProject.SymbolTable);
 
-            dlg.LabelSym = attr.Symbol;
-            dlg.Address = attr.Address;
-            dlg.ShowDialog();
-            if (dlg.DialogResult == DialogResult.OK) {
+            if (dlg.ShowDialog() == DialogResult.OK) {
                 // NOTE: if label matching is case-insensitive, we want to allow a situation
                 // where a label is being renamed from "FOO" to "Foo".  (We should be able to
                 // test for object equality on the Symbol.)
@@ -2895,11 +2883,9 @@ namespace SourceGen.AppForms {
             Debug.Assert(IsSingleItemSelected());
             int offset = mDisplayList[sel[0]].FileOffset;
 
-            EditStatusFlags dlg = new EditStatusFlags();
-            dlg.HasEmuFlag = mProject.CpuDef.HasEmuFlag;
-            dlg.FlagValue = mProject.StatusFlagOverrides[offset];
-            dlg.ShowDialog();
-            if (dlg.DialogResult == DialogResult.OK) {
+            EditStatusFlags dlg = new EditStatusFlags(mProject.StatusFlagOverrides[offset],
+                mProject.CpuDef.HasEmuFlag);
+            if (dlg.ShowDialog() == DialogResult.OK) {
                 if (dlg.FlagValue != mProject.StatusFlagOverrides[offset]) {
                     UndoableChange uc = UndoableChange.CreateStatusFlagChange(offset,
                         mProject.StatusFlagOverrides[offset], dlg.FlagValue);
@@ -2916,11 +2902,9 @@ namespace SourceGen.AppForms {
             Debug.Assert(IsSingleItemSelected());
             int offset = mDisplayList[sel[0]].FileOffset;
 
-            EditComment dlg = new EditComment();
-            string oldComment = dlg.Comment = mProject.Comments[offset];
-            dlg.ShowDialog();
-
-            if (dlg.DialogResult == DialogResult.OK) {
+            string oldComment = mProject.Comments[offset];
+            EditComment dlg = new EditComment(oldComment);
+            if (dlg.ShowDialog() == DialogResult.OK) {
                 if (!oldComment.Equals(dlg.Comment)) {
                     Debug.WriteLine("Changing comment at +" + offset.ToString("x6"));
 
@@ -4478,9 +4462,10 @@ namespace SourceGen.AppForms {
         #region Tools items
 
         private void hexDumpToolStripMenuItem_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog();
-            fileDlg.Filter = Properties.Resources.FILE_FILTER_ALL;
-            fileDlg.FilterIndex = 1;
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Properties.Resources.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }

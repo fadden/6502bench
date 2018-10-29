@@ -32,12 +32,12 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// Format object to use when formatting addresses and constants.
         /// </summary>
-        private Formatter NumFormatter { get; set; }
+        private Formatter mNumFormatter;
 
         /// <summary>
         /// List of existing symbols, for uniqueness check.  The list will not be modified.
         /// </summary>
-        private SortedList<String, DefSymbol> DefSymbolList { get; set; }
+        private SortedList<String, DefSymbol> mDefSymbolList;
 
         // Saved off at dialog load time.
         private Color mDefaultLabelColor;
@@ -46,8 +46,8 @@ namespace SourceGen.AppForms {
         public EditDefSymbol(Formatter formatter, SortedList<String, DefSymbol> defList) {
             InitializeComponent();
 
-            NumFormatter = formatter;
-            DefSymbolList = defList;
+            mNumFormatter = formatter;
+            mDefSymbolList = defList;
         }
 
         private void EditDefSymbol_Load(object sender, EventArgs e) {
@@ -55,7 +55,7 @@ namespace SourceGen.AppForms {
 
             if (DefSym != null) {
                 labelTextBox.Text = DefSym.Label;
-                valueTextBox.Text = NumFormatter.FormatValueInBase(DefSym.Value,
+                valueTextBox.Text = mNumFormatter.FormatValueInBase(DefSym.Value,
                     DefSym.DataDescriptor.NumBase);
                 commentTextBox.Text = DefSym.Comment;
 
@@ -78,7 +78,7 @@ namespace SourceGen.AppForms {
             // if it exists elsewhere.)
             labelValid = Asm65.Label.ValidateLabel(labelTextBox.Text);
 
-            if (DefSymbolList.TryGetValue(labelTextBox.Text, out DefSymbol existing)) {
+            if (mDefSymbolList.TryGetValue(labelTextBox.Text, out DefSymbol existing)) {
                 // It's okay if it's the same object.
                 labelUnique = (existing == DefSym);
             } else {

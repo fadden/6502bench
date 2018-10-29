@@ -41,7 +41,7 @@ namespace SourceGen.AppForms {
             System.Windows.Forms.Label addressLabel;
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.addressTextBox = new System.Windows.Forms.TextBox();
             this.instructionLabel1 = new System.Windows.Forms.Label();
             this.instructionLabel2 = new System.Windows.Forms.Label();
             addressLabel = new System.Windows.Forms.Label();
@@ -79,12 +79,13 @@ namespace SourceGen.AppForms {
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
-            // textBox1
+            // addressTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(68, 13);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(275, 20);
-            this.textBox1.TabIndex = 0;
+            this.addressTextBox.Location = new System.Drawing.Point(68, 13);
+            this.addressTextBox.Name = "addressTextBox";
+            this.addressTextBox.Size = new System.Drawing.Size(275, 20);
+            this.addressTextBox.TabIndex = 0;
+            this.addressTextBox.TextChanged += new System.EventHandler(this.addressTextBox_TextChanged);
             // 
             // instructionLabel1
             // 
@@ -113,7 +114,7 @@ namespace SourceGen.AppForms {
             this.ClientSize = new System.Drawing.Size(358, 126);
             this.Controls.Add(this.instructionLabel2);
             this.Controls.Add(this.instructionLabel1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.addressTextBox);
             this.Controls.Add(addressLabel);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.okButton);
@@ -124,6 +125,7 @@ namespace SourceGen.AppForms {
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Edit Address";
+            this.Load += new System.EventHandler(this.EditAddress_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -133,7 +135,7 @@ namespace SourceGen.AppForms {
 
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox addressTextBox;
         private System.Windows.Forms.Label instructionLabel1;
         private System.Windows.Forms.Label instructionLabel2;
     }

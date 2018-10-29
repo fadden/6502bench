@@ -540,10 +540,11 @@ namespace SourceGen.AppForms {
                 name += ".exe";
             }
 
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.FileName = name;
-            dlg.Filter = prefix + "|" + name;
-            dlg.RestoreDirectory = true;
+            OpenFileDialog dlg = new OpenFileDialog() {
+                FileName = name,
+                Filter = prefix + "|" + name,
+                RestoreDirectory = true
+            };
             if (dlg.ShowDialog() != DialogResult.Cancel) {
                 pathName = dlg.FileName;
             }

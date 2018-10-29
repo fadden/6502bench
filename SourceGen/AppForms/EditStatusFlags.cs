@@ -24,21 +24,24 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// In/out status flag value.
         /// </summary>
-        public StatusFlags FlagValue { get; set; }
+        public StatusFlags FlagValue { get; private set; }
 
         /// <summary>
         /// Set this if the CPU has an emulation flag (65802/65816).  If this isn't
         /// set, the M, X, and E flag buttons will be disabled.
         /// </summary>
-        public bool HasEmuFlag { get; set; }
+        private bool mHasEmuFlag;
 
 
-        public EditStatusFlags() {
+        public EditStatusFlags(StatusFlags flagValue, bool hasEmuFlag) {
             InitializeComponent();
+
+            FlagValue = flagValue;
+            mHasEmuFlag = hasEmuFlag;
         }
 
         private void EditStatusFlags_Load(object sender, EventArgs e) {
-            if (!HasEmuFlag) {
+            if (!mHasEmuFlag) {
                 panelM.Enabled = false;
                 panelX.Enabled = false;
                 panelE.Enabled = false;

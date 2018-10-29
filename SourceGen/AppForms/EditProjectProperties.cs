@@ -33,11 +33,6 @@ namespace SourceGen.AppForms {
     /// </summary>
     public partial class EditProjectProperties : Form {
         /// <summary>
-        /// Working set.  Used internally to hold state.
-        /// </summary>
-        private ProjectProperties WorkProps { get; set; }
-
-        /// <summary>
         /// New set.  Updated when Apply or OK is hit.  This will be null if no changes have
         /// been applied.
         /// </summary>
@@ -46,7 +41,12 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// Format object to use when formatting addresses and constants.
         /// </summary>
-        public Formatter NumFormatter { get; set; }
+        private Formatter mFormatter { get; set; }
+
+        /// <summary>
+        /// Working set.  Used internally to hold state.
+        /// </summary>
+        private ProjectProperties mWorkProps;
 
         /// <summary>
         /// Dirty flag.  Ideally this would just be "WorkProps != OldProps", but it doesn't
@@ -60,24 +60,24 @@ namespace SourceGen.AppForms {
         private string mProjectDir;
 
 
-        public EditProjectProperties(string projectDir) {
+        /// <summary>
+        /// Constructor.  Initial state is configured from an existing ProjectProperties object.
+        /// </summary>
+        /// <param name="props">Property holder to clone.</param>
+        /// <param name="projectDir">Project directory, if known.</param>
+        /// <param name="formatter">Text formatter.</param>
+        public EditProjectProperties(ProjectProperties props, string projectDir,
+                Formatter formatter) {
             InitializeComponent();
 
+            mWorkProps = new ProjectProperties(props);
             mProjectDir = projectDir;
-        }
-
-        /// <summary>
-        /// Sets the initial state from an existing ProjectProperties object.  This must be
-        /// called, and must be called before the dialog is shown.
-        /// </summary>
-        /// <param name="props">Object to clone.</param>
-        public void SetInitialProps(ProjectProperties props) {
-            WorkProps = new ProjectProperties(props);
+            mFormatter = formatter;
         }
 
         private void EditProperties_Load(object sender, EventArgs e) {
             // Configure CPU chooser.  This must match the order of strings in the designer.
-            switch (WorkProps.CpuType) {
+            switch (mWorkProps.CpuType) {
                 case CpuDef.CpuType.Cpu6502:
                     cpuComboBox.SelectedIndex = 0;
                     break;
@@ -93,13 +93,13 @@ namespace SourceGen.AppForms {
                     break;
             }
 
-            undocInstrCheckBox.Checked = WorkProps.IncludeUndocumentedInstr;
+            undocInstrCheckBox.Checked = mWorkProps.IncludeUndocumentedInstr;
             analyzeUncategorizedCheckBox.Checked =
-                WorkProps.AnalysisParams.AnalyzeUncategorizedData;
+                mWorkProps.AnalysisParams.AnalyzeUncategorizedData;
             seekAltTargetCheckBox.Checked =
-                WorkProps.AnalysisParams.SeekNearbyTargets;
+                mWorkProps.AnalysisParams.SeekNearbyTargets;
 
-            int matchLen = WorkProps.AnalysisParams.MinCharsForString;
+            int matchLen = mWorkProps.AnalysisParams.MinCharsForString;
             int selIndex;
             if (matchLen == DataAnalysis.MIN_CHARS_FOR_STRING_DISABLED) {
                 selIndex = 0;       // disabled
@@ -122,11 +122,11 @@ namespace SourceGen.AppForms {
         }
 
         private void okButton_Click(object sender, EventArgs e) {
-            NewProps = new ProjectProperties(WorkProps);
+            NewProps = new ProjectProperties(mWorkProps);
         }
 
         private void applyButton_Click(object sender, EventArgs e) {
-            NewProps = new ProjectProperties(WorkProps);
+            NewProps = new ProjectProperties(mWorkProps);
             mDirty = false;
             UpdateControls();
         }
@@ -140,7 +140,7 @@ namespace SourceGen.AppForms {
             const string FLAGS = "CZIDXMVNE";   // flags, in order low to high, plus emu bit
             const string VALUES = "-?01";
             StringBuilder sb = new StringBuilder(27);
-            StatusFlags flags = WorkProps.EntryFlags;
+            StatusFlags flags = mWorkProps.EntryFlags;
             for (int i = 0; i < 9; i++) {
                 // Want to show P reg flags (first 8) in conventional high-to-low order.
                 int idx = (7 - i) + (i == 8 ? 9 : 0);
@@ -197,34 +197,31 @@ namespace SourceGen.AppForms {
 
         private void cpuComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             CpuDef.CpuType cpuType = CpuSelectionToCpuType(cpuComboBox.SelectedIndex);
-            if (WorkProps.CpuType != cpuType) {
-                WorkProps.CpuType = cpuType;
+            if (mWorkProps.CpuType != cpuType) {
+                mWorkProps.CpuType = cpuType;
                 mDirty = true;
                 UpdateControls();
             }
         }
 
         private void undocInstrCheckBox_CheckedChanged(object sender, EventArgs e) {
-            if (WorkProps.IncludeUndocumentedInstr != undocInstrCheckBox.Checked) {
-                WorkProps.IncludeUndocumentedInstr = undocInstrCheckBox.Checked;
+            if (mWorkProps.IncludeUndocumentedInstr != undocInstrCheckBox.Checked) {
+                mWorkProps.IncludeUndocumentedInstr = undocInstrCheckBox.Checked;
                 mDirty = true;
                 UpdateControls();
             }
         }
 
         private void changeFlagButton_Click(object sender, EventArgs e) {
-            EditStatusFlags dlg = new EditStatusFlags();
-            dlg.FlagValue = WorkProps.EntryFlags;
-
-            CpuDef cpuDef = CpuDef.GetBestMatch(WorkProps.CpuType,
-                WorkProps.IncludeUndocumentedInstr);
-            dlg.HasEmuFlag = cpuDef.HasEmuFlag;
+            CpuDef cpuDef = CpuDef.GetBestMatch(mWorkProps.CpuType,
+                mWorkProps.IncludeUndocumentedInstr);
+            EditStatusFlags dlg = new EditStatusFlags(mWorkProps.EntryFlags, cpuDef.HasEmuFlag);
 
             dlg.ShowDialog();
             if (dlg.DialogResult == DialogResult.OK) {
-                if (WorkProps.EntryFlags != dlg.FlagValue) {
+                if (mWorkProps.EntryFlags != dlg.FlagValue) {
                     // Flags changed.
-                    WorkProps.EntryFlags = dlg.FlagValue;
+                    mWorkProps.EntryFlags = dlg.FlagValue;
                     mDirty = true;
                     UpdateControls();
                 }
@@ -234,14 +231,14 @@ namespace SourceGen.AppForms {
         }
 
         private void analyzeUncategorizedCheckBox_CheckedChanged(object sender, EventArgs e) {
-            WorkProps.AnalysisParams.AnalyzeUncategorizedData =
+            mWorkProps.AnalysisParams.AnalyzeUncategorizedData =
                 analyzeUncategorizedCheckBox.Checked;
             mDirty = true;
             UpdateControls();
         }
 
         private void seekAltTargetCheckBox_CheckedChanged(object sender, EventArgs e) {
-            WorkProps.AnalysisParams.SeekNearbyTargets =
+            mWorkProps.AnalysisParams.SeekNearbyTargets =
                 seekAltTargetCheckBox.Checked;
             mDirty = true;
             UpdateControls();
@@ -256,8 +253,8 @@ namespace SourceGen.AppForms {
                 newVal = index + 2;
             }
 
-            if (newVal != WorkProps.AnalysisParams.MinCharsForString) {
-                WorkProps.AnalysisParams.MinCharsForString = newVal;
+            if (newVal != mWorkProps.AnalysisParams.MinCharsForString) {
+                mWorkProps.AnalysisParams.MinCharsForString = newVal;
                 mDirty = true;
                 UpdateControls();
             }
@@ -280,7 +277,7 @@ namespace SourceGen.AppForms {
             //Debug.WriteLine("LPS loading " + WorkProps.ProjectSyms.Count + " project symbols");
             projectSymbolsListView.BeginUpdate();
             projectSymbolsListView.Items.Clear();
-            foreach (KeyValuePair<string, DefSymbol> kvp in WorkProps.ProjectSyms) {
+            foreach (KeyValuePair<string, DefSymbol> kvp in mWorkProps.ProjectSyms) {
                 DefSymbol defSym = kvp.Value;
                 string typeStr;
                 if (defSym.SymbolType == Symbol.Type.Constant) {
@@ -292,7 +289,7 @@ namespace SourceGen.AppForms {
                 ListViewItem lvi = new ListViewItem();
                 lvi.Text = defSym.Label;
                 mSymbolSubArray[0] = new ListViewItem.ListViewSubItem(lvi,
-                    NumFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase));
+                    mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase));
                 mSymbolSubArray[1] = new ListViewItem.ListViewSubItem(lvi, typeStr);
                 mSymbolSubArray[2] = new ListViewItem.ListViewSubItem(lvi, defSym.Comment);
                 lvi.SubItems.AddRange(mSymbolSubArray);
@@ -310,11 +307,11 @@ namespace SourceGen.AppForms {
         }
 
         private void newSymbolButton_Click(object sender, EventArgs e) {
-            EditDefSymbol dlg = new EditDefSymbol(NumFormatter, WorkProps.ProjectSyms);
+            EditDefSymbol dlg = new EditDefSymbol(mFormatter, mWorkProps.ProjectSyms);
             dlg.ShowDialog();
             if (dlg.DialogResult == DialogResult.OK) {
                 Debug.WriteLine("ADD: " + dlg.DefSym);
-                WorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+                mWorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
                 mDirty = true;
                 LoadProjectSymbols();
                 UpdateControls();
@@ -326,24 +323,24 @@ namespace SourceGen.AppForms {
             // Single-select list view, button dimmed when no selection.
             Debug.Assert(projectSymbolsListView.SelectedItems.Count == 1);
             ListViewItem item = projectSymbolsListView.SelectedItems[0];
-            DefSymbol defSym = WorkProps.ProjectSyms[item.Text];
+            DefSymbol defSym = mWorkProps.ProjectSyms[item.Text];
             DoEditSymbol(defSym);
         }
 
         private void projectSymbolsListView_MouseDoubleClick(object sender, MouseEventArgs e) {
             ListViewHitTestInfo info = projectSymbolsListView.HitTest(e.X, e.Y);
-            DefSymbol defSym = WorkProps.ProjectSyms[info.Item.Text];
+            DefSymbol defSym = mWorkProps.ProjectSyms[info.Item.Text];
             DoEditSymbol(defSym);
         }
 
         private void DoEditSymbol(DefSymbol defSym) {
-            EditDefSymbol dlg = new EditDefSymbol(NumFormatter, WorkProps.ProjectSyms);
+            EditDefSymbol dlg = new EditDefSymbol(mFormatter, mWorkProps.ProjectSyms);
             dlg.DefSym = defSym;
             dlg.ShowDialog();
             if (dlg.DialogResult == DialogResult.OK) {
                 // Label might have changed, so remove old before adding new.
-                WorkProps.ProjectSyms.Remove(defSym.Label);
-                WorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+                mWorkProps.ProjectSyms.Remove(defSym.Label);
+                mWorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
                 mDirty = true;
                 LoadProjectSymbols();
                 UpdateControls();
@@ -357,8 +354,8 @@ namespace SourceGen.AppForms {
 
             int selectionIndex = projectSymbolsListView.SelectedIndices[0];
             ListViewItem item = projectSymbolsListView.SelectedItems[0];
-            DefSymbol defSym = WorkProps.ProjectSyms[item.Text];
-            WorkProps.ProjectSyms.Remove(defSym.Label);
+            DefSymbol defSym = mWorkProps.ProjectSyms[item.Text];
+            mWorkProps.ProjectSyms.Remove(defSym.Label);
             mDirty = true;
             LoadProjectSymbols();
             UpdateControls();
@@ -387,7 +384,7 @@ namespace SourceGen.AppForms {
             symbolFilesListBox.BeginUpdate();
             symbolFilesListBox.Items.Clear();
 
-            foreach (string fileName in WorkProps.PlatformSymbolFileIdentifiers) {
+            foreach (string fileName in mWorkProps.PlatformSymbolFileIdentifiers) {
                 symbolFilesListBox.Items.Add(fileName);
             }
 
@@ -400,11 +397,12 @@ namespace SourceGen.AppForms {
         }
 
         private void addSymbolFilesButton_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog();
-            fileDlg.Filter = PlatformSymbols.FILENAME_FILTER;
-            fileDlg.Multiselect = true;
-            fileDlg.InitialDirectory = RuntimeDataAccess.GetDirectory();
-            fileDlg.RestoreDirectory = true;    // doesn't seem to work?
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = PlatformSymbols.FILENAME_FILTER,
+                Multiselect = true,
+                InitialDirectory = RuntimeDataAccess.GetDirectory(),
+                RestoreDirectory = true     // doesn't seem to work?
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }
@@ -429,13 +427,13 @@ namespace SourceGen.AppForms {
 
                 string ident = ef.Identifier;
 
-                if (WorkProps.PlatformSymbolFileIdentifiers.Contains(ident)) {
+                if (mWorkProps.PlatformSymbolFileIdentifiers.Contains(ident)) {
                     Debug.WriteLine("Already present: " + ident);
                     continue;
                 }
 
                 Debug.WriteLine("Adding symbol file: " + ident);
-                WorkProps.PlatformSymbolFileIdentifiers.Add(ident);
+                mWorkProps.PlatformSymbolFileIdentifiers.Add(ident);
                 mDirty = true;
             }
 
@@ -468,9 +466,9 @@ namespace SourceGen.AppForms {
             symbolFilesListBox.SetSelected(selIndex + adj, true);
 
             // do the same operation in the file name list
-            string str = WorkProps.PlatformSymbolFileIdentifiers[selIndex];
-            WorkProps.PlatformSymbolFileIdentifiers.RemoveAt(selIndex);
-            WorkProps.PlatformSymbolFileIdentifiers.Insert(selIndex + adj, str);
+            string str = mWorkProps.PlatformSymbolFileIdentifiers[selIndex];
+            mWorkProps.PlatformSymbolFileIdentifiers.RemoveAt(selIndex);
+            mWorkProps.PlatformSymbolFileIdentifiers.Insert(selIndex + adj, str);
 
             mDirty = true;
             UpdateControls();
@@ -481,7 +479,7 @@ namespace SourceGen.AppForms {
             for (int i = symbolFilesListBox.SelectedIndices.Count - 1; i >= 0; i--) {
                 int index = symbolFilesListBox.SelectedIndices[i];
                 symbolFilesListBox.Items.RemoveAt(index);
-                WorkProps.PlatformSymbolFileIdentifiers.RemoveAt(index);
+                mWorkProps.PlatformSymbolFileIdentifiers.RemoveAt(index);
             }
 
             mDirty = true;
@@ -489,11 +487,10 @@ namespace SourceGen.AppForms {
         }
 
         private void importSymbolsButton_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog();
-
-            fileDlg.Filter = ProjectFile.FILENAME_FILTER + "|" +
-                Properties.Resources.FILE_FILTER_ALL;
-            fileDlg.FilterIndex = 1;
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = ProjectFile.FILENAME_FILTER + "|" + Properties.Resources.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }
@@ -502,9 +499,9 @@ namespace SourceGen.AppForms {
             DisasmProject newProject = new DisasmProject();
             if (!ProjectFile.DeserializeFromFile(projPathName, newProject,
                     out FileLoadReport report)) {
-                ProjectLoadIssues dlg = new ProjectLoadIssues();
-                dlg.Messages = report.Format();
-                dlg.CanContinue = false;
+                // Unable to open project file.  Report error and bail.
+                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
+                    ProjectLoadIssues.Buttons.Cancel);
                 dlg.ShowDialog();
                 // ignore dlg.DialogResult
                 dlg.Dispose();
@@ -520,7 +517,7 @@ namespace SourceGen.AppForms {
                     DefSymbol defSym = new DefSymbol(sym.Label, sym.Value, Symbol.Source.Project,
                         Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
                         string.Empty, string.Empty);
-                    WorkProps.ProjectSyms[defSym.Label] = defSym;
+                    mWorkProps.ProjectSyms[defSym.Label] = defSym;
                     foundCount++;
                 }
             }
@@ -556,7 +553,7 @@ namespace SourceGen.AppForms {
             extensionScriptsListBox.BeginUpdate();
             extensionScriptsListBox.Items.Clear();
 
-            foreach (string fileName in WorkProps.ExtensionScriptFileIdentifiers) {
+            foreach (string fileName in mWorkProps.ExtensionScriptFileIdentifiers) {
                 extensionScriptsListBox.Items.Add(fileName);
             }
 
@@ -569,11 +566,12 @@ namespace SourceGen.AppForms {
         }
 
         private void addExtensionScriptsButton_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog();
-            fileDlg.Filter = Sandbox.ScriptManager.FILENAME_FILTER;
-            fileDlg.Multiselect = true;
-            fileDlg.InitialDirectory = RuntimeDataAccess.GetDirectory();
-            fileDlg.RestoreDirectory = true;    // doesn't seem to work?
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Sandbox.ScriptManager.FILENAME_FILTER,
+                Multiselect = true,
+                InitialDirectory = RuntimeDataAccess.GetDirectory(),
+                RestoreDirectory = true     // doesn't seem to work?
+            };
             if (fileDlg.ShowDialog() != DialogResult.OK) {
                 return;
             }
@@ -598,13 +596,13 @@ namespace SourceGen.AppForms {
 
                 string ident = ef.Identifier;
 
-                if (WorkProps.ExtensionScriptFileIdentifiers.Contains(ident)) {
+                if (mWorkProps.ExtensionScriptFileIdentifiers.Contains(ident)) {
                     Debug.WriteLine("Already present: " + ident);
                     continue;
                 }
 
                 Debug.WriteLine("Adding extension script: " + ident);
-                WorkProps.ExtensionScriptFileIdentifiers.Add(ident);
+                mWorkProps.ExtensionScriptFileIdentifiers.Add(ident);
                 mDirty = true;
             }
 
@@ -619,7 +617,7 @@ namespace SourceGen.AppForms {
             for (int i = extensionScriptsListBox.SelectedIndices.Count - 1; i >= 0; i--) {
                 int index = extensionScriptsListBox.SelectedIndices[i];
                 extensionScriptsListBox.Items.RemoveAt(index);
-                WorkProps.ExtensionScriptFileIdentifiers.RemoveAt(index);
+                mWorkProps.ExtensionScriptFileIdentifiers.RemoveAt(index);
             }
 
             mDirty = true;

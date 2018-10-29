@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace SourceGen.AppForms {
@@ -25,34 +24,36 @@ namespace SourceGen.AppForms {
         /// <summary>
         /// Multi-line message for text box.
         /// </summary>
-        public string Messages { get; set; }
+        private string mMessages;
 
         /// <summary>
-        /// Enable or disable the Continue button.  Defaults to true.
+        /// Which buttons are enabled.
         /// </summary>
-        public bool CanContinue { get; set; }
-
-        /// <summary>
-        /// Enable or disable the Cancel button.  Defaults to true.
-        /// </summary>
-        public bool CanCancel { get; set; }
+        private Buttons mAllowedButtons;
+        public enum Buttons {
+            Unknown = 0, Continue, Cancel, ContinueOrCancel
+        }
 
 
-        public ProjectLoadIssues() {
+        public ProjectLoadIssues(string msgs, Buttons allowedButtons) {
             InitializeComponent();
-            CanContinue = CanCancel = true;
+
+            mMessages = msgs;
+            mAllowedButtons = allowedButtons;
         }
 
         private void ProjectLoadIssues_Load(object sender, EventArgs e) {
-            messageTextBox.Text = Messages;
+            messageTextBox.Text = mMessages;
 
-            if (!CanContinue) {
+            if (mAllowedButtons == Buttons.Cancel) {
+                // Continue not allowed
                 okButton.Enabled = false;
 
                 // No point warning them about invalid data if they can't continue.
                 invalidDiscardLabel.Visible = false;
             }
-            if (!CanCancel) {
+            if (mAllowedButtons == Buttons.Continue) {
+                // Cancel not allowed.
                 cancelButton.Enabled = false;
 
                 // They're stuck with the problem.
