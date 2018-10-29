@@ -4409,9 +4409,9 @@ namespace SourceGen.AppForms {
                 string shortDesc = mOpDesc.GetShortDescription(op.Mnemonic);
                 if (!string.IsNullOrEmpty(shortDesc)) {
                     if (op.IsUndocumented) {
-                        sb.Append("\u23e9[*] ");
+                        sb.Append("\u25b6[*] ");
                     } else {
-                        sb.Append("\u23e9 ");
+                        sb.Append("\u25b6 ");
                     }
                     sb.Append(shortDesc);
                     string addrStr = mOpDesc.GetAddressModeDescription(op.AddrMode);
