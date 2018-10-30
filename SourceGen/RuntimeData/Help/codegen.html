@@ -166,6 +166,7 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>BRK &lt;arg&gt; is assembled to opcode $05 rather than $00.</li>
   <li>WDM is not supported.</li>
+  <li>Source file names must not have spaces in them on Windows.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -179,6 +180,11 @@ code, but also needs to know how to handle the corner cases.</p>
     SourceGen currently generates require parenthesis.)</li>
   <li>Undocumented opcodes: SBX ($cb) uses the mnemonic AXS.  All other
     opcodes match up with the "unintended opcodes" document.</li>
+  <li>ca65 is implemented as a single-pass assembler, so label widths
+    can't always be known in time.  For example, if you .ORG $0000 after
+    the point where the labels are used, the assembler will already have
+    generated them as absolute values.  Width disambiguation must be applied
+    to instructions that aren't ambiguous to multi-pass assemblers.</li>
 </ul>
 
 
@@ -190,6 +196,8 @@ code, but also needs to know how to handle the corner cases.</p>
 <ul>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>For some failures, an exit code of zero is returned.</li>
+  <li>Some indexed store instructions cause errors if the label isn't
+    unambiguously DP (e.g. `STX $00,X` vs. `STX $0000,X`).</li>
 </ul>
 
 <p>Quirks:</p>

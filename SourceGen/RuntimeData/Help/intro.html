@@ -378,6 +378,11 @@ with most assemblers:</p>
 </ul>
 <p>Label comparisons are case-sensitive, as is customary for programming
 languages.</p>
+<p>Some assemblers restrict the set of valid labels further.  For example,
+64tass uses a leading underscore to indicate a local label, and reserves
+a double leading underscore (e.g. <code>__label</code>) for its own
+purposes.  In such cases, the label will be modified to comply with the
+target assembler syntax.</p>
 
 <p><b>Platform symbols</b> are defined in platform symbol files.  These
 are named with a ".sym65" extension, and have a fairly straightforward
