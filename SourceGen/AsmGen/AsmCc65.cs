@@ -782,6 +782,8 @@ namespace SourceGen.AsmGen {
                 return null;
             }
 
+            worker.ReportProgress(0, Properties.Resources.PROGRESS_ASSEMBLING);
+
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
             ShellCommand cmd = new ShellCommand(config.ExecutablePath,

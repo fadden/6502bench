@@ -348,6 +348,9 @@
   <data name="PLUGIN_DIR_FAIL_CAPTION" xml:space="preserve">
     <value>Failed Preparing Plugin Directory</value>
   </data>
+  <data name="PROGRESS_ASSEMBLING" xml:space="preserve">
+    <value>Executing assembler...</value>
+  </data>
   <data name="PROGRESS_GENERATING_FMT" xml:space="preserve">
     <value>Generating {0}...</value>
   </data>

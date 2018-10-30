@@ -711,7 +711,7 @@ namespace Asm65 {
             { OpDef.AddressMode.StackRTI, "" },
             { OpDef.AddressMode.StackRTL, "" },
             { OpDef.AddressMode.StackRTS, "" },
-            { OpDef.AddressMode.StackRel, "" },
+            { OpDef.AddressMode.StackRel, "Stack Relative" },
             { OpDef.AddressMode.StackRelIndIndexY, "Stack Relative Indirect Index Y" },
             { OpDef.AddressMode.WDM, "" }
         };

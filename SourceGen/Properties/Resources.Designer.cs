@@ -754,6 +754,15 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Executing assembler....
+        /// </summary>
+        internal static string PROGRESS_ASSEMBLING {
+            get {
+                return ResourceManager.GetString("PROGRESS_ASSEMBLING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Generating {0}....
         /// </summary>
         internal static string PROGRESS_GENERATING_FMT {

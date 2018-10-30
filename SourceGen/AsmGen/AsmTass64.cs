@@ -754,6 +754,8 @@ namespace SourceGen.AsmGen {
                 return null;
             }
 
+            worker.ReportProgress(0, Properties.Resources.PROGRESS_ASSEMBLING);
+
             string options = "--case-sensitive --nostart --long-address -Wall";
             string outFileName = pathName.Substring(0, pathName.Length - 2);
 
