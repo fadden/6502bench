@@ -185,6 +185,11 @@ code, but also needs to know how to handle the corner cases.</p>
     the point where the labels are used, the assembler will already have
     generated them as absolute values.  Width disambiguation must be applied
     to instructions that aren't ambiguous to multi-pass assemblers.</li>
+  <li>The assembler is geared toward generating relocatable code with
+    multiple segments (it is, after all, an assembler for a C compiler).
+    A linker script is expected to be provided for anything complex.  Since
+    SourceGen doesn't currently generate a linker script, binaries are
+    limited to 26KiB ($6800 bytes).</li>
 </ul>
 
 
