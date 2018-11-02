@@ -259,11 +259,12 @@ namespace SourceGen.AsmGen {
         }
 
         /// <summary>
-        /// Map the mnemonics we chose for undocumented opcodes to the cc65 mnemonics.
-        /// After switching to the Unintended Opcodes mnemonics there's almost no difference.
+        /// Map the undocumented opcodes to the cc65 mnemonics.  There's almost no difference
+        /// vs. the Unintended Opcodes mnemonics.
         /// 
         /// We don't include the double- and triple-byte NOPs here, as cc65 doesn't
-        /// appear to have a definition for them (as of 2.17).
+        /// appear to have a definition for them (as of 2.17).  We also omit the alias
+        /// for SBC.  These will all be output as hex.
         /// </summary>
         private static Dictionary<string, string> sUndocMap = new Dictionary<string, string>() {
             { OpName.ALR, "alr" },      // imm 0x4b
@@ -288,7 +289,7 @@ namespace SourceGen.AsmGen {
         };
 
         // IGenerator
-        public string ReplaceMnemonic(OpDef op) {
+        public string ModifyOpcode(int offset, OpDef op) {
             if ((op == OpDef.OpWDM_WDM || op == OpDef.OpBRK_StackInt) && mAsmVersion <= V2_17) {
                 // cc65 v2.17 doesn't support WDM, and assembles BRK <arg> to opcode $05.
                 // https://github.com/cc65/cc65/issues/715

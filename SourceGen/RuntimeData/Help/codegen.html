@@ -148,8 +148,8 @@ code, but also needs to know how to handle the corner cases.</p>
     as case-sensitive.  The <code>--case-sensitive</code> must be passed to
     the assembler.</li>
   <li>If you set the <code>--case-sensitive</code> flag, <b>all</b> opcodes
-    and operands must be lower-case.  Most of the flags used to show
-    things in upper case must be disabled.</li>
+    and operands must be lower-case.  Most of the SourceGen options used to
+    show things in upper case must be disabled.</li>
   <li>For 65816, selecting the bank byte is done with the back-quote ('`')
     rather than the caret ('^').  (There's a note in the docs to the effect
     that they plan to move to carets.)</li>
@@ -166,7 +166,7 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>BRK &lt;arg&gt; is assembled to opcode $05 rather than $00.</li>
   <li>WDM is not supported.</li>
-  <li>Source file names must not have spaces in them on Windows.</li>
+  <li>Source file names may not have spaces in them on Windows.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -181,10 +181,11 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>Undocumented opcodes: SBX ($cb) uses the mnemonic AXS.  All other
     opcodes match up with the "unintended opcodes" document.</li>
   <li>ca65 is implemented as a single-pass assembler, so label widths
-    can't always be known in time.  For example, if you .ORG $0000 after
-    the point where the labels are used, the assembler will already have
-    generated them as absolute values.  Width disambiguation must be applied
-    to instructions that aren't ambiguous to multi-pass assemblers.</li>
+    can't always be known in time.  For example, if you use some zero-page
+    labels, but they're defined via .ORG $0000 after the point where the
+    labels are used, the assembler will already have generated them as
+    absolute values.  Width disambiguation must be applied to operands
+    that wouldn't be ambiguous to a multi-pass assembler.</li>
   <li>The assembler is geared toward generating relocatable code with
     multiple segments (it is, after all, an assembler for a C compiler).
     A linker script is expected to be provided for anything complex.  Since
@@ -201,8 +202,12 @@ code, but also needs to know how to handle the corner cases.</p>
 <ul>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>For some failures, an exit code of zero is returned.</li>
-  <li>Some indexed store instructions cause errors if the label isn't
-    unambiguously DP (e.g. `STX $00,X` vs. `STX $0000,X`).</li>
+  <li>Some DP indexed store instructions cause errors if the label isn't
+    unambiguously DP (e.g. <code>STX $00,X</code> vs.
+    <code>STX $0000,X</code>).  This isn't a problem with project/platform
+    symbols, which are output as two-digit hex values when possible, but
+    causes failures when direct page locations are included in the project
+    and given labels.</li>
 </ul>
 
 <p>Quirks:</p>

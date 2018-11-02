@@ -172,7 +172,6 @@ namespace SourceGen.AsmGen {
                 wdis = OpDef.GetWidthDisambiguation(instrLen, operand);
             }
 
-            string replMnemonic = gen.ReplaceMnemonic(op);
             string opcodeStr = formatter.FormatOpcode(op, wdis);
 
             string formattedOperand = null;
@@ -268,6 +267,7 @@ namespace SourceGen.AsmGen {
             }
             string commentStr = formatter.FormatEolComment(eolComment);
 
+            string replMnemonic = gen.ModifyOpcode(offset, op);
             if (attr.Length != instrBytes) {
                 // This instruction has another instruction inside it.  Throw out what we
                 // computed and just output as bytes.

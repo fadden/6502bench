@@ -244,7 +244,6 @@ namespace SourceGen.AsmGen {
             } else if (cpuDef.Type == CpuDef.CpuType.Cpu6502 && cpuDef.HasUndocumented) {
                 cpuStr = "6502i";
             } else {
-                // 6502 def includes undocumented ops
                 cpuStr = "6502";
             }
 
@@ -253,7 +252,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public string ReplaceMnemonic(OpDef op) {
+        public string ModifyOpcode(int offset, OpDef op) {
             if (op.IsUndocumented) {
                 if (Project.CpuDef.Type == CpuDef.CpuType.Cpu65C02) {
                     // none of the "LDD" stuff is handled

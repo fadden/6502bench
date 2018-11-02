@@ -85,14 +85,14 @@ namespace SourceGen.AsmGen {
         List<string> GenerateSource(BackgroundWorker worker);
 
         /// <summary>
-        /// Provides an opportunity for the assembler to replace a mnemonic with another.  This
-        /// is primarily intended for undocumented ops, which don't have standard mnemonics,
-        /// and hence can vary between assemblers.
+        /// Provides an opportunity for the assembler to replace a mnemonic with another, or
+        /// output an instruction as hex bytes.
         /// </summary>
+        /// <param name="offset">Opcode offset.</param>
         /// <param name="op">Opcode to replace.</param>
         /// <returns>Replacement mnemonic, an empty string if the original is fine, or
-        ///   null if the op is not supported at all and should be emitted as hex.</returns>
-        string ReplaceMnemonic(OpDef op);
+        ///   null if the op is unsupported or broken and should be emitted as hex.</returns>
+        string ModifyOpcode(int offset, OpDef op);
 
         /// <summary>
         /// Generates an opcode/operand pair for a short sequence of bytes (1-4 bytes).
@@ -163,6 +163,9 @@ namespace SourceGen.AsmGen {
         void OutputLine(string fullLine);
     }
 
+    /// <summary>
+    /// Enumeration of quirky or buggy behavior that GenCommon needs to handle.
+    /// </summary>
     public class AssemblerQuirks {
         /// <summary>
         /// Are the arguments to MVN/MVP reversed?

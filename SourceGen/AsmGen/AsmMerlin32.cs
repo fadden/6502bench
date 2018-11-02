@@ -328,12 +328,34 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public string ReplaceMnemonic(OpDef op) {
+        public string ModifyOpcode(int offset, OpDef op) {
             if (op.IsUndocumented) {
                 return null;
-            } else {
-                return string.Empty;
             }
+
+            // The assembler works correctly if the symbol is defined as a two-digit hex
+            // value (e.g. "foo equ $80") but fails if it's four (e.g. "foo equ $0080").  We
+            // output symbols with minimal digits, but we have no control over labels when
+            // the code has a zero-page EQU.  So if the operand is a reference to a user
+            // label, we need to output the instruction as hex.
+            if (op == OpDef.OpPEI_StackDPInd ||
+                    op == OpDef.OpSTY_DPIndexX ||
+                    op == OpDef.OpSTX_DPIndexY ||
+                    op.AddrMode == OpDef.AddressMode.DPIndLong ||
+                    op.AddrMode == OpDef.AddressMode.DPInd ||
+                    op.AddrMode == OpDef.AddressMode.DPIndexXInd) {
+                FormatDescriptor dfd = Project.GetAnattrib(offset).DataDescriptor;
+                if (dfd != null && dfd.HasSymbol) {
+                    // It has a symbol.  See if the symbol target is a label (auto or user).
+                    if (Project.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+                        if (sym.IsInternalLabel) {
+                            return null;
+                        }
+                    }
+                }
+            }
+
+            return string.Empty;
         }
 
         // IGenerator

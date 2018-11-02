@@ -48,6 +48,18 @@ namespace SourceGen {
             Constant            // constant value
         }
 
+        /// <summary>
+        /// Returns true if the symbol's type is an internal label (auto or user).  Returns
+        /// false for external addresses and constants.
+        /// </summary>
+        public bool IsInternalLabel {
+            get {
+                return SymbolType == Type.LocalOrGlobalAddr ||
+                    SymbolType == Type.GlobalAddr ||
+                    SymbolType == Type.GlobalAddrExport;
+            }
+        }
+
 
         /// <summary>
         /// Label sent to assembler.
@@ -73,6 +85,7 @@ namespace SourceGen {
         /// Two-character string representation of Source and Type, for display in the UI.
         /// </summary>
         public string SourceTypeString { get; private set; }
+
 
         // No nullary constructor.
         private Symbol() { }
