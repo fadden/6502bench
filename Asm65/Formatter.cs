@@ -63,7 +63,8 @@ namespace Asm65 {
             public bool mAllowHighAsciiCharConst;   // can we do high-ASCII character constants?
                                                     // (this might need to be generalized)
 
-            public string mForceAbsOpcodeSuffix;    // these may be null or empty
+            public string mForceDirectOperandPrefix;    // these may be null or empty
+            public string mForceAbsOpcodeSuffix;
             public string mForceAbsOperandPrefix;
             public string mForceLongOpcodeSuffix;
             public string mForceLongOperandPrefix;
@@ -485,7 +486,9 @@ namespace Asm65 {
         /// <returns></returns>
         public string FormatMnemonic(string mnemonic, OpDef.WidthDisambiguation wdis) {
             string opcodeStr = mnemonic;
-            if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
+            if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
+                // nothing to do for opcode
+            } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
                 if (!string.IsNullOrEmpty(mFormatConfig.mForceAbsOpcodeSuffix)) {
                     opcodeStr += mFormatConfig.mForceAbsOpcodeSuffix;
                 }
@@ -507,13 +510,18 @@ namespace Asm65 {
         /// Generates an operand format.
         /// </summary>
         /// <param name="addrMode">Addressing mode.</param>
+        /// <param name="wdis">Width disambiguation mode.</param>
         /// <returns>Format string.</returns>
         private string GenerateOperandFormat(OpDef.AddressMode addrMode,
                 OpDef.WidthDisambiguation wdis) {
             string fmt;
             string wdisStr = string.Empty;
 
-            if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
+            if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
+                if (!string.IsNullOrEmpty(mFormatConfig.mForceDirectOperandPrefix)) {
+                    wdisStr = mFormatConfig.mForceDirectOperandPrefix;
+                }
+            } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
                 if (!string.IsNullOrEmpty(mFormatConfig.mForceAbsOperandPrefix)) {
                     wdisStr = mFormatConfig.mForceAbsOperandPrefix;
                 }

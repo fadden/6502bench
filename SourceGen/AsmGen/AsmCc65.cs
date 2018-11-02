@@ -164,6 +164,7 @@ namespace SourceGen.AsmGen {
                 // cc65 v2.17: https://github.com/cc65/cc65/issues/754
                 Quirks.NoPcRelBankWrap = true;
             }
+            Quirks.SinglePassAssembler = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
@@ -182,6 +183,7 @@ namespace SourceGen.AsmGen {
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
             config.mForceAbsOpcodeSuffix = string.Empty;
             config.mForceLongOpcodeSuffix = string.Empty;
+            config.mForceDirectOperandPrefix = "z:";    // zero
             config.mForceAbsOperandPrefix = "a:";       // absolute
             config.mForceLongOperandPrefix = "f:";      // far
             config.mEndOfLineCommentDelimiter = ";";

@@ -179,6 +179,7 @@ namespace SourceGen.AsmGen {
 
             config.mForceAbsOpcodeSuffix = string.Empty;
             config.mForceLongOpcodeSuffix = string.Empty;
+            config.mForceDirectOperandPrefix = string.Empty;
             config.mForceAbsOperandPrefix = "@w";       // word
             config.mForceLongOperandPrefix = "@l";      // long
             config.mEndOfLineCommentDelimiter = ";";

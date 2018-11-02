@@ -171,6 +171,15 @@ namespace SourceGen.AsmGen {
             if (op.IsWidthPotentiallyAmbiguous) {
                 wdis = OpDef.GetWidthDisambiguation(instrLen, operand);
             }
+            if (gen.Quirks.SinglePassAssembler && wdis == OpDef.WidthDisambiguation.None &&
+                    (op.AddrMode == OpDef.AddressMode.DP ||
+                        op.AddrMode == OpDef.AddressMode.DPIndexX) ||
+                        op.AddrMode == OpDef.AddressMode.DPIndexY) {
+                // Could be a forward reference to a direct-page label.
+                if (IsForwardLabelReference(gen, offset)) {
+                    wdis = OpDef.WidthDisambiguation.ForceDirect;
+                }
+            }
 
             string opcodeStr = formatter.FormatOpcode(op, wdis);
 
@@ -296,6 +305,46 @@ namespace SourceGen.AsmGen {
                     gen.OutputRegWidthDirective(offset, 0, 0, 1, 1);
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether the instruction at the specified offset has an operand that is
+        /// a forward reference.  This only matters for single-pass assemblers.
+        /// </summary>
+        /// <param name="gen">Source generator reference.</param>
+        /// <param name="offset">Offset of instruction opcode.</param>
+        /// <returns>True if the instruction's operand is a forward reference to a label.</returns>
+        private static bool IsForwardLabelReference(IGenerator gen, int offset) {
+            DisasmProject proj = gen.Project;
+            Debug.Assert(proj.GetAnattrib(offset).IsInstructionStart);
+
+            FormatDescriptor dfd = proj.GetAnattrib(offset).DataDescriptor;
+            if (dfd == null || !dfd.HasSymbol) {
+                return false;
+            }
+            if (!proj.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+                return false;
+            }
+            if (!sym.IsInternalLabel) {
+                return false;
+            }
+
+            // It's an internal label reference.  We don't currently have a data structure
+            // that lets us go from label name to file offset.  This situation is sufficiently
+            // rare that an O(n) approach is acceptable.  We may need to fix this someday.
+            //
+            // We only want to know if it is defined after the current instruction.  This is
+            // probably being used for a direct-page reference, which is probably at the start
+            // of the file, so we run from the start to the current instruction.
+            for (int i = 0; i < offset; i++) {
+                Anattrib attr = proj.GetAnattrib(i);
+                if (attr.Symbol != null && attr.Symbol == sym) {
+                    // Found it earlier in file.
+                    return false;
+                }
+            }
+            // Must appear later in file.
+            return true;
         }
 
         /// <summary>

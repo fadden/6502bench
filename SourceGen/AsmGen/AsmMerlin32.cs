@@ -185,6 +185,7 @@ namespace SourceGen.AsmGen {
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
             config.mForceAbsOpcodeSuffix = ":";
             config.mForceLongOpcodeSuffix = "l";
+            config.mForceDirectOperandPrefix = string.Empty;
             config.mForceAbsOperandPrefix = string.Empty;
             config.mForceLongOperandPrefix = string.Empty;
             config.mEndOfLineCommentDelimiter = ";";

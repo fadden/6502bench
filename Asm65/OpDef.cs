@@ -112,9 +112,10 @@ namespace Asm65 {
         /// </summary>
         public enum WidthDisambiguation : byte {
             None = 0,
+            ForceDirect,    // only needed for forward DP label refs in single-pass assemblers
             ForceAbs,
             ForceLong,
-            ForceLongMaybe
+            ForceLongMaybe  // add opcode suffix but not operand prefix
 
             // May want an additional item: "force long if operand suffix specified".  This
             // would let us generate LDAL for assemblers that like to have that made explicit,

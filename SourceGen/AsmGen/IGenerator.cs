@@ -183,5 +183,10 @@ namespace SourceGen.AsmGen {
         /// (Note this affects long-distance BRLs that don't appear to wrap.)
         /// </summary>
         public bool NoPcRelBankWrap { get; set; }
+
+        /// <summary>
+        /// Is the assembler implemented as a single pass?
+        /// </summary>
+        public bool SinglePassAssembler { get; set; }
     }
 }
