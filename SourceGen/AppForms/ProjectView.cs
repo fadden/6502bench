@@ -1495,20 +1495,18 @@ namespace SourceGen.AppForms {
         }
 
         // File > Save (Ctrl+S)
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (string.IsNullOrEmpty(mProjectPathName)) {
-                saveAsToolStripMenuItem_Click(sender, e);
-                return;
-            }
-
-            DoSave(mProjectPathName);
-        }
         private void saveToolStripButton_Click(object sender, EventArgs e) {
             saveToolStripMenuItem_Click(sender, e);
         }
-
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
+            DoSave();
+        }
         // File > Save As...
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
+            DoSaveAs();
+        }
+
+        private bool DoSaveAs() {
             SaveFileDialog fileDlg = new SaveFileDialog() {
                 Filter = ProjectFile.FILENAME_FILTER + "|" + Properties.Resources.FILE_FILTER_ALL,
                 FilterIndex = 1,
@@ -1525,8 +1523,18 @@ namespace SourceGen.AppForms {
 
                     // add it to the title bar
                     UpdateMenuItemsAndTitle();
+                    return true;
                 }
             }
+            return false;
+        }
+
+        // Save the project.  If it hasn't been saved before, use save-as behavior instead.
+        private bool DoSave() {
+            if (string.IsNullOrEmpty(mProjectPathName)) {
+                return DoSaveAs();
+            }
+            return DoSave(mProjectPathName);
         }
 
         private bool DoSave(string pathName) {
@@ -1588,11 +1596,14 @@ namespace SourceGen.AppForms {
             Debug.WriteLine("ProjectView.DoClose() - dirty=" +
                 (mProject == null ? "N/A" : mProject.IsDirty.ToString()));
             if (mProject != null && mProject.IsDirty) {
-                DialogResult result = MessageBox.Show(this, Properties.Resources.UNSAVED_CHANGES,
-                    Properties.Resources.UNSAVED_CHANGES_CAPTION, MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                DiscardChanges dlg = new DiscardChanges();
+                DialogResult result = dlg.ShowDialog(this);
                 if (result == DialogResult.Cancel) {
                     return false;
+                } else if (result == DialogResult.Yes) {
+                    if (!DoSave()) {
+                        return false;
+                    }
                 }
             }
 

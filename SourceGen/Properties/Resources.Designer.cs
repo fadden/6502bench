@@ -997,24 +997,6 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The current project has unsaved changes that will be lost. Are you sure you wish to continue?.
-        /// </summary>
-        internal static string UNSAVED_CHANGES {
-            get {
-                return ResourceManager.GetString("UNSAVED_CHANGES", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsaved Changes.
-        /// </summary>
-        internal static string UNSAVED_CHANGES_CAPTION {
-            get {
-                return ResourceManager.GetString("UNSAVED_CHANGES_CAPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to [unset].
         /// </summary>
         internal static string UNSET {

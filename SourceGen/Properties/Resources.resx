@@ -429,12 +429,6 @@
   <data name="TITLE_NEW_PROJECT" xml:space="preserve">
     <value>[new project]</value>
   </data>
-  <data name="UNSAVED_CHANGES" xml:space="preserve">
-    <value>The current project has unsaved changes that will be lost. Are you sure you wish to continue?</value>
-  </data>
-  <data name="UNSAVED_CHANGES_CAPTION" xml:space="preserve">
-    <value>Unsaved Changes</value>
-  </data>
   <data name="UNSET" xml:space="preserve">
     <value>[unset]</value>
   </data>
