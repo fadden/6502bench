@@ -219,7 +219,7 @@ namespace SourceGen.AsmGen {
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                        "64tass", V1_53));
+                        "64tass", V1_53, AsmTass64.OPTIONS));
                 }
 
                 GenCommon.Generate(this, sw, worker);
@@ -670,6 +670,8 @@ namespace SourceGen.AsmGen {
     /// Cross-assembler execution interface.
     /// </summary>
     public class AsmTass64 : IAssembler {
+        public const string OPTIONS = "--case-sensitive --nostart --long-address -Wall";
+
         // Paths from generator.
         private List<string> mPathNames;
 
@@ -756,13 +758,12 @@ namespace SourceGen.AsmGen {
 
             worker.ReportProgress(0, Properties.Resources.PROGRESS_ASSEMBLING);
 
-            string options = "--case-sensitive --nostart --long-address -Wall";
             string outFileName = pathName.Substring(0, pathName.Length - 2);
 
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
             ShellCommand cmd = new ShellCommand(config.ExecutablePath,
-                options + " \"" + pathName + "\"" + " -o \"" + outFileName + "\"",
+                OPTIONS + " \"" + pathName + "\"" + " -o \"" + outFileName + "\"",
                 mWorkDirectory, null);
             cmd.Execute();
 

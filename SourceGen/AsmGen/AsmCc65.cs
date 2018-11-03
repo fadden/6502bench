@@ -232,7 +232,7 @@ namespace SourceGen.AsmGen {
                     // Currently generating code for v2.17.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                        "cc65", V2_17));
+                        "cc65", V2_17, AsmCc65.OPTIONS));
                 }
 
                 GenCommon.Generate(this, sw, worker);
@@ -700,6 +700,8 @@ namespace SourceGen.AsmGen {
     /// Cross-assembler execution interface.
     /// </summary>
     public class AsmCc65 : IAssembler {
+        public const string OPTIONS = "--target none";
+
         // Paths from generator.
         private List<string> mPathNames;
 
@@ -790,7 +792,7 @@ namespace SourceGen.AsmGen {
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
             ShellCommand cmd = new ShellCommand(config.ExecutablePath,
-                "--target none \"" + pathName + "\"", mWorkDirectory, null);
+                OPTIONS + " \"" + pathName + "\"", mWorkDirectory, null);
             cmd.Execute();
 
             // Can't really do anything with a "cancel" request.

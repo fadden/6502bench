@@ -274,7 +274,7 @@
     <value>Target assembler: {0} (latest)</value>
   </data>
   <data name="GENERATED_FOR_VERSION" xml:space="preserve">
-    <value>Target assembler: {0} v{1}</value>
+    <value>Target assembler: {0} v{1} [{2}]</value>
   </data>
   <data name="HIDE_COL" xml:space="preserve">
     <value>Hide</value>

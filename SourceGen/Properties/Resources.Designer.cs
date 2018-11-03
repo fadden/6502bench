@@ -529,7 +529,7 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Target assembler: {0} v{1}.
+        ///   Looks up a localized string similar to Target assembler: {0} v{1} [{2}].
         /// </summary>
         internal static string GENERATED_FOR_VERSION {
             get {

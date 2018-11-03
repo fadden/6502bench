@@ -225,7 +225,7 @@ namespace SourceGen.AsmGen {
                     // No version-specific stuff yet.  We're generating code for v1.0.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                            "Merlin 32", new CommonUtil.Version(1, 0)));
+                            "Merlin 32", new CommonUtil.Version(1, 0), string.Empty));
                 }
 
                 GenCommon.Generate(this, sw, worker);
@@ -768,6 +768,8 @@ namespace SourceGen.AsmGen {
 
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
+            //
+            // Merlin 32 has no options.  The second argument is the macro include file path.
             ShellCommand cmd = new ShellCommand(config.ExecutablePath, ". \"" + pathName + "\"",
                 mWorkDirectory, null);
             cmd.Execute();
