@@ -286,7 +286,7 @@ L122A:   sbc     (L0080),y
          sbc     f:L0089,x
          .org    $0080
 L0080:   bit     z:L0082
-L0082:   bit     z:L0082
+L0082:   bit     L0082
          bit     L0082
 L0086:   bit     a:L0086
 L0089:   lda     f:L0089

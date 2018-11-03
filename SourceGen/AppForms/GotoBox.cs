@@ -84,7 +84,7 @@ namespace SourceGen.AppForms {
 
             // Try it as a label.  If they give the label a hex name (e.g. "A001") they
             // can prefix it with '$' to disambiguate the address.
-            int labelOffset = mProject.FindLabelByName(input);
+            int labelOffset = mProject.FindLabelOffsetByName(input);
             if (labelOffset >= 0) {
                 TargetOffset = labelOffset;
             } else if (Address.ParseAddress(input, 1<<24, out int addr)) {

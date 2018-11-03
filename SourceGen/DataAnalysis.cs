@@ -196,7 +196,8 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Extracts the operand offset from a data item.
+        /// Extracts the operand offset from a data item.  Only useful for numeric/Address
+        /// and numeric/Symbol.
         /// </summary>
         /// <param name="proj">Project reference.</param>
         /// <param name="offset">Offset of data item.</param>

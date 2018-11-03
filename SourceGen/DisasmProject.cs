@@ -1584,7 +1584,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="name">Label to find.</param>
         /// <returns>File offset associated with label, or -1 if not found.</returns>
-        public int FindLabelByName(string name) {
+        public int FindLabelOffsetByName(string name) {
             // We're interested in user labels and auto-generated labels.  Do a lookup in
             // SymbolTable to find the symbol, then if it's user or auto, we do a second
             // search to find the file offset it's associated with.  The second search
@@ -1593,10 +1593,11 @@ namespace SourceGen {
             //
             // This will not find "hidden" labels, i.e. labels that are in the middle of an
             // instruction or multi-byte data area, because those are removed from SymbolTable.
+
             if (!SymbolTable.TryGetValue(name, out Symbol sym)) {
                 return -1;
             }
-            if (sym.SymbolSource != Symbol.Source.Auto && sym.SymbolSource != Symbol.Source.User) {
+            if (!sym.IsInternalLabel) {
                 return -1;
             }
             for (int i = 0; i < mAnattribs.Length; i++) {

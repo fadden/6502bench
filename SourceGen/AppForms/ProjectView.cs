@@ -2069,23 +2069,28 @@ namespace SourceGen.AppForms {
                             // statements and header comment earlier.
                             if (line.FileOffset >= 0) {
                                 Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+                                FormatDescriptor dfd = attr.DataDescriptor;
+
                                 // Does this have an operand with an in-file target offset?
+                                // (Resolve it as a numeric reference.)
                                 if (attr.OperandOffset >= 0) {
                                     // Yup, find the line for that offset and jump to it.
                                     GoToOffset(attr.OperandOffset, false, true);
-                                    //int targetIndex =
-                                    //    mDisplayList.FindLineIndexByOffset(attr.OperandOffset);
-                                    //GoToOffset(mDisplayList[targetIndex].FileOffset);
+                                } else if (dfd != null && dfd.HasSymbol) {
+                                    // Operand has a symbol, do a symbol lookup.
+                                    int labelOffset = mProject.FindLabelOffsetByName(
+                                        dfd.SymbolRef.Label);
+                                    if (labelOffset >= 0) {
+                                        GoToOffset(labelOffset, false, true);
+                                    }
                                 } else if (attr.IsDataStart || attr.IsInlineDataStart) {
                                     // If it's an Address or Symbol, we can try to resolve
-                                    // the value.
+                                    // the value.  (Symbols should have been resolved by the
+                                    // previous clause, but Address entries would not have been.)
                                     int operandOffset = DataAnalysis.GetDataOperandOffset(
                                         mProject, line.FileOffset);
                                     if (operandOffset >= 0) {
                                         GoToOffset(operandOffset, false, true);
-                                        //int targetIndex =
-                                        //    mDisplayList.FindLineIndexByOffset(operandOffset);
-                                        //GoToOffset(mDisplayList[targetIndex].FileOffset);
                                     }
                                 }
                             }
@@ -3753,7 +3758,7 @@ namespace SourceGen.AppForms {
             Symbol sym = mSymbolSubset.GetSubsetItem(row);
 
             if (sym.SymbolSource == Symbol.Source.Auto || sym.SymbolSource == Symbol.Source.User) {
-                int offset = mProject.FindLabelByName(sym.Label);
+                int offset = mProject.FindLabelOffsetByName(sym.Label);
                 if (offset >= 0) {
                     GoToOffset(offset, false, true);
                     codeListView.Focus();

@@ -26,12 +26,12 @@ namespace SourceGen {
         /// </summary>
         public enum Source {
             // These are in order of highest to lowest precedence.  This matters when
-            // looking up a symbol by value.
+            // looking up a symbol by value, since multiple symbols can have the same value.
             Unknown = 0,
             User,               // user-defined label
             Project,            // from project configuration file
             Platform,           // from platform definition file
-            Auto                // auto-generated
+            Auto                // auto-generated label
         }
 
         /// <summary>
@@ -48,15 +48,13 @@ namespace SourceGen {
             Constant            // constant value
         }
 
-        /// <summary>
         /// Returns true if the symbol's type is an internal label (auto or user).  Returns
         /// false for external addresses and constants.
         /// </summary>
         public bool IsInternalLabel {
             get {
-                return SymbolType == Type.LocalOrGlobalAddr ||
-                    SymbolType == Type.GlobalAddr ||
-                    SymbolType == Type.GlobalAddrExport;
+                // Could also check Type instead.  Either works for now.
+                return SymbolSource == Source.User || SymbolSource == Source.Auto;
             }
         }
 

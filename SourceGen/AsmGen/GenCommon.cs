@@ -322,28 +322,11 @@ namespace SourceGen.AsmGen {
             if (dfd == null || !dfd.HasSymbol) {
                 return false;
             }
-            if (!proj.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+            int labelOffset = proj.FindLabelOffsetByName(dfd.SymbolRef.Label);
+            if (labelOffset <= offset) {
+                // Doesn't exist, or is backward reference.
                 return false;
             }
-            if (!sym.IsInternalLabel) {
-                return false;
-            }
-
-            // It's an internal label reference.  We don't currently have a data structure
-            // that lets us go from label name to file offset.  This situation is sufficiently
-            // rare that an O(n) approach is acceptable.  We may need to fix this someday.
-            //
-            // We only want to know if it is defined after the current instruction.  This is
-            // probably being used for a direct-page reference, which is probably at the start
-            // of the file, so we run from the start to the current instruction.
-            for (int i = 0; i < offset; i++) {
-                Anattrib attr = proj.GetAnattrib(i);
-                if (attr.Symbol != null && attr.Symbol == sym) {
-                    // Found it earlier in file.
-                    return false;
-                }
-            }
-            // Must appear later in file.
             return true;
         }
 
