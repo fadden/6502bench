@@ -208,6 +208,10 @@ code, but also needs to know how to handle the corner cases.</p>
     symbols, which are output as two-digit hex values when possible, but
     causes failures when direct page locations are included in the project
     and given labels.</li>
+  <li>The check for 64KiB overflow appears to happen before instructions
+    that might be absolute or direct page are resolved and reduced in size.
+    This makes it unlikely that a full 64KiB bank of code can be
+    assembled.</li>
 </ul>
 
 <p>Quirks:</p>
