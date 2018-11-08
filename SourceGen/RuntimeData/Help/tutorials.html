@@ -13,17 +13,18 @@
 <h1>6502bench SourceGen: Tutorials</h1>
 <p><a href="index.html">Back to index</a></p>
 
+<p>The tutorials introduce SourceGen and cover some of the basic
+features.  They skim lightly over some important concepts, like the
+difference between numeric and symbolic references, so reading the
+manual is recommended.</p>
+
 <ul>
   <li><a href="#basic-features">Basic Features</a></li>
   <li><a href="#advanced-features">Advanced Features</a></li>
 </ul>
 
 
-<h2><a name="basic-features">Basic Features</a></h2>
-
-<p>This tutorial introduces SourceGen and covers some of the basic
-features.  This skims lightly over some important concepts, so reading the
-manual is recommended.</p>
+<h2><a name="basic-features">Tutorial #1: Basic Features</a></h2>
 
 <p>Start by launching SourceGen.  The initial screen has a large
 center area with some links, and some mostly-empty windows on the sides.
@@ -275,9 +276,15 @@ instead.  There's an easy way to do that: use Actions &gt; Toggle Single-Byte
 Format (or hit Ctrl+B).</p>
 <p>The data starting at $2025 appears to be 16-bit addresses that point
 into the table of strings, so let's format them appropriately.</p>
-<p>Select the line at $2025, then shift-click the line at $202E.  Select
-Actions &gt; Edit Operand.  If you selected the correct set of bytes,
-the top should say, "10 bytes selected".  Click the
+<p>Double-click the operand column on line $2025 ("$30") to open
+the operand data format editor.  Because you only have one byte selected,
+most of the options are disabled.  This won't do what we want, so
+click "Cancel".</p>
+<p>Select the line at $2025, then shift-click the line at $202E.  Right-click
+and select Edit Operand.  If you selected the correct set of bytes,
+the top line in the dialog should now say, "10 bytes selected".  Because
+10 is a multiple of two, the 16-bit formats are enabled.  It's not a multiple
+of 3 or 4, so the 24-bit and 32-bit options are not enabled.  Click the
 "16-bit words, little-endian" radio button, then over to the right, click
 the "Address" radio button.  Click "OK".</p>
 <p>We just told SourceGen that those 10 bytes are actually five numeric
@@ -285,7 +292,7 @@ references.  SourceGen determined that the addresses are contained in the
 file, and created labels for each of them.  Labels only work if they're
 on their own line, so each string is now in a separate ".STR" statement.</p>
 
-<p>Use File &gt; Save (or hit Ctrl+S) to save your hard work.</p>
+<p>Use File &gt; Save (or hit Ctrl+S) to save your work.</p>
 
 
 <h3>Generating Assembly Code</h3>
@@ -315,7 +322,7 @@ it should always match exactly.)</p>
 on to the next tutorial to learn more.</p>
 
 
-<h2><a name="advanced-features">Advanced Features</a></h2>
+<h2><a name="advanced-features">Tutorial #2: Advanced Features</a></h2>
 
 <p>This tutorial will walk you through some of the fancier things SourceGen
 can do.  We assume you've already finished the Basic Features tutorial.</p>
