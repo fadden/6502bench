@@ -2325,6 +2325,12 @@ namespace SourceGen.AppForms {
             toggleSingleBytesToolStripMenuItem.Enabled =
                 (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
 
+            // This is insufficient -- we need to know how many bytes are selected, and
+            // whether they're already formatted as multi-byte items.  Too expensive to
+            // deal with here, so we'll need to show failure dialogs instead (ugh).
+            formatAsWordToolStripMenuItem.Enabled =
+                (entityCounts.mDataLines > 0 && entityCounts.mCodeLines == 0);
+
 
             // So long as some code or data is highlighted, allow these.  Don't worry about
             // control lines.  Disable options that would have no effect.
@@ -2835,6 +2841,94 @@ namespace SourceGen.AppForms {
             }
         }
 
+        private void formatAsWordToolStripMenuItem_Click(object sender, EventArgs e) {
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                Debug.Assert(false, "nothing to edit");         // shouldn't happen
+                return;
+            }
+
+            // If the user has only selected a single byte, we want to add the following byte
+            // to the selection, then proceed as usual.  We can't simply modify the ListView
+            // selection because the following item might be an auto-detected string or fill,
+            // and we'd be adding multiple bytes.  We have to be careful when grabbing the byte
+            // in case there's a region-split at that point (e.g. user label or .ORG).
+            //
+            // We could expand this to allow multiple regions, each of which is a single byte,
+            // but we'd need to deal with the case where the user selects two adjacent bytes that
+            // cross a region boundary.
+            if (trs.RangeCount == 1) {
+                // Exactly one range entry.  Check its size.
+                IEnumerator<TypedRangeSet.TypedRange> checkIter = trs.RangeListIterator;
+                checkIter.MoveNext();
+                TypedRangeSet.TypedRange rng = checkIter.Current;
+                if (rng.Low == rng.High && rng.Low < mProject.FileDataLength - 1) {
+                    // Single byte selected.  Check to see if it's okay to grab the next byte.
+                    Anattrib thisAttr = mProject.GetAnattrib(rng.Low);
+                    Debug.Assert(thisAttr.DataDescriptor.Length == 1);
+
+                    int nextOffset = rng.Low + 1;
+                    Anattrib nextAttr = mProject.GetAnattrib(nextOffset);
+                    // This must match what GroupedOffsetSetFromSelected() does.
+                    if (!mProject.UserLabels.ContainsKey(nextOffset) &&
+                            !mProject.HasCommentOrNote(nextOffset) &&
+                            thisAttr.Address == nextAttr.Address - 1) {
+                        // Good to go.
+                        Debug.WriteLine("Grabbing second byte from +" + nextOffset.ToString("x6"));
+                        trs.Add(nextOffset, rng.Type);
+                    }
+                }
+            }
+
+            // Confirm that every selected byte is a single-byte data item (either set by
+            // the user or as part of the uncategorized data scan).
+            foreach (TypedRangeSet.Tuple tup in trs) {
+                FormatDescriptor dfd = mProject.GetAnattrib(tup.Value).DataDescriptor;
+                if (dfd != null && dfd.Length != 1) {
+                    Debug.WriteLine("Can't format as word: offset +" + tup.Value.ToString("x6") +
+                        " has len=" + dfd.Length + " (must be 1)");
+                    string msg = string.Format(Properties.Resources.INVALID_FORMAT_WORD_SEL_NON1,
+                        "\r\n\r\n");
+                    MessageBox.Show(this, msg,
+                        Properties.Resources.INVALID_FORMAT_WORD_SEL_CAPTION,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // Confirm that, in each region, an even number of bytes are selected.
+            IEnumerator<TypedRangeSet.TypedRange> rngIter = trs.RangeListIterator;
+            while (rngIter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = rngIter.Current;
+                int rangeLen = rng.High - rng.Low + 1;
+                if ((rangeLen & 0x01) != 0) {
+                    string msg = string.Format(Properties.Resources.INVALID_FORMAT_WORD_SEL_UNEVEN,
+                        trs.RangeCount);
+                    MessageBox.Show(this, msg,
+                        Properties.Resources.INVALID_FORMAT_WORD_SEL_CAPTION,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            // Selection is good, generate changes.
+            SortedList<int, FormatDescriptor> newFmts = new SortedList<int, FormatDescriptor>();
+            rngIter.Reset();
+            FormatDescriptor newDfd = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
+                FormatDescriptor.SubType.None);
+            while (rngIter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = rngIter.Current;
+                for (int i = rng.Low; i <= rng.High; i += 2) {
+                    newFmts.Add(i, newDfd);
+                }
+            }
+
+            ChangeSet cs = mProject.GenerateFormatMergeSet(newFmts);
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            }
+        }
+
         private void DeleteNoteComment_Click(object sender, EventArgs e) {
             Debug.Assert(IsSingleItemSelected());
             ListView.SelectedIndexCollection sel = codeListView.SelectedIndices;
@@ -3216,16 +3310,15 @@ namespace SourceGen.AppForms {
                     // The code does "LDA table,X / STA / LDA table+1,X / STA", which puts auto
                     // labels at the first two addresses -- splitting the region.  That's good
                     // for the uncategorized data analyzer, but very annoying if you want to
-                    // slap a 16-bit numeric format on all entries.
+                    // slap a 16-bit numeric format on all entries in a table.
                     groupNum++;
                 } else if (mProject.HasCommentOrNote(offset)) {
                     // Don't carry across a long comment or note.
                     groupNum++;
                 } else if (attr.Address != expectedAddr) {
                     // For a contiguous selection, this should only happen if there's a .ORG
-                    // address change.  For a selection that skips code/data lines this is
-                    // expected.  In the later case, incrementing the group number is
-                    // unnecessary but harmless.
+                    // address change.  For non-contiguous selection this is expected.  In the
+                    // latter case, incrementing the group number is unnecessary but harmless.
                     Debug.WriteLine("Address break: " + attr.Address + " vs. " + expectedAddr);
                     //Debug.Assert(mProject.AddrMap.Get(offset) >= 0);
 
@@ -3757,7 +3850,7 @@ namespace SourceGen.AppForms {
             int row = info.Item.Index;
             Symbol sym = mSymbolSubset.GetSubsetItem(row);
 
-            if (sym.SymbolSource == Symbol.Source.Auto || sym.SymbolSource == Symbol.Source.User) {
+            if (sym.IsInternalLabel) {
                 int offset = mProject.FindLabelOffsetByName(sym.Label);
                 if (offset >= 0) {
                     GoToOffset(offset, false, true);

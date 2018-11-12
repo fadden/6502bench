@@ -175,6 +175,7 @@ namespace SourceGen.AppForms
             this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
+            this.formatAsWordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -474,6 +475,7 @@ namespace SourceGen.AppForms
             this.toolStripMenuItem11,
             this.formatSplitAddressTableToolStripMenuItem,
             this.toggleSingleBytesToolStripMenuItem,
+            this.formatAsWordToolStripMenuItem,
             this.deleteNoteCommentToolStripMenuItem,
             this.toolStripMenuItem9,
             this.showHexDumpToolStripMenuItem});
@@ -591,7 +593,7 @@ namespace SourceGen.AppForms
             // 
             this.formatSplitAddressTableToolStripMenuItem.Name = "formatSplitAddressTableToolStripMenuItem";
             this.formatSplitAddressTableToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
-            this.formatSplitAddressTableToolStripMenuItem.Text = "Format Split-Address Table";
+            this.formatSplitAddressTableToolStripMenuItem.Text = "Format Split-Address Table...";
             this.formatSplitAddressTableToolStripMenuItem.Click += new System.EventHandler(this.FormatSplitAddressTable_Click);
             // 
             // toggleSingleBytesToolStripMenuItem
@@ -1451,6 +1453,14 @@ namespace SourceGen.AppForms
             this.infoTextBox.Size = new System.Drawing.Size(177, 120);
             this.infoTextBox.TabIndex = 0;
             // 
+            // formatAsWordToolStripMenuItem
+            // 
+            this.formatAsWordToolStripMenuItem.Name = "formatAsWordToolStripMenuItem";
+            this.formatAsWordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.formatAsWordToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
+            this.formatAsWordToolStripMenuItem.Text = "Format As Word";
+            this.formatAsWordToolStripMenuItem.Click += new System.EventHandler(this.formatAsWordToolStripMenuItem_Click);
+            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1636,6 +1646,7 @@ namespace SourceGen.AppForms
         private System.Windows.Forms.ToolStripMenuItem deleteNoteCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem formatSplitAddressTableToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toggleDataScanToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem formatAsWordToolStripMenuItem;
     }
 }
 

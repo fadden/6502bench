@@ -388,7 +388,7 @@ is just significantly more convenient.  It also does everything as a single
 undoable action, so if it comes out looking wrong, just hit "undo".</p>
 
 
-<h3><a name="toggle-format">Quick Format Toggle</a></h3>
+<h3><a name="toggle-format">Toggle Single-Byte Format</a></h3>
 
 <p>The "Toggle Single-Byte Format" feature provides a quick way to
 change a range of bytes to single bytes
@@ -399,6 +399,25 @@ selecting "Default".</p>
 string, but you want to see it as bytes or set a label in the middle.</p>
 
 
+<h3><a name="format-as-word">Format As Word</a></h3>
+
+<p>This is a quick way to format pairs of bytes as 16-bit words.  It's
+equivalent to opening the Edit Data Format dialog and selecting
+"16-bit words, little-endian", displayed as hex.</p>
+
+<p>To avoid some confusing situations, it only works on sets of
+single-byte values.  This means, for example, that you can't select a
+10-byte string and have it turn into five 16-bit words.  You can select as
+many bytes as you want, but they must come in pairs.  (Remember that you
+can turn off auto-generation of strings and .FILLs with
+<a href="#toggle-data">Toggle Data Scan</a>.)</p>
+<p>As a special case, if you select a single byte, the following byte will
+also be selected.  This won't work if the following byte is part of a
+multi-byte data item, is the start of a new region (see
+<a href="editors.html#data">Edit Data Format</a> for a definition of
+what splits a region), or is the last byte in the file.</p>
+
+
 <h3><a name="toggle-data">Toggle Data Scan</a></h3>
 
 <p>This menu item is in the Edit menu, and acts as a shortcut to opening
@@ -406,9 +425,9 @@ the Project Properties editor, and clicking on the "Analyze Uncategorized
 Data" checkbox.  When enabled, SourceGen will look for ASCII strings and
 regions of identical bytes, and generate .STR and .FILL directives.  When
 disabled, uncategorized data is presented as one byte per line, which can
-be handy if you're trying to get at a bit in the middle of a string.</p>
-<p>As with all other project properties changes, this is an undoable
-event.</p>
+be handy if you're trying to get at a byte in the middle of a string.</p>
+<p>As with all other project property changes, this is an undoable
+action.</p>
 
 
 <h3><a name="clipboard">Copying to Clipboard</a></h3>

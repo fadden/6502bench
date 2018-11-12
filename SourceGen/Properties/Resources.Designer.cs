@@ -592,6 +592,33 @@ namespace SourceGen.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Selection.
+        /// </summary>
+        internal static string INVALID_FORMAT_WORD_SEL_CAPTION {
+            get {
+                return ResourceManager.GetString("INVALID_FORMAT_WORD_SEL_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to format as word: selection must be an even number of bytes that have not previously been formatted as multi-byte values.{0}Use Toggle Data Scan (Ctrl+D) to turn off auto-detection of strings and memory fill..
+        /// </summary>
+        internal static string INVALID_FORMAT_WORD_SEL_NON1 {
+            get {
+                return ResourceManager.GetString("INVALID_FORMAT_WORD_SEL_NON1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to format as word: each selected region must have an even number of bytes ({0} region(s) are selected)..
+        /// </summary>
+        internal static string INVALID_FORMAT_WORD_SEL_UNEVEN {
+            get {
+                return ResourceManager.GetString("INVALID_FORMAT_WORD_SEL_UNEVEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Legal Stuff.
         /// </summary>
         internal static string LEGAL_STUFF_TITLE {
