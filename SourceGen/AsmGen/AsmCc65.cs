@@ -30,7 +30,8 @@ namespace SourceGen.AsmGen {
     /// Generate source code compatible with the cc65 assembler (https://github.com/cc65/cc65).
     /// </summary>
     public class GenCc65 : IGenerator {
-        private const string ASM_FILE_SUFFIX = "_cc65.S";   // must start with underscore
+        private const string ASM_FILE_SUFFIX = "_cc65.S";       // must start with underscore
+        private const string CFG_FILE_SUFFIX = "_cc65.cfg";     // ditto
         private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
@@ -197,9 +198,10 @@ namespace SourceGen.AsmGen {
         public List<string> GenerateSource(BackgroundWorker worker) {
             List<string> pathNames = new List<string>(1);
 
-            string fileName = mFileNameBase + ASM_FILE_SUFFIX;
-            string pathName = Path.Combine(mWorkDirectory, fileName);
+            string pathName = Path.Combine(mWorkDirectory, mFileNameBase + ASM_FILE_SUFFIX);
             pathNames.Add(pathName);
+            string cfgName = Path.Combine(mWorkDirectory, mFileNameBase + CFG_FILE_SUFFIX);
+            pathNames.Add(cfgName);
 
             Formatter.FormatConfig config = new Formatter.FormatConfig();
             GenCommon.ConfigureFormatterFromSettings(Settings, ref config);
@@ -216,6 +218,9 @@ namespace SourceGen.AsmGen {
             }
 
             // Use UTF-8 encoding, without a byte-order mark.
+            using (StreamWriter sw = new StreamWriter(cfgName, false, new UTF8Encoding(false))) {
+                GenerateLinkerScript(sw);
+            }
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
                 mOutStream = sw;
 
@@ -232,7 +237,8 @@ namespace SourceGen.AsmGen {
                     // Currently generating code for v2.17.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                        "cc65", V2_17, AsmCc65.OPTIONS));
+                        "cc65", V2_17,
+                        AsmCc65.OPTIONS + " -C " + Path.GetFileName(cfgName)));
                 }
 
                 GenCommon.Generate(this, sw, worker);
@@ -240,6 +246,21 @@ namespace SourceGen.AsmGen {
             mOutStream = null;
 
             return pathNames;
+        }
+
+        private void GenerateLinkerScript(StreamWriter sw) {
+            sw.WriteLine("# 6502bench SourceGen generated linker script for " + mFileNameBase);
+
+            sw.WriteLine("MEMORY {");
+            sw.WriteLine("    MAIN: file=%O, start=%S, size=65536;");
+            sw.WriteLine("}");
+
+            sw.WriteLine("SEGMENTS {");
+            sw.WriteLine("    CODE: load=MAIN, type=rw;");
+            sw.WriteLine("}");
+
+            sw.WriteLine("FEATURES {}");
+            sw.WriteLine("SYMBOLS {}");
         }
 
         // IGenerator
@@ -700,6 +721,8 @@ namespace SourceGen.AsmGen {
     /// Cross-assembler execution interface.
     /// </summary>
     public class AsmCc65 : IAssembler {
+        // Fixed options.  "--target none" is needed to neutralize the character encoding,
+        // which seems to default to PETSCII.
         public const string OPTIONS = "--target none";
 
         // Paths from generator.
@@ -770,15 +793,9 @@ namespace SourceGen.AsmGen {
 
         // IAssembler
         public AssemblerResults RunAssembler(BackgroundWorker worker) {
-            // Reduce input file to a partial path if possible.  This is really just to make
-            // what we display to the user a little easier to read.
-            string pathName = mPathNames[0];
-            if (pathName.StartsWith(mWorkDirectory)) {
-                pathName = pathName.Remove(0, mWorkDirectory.Length + 1);
-            } else {
-                // Unexpected, but shouldn't be a problem.
-                Debug.WriteLine("NOTE: source file is not in work directory");
-            }
+            Debug.Assert(mPathNames.Count == 2);
+            string pathName = StripWorkDirectory(mPathNames[0]);
+            string cfgName = StripWorkDirectory(mPathNames[1]);
 
             AssemblerConfig config =
                 AssemblerConfig.GetConfig(AppSettings.Global, AssemblerInfo.Id.Cc65);
@@ -787,12 +804,14 @@ namespace SourceGen.AsmGen {
                 return null;
             }
 
+            string cfgOpt = " -C \"" + cfgName + "\"";
+
             worker.ReportProgress(0, Properties.Resources.PROGRESS_ASSEMBLING);
 
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
             ShellCommand cmd = new ShellCommand(config.ExecutablePath,
-                OPTIONS + " \"" + pathName + "\"", mWorkDirectory, null);
+                OPTIONS + cfgOpt + " \"" + pathName + "\"", mWorkDirectory, null);
             cmd.Execute();
 
             // Can't really do anything with a "cancel" request.
@@ -803,6 +822,22 @@ namespace SourceGen.AsmGen {
 
             return new AssemblerResults(cmd.FullCommandLine, cmd.ExitCode, cmd.Stdout,
                 cmd.Stderr, outputFile);
+        }
+
+        /// <summary>
+        /// Reduce input file to a partial path if possible.  This is just to make
+        /// what we display to the user a little easier to read.
+        /// </summary>
+        /// <param name="pathName">Full pathname of file.</param>
+        /// <returns>Pathname with working directory prefix stripped off.</returns>
+        private string StripWorkDirectory(string pathName) {
+            if (pathName.StartsWith(mWorkDirectory)) {
+                return pathName.Remove(0, mWorkDirectory.Length + 1);
+            } else {
+                // Unexpected, but shouldn't be a problem.
+                Debug.WriteLine("NOTE: source file is not in work directory");
+                return pathName;
+            }
         }
     }
 
