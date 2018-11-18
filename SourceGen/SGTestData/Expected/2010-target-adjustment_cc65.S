@@ -1,4 +1,5 @@
          .setcpu "65816"
+;         .segment "SEG000"
          .org    $1000
          .a8
          .i8
@@ -48,6 +49,7 @@ L107A:   sta     L107A+1
 
          .byte   $80
 dat81:   .byte   $81
+;         .segment "SEG001"
          .org    $2000
 L2000:   .byte   $82
          .byte   $83

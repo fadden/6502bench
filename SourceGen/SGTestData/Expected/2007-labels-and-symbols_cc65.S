@@ -9,6 +9,7 @@ absh     =       $feed
 biggie   =       $123456
 thirty2  =       $12345678  ;32-bit constant test
 
+;         .segment "SEG000"
          .org    $012345
          .a8
          .i8
@@ -123,6 +124,7 @@ skipdata: lda    #biggie >> 16 -1
 
 nextchunk: jml   L1000_1
 
+;         .segment "SEG001"
          .org    $1000
 L1000_1: nop
 L1000:   nop

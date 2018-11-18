@@ -1,5 +1,6 @@
 ;Project file was edited to get zero-length strings and reverse DCI.
          .setcpu "6502"
+;         .segment "SEG000"
          .org    $1000
          rts
 

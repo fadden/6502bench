@@ -85,8 +85,20 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Returns the address map entry index associated with the specified offset, or -1
-        /// if there is no address map entry there.
+        /// Returns the Nth entry in the address map.
+        /// </summary>
+        public AddressMapEntry this[int i] {
+            get { return mAddrList[i]; }
+        }
+
+        /// <summary>
+        /// Number of entries in the address map.
+        /// </summary>
+        public int Count { get { return mAddrList.Count; } }
+
+        /// <summary>
+        /// Returns the Address value of the address map entry associated with the specified
+        /// offset, or -1 if there is no address map entry there.  The offset must match exactly.
         /// </summary>
         public int Get(int offset) {
             foreach (AddressMapEntry ad in mAddrList) {
@@ -95,6 +107,20 @@ namespace SourceGen {
                 }
             }
             return -1;
+        }
+
+        /// <summary>
+        /// Returns the index of the address map entry that contains the given offset.
+        /// We assume the offset is valid.
+        /// </summary>
+        private int IndexForOffset(int offset) {
+            for (int i = 1; i < mAddrList.Count; i++) {
+                if (mAddrList[i].Offset > offset) {
+                    return i - 1;
+                }
+            }
+
+            return mAddrList.Count - 1;
         }
 
         /// <summary>
@@ -163,20 +189,6 @@ namespace SourceGen {
                 }
             }
             return false;
-        }
-
-        /// <summary>
-        /// Returns the index of the address map entry that contains the given offset.
-        /// We assume the offset is valid.
-        /// </summary>
-        private int IndexForOffset(int offset) {
-            for (int i = 1; i < mAddrList.Count; i++) {
-                if (mAddrList[i].Offset > offset) {
-                    return i - 1;
-                }
-            }
-
-            return mAddrList.Count - 1;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ;Project file was edited to get all big-endian data types.
          .setcpu "6502"
+;         .segment "SEG000"
          .org    $1000
          rts
 

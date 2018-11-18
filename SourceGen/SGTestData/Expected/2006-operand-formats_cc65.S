@@ -1,5 +1,6 @@
 ;Project file was edited for some ASCII operands.
          .setcpu "65816"
+;         .segment "SEG000"
          .org    $1000
          .a8
          .i8

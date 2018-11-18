@@ -1,4 +1,5 @@
          .setcpu "6502"
+;         .segment "SEG000"
          .org    $1000
          .byte   $03
          .byte   $02

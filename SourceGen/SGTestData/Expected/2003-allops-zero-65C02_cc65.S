@@ -1,4 +1,5 @@
          .setcpu "65C02"
+;         .segment "SEG000"
          .org    $1000
          jsr     L1014
          jsr     L108A

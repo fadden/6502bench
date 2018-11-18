@@ -447,11 +447,7 @@ namespace SourceGen.AsmGen {
             // of a pair of ops (.logical <addr> to open, .here to end).  Omitting the .here
             // causes an error.
             if (offset == 0) {
-                // Set the "compile offset", which determines where assembled code goes in the
-                // output file.  This 
-                //
-                // This is different from the "program counter", which determines how code is
-                // actually assembled.
+                // Set the "compile offset" to the initial address.
                 OutputLine("*", "=", SourceFormatter.FormatHexValue(Project.AddrMap.Get(0), 4),
                     string.Empty);
             } else {

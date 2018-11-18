@@ -253,10 +253,18 @@ namespace SourceGen.AsmGen {
 
             sw.WriteLine("MEMORY {");
             sw.WriteLine("    MAIN: file=%O, start=%S, size=65536;");
+            for (int i = 0; i < Project.AddrMap.Count; i++) {
+                AddressMap.AddressMapEntry ame = Project.AddrMap[i];
+                sw.WriteLine(string.Format("#    MEM{0:D3}: file=%O, start=${1:x4}, size={2};",
+                    i, ame.Addr, ame.Length));
+            }
             sw.WriteLine("}");
 
             sw.WriteLine("SEGMENTS {");
             sw.WriteLine("    CODE: load=MAIN, type=rw;");
+            for (int i = 0; i < Project.AddrMap.Count; i++) {
+                sw.WriteLine(string.Format("#    SEG{0:D3}: load=MEM{0:D3}, type=rw;", i));
+            }
             sw.WriteLine("}");
 
             sw.WriteLine("FEATURES {}");
@@ -489,6 +497,22 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputOrgDirective(int offset, int address) {
+            // Linear search for offset.  List should be small, so this should be quick.
+            int index = 0;
+            foreach (AddressMap.AddressMapEntry ame in Project.AddrMap) {
+                if (ame.Offset == offset) {
+                    break;
+                }
+                index++;
+            }
+
+            mLineBuilder.Clear();
+            TextUtil.AppendPaddedString(mLineBuilder, ";", mColumnWidths[0]);
+            TextUtil.AppendPaddedString(mLineBuilder, SourceFormatter.FormatPseudoOp(" .segment"),
+                mColumnWidths[1]);
+            mLineBuilder.AppendFormat("\"SEG{0:D3}\"", index);
+            OutputLine(mLineBuilder.ToString());
+
             OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
                 SourceFormatter.FormatHexValue(address, 4), string.Empty);
         }
