@@ -188,9 +188,8 @@ code, but also needs to know how to handle the corner cases.</p>
     that wouldn't be ambiguous to a multi-pass assembler.</li>
   <li>The assembler is geared toward generating relocatable code with
     multiple segments (it is, after all, an assembler for a C compiler).
-    A linker script is expected to be provided for anything complex.  Since
-    SourceGen doesn't currently generate a linker script, binaries are
-    limited to 26KiB ($6800 bytes).</li>
+    A linker configuration script is expected to be provided for anything
+    complex.  SourceGen generates a custom config file for each project.</li>
 </ul>
 
 
