@@ -28,12 +28,16 @@ namespace SourceGen {
     public class XrefSet : IEnumerable<XrefSet.Xref> {
         /// <summary>
         /// Reference type.  This is mostly useful for display to the user.
+        /// 
+        /// The enum is in priority order, i.e. the lowest-valued
+        /// item "wins" in situations where only one value is used.
         /// </summary>
         public enum XrefType {
             Unknown = 0,
-            InstrOperand,       // generic instruction operand
-            BranchOperand,      // branch instruction
-            DataOperand         // e.g. ".dd2 <address>"
+            SubCallOp,          // subroutine call
+            BranchOp,           // branch instruction
+            RefFromData,        // reference in data area, e.g. ".dd2 <address>"
+            MemAccessOp,        // instruction that accesses memory, or refers to an address
         }
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace SourceGen {
         /// </summary>
         public class Xref {
             /// <summary>
-            /// Offset of start of instruction or data with the reference.
+            /// Offset of start of instruction or data that refers to the target offset.
             /// </summary>
             public int Offset { get; private set; }
 
@@ -56,21 +60,28 @@ namespace SourceGen {
             public XrefType Type { get; private set; }
 
             /// <summary>
+            /// For Type==MemAccessOp, what type of memory access is performed.
+            /// </summary>
+            public Asm65.OpDef.MemoryEffect AccType { get; private set; }
+
+            /// <summary>
             /// Adjustment to symbol.  For example, "LDA label+2" adds an xref entry to
             /// "label", with an adjustment of +2.
             /// </summary>
             public int Adjustment { get; private set; }
 
-            public Xref(int offset, bool isSymbolic, XrefType type, int adjustment) {
+            public Xref(int offset, bool isSymbolic, XrefType type,
+                    Asm65.OpDef.MemoryEffect accType, int adjustment) {
                 Offset = offset;
                 IsSymbolic = isSymbolic;
                 Type = type;
+                AccType = accType;
                 Adjustment = adjustment;
             }
 
             public override string ToString() {
                 return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsSymbolic +
-                    " type=" + Type + " adj=" + Adjustment;
+                    " type=" + Type + " accType= " + AccType + " adj=" + Adjustment;
             }
         }
 

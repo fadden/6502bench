@@ -4003,6 +4003,7 @@ namespace SourceGen.AppForms {
                     return;
                 }
 
+                // TODO(someday): localization
                 Asm65.Formatter formatter = mOutputFormatter;
                 bool showBank = !mProject.CpuDef.HasAddr16;
                 for (int i = 0; i < xrefs.Count; i++) {
@@ -4011,14 +4012,35 @@ namespace SourceGen.AppForms {
 
                     string typeStr;
                     switch (xr.Type) {
-                        case XrefSet.XrefType.BranchOperand:
+                        case XrefSet.XrefType.SubCallOp:
+                            typeStr = "call ";
+                            break;
+                        case XrefSet.XrefType.BranchOp:
                             typeStr = "branch ";
                             break;
-                        case XrefSet.XrefType.InstrOperand:
-                            typeStr = "instr ";
-                            break;
-                        case XrefSet.XrefType.DataOperand:
+                        case XrefSet.XrefType.RefFromData:
                             typeStr = "data ";
+                            break;
+                        case XrefSet.XrefType.MemAccessOp:
+                            switch (xr.AccType) {
+                                case OpDef.MemoryEffect.Read:
+                                    typeStr = "read ";
+                                    break;
+                                case OpDef.MemoryEffect.Write:
+                                    typeStr = "write ";
+                                    break;
+                                case OpDef.MemoryEffect.ReadModifyWrite:
+                                    typeStr = "rmw ";
+                                    break;
+                                case OpDef.MemoryEffect.None:   // e.g. LDA #<symbol, PEA addr
+                                    typeStr = "ref ";
+                                    break;
+                                case OpDef.MemoryEffect.Unknown:
+                                default:
+                                    Debug.Assert(false);
+                                    typeStr = "??! ";
+                                    break;
+                            }
                             break;
                         default:
                             Debug.Assert(false);

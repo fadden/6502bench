@@ -127,7 +127,7 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <p>Bugs:</p>
 <ul>
-  <li>Undocumented opcodes: <code>SHA (ZP),Y</code> ($93) is not supported;
+  <li>Undocumented opcode <code>SHA (ZP),Y</code> ($93) is not supported;
     the assembler appears to be expecting <code>SHA ABS,X</code> instead.</li>
   <li>BRK, COP, and WDM are not allowed to have operands.</li>
 </ul>
@@ -166,7 +166,6 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>BRK &lt;arg&gt; is assembled to opcode $05 rather than $00.</li>
   <li>WDM is not supported.</li>
-  <li>Source file names may not have spaces in them on Windows.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -178,8 +177,8 @@ code, but also needs to know how to handle the corner cases.</p>
     more common interpretation would be <code>label >> (8 - 16)</code>.
     (This is actually somewhat convenient, since none of the expressions
     SourceGen currently generates require parenthesis.)</li>
-  <li>Undocumented opcodes: SBX ($cb) uses the mnemonic AXS.  All other
-    opcodes match up with the "unintended opcodes" document.</li>
+  <li>Undocumented opcode <code>SBX</code> ($cb) uses the mnemonic AXS.  All
+    other opcodes match up with the "unintended opcodes" document.</li>
   <li>ca65 is implemented as a single-pass assembler, so label widths
     can't always be known in time.  For example, if you use some zero-page
     labels, but they're defined via .ORG $0000 after the point where the
@@ -224,7 +223,8 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>Values loaded into registers are implicitly mod 256 or 65536.  There
     is no need to explicitly mask an expression.</li>
   <li>The assembler tracks register widths when it sees SEP/REP instructions,
-    but doesn't attempt to track the emulation flag.  So if you issue a REP
+    but doesn't attempt to track the emulation flag.  So if you issue a
+    <code>REP #$20</code>
     while in emulation mode, the assembler will incorrectly assume long
     registers.  (Really I just want to be able to turn the width-tracking
     off, but there's no way to do that.)</li>

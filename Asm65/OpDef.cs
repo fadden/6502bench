@@ -33,7 +33,18 @@ namespace Asm65 {
             NoCont,             // RTS, BRK, ... (jump to new address, not specified in operand)
             CallSubroutine,     // JSR, JSL (jump to new address, and also continue to next)
             ConditionalBranch   // BCC, BEQ, ... (jump to new address and/or continue to next)
-        };
+        }
+
+        /// <summary>
+        /// Effect of executing an instruction on memory.
+        /// </summary>
+        public enum MemoryEffect {
+            Unknown = 0,
+            None,               // e.g. TAX, PEA addr, LDA #imm
+            Read,               // e.g. LDA addr
+            Write,              // e.g. STA addr
+            ReadModifyWrite     // e.g. LSR addr
+        }
 
         /// <summary>
         /// Addressing mode.  This uses the same distinctions as Eyes & Lichty, which for
@@ -161,6 +172,22 @@ namespace Asm65 {
         public FlowEffect Effect { get; private set; }
 
         /// <summary>
+        /// Effect this instruction has on memory.
+        /// </summary>
+        public MemoryEffect MemEffect {
+            get {
+                // If we do this a lot, we should probably just go through and set the
+                // mem effect to "none" in all the immediate-mode op definitions.
+                if (IsImmediate) {
+                    return MemoryEffect.None;
+                } else {
+                    return BaseMemEffect;
+                }
+            }
+        }
+        private MemoryEffect BaseMemEffect { get; set; }
+
+        /// <summary>
         /// Cycles required.  The low 8 bits hold the base cycle count, the remaining bits
         /// are defined by the CycleMod enum.
         /// </summary>
@@ -221,6 +248,7 @@ namespace Asm65 {
             this.Mnemonic = src.Mnemonic;
             this.FlagsAffected = src.FlagsAffected;
             this.Effect = src.Effect;
+            this.BaseMemEffect = src.BaseMemEffect;
             this.CycDef = src.CycDef;
             this.IsOperandWidthUnambiguous = src.IsOperandWidthUnambiguous;
             this.StatusFlagUpdater = src.StatusFlagUpdater;
@@ -247,14 +275,23 @@ namespace Asm65 {
 
 
         /// <summary>
-        /// True if this operation is a branch instruction (conditional branch,
+        /// True if this operation is any type of branch instruction (conditional branch,
         /// unconditional branch/jump, subroutine call).
         /// </summary>
-        public bool IsBranch {
+        public bool IsBranchOrSubCall {
             get {
                 return Effect == FlowEffect.Branch ||
                     Effect == FlowEffect.ConditionalBranch ||
                     Effect == FlowEffect.CallSubroutine;
+            }
+        }
+
+        /// <summary>
+        /// True if this operation is a subroutine call.
+        /// </summary>
+        public bool IsSubroutineCall {
+            get {
+                return Effect == FlowEffect.CallSubroutine;
             }
         }
 
@@ -270,11 +307,11 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// True if the operand is an "extended immediate" value, which includes PEA
-        /// as well as Imm.
+        /// True if the operand is an "extended immediate" value, which includes PEA in
+        /// addition to Imm/ImmLongA/ImmLongXY.
         /// </summary>
         public bool IsExtendedImmediate {
-            get {   // should this include PER as well?
+            get {
                 return IsImmediate || AddrMode == AddressMode.StackAbs;
             }
         }
@@ -748,24 +785,28 @@ namespace Asm65 {
         private static OpDef OpADC = new OpDef() {
             Mnemonic = OpName.ADC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
         private static OpDef OpAND = new OpDef() {
             Mnemonic = OpName.AND,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ  // special handling for imm
         };
         private static OpDef OpASL = new OpDef() {
             Mnemonic = OpName.ASL,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpBCC = new OpDef() {
             Mnemonic = OpName.BCC,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate(StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.C = 0;
@@ -776,6 +817,7 @@ namespace Asm65 {
         private static OpDef OpBCS = new OpDef() {
             Mnemonic = OpName.BCS,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.C = 1;
@@ -786,6 +828,7 @@ namespace Asm65 {
         private static OpDef OpBEQ = new OpDef() {
             Mnemonic = OpName.BEQ,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.Z = 1;
@@ -796,12 +839,14 @@ namespace Asm65 {
         private static OpDef OpBIT = new OpDef() {
             Mnemonic = OpName.BIT,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZC,  // special handling for imm
             StatusFlagUpdater = FlagUpdater_NZC // special handling for imm
         };
         private static OpDef OpBMI = new OpDef() {
             Mnemonic = OpName.BMI,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.N = 1;
@@ -812,6 +857,7 @@ namespace Asm65 {
         private static OpDef OpBNE = new OpDef() {
             Mnemonic = OpName.BNE,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.Z = 0;
@@ -822,6 +868,7 @@ namespace Asm65 {
         private static OpDef OpBPL = new OpDef() {
             Mnemonic = OpName.BPL,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.N = 0;
@@ -831,19 +878,23 @@ namespace Asm65 {
         };
         private static OpDef OpBRA = new OpDef() {
             Mnemonic = OpName.BRA,
-            Effect = FlowEffect.Branch
+            Effect = FlowEffect.Branch,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpBRK = new OpDef() {
             Mnemonic = OpName.BRK,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpBRL = new OpDef() {
             Mnemonic = OpName.BRL,
-            Effect = FlowEffect.Branch
+            Effect = FlowEffect.Branch,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpBVC = new OpDef() {
             Mnemonic = OpName.BVC,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.V = 0;
@@ -854,6 +905,7 @@ namespace Asm65 {
         private static OpDef OpBVS = new OpDef() {
             Mnemonic = OpName.BVS,
             Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
                 condBranchTakenFlags.V = 1;
@@ -864,6 +916,7 @@ namespace Asm65 {
         private static OpDef OpCLC = new OpDef() {
             Mnemonic = OpName.CLC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_C,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -874,6 +927,7 @@ namespace Asm65 {
         private static OpDef OpCLD = new OpDef() {
             Mnemonic = OpName.CLD,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_D,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -884,6 +938,7 @@ namespace Asm65 {
         private static OpDef OpCLI = new OpDef() {
             Mnemonic = OpName.CLI,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_I,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -894,6 +949,7 @@ namespace Asm65 {
         private static OpDef OpCLV = new OpDef() {
             Mnemonic = OpName.CLV,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_V,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -904,246 +960,293 @@ namespace Asm65 {
         private static OpDef OpCMP = new OpDef() {
             Mnemonic = OpName.CMP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpCOP = new OpDef() {
             Mnemonic = OpName.COP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpCPX = new OpDef() {
             Mnemonic = OpName.CPX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpCPY = new OpDef() {
             Mnemonic = OpName.CPY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpDEC = new OpDef() {
             Mnemonic = OpName.DEC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpDEX = new OpDef() {
             Mnemonic = OpName.DEX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpDEY = new OpDef() {
             Mnemonic = OpName.DEY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpEOR = new OpDef() {
             Mnemonic = OpName.EOR,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpINC = new OpDef() {
             Mnemonic = OpName.INC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpINX = new OpDef() {
             Mnemonic = OpName.INX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpINY = new OpDef() {
             Mnemonic = OpName.INY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpJML = new OpDef() {
             Mnemonic = OpName.JML,      // technically JMP with long operand, but JML is convention
             Effect = FlowEffect.Branch,
+            BaseMemEffect = MemoryEffect.None,
             IsOperandWidthUnambiguous = true,
         };
         private static OpDef OpJMP = new OpDef() {
             Mnemonic = OpName.JMP,
             Effect = FlowEffect.Branch,
+            BaseMemEffect = MemoryEffect.None,
             IsOperandWidthUnambiguous = true
         };
         private static OpDef OpJSL = new OpDef() {
             Mnemonic = OpName.JSL,      // technically JSR with long operand, but JSL is convention
             Effect = FlowEffect.CallSubroutine,
+            BaseMemEffect = MemoryEffect.None,
             IsOperandWidthUnambiguous = true,
             StatusFlagUpdater = FlagUpdater_Subroutine
         };
         private static OpDef OpJSR = new OpDef() {
             Mnemonic = OpName.JSR,
             Effect = FlowEffect.CallSubroutine,
+            BaseMemEffect = MemoryEffect.None,
             IsOperandWidthUnambiguous = true,
             StatusFlagUpdater = FlagUpdater_Subroutine
         };
         private static OpDef OpLDA = new OpDef() {
             Mnemonic = OpName.LDA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ  // special handling for imm
         };
         private static OpDef OpLDX = new OpDef() {
             Mnemonic = OpName.LDX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ  // special handling for imm
         };
         private static OpDef OpLDY = new OpDef() {
             Mnemonic = OpName.LDY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ  // special handling for imm
         };
         private static OpDef OpLSR = new OpDef() {
             Mnemonic = OpName.LSR,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpMVN = new OpDef() {
             Mnemonic = OpName.MVN,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None       // not quite right, but what is?
         };
         private static OpDef OpMVP = new OpDef() {
             Mnemonic = OpName.MVP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpNOP = new OpDef() {
             Mnemonic = OpName.NOP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpORA = new OpDef() {
             Mnemonic = OpName.ORA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ  // special handling for imm
         };
         private static OpDef OpPEA = new OpDef() {
             Mnemonic = OpName.PEA,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPEI = new OpDef() {
             Mnemonic = OpName.PEI,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read
         };
         private static OpDef OpPER = new OpDef() {
             Mnemonic = OpName.PER,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHA = new OpDef() {
             Mnemonic = OpName.PHA,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHB = new OpDef() {
             Mnemonic = OpName.PHB,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHD = new OpDef() {
             Mnemonic = OpName.PHD,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHK = new OpDef() {
             Mnemonic = OpName.PHK,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHP = new OpDef() {
             Mnemonic = OpName.PHP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHX = new OpDef() {
             Mnemonic = OpName.PHX,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPHY = new OpDef() {
             Mnemonic = OpName.PHY,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpPLA = new OpDef() {
             Mnemonic = OpName.PLA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpPLB = new OpDef() {
             Mnemonic = OpName.PLB,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpPLD = new OpDef() {
             Mnemonic = OpName.PLD,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpPLP = new OpDef() {
             Mnemonic = OpName.PLP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_All,
             StatusFlagUpdater = FlagUpdater_PLP
         };
         private static OpDef OpPLX = new OpDef() {
             Mnemonic = OpName.PLX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpPLY = new OpDef() {
             Mnemonic = OpName.PLY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpREP = new OpDef() {
             Mnemonic = OpName.REP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_All,
             StatusFlagUpdater = FlagUpdater_REP
         };
         private static OpDef OpROL = new OpDef() {
             Mnemonic = OpName.ROL,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_ROL
         };
         private static OpDef OpROR = new OpDef() {
             Mnemonic = OpName.ROR,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_ROR
         };
         private static OpDef OpRTI = new OpDef() {
             Mnemonic = OpName.RTI,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None,
         };
         private static OpDef OpRTL = new OpDef() {
             Mnemonic = OpName.RTL,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None,
         };
         private static OpDef OpRTS = new OpDef() {
             Mnemonic = OpName.RTS,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None,
         };
         private static OpDef OpSBC = new OpDef() {
             Mnemonic = OpName.SBC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
         private static OpDef OpSEC = new OpDef() {
             Mnemonic = OpName.SEC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_C,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -1154,6 +1257,7 @@ namespace Asm65 {
         private static OpDef OpSED = new OpDef() {
             Mnemonic = OpName.SED,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_D,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -1164,6 +1268,7 @@ namespace Asm65 {
         private static OpDef OpSEI = new OpDef() {
             Mnemonic = OpName.SEI,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_I,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
@@ -1174,126 +1279,150 @@ namespace Asm65 {
         private static OpDef OpSEP = new OpDef() {
             Mnemonic = OpName.SEP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_All,
             StatusFlagUpdater = FlagUpdater_SEP
         };
         private static OpDef OpSTA = new OpDef() {
             Mnemonic = OpName.STA,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write,
         };
         private static OpDef OpSTP = new OpDef() {
             Mnemonic = OpName.STP,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None,
         };
         private static OpDef OpSTX = new OpDef() {
             Mnemonic = OpName.STX,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write,
         };
         private static OpDef OpSTY = new OpDef() {
             Mnemonic = OpName.STY,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write,
         };
         private static OpDef OpSTZ = new OpDef() {
             Mnemonic = OpName.STZ,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write,
         };
         private static OpDef OpTAX = new OpDef() {
             Mnemonic = OpName.TAX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTAY = new OpDef() {
             Mnemonic = OpName.TAY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTCD = new OpDef() {
             Mnemonic = OpName.TCD,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTCS = new OpDef() {
             Mnemonic = OpName.TCS,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpTDC = new OpDef() {
             Mnemonic = OpName.TDC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTRB = new OpDef() {
             Mnemonic = OpName.TRB,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_Z,
             StatusFlagUpdater = FlagUpdater_Z
         };
         private static OpDef OpTSB = new OpDef() {
             Mnemonic = OpName.TSB,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_Z,
             StatusFlagUpdater = FlagUpdater_Z
         };
         private static OpDef OpTSC = new OpDef() {
             Mnemonic = OpName.TSC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTSX = new OpDef() {
             Mnemonic = OpName.TSX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTXA = new OpDef() {
             Mnemonic = OpName.TXA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTXS = new OpDef() {
             Mnemonic = OpName.TXS,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpTXY = new OpDef() {
             Mnemonic = OpName.TXY,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTYA = new OpDef() {
             Mnemonic = OpName.TYA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpTYX = new OpDef() {
             Mnemonic = OpName.TYX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpWAI = new OpDef() {
             Mnemonic = OpName.WAI,
-            Effect = FlowEffect.Cont    // when I=1 (interrupts disabled), continues on interrupt
+            Effect = FlowEffect.Cont,   // when I=1 (interrupts disabled), continues on interrupt
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpWDM = new OpDef() {
             Mnemonic = OpName.WDM,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpXBA = new OpDef() {
             Mnemonic = OpName.XBA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpXCE = new OpDef() {
             Mnemonic = OpName.XCE,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_C,
             StatusFlagUpdater = FlagUpdater_XCE
         };
@@ -2698,18 +2827,21 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.ANC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpANE = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.ANE,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpALR = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.ALR,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
@@ -2717,6 +2849,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.ARR,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
@@ -2724,23 +2857,27 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.DCP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_C,
             StatusFlagUpdater = FlagUpdater_C
         };
-        private static OpDef OpDOP = new OpDef() {
+        private static OpDef OpDOP = new OpDef() {      // double-byte NOP
             IsUndocumented = true,
             Mnemonic = OpName.DOP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpJAM = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.JAM,
-            Effect = FlowEffect.NoCont
+            Effect = FlowEffect.NoCont,
+            BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpISC = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.ISC,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
@@ -2748,6 +2885,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.LAS,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
@@ -2755,20 +2893,15 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.LAX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
-        //private static OpDef OpLXA = new OpDef() {
-        //    IsUndocumented = true,
-        //    Mnemonic = OpName.LXA,
-        //    Effect = FlowEffect.Cont,
-        //    FlagsAffected = FlagsAffected_NZ,
-        //    StatusFlagUpdater = FlagUpdater_NZ
-        //};
         private static OpDef OpRLA = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.RLA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
@@ -2776,6 +2909,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.RRA,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
         };
@@ -2783,6 +2917,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.SAX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write,
             FlagsAffected = FlagsAffected_NZ,
             StatusFlagUpdater = FlagUpdater_NZ
         };
@@ -2790,33 +2925,33 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.SBX,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpSHA = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.SHA,
-            Effect = FlowEffect.Cont
-        };
-        private static OpDef OpTAS = new OpDef() {
-            IsUndocumented = true,
-            Mnemonic = OpName.TAS,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write
         };
         private static OpDef OpSHX = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.SHX,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write
         };
         private static OpDef OpSHY = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.SHY,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write
         };
         private static OpDef OpSLO = new OpDef() {
             IsUndocumented = true,
             Mnemonic = OpName.SLO,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
@@ -2824,14 +2959,23 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.SRE,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
             StatusFlagUpdater = FlagUpdater_NZC
         };
-        private static OpDef OpTOP = new OpDef() {
+        private static OpDef OpTAS = new OpDef() {
+            IsUndocumented = true,
+            Mnemonic = OpName.TAS,
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Write
+        };
+        private static OpDef OpTOP = new OpDef() {      // triple-byte NOP
             IsUndocumented = true,
             Mnemonic = OpName.TOP,
-            Effect = FlowEffect.Cont
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None
         };
+
         public static readonly OpDef OpSLO_DPIndexXInd = new OpDef(OpSLO) {
             Opcode = 0x03,
             AddrMode = AddressMode.DPIndexXInd,

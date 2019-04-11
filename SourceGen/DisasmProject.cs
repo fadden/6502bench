@@ -478,7 +478,8 @@ namespace SourceGen {
             reanalysisTimer.EndTask("GenerateXrefs");
 
             reanalysisTimer.StartTask("GenerateActiveDefSymbolList");
-            // Generate the list of project/platform symbols that are being used.
+            // Generate the list of project/platform symbols that are being used.  This forms
+            // the list of EQUates at the top of the file.
             GenerateActiveDefSymbolList();
             reanalysisTimer.EndTask("GenerateActiveDefSymbolList");
 
@@ -792,15 +793,19 @@ namespace SourceGen {
                 Anattrib attr = mAnattribs[offset];
 
                 XrefSet.XrefType xrefType = XrefSet.XrefType.Unknown;
+                OpDef.MemoryEffect accType = OpDef.MemoryEffect.Unknown;
                 if (attr.IsInstruction) {
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
-                    if (op.IsBranch) {
-                        xrefType = XrefSet.XrefType.BranchOperand;
+                    if (op.IsSubroutineCall) {
+                        xrefType = XrefSet.XrefType.SubCallOp;
+                    } else if (op.IsBranchOrSubCall) {
+                        xrefType = XrefSet.XrefType.BranchOp;
                     } else {
-                        xrefType = XrefSet.XrefType.InstrOperand;
+                        xrefType = XrefSet.XrefType.MemAccessOp;
+                        accType = op.MemEffect;
                     }
                 } else if (attr.IsData || attr.IsInlineData) {
-                    xrefType = XrefSet.XrefType.DataOperand;
+                    xrefType = XrefSet.XrefType.RefFromData;
                 }
 
                 bool hasZeroOffsetSym = false;
@@ -825,7 +830,8 @@ namespace SourceGen {
                                     mAnattribs[operandOffset].Address;
                             }
 
-                            AddXref(symOffset, new XrefSet.Xref(offset, true, xrefType, adj));
+                            AddXref(symOffset,
+                                new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             if (adj == 0) {
                                 hasZeroOffsetSym = true;
                             }
@@ -838,7 +844,8 @@ namespace SourceGen {
                                 if (operandOffset >= 0) {
                                     adj = defSym.Value - operandOffset;
                                 }
-                                defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, adj));
+                                defSym.Xrefs.Add(
+                                    new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             } else {
                                 Debug.WriteLine("NOTE: not xrefing '" + sym.Label + "'");
                                 Debug.Assert(false);    // not possible?
@@ -849,7 +856,8 @@ namespace SourceGen {
                         Debug.Assert(attr.IsData || attr.IsInlineData);
                         int operandOffset = RawData.GetWord(mFileData, offset,
                             dfd.Length, dfd.FormatType == FormatDescriptor.Type.NumericBE);
-                        AddXref(operandOffset, new XrefSet.Xref(offset, false, xrefType, 0));
+                        AddXref(operandOffset,
+                            new XrefSet.Xref(offset, false, xrefType, accType, 0));
                     }
 
                     // Look for instruction offset references.  We skip this if we've already
@@ -857,7 +865,8 @@ namespace SourceGen {
                     // just leave a duplicate entry.  (The symbolic ref wins because we need
                     // it for the label localizer and possibly the label refactorer.)
                     if (!hasZeroOffsetSym && attr.IsInstructionStart && attr.OperandOffset >= 0) {
-                        AddXref(attr.OperandOffset, new XrefSet.Xref(offset, false, xrefType, 0));
+                        AddXref(attr.OperandOffset,
+                            new XrefSet.Xref(offset, false, xrefType, accType, 0));
                     }
                 }
 
@@ -1492,13 +1501,15 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Updates all symbolic references to the old label.
+        /// Updates all symbolic references to the old label.  Call this after replacing
+        /// mAnattribs[labelOffset].Symbol.
         /// </summary>
         /// <param name="labelOffset">Offset with the just-renamed label.</param>
         /// <param name="oldLabel">Previous value.</param>
         private void RefactorLabel(int labelOffset, string oldLabel) {
             if (!mXrefs.TryGetValue(labelOffset, out XrefSet xrefs)) {
-                // This can happen if you add a label in the middle of nowhere and rename it.
+                // This can happen if you add a label in a file section that nothing references,
+                // and then rename it.
                 Debug.WriteLine("RefactorLabel: no references to " + oldLabel);
                 return;
             }
@@ -1548,7 +1559,7 @@ namespace SourceGen {
                     continue;
                 }
 
-                Debug.WriteLine("Replacing symbol at +" + xr.Offset.ToString("x6") +
+                Debug.WriteLine("Replacing OpFor symbol at +" + xr.Offset.ToString("x6") +
                     " with " + newLabel);
                 OperandFormats[xr.Offset] = FormatDescriptor.Create(
                     dfd.Length, new WeakSymbolRef(newLabel, dfd.SymbolRef.ValuePart),

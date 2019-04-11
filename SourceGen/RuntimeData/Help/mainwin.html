@@ -216,10 +216,20 @@ For each reference, the file offset, address, and some details about the
 type of reference will be shown.</p>
 
 <p>The reference type indicates whether the origin is an instruction or
-data operand.  Branch instructions are called out separately.  In
-addition, it will be identified as a numeric or symbolic reference.
-Symbolic references may be offset from the actual operand value; if this
-is the case, the adjustment will be shown as well.</p>
+data operand, and provides an indication of the nature of the reference:</p>
+<ul>
+  <li>call - subroutine call (e.g. JSR addr, JSL addr)</li>
+  <li>branch - conditional or unconditional branch (e.g. JMP addr, BCC addr)</li>
+  <li>read - read from memory (e.g. LDA addr, BIT addr)</li>
+  <li>write - write to memory (e.g. STA addr)</li>
+  <li>rmw - read-modify-write (e.g. LSR addr, TSB addr)</li>
+  <li>ref - address reference only (e.g. LDA #&lt;addr, PEA addr)</li>
+  <li>data - address referenced by data (e.g. .DD2 addr)</li>
+</ul>
+<p>In addition, the source will be identified as a symbolic ("Sym") or
+numeric ("Num") reference.  Symbolic references may be offset from the
+actual operand value; if this is the case, the adjustment will be shown
+as well.</p>
 
 <p>Double-clicking on a reference moves the code list selection to that
 reference, and adds the previous selection to the navigation stack.</p>

@@ -215,7 +215,7 @@ namespace SourceGen {
         /// <summary>
         /// Generates a unique address symbol.  Does not add the symbol to the list.
         /// </summary>
-        /// <param name="addr">Address label will be applied to</param>
+        /// <param name="addr">Address that label will be applied to.</param>
         /// <param name="symbols">Symbol table.</param>
         /// <param name="prefix">Prefix to use; must start with a letter.</param>
         /// <returns>Newly-created, unique symbol.</returns>
@@ -239,7 +239,7 @@ namespace SourceGen {
                     sb.Append(index);
                     label = sb.ToString();
                 } while (index <= MAX_RENAME && symbols.TryGetValue(label, out unused));
-                if (index == MAX_RENAME) {
+                if (index > MAX_RENAME) {
                     // I give up
                     throw new Exception("Too many identical symbols");
                 }

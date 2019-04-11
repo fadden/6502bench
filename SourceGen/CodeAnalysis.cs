@@ -537,7 +537,7 @@ namespace SourceGen {
                 bool doBranch, doContinue;
 
                 // Check for branching.
-                if (op.IsBranch) {
+                if (op.IsBranchOrSubCall) {
                     if (mAnattribs[offset].IsOperandOffsetDirect) {
                         branchOffset = mAnattribs[offset].OperandOffset;
                     }

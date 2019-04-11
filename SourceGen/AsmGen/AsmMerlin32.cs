@@ -336,9 +336,10 @@ namespace SourceGen.AsmGen {
 
             // The assembler works correctly if the symbol is defined as a two-digit hex
             // value (e.g. "foo equ $80") but fails if it's four (e.g. "foo equ $0080").  We
-            // output symbols with minimal digits, but we have no control over labels when
-            // the code has a zero-page EQU.  So if the operand is a reference to a user
-            // label, we need to output the instruction as hex.
+            // output symbols with minimal digits, but this doesn't help if the code itself
+            // lives on zero page.  If the operand is a reference to a zero-page user label,
+            // we need to output the instruction as hex.
+            // More info: https://github.com/apple2accumulator/merlin32/issues/8
             if (op == OpDef.OpPEI_StackDPInd ||
                     op == OpDef.OpSTY_DPIndexX ||
                     op == OpDef.OpSTX_DPIndexY ||

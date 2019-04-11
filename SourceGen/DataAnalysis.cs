@@ -347,6 +347,15 @@ namespace SourceGen {
                 isBigEndian);
         }
 
+        /// <summary>
+        /// Given a reference from srcOffset to targetOffset, check to see if there's a
+        /// nearby location that we'd prefer to refer to.  For example, if targetOffset points
+        /// into the middle of an instruction, we'd rather have it refer to the first byte.
+        /// </summary>
+        /// <param name="srcOffset">Reference source.</param>
+        /// <param name="targetOffset">Reference target.</param>
+        /// <returns>New value for targetOffset, or original value if nothing better was
+        ///   found.</returns>
         private int FindAlternateTarget(int srcOffset, int targetOffset) {
             int origTargetOffset = targetOffset;
 
@@ -393,7 +402,7 @@ namespace SourceGen {
             // Source is an instruction, so we have an instruction referencing an instruction.
             // Could be a branch, an address push, or self-modifying code.
             OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[srcOffset]);
-            if (op.IsBranch) {
+            if (op.IsBranchOrSubCall) {
                 // Don't mess with jumps and branches -- always go directly to the
                 // target address.
             } else if (op == OpDef.OpPEA_StackAbs || op == OpDef.OpPER_StackPCRelLong) {
