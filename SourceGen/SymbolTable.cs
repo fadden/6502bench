@@ -211,42 +211,5 @@ namespace SourceGen {
             mSymbolsByValue.Remove(sym);
             ChangeSerial++;
         }
-
-        /// <summary>
-        /// Generates a unique address symbol.  Does not add the symbol to the list.
-        /// </summary>
-        /// <param name="addr">Address that label will be applied to.</param>
-        /// <param name="symbols">Symbol table.</param>
-        /// <param name="prefix">Prefix to use; must start with a letter.</param>
-        /// <returns>Newly-created, unique symbol.</returns>
-        public static Symbol GenerateUniqueForAddress(int addr, SymbolTable symbols,
-                string prefix) {
-            // $1234 == L1234, $05/1234 == L51234.
-            string label = prefix + addr.ToString("X4");    // always upper-case
-            if (symbols.TryGetValue(label, out Symbol unused)) {
-                const int MAX_RENAME = 999;
-                string baseLabel = label;
-                StringBuilder sb = new StringBuilder(baseLabel.Length + 8);
-                int index = -1;
-
-                do {
-                    // This is expected to be unlikely and infrequent, so a simple linear
-                    // probe for uniqueness is fine.
-                    index++;
-                    sb.Clear();
-                    sb.Append(baseLabel);
-                    sb.Append('_');
-                    sb.Append(index);
-                    label = sb.ToString();
-                } while (index <= MAX_RENAME && symbols.TryGetValue(label, out unused));
-                if (index > MAX_RENAME) {
-                    // I give up
-                    throw new Exception("Too many identical symbols");
-                }
-            }
-            Symbol sym = new Symbol(label, addr, Symbol.Source.Auto,
-                Symbol.Type.LocalOrGlobalAddr);
-            return sym;
-        }
     }
 }

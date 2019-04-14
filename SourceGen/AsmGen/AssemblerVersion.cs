@@ -20,7 +20,7 @@ using System.Diagnostics;
 namespace SourceGen.AsmGen {
     public class AssemblerVersion {
         /// <summary>
-        /// Version string reported by the assembler.
+        /// Version string reported by the assembler.  Retained mostly for debugging.
         /// </summary>
         public string VersionStr { get; private set; }
 
@@ -49,7 +49,7 @@ namespace SourceGen.AsmGen {
         }
 
         public override string ToString() {
-            return "[" + VersionStr + "/" + Version + "]";
+            return "['" + VersionStr + "'/" + Version + "]";
         }
     }
 

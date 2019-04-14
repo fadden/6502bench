@@ -385,7 +385,7 @@ namespace SourceGen.AppForms {
                         // won't generate identical labels for different addresses, and we do
                         // want to generate a single label if more than one table entry refers
                         // to the same target.
-                        Symbol tmpSym = SymbolTable.GenerateUniqueForAddress(addr,
+                        Symbol tmpSym = AutoLabel.GenerateUniqueForAddress(addr,
                             mProject.SymbolTable, "T");
                         // tmpSym was returned as an auto-label, make it a user label instead
                         tmpSym = new Symbol(tmpSym.Label, tmpSym.Value, Symbol.Source.User,

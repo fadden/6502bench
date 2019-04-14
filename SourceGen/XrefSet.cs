@@ -28,9 +28,6 @@ namespace SourceGen {
     public class XrefSet : IEnumerable<XrefSet.Xref> {
         /// <summary>
         /// Reference type.  This is mostly useful for display to the user.
-        /// 
-        /// The enum is in priority order, i.e. the lowest-valued
-        /// item "wins" in situations where only one value is used.
         /// </summary>
         public enum XrefType {
             Unknown = 0,

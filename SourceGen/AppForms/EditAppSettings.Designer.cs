@@ -91,6 +91,8 @@ namespace SourceGen.AppForms {
             this.showAsmIdentCheckBox = new System.Windows.Forms.CheckBox();
             this.disableLabelLocalizationCheckBox = new System.Windows.Forms.CheckBox();
             this.displayFormatTabPage = new System.Windows.Forms.TabPage();
+            this.expressionStyleComboBox = new System.Windows.Forms.ComboBox();
+            this.expressionStyleLabel = new System.Windows.Forms.Label();
             this.fmtExplanationLabel = new System.Windows.Forms.Label();
             this.quickDisplayFormatGroup = new System.Windows.Forms.GroupBox();
             this.displayFmtQuickComboBox = new System.Windows.Forms.ComboBox();
@@ -157,8 +159,6 @@ namespace SourceGen.AppForms {
             this.defineData1Label = new System.Windows.Forms.Label();
             this.equDirectiveTextBox = new System.Windows.Forms.TextBox();
             this.equDirectiveLabel = new System.Windows.Forms.Label();
-            this.expressionStyleLabel = new System.Windows.Forms.Label();
-            this.expressionStyleComboBox = new System.Windows.Forms.ComboBox();
             this.settingsTabControl.SuspendLayout();
             this.codeViewTabPage.SuspendLayout();
             this.codeViewMiscGroupBox.SuspendLayout();
@@ -751,6 +751,24 @@ namespace SourceGen.AppForms {
             this.displayFormatTabPage.TabIndex = 3;
             this.displayFormatTabPage.Text = "Display Format";
             this.displayFormatTabPage.UseVisualStyleBackColor = true;
+            // 
+            // expressionStyleComboBox
+            // 
+            this.expressionStyleComboBox.FormattingEnabled = true;
+            this.expressionStyleComboBox.Location = new System.Drawing.Point(98, 153);
+            this.expressionStyleComboBox.Name = "expressionStyleComboBox";
+            this.expressionStyleComboBox.Size = new System.Drawing.Size(121, 21);
+            this.expressionStyleComboBox.TabIndex = 5;
+            this.expressionStyleComboBox.SelectedIndexChanged += new System.EventHandler(this.expressionStyleComboBox_SelectedIndexChanged);
+            // 
+            // expressionStyleLabel
+            // 
+            this.expressionStyleLabel.AutoSize = true;
+            this.expressionStyleLabel.Location = new System.Drawing.Point(7, 156);
+            this.expressionStyleLabel.Name = "expressionStyleLabel";
+            this.expressionStyleLabel.Size = new System.Drawing.Size(85, 13);
+            this.expressionStyleLabel.TabIndex = 4;
+            this.expressionStyleLabel.Text = "Expression style:";
             // 
             // fmtExplanationLabel
             // 
@@ -1467,24 +1485,6 @@ namespace SourceGen.AppForms {
             this.equDirectiveLabel.TabIndex = 1;
             this.equDirectiveLabel.Text = "Equate:";
             this.equDirectiveLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // expressionStyleLabel
-            // 
-            this.expressionStyleLabel.AutoSize = true;
-            this.expressionStyleLabel.Location = new System.Drawing.Point(7, 156);
-            this.expressionStyleLabel.Name = "expressionStyleLabel";
-            this.expressionStyleLabel.Size = new System.Drawing.Size(85, 13);
-            this.expressionStyleLabel.TabIndex = 4;
-            this.expressionStyleLabel.Text = "Expression style:";
-            // 
-            // expressionStyleComboBox
-            // 
-            this.expressionStyleComboBox.FormattingEnabled = true;
-            this.expressionStyleComboBox.Location = new System.Drawing.Point(98, 153);
-            this.expressionStyleComboBox.Name = "expressionStyleComboBox";
-            this.expressionStyleComboBox.Size = new System.Drawing.Size(121, 21);
-            this.expressionStyleComboBox.TabIndex = 5;
-            this.expressionStyleComboBox.SelectedIndexChanged += new System.EventHandler(this.expressionStyleComboBox_SelectedIndexChanged);
             // 
             // EditAppSettings
             // 

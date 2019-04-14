@@ -477,6 +477,13 @@ namespace SourceGen {
             GenerateXrefs();
             reanalysisTimer.EndTask("GenerateXrefs");
 
+            // replace simple auto-labels ("L1234") with annotated versions ("WR_1234")
+            if (ProjectProps.AutoLabelStyle != AutoLabel.Style.Simple) {
+                reanalysisTimer.StartTask("AnnotateAutoLabels");
+                AnnotateAutoLabels();
+                reanalysisTimer.EndTask("AnnotateAutoLabels");
+            }
+
             reanalysisTimer.StartTask("GenerateActiveDefSymbolList");
             // Generate the list of project/platform symbols that are being used.  This forms
             // the list of EQUates at the top of the file.
@@ -676,7 +683,7 @@ namespace SourceGen {
         /// Call this after the code and data analysis passes have completed.  This doesn't
         /// interact with labels, so the ordering there doesn't matter.
         /// </summary>
-        public void GeneratePlatformSymbolRefs() {
+        private void GeneratePlatformSymbolRefs() {
             bool checkNearby = ProjectProps.AnalysisParams.SeekNearbyTargets;
 
             for (int offset = 0; offset < mAnattribs.Length; ) {
@@ -738,7 +745,7 @@ namespace SourceGen {
         /// 
         /// Call this after the code and data analysis passes have completed.
         /// </summary>
-        public void GenerateXrefs() {
+        private void GenerateXrefs() {
             // Xref generation.  There are two general categories of references:
             //  (1) Numeric reference.  Comes from instructions (e.g. "LDA $1000" or "BRA $1000")
             //      and Numeric/Address data items.
@@ -899,6 +906,39 @@ namespace SourceGen {
         public XrefSet GetXrefSet(int offset) {
             mXrefs.TryGetValue(offset, out XrefSet xset);
             return xset;        // will be null if not found
+        }
+
+        /// <summary>
+        /// Replaces generic auto-labels with fancier versions generated from xrefs.
+        /// </summary>
+        private void AnnotateAutoLabels() {
+            AutoLabel.Style style = ProjectProps.AutoLabelStyle;
+            Debug.Assert(style != AutoLabel.Style.Simple);
+
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                Anattrib attr = mAnattribs[offset];
+                if (attr.Symbol != null && attr.Symbol.SymbolSource == Symbol.Source.Auto) {
+                    XrefSet xset = GetXrefSet(offset);
+                    if (xset == null) {
+                        // Nothing useful to do here. This is unexpected, since auto-labels
+                        // should only exist because something referenced the offset.
+                        continue;
+                    }
+                    Symbol newSym =
+                        AutoLabel.GenerateAnnotatedLabel(attr.Address, SymbolTable, xset, style);
+                    if (!newSym.Equals(attr.Symbol)) {
+                        //Debug.WriteLine("Replace " + attr.Symbol.Label + " with " +newSym.Label);
+
+                        // Replace the symbol in Anattribs, update the symbol table, then
+                        // call Refactor to update everything that referenced it.
+                        Symbol oldSym = mAnattribs[offset].Symbol;
+                        mAnattribs[offset].Symbol = newSym;
+                        SymbolTable.Remove(oldSym);
+                        SymbolTable.Add(newSym);
+                        RefactorLabel(offset, oldSym.Label);
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -244,6 +244,40 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Retrieves an enumerated value setting.
+        /// </summary>
+        /// <param name="name">Setting name.</param>
+        /// <param name="enumType">Enum type that the value is part of.</param>
+        /// <param name="defaultValue">Setting default value.</param>
+        /// <returns>The value found, or the default value if no setting with the specified
+        ///   name exists, or the stored value is not a member of the specified enumerated
+        ///   type.</returns>
+        public int GetEnum(string name, Type enumType, int defaultValue) {
+            if (!mSettings.TryGetValue(name, out string valueStr)) {
+                return defaultValue;
+            }
+            try {
+                object o = Enum.Parse(enumType, valueStr);
+                return (int)o;
+            } catch (ArgumentException ae) {
+                Debug.WriteLine("Failed to parse " + valueStr + " (enum " + enumType + "): " +
+                    ae.Message);
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Sets an enumerated setting.
+        /// </summary>
+        /// <param name="name">Setting name.</param>
+        /// <param name="enumType">Enum type.</param>
+        /// <param name="value">Setting value (integer enum index).</param>
+        public void SetEnum(string name, Type enumType, int value) {
+            mSettings[name] = Enum.GetName(enumType, value);
+            Dirty = true;
+        }
+
+        /// <summary>
         /// Retrieves a string setting.  The default value will be returned if the key
         /// is not found, or if the value is null.
         /// </summary>

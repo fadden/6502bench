@@ -311,7 +311,7 @@ namespace SourceGen {
                 // incorporates the address.  It's possible through various means to end
                 // up with a user or platform label that matches an auto label, so we
                 // need to do some renaming in that case.  Shouldn't happen often.
-                Symbol sym = SymbolTable.GenerateUniqueForAddress(mAnattribs[targetOffset].Address,
+                Symbol sym = AutoLabel.GenerateUniqueForAddress(mAnattribs[targetOffset].Address,
                     mProject.SymbolTable, "L");
                 mAnattribs[targetOffset].Symbol = sym;
                 // This will throw if the symbol already exists.  That is the desired

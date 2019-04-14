@@ -45,6 +45,9 @@ namespace SourceGen.AppForms {
             "This is a test to gauge column widths"}, -1);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.generalTab = new System.Windows.Forms.TabPage();
+            this.miscGroupBox = new System.Windows.Forms.GroupBox();
+            this.autoLabelStyleComboBox = new System.Windows.Forms.ComboBox();
+            this.autoLabelStyleLabel = new System.Windows.Forms.Label();
             this.analysisGroupBox = new System.Windows.Forms.GroupBox();
             this.seekAltTargetCheckBox = new System.Windows.Forms.CheckBox();
             this.minStringCharsComboBox = new System.Windows.Forms.ComboBox();
@@ -86,6 +89,7 @@ namespace SourceGen.AppForms {
             this.applyButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.generalTab.SuspendLayout();
+            this.miscGroupBox.SuspendLayout();
             this.analysisGroupBox.SuspendLayout();
             this.entryFlagsGroupBox.SuspendLayout();
             this.cpuGroupBox.SuspendLayout();
@@ -112,6 +116,7 @@ namespace SourceGen.AppForms {
             // 
             // generalTab
             // 
+            this.generalTab.Controls.Add(this.miscGroupBox);
             this.generalTab.Controls.Add(this.analysisGroupBox);
             this.generalTab.Controls.Add(this.entryFlagsGroupBox);
             this.generalTab.Controls.Add(this.cpuGroupBox);
@@ -122,6 +127,40 @@ namespace SourceGen.AppForms {
             this.generalTab.TabIndex = 0;
             this.generalTab.Text = "General";
             this.generalTab.UseVisualStyleBackColor = true;
+            // 
+            // miscGroupBox
+            // 
+            this.miscGroupBox.Controls.Add(this.autoLabelStyleComboBox);
+            this.miscGroupBox.Controls.Add(this.autoLabelStyleLabel);
+            this.miscGroupBox.Location = new System.Drawing.Point(7, 177);
+            this.miscGroupBox.Name = "miscGroupBox";
+            this.miscGroupBox.Size = new System.Drawing.Size(422, 100);
+            this.miscGroupBox.TabIndex = 3;
+            this.miscGroupBox.TabStop = false;
+            this.miscGroupBox.Text = "Miscellaneous";
+            // 
+            // autoLabelStyleComboBox
+            // 
+            this.autoLabelStyleComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.autoLabelStyleComboBox.FormattingEnabled = true;
+            this.autoLabelStyleComboBox.Items.AddRange(new object[] {
+            "Simple (\"L1234\")",
+            "Annotated (\"W_1234\")",
+            "Fully Annotated (\"DWR_1234\")"});
+            this.autoLabelStyleComboBox.Location = new System.Drawing.Point(98, 19);
+            this.autoLabelStyleComboBox.Name = "autoLabelStyleComboBox";
+            this.autoLabelStyleComboBox.Size = new System.Drawing.Size(318, 21);
+            this.autoLabelStyleComboBox.TabIndex = 1;
+            this.autoLabelStyleComboBox.SelectedIndexChanged += new System.EventHandler(this.autoLabelStyleComboBox_SelectedIndexChanged);
+            // 
+            // autoLabelStyleLabel
+            // 
+            this.autoLabelStyleLabel.AutoSize = true;
+            this.autoLabelStyleLabel.Location = new System.Drawing.Point(6, 22);
+            this.autoLabelStyleLabel.Name = "autoLabelStyleLabel";
+            this.autoLabelStyleLabel.Size = new System.Drawing.Size(81, 13);
+            this.autoLabelStyleLabel.TabIndex = 0;
+            this.autoLabelStyleLabel.Text = "Auto-label style:";
             // 
             // analysisGroupBox
             // 
@@ -568,6 +607,8 @@ namespace SourceGen.AppForms {
             this.Load += new System.EventHandler(this.EditProperties_Load);
             this.tabControl1.ResumeLayout(false);
             this.generalTab.ResumeLayout(false);
+            this.miscGroupBox.ResumeLayout(false);
+            this.miscGroupBox.PerformLayout();
             this.analysisGroupBox.ResumeLayout(false);
             this.analysisGroupBox.PerformLayout();
             this.entryFlagsGroupBox.ResumeLayout(false);
@@ -628,5 +669,8 @@ namespace SourceGen.AppForms {
         private System.Windows.Forms.Label configuredScriptsLabel;
         private System.Windows.Forms.Button importSymbolsButton;
         private System.Windows.Forms.CheckBox seekAltTargetCheckBox;
+        private System.Windows.Forms.GroupBox miscGroupBox;
+        private System.Windows.Forms.ComboBox autoLabelStyleComboBox;
+        private System.Windows.Forms.Label autoLabelStyleLabel;
     }
 }

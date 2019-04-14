@@ -112,6 +112,13 @@ namespace SourceGen.AppForms {
             }
             minStringCharsComboBox.SelectedIndex = selIndex;
 
+            selIndex = (int) mWorkProps.AutoLabelStyle;
+            if (selIndex < 0 || selIndex >= autoLabelStyleComboBox.Items.Count) {
+                Debug.Assert(false, "bad AutoLabelStyle " + mWorkProps.AutoLabelStyle);
+                selIndex = 0;
+            }
+            autoLabelStyleComboBox.SelectedIndex = selIndex;
+
             LoadProjectSymbols();
             LoadPlatformSymbolFiles();
             LoadExtensionScriptNames();
@@ -245,6 +252,7 @@ namespace SourceGen.AppForms {
         }
 
         private void minStringCharsComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            // ComboBox must be the value 0, then N+2 in each subsequent entry (3, 4, 5, ...).
             int index = minStringCharsComboBox.SelectedIndex;
             int newVal;
             if (index == 0) {
@@ -255,6 +263,15 @@ namespace SourceGen.AppForms {
 
             if (newVal != mWorkProps.AnalysisParams.MinCharsForString) {
                 mWorkProps.AnalysisParams.MinCharsForString = newVal;
+                mDirty = true;
+                UpdateControls();
+            }
+        }
+
+        private void autoLabelStyleComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+            AutoLabel.Style newStyle = (AutoLabel.Style)autoLabelStyleComboBox.SelectedIndex;
+            if (newStyle != mWorkProps.AutoLabelStyle) {
+                mWorkProps.AutoLabelStyle = newStyle;
                 mDirty = true;
                 UpdateControls();
             }

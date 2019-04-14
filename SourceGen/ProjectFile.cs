@@ -185,6 +185,7 @@ namespace SourceGen {
             public string CpuName { get; set; }
             public bool IncludeUndocumentedInstr { get; set; }
             public int EntryFlags { get; set; }
+            public string AutoLabelStyle { get; set; }
             public SerAnalysisParameters AnalysisParams { get; set; }
             public List<string> PlatformSymbolFileIdentifiers { get; set; }
             public List<string> ExtensionScriptFileIdentifiers { get; set; }
@@ -195,6 +196,7 @@ namespace SourceGen {
                 CpuName = Asm65.CpuDef.GetCpuNameFromType(props.CpuType);
                 IncludeUndocumentedInstr = props.IncludeUndocumentedInstr;
                 EntryFlags = props.EntryFlags.AsInt;
+                AutoLabelStyle = props.AutoLabelStyle.ToString();
                 AnalysisParams = new SerAnalysisParameters(props.AnalysisParams);
 
                 // External file identifiers require no conversion.
@@ -461,6 +463,12 @@ namespace SourceGen {
             proj.ProjectProps.CpuType = Asm65.CpuDef.GetCpuTypeFromName(spf.ProjectProps.CpuName);
             proj.ProjectProps.IncludeUndocumentedInstr = spf.ProjectProps.IncludeUndocumentedInstr;
             proj.ProjectProps.EntryFlags = Asm65.StatusFlags.FromInt(spf.ProjectProps.EntryFlags);
+            if (Enum.TryParse<AutoLabel.Style>(spf.ProjectProps.AutoLabelStyle,
+                    out AutoLabel.Style als)) {
+                proj.ProjectProps.AutoLabelStyle = als;
+            } else {
+                // unknown value, leave as default
+            }
             proj.ProjectProps.AnalysisParams = new ProjectProperties.AnalysisParameters();
             proj.ProjectProps.AnalysisParams.AnalyzeUncategorizedData =
                 spf.ProjectProps.AnalysisParams.AnalyzeUncategorizedData;

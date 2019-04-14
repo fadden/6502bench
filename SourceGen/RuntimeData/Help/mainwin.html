@@ -227,9 +227,12 @@ data operand, and provides an indication of the nature of the reference:</p>
   <li>data - address referenced by data (e.g. .DD2 addr)</li>
 </ul>
 <p>In addition, the source will be identified as a symbolic ("Sym") or
-numeric ("Num") reference.  Symbolic references may be offset from the
-actual operand value; if this is the case, the adjustment will be shown
-as well.</p>
+numeric ("Num") reference.  Most will be symbolic, because SourceGen
+generates symbols automatically.  However, references to addresses that
+are offset from a symbol will also create a numeric reference entry.
+For example, "LDA addr+1" will create a symbolic reference at &lt;addr&gt;
+(shown in the table with an adjustment of "+1") and a numeric reference
+at &lt;addr+1&gt;.</p>
 
 <p>Double-clicking on a reference moves the code list selection to that
 reference, and adds the previous selection to the navigation stack.</p>

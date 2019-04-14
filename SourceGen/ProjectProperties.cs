@@ -26,6 +26,12 @@ namespace SourceGen {
     /// All fields are explicitly handled by the ProjectFile serializer.
     /// </summary>
     public class ProjectProperties {
+        //
+        // NOTE:
+        // If you add or modify a member, make sure to update the copy constructor and
+        // add serialization code to ProjectFile.
+        //
+
         /// <summary>
         /// Some parameters we feed to the analyzers.
         /// </summary>
@@ -60,6 +66,11 @@ namespace SourceGen {
         /// Initial status flags at entry points.
         /// </summary>
         public Asm65.StatusFlags EntryFlags { get; set; }
+
+        /// <summary>
+        /// Naming style for auto-generated labels.
+        /// </summary>
+        public AutoLabel.Style AutoLabelStyle { get; set; }
 
         /// <summary>
         /// Configurable parameters for the analyzers.
@@ -101,6 +112,7 @@ namespace SourceGen {
             CpuType = src.CpuType;
             IncludeUndocumentedInstr = src.IncludeUndocumentedInstr;
             EntryFlags = src.EntryFlags;
+            AutoLabelStyle = src.AutoLabelStyle;
 
             AnalysisParams = new AnalysisParameters(src.AnalysisParams);
 

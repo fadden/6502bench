@@ -1731,11 +1731,13 @@ namespace SourceGen.AppForms {
 
         // Edit > Copy (Ctrl+C)
         private void copyToolStripMenuItem_Click(object sender, EventArgs e) {
-            const int AssemblerSource = 0;
-            const int Disassembly = 1;
             const bool addCsv = true;
 
-            int format = AppSettings.Global.GetInt(AppSettings.CLIP_LINE_FORMAT, AssemblerSource);
+            EditAppSettings.ClipLineFormat format =
+                (EditAppSettings.ClipLineFormat) AppSettings.Global.GetEnum(
+                    AppSettings.CLIP_LINE_FORMAT,
+                    typeof(EditAppSettings.ClipLineFormat),
+                    (int) EditAppSettings.ClipLineFormat.AssemblerSource);
             StringBuilder fullText = new StringBuilder(codeListView.SelectedIndices.Count * 50);
             StringBuilder csv = new StringBuilder(codeListView.SelectedIndices.Count * 40);
             StringBuilder sb = new StringBuilder(100);
@@ -1743,7 +1745,7 @@ namespace SourceGen.AppForms {
             int addrAdj = mProject.CpuDef.HasAddr16 ? 6 : 9;
             int disAdj = 0;
             int bytesWidth = 0;
-            if (format == Disassembly) {
+            if (format == EditAppSettings.ClipLineFormat.Disassembly) {
                 // A limit of 8 gets us 4 bytes from dense display ("20edfd60") and 3 if spaces
                 // are included ("20 ed fd") with no excess.  We want to increase it to 11 so
                 // we can always show 4 bytes.
@@ -1766,7 +1768,7 @@ namespace SourceGen.AppForms {
                     case DisplayList.Line.Type.EquDirective:
                     case DisplayList.Line.Type.RegWidthDirective:
                     case DisplayList.Line.Type.OrgDirective:
-                        if (format == Disassembly) {
+                        if (format == EditAppSettings.ClipLineFormat.Disassembly) {
                             if (!string.IsNullOrEmpty(parts.Addr)) {
                                 sb.Append(parts.Addr);
                                 sb.Append(": ");
@@ -1791,7 +1793,7 @@ namespace SourceGen.AppForms {
                         sb.Append("\r\n");
                         break;
                     case DisplayList.Line.Type.LongComment:
-                        if (format == Disassembly) {
+                        if (format == EditAppSettings.ClipLineFormat.Disassembly) {
                             TextUtil.AppendPaddedString(sb, string.Empty, disAdj);
                         }
                         sb.Append(parts.Comment);

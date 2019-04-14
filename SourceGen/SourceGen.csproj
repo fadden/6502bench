@@ -131,6 +131,7 @@
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
     <Compile Include="AsmGen\StringGather.cs" />
+    <Compile Include="AutoLabel.cs" />
     <Compile Include="NavStack.cs" />
     <Compile Include="ChangeSet.cs" />
     <Compile Include="CodeAnalysis.cs" />

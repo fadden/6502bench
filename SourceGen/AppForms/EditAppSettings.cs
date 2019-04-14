@@ -38,6 +38,15 @@ namespace SourceGen.AppForms {
         }
 
         /// <summary>
+        /// Clipboard format enumeration.  Numbers must match order of items in combo box.
+        /// </summary>
+        public enum ClipLineFormat {
+            Unknown = -1,
+            AssemblerSource = 0,
+            Disassembly = 1
+        }
+
+        /// <summary>
         /// ProjectView reference.  When the user hits Apply, the object's ApplyAppSettings
         /// method will be invoked.
         /// </summary>
@@ -140,7 +149,7 @@ namespace SourceGen.AppForms {
                 showCol5, showCol6, showCol7, showCol8 };
             Debug.Assert(NUM_COLUMNS == 9);
 
-            // Extract formats from column-width button labels.
+            // Extract format strings from column-width button labels.
             for (int i = 0; i < NUM_COLUMNS; i++) {
                 mColButtons[i].Click += ColumnVisibilityButtonClick;
                 mColumnFormats[i] = mColButtons[i].Text;
@@ -230,7 +239,8 @@ namespace SourceGen.AppForms {
             upperSCheckBox.Checked = mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_S, false);
             upperXYCheckBox.Checked = mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
 
-            int clipIndex = mSettings.GetInt(AppSettings.CLIP_LINE_FORMAT, 0);
+            int clipIndex = mSettings.GetEnum(AppSettings.CLIP_LINE_FORMAT,
+                typeof(ClipLineFormat), 0);
             if (clipIndex >= 0 && clipIndex < clipboardFormatComboBox.Items.Count) {
                 clipboardFormatComboBox.SelectedIndex = clipIndex;
             }
@@ -422,7 +432,8 @@ namespace SourceGen.AppForms {
         }
 
         private void clipboardFormatComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-            mSettings.SetInt(AppSettings.CLIP_LINE_FORMAT, clipboardFormatComboBox.SelectedIndex);
+            mSettings.SetEnum(AppSettings.CLIP_LINE_FORMAT, typeof(ClipLineFormat),
+                clipboardFormatComboBox.SelectedIndex);
             SetDirty(true);
         }
 
