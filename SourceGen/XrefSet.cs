@@ -35,6 +35,8 @@ namespace SourceGen {
             BranchOp,           // branch instruction
             RefFromData,        // reference in data area, e.g. ".dd2 <address>"
             MemAccessOp,        // instruction that accesses memory, or refers to an address
+            // TODO(someday): track 16-bit vs. 24-bit addressing, so we can show whether
+            //   something is a "far" reference (and maybe carry this into auto-label annotation)
         }
 
         /// <summary>

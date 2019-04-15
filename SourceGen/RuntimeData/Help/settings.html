@@ -201,6 +201,12 @@ declare it a string.  Shorter values are prone to false-positive
 identifications, longer values miss out on short strings.  You can also
 set it to "none" to disable automatic string identification.</p>
 
+<p>The auto-label style setting determines the format for labels that are
+generated automatically.  By default the label will be the letter 'L'
+followed by the hexadecimal address, but the label can be annotated based
+on usage.  For example, addresses that are the target of branch instructions
+can be labeled with the letter 'B'.</p>
+
 
 <h3><a name="projprop-projsym">Project Symbols</a></h3>
 <p>You can add, edit, and delete individual symbols and constants.
