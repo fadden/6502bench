@@ -271,6 +271,38 @@ namespace CommonUtil {
             return (FindValue(val) >= 0);
         }
 
+#if false
+        /// <summary>
+        /// Finds a range that contains searchVal, or identifies the one that immediately
+        /// follows.  The caller can determine which by checking to see if range.Low is
+        /// greater than searchVal.
+        /// </summary>
+        /// <param name="searchVal">Value to find.</param>
+        /// <param name="range">Result.</param>
+        /// <returns>True if a valid range was returned.</returns>
+        public bool GetContainingOrSubsequentRange(int searchVal, out TypedRange range) {
+            int index = FindValue(searchVal);
+            if (index >= 0) {
+                // found a range that contains val
+                range = mRangeList[index];
+                return true;
+            }
+
+            // No matching range, so the index of the insertion point was returned.  The
+            // indexed range will have a "low" value that is greater than searchVal.  If
+            // we've reached the end of the list, the index will be past the end.
+            index = -index - 1;
+            if (index >= mRangeList.Count) {
+                // reached the end of the list
+                range = new TypedRange(-128, -128, -128);
+                return false;
+            }
+
+            range = mRangeList[index];
+            return true;
+        }
+#endif
+
         /// <summary>
         /// Gets the type of the specified value.
         /// </summary>
@@ -356,9 +388,12 @@ namespace CommonUtil {
         /// </summary>
         /// <param name="low">Lowest value (inclusive).</param>
         /// <param name="high">Highest value (inclusive).</param>
-        /// <param name="high">Value type.</param>
+        /// <param name="type">Value type.</param>
         public void AddRange(int low, int high, int type) {
             // There's probably some very efficient way to do this.  Keeping it simple for now.
+            // (TODO: do a quick check to see if there's anything overlapping; if not, just
+            // create a new item and insert it into the list.  Should handle the common case.)
+            Debug.Assert(low <= high);  // adding an empty set is valid but weird
             for (int i = low; i <= high; i++) {
                 Add(i, type);
             }
@@ -395,6 +430,16 @@ namespace CommonUtil {
                 rng.High = val - 1;
                 mRangeList[listIndex] = rng;
                 mRangeList.Insert(listIndex + 1, next);
+            }
+        }
+
+
+        public void DebugDump(string name) {
+            Debug.WriteLine(name + " has " + RangeCount + " ranges");
+            IEnumerator<TypedRange> iter = RangeListIterator;
+            while (iter.MoveNext()) {
+                TypedRange rng = iter.Current;
+                Debug.WriteLine("[+{0:x6},+{1:x6}] ({2:x2})", rng.Low, rng.High, rng.Type);
             }
         }
 

@@ -63,6 +63,9 @@ method in <code>DisasmProject.cs</code>):</p>
     the list that is displayed in .EQ directives.</li>
   <li>Generate cross-reference lists.  This is done for file data and
     for any platform/project symbols that are referenced.</li>
+  <li>If annotated auto-labels are enabled, the simple labels are
+    replaced with the annotated versions here.  (This can't be done earlier
+    because the annotations are generated from the cross-reference data.)</li>
   <li>In a debug build, some validity checks are performed.</li>
 </ul>
 
@@ -84,7 +87,8 @@ determines the width of the numeric value or length of the string.  For
 this reason, instructions do not need a format descriptor, but all
 data items do.</p>
 <p>Symbolic references are format descriptors with a symbol attached.
-The symbol reference also specifies low/high/bank.</p>
+The symbol reference also specifies low/high/bank, for partial symbol
+references like <code>LDA #&gt;symbol</code>.</p>
 <p>Every offset marked as a start point gets its own line in the on-screen
 display list.  Embedded instructions are identified internally by
 looking for instruction-start offsets inside instructions.</p>

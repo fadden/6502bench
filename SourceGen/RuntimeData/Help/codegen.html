@@ -44,9 +44,9 @@ just outputs raw hex bytes for MVN/MVP instructions.  This yields the
 correct code for all versions of the assembler, but is ugly and
 annoying.  So we want to output actual MVN/MVP instructions when producing
 code for newer versions of the assembler.</p>
-<p>When you configure a cross-assembler, SourceGen executes it and
-extracts the version information from the command-line output stream.
-This is used by the generator to ensure that the output will compile.
+<p>When you configure a cross-assembler, SourceGen runs the executable with
+version query args, and extracts the version information from the output
+stream.  This is used by the generator to ensure that the output will compile.
 If no assembler is configured, SourceGen will produce code optimized
 for the latest version of the assembler.</p>
 
@@ -58,7 +58,8 @@ generators may produce multiple source files, perhaps a link script or
 symbol definition header to go with the assembly source.  To avoid
 spreading files across the filesystem, SourceGen does all of its work
 in the same directory where the project lives.  Before you can generate
-code, you have to have given your project a name by saving it.</p>
+code, you have to have assigned your project a directory.  This is why
+you can't assemble a project until you've saved it for the first time.</p>
 
 <p>The Generate and Assemble dialog has a drop-down list near the top
 that lets you pick which assembler to target.  The name of the assembler

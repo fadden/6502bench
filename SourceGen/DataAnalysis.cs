@@ -29,14 +29,21 @@ namespace SourceGen {
     public class DataAnalysis {
         // Minimum number of consecutive identical bytes for something to be called a "run".
         private const int MIN_RUN_LENGTH = 5;
+
         // Minimum length for treating data as a run if the byte is a valid ASCII value.
         // (Alternatively, the maximum length of an ASCII string composed of single characters.)
         // Anything shorter than this is handled with a string directive, anything this long or
         // longer becomes FILL.  This should be larger than the MinCharsForString parameter.
         private const int MIN_RUN_LENGTH_ASCII = 62;
 
+        // Absolute minimum string length for auto-detection.  This is used when generating the
+        // data tables.
+        public const int MIN_STRING_LENGTH = 3;
+
         // Minimum length for an ASCII string.  Anything shorter is just output as bytes.
+        // This is the default value; the actual value is configured as a project preference.
         public const int DEFAULT_MIN_STRING_LENGTH = 4;
+
         // Set min chars to this to disable string detection.
         public const int MIN_CHARS_FOR_STRING_DISABLED = int.MaxValue;
 
@@ -454,15 +461,6 @@ namespace SourceGen {
         /// </summary>
         /// <returns>True on success.</returns>
         public void AnalyzeUncategorized() {
-            // TODO(someday): we can make this faster.  The data doesn't change, so we
-            // only need to do a full scan once, when the file is first loaded.  We can
-            // create a TypedRangeSet for runs of identical bytes, using the byte value
-            // as the type.  A second TypedRangeSet would identify runs of ASCII chars,
-            // with different types for high/low ASCII (and PETSCII?).  AnalyzeRange() would
-            // then just need to find the intersection with the sets, which should be
-            // significantly faster.  We would need to re-do the scan if the parameters
-            // for things like min match length change.
-
             FormatDescriptor oneByteDefault = FormatDescriptor.Create(1,
                 FormatDescriptor.Type.Default, FormatDescriptor.SubType.None);
             FormatDescriptor.DebugPrefabBump(-1);
@@ -503,6 +501,7 @@ namespace SourceGen {
                     }
                     if (attr.IsInstruction) {
                         // Because of embedded instructions, we can't simply leap forward.
+                        // [or can we?]
                         offset++;
                     } else {
                         Debug.Assert(attr.Length > 0);
@@ -549,81 +548,208 @@ namespace SourceGen {
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
         private void AnalyzeRange(int start, int end) {
-            // TODO(someday): consider copying the buffer into a string and using Regex.  This
-            //   can be done fairly quickly with "unsafe" code, e.g.:
+            // We want to identify runs of identical bytes, and runs of more than N human-
+            // readable characters (ASCII, high ASCII, PETSCII, whatever).  There are a few
+            // ways to do this.
+            //
+            // The simple approach is to walk through the data from start to end, checking at
+            // each offset for runs of bytes matching the criteria.  Because the data doesn't
+            // change, we can pre-analyze the data at project load time to speed things up.
+            //
+            // One approach is to put runs into TypedRangeSet (setting the type to the byte
+            // value so a run of 0x00 doesn't merge into an adjacent run of 0x01), and the
+            // various character encodings into individual RangeSets.  Then, for any given
+            // byte address, you can query the length of a potential run directly.  This could
+            // be made faster with a mergesort-like algorithm that walked through the various
+            // range sets, rather than iterating over every byte in the range.  However, the
+            // ranges passed into this method tend to be small, so the initial setup time for
+            // each region can dominate the performance.  (The optimized implementation of this
+            // approach is also fairly complicated.)
+            //
+            // A memory-hungry alternative is to create arrays of integers, one entry per byte
+            // in the file, and set each entry to the number of bytes in the run that would
+            // follow at that point.  So if a run of 20 zeroes began at off set 5, you would
+            // set run[5]=20, run[6]=19, and so on.  That avoids searching in the sets, at the
+            // cost of potentially several megabytes for a large 65816 file.
+            //
+            // It's even possible that Regex would handle this faster and more easily.  This
+            // can be done fairly quickly with "unsafe" code, e.g.:
             //   https://stackoverflow.com/questions/3028768/net-regular-expressions-on-bytes-instead-of-chars
-            //   Could be useful for ASCII stuff and the repeated-byte detector, e.g.:
             //   https://stackoverflow.com/questions/1660694/regular-expression-to-match-any-character-being-repeated-more-than-10-times
+            //
+            // Ultimately we're just not spending that much time here.  Setting
+            // AnalyzeUncategorizedData=false reveals that most of the time is spent in
+            // the caller, identifying the regions, so a significant improvement here won't
+            // have much impact on the user experience.
 
-            mDebugLog.LogI("Analyzing  +" + start.ToString("x6") + " - +" + end.ToString("x6"));
+            mDebugLog.LogI("Analyzing [+" + start.ToString("x6") + ",+" + end.ToString("x6") +"]");
 
-            int minStringChars = mAnalysisParams.MinCharsForString;
-            bool doAnalysis = mAnalysisParams.AnalyzeUncategorizedData;
             FormatDescriptor oneByteDefault = FormatDescriptor.Create(1,
                         FormatDescriptor.Type.Default, FormatDescriptor.SubType.None);
             FormatDescriptor.DebugPrefabBump(-1);
-
-            while (start <= end) {
-                if (!doAnalysis) {
-                    // Analysis is disabled, so just mark everything as single-byte data.
+            if (!mAnalysisParams.AnalyzeUncategorizedData) {
+                // Analysis is disabled, so just mark everything as single-byte data.
+                while (start <= end) {
                     mAnattribs[start].DataDescriptor = oneByteDefault;
                     FormatDescriptor.DebugPrefabBump();
                     start++;
-                    continue;
+                }
+                return;
+            }
+
+            int minStringChars = mAnalysisParams.MinCharsForString;
+
+#if false   // this is actually slower (and uses more memory)
+            while (start <= end) {
+                // This is used to let us skip forward.  It starts past the end of the block,
+                // and moves backward as we identify potential points of interest.
+                int minNextStart = end + 1;
+
+                bool found = mProject.RepeatedBytes.GetContainingOrSubsequentRange(start,
+                        out TypedRangeSet.TypedRange tyRange);
+                if (found) {
+                    if (tyRange.Low <= start) {
+                        // found a matching range
+                        Debug.Assert(tyRange.Low <= start && tyRange.High >= start);
+                        int clampEnd = Math.Min(tyRange.High, end);
+                        int repLen = clampEnd - start + 1;
+                        if (repLen >= MIN_RUN_LENGTH) {
+                            bool isAscii =
+                                TextUtil.IsPrintableAscii((char)(mFileData[start] & 0x7f));
+
+                            // IF the run isn't ASCII, OR it's so long that we don't want to
+                            // encode it as a string, OR it's so short that we don't want to
+                            // treat it as a string, THEN output it as a run.  Otherwise, just
+                            // let the ASCII-catcher handle it later.
+                            if (!isAscii ||
+                                    repLen > MIN_RUN_LENGTH_ASCII || repLen < minStringChars) {
+                                LogV(start, "Run of 0x" + mFileData[start].ToString("x2") + ": " +
+                                    repLen + " bytes");
+                                mAnattribs[start].DataDescriptor = FormatDescriptor.Create(
+                                    repLen, FormatDescriptor.Type.Fill,
+                                    FormatDescriptor.SubType.None);
+                                start += repLen;
+                                continue;
+                            }
+                        }
+                        // We didn't like this range.  We probably won't like it for any other
+                        // point within the range, so start again past it.  Ideally we'd use
+                        // Range.Low of the range that followed the one that was returned, but
+                        // we don't have that handy.
+                        minNextStart = Math.Min(minNextStart, tyRange.High + 1);
+                    } else {
+                        // no match; try to advance to the start of the next range.
+                        Debug.Assert(tyRange.Low > start);
+                        minNextStart = Math.Min(minNextStart, tyRange.Low);
+                    }
                 }
 
+                found = mProject.StdAsciiBytes.GetContainingOrSubsequentRange(start,
+                        out RangeSet.Range range);
+                if (found) {
+                    if (range.Low <= start) {
+                        // found a matching range
+                        Debug.Assert(range.Low <= start && range.High >= start);
+                        int clampEnd = Math.Min(range.High, end);
+                        int repLen = clampEnd - start + 1;
+                        if (repLen >= minStringChars) {
+                            LogV(start, "Std ASCII string, len=" + repLen + " bytes");
+                            mAnattribs[start].DataDescriptor = FormatDescriptor.Create(repLen,
+                                FormatDescriptor.Type.String, FormatDescriptor.SubType.None);
+                            start += repLen;
+                            continue;
+                        }
+
+                        minNextStart = Math.Min(minNextStart, range.High + 1);
+                    } else {
+                        Debug.Assert(range.Low > start);
+                        minNextStart = Math.Min(minNextStart, range.Low);
+                    }
+                }
+
+                found = mProject.HighAsciiBytes.GetContainingOrSubsequentRange(start,
+                        out range);
+                if (found) {
+                    if (range.Low <= start) {
+                        // found a matching range
+                        Debug.Assert(range.Low <= start && range.High >= start);
+                        int clampEnd = Math.Min(range.High, end);
+                        int repLen = clampEnd - start + 1;
+                        if (repLen >= minStringChars) {
+                            LogV(start, "High ASCII string, len=" + repLen + " bytes");
+                            mAnattribs[start].DataDescriptor = FormatDescriptor.Create(repLen,
+                                FormatDescriptor.Type.String, FormatDescriptor.SubType.None);
+                            start += repLen;
+                            continue;
+                        }
+
+                        minNextStart = Math.Min(minNextStart, range.High + 1);
+                    } else {
+                        Debug.Assert(range.Low > start);
+                        minNextStart = Math.Min(minNextStart, range.Low);
+                    }
+                }
+
+                // Advance to the next possible run location.
+                int nextStart = minNextStart > 0 ? minNextStart : start + 1;
+                Debug.Assert(nextStart > start);
+
+                // No runs found, output as single bytes.  This is the easiest form for users
+                // to edit.
+                while (start < nextStart) {
+                    mAnattribs[start].DataDescriptor = oneByteDefault;
+                    FormatDescriptor.DebugPrefabBump();
+                    start++;
+                }
+            }
+#else
+            while (start <= end) {
                 // Check for block of repeated values.
-                int length = RecognizeRun(mFileData, start, end);
+                int runLen = RecognizeRun(mFileData, start, end);
                 bool isAscii = TextUtil.IsPrintableAscii((char)(mFileData[start] & 0x7f));
-                if (length >= MIN_RUN_LENGTH) {
+                if (runLen >= MIN_RUN_LENGTH) {
                     // Output as run or ASCII string.  Prefer ASCII if the string is short
                     // enough to fit on one line (e.g. 64 chars including delimiters) and
                     // meets the minimum string length threshold.
-                    if (isAscii && length <= MIN_RUN_LENGTH_ASCII && length >= minStringChars) {
-                        // string -- if we create the descriptor here, we save a little time,
-                        //  but strings like "*****hello" turn into two separate strings.
-                        //LogV(start, "String from run of '" + (char)(mFileData[start] & 0x7f) +
-                        //    "': " + length + " bytes");
-                        //mAnattribs[start].DataDescriptor = FormatDescriptor.CreateDescriptor(
-                        //    length, FormatDescriptor.Type.String,
-                        //    FormatDescriptor.SubType.None);
-                        //start += length;
-                        //continue;
+                    if (isAscii && runLen <= MIN_RUN_LENGTH_ASCII && runLen >= minStringChars) {
+                        // String -- if we create the descriptor here, we save a little time,
+                        // but strings like "*****hello" turn into two separate strings.  So
+                        // just fall through and let the ASCII recognizer handle it.
                     } else {
                         // run
                         LogV(start, "Run of 0x" + mFileData[start].ToString("x2") + ": " +
-                            length + " bytes");
+                            runLen + " bytes");
                         mAnattribs[start].DataDescriptor = FormatDescriptor.Create(
-                            length, FormatDescriptor.Type.Fill,
+                            runLen, FormatDescriptor.Type.Fill,
                             FormatDescriptor.SubType.None);
-                        start += length;
+                        start += runLen;
                         continue;
                     }
                 }
 
-                length = RecognizeAscii(mFileData, start, end);
-                if (length >= minStringChars) {
-                    LogV(start, "ASCII string, len=" + length + " bytes");
-                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(length,
+                int asciiLen = RecognizeAscii(mFileData, start, end);
+                if (asciiLen >= minStringChars) {
+                    LogV(start, "ASCII string, len=" + asciiLen + " bytes");
+                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(asciiLen,
                         FormatDescriptor.Type.String, FormatDescriptor.SubType.None);
-                    start += length;
+                    start += asciiLen;
                     continue;
                 }
 
                 // Nothing found, output as single byte.  This is the easiest form for users
-                // to edit.
-                mAnattribs[start].DataDescriptor = oneByteDefault;
-                FormatDescriptor.DebugPrefabBump();
-
-                // It's tempting to advance by the "length" result from RecognizeRun, and if
-                // we were just looking for runs of identical bytes we could.  However, that
-                // would lose short ASCII strings that began with repeated bytes, e.g. "---%".
-
-                start++;
+                // to edit.  If we found a run, but it was too short, we can go ahead and
+                // mark all bytes in the run because we know the later matches will also be
+                // too short.
+                Debug.Assert(runLen > 0);
+                while (runLen-- != 0) {
+                    mAnattribs[start++].DataDescriptor = oneByteDefault;
+                    FormatDescriptor.DebugPrefabBump();
+                }
             }
-        }
+#endif
+            }
 
-        #region Static analyzer methods
+#region Static analyzer methods
 
         /// <summary>
         /// Checks for a repeated run of the same byte.
@@ -940,7 +1066,7 @@ namespace SourceGen {
             return stringCount;
         }
 
-        #endregion // Static analyzers
+#endregion // Static analyzers
     }
 }
 

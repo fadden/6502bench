@@ -6,6 +6,7 @@ NOTE: some tests may fail if you use a version of the assembler that is
 different from the one used to generate the expected output.  The current
 set was generated with:
 
+ * 64tass v1.53.1515
  * cc65 v2.17
  * Merlin 32 v1.0
 

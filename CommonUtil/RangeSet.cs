@@ -254,6 +254,38 @@ namespace CommonUtil {
             return (FindValue(val) >= 0);
         }
 
+#if false
+        /// <summary>
+        /// Finds a range that contains searchVal, or identifies the one that immediately
+        /// follows.  The caller can determine which by checking to see if range.Low is
+        /// greater than searchVal.
+        /// </summary>
+        /// <param name="searchVal">Value to find.</param>
+        /// <param name="range">Result.</param>
+        /// <returns>True if a valid range was returned.</returns>
+        public bool GetContainingOrSubsequentRange(int searchVal, out Range range) {
+            int index = FindValue(searchVal);
+            if (index >= 0) {
+                // found a range that contains val
+                range = mRangeList[index];
+                return true;
+            }
+
+            // No matching range, so the index of the insertion point was returned.  The
+            // indexed range will have a "low" value that is greater than searchVal.  If
+            // we've reached the end of the list, the index will be past the end.
+            index = -index - 1;
+            if (index >= mRangeList.Count) {
+                // reached the end of the list
+                range = new Range(-128, -128);
+                return false;
+            }
+
+            range = mRangeList[index];
+            return true;
+        }
+#endif
+
         /// <summary>
         /// Adds a value to the set.  If the value is already present, nothing changes.
         /// </summary>
@@ -352,8 +384,18 @@ namespace CommonUtil {
         }
 
 
+        public void DebugDump(string name) {
+            Debug.WriteLine(name + " has " + DebugRangeCount + " ranges");
+            IEnumerator<Range> iter = RangeListIterator;
+            while (iter.MoveNext()) {
+                Range rng = iter.Current;
+                Debug.WriteLine("[+{0:x6},+{1:x6}]", rng.Low, rng.High);
+            }
+        }
+
+
         /// <summary>
-        /// Internal test function.
+        /// Internal test helper function.
         /// </summary>
         private static bool CheckRangeSet(RangeSet set, int expectedRanges, int[] expected) {
             if (set.DebugRangeCount != expectedRanges) {

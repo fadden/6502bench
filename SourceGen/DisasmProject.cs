@@ -37,7 +37,7 @@ namespace SourceGen {
         private const long MAGIC = 6982516645493599905;
 
 
-        #region Data that is saved and restored
+        #region Data that is saved to the project file
         // All data held by structures in this section are persistent, and will be
         // written to the project file.  Anything not in this section may be discarded
         // at any time.  Smaller items are kept in arrays, with one entry per byte
@@ -143,6 +143,13 @@ namespace SourceGen {
         // Project and platform symbols that are being referenced from code.
         public List<DefSymbol> ActiveDefSymbolList { get; private set; }
 
+#if false
+        // Data scan results.
+        public TypedRangeSet RepeatedBytes { get; private set; }
+        public RangeSet StdAsciiBytes { get; private set; }
+        public RangeSet HighAsciiBytes { get; private set; }
+#endif
+
         // List of changes for undo/redo.
         private List<ChangeSet> mUndoList = new List<ChangeSet>();
 
@@ -226,6 +233,9 @@ namespace SourceGen {
             mFileData = fileData;
             mDataFileName = dataFileName;
             FileDataCrc32 = CommonUtil.CRC32.OnWholeBuffer(0, mFileData);
+#if false
+            ScanFileData();
+#endif
 
             // Mark the first byte as code so we have something to do.  This may get
             // overridden later.
@@ -303,7 +313,88 @@ namespace SourceGen {
             Debug.Assert(CRC32.OnWholeBuffer(0, fileData) == FileDataCrc32);
             mFileData = fileData;
             mDataFileName = dataFileName;
+
+#if false
+            ScanFileData();
+#endif
         }
+
+#if false
+        private delegate bool ByteTest(byte val);   // for ScanFileData()
+
+        /// <summary>
+        /// Scans the contents of the file data array, noting runs of identical bytes and
+        /// other interesting bits.
+        /// 
+        /// The file data is guaranteed not to change, so doing a bit of work here can save
+        /// us time during data analysis.
+        /// </summary>
+        private void ScanFileData() {
+            DateTime startWhen = DateTime.Now;
+            // Find runs of identical bytes.
+            TypedRangeSet repeats = new TypedRangeSet();
+
+            Debug.Assert(mFileData.Length > 0);
+            byte matchByte = mFileData[0];
+            int count = 1;
+            for (int i = 1; i < mFileData.Length; i++) {
+                if (mFileData[i] == matchByte) {
+                    count++;
+                    continue;
+                }
+                if (count >= DataAnalysis.MIN_RUN_LENGTH) {
+                    repeats.AddRange(i - count, i - 1, matchByte);
+                }
+                matchByte = mFileData[i];
+                count = 1;
+            }
+            if (count >= DataAnalysis.MIN_RUN_LENGTH) {
+                repeats.AddRange(mFileData.Length - count, mFileData.Length - 1, matchByte);
+            }
+
+            RangeSet ascii = new RangeSet();
+            CreateByteRangeSet(ascii, mFileData, DataAnalysis.MIN_STRING_LENGTH,
+                delegate (byte val) {
+                    return val >= 0x20 && val < 0x7f;
+                }
+            );
+            RangeSet highAscii = new RangeSet();
+            CreateByteRangeSet(highAscii, mFileData, DataAnalysis.MIN_STRING_LENGTH,
+                delegate (byte val) {
+                    return val >= 0xa0 && val < 0xff;
+                }
+            );
+
+            if (false) {
+                repeats.DebugDump("Repeated-Bytes (" + DataAnalysis.MIN_RUN_LENGTH + "+)");
+                ascii.DebugDump("Standard-ASCII (" + DataAnalysis.MIN_STRING_LENGTH + "+)");
+                highAscii.DebugDump("High-ASCII (" + DataAnalysis.MIN_STRING_LENGTH + "+)");
+            }
+            Debug.WriteLine("ScanFileData took " +
+                ((DateTime.Now - startWhen).Milliseconds) + " ms");
+
+            RepeatedBytes = repeats;
+            StdAsciiBytes = ascii;
+            HighAsciiBytes = highAscii;
+        }
+
+        private void CreateByteRangeSet(RangeSet set, byte[] data, int minLen, ByteTest tester) {
+            int count = 0;
+            for (int i = 0; i < data.Length; i++) {
+                if (tester(data[i])) {
+                    count++;
+                } else if (count < minLen) {
+                    count = 0;
+                } else {
+                    set.AddRange(i - count, i - 1);
+                    count = 0;
+                }
+            }
+            if (count >= minLen) {
+                set.AddRange(data.Length - count, data.Length - 1);
+            }
+        }
+#endif
 
         /// <summary>
         /// Loads platform symbol files and extension scripts.
@@ -486,11 +577,16 @@ namespace SourceGen {
 
             reanalysisTimer.StartTask("GenerateActiveDefSymbolList");
             // Generate the list of project/platform symbols that are being used.  This forms
-            // the list of EQUates at the top of the file.
+            // the list of EQUates at the top of the file.  The active set is identified from
+            // the cross-reference data.
             GenerateActiveDefSymbolList();
             reanalysisTimer.EndTask("GenerateActiveDefSymbolList");
 
+#if DEBUG
+            reanalysisTimer.StartTask("Validate");
             Validate();
+            reanalysisTimer.EndTask("Validate");
+#endif
 
             reanalysisTimer.EndTask("DisasmProject.Analyze()");
             //reanalysisTimer.DumpTimes("DisasmProject timers:", debugLog);
