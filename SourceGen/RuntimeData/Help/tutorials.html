@@ -82,9 +82,9 @@ things happened:</p>
 <ul>
   <li>The line was highlighted in the system selection color (usually
     blue).</li>
-  <li>Address 1017 and label L1017 were highlighted.  When a line
-    with an in-file operand is selected, the target address is
-    highlighted.</li>
+  <li>Address 1017 and label L1017 were highlighted.  When you select
+    a line with an operand that targets an in-file address, the target
+    address is highlighted.</li>
   <li>An entry appeared in the References window.  This tells you that the
     only reference to L1002 is a branch from address $100B.</li>
   <li>The Info window filled with a bunch of text that describes the
@@ -226,7 +226,7 @@ as a hexadecimal value.</p>
 Actions &gt; Edit Label.  Enter "IS_OK", and hit Enter.  (NOTE: labels are
 case-sensitive, so it needs to match the operand at $2005 exactly.)  You'll
 see the new label appear, and the operand at line $2005 will use it.</p>
-<p>There's an easier way.  Use Edit &gt; Undo twice, to get back to the place
+<p>There's an easier way.  Use Edit &gt; Undo twice, to get back to the time
 where line $2005 is using "L2009" as its operand.  Select that line and
 Actions &gt; Edit Operand.  Enter "IS_OK", then select "Create label at target
 address instead".  Hit "OK".</p>
@@ -237,7 +237,7 @@ process: the operand at $2005 is still a numeric reference.  It was
 automatically changed to match IS_OK in the same way that the references
 to MAIN were when we renamed "L2000" earlier.  If you actually do want the
 symbolic reference, there's another option in the Edit Operand dialog that
-does it.)</p>
+does it.  The difference can be noted in the Info window.)</p>
 
 
 <h3>Editing Data Operands</h3>
@@ -264,12 +264,13 @@ At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
 two separate regions.  Select "mixed ASCII and non-ASCII", then click
 "OK".</p>
-<p>We now have two ".STR" lines, one for "string zero  ", one with the
+<p>We now have two ".STR" lines, one for "string zero  ", and one with the
 STR1 label and the rest of the string data.  This is okay, but it's not
-really what we want.  The code at $2022 appears to be loading a 16-bit
+really what we want.  The code at $200B appears to be loading a 16-bit
 address from data at $2025, so we want to use that if we can.</p>
-<p>Select Edit &gt; Undo twice.  You should be back to a state where there's
-a single ".STR" line at the bottom, split across two lines with a '+'.</p>
+<p>Select Edit &gt; Undo three times.  You should be back to the state where
+there's a single ".STR" line at the bottom, split across two lines with
+a '+'.</p>
 <p>Select the line at $2026.  This is currently formatted as a string,
 but that appears to be incorrect, so let's format it as individual bytes
 instead.  There's an easy way to do that: use Actions &gt; Toggle Single-Byte
@@ -287,10 +288,11 @@ the top line in the dialog should now say, "10 bytes selected".  Because
 of 3 or 4, so the 24-bit and 32-bit options are not enabled.  Click the
 "16-bit words, little-endian" radio button, then over to the right, click
 the "Address" radio button.  Click "OK".</p>
-<p>We just told SourceGen that those 10 bytes are actually five numeric
+<p>We just told SourceGen that those 10 bytes are actually five 16-bit numeric
 references.  SourceGen determined that the addresses are contained in the
 file, and created labels for each of them.  Labels only work if they're
-on their own line, so each string is now in a separate ".STR" statement.</p>
+on their own line, so the long string was automatically split into five
+separate ".STR" statements.</p>
 
 <p>Use File &gt; Save (or hit Ctrl+S) to save your work.</p>
 
@@ -394,7 +396,7 @@ label, apply the label to the low and high bytes in the table, add a
 code entry point hint -- but did several of them at once.</p>
 
 <p>We don't want to save this project, so select File &gt; Close.  When
-SourceGen asks if you want to continue, click OK.</p>
+SourceGen asks for confirmation, click Discard & Continue.</p>
 
 
 <h3>Going Deeper</h3>
@@ -406,20 +408,22 @@ select "Tutorial2".</p>
 which is a pretty reliable sign that we're not in a code section.  The
 generic profile puts a code entry point hint on the first byte, but that's
 wrong here.  This particular file begins with <code>00 20</code>, which
-could be a load address (C64 binaries look like this).  So let's start
+could be a load address (some C64 binaries look like this).  So let's start
 with that assumption.</p>
 <p>Click on the first line of code at address $1000, and select
 Actions &gt; Remove Hints.  The $20 got absorbed into a string.  The string
 is making it hard to manipulate the next few bytes, so let's fix that by
-selecting Edit &gt; Toggle Data Scan.  This turns off the feature that
-looks for strings and .FILL regions, so now each uncategorized byte is
+selecting Edit &gt; Toggle Data Scan (Ctrl+D).  This turns off the feature
+that looks for strings and .FILL regions, so now each uncategorized byte is
 on its own line.</p>
-<p>Select the first two lines, use Actions &gt; Edit Operand, and format
-it as a 16-bit little-endian word.  We're assuming this is the load
-address for the data that follows, so click on the line with address
-$1002, select Actions &gt; Set Address, and enter "2000".  With that
-line still selected, use Actions &gt; Hint As Code Entry Point to identify
-it as code.</p>
+<p>You could select the first two lines and use Actions &gt; Edit Operand
+to format them as a 16-bit little-endian hex value, but there's a shortcut:
+select the first line only, then Edit &gt; Format As Word (Ctrl+W).  It
+automatically grabbed the following byte and combined them.  Since we believe
+$2000 is the load address for everything that follows, click on the line
+with address $1002, select Actions &gt; Set Address, and enter "2000".  With
+that line still selected, use Actions &gt; Hint As Code Entry Point
+(Ctrl+H then Ctrl+C) to identify it as code.</p>
 <p>That looks better, but it's branching off the bottom of the screen
 (unless you have a really tall screen or small fonts) because of all the
 intervening data.  Use Edit &gt; Toggle Data Scan to turn the string
@@ -429,17 +433,18 @@ finder back on.</p>
 followed by $00.  These look like null-terminated strings, so let's make
 it official.  But first, let's do it wrong.  Click on the line with
 address $2004 to select it.  Hold the shift key down, then double-click
-on the operand field of the line with address $2031 (i.e. click on
-"last string").</p>
+on the operand field of the line with address $2031 (i.e. double-click on
+the words "last string").</p>
 <p>The Edit Data Format dialog opens, but the null-terminated strings
 option is not available.  This is because we didn't include the null byte
 on the last string.  To be recognized as one of the "special" string types,
 every selected string must match the expected pattern.</p>
 <p>Cancel out of the dialog.  Hold the control key down, and double-click
-on the operand on line $203c ($00).  Control-clicking adds the line to
-the selection, and double-clicking the operand reopens the dialog.  You
-should see "Null-terminated strings (4)" as an available option now.  Click
-on that, then click OK.  The strings are now shown as .ZSTR.</p>
+on the operand on line $203c (<code>.DD1 $00</code>).  Control-clicking
+adds the line to the selection, and double-clicking the operand reopens
+the dialog.  You should see "Null-terminated strings (4)" as an available
+option now.  Click on that, then click OK.  The strings are now shown
+as .ZSTR operands.</p>
 
 <p>It's wise to save your work periodically.  Use File &gt; Save to create
 a project file for Tutorial2.</p>
@@ -494,7 +499,9 @@ counts are adjusted for everything SourceGen can figure out.  For example,
 the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
 cycles but might take more.  That's because conditional branches take an
 extra cycles if the branch is taken.  The BNE on line $2061" shows 3 cycles,
-because we know that the branch is always taken.</p>
+because we know that the branch is always taken.  (If you want to see why,
+look at the value of the 'Z' flag in the "flags" column.  Lower-case 'z'
+means the zero-flag is clear.)</p>
 <p>The cycle-count comments are included in assembled output as well.  If
 you add an end-of-line comment, it appears after the cycle count.</p>
 <p>Hit Ctrl+S to save your project.  Make that a habit.</p>
@@ -530,7 +537,7 @@ you scroll up, you'll see that the stores to PTR1+1 and PTR2+1 are now
 just stores to $03 and $05.</p>
 <p>The nearby-target behavior is generally desirable, because it lets you
 avoid explicitly labeling every part of a multi-byte data item.  For now,
-use Edit &gt; Undo to turn it back on.</p>
+use Edit &gt; Undo to switch it back on.</p>
 
 <p>The code at $2085 looks a bit strange.  LDX, then a BIT with a weird
 symbol, then another LDX.  If you look at the "bytes" column, you'll notice

@@ -80,10 +80,13 @@ will initially contain assembler-specific default values.  All of
 the values in the Assembler Configuration box may be configured
 differently for each assembler.</p>
 <p>The "executable" box holds the full path to the cross-assembler
-executable.  For cc65 this is <code>bin/cl65.exe</code>, for Merlin32
-you need <code>Merlin32.exe</code>.  (On non-Windows platforms, you
-won't need the ".exe".)  For cc65 you need a full installation, with
-the configuration files and libraries, not just the cl65 binary itself.</p>
+executable.
+For cc65 this is <code>bin/cl65.exe</code>,
+for Merlin32 you need <code>Merlin32.exe</code>,
+for 64tass it's <code>64tass.exe</code>.
+(On non-Windows platforms, you won't need the ".exe".)  For cc65 you need
+a full installation, with the configuration files and libraries, not just
+the cl65 binary alone.</p>
 <p>The "column widths" section allows you to specify the width of the
 label, opcode, operand, and comment fields.  If the width is less than 1,
 or isn't a valid number, 1 will be used.  (Note: the comment width isn't
