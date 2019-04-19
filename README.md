@@ -30,9 +30,9 @@ as well as many less-common ones.
   processor status flags are tracked, allowing identification of branches
   that are always/never taken, accurate cycle count listings, and correct
   analysis of 65816 code with variable-width registers.
-- Easy generation of assembly source code in popular formats (currently
-  cc65 and Merlin 32). Cross-assemblers can be invoked from the GUI to
-  verify correctness.
+- Easy generation of assembly source code for popular cross-assemblers
+  (currently cc65, 64tass, and Merlin 32). Cross-assemblers can be invoked
+  from the GUI to verify correctness.
 - Symbols and constants are provided for ROM and operating system entry
   points on several popular systems.
 - Project files are designed for sharing and collaboration.</li>

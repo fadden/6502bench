@@ -68,14 +68,17 @@ namespace SourceGen.AsmGen {
 
         /// <summary>
         /// Creates a populated AssemblerConfig from the app settings for the specified ID.
+        /// If the assembler hasn't been configured yet, the default configuration object
+        /// will be returned.
         /// </summary>
         /// <param name="settings">Settings object to pull the values from.</param>
         /// <param name="id">Assembler ID.</param>
-        /// <returns>The AssemblerConfig, or null if not configured.</returns>
+        /// <returns>The AssemblerConfig.</returns>
         public static AssemblerConfig GetConfig(AppSettings settings, AssemblerInfo.Id id) {
             string cereal = settings.GetString(GetSettingName(id), null);
             if (string.IsNullOrEmpty(cereal)) {
-                return null;
+                IAssembler asm = AssemblerInfo.GetAssembler(id);
+                return asm.GetDefaultConfig();
             }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
