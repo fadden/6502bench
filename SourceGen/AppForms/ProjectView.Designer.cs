@@ -92,6 +92,7 @@ namespace SourceGen.AppForms
             this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
             this.formatSplitAddressTableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toggleSingleBytesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.formatAsWordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteNoteCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripSeparator();
             this.showHexDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -175,7 +176,6 @@ namespace SourceGen.AppForms
             this.symbolNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.infoGroupBox = new System.Windows.Forms.GroupBox();
             this.infoTextBox = new System.Windows.Forms.TextBox();
-            this.formatAsWordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -603,6 +603,14 @@ namespace SourceGen.AppForms
             this.toggleSingleBytesToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
             this.toggleSingleBytesToolStripMenuItem.Text = "Toggle Single-Byte Format";
             this.toggleSingleBytesToolStripMenuItem.Click += new System.EventHandler(this.ToggleSingleBytes_Click);
+            // 
+            // formatAsWordToolStripMenuItem
+            // 
+            this.formatAsWordToolStripMenuItem.Name = "formatAsWordToolStripMenuItem";
+            this.formatAsWordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.formatAsWordToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
+            this.formatAsWordToolStripMenuItem.Text = "Format As Word";
+            this.formatAsWordToolStripMenuItem.Click += new System.EventHandler(this.formatAsWordToolStripMenuItem_Click);
             // 
             // deleteNoteCommentToolStripMenuItem
             // 
@@ -1452,14 +1460,6 @@ namespace SourceGen.AppForms
             this.infoTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.infoTextBox.Size = new System.Drawing.Size(177, 120);
             this.infoTextBox.TabIndex = 0;
-            // 
-            // formatAsWordToolStripMenuItem
-            // 
-            this.formatAsWordToolStripMenuItem.Name = "formatAsWordToolStripMenuItem";
-            this.formatAsWordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.formatAsWordToolStripMenuItem.Size = new System.Drawing.Size(289, 22);
-            this.formatAsWordToolStripMenuItem.Text = "Format As Word";
-            this.formatAsWordToolStripMenuItem.Click += new System.EventHandler(this.formatAsWordToolStripMenuItem_Click);
             // 
             // ProjectView
             // 

@@ -33,6 +33,10 @@ namespace SourceGen {
         // that forward movement is always to places we've jumped to, and backward movement
         // is to places we jumped away from.
 
+        // TODO(someday): this can be simplified(?) to use a pair of stacks, one for moving
+        //   forward, one for moving backward.  Traversing the stack requires popping off one
+        //   and pushing onto the other, rather than moving the cursor.  No change in
+        //   behavior, but potentially easier to make sense of.
         // TODO(someday): record more about what was selected, so e.g. when we move back or
         //   forward to a Note we can highlight it appropriately.
         // TODO(someday): once we have the above, we can change the back button to a pop-up

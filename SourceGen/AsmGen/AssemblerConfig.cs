@@ -25,7 +25,7 @@ namespace SourceGen.AsmGen {
     /// application settings.
     /// </summary>
     public class AssemblerConfig {
-        // Fields are deserialized from JSON.  Changing the names will break compatibility.
+        // Public fields are deserialized from JSON.  Changing the names will break compatibility.
 
         /// <summary>
         /// Path to cross-assembler executable.  Will be null or empty if this assembler

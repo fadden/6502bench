@@ -581,6 +581,12 @@ namespace SourceGen {
             // AnalyzeUncategorizedData=false reveals that most of the time is spent in
             // the caller, identifying the regions, so a significant improvement here won't
             // have much impact on the user experience.
+            //
+            // Vague idea: figure out how to re-use the results from the previous analysis
+            // pass.  At a superficial level we can cache the result of calling here with a
+            // particular (start, end) pair.  At a higher level we may be able to avoid
+            // the search for uncategorized data, certainly at the bank level, possibly within
+            // a bank.
 
             mDebugLog.LogI("Analyzing [+" + start.ToString("x6") + ",+" + end.ToString("x6") +"]");
 
