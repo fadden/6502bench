@@ -1,0 +1,38 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:SourceGenWPF.Res">
+
+    <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
+    <system:String x:Key="str_ErrBadFdType">Bad format descriptor type</system:String>
+    <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
+    <system:String x:Key="str_ErrBadIdent">Invalid file identifier</system:String>
+    <system:String x:Key="str_ErrBadRange">Bad range</system:String>
+    <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
+    <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
+    <system:String x:Key="str_ErrBadTypeHint">Type hint not recognized</system:String>
+    <system:String x:Key="str_ErrDuplicateLabelFmt">Removing duplicate label '{0}' (offset +{1:x6})</system:String>
+    <system:String x:Key="str_ErrFileExistsNotDirFmt">The file {0} exists, but is not a directory.</system:String>
+    <system:String x:Key="str_ErrFileNotFoundFmt">File not found: {0}</system:String>
+    <system:String x:Key="str_ErrFileReadOnlyFmt">Cannot write to read-only file {0}.</system:String>
+    <system:String x:Key="str_ErrInvalidIntValue">Could not convert value to integer</system:String>
+    <system:String x:Key="str_ErrInvalidKeyValue">Key value is out of range</system:String>
+    <system:String x:Key="str_ErrNotProjectFile">This does not appear to be a valid .dis65 project file</system:String>
+    <system:String x:Key="str_ErrProjectFileCorrupt">Project file may be corrupt</system:String>
+    <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
+    <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
+    <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
+    <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
+    <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
+    <system:String x:Key="str_InitialParameters">Default settings:</system:String>
+    <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>
+    <system:String x:Key="str_ProjectFieldComment">comment</system:String>
+    <system:String x:Key="str_ProjectFieldLongComment">long comment</system:String>
+    <system:String x:Key="str_ProjectFieldNote">note</system:String>
+    <system:String x:Key="str_ProjectFieldOperandFormat">operand format</system:String>
+    <system:String x:Key="str_ProjectFieldStatusFlags">status flag override</system:String>
+    <system:String x:Key="str_ProjectFieldTypeHint">type hint</system:String>
+    <system:String x:Key="str_ProjectFieldUserLabel">user-defined label</system:String>
+    <system:String x:Key="str_ProjectFromNewerApp">This project was created by a newer version of SourceGen. It may contain data that will be lost if the project is edited.</system:String>
+    <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
+</ResourceDictionary>

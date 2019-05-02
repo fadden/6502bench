@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,12 +56,45 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddressMap.cs" />
+    <Compile Include="Anattrib.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PseudoOp.cs" />
+    <Compile Include="Res\Strings.xaml.cs" />
+    <Compile Include="RuntimeDataAccess.cs" />
+    <Compile Include="Sandbox\DomainManager.cs" />
+    <Compile Include="Sandbox\PluginDllCache.cs" />
+    <Compile Include="Sandbox\ScriptManager.cs" />
+    <Compile Include="Sandbox\Sponsor.cs" />
+    <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolTable.cs" />
+    <Compile Include="SystemDefaults.cs" />
+    <Compile Include="SystemDefs.cs" />
+    <Compile Include="UndoableChange.cs" />
+    <Compile Include="VirtualListViewSelection.cs" />
+    <Compile Include="WeakSymbolRef.cs" />
+    <Compile Include="XrefSet.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppSettings.cs" />
+    <Compile Include="AutoLabel.cs" />
+    <Compile Include="ChangeSet.cs" />
+    <Compile Include="CodeAnalysis.cs" />
+    <Compile Include="DataAnalysis.cs" />
+    <Compile Include="DefSymbol.cs" />
+    <Compile Include="DisasmProject.cs" />
+    <Compile Include="DisplayList.cs" />
+    <Compile Include="ExternalFile.cs" />
+    <Compile Include="FormatDescriptor.cs" />
+    <Compile Include="HelpAccess.cs" />
+    <Compile Include="MultiLineComment.cs" />
+    <Compile Include="NavStack.cs" />
+    <Compile Include="PlatformSymbols.cs" />
+    <Compile Include="ProjectFile.cs" />
+    <Compile Include="ProjectProperties.cs" />
     <Compile Include="ProjWin\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -97,6 +131,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Res\Strings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Asm65\Asm65.csproj">
+      <Project>{65a50bd0-ab07-492b-b51c-4ca1b700224d}</Project>
+      <Name>Asm65</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtil\CommonUtil.csproj">
+      <Project>{a2993eac-35d8-4768-8c54-152b4e14d69c}</Project>
+      <Name>CommonUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PluginCommon\PluginCommon.csproj">
+      <Project>{70f04543-9e46-4ad3-875a-160fd198c0ff}</Project>
+      <Name>PluginCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\SourceGenIcon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
