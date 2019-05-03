@@ -20,7 +20,9 @@ limitations under the License.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGenWPF.ProjWin"
         mc:Ignorable="d"
-        Title="6502bench SourceGen" Width="810" Height="510" MinWidth="800" MinHeight="500" Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico">
+        Title="6502bench SourceGen"
+        Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
+        Width="810" Height="510" MinWidth="800" MinHeight="500">
 
     <Window.Resources>
         <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
@@ -176,7 +178,6 @@ limitations under the License.
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <Image Source="/SourceGenWPF;component/Res/Logo.png" Height="100"/>
-                    <!-- <Image Source="Res/Logo.png" Height="100"/> -->
                     <Grid Margin="8">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -185,7 +186,10 @@ limitations under the License.
                         <TextBlock Grid.Row="0" VerticalAlignment="Center"
                                    Text="6502bench SourceGen" FontSize="36"/>
                         <TextBlock Grid.Row="1" VerticalAlignment="Center"
-                                   Text="Version X.Y.Z Alpha 1" FontSize="24"/>
+                                   Text="{Binding ProgramVersionString, StringFormat={}Version {0},
+                                       RelativeSource={RelativeSource FindAncestor, AncestorType=Window},
+                                       FallbackValue=Version X.Y.Z-alpha1}"
+                                   FontSize="24"/>
                     </Grid>
                 </StackPanel>
 

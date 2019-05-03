@@ -33,6 +33,12 @@ namespace SourceGenWPF.ProjWin {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        public static readonly CommonUtil.Version ProgramVersion =
+            new CommonUtil.Version(1, 2, 0, CommonUtil.Version.PreRelType.Alpha, 1);
+        public string ProgramVersionString {
+            get { return ProgramVersion.ToString(); }
+        }
+
         public MainWindow() {
             InitializeComponent();
         }
