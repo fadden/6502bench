@@ -1,0 +1,24 @@
+﻿<Window x:Class="SourceGenWPF.ProjWin.ProjectLoadIssues"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceGenWPF.ProjWin"
+        mc:Ignorable="d"
+        Title="Project Load Issues" ShowInTaskbar="False"
+        Width="570" Height="231" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Loaded="ProjectLoadIssues_Loaded">
+    <DockPanel LastChildFill="False" Margin="8">
+        <TextBlock DockPanel.Dock="Top">Problems were detected while loading the project file:</TextBlock>
+        <TextBox Name="messageTextBox" DockPanel.Dock="Top" Margin="0,8,0,0" Height="107"
+                 IsReadOnly="True" TextWrapping="Wrap" Text=""/>
+        <TextBlock Name="invalidDiscardLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Foreground="Red">
+            Invalid data items will be discarded when you save the project.
+        </TextBlock>
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0"
+                    Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="okButton" Width="75" Content="Continue" IsDefault="True"/>
+            <Button Name="cancelButton" Margin="8,0,0,0" Width="75" Content="Cancel" IsCancel="True"/>
+        </StackPanel>
+    </DockPanel>
+</Window>

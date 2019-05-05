@@ -33,19 +33,32 @@ namespace SourceGenWPF.ProjWin {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        public static readonly CommonUtil.Version ProgramVersion =
-            new CommonUtil.Version(1, 2, 0, CommonUtil.Version.PreRelType.Alpha, 1);
         public string ProgramVersionString {
-            get { return ProgramVersion.ToString(); }
+            get { return App.ProgramVersion.ToString(); }
         }
+
+        private MainController mUI;
 
         public MainWindow() {
             InitializeComponent();
+
+            mUI = new MainController();
         }
 
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             // test
             Debug.WriteLine("assembling");
+        }
+
+        private void RecentProject_Executed(object sender, ExecutedRoutedEventArgs e) {
+            if (!int.TryParse((string)e.Parameter, out int recentIndex) ||
+                    recentIndex < 1 || recentIndex > MainController.MAX_RECENT_PROJECTS) {
+                throw new Exception("Bad parameter: " + e.Parameter);
+            }
+            recentIndex--;
+
+            Debug.WriteLine("Recent project #" + recentIndex);
+            mUI.OpenRecentProject(recentIndex);
         }
     }
 }

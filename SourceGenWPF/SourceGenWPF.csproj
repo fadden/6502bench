@@ -62,6 +62,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MainController.cs" />
+    <Compile Include="ProjWin\DataFileLoadIssue.xaml.cs">
+      <DependentUpon>DataFileLoadIssue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProjWin\DiscardChanges.xaml.cs">
+      <DependentUpon>DiscardChanges.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ProjWin\ProjectLoadIssue.xaml.cs">
+      <DependentUpon>ProjectLoadIssue.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PseudoOp.cs" />
     <Compile Include="Res\Strings.xaml.cs" />
     <Compile Include="RuntimeDataAccess.cs" />
@@ -127,7 +137,19 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ProjWin\DataFileLoadIssue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProjWin\DiscardChanges.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ProjWin\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProjWin\ProjectLoadIssue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

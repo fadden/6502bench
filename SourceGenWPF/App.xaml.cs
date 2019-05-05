@@ -26,5 +26,7 @@ namespace SourceGenWPF {
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application {
+        public static readonly CommonUtil.Version ProgramVersion =
+            new CommonUtil.Version(1, 2, 0, CommonUtil.Version.PreRelType.Alpha, 1);
     }
 }

@@ -30,10 +30,12 @@ limitations under the License.
                 <KeyGesture>Ctrl+Shift+A</KeyGesture>
             </RoutedUICommand.InputGestures>
         </RoutedUICommand>
+        <RoutedUICommand x:Key="RecentProject"/>
     </Window.Resources>
 
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource AssembleCmd}" Executed="AssembleCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RecentProject}" Executed="RecentProject_Executed"/>
     </Window.CommandBindings>
     
     <DockPanel>
@@ -196,8 +198,12 @@ limitations under the License.
                 <StackPanel Grid.Row="1" HorizontalAlignment="Left">
                     <Button Content="Start new project" Width="200" Height="50" Margin="10,30,10,10"/>
                     <Button Content="Open existing project" Width="200" Height="50" Margin="10"/>
-                    <Button Content="Recent project #1" Width="200" Height="50" Margin="10"/>
-                    <Button Content="Recent project #2" Width="200" Height="50" Margin="10"/>
+                    <Button Content="Recent project #1" Width="200" Height="50" Margin="10"
+                            CommandParameter="1"
+                            Command="{DynamicResource RecentProject}"/>
+                    <Button Content="Recent project #2" Width="200" Height="50" Margin="10"
+                            CommandParameter="2"
+                            Command="{DynamicResource RecentProject}"/>
                 </StackPanel>
             </Grid>
 
