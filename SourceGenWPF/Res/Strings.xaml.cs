@@ -18,10 +18,10 @@ using System.Windows;
 
 namespace SourceGenWPF.Res {
     public static class Strings {
-        public static string ERR_BAD_FD_FMT =
-            (string)Application.Current.FindResource("str_ErrBadFdFmt");
-        public static string ERR_BAD_FD_TYPE =
-            (string)Application.Current.FindResource("str_ErrBadFdType");
+        public static string ERR_BAD_FD =
+            (string)Application.Current.FindResource("str_ErrBadFd");
+        public static string ERR_BAD_FD_FORMAT =
+            (string)Application.Current.FindResource("str_ErrBadFdFormat");
         public static string ERR_BAD_FILE_LENGTH =
             (string)Application.Current.FindResource("str_ErrBadFileLength");
         public static string ERR_BAD_IDENT =

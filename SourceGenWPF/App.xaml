@@ -19,9 +19,9 @@ limitations under the License.
              xmlns:local="clr-namespace:SourceGenWPF"
              StartupUri="ProjWin/MainWindow.xaml">
     <Application.Resources>
-        <FontFamily x:Key="GeneralMonoFont">Consolas</FontFamily>
+        <ResourceDictionary>
+            <FontFamily x:Key="GeneralMonoFont">Consolas</FontFamily>
 
-        <ResourceDictionary x:Key="whatever">
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Res/Strings.xaml"/>
             </ResourceDictionary.MergedDictionaries>

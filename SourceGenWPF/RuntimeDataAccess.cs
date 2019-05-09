@@ -55,7 +55,11 @@ namespace SourceGenWPF {
                 return sBasePath;
             }
 
+            // Hack during development: remove bin/Debug, and convert SourceGenWPF to SourceGen.
             string upTwo = Path.GetDirectoryName(Path.GetDirectoryName(baseDir));
+            if (upTwo.EndsWith("WPF")) {
+                upTwo = upTwo.Substring(0, upTwo.Length - 3);
+            }
             tryPath = Path.Combine(upTwo, RUNTIME_DATA_FILENAME);
             if (Directory.Exists(tryPath)) {
                 sBasePath = Path.GetFullPath(tryPath);

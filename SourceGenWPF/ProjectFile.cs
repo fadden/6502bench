@@ -620,7 +620,7 @@ namespace SourceGenWPF {
                 }
                 if (intKey < 0 || intKey + dfd.Length > spf.FileDataLength) {
                     report.Add(FileLoadItem.Type.Warning,
-                        string.Format(Res.Strings.ERR_BAD_FD_FMT, intKey));
+                        string.Format(Res.Strings.ERR_BAD_FD, intKey));
                     continue;
                 }
 
@@ -675,7 +675,7 @@ namespace SourceGenWPF {
                 subFormat = (FormatDescriptor.SubType)Enum.Parse(
                     typeof(FormatDescriptor.SubType), sfd.SubFormat);
             } catch (ArgumentException) {
-                report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_FD_TYPE +
+                report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_FD_FORMAT +
                     ": " + sfd.Format + "/" + sfd.SubFormat);
                 return false;
             }

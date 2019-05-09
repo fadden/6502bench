@@ -3,8 +3,8 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:SourceGenWPF.Res">
 
-    <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
-    <system:String x:Key="str_ErrBadFdType">Bad format descriptor type</system:String>
+    <system:String x:Key="str_ErrBadFd">Bad format descriptor at +{0:x6}.</system:String>
+    <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
     <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
     <system:String x:Key="str_ErrBadIdent">Invalid file identifier</system:String>
     <system:String x:Key="str_ErrBadRange">Bad range</system:String>

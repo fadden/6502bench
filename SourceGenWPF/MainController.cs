@@ -184,9 +184,10 @@ namespace SourceGenWPF {
 
 
         public void OpenRecentProject(int projIndex) {
-            //if (DoClose()) {
-            //    DoOpenFile(mRecentProjectPaths[projIndex]);
-            //}
+            if (DoClose()) {
+                //DoOpenFile(mRecentProjectPaths[projIndex]);
+                DoOpenFile(@"C:\Src\6502bench\EXTRA\ZIPPY#ff2000.dis65");
+            }
         }
 
         /// <summary>

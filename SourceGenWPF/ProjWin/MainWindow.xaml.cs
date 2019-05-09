@@ -42,6 +42,8 @@ namespace SourceGenWPF.ProjWin {
         public MainWindow() {
             InitializeComponent();
 
+            // TODO: verify that RuntimeData dir is accessible
+
             mUI = new MainController();
         }
 

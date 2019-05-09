@@ -202,6 +202,12 @@ namespace SourceGenWPF {
             switch (mIdentLocation) {
                 case Location.RuntimeDir:
                     dir = RuntimeDataAccess.GetDirectory();
+                    if (string.IsNullOrEmpty(dir)) {
+                        // Could happen if we can't find the runtime data directory, though
+                        // we probably should've failed before now.
+                        Debug.Assert(false);
+                        return null;
+                    }
                     subdirAllowed = true;
                     break;
                 case Location.ProjectDir:
