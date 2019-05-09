@@ -15,8 +15,10 @@
  */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,11 +34,8 @@ namespace SourceGenWPF.ProjWin {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        public string ProgramVersionString {
-            get { return App.ProgramVersion.ToString(); }
-        }
-
+    public partial class MainWindow : Window, INotifyPropertyChanged {
+        /// <summary>
         private MainController mUI;
 
         public MainWindow() {
@@ -44,7 +43,62 @@ namespace SourceGenWPF.ProjWin {
 
             // TODO: verify that RuntimeData dir is accessible
 
-            mUI = new MainController();
+            this.DataContext = this;
+            mUI = new MainController(this);
+        }
+
+
+        /// <summary>
+        /// INotifyPropertyChanged event
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Call this when a notification-worthy property changes value.
+        /// 
+        /// The CallerMemberName attribute puts the calling property's name in the first arg.
+        /// </summary>
+        /// <param name="propertyName">Name of property that changed.</param>
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool mShowCodeListView;
+
+        /// <summary>
+        /// Which panel are we showing, launchPanel or codeListView?
+        /// </summary>
+        public bool ShowCodeListView {
+            get {
+                return mShowCodeListView;
+            }
+            set {
+                mShowCodeListView = value;
+                NotifyPropertyChanged("LaunchPanelVisibility");
+                NotifyPropertyChanged("CodeListVisibility");
+            }
+        }
+
+        /// <summary>
+        /// Returns true if we should be showing the launch panel.
+        /// (Intended for use from XAML.)
+        /// </summary>
+        public Visibility LaunchPanelVisibility {
+            get { return mShowCodeListView ? Visibility.Hidden : Visibility.Visible; }
+        }
+
+        /// <summary>
+        /// Returns true if we should be showing the code ListView.
+        /// (Intended for use from XAML.)
+        /// </summary>
+        public Visibility CodeListVisibility {
+            get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
+        }
+
+        /// Version string, for display.
+        /// </summary>
+        public string ProgramVersionString {
+            get { return App.ProgramVersion.ToString(); }
         }
 
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

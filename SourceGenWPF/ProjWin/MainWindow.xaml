@@ -31,6 +31,13 @@ limitations under the License.
             </RoutedUICommand.InputGestures>
         </RoutedUICommand>
         <RoutedUICommand x:Key="RecentProject"/>
+
+        <!-- don't center the ListView(GridView) column headers
+             https://stackoverflow.com/questions/44119146/wpf-listview-column-header-alignment
+          -->
+        <Style TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
     </Window.Resources>
 
     <Window.CommandBindings>
@@ -172,7 +179,8 @@ limitations under the License.
                               HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
             </Grid>
 
-            <Grid Name="CenterPanel" Grid.Column="2">
+            <Grid Name="launchPanel" Grid.Column="2"
+                  Visibility="{Binding Path=LaunchPanelVisibility}" d:IsHidden="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -206,6 +214,24 @@ limitations under the License.
                             Command="{DynamicResource RecentProject}"/>
                 </StackPanel>
             </Grid>
+
+            <ListView Name="codeListView" Grid.Column="2"
+                      FontFamily="{StaticResource GeneralMonoFont}"
+                      Visibility="{Binding Path=CodeListVisibility}">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridViewColumn Header="Offset"/>
+                        <GridViewColumn Header="Addr"/>
+                        <GridViewColumn Header="Bytes"/>
+                        <GridViewColumn Header="Flags"/>
+                        <GridViewColumn Header="Attr"/>
+                        <GridViewColumn Header="Label"/>
+                        <GridViewColumn Header="Opcode"/>
+                        <GridViewColumn Header="Operand"/>
+                        <GridViewColumn Header="Comment"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
 
             <Grid Name="RightPanel" Grid.Column="4">
                 <Grid.RowDefinitions>

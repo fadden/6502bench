@@ -71,6 +71,11 @@ namespace SourceGenWPF {
 
 
         /// <summary>
+        /// Reference back to MainWindow object.
+        /// </summary>
+        private MainWindow mMainWin;
+
+        /// <summary>
         /// List of recently-opened projects.
         /// </summary>
         private List<string> mRecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
@@ -141,6 +146,10 @@ namespace SourceGenWPF {
         /// the sandbox.
         /// </summary>
         private bool mUseMainAppDomainForPlugins = false;
+
+        public MainController(MainWindow win) {
+            mMainWin = win;
+        }
 
 
         /// <summary>
@@ -477,6 +486,7 @@ namespace SourceGenWPF {
             ShowNoProject();
             InvalidateControls(null);
 #endif
+            mMainWin.ShowCodeListView = false;
 
             mGenerationLog = null;
 
@@ -538,6 +548,8 @@ namespace SourceGenWPF {
             RefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
             //ShowProject();
             //InvalidateControls(null);
+            mMainWin.ShowCodeListView = true;
+            mNavStack.Clear();
 
             // Want to do this after ShowProject() or we see a weird glitch.
             UpdateRecentProjectList(mProjectPathName);
