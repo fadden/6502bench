@@ -45,6 +45,8 @@ namespace SourceGenWPF.ProjWin {
 
             this.DataContext = this;
             mUI = new MainController(this);
+
+            codeListView.ItemsSource = new DisplayList(500);
         }
 
 

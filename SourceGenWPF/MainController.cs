@@ -65,7 +65,7 @@ namespace SourceGenWPF {
         /// <summary>
         /// Data backing the codeListView.
         /// </summary>
-        private DisplayList mDisplayList;
+        private DisplayListGen mDisplayList;
 
         #endregion Project state
 
@@ -519,7 +519,7 @@ namespace SourceGenWPF {
             proj.Initialize(fileData.Length);
             proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
 
-            proj.LongComments.Add(DisplayList.Line.HEADER_COMMENT_OFFSET,
+            proj.LongComments.Add(DisplayListGen.Line.HEADER_COMMENT_OFFSET,
                 new MultiLineComment("6502bench SourceGen v" + App.ProgramVersion));
 
             // The system definition provides a set of defaults that can be overridden.
@@ -540,7 +540,7 @@ namespace SourceGenWPF {
                 dlg.ShowDialog();
             }
 
-            mDisplayList = new DisplayList(mProject, mOutputFormatter, mPseudoOpNames);
+            mDisplayList = new DisplayListGen(mProject, mOutputFormatter, mPseudoOpNames);
 
             // Prep the symbol table subset object.  Replace the old one with a new one.
             //mSymbolSubset = new SymbolTableSubset(mProject.SymbolTable);
@@ -625,7 +625,7 @@ namespace SourceGenWPF {
             int topItem = 0;
 #endif
             int topOffset = mDisplayList[topItem].FileOffset;
-            DisplayList.SavedSelection savedSel = DisplayList.SavedSelection.Generate(
+            DisplayListGen.SavedSelection savedSel = DisplayListGen.SavedSelection.Generate(
                 mDisplayList, mCodeViewSelection, topOffset);
             //savedSel.DebugDump();
             mReanalysisTimer.EndTask("Save selection");

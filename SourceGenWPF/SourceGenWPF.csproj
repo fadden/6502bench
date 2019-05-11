@@ -62,6 +62,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DisplayList.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="ProjWin\DataFileLoadIssue.xaml.cs">
       <DependentUpon>DataFileLoadIssue.xaml</DependentUpon>
@@ -96,7 +97,7 @@
     <Compile Include="DataAnalysis.cs" />
     <Compile Include="DefSymbol.cs" />
     <Compile Include="DisasmProject.cs" />
-    <Compile Include="DisplayList.cs" />
+    <Compile Include="DisplayListGen.cs" />
     <Compile Include="ExternalFile.cs" />
     <Compile Include="FormatDescriptor.cs" />
     <Compile Include="HelpAccess.cs" />

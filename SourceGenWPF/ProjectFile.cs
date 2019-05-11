@@ -721,7 +721,7 @@ namespace SourceGenWPF {
             // Shouldn't allow DisplayList.Line.HEADER_COMMENT_OFFSET on anything but
             // LongComment.  Maybe "bool allowNegativeKeys"?
             if (intKey < fileLen &&
-                    (intKey >= 0 || intKey == DisplayList.Line.HEADER_COMMENT_OFFSET)) {
+                    (intKey >= 0 || intKey == DisplayListGen.Line.HEADER_COMMENT_OFFSET)) {
                 return true;
             } else {
                 report.Add(FileLoadItem.Type.Warning,

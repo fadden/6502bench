@@ -220,15 +220,15 @@ limitations under the License.
                       Visibility="{Binding Path=CodeListVisibility}">
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
-                        <GridViewColumn Header="Offset"/>
-                        <GridViewColumn Header="Addr"/>
-                        <GridViewColumn Header="Bytes"/>
-                        <GridViewColumn Header="Flags"/>
-                        <GridViewColumn Header="Attr"/>
-                        <GridViewColumn Header="Label"/>
-                        <GridViewColumn Header="Opcode"/>
-                        <GridViewColumn Header="Operand"/>
-                        <GridViewColumn Header="Comment"/>
+                        <GridViewColumn Header="Offset" DisplayMemberBinding="{Binding Offset}"/>
+                        <GridViewColumn Header="Addr" DisplayMemberBinding="{Binding Addr}"/>
+                        <GridViewColumn Header="Bytes" DisplayMemberBinding="{Binding Bytes}"/>
+                        <GridViewColumn Header="Flags" DisplayMemberBinding="{Binding Flags}"/>
+                        <GridViewColumn Header="Attr" DisplayMemberBinding="{Binding Attr}"/>
+                        <GridViewColumn Header="Label" DisplayMemberBinding="{Binding Label}"/>
+                        <GridViewColumn Header="Opcode" DisplayMemberBinding="{Binding Opcode}"/>
+                        <GridViewColumn Header="Operand" DisplayMemberBinding="{Binding Operand}"/>
+                        <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
