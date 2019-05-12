@@ -121,5 +121,9 @@ namespace SourceGenWPF.ProjWin {
             Debug.WriteLine("Recent project #" + recentIndex);
             mUI.OpenRecentProject(recentIndex);
         }
+
+        private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            Debug.WriteLine("SEL: add " + e.AddedItems.Count + ", rem " + e.RemovedItems.Count);
+        }
     }
 }

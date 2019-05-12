@@ -284,7 +284,7 @@ namespace SourceGenWPF {
                 return FormattedParts.Create("off" + index, "addr" + index, "12 34",
                     "vncidmx", "", "yup:", "LDA", "$1234", "a & b");
             } else {
-                return FormattedParts.Create("offN This is a long comment line");
+                return FormattedParts.Create("yup: This is a long comment line");
             }
         }
 
@@ -298,7 +298,7 @@ namespace SourceGenWPF {
             public string Opcode { get; private set; }
             public string Operand { get; private set; }
             public string Comment { get; private set; }
-            public bool SingleLine { get; private set; }
+            public bool IsSingleLine { get; private set; }
 
             // Construct with factory methods.
             private FormattedParts() { }
@@ -316,7 +316,7 @@ namespace SourceGenWPF {
                 parts.Opcode = opcode;
                 parts.Operand = operand;
                 parts.Comment = comment;
-                parts.SingleLine = false;
+                parts.IsSingleLine = false;
 
                 return parts;
             }
@@ -324,7 +324,7 @@ namespace SourceGenWPF {
             public static FormattedParts Create(string longComment) {
                 FormattedParts parts = new FormattedParts();
                 parts.Comment = longComment;
-                parts.SingleLine = true;
+                parts.IsSingleLine = true;
 
                 return parts;
             }
