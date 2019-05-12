@@ -215,9 +215,27 @@ limitations under the License.
                 </StackPanel>
             </Grid>
 
+            <!--
+              ListView tweaks from https://stackoverflow.com/a/4472061/294248 .  This is
+              necessary to get long comments and notes to start in the Label column.  The
+              approach feels a little wobbly, but it seems to work.
+
+              MSFT GridViewRowPresenter example is promising, but I haven't figured out how to
+              make long-comment rows follow the same header (maybe manual update in code-behind?).
+              https://docs.microsoft.com/en-us/dotnet/api/system.windows.controls.gridviewrowpresenter?view=netframework-4.8
+              (in examples: snippets\csharp\VS_Snippets_Wpf\ListViewItemStyleSnippet)
+
+              https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/how-to-display-data-by-using-gridviewrowpresenter
+
+              Item Template Selectors are another possibility, maybe?
+              https://stackoverflow.com/q/5416946/294248
+
+              Getting more custom:
+            -->
             <ListView Name="codeListView" Grid.Column="2"
                       FontFamily="{StaticResource GeneralMonoFont}"
-                      Visibility="{Binding Path=CodeListVisibility}">
+                      Visibility="{Binding Path=CodeListVisibility}"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling" >
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
                         <GridViewColumn Header="Offset" DisplayMemberBinding="{Binding Offset}"/>
@@ -231,6 +249,49 @@ limitations under the License.
                         <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>
+
+                <!-- https://stackoverflow.com/a/4472061/294248 -->
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SingleLine}" Value="True">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                            <Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{Binding ElementName=codeListView, Path=View.Columns[0].ActualWidth}"/>
+                                                        <ColumnDefinition Width="{Binding ElementName=codeListView, Path=View.Columns[1].ActualWidth}"/>
+                                                        <ColumnDefinition Width="{Binding ElementName=codeListView, Path=View.Columns[2].ActualWidth}"/>
+                                                        <ColumnDefinition Width="{Binding ElementName=codeListView, Path=View.Columns[3].ActualWidth}"/>
+                                                        <ColumnDefinition Width="{Binding ElementName=codeListView, Path=View.Columns[4].ActualWidth}"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="5" Padding="8,2" Text="{Binding Comment}"/>
+                                                </Grid>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+
+                        <!--
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <Grid>
+                                        <GridViewRowPresenter />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        -->
+
+                    </Style>
+                </ListView.ItemContainerStyle>
+
             </ListView>
 
             <Grid Name="RightPanel" Grid.Column="4">

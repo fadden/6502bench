@@ -47,6 +47,9 @@ namespace SourceGenWPF.ProjWin {
             mUI = new MainController(this);
 
             codeListView.ItemsSource = new DisplayList(500);
+
+            GridView gv = (GridView)codeListView.View;
+            //gv.Columns[0].Width = 50;
         }
 
 
