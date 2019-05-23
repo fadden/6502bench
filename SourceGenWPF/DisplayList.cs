@@ -298,9 +298,9 @@ namespace SourceGenWPF {
             public string Opcode { get; private set; }
             public string Operand { get; private set; }
             public string Comment { get; private set; }
-            public bool IsSingleLine { get; private set; }
+            public bool IsLongComment { get; private set; }
 
-            // Construct with factory methods.
+            // Private constructor -- create instances with factory methods.
             private FormattedParts() { }
 
             public static FormattedParts Create(string offset, string addr, string bytes,
@@ -316,7 +316,7 @@ namespace SourceGenWPF {
                 parts.Opcode = opcode;
                 parts.Operand = operand;
                 parts.Comment = comment;
-                parts.IsSingleLine = false;
+                parts.IsLongComment = false;
 
                 return parts;
             }
@@ -324,7 +324,7 @@ namespace SourceGenWPF {
             public static FormattedParts Create(string longComment) {
                 FormattedParts parts = new FormattedParts();
                 parts.Comment = longComment;
-                parts.IsSingleLine = true;
+                parts.IsLongComment = true;
 
                 return parts;
             }

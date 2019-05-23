@@ -138,6 +138,10 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ProjWin\CodeListItemStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ProjWin\DataFileLoadIssue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
