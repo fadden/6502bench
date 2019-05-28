@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,9 +45,14 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         private MainController mMainCtrl;
 
+        private MethodInfo listViewSetSelectedItems;
 
         public MainWindow() {
             InitializeComponent();
+
+            listViewSetSelectedItems = codeListView.GetType().GetMethod("SetSelectedItems",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Debug.Assert(listViewSetSelectedItems != null);
 
             this.DataContext = this;
 
@@ -82,7 +88,7 @@ namespace SourceGenWPF.ProjWin {
         /// The CallerMemberName attribute puts the calling property's name in the first arg.
         /// </summary>
         /// <param name="propertyName">Name of property that changed.</param>
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") {
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -97,8 +103,8 @@ namespace SourceGenWPF.ProjWin {
             }
             set {
                 mShowCodeListView = value;
-                NotifyPropertyChanged("LaunchPanelVisibility");
-                NotifyPropertyChanged("CodeListVisibility");
+                OnPropertyChanged("LaunchPanelVisibility");
+                OnPropertyChanged("CodeListVisibility");
             }
         }
 
@@ -129,19 +135,36 @@ namespace SourceGenWPF.ProjWin {
             Debug.WriteLine("assembling");
         }
 
-        private void RecentProject_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void SelectAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            DateTime start = DateTime.Now;
+
+            codeListView.SelectAll();
+
+            //codeListView.SelectedItems.Clear();
+            //foreach (var item in codeListView.Items) {
+            //    codeListView.SelectedItems.Add(item);
+            //}
+
+            // This seems to be faster than setting items individually (10x), but is still O(n^2)
+            // or worse, and hence unsuitable for very large lists.
+            //codeListView.SelectedItems.Clear();
+            //listViewSetSelectedItems.Invoke(codeListView, new object[] { codeListView.Items });
+
+            Debug.WriteLine("Select All cmd: " + (DateTime.Now - start).Milliseconds + " ms");
+        }
+
+        private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             if (!int.TryParse((string)e.Parameter, out int recentIndex) ||
-                    recentIndex < 1 || recentIndex > MainController.MAX_RECENT_PROJECTS) {
+                    recentIndex < 0 || recentIndex >= MainController.MAX_RECENT_PROJECTS) {
                 throw new Exception("Bad parameter: " + e.Parameter);
             }
-            recentIndex--;
 
             Debug.WriteLine("Recent project #" + recentIndex);
             mMainCtrl.OpenRecentProject(recentIndex);
         }
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            Debug.WriteLine("SEL: add " + e.AddedItems.Count + ", rem " + e.RemovedItems.Count);
+            //Debug.WriteLine("SEL: add " + e.AddedItems.Count + ", rem " + e.RemovedItems.Count);
         }
     }
 }

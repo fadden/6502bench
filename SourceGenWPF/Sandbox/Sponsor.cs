@@ -168,7 +168,12 @@ namespace SourceGenWPF.Sandbox {
             }
             if (leaseObj is ILease) {
                 ILease lease = (ILease)leaseObj;
-                lease.Unregister(this);
+                try {
+                    lease.Unregister(this);
+                } catch (InvalidOperationException ex) {
+                    // TODO: not expected -- why did this start happening?
+                    Debug.WriteLine("WARNING: lease.Unregister threw " + ex);
+                }
             }
 
             mDisposed = true;

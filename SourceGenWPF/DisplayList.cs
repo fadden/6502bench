@@ -43,12 +43,14 @@ namespace SourceGenWPF {
     /// 
     /// The list is initially filled with null references, with FormattedParts instances
     /// generated on demand.  This is done by requesting individual items from the
-    /// DisplayListGen object.
+    /// LineListGen object.
+    /// 
+    /// NOTE: it may or may not be possible to implement this trivially with an
+    /// ObservedCollection.  At an earlier iteration it wasn't, and I'd like to keep this
+    /// around even if it is now possible, in case the pendulum swings back the other way.
     /// </remarks>
     public class DisplayList : IList<DisplayList.FormattedParts>, IList,
             INotifyCollectionChanged, INotifyPropertyChanged {
-
-        // TODO: check VirtualizingStackPanel.VirtualizationMode == recycling (page 259)
 
         /// <summary>
         /// List of formatted parts.  DO NOT access this directly outside the event-sending
@@ -83,41 +85,6 @@ namespace SourceGenWPF {
 
         private const string CountString = "Count";
         private const string IndexerName = "Item[]";
-
-#if false
-        protected override void ClearItems() {
-            base.ClearItems();
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
-            OnCollectionReset();
-        }
-
-        protected override void RemoveItem(int index) {
-            FormattedParts removedItem = this[index];
-
-            base.RemoveItem(index);
-
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
-            OnCollectionChanged(NotifyCollectionChangedAction.Remove, removedItem, index);
-        }
-
-        protected override void InsertItem(int index, FormattedParts item) {
-            base.InsertItem(index, item);
-
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
-            OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
-        }
-
-        protected override void SetItem(int index, FormattedParts item) {
-            FormattedParts originalItem = this[index];
-            base.SetItem(index, item);
-
-            OnPropertyChanged(IndexerName);
-            OnCollectionChanged(NotifyCollectionChangedAction.Replace, originalItem, item, index);
-        }
-#endif
 
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs e) {
             PropertyChanged?.Invoke(this, e);

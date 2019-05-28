@@ -358,9 +358,14 @@ namespace SourceGenWPF {
 
 
         public void OpenRecentProject(int projIndex) {
-            if (DoClose()) {
-                //DoOpenFile(mRecentProjectPaths[projIndex]);
+            if (!DoClose()) {
+                return;
+            }
+            //DoOpenFile(mRecentProjectPaths[projIndex]);
+            if (projIndex == 0) {
                 DoOpenFile(@"C:\Src\6502bench\EXTRA\ZIPPY#ff2000.dis65");
+            } else {
+                DoOpenFile(@"C:\Src\6502bench\EXTRA\CRYLLAN.MISSION#b30100.dis65");
             }
         }
 
