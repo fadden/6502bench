@@ -51,7 +51,6 @@ namespace SourceGenWPF {
         /// an empty symbol table.
         /// </summary>
         private SymbolTableSubset mSymbolSubset;
-#endif
 
         /// <summary>
         /// Current code list view selection.  The length will match the DisplayList Count.
@@ -61,11 +60,12 @@ namespace SourceGenWPF {
         /// notifies us of changes to the selection, so we can track it ourselves.
         /// </summary>
         private VirtualListViewSelection mCodeViewSelection = new VirtualListViewSelection();
+#endif
 
         /// <summary>
-        /// Data backing the codeListView.
+        /// Data backing the code list.
         /// </summary>
-        private DisplayListGen mDisplayList;
+        public LineListGen CodeListGen { get; private set; }
 
         #endregion Project state
 
@@ -151,6 +151,171 @@ namespace SourceGenWPF {
             mMainWin = win;
         }
 
+        /// <summary>
+        /// Perform one-time initialization after the Window has finished loading.  We defer
+        /// to this point so we can report fatal errors directly to the user.
+        /// </summary>
+        public void WindowLoaded() {
+            if (RuntimeDataAccess.GetDirectory() == null) {
+                MessageBox.Show(Res.Strings.RUNTIME_DIR_NOT_FOUND,
+                    Res.Strings.RUNTIME_DIR_NOT_FOUND_CAPTION,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Shutdown();
+                return;
+            }
+#if false
+            try {
+                PluginDllCache.PreparePluginDir();
+            } catch (Exception ex) {
+                string pluginPath = PluginDllCache.GetPluginDirPath();
+                if (pluginPath == null) {
+                    pluginPath = "<???>";
+                }
+                string msg = string.Format(Properties.Resources.PLUGIN_DIR_FAIL,
+                    pluginPath + ": " + ex.Message);
+                MessageBox.Show(this, msg, Properties.Resources.PLUGIN_DIR_FAIL_CAPTION,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+                return;
+            }
+#endif
+
+#if false
+            logoPictureBox.ImageLocation = RuntimeDataAccess.GetPathName(LOGO_FILE_NAME);
+            versionLabel.Text = string.Format(Properties.Resources.VERSION_FMT,
+                Program.ProgramVersion);
+
+            toolStripStatusLabel.Text = Properties.Resources.STATUS_READY;
+
+            mProjectControl = this.codeListView;
+            mNoProjectControl = this.noProjectPanel;
+
+            // Clone the menu structure from the designer.  The same items are used for
+            // both Edit > Actions and the right-click context menu in codeListView.
+            mActionsMenuItems = new ToolStripItem[actionsToolStripMenuItem.DropDownItems.Count];
+            for (int i = 0; i < actionsToolStripMenuItem.DropDownItems.Count; i++) {
+                mActionsMenuItems[i] = actionsToolStripMenuItem.DropDownItems[i];
+            }
+#endif
+
+#if false
+            // Load the settings from the file.  Some things (like the symbol subset) need
+            // these.  The general "apply settings" doesn't happen until a bit later, after
+            // the sub-windows have been initialized.
+            LoadAppSettings();
+
+            // Init primary ListView (virtual, ownerdraw)
+            InitCodeListView();
+
+            // Init Symbols ListView (virtual, non-ownerdraw)
+            mSymbolSubset = new SymbolTableSubset(new SymbolTable());
+            symbolListView.SetDoubleBuffered(true);
+            InitSymbolListView();
+
+            // Init References ListView (non-virtual, non-ownerdraw)
+            referencesListView.SetDoubleBuffered(true);
+
+            // Place the main window and apply the various settings.
+            SetAppWindowLocation();
+#endif
+            ApplyAppSettings();
+
+#if false
+            UpdateActionMenu();
+            UpdateMenuItemsAndTitle();
+            UpdateRecentLinks();
+
+            ShowNoProject();
+#endif
+
+            ProcessCommandLine();
+        }
+
+        private void ProcessCommandLine() {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length == 2) {
+                DoOpenFile(Path.GetFullPath(args[1]));
+            }
+        }
+
+        /// <summary>
+        /// Applies "actionable" settings to the ProjectView, pulling them out of the global
+        /// settings object.  If a project is open, refreshes the display list and all sub-windows.
+        /// </summary>
+        private void ApplyAppSettings() {
+            Debug.WriteLine("ApplyAppSettings...");
+            AppSettings settings = AppSettings.Global;
+
+            // Set up the formatter.
+            mFormatterConfig = new Formatter.FormatConfig();
+            AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
+                ref mFormatterConfig);
+            mFormatterConfig.mEndOfLineCommentDelimiter = ";";
+            mFormatterConfig.mFullLineCommentDelimiterBase = ";";
+            mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
+            mFormatterConfig.mAllowHighAsciiCharConst = true;
+            mOutputFormatter = new Formatter(mFormatterConfig);
+            mOutputFormatterCpuDef = null;
+
+            // Set pseudo-op names.  Entries aren't allowed to be blank, so we start with the
+            // default values and merge in whatever the user has configured.
+            mPseudoOpNames = PseudoOp.sDefaultPseudoOpNames.GetCopy();
+            string pseudoCereal = settings.GetString(AppSettings.FMT_PSEUDO_OP_NAMES, null);
+            if (!string.IsNullOrEmpty(pseudoCereal)) {
+                PseudoOp.PseudoOpNames deser = PseudoOp.PseudoOpNames.Deserialize(pseudoCereal);
+                if (deser != null) {
+                    mPseudoOpNames.Merge(deser);
+                }
+            }
+
+#if false
+            // Configure the Symbols window.
+            symbolUserCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_USER, false);
+            symbolAutoCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
+            symbolProjectCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_PROJECT, false);
+            symbolPlatformCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
+            symbolConstantCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_CONST, false);
+            symbolAddressCheckBox.Checked =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_ADDR, false);
+
+            // Set the code list view font.
+            string fontStr = settings.GetString(AppSettings.CDLV_FONT, null);
+            if (!string.IsNullOrEmpty(fontStr)) {
+                FontConverter cvt = new FontConverter();
+                try {
+                    Font font = cvt.ConvertFromInvariantString(fontStr) as Font;
+                    codeListView.Font = font;
+                    Debug.WriteLine("Set font to " + font.ToString());
+                } catch (Exception ex) {
+                    Debug.WriteLine("Font convert failed: " + ex.Message);
+                }
+            }
+
+            // Unpack the recent-project list.
+            UnpackRecentProjectList();
+
+            // Enable the DEBUG menu if configured.
+            bool showDebugMenu = AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
+            if (dEBUGToolStripMenuItem.Visible != showDebugMenu) {
+                dEBUGToolStripMenuItem.Visible = showDebugMenu;
+                mainMenuStrip.Refresh();
+            }
+#endif
+
+            // Finally, update the display list generator with all the fancy settings.
+            if (CodeListGen != null) {
+                // Regenerate the display list with the latest formatter config and
+                // pseudo-op definition.  (These are set as part of the refresh.)
+                UndoableChange uc =
+                    UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DisplayOnly);
+                ApplyChanges(new ChangeSet(uc), false);
+            }
+        }
 
         /// <summary>
         /// Ensures that the named project is at the top of the list.  If it's elsewhere
@@ -519,7 +684,7 @@ namespace SourceGenWPF {
             proj.Initialize(fileData.Length);
             proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
 
-            proj.LongComments.Add(DisplayListGen.Line.HEADER_COMMENT_OFFSET,
+            proj.LongComments.Add(LineListGen.Line.HEADER_COMMENT_OFFSET,
                 new MultiLineComment("6502bench SourceGen v" + App.ProgramVersion));
 
             // The system definition provides a set of defaults that can be overridden.
@@ -540,7 +705,8 @@ namespace SourceGenWPF {
                 dlg.ShowDialog();
             }
 
-            mDisplayList = new DisplayListGen(mProject, mOutputFormatter, mPseudoOpNames);
+            CodeListGen = new LineListGen(mProject, mMainWin.CodeDisplayList,
+                mOutputFormatter, mPseudoOpNames);
 
             // Prep the symbol table subset object.  Replace the old one with a new one.
             //mSymbolSubset = new SymbolTableSubset(mProject.SymbolTable);
@@ -624,9 +790,9 @@ namespace SourceGenWPF {
 #else
             int topItem = 0;
 #endif
-            int topOffset = mDisplayList[topItem].FileOffset;
-            DisplayListGen.SavedSelection savedSel = DisplayListGen.SavedSelection.Generate(
-                mDisplayList, mCodeViewSelection, topOffset);
+            int topOffset = CodeListGen[topItem].FileOffset;
+            LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
+                CodeListGen, null /*mCodeViewSelection*/, topOffset);
             //savedSel.DebugDump();
             mReanalysisTimer.EndTask("Save selection");
 
@@ -647,7 +813,7 @@ namespace SourceGenWPF {
             }
             mReanalysisTimer.EndTask(refreshTaskStr);
 
-            VirtualListViewSelection newSel = savedSel.Restore(mDisplayList, out int topIndex);
+            VirtualListViewSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
             //newSel.DebugDump();
 
             // Refresh the various windows, and restore the selection.
@@ -708,8 +874,8 @@ namespace SourceGenWPF {
                 Debug.WriteLine("CpuDef has changed, resetting formatter (now " +
                     mProject.CpuDef + ")");
                 mOutputFormatter = new Formatter(mFormatterConfig);
-                mDisplayList.SetFormatter(mOutputFormatter);
-                mDisplayList.SetPseudoOpNames(mPseudoOpNames);
+                CodeListGen.SetFormatter(mOutputFormatter);
+                CodeListGen.SetPseudoOpNames(mPseudoOpNames);
                 mOutputFormatterCpuDef = mProject.CpuDef;
             }
 
@@ -733,8 +899,10 @@ namespace SourceGenWPF {
                     toolStripStatusLabel.Text = prevStatus;
                 }
             } else {
+#endif
                 DoRefreshProject(reanalysisRequired);
-            }
+#if false
+        }
 #endif
 
             if (FormatDescriptor.DebugCreateCount != 0) {
@@ -755,7 +923,7 @@ namespace SourceGenWPF {
             IEnumerator<RangeSet.Range> iter = offsetSet.RangeListIterator;
             while (iter.MoveNext()) {
                 RangeSet.Range range = iter.Current;
-                mDisplayList.GenerateRange(range.Low, range.High);
+                CodeListGen.GenerateRange(range.Low, range.High);
             }
         }
 
@@ -783,7 +951,7 @@ namespace SourceGenWPF {
             }
 
             mReanalysisTimer.StartTask("Generate DisplayList");
-            mDisplayList.GenerateAll();
+            CodeListGen.GenerateAll();
             mReanalysisTimer.EndTask("Generate DisplayList");
         }
 

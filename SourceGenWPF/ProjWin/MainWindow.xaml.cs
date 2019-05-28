@@ -36,22 +36,40 @@ namespace SourceGenWPF.ProjWin {
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged {
         /// <summary>
-        private MainController mUI;
+        /// Disassembled code display list provided to XAML.
+        /// </summary>
+        public DisplayList CodeDisplayList { get; private set; }
+
+        /// <summary>
+        /// </summary>
+        private MainController mMainCtrl;
+
 
         public MainWindow() {
             InitializeComponent();
 
-            // TODO: verify that RuntimeData dir is accessible
-
             this.DataContext = this;
-            mUI = new MainController(this);
 
-            codeListView.ItemsSource = new DisplayList(500);
+            CodeDisplayList = new DisplayList();
+            codeListView.ItemsSource = CodeDisplayList;
 
-            GridView gv = (GridView)codeListView.View;
+            mMainCtrl = new MainController(this);
+
+            //GridView gv = (GridView)codeListView.View;
             //gv.Columns[0].Width = 50;
         }
 
+
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            mMainCtrl.WindowLoaded();
+
+#if DEBUG
+            // Get more info on CollectionChanged events that do not agree with current
+            // state of Items collection.
+            PresentationTraceSources.SetTraceLevel(codeListView.ItemContainerGenerator,
+                PresentationTraceLevel.High);
+        }
+#endif
 
         /// <summary>
         /// INotifyPropertyChanged event
@@ -119,7 +137,7 @@ namespace SourceGenWPF.ProjWin {
             recentIndex--;
 
             Debug.WriteLine("Recent project #" + recentIndex);
-            mUI.OpenRecentProject(recentIndex);
+            mMainCtrl.OpenRecentProject(recentIndex);
         }
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {

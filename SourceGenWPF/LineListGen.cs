@@ -20,16 +20,27 @@ using System.Windows.Media;
 using System.Text;
 
 using Asm65;
+using FormattedParts = SourceGenWPF.DisplayList.FormattedParts;
 
 namespace SourceGenWPF {
     /// <summary>
     /// Converts file data and Anattrib contents into a series of strings and format metadata.
     /// </summary>
-    public class DisplayListGen {
+    public class LineListGen {
         /// <summary>
         /// List of display lines.
         /// </summary>
         private List<Line> mLineList;
+
+        /// <summary>
+        /// List of formatted parts to be presented to the user.  This has one entry per line.
+        /// </summary>
+        /// <remarks>
+        /// Separating FormattedParts out of Line seems odd at first, but we need changes to
+        /// DisplayList to cause events in XAML.  I'm thinking the artificial separation of
+        /// Line from the formatted data holder may make future ports easier.
+        /// </remarks>
+        private DisplayList mDisplayList;
 
         /// <summary>
         /// Project that contains the data we're formatting, notably the FileData and
@@ -52,68 +63,6 @@ namespace SourceGenWPF {
         /// </summary>
         private PseudoOp.PseudoOpNames mPseudoOpNames;
 
-
-        /// <summary>
-        /// Holds a collection of formatted strings.  Instances are immutable.
-        /// </summary>
-        public class FormattedParts {
-            public string Offset { get; private set; }
-            public string Addr { get; private set; }
-            public string Bytes { get; private set; }
-            public string Flags { get; private set; }
-            public string Attr { get; private set; }
-            public string Label { get; private set; }
-            public string Opcode { get; private set; }
-            public string Operand { get; private set; }
-            public string Comment { get; private set; }
-
-            // Use factory methods.
-            private FormattedParts() { }
-
-            public static FormattedParts Create(string offset, string addr, string bytes,
-                    string flags, string attr, string label, string opcode, string operand,
-                    string comment, string debug) {
-                FormattedParts parts = new FormattedParts();
-                parts.Offset = offset;
-                parts.Addr = addr;
-                parts.Bytes = bytes;
-                parts.Flags = flags;
-                parts.Attr = attr;
-                parts.Label = label;
-                parts.Opcode = opcode;
-                parts.Operand = operand;
-                parts.Comment = comment;
-                return parts;
-            }
-
-            public static FormattedParts CreateBlankLine() {
-                FormattedParts parts = new FormattedParts();
-                return parts;
-            }
-
-            public static FormattedParts CreateLongComment(string comment) {
-                FormattedParts parts = new FormattedParts();
-                parts.Comment = comment;
-                return parts;
-            }
-
-            public static FormattedParts CreateDirective(string opstr, string addrStr) {
-                FormattedParts parts = new FormattedParts();
-                parts.Opcode = opstr;
-                parts.Operand = addrStr;
-                return parts;
-            }
-
-            public static FormattedParts CreateEquDirective(string label, string opstr,
-                    string addrStr, string comment) {
-                FormattedParts parts = new FormattedParts();
-                parts.Label = label;
-                parts.Opcode = opstr;
-                parts.Operand = addrStr;
-                parts.Comment = comment;
-                return parts;
-            }
-        }
 
         /// <summary>
         /// One of these per line of output in the display.  It should be possible to draw
@@ -174,6 +123,11 @@ namespace SourceGenWPF {
             /// Strings for display.  Creation may be deferred.  Use the DisplayList
             /// GetFormattedParts() method to access this property.
             /// </summary>
+            /// <remarks>
+            /// Certain elements, such as multi-line comments, must be formatted to determine
+            /// the number of lines they span.  We retain the results to avoid formatting
+            /// them twice.
+            /// </remarks>
             public FormattedParts Parts { get; set; }
 
             /// <summary>
@@ -277,7 +231,7 @@ namespace SourceGenWPF {
             /// <param name="dl">Display list, with list of Lines.</param>
             /// <param name="sel">Bit vector specifying which lines are selected.</param>
             /// <returns>New SavedSelection object.</returns>
-            public static SavedSelection Generate(DisplayListGen dl, VirtualListViewSelection sel,
+            public static SavedSelection Generate(LineListGen dl, VirtualListViewSelection sel,
                     int topOffset) {
                 SavedSelection savedSel = new SavedSelection();
                 //Debug.Assert(topOffset >= 0);
@@ -343,7 +297,7 @@ namespace SourceGenWPF {
             /// </summary>
             /// <param name="dl">Display list, with list of Lines.</param>
             /// <returns>Set of selected lines.</returns>
-            public VirtualListViewSelection Restore(DisplayListGen dl, out int topIndex) {
+            public VirtualListViewSelection Restore(LineListGen dl, out int topIndex) {
                 List<Line> lineList = dl.mLineList;
                 VirtualListViewSelection sel = new VirtualListViewSelection(lineList.Count);
 
@@ -414,15 +368,23 @@ namespace SourceGenWPF {
         /// </summary>
         /// <param name="proj">Project object.</param>
         /// <param name="formatter">Formatter object.</param>
-        public DisplayListGen(DisasmProject proj, Formatter formatter,
+        public LineListGen(DisasmProject proj, DisplayList displayList, Formatter formatter,
                 PseudoOp.PseudoOpNames opNames) {
+            Debug.Assert(proj != null);
+            Debug.Assert(displayList != null);
+            Debug.Assert(formatter != null);
+            Debug.Assert(opNames != null);
+
             mProject = proj;
+            mDisplayList = displayList;
             mFormatter = formatter;
             mPseudoOpNames = opNames;
 
             mLineList = new List<Line>();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
+
+            mDisplayList.ListGen = this;
         }
 
         /// <summary>
@@ -432,6 +394,7 @@ namespace SourceGenWPF {
         public void SetFormatter(Formatter formatter) {
             mFormatter = formatter;
             mLineList.Clear();
+            // TODO: update display list
 
             // We probably just changed settings, so update this as well.
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
@@ -446,6 +409,7 @@ namespace SourceGenWPF {
         public void SetPseudoOpNames(PseudoOp.PseudoOpNames opNames) {
             mPseudoOpNames = opNames;
             mLineList.Clear();
+            // TODO: update display list
         }
 
         /// <summary>
@@ -490,8 +454,7 @@ namespace SourceGenWPF {
                     // should have been done already
                     default:
                         Debug.Assert(false);
-                        parts = FormattedParts.Create("x", "x", "x", "x", "x", "x", "x", "x",
-                            "x", "x");
+                        parts = FormattedParts.Create("x", "x", "x", "x", "x", "x", "x", "x", "x");
                         break;
                 }
                 line.Parts = parts;
@@ -617,6 +580,8 @@ namespace SourceGenWPF {
             GenerateLineList(mProject, mFormatter, mPseudoOpNames,
                 0, mProject.FileData.Length - 1, mLineList);
 
+            mDisplayList.ResetList(mLineList.Count);
+
             Debug.Assert(ValidateLineList(), "Display list failed validation");
         }
 
@@ -689,6 +654,7 @@ namespace SourceGenWPF {
             // Out with the old, in with the new.
             mLineList.RemoveRange(startIndex, endIndex - startIndex + 1);
             mLineList.InsertRange(startIndex, newLines);
+            // TODO: update display list
 
             Debug.Assert(ValidateLineList(), "Display list failed validation");
         }
@@ -754,6 +720,7 @@ namespace SourceGenWPF {
             }
             Debug.WriteLine("Removing " + endIndex + " header lines");
             mLineList.RemoveRange(0, endIndex);
+            // TODO: update display list
         }
 
         /// <summary>
@@ -1169,12 +1136,8 @@ namespace SourceGenWPF {
             }
             string commentStr = formatter.FormatEolComment(eolComment);
 
-            string debugStr = string.Empty;
-            //debugStr = "opOff=" +
-            //    (attr.OperandOffset < 0 ? "-" : "+" + attr.OperandOffset.ToString("x6"));
-
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
-                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr, debugStr);
+                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
             return parts;
         }
 
@@ -1184,9 +1147,9 @@ namespace SourceGenWPF {
             byte[] data = proj.FileData;
 
             string offsetStr, addrStr, bytesStr, flagsStr, attrStr, labelStr, opcodeStr,
-                operandStr, commentStr, debugStr;
+                operandStr, commentStr;
             offsetStr = addrStr = bytesStr = flagsStr = attrStr = labelStr = opcodeStr =
-                operandStr = commentStr = debugStr = string.Empty;
+                operandStr = commentStr = string.Empty;
 
             PseudoOp.PseudoOut pout = PseudoOp.FormatDataOp(formatter, opNames, proj.SymbolTable,
                 null, attr.DataDescriptor, proj.FileData, offset, subLineIndex);
@@ -1210,13 +1173,10 @@ namespace SourceGenWPF {
 
             if (subLineIndex == 0) {
                 commentStr = formatter.FormatEolComment(proj.Comments[offset]);
-
-                //debugStr = "opOff=" +
-                //    (attr.OperandOffset < 0 ? "-" : "+" + attr.OperandOffset.ToString("x6"));
             }
 
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
-                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr, debugStr);
+                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
             return parts;
         }
     }

@@ -26,6 +26,7 @@
     <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
+    <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
     <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
     <system:String x:Key="str_InitialParameters">Default settings:</system:String>
     <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>
@@ -39,6 +40,8 @@
     <system:String x:Key="str_OpenDataWrongLengthFmt">The file is {0:N0} bytes long, but the project expected {1:N0}.</system:String>
     <system:String x:Key="str_OpenDataWrongCrcFmt">The file has CRC {0}, but the project expected {1}.</system:String>
     <system:String x:Key="str_OperationFailed">Failed</system:String>
+    <system:String x:Key="str_ProgressAssembling">Executing assembler...</system:String>
+    <system:String x:Key="str_ProgressGeneratingFmt">Generating {0}...</system:String>
     <system:String x:Key="str_ProjectFieldComment">comment</system:String>
     <system:String x:Key="str_ProjectFieldLongComment">long comment</system:String>
     <system:String x:Key="str_ProjectFieldNote">note</system:String>
@@ -47,5 +50,7 @@
     <system:String x:Key="str_ProjectFieldTypeHint">type hint</system:String>
     <system:String x:Key="str_ProjectFieldUserLabel">user-defined label</system:String>
     <system:String x:Key="str_ProjectFromNewerApp">This project was created by a newer version of SourceGen. It may contain data that will be lost if the project is edited.</system:String>
+    <system:String x:Key="str_RuntimeDirNotFound">The RuntimeData directory was not found. It should be in the same directory as the executable.</system:String>
+    <system:String x:Key="str_RuntimeDirNotFoundCaption">RuntimeData Not Found</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
 </ResourceDictionary>

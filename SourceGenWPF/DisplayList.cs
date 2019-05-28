@@ -35,11 +35,15 @@ namespace SourceGenWPF {
     /// 
     /// The ItemsControl.ItemsSource property wants an IEnumerable (which IList implements).
     /// According to various articles, if the object implements IList, and the UI element
-    /// is providing UI virtualization, you will also get data virtualization.  This behavior
+    /// is providing *UI* virtualization, you will also get *data* virtualization.  This behavior
     /// doesn't seem to be documented anywhere, but the consensus is that it's expected to work.
     /// 
-    /// Implementing generic IList doesn't seem necessary for XAML, but is useful for other
-    /// customers of the data (e.g. the assembler source generator).
+    /// Implementing generic IList&lt;&gt; doesn't seem necessary for XAML, but may be useful
+    /// for other consumers of the data.
+    /// 
+    /// The list is initially filled with null references, with FormattedParts instances
+    /// generated on demand.  This is done by requesting individual items from the
+    /// DisplayListGen object.
     /// </remarks>
     public class DisplayList : IList<DisplayList.FormattedParts>, IList,
             INotifyCollectionChanged, INotifyPropertyChanged {
@@ -47,10 +51,19 @@ namespace SourceGenWPF {
         // TODO: check VirtualizingStackPanel.VirtualizationMode == recycling (page 259)
 
         /// <summary>
-        /// List of formatted parts.  The idea is that the list is initially populated with
-        /// null references, and FormattedParts objects are generated on demand.
+        /// List of formatted parts.  DO NOT access this directly outside the event-sending
+        /// method wrappers.
         /// </summary>
         private List<FormattedParts> mList;
+
+        /// <summary>
+        /// Data generation object.
+        /// </summary>
+        /// <remarks>
+        /// This property is set by the LineListGen constructor.
+        /// </remarks>
+        public LineListGen ListGen { get; set; }
+
 
         /// <summary>
         /// Constructs an empty collection, with the default initial capacity.
@@ -58,14 +71,6 @@ namespace SourceGenWPF {
         public DisplayList() {
             mList = new List<FormattedParts>();
         }
-
-        public DisplayList(int count) {
-            mList = new List<FormattedParts>(count);
-            for (int i = 0; i < count; i++) {
-                mList.Add(null);
-            }
-        }
-
 
 
         #region Property / Collection Changed
@@ -279,12 +284,18 @@ namespace SourceGenWPF {
         /// Retrieves the Nth element.
         /// </summary>
         private FormattedParts GetEntry(int index) {
-            Debug.WriteLine("GEN " + index);
-            if ((index % 10) != 0) {
-                return FormattedParts.Create("off" + index, "addr" + index, "12 34",
-                    "vncidmx", "", "yup:", "LDA", "$1234", "a & b");
-            } else {
-                return FormattedParts.Create("yup: This is a long comment line");
+            FormattedParts parts = mList[index];
+            if (parts == null) {
+                parts = mList[index] = ListGen.GetFormattedParts(index);
+            }
+            return parts;
+        }
+
+        public void ResetList(int size) {
+            Clear();
+            mList.Capacity = size;
+            for (int i = 0; i < size; i++) {
+                Add(null);
             }
         }
 
@@ -326,6 +337,33 @@ namespace SourceGenWPF {
                 parts.Comment = longComment;
                 parts.IsLongComment = true;
 
+                return parts;
+            }
+            public static FormattedParts CreateBlankLine() {
+                FormattedParts parts = new FormattedParts();
+                return parts;
+            }
+
+            public static FormattedParts CreateLongComment(string comment) {
+                FormattedParts parts = new FormattedParts();
+                parts.Comment = comment;
+                return parts;
+            }
+
+            public static FormattedParts CreateDirective(string opstr, string addrStr) {
+                FormattedParts parts = new FormattedParts();
+                parts.Opcode = opstr;
+                parts.Operand = addrStr;
+                return parts;
+            }
+
+            public static FormattedParts CreateEquDirective(string label, string opstr,
+                    string addrStr, string comment) {
+                FormattedParts parts = new FormattedParts();
+                parts.Label = label;
+                parts.Opcode = opstr;
+                parts.Operand = addrStr;
+                parts.Comment = comment;
                 return parts;
             }
         }

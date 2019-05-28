@@ -22,7 +22,8 @@ limitations under the License.
         mc:Ignorable="d"
         Title="6502bench SourceGen"
         Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
-        Width="810" Height="510" MinWidth="800" MinHeight="500">
+        Width="810" Height="510" MinWidth="800" MinHeight="500"
+        Loaded="Window_Loaded">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -31,13 +32,6 @@ limitations under the License.
                 <ResourceDictionary Source="CodeListItemStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
-                <RoutedUICommand.InputGestures>
-                    <KeyGesture>Ctrl+Shift+A</KeyGesture>
-                </RoutedUICommand.InputGestures>
-            </RoutedUICommand>
-            <RoutedUICommand x:Key="RecentProject"/>
-
             <!-- don't center the ListView(GridView) column headers
             https://stackoverflow.com/q/44119146/294248
             (style without ID applies to all instances of that type)
@@ -45,6 +39,13 @@ limitations under the License.
             <Style TargetType="{x:Type GridViewColumnHeader}">
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
             </Style>
+
+            <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Shift+A</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="RecentProject"/>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -54,7 +55,7 @@ limitations under the License.
     </Window.CommandBindings>
     
     <DockPanel>
-        <Menu Name="AppMenu" DockPanel.Dock="Top">
+        <Menu Name="appMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="New"/>
                 <MenuItem Header="Open"/>
@@ -136,13 +137,13 @@ limitations under the License.
             <Button Content="tbb" Width="75"/>
         </ToolBar>
 
-        <StatusBar Name="MainStatusBar" DockPanel.Dock="Bottom">
+        <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
             <TextBlock Text="Ready"/>
         </StatusBar>
 
         <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes
              size when the window is resized. -->
-        <Grid Name="TriptychGrid" DockPanel.Dock="Top">
+        <Grid Name="triptychGrid" DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="168" MinWidth="100"/>
                 <ColumnDefinition Width="Auto"/>
@@ -155,7 +156,7 @@ limitations under the License.
             <GridSplitter Width="4" Grid.Column="1" HorizontalAlignment="Left"/>
             <GridSplitter Width="4" Grid.Column="3" HorizontalAlignment="Center"/>
 
-            <Grid Name="LeftPanel" Grid.Column="0">
+            <Grid Name="leftPanel" Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" MinHeight="100"/>
                     <RowDefinition Height="Auto"/>
@@ -163,7 +164,7 @@ limitations under the License.
                 </Grid.RowDefinitions>
 
                 <GroupBox Grid.Row="0" Header="References">
-                    <DataGrid Name="ReferencesList" IsReadOnly="True"
+                    <DataGrid Name="referencesList" IsReadOnly="True"
                               FontFamily="{StaticResource GeneralMonoFont}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
@@ -174,7 +175,7 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Notes">
-                    <DataGrid Name="NotesList" IsReadOnly="True"
+                    <DataGrid Name="notesList" IsReadOnly="True"
                               FontFamily="{StaticResource GeneralMonoFont}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
@@ -245,7 +246,7 @@ limitations under the License.
 
             </ListView>
 
-            <Grid Name="RightPanel" Grid.Column="4">
+            <Grid Name="rightPanel" Grid.Column="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" MinHeight="100"/>
                     <RowDefinition Height="Auto"/>

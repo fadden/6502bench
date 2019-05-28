@@ -64,6 +64,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_FileFilterDis65");
         public static string FILE_FILTER_SYM65 =
             (string)Application.Current.FindResource("str_FileFilterSym65");
+        public static string GENERATED_FOR_VERSION_FMT =
+            (string)Application.Current.FindResource("str_GeneratedForVersion");
         public static string INITIAL_EXTENSION_SCRIPTS =
             (string)Application.Current.FindResource("str_InitialExtensionScripts");
         public static string INITIAL_PARAMETERS =
@@ -90,6 +92,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_OpenDataWrongLengthFmt");
         public static string OPERATION_FAILED =
             (string)Application.Current.FindResource("str_OperationFailed");
+        public static string PROGRESS_ASSEMBLING =
+            (string)Application.Current.FindResource("str_ProgressAssembling");
+        public static string PROGRESS_GENERATING_FMT =
+            (string)Application.Current.FindResource("str_ProgressGeneratingFmt");
         public static string PROJECT_FIELD_COMMENT =
             (string)Application.Current.FindResource("str_ProjectFieldComment");
         public static string PROJECT_FIELD_LONG_COMMENT =
@@ -106,6 +112,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ProjectFieldUserLabel");
         public static string PROJECT_FROM_NEWER_APP =
             (string)Application.Current.FindResource("str_ProjectFromNewerApp");
+        public static string RUNTIME_DIR_NOT_FOUND =
+            (string)Application.Current.FindResource("str_RuntimeDirNotFound");
+        public static string RUNTIME_DIR_NOT_FOUND_CAPTION =
+            (string)Application.Current.FindResource("str_RuntimeDirNotFoundCaption");
         public static string SETUP_SYSTEM_SUMMARY_FMT =
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
     }
