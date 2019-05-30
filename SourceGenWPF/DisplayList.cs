@@ -258,12 +258,23 @@ namespace SourceGenWPF {
             return parts;
         }
 
+        /// <summary>
+        /// Resets the list, filling it with empty elements.
+        /// </summary>
+        /// <param name="size">New size of the list.</param>
         public void ResetList(int size) {
+            // TODO: can we recycle existing elements and just add/trim as needed?
             Clear();
             mList.Capacity = size;
             for (int i = 0; i < size; i++) {
-                Add(null);
+                // add directly to list so we don't send events
+                mList.Add(null);
             }
+
+            // send one big notification at the end; "reset" means "forget everything you knew"
+            OnPropertyChanged(CountString);
+            OnPropertyChanged(IndexerName);
+            OnCollectionReset();
         }
 
         public class FormattedParts {

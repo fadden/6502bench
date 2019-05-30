@@ -371,7 +371,7 @@ namespace SourceGen {
                 highAscii.DebugDump("High-ASCII (" + DataAnalysis.MIN_STRING_LENGTH + "+)");
             }
             Debug.WriteLine("ScanFileData took " +
-                ((DateTime.Now - startWhen).Milliseconds) + " ms");
+                ((DateTime.Now - startWhen).TotalMilliseconds) + " ms");
 
             RepeatedBytes = repeats;
             StdAsciiBytes = ascii;

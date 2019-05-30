@@ -74,8 +74,8 @@ namespace SourceGenWPF.ProjWin {
             // state of Items collection.
             PresentationTraceSources.SetTraceLevel(codeListView.ItemContainerGenerator,
                 PresentationTraceLevel.High);
-        }
 #endif
+        }
 
         /// <summary>
         /// INotifyPropertyChanged event
@@ -150,7 +150,7 @@ namespace SourceGenWPF.ProjWin {
             //codeListView.SelectedItems.Clear();
             //listViewSetSelectedItems.Invoke(codeListView, new object[] { codeListView.Items });
 
-            Debug.WriteLine("Select All cmd: " + (DateTime.Now - start).Milliseconds + " ms");
+            Debug.WriteLine("Select All cmd: " + (DateTime.Now - start).TotalMilliseconds + " ms");
         }
 
         private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
