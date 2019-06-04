@@ -31,6 +31,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using CommonWPF;
+
 namespace SourceGenWPF.ProjWin {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -61,10 +63,40 @@ namespace SourceGenWPF.ProjWin {
 
             mMainCtrl = new MainController(this);
 
+            AddMultiKeyGestures();
+
             //GridView gv = (GridView)codeListView.View;
             //gv.Columns[0].Width = 50;
         }
 
+        private void AddMultiKeyGestures() {
+            RoutedUICommand ruic;
+
+            ruic = (RoutedUICommand)FindResource("HintAsCodeEntryPoint");
+            ruic.InputGestures.Add(
+                new MultiKeyInputGesture(new KeyGesture[] {
+                      new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
+                      new KeyGesture(Key.C, ModifierKeys.Control, "Ctrl+C")
+                }));
+            ruic = (RoutedUICommand)FindResource("HintAsDataStart");
+            ruic.InputGestures.Add(
+                new MultiKeyInputGesture(new KeyGesture[] {
+                      new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
+                      new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D")
+                }));
+            ruic = (RoutedUICommand)FindResource("HintAsInlineData");
+            ruic.InputGestures.Add(
+                new MultiKeyInputGesture(new KeyGesture[] {
+                      new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
+                      new KeyGesture(Key.I, ModifierKeys.Control, "Ctrl+I")
+                }));
+            ruic = (RoutedUICommand)FindResource("RemoveHints");
+            ruic.InputGestures.Add(
+                new MultiKeyInputGesture(new KeyGesture[] {
+                      new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
+                      new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R")
+                }));
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mMainCtrl.WindowLoaded();
@@ -133,6 +165,22 @@ namespace SourceGenWPF.ProjWin {
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             // test
             Debug.WriteLine("assembling");
+        }
+
+        private void HintAsCodeEntryPoint_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("hint as code entry point");
+        }
+
+        private void HintAsDataStart_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("hint as data start");
+        }
+
+        private void HintAsInlineData_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("hint as inline data");
+        }
+
+        private void RemoveHints_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("remove hints");
         }
 
         private void SelectAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

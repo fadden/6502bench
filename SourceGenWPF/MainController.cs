@@ -54,10 +54,10 @@ namespace SourceGenWPF {
 
         /// <summary>
         /// Current code list view selection.  The length will match the DisplayList Count.
-        /// 
-        /// A simple foreach through codeListView.SelectedIndices on a 500K-line data set
-        /// takes about 2.5 seconds on a fast Win10 x64 machine.  Fortunately the control
-        /// notifies us of changes to the selection, so we can track it ourselves.
+        ///
+        /// WinForms was bad -- a simple foreach through SelectedIndices on a 500K-line data set
+        /// took about 2.5 seconds on a fast Win10 x64 machine.  In WPF you get a list of
+        /// selected objects, which is fine unless what you really want is the line number.
         /// </summary>
         private VirtualListViewSelection mCodeViewSelection = new VirtualListViewSelection();
 #endif

@@ -183,6 +183,10 @@
       <Project>{a2993eac-35d8-4768-8c54-152b4e14d69c}</Project>
       <Name>CommonUtil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CommonWPF\CommonWPF.csproj">
+      <Project>{1299aa2e-606d-4f3e-b3a9-3f9421e44667}</Project>
+      <Name>CommonWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PluginCommon\PluginCommon.csproj">
       <Project>{70f04543-9e46-4ad3-875a-160fd198c0ff}</Project>
       <Name>PluginCommon</Name>

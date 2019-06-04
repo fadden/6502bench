@@ -26,6 +26,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonWinForms", "CommonWinForms\CommonWinForms.csproj", "{08EC328D-078E-4236-B574-BE6B3FD85915}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenWPF", "SourceGenWPF\SourceGenWPF.csproj", "{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1299AA2E-606D-4F3E-B3A9-3F9421E44667} = {1299AA2E-606D-4F3E-B3A9-3F9421E44667}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonWPF", "CommonWPF\CommonWPF.csproj", "{1299AA2E-606D-4F3E-B3A9-3F9421E44667}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +74,10 @@ Global
 		{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1299AA2E-606D-4F3E-B3A9-3F9421E44667}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1299AA2E-606D-4F3E-B3A9-3F9421E44667}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1299AA2E-606D-4F3E-B3A9-3F9421E44667}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1299AA2E-606D-4F3E-B3A9-3F9421E44667}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
