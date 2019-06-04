@@ -72,7 +72,7 @@ See also https://github.com/fadden/DisasmUiTest
     <!-- Template for long lines.  This is a modification of the default style, with
     Content and Columns attributes defined in the GridViewRowPresenter.  It appears we
     inherit the FocusVisualStyle from the default. -->
-    <ControlTemplate x:Key="longComment" TargetType="{x:Type ListViewItem}">
+    <ControlTemplate x:Key="longCommentTemplate" TargetType="{x:Type ListViewItem}">
         <StackPanel>
             <Border BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
@@ -135,7 +135,7 @@ See also https://github.com/fadden/DisasmUiTest
     <Style x:Key="codeListItemStyle" TargetType="{x:Type ListViewItem}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
-                <Setter Property="Template" Value="{StaticResource longComment}"/>
+                <Setter Property="Template" Value="{StaticResource longCommentTemplate}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>

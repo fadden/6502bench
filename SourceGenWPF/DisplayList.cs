@@ -310,13 +310,6 @@ namespace SourceGenWPF {
                 return parts;
             }
 
-            public static FormattedParts Create(string longComment) {
-                FormattedParts parts = new FormattedParts();
-                parts.Comment = longComment;
-                parts.IsLongComment = true;
-
-                return parts;
-            }
             public static FormattedParts CreateBlankLine() {
                 FormattedParts parts = new FormattedParts();
                 return parts;
@@ -325,6 +318,7 @@ namespace SourceGenWPF {
             public static FormattedParts CreateLongComment(string comment) {
                 FormattedParts parts = new FormattedParts();
                 parts.Comment = comment;
+                parts.IsLongComment = true;
                 return parts;
             }
 
