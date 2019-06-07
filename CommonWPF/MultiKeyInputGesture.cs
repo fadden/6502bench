@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018 faddenSoft
+ * Copyright 2019 faddenSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
-/// <summary>
-/// Handle a multi-key input sequence for WPF windows.
-/// </summary>
-/// <remarks>
-/// Also posted as https://stackoverflow.com/a/56452142/294248
-/// 
-/// Example:
-///   {RoutedUICommand}.InputGestures.Add(
-///       new MultiKeyInputGesture(new KeyGesture[] {
-///           new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
-///           new KeyGesture(Key.C, ModifierKeys.Control, "Ctrl+C")
-///       }) );
-///
-/// TODO: if you have more than one handler, the handler that completes a sequence will
-/// "eat" the final key, and the other handlers won't reset.  Might need to define an event
-/// that all gesture objects subscribe to, so they all reset at once.  In the mean time, the
-/// reset-after-time handler solves the problem if the user is moving slowly enough.
-/// </remarks>
 namespace CommonWPF {
+    /// <summary>
+    /// Handle a multi-key input sequence for WPF windows.
+    /// </summary>
+    /// <remarks>
+    /// Also posted as https://stackoverflow.com/a/56452142/294248
+    /// 
+    /// Example:
+    ///   {RoutedUICommand}.InputGestures.Add(
+    ///       new MultiKeyInputGesture(new KeyGesture[] {
+    ///           new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
+    ///           new KeyGesture(Key.C, ModifierKeys.Control, "Ctrl+C")
+    ///       }) );
+    /// </remarks>
     public class MultiKeyInputGesture : InputGesture {
-        private const int MAX_PAUSE_MILLIS = 1500;
+        private const int MAX_PAUSE_MILLIS = 2000;
 
         private InputGestureCollection mGestures = new InputGestureCollection();
 
@@ -49,9 +41,22 @@ namespace CommonWPF {
         private int mCheckIdx;
         private string mIdStr;
 
+        // On a successful match, the handler "eats" the final keypress.  If you have multiple
+        // handlers, the ones that are called later won't see the non-matching key and will
+        // still be waiting.  This can be a problem if the user types multiple multi-key
+        // sequences in rapid succession (or even not-so-rapid if you disable the timeout).  To
+        // deal with this, all instances subscribe to this event, which fires when a match is
+        // found.
+        private delegate void GotMatchHandler(object sender, EventArgs e);
+        private static event GotMatchHandler sGotMatch;
 
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="keys">Sequence of keys to watch for.</param>
         public MultiKeyInputGesture(KeyGesture[] keys) {
-            Debug.Assert(keys.Length > 0);
+            Debug.Assert(keys.Length > 0);  // arguably also bad input if == 1
 
             StringBuilder idSb = new StringBuilder();
 
@@ -61,8 +66,18 @@ namespace CommonWPF {
                 idSb.Append(kg.DisplayString[kg.DisplayString.Length - 1]);
             }
             mIdStr = idSb.ToString();
+
+            sGotMatch += delegate(object sender, EventArgs e) {
+                mCheckIdx = 0;
+            };
         }
 
+        /// <summary>
+        /// InputGesture interface.  Tests an input event to see if it's part of a sequence.
+        /// </summary>
+        /// <param name="targetElement">Not used.</param>
+        /// <param name="inputEventArgs">Input event.  Ignored if not a key event.</param>
+        /// <returns>True if the key matches and we're at the end of the sequence.</returns>
         public override bool Matches(object targetElement, InputEventArgs inputEventArgs) {
             if (!(inputEventArgs is KeyEventArgs)) {
                 // does this actually happen?
@@ -96,6 +111,9 @@ namespace CommonWPF {
                 //Debug.WriteLine("MKIG " + mIdStr + ": match");
                 mCheckIdx = 0;
                 inputEventArgs.Handled = true;
+
+                // signal other instances
+                sGotMatch(this, null);
                 return true;
             }
 
