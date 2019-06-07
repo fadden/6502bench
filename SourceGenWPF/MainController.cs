@@ -358,7 +358,7 @@ namespace SourceGenWPF {
 
 
         public void OpenRecentProject(int projIndex) {
-            if (!DoClose()) {
+            if (!CloseProject()) {
                 return;
             }
             //DoOpenFile(mRecentProjectPaths[projIndex]);
@@ -373,7 +373,7 @@ namespace SourceGenWPF {
         /// Handles opening an existing project by letting the user select the project file.
         /// </summary>
         private void DoOpen() {
-            if (!DoClose()) {
+            if (!CloseProject()) {
                 return;
             }
 
@@ -609,7 +609,7 @@ namespace SourceGenWPF {
         /// opportunity to cancel.
         /// </summary>
         /// <returns>True if the project was closed, false if the user chose to cancel.</returns>
-        private bool DoClose() {
+        public bool CloseProject() {
             Debug.WriteLine("ProjectView.DoClose() - dirty=" +
                 (mProject == null ? "N/A" : mProject.IsDirty.ToString()));
             if (mProject != null && mProject.IsDirty) {
@@ -665,6 +665,10 @@ namespace SourceGenWPF {
             GC.Collect();
 
             return true;
+        }
+
+        public bool IsProjectOpen() {
+            return mProject != null;
         }
 
 

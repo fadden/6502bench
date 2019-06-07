@@ -22,7 +22,7 @@ limitations under the License.
         mc:Ignorable="d"
         Title="6502bench SourceGen"
         Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
-        Width="810" Height="510" MinWidth="800" MinHeight="500"
+        Width="1000" Height="600" MinWidth="800" MinHeight="500"
         Loaded="Window_Loaded">
 
     <Window.Resources>
@@ -45,6 +45,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+A</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
             <RoutedUICommand x:Key="HintAsCodeEntryPoint" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStart" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineData" Text="Hint As Inline Data"/>
@@ -59,14 +60,22 @@ limitations under the License.
     </Window.Resources>
 
     <Window.CommandBindings>
-        <CommandBinding Command="{StaticResource AssembleCmd}" Executed="AssembleCmd_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsCodeEntryPoint}" Executed="HintAsCodeEntryPoint_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsDataStart}" Executed="HintAsDataStart_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsInlineData}" Executed="HintAsInlineData_Executed"/>
-        <CommandBinding Command="{StaticResource RemoveHints}" Executed="RemoveHints_Executed"/>
+        <CommandBinding Command="{StaticResource AssembleCmd}"
+                        CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
+        <CommandBinding Command="{StaticResource CloseCmd}"
+                        CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsCodeEntryPoint}"
+                        CanExecute="IsProjectOpen" Executed="HintAsCodeEntryPoint_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsDataStart}"
+                        CanExecute="IsProjectOpen" Executed="HintAsDataStart_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsInlineData}"
+                        CanExecute="IsProjectOpen" Executed="HintAsInlineData_Executed"/>
+        <CommandBinding Command="{StaticResource RemoveHints}"
+                        CanExecute="IsProjectOpen" Executed="RemoveHints_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" Executed="RecentProjectCmd_Executed"/>
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView not in focus -->
-        <CommandBinding Command="{StaticResource SelectAllCmd}" Executed="SelectAllCmd_Executed"/>
+        <CommandBinding Command="{StaticResource SelectAllCmd}"
+                        CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
     </Window.CommandBindings>
     
     <DockPanel>
@@ -76,7 +85,7 @@ limitations under the License.
                 <MenuItem Header="Open"/>
                 <MenuItem Command="Save"/>
                 <MenuItem Command="SaveAs"/>
-                <MenuItem Command="Close"/>
+                <MenuItem Command="{StaticResource CloseCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource AssembleCmd}"/>
                 <MenuItem Command="Print"/>
@@ -104,7 +113,7 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Header="Settings..."/>
             </MenuItem>
-            <MenuItem Header="_Actions">
+            <MenuItem Name="ActionsMenu" Header="_Actions">
                 <MenuItem Header="Set Address..."/>
                 <MenuItem Header="Override Status Flags..."/>
                 <MenuItem Header="Edit Label..."/>
@@ -258,6 +267,11 @@ limitations under the License.
                         <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>
+
+                <ListView.ContextMenu>
+                    <!-- this is populated as a clone of the Actions menu during init -->
+                    <ContextMenu/>
+                </ListView.ContextMenu>
 
             </ListView>
 

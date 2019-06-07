@@ -100,6 +100,7 @@ namespace SourceGenWPF.ProjWin {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mMainCtrl.WindowLoaded();
+            CreateCodeListContextMenu();
 
 #if DEBUG
             // Get more info on CollectionChanged events that do not agree with current
@@ -107,6 +108,43 @@ namespace SourceGenWPF.ProjWin {
             PresentationTraceSources.SetTraceLevel(codeListView.ItemContainerGenerator,
                 PresentationTraceLevel.High);
 #endif
+        }
+
+        private void CreateCodeListContextMenu() {
+            // Find Actions menu.
+            ItemCollection mainItems = this.appMenu.Items;
+            MenuItem actionsMenu = null;
+            foreach (object obj in mainItems) {
+                if (!(obj is MenuItem)) {
+                    continue;
+                }
+                MenuItem mi = (MenuItem)obj;
+                if (mi.Name.Equals("ActionsMenu")) {
+                    actionsMenu = mi;
+                    break;
+                }
+            }
+            Debug.Assert(actionsMenu != null);
+
+            // Clone the Actions menu into the codeListView context menu.
+            ContextMenu ctxt = this.codeListView.ContextMenu;
+            foreach (object item in actionsMenu.Items) {
+                if (item is MenuItem) {
+                    MenuItem oldItem = (MenuItem)item;
+                    MenuItem newItem = new MenuItem();
+                    // I don't see a "clone" method, so just copy the fields we think we care about
+                    newItem.Name = oldItem.Name;
+                    newItem.Header = oldItem.Header;
+                    newItem.Icon = oldItem.Icon;
+                    newItem.InputGestureText = oldItem.InputGestureText;
+                    newItem.Command = oldItem.Command;
+                    ctxt.Items.Add(newItem);
+                } else if (item is Separator) {
+                    ctxt.Items.Add(new Separator());
+                } else {
+                    Debug.Assert(false, "Found weird thing in menu: " + item);
+                }
+            }
         }
 
         /// <summary>
@@ -162,9 +200,22 @@ namespace SourceGenWPF.ProjWin {
             get { return App.ProgramVersion.ToString(); }
         }
 
+        /// <summary>
+        /// Returns true if the project is open.  Intended for use in XAML CommandBindings.
+        /// </summary>
+        private void IsProjectOpen(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl.IsProjectOpen();
+        }
+
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             // test
             Debug.WriteLine("assembling");
+        }
+
+        private void CloseCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            if (!mMainCtrl.CloseProject()) {
+                Debug.WriteLine("Close canceled");
+            }
         }
 
         private void HintAsCodeEntryPoint_Executed(object sender, ExecutedRoutedEventArgs e) {
