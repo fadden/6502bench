@@ -49,8 +49,14 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         private MainController mMainCtrl;
 
+        /// <summary>
+        /// Analyzed selection state.
+        /// </summary>
+        private MainController.SelectionState mSelectionState;
+
         // Handle to protected ListView.SetSelectedItems() method
         private MethodInfo listViewSetSelectedItems;
+
 
         public MainWindow() {
             InitializeComponent();
@@ -203,12 +209,122 @@ namespace SourceGenWPF.ProjWin {
             get { return App.ProgramVersion.ToString(); }
         }
 
+        private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            // Update the selected-item bitmap.
+            CodeDisplayList.SelectedIndices.SelectionChanged(e);
+
+            // Update the selection summary, which is used for can-execute methods.
+            mSelectionState = mMainCtrl.UpdateSelectionState();
+
+            Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
+                codeListView.SelectedItems.Count));
+        }
+
+        /// <summary>
+        /// Returns the number of selected items.
+        /// </summary>
+        /// <returns>
+        /// The SelectedItems list appears to hold the full set, so we can just return the count.
+        /// </returns>
+        public int GetSelectionCount() {
+            return codeListView.SelectedItems.Count;
+        }
+
+        /// <summary>
+        /// Returns the index of the first selected item, or -1 if nothing is selected.
+        /// </summary>
+        /// <remarks>
+        /// The ListView.SelectedIndex property returns the index of a selected item, but
+        /// doesn't make guarantees about first or last.
+        /// 
+        /// This would be easier if the ListView kept SelectedItems in sorted order.  However,
+        /// if you ctrl+click around you can get to a point where entry[0] is not the first
+        /// and entry[count-1] is not the last selected item.
+        /// 
+        /// So we either have to walk the SelectedItems list or the DisplayListSelection array.
+        /// For short selections the former will be faster than the later.  I'm assuming the
+        /// common cases will be short selections and select-all, so this should handle both
+        /// efficiently.
+        /// </remarks>
+        public int GetFirstSelectedIndex() {
+            int count = codeListView.SelectedItems.Count;
+            if (count == 0) {
+                return -1;
+            } else if (count < 500) {
+                int min = CodeDisplayList.Count;
+                foreach (DisplayList.FormattedParts parts in codeListView.SelectedItems) {
+                    if (min > parts.ListIndex) {
+                        min = parts.ListIndex;
+                    }
+                }
+                Debug.Assert(min < CodeDisplayList.Count);
+                return min;
+            } else {
+                return CodeDisplayList.SelectedIndices.GetFirstSelectedIndex();
+            }
+        }
+
+        /// <summary>
+        /// Returns the index of the last selected item, or -1 if nothing is selected.
+        /// </summary>
+        /// <remarks>
+        /// Again, the ListView does not provide what we need.
+        /// </remarks>
+        public int GetLastSelectedIndex() {
+            int count = codeListView.SelectedItems.Count;
+            if (count == 0) {
+                return -1;
+            } else if (count < 500) {
+                int max = -1;
+                foreach (DisplayList.FormattedParts parts in codeListView.SelectedItems) {
+                    if (max < parts.ListIndex) {
+                        max = parts.ListIndex;
+                    }
+                }
+                Debug.Assert(max >= 0);
+                return max;
+            } else {
+                return CodeDisplayList.SelectedIndices.GetLastSelectedIndex();
+            }
+        }
+
+
+        #region Can-execute handlers
+
         /// <summary>
         /// Returns true if the project is open.  Intended for use in XAML CommandBindings.
         /// </summary>
         private void IsProjectOpen(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = mMainCtrl.IsProjectOpen();
         }
+
+        private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
+            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            e.CanExecute = mMainCtrl.IsProjectOpen() &&
+                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+                (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
+        }
+        private void CanHintAsDataStart(object sender, CanExecuteRoutedEventArgs e) {
+            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            e.CanExecute = mMainCtrl.IsProjectOpen() &&
+                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+                (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
+        }
+        private void CanHintAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
+            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            e.CanExecute = mMainCtrl.IsProjectOpen() &&
+                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+                (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
+        }
+        private void CanRemoveHints(object sender, CanExecuteRoutedEventArgs e) {
+            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            e.CanExecute = mMainCtrl.IsProjectOpen() &&
+                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+                (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
+        }
+
+        #endregion Can-execute handlers
+
 
         #region Command handlers
 
@@ -268,12 +384,5 @@ namespace SourceGenWPF.ProjWin {
         }
 
         #endregion Command handlers
-
-        private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            CodeDisplayList.SelectedIndices.SelectionChanged(e);
-
-            //Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
-            //    codeListView.SelectedItems.Count));
-        }
     }
 }

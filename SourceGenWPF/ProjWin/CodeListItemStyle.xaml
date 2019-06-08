@@ -16,7 +16,7 @@ limitations under the License.
 <!--
 ListViewItem control template and style.  This is used for the main code ListView.  The
 most significant consideration is getting long comments and notes into the 5th column and
-having them span multiple columns.
+having them span multiple columns.  Most of this came from the default style (WPF 4.5).
 
 This interacts with DisplayList.FormattedParts.
 

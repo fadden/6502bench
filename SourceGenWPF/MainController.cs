@@ -147,6 +147,9 @@ namespace SourceGenWPF {
         /// </summary>
         private bool mUseMainAppDomainForPlugins = false;
 
+
+        #region Init and settings
+
         public MainController(MainWindow win) {
             mMainWin = win;
         }
@@ -356,6 +359,354 @@ namespace SourceGenWPF {
 #endif
         }
 
+        #endregion Init and settings
+
+
+
+
+        #region Project management
+
+        private bool PrepareNewProject(string dataPathName, SystemDef sysDef) {
+            DisasmProject proj = new DisasmProject();
+            mDataPathName = dataPathName;
+            mProjectPathName = string.Empty;
+            byte[] fileData = null;
+            try {
+                fileData = LoadDataFile(dataPathName);
+            } catch (Exception ex) {
+                Debug.WriteLine("PrepareNewProject exception: " + ex);
+                string message = Res.Strings.OPEN_DATA_FAIL_CAPTION;
+                string caption = Res.Strings.OPEN_DATA_FAIL_MESSAGE + ": " + ex.Message;
+                MessageBox.Show(caption, message, MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+            proj.UseMainAppDomainForPlugins = mUseMainAppDomainForPlugins;
+            proj.Initialize(fileData.Length);
+            proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
+
+            proj.LongComments.Add(LineListGen.Line.HEADER_COMMENT_OFFSET,
+                new MultiLineComment("6502bench SourceGen v" + App.ProgramVersion));
+
+            // The system definition provides a set of defaults that can be overridden.
+            // We pull everything of interest out and then discard the object.
+            proj.ApplySystemDef(sysDef);
+
+            mProject = proj;
+
+            return true;
+        }
+
+        private void FinishPrep() {
+            string messages = mProject.LoadExternalFiles();
+            if (messages.Length != 0) {
+                // ProjectLoadIssues isn't quite the right dialog, but it'll do.
+                ProjectLoadIssues dlg = new ProjectLoadIssues(messages,
+                    ProjectLoadIssues.Buttons.Continue);
+                dlg.ShowDialog();
+            }
+
+            CodeListGen = new LineListGen(mProject, mMainWin.CodeDisplayList,
+                mOutputFormatter, mPseudoOpNames);
+
+            // Prep the symbol table subset object.  Replace the old one with a new one.
+            //mSymbolSubset = new SymbolTableSubset(mProject.SymbolTable);
+
+            RefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
+            //ShowProject();
+            //InvalidateControls(null);
+            mMainWin.ShowCodeListView = true;
+            mNavStack.Clear();
+
+            // Want to do this after ShowProject() or we see a weird glitch.
+            UpdateRecentProjectList(mProjectPathName);
+        }
+
+        /// <summary>
+        /// Loads the data file, reading it entirely into memory.
+        /// 
+        /// All errors are reported as exceptions.
+        /// </summary>
+        /// <param name="dataFileName">Full pathname.</param>
+        /// <returns>Data file contents.</returns>
+        private byte[] LoadDataFile(string dataFileName) {
+            byte[] fileData;
+
+            using (FileStream fs = File.Open(dataFileName, FileMode.Open, FileAccess.Read)) {
+                // Check length; should have been caught earlier.
+                if (fs.Length > DisasmProject.MAX_DATA_FILE_SIZE) {
+                    throw new InvalidDataException(
+                        string.Format(Res.Strings.OPEN_DATA_TOO_LARGE_FMT,
+                            fs.Length / 1024, DisasmProject.MAX_DATA_FILE_SIZE / 1024));
+                } else if (fs.Length == 0) {
+                    throw new InvalidDataException(Res.Strings.OPEN_DATA_EMPTY);
+                }
+                fileData = new byte[fs.Length];
+                int actual = fs.Read(fileData, 0, (int)fs.Length);
+                if (actual != fs.Length) {
+                    // Not expected -- should be able to read the entire file in one shot.
+                    throw new Exception(Res.Strings.OPEN_DATA_PARTIAL_READ);
+                }
+            }
+
+            return fileData;
+        }
+
+        /// <summary>
+        /// Applies the changes to the project, adds them to the undo stack, and updates
+        /// the display.
+        /// </summary>
+        /// <param name="cs">Set of changes to apply.</param>
+        private void ApplyUndoableChanges(ChangeSet cs) {
+            if (cs.Count == 0) {
+                Debug.WriteLine("ApplyUndoableChanges: change set is empty");
+            }
+            ApplyChanges(cs, false);
+            mProject.PushChangeSet(cs);
+#if false
+            UpdateMenuItemsAndTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Applies the changes to the project, and updates the display.
+        /// 
+        /// This is called by the undo/redo commands.  Don't call this directly from the
+        /// various UI-driven functions, as this does not add the change to the undo stack.
+        /// </summary>
+        /// <param name="cs">Set of changes to apply.</param>
+        /// <param name="backward">If set, undo the changes instead.</param>
+        private void ApplyChanges(ChangeSet cs, bool backward) {
+            mReanalysisTimer.Clear();
+            mReanalysisTimer.StartTask("ProjectView.ApplyChanges()");
+
+            mReanalysisTimer.StartTask("Save selection");
+#if false
+            int topItem = codeListView.TopItem.Index;
+#else
+            int topItem = 0;
+#endif
+            int topOffset = CodeListGen[topItem].FileOffset;
+            LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
+                CodeListGen, null /*mCodeViewSelection*/, topOffset);
+            //savedSel.DebugDump();
+            mReanalysisTimer.EndTask("Save selection");
+
+            mReanalysisTimer.StartTask("Apply changes");
+            UndoableChange.ReanalysisScope needReanalysis = mProject.ApplyChanges(cs, backward,
+                out RangeSet affectedOffsets);
+            mReanalysisTimer.EndTask("Apply changes");
+
+            string refreshTaskStr = "Refresh w/reanalysis=" + needReanalysis;
+            mReanalysisTimer.StartTask(refreshTaskStr);
+            if (needReanalysis != UndoableChange.ReanalysisScope.None) {
+                Debug.WriteLine("Refreshing project (" + needReanalysis + ")");
+                RefreshProject(needReanalysis);
+            } else {
+                Debug.WriteLine("Refreshing " + affectedOffsets.Count + " offsets");
+                RefreshCodeListViewEntries(affectedOffsets);
+                mProject.Validate();    // shouldn't matter w/o reanalysis, but do it anyway
+            }
+            mReanalysisTimer.EndTask(refreshTaskStr);
+
+            DisplayListSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
+            //newSel.DebugDump();
+
+            // Refresh the various windows, and restore the selection.
+            mReanalysisTimer.StartTask("Invalidate controls");
+#if false
+            InvalidateControls(newSel);
+#endif
+            mReanalysisTimer.EndTask("Invalidate controls");
+
+            // This apparently has to be done after the EndUpdate, and inside try/catch.
+            // See https://stackoverflow.com/questions/626315/ for notes.
+            try {
+                Debug.WriteLine("Setting TopItem to index=" + topIndex);
+#if false
+                codeListView.TopItem = codeListView.Items[topIndex];
+#endif
+            } catch (NullReferenceException) {
+                Debug.WriteLine("Caught an NRE from TopItem");
+            }
+
+            mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
+
+            //mReanalysisTimer.DumpTimes("ProjectView timers:", mGenerationLog);
+#if false
+            if (mShowAnalysisTimersDialog != null) {
+                string timerStr = mReanalysisTimer.DumpToString("ProjectView timers:");
+                mShowAnalysisTimersDialog.BodyText = timerStr;
+            }
+#endif
+
+            // Lines may have moved around.  Update the selection highlight.  It's important
+            // we do it here, and not down in DoRefreshProject(), because at that point the
+            // ListView's selection index could be referencing a line off the end.
+#if false
+            UpdateSelectionHighlight();
+#endif
+        }
+
+        /// <summary>
+        /// Refreshes the project after something of substance has changed.  Some
+        /// re-analysis will be done, followed by a complete rebuild of the DisplayList.
+        /// </summary>
+        /// <param name="reanalysisRequired">Indicates whether reanalysis is required, and
+        ///   what level.</param>
+        private void RefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
+            Debug.Assert(reanalysisRequired != UndoableChange.ReanalysisScope.None);
+
+            // NOTE: my goal is to arrange things so that reanalysis (data-only, and ideally
+            // code+data) takes less than 100ms.  With that response time there's no need for
+            // background processing and progress bars.  Since we need to do data-only
+            // reanalysis after many common operations, the program becomes unpleasant to
+            // use if we miss this goal, and progress bars won't make it less so.
+
+            // Changing the CPU type or whether undocumented instructions are supported
+            // invalidates the Formatter's mnemonic cache.  We can change these values
+            // through undo/redo, so we need to check it here.
+            if (mOutputFormatterCpuDef != mProject.CpuDef) {    // reference equality is fine
+                Debug.WriteLine("CpuDef has changed, resetting formatter (now " +
+                    mProject.CpuDef + ")");
+                mOutputFormatter = new Formatter(mFormatterConfig);
+                CodeListGen.SetFormatter(mOutputFormatter);
+                CodeListGen.SetPseudoOpNames(mPseudoOpNames);
+                mOutputFormatterCpuDef = mProject.CpuDef;
+            }
+
+#if false
+            if (mDisplayList.Count > 200000) {
+                string prevStatus = toolStripStatusLabel.Text;
+
+                // The Windows stuff can take 50-100ms, potentially longer than the actual
+                // work, so don't bother unless the file is very large.
+                try {
+                    mReanalysisTimer.StartTask("Do Windows stuff");
+                    Application.UseWaitCursor = true;
+                    Cursor.Current = Cursors.WaitCursor;
+                    toolStripStatusLabel.Text = Res.Strings.STATUS_RECALCULATING;
+                    Refresh();      // redraw status label
+                    mReanalysisTimer.EndTask("Do Windows stuff");
+
+                    DoRefreshProject(reanalysisRequired);
+                } finally {
+                    Application.UseWaitCursor = false;
+                    toolStripStatusLabel.Text = prevStatus;
+                }
+            } else {
+#endif
+                DoRefreshProject(reanalysisRequired);
+#if false
+        }
+#endif
+
+            if (FormatDescriptor.DebugCreateCount != 0) {
+                Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +
+                    " prefab=" + FormatDescriptor.DebugPrefabCount + " (" +
+                    (FormatDescriptor.DebugPrefabCount * 100) / FormatDescriptor.DebugCreateCount +
+                    "%)");
+            }
+        }
+
+        /// <summary>
+        /// Updates all of the specified ListView entries.  This is called after minor changes,
+        /// such as editing a comment or renaming a label, that can be handled by regenerating
+        /// selected parts of the DisplayList.
+        /// </summary>
+        /// <param name="offsetSet"></param>
+        private void RefreshCodeListViewEntries(RangeSet offsetSet) {
+            IEnumerator<RangeSet.Range> iter = offsetSet.RangeListIterator;
+            while (iter.MoveNext()) {
+                RangeSet.Range range = iter.Current;
+                CodeListGen.GenerateRange(range.Low, range.High);
+            }
+        }
+
+        private void DoRefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
+            if (reanalysisRequired != UndoableChange.ReanalysisScope.DisplayOnly) {
+                mGenerationLog = new CommonUtil.DebugLog();
+                mGenerationLog.SetMinPriority(CommonUtil.DebugLog.Priority.Debug);
+                mGenerationLog.SetShowRelTime(true);
+
+                mReanalysisTimer.StartTask("Call DisasmProject.Analyze()");
+                mProject.Analyze(reanalysisRequired, mGenerationLog, mReanalysisTimer);
+                mReanalysisTimer.EndTask("Call DisasmProject.Analyze()");
+            }
+
+            if (mGenerationLog != null) {
+                //mReanalysisTimer.StartTask("Save _log");
+                //mGenerationLog.WriteToFile(@"C:\Src\WorkBench\SourceGen\TestData\_log.txt");
+                //mReanalysisTimer.EndTask("Save _log");
+
+#if false
+                if (mShowAnalyzerOutputDialog != null) {
+                    mShowAnalyzerOutputDialog.BodyText = mGenerationLog.WriteToString();
+                }
+#endif
+            }
+
+            mReanalysisTimer.StartTask("Generate DisplayList");
+            CodeListGen.GenerateAll();
+            mReanalysisTimer.EndTask("Generate DisplayList");
+        }
+
+        #endregion Project management
+
+        #region Main window UI event handlers
+
+#if false
+        /// <summary>
+        /// Restores the ListView selection by applying a diff between the old and
+        /// new selection bitmaps.
+        /// 
+        /// The virtual list view doesn't change the selection when we rebuild the
+        /// list.  It would be expensive to set all the bits, so we just update the
+        /// entries that changed.
+        /// 
+        /// Before returning, mCodeViewSelection is replaced with curSel.
+        /// </summary>
+        /// <param name="curSel">Selection bits for the current display list.</param>
+        private void RestoreSelection(DisplayListSelection curSel) {
+            Debug.Assert(curSel != null);
+
+            // We have to replace mCodeViewSelection immediately, because changing
+            // the selection will cause ItemSelectionChanged events to fire, invoking
+            // callbacks that expect the new selection object.  Things will explode if
+            // the older list was shorter.
+            DisplayListSelection prevSel = mCodeViewSelection;
+            mCodeViewSelection = curSel;
+
+            // Set everything that has changed between the two sets.
+            int debugNumChanged = 0;
+            int count = Math.Min(prevSel.Length, curSel.Length);
+            int i;
+            for (i = 0; i < count; i++) {
+                if (prevSel[i] != curSel[i]) {
+                    codeListView.Items[i].Selected = curSel[i];
+                    debugNumChanged++;
+                }
+            }
+            // Set everything that wasn't there before.  New entries default to unselected,
+            // so we only need to do this if the new value is "true".
+            for (; i < curSel.Length; i++) {
+                // An ItemSelectionChanged event will fire that will cause curSel[i] to
+                // be assigned.  This is fine.
+                if (curSel[i]) {
+                    codeListView.Items[i].Selected = curSel[i];
+                    debugNumChanged++;
+                }
+            }
+
+            Debug.WriteLine("RestoreSelection: changed " + debugNumChanged +
+                " of " + curSel.Length + " lines");
+        }
+#endif
 
         public void OpenRecentProject(int projIndex) {
             if (!CloseProject()) {
@@ -671,299 +1022,198 @@ namespace SourceGenWPF {
             return mProject != null;
         }
 
+        /// <summary>
+        /// Gathered facts about the current selection.  Recalculated whenever the selection
+        /// changes.
+        /// </summary>
+        public class SelectionState {
+            // Number of selected items or lines, reduced.  This will be:
+            //  0 if no lines are selected
+            //  1 if a single *item* is selected (regardless of number of lines)
+            //  >1 if more than one item is selected (exact value not specified)
+            public int mNumSelected;
 
-        #region Project management
+            // Single selection: the type of line selected.
+            public LineListGen.Line.Type mLineType;
 
-        private bool PrepareNewProject(string dataPathName, SystemDef sysDef) {
-            DisasmProject proj = new DisasmProject();
-            mDataPathName = dataPathName;
-            mProjectPathName = string.Empty;
-            byte[] fileData = null;
-            try {
-                fileData = LoadDataFile(dataPathName);
-            } catch (Exception ex) {
-                Debug.WriteLine("PrepareNewProject exception: " + ex);
-                string message = Res.Strings.OPEN_DATA_FAIL_CAPTION;
-                string caption = Res.Strings.OPEN_DATA_FAIL_MESSAGE + ": " + ex.Message;
-                MessageBox.Show(caption, message, MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+            // Single selection: is line an instruction with an operand.
+            public bool mIsInstructionWithOperand;
+
+            // Single selection: is line an EQU directive for a project symbol.
+            public bool mIsProjectSymbolEqu;
+
+            // Some totals.
+            public EntityCounts mEntityCounts;
+        }
+
+        /// <summary>
+        /// Updates Actions menu enable states when the selection changes.
+        /// </summary>
+        ///   is selected.</param>
+        public SelectionState UpdateSelectionState() {
+            int firstIndex = mMainWin.GetFirstSelectedIndex();
+            Debug.WriteLine("SelectionChanged, firstIndex=" + firstIndex);
+
+            SelectionState state = new SelectionState();
+
+            // Use IsSingleItemSelected(), rather than just checking sel.Count, because we
+            // want the user to be able to e.g. EditData on a multi-line string even if all
+            // lines in the string are selected.
+            if (firstIndex == -1) {
+                // nothing selected, leave everything set to false / 0
+                state.mEntityCounts = new EntityCounts();
+            } else if (IsSingleItemSelected()) {
+                state.mNumSelected = 1;
+                state.mEntityCounts = GatherEntityCounts(firstIndex);
+                LineListGen.Line line = CodeListGen[firstIndex];
+                state.mLineType = line.LineType;
+
+                state.mIsInstructionWithOperand = (line.LineType == LineListGen.Line.Type.Code &&
+                    mProject.GetAnattrib(line.FileOffset).IsInstructionWithOperand);
+                if (line.LineType == LineListGen.Line.Type.EquDirective) {
+                    // See if this EQU directive is for a project symbol.
+                    int symIndex = LineListGen.DefSymIndexFromOffset(line.FileOffset);
+                    DefSymbol defSym = mProject.ActiveDefSymbolList[symIndex];
+                    state.mIsProjectSymbolEqu = (defSym.SymbolSource == Symbol.Source.Project);
+                }
+            } else {
+                state.mNumSelected = 2;
+                state.mEntityCounts = GatherEntityCounts(-1);
+            }
+
+            return state;
+        }
+
+        /// <summary>
+        /// Entity count collection, for GatherEntityCounts.
+        /// </summary>
+        public class EntityCounts {
+            public int mCodeLines;
+            public int mDataLines;
+            public int mBlankLines;
+            public int mControlLines;
+
+            public int mCodeHints;
+            public int mDataHints;
+            public int mInlineDataHints;
+            public int mNoHints;
+        };
+
+        /// <summary>
+        /// Gathers a count of different line types and hints that are currently selected.
+        /// </summary>
+        /// <param name="singleLineIndex">If a single line is selected, pass the index in.
+        ///   Otherwise, pass -1 to traverse the entire line list.</param>
+        /// <returns>Object with computed totals.</returns>
+        private EntityCounts GatherEntityCounts(int singleLineIndex) {
+            //DateTime startWhen = DateTime.Now;
+            int codeLines, dataLines, blankLines, controlLines;
+            int codeHints, dataHints, inlineDataHints, noHints;
+            codeLines = dataLines = blankLines = controlLines = 0;
+            codeHints = dataHints = inlineDataHints = noHints = 0;
+
+            int startIndex, endIndex;
+            if (singleLineIndex < 0) {
+                startIndex = 0;
+                endIndex = mMainWin.CodeDisplayList.Count - 1;
+            } else {
+                startIndex = endIndex = singleLineIndex;
+            }
+
+            for (int i = startIndex; i <= endIndex; i++) {
+                if (!mMainWin.CodeDisplayList.SelectedIndices[i]) {
+                    // not selected, ignore
+                    continue;
+                }
+                LineListGen.Line line = CodeListGen[i];
+                switch (line.LineType) {
+                    case LineListGen.Line.Type.Code:
+                        codeLines++;
+                        break;
+                    case LineListGen.Line.Type.Data:
+                        dataLines++;
+                        break;
+                    case LineListGen.Line.Type.Blank:
+                        // Don't generally care how many blank lines there are, but we do want
+                        // to exclude them from the other categories: if we have nothing but
+                        // blank lines, there's nothing to do.
+                        blankLines++;
+                        break;
+                    default:
+                        // These are only editable as single-line items.  We do allow mass
+                        // code hint selection to include them (they will be ignored).
+                        // org, equ, rwid, long comment...
+                        controlLines++;
+                        break;
+                }
+
+                // A single line can span multiple offsets, each of which could have a
+                // different hint.
+                for (int offset = line.FileOffset; offset < line.FileOffset + line.OffsetSpan;
+                        offset++) {
+                    switch (mProject.TypeHints[offset]) {
+                        case CodeAnalysis.TypeHint.Code:
+                            codeHints++;
+                            break;
+                        case CodeAnalysis.TypeHint.Data:
+                            dataHints++;
+                            break;
+                        case CodeAnalysis.TypeHint.InlineData:
+                            inlineDataHints++;
+                            break;
+                        case CodeAnalysis.TypeHint.NoHint:
+                            noHints++;
+                            break;
+                        default:
+                            Debug.Assert(false);
+                            break;
+                    }
+                }
+            }
+
+            //Debug.WriteLine("GatherEntityCounts (len=" + mCodeViewSelection.Length + ") took " +
+            //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
+
+            return new EntityCounts() {
+                mCodeLines = codeLines,
+                mDataLines = dataLines,
+                mBlankLines = blankLines,
+                mControlLines = controlLines,
+                mCodeHints = codeHints,
+                mDataHints = dataHints,
+                mInlineDataHints = inlineDataHints,
+                mNoHints = noHints
+            };
+        }
+
+        /// <summary>
+        /// Determines whether the current selection spans a single item.  This could be a
+        /// single-line item or a multi-line item.
+        /// </summary>
+        private bool IsSingleItemSelected() {
+            int firstIndex = mMainWin.GetFirstSelectedIndex();
+            if (firstIndex < 0) {
+                // empty selection
                 return false;
             }
-            proj.UseMainAppDomainForPlugins = mUseMainAppDomainForPlugins;
-            proj.Initialize(fileData.Length);
-            proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
 
-            proj.LongComments.Add(LineListGen.Line.HEADER_COMMENT_OFFSET,
-                new MultiLineComment("6502bench SourceGen v" + App.ProgramVersion));
+            int lastIndex = mMainWin.GetLastSelectedIndex();
+            Debug.WriteLine("CHECK: first=" + firstIndex + ", last=" + lastIndex);
+            if (lastIndex == firstIndex) {
+                // only one line is selected
+                return true;
+            }
 
-            // The system definition provides a set of defaults that can be overridden.
-            // We pull everything of interest out and then discard the object.
-            proj.ApplySystemDef(sysDef);
-
-            mProject = proj;
-
-            return true;
+            // Just check the first and last entries to see if they're the same.
+            LineListGen.Line firstItem = CodeListGen[firstIndex];
+            LineListGen.Line lastItem = CodeListGen[lastIndex];
+            if (firstItem.FileOffset == lastItem.FileOffset &&
+                    firstItem.LineType == lastItem.LineType) {
+                return true;
+            }
+            return false;
         }
 
-        private void FinishPrep() {
-            string messages = mProject.LoadExternalFiles();
-            if (messages.Length != 0) {
-                // ProjectLoadIssues isn't quite the right dialog, but it'll do.
-                ProjectLoadIssues dlg = new ProjectLoadIssues(messages,
-                    ProjectLoadIssues.Buttons.Continue);
-                dlg.ShowDialog();
-            }
-
-            CodeListGen = new LineListGen(mProject, mMainWin.CodeDisplayList,
-                mOutputFormatter, mPseudoOpNames);
-
-            // Prep the symbol table subset object.  Replace the old one with a new one.
-            //mSymbolSubset = new SymbolTableSubset(mProject.SymbolTable);
-
-            RefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
-            //ShowProject();
-            //InvalidateControls(null);
-            mMainWin.ShowCodeListView = true;
-            mNavStack.Clear();
-
-            // Want to do this after ShowProject() or we see a weird glitch.
-            UpdateRecentProjectList(mProjectPathName);
-        }
-
-        /// <summary>
-        /// Loads the data file, reading it entirely into memory.
-        /// 
-        /// All errors are reported as exceptions.
-        /// </summary>
-        /// <param name="dataFileName">Full pathname.</param>
-        /// <returns>Data file contents.</returns>
-        private byte[] LoadDataFile(string dataFileName) {
-            byte[] fileData;
-
-            using (FileStream fs = File.Open(dataFileName, FileMode.Open, FileAccess.Read)) {
-                // Check length; should have been caught earlier.
-                if (fs.Length > DisasmProject.MAX_DATA_FILE_SIZE) {
-                    throw new InvalidDataException(
-                        string.Format(Res.Strings.OPEN_DATA_TOO_LARGE_FMT,
-                            fs.Length / 1024, DisasmProject.MAX_DATA_FILE_SIZE / 1024));
-                } else if (fs.Length == 0) {
-                    throw new InvalidDataException(Res.Strings.OPEN_DATA_EMPTY);
-                }
-                fileData = new byte[fs.Length];
-                int actual = fs.Read(fileData, 0, (int)fs.Length);
-                if (actual != fs.Length) {
-                    // Not expected -- should be able to read the entire file in one shot.
-                    throw new Exception(Res.Strings.OPEN_DATA_PARTIAL_READ);
-                }
-            }
-
-            return fileData;
-        }
-
-        /// <summary>
-        /// Applies the changes to the project, adds them to the undo stack, and updates
-        /// the display.
-        /// </summary>
-        /// <param name="cs">Set of changes to apply.</param>
-        private void ApplyUndoableChanges(ChangeSet cs) {
-            if (cs.Count == 0) {
-                Debug.WriteLine("ApplyUndoableChanges: change set is empty");
-            }
-            ApplyChanges(cs, false);
-            mProject.PushChangeSet(cs);
-#if false
-            UpdateMenuItemsAndTitle();
-
-            // If the debug dialog is visible, update it.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
-            }
-#endif
-        }
-
-        /// <summary>
-        /// Applies the changes to the project, and updates the display.
-        /// 
-        /// This is called by the undo/redo commands.  Don't call this directly from the
-        /// various UI-driven functions, as this does not add the change to the undo stack.
-        /// </summary>
-        /// <param name="cs">Set of changes to apply.</param>
-        /// <param name="backward">If set, undo the changes instead.</param>
-        private void ApplyChanges(ChangeSet cs, bool backward) {
-            mReanalysisTimer.Clear();
-            mReanalysisTimer.StartTask("ProjectView.ApplyChanges()");
-
-            mReanalysisTimer.StartTask("Save selection");
-#if false
-            int topItem = codeListView.TopItem.Index;
-#else
-            int topItem = 0;
-#endif
-            int topOffset = CodeListGen[topItem].FileOffset;
-            LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
-                CodeListGen, null /*mCodeViewSelection*/, topOffset);
-            //savedSel.DebugDump();
-            mReanalysisTimer.EndTask("Save selection");
-
-            mReanalysisTimer.StartTask("Apply changes");
-            UndoableChange.ReanalysisScope needReanalysis = mProject.ApplyChanges(cs, backward,
-                out RangeSet affectedOffsets);
-            mReanalysisTimer.EndTask("Apply changes");
-
-            string refreshTaskStr = "Refresh w/reanalysis=" + needReanalysis;
-            mReanalysisTimer.StartTask(refreshTaskStr);
-            if (needReanalysis != UndoableChange.ReanalysisScope.None) {
-                Debug.WriteLine("Refreshing project (" + needReanalysis + ")");
-                RefreshProject(needReanalysis);
-            } else {
-                Debug.WriteLine("Refreshing " + affectedOffsets.Count + " offsets");
-                RefreshCodeListViewEntries(affectedOffsets);
-                mProject.Validate();    // shouldn't matter w/o reanalysis, but do it anyway
-            }
-            mReanalysisTimer.EndTask(refreshTaskStr);
-
-            DisplayListSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
-            //newSel.DebugDump();
-
-            // Refresh the various windows, and restore the selection.
-            mReanalysisTimer.StartTask("Invalidate controls");
-#if false
-            InvalidateControls(newSel);
-#endif
-            mReanalysisTimer.EndTask("Invalidate controls");
-
-            // This apparently has to be done after the EndUpdate, and inside try/catch.
-            // See https://stackoverflow.com/questions/626315/ for notes.
-            try {
-                Debug.WriteLine("Setting TopItem to index=" + topIndex);
-#if false
-                codeListView.TopItem = codeListView.Items[topIndex];
-#endif
-            } catch (NullReferenceException) {
-                Debug.WriteLine("Caught an NRE from TopItem");
-            }
-
-            mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
-
-            //mReanalysisTimer.DumpTimes("ProjectView timers:", mGenerationLog);
-#if false
-            if (mShowAnalysisTimersDialog != null) {
-                string timerStr = mReanalysisTimer.DumpToString("ProjectView timers:");
-                mShowAnalysisTimersDialog.BodyText = timerStr;
-            }
-#endif
-
-            // Lines may have moved around.  Update the selection highlight.  It's important
-            // we do it here, and not down in DoRefreshProject(), because at that point the
-            // ListView's selection index could be referencing a line off the end.
-#if false
-            UpdateSelectionHighlight();
-#endif
-        }
-
-        /// <summary>
-        /// Refreshes the project after something of substance has changed.  Some
-        /// re-analysis will be done, followed by a complete rebuild of the DisplayList.
-        /// </summary>
-        /// <param name="reanalysisRequired">Indicates whether reanalysis is required, and
-        ///   what level.</param>
-        private void RefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
-            Debug.Assert(reanalysisRequired != UndoableChange.ReanalysisScope.None);
-
-            // NOTE: my goal is to arrange things so that reanalysis (data-only, and ideally
-            // code+data) takes less than 100ms.  With that response time there's no need for
-            // background processing and progress bars.  Since we need to do data-only
-            // reanalysis after many common operations, the program becomes unpleasant to
-            // use if we miss this goal, and progress bars won't make it less so.
-
-            // Changing the CPU type or whether undocumented instructions are supported
-            // invalidates the Formatter's mnemonic cache.  We can change these values
-            // through undo/redo, so we need to check it here.
-            if (mOutputFormatterCpuDef != mProject.CpuDef) {    // reference equality is fine
-                Debug.WriteLine("CpuDef has changed, resetting formatter (now " +
-                    mProject.CpuDef + ")");
-                mOutputFormatter = new Formatter(mFormatterConfig);
-                CodeListGen.SetFormatter(mOutputFormatter);
-                CodeListGen.SetPseudoOpNames(mPseudoOpNames);
-                mOutputFormatterCpuDef = mProject.CpuDef;
-            }
-
-#if false
-            if (mDisplayList.Count > 200000) {
-                string prevStatus = toolStripStatusLabel.Text;
-
-                // The Windows stuff can take 50-100ms, potentially longer than the actual
-                // work, so don't bother unless the file is very large.
-                try {
-                    mReanalysisTimer.StartTask("Do Windows stuff");
-                    Application.UseWaitCursor = true;
-                    Cursor.Current = Cursors.WaitCursor;
-                    toolStripStatusLabel.Text = Res.Strings.STATUS_RECALCULATING;
-                    Refresh();      // redraw status label
-                    mReanalysisTimer.EndTask("Do Windows stuff");
-
-                    DoRefreshProject(reanalysisRequired);
-                } finally {
-                    Application.UseWaitCursor = false;
-                    toolStripStatusLabel.Text = prevStatus;
-                }
-            } else {
-#endif
-                DoRefreshProject(reanalysisRequired);
-#if false
-        }
-#endif
-
-            if (FormatDescriptor.DebugCreateCount != 0) {
-                Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +
-                    " prefab=" + FormatDescriptor.DebugPrefabCount + " (" +
-                    (FormatDescriptor.DebugPrefabCount * 100) / FormatDescriptor.DebugCreateCount +
-                    "%)");
-            }
-        }
-
-        /// <summary>
-        /// Updates all of the specified ListView entries.  This is called after minor changes,
-        /// such as editing a comment or renaming a label, that can be handled by regenerating
-        /// selected parts of the DisplayList.
-        /// </summary>
-        /// <param name="offsetSet"></param>
-        private void RefreshCodeListViewEntries(RangeSet offsetSet) {
-            IEnumerator<RangeSet.Range> iter = offsetSet.RangeListIterator;
-            while (iter.MoveNext()) {
-                RangeSet.Range range = iter.Current;
-                CodeListGen.GenerateRange(range.Low, range.High);
-            }
-        }
-
-        private void DoRefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
-            if (reanalysisRequired != UndoableChange.ReanalysisScope.DisplayOnly) {
-                mGenerationLog = new CommonUtil.DebugLog();
-                mGenerationLog.SetMinPriority(CommonUtil.DebugLog.Priority.Debug);
-                mGenerationLog.SetShowRelTime(true);
-
-                mReanalysisTimer.StartTask("Call DisasmProject.Analyze()");
-                mProject.Analyze(reanalysisRequired, mGenerationLog, mReanalysisTimer);
-                mReanalysisTimer.EndTask("Call DisasmProject.Analyze()");
-            }
-
-            if (mGenerationLog != null) {
-                //mReanalysisTimer.StartTask("Save _log");
-                //mGenerationLog.WriteToFile(@"C:\Src\WorkBench\SourceGen\TestData\_log.txt");
-                //mReanalysisTimer.EndTask("Save _log");
-
-#if false
-                if (mShowAnalyzerOutputDialog != null) {
-                    mShowAnalyzerOutputDialog.BodyText = mGenerationLog.WriteToString();
-                }
-#endif
-            }
-
-            mReanalysisTimer.StartTask("Generate DisplayList");
-            CodeListGen.GenerateAll();
-            mReanalysisTimer.EndTask("Generate DisplayList");
-        }
-
-        #endregion Project management
+        #endregion Main window UI event handlers
     }
 }

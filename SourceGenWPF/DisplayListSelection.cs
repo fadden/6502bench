@@ -18,6 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Controls;
+
 using CommonUtil;
 
 namespace SourceGenWPF {
@@ -82,6 +83,35 @@ namespace SourceGenWPF {
                 Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
                 mSelection.Set(parts.ListIndex, false);
             }
+        }
+
+        /// <summary>
+        /// Returns the index of the first selected item, or -1 if nothing is selected.
+        /// </summary>
+        public int GetFirstSelectedIndex() {
+            int idx;
+            for (idx = 0; idx < mSelection.Length; idx++) {
+                if (mSelection[idx]) {
+                    break;
+                }
+            }
+            if (idx == mSelection.Length) {
+                idx = -1;
+            }
+            return idx;
+        }
+
+        /// <summary>
+        /// Returns the index of the last selected item, or -1 if nothing is selected.
+        /// </summary>
+        public int GetLastSelectedIndex() {
+            int idx;
+            for (idx = mSelection.Length - 1; idx >= 0; idx--) {
+                if (mSelection[idx]) {
+                    break;
+                }
+            }
+            return idx;
         }
 
         /// <summary>

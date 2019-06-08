@@ -65,13 +65,13 @@ limitations under the License.
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsCodeEntryPoint}"
-                        CanExecute="IsProjectOpen" Executed="HintAsCodeEntryPoint_Executed"/>
+                        CanExecute="CanHintAsCodeEntryPoint" Executed="HintAsCodeEntryPoint_Executed"/>
         <CommandBinding Command="{StaticResource HintAsDataStart}"
-                        CanExecute="IsProjectOpen" Executed="HintAsDataStart_Executed"/>
+                        CanExecute="CanHintAsDataStart" Executed="HintAsDataStart_Executed"/>
         <CommandBinding Command="{StaticResource HintAsInlineData}"
-                        CanExecute="IsProjectOpen" Executed="HintAsInlineData_Executed"/>
+                        CanExecute="CanHintAsInlineData" Executed="HintAsInlineData_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHints}"
-                        CanExecute="IsProjectOpen" Executed="RemoveHints_Executed"/>
+                        CanExecute="CanRemoveHints" Executed="RemoveHints_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" Executed="RecentProjectCmd_Executed"/>
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
