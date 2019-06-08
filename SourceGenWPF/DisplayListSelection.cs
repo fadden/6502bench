@@ -17,16 +17,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Windows.Controls;
 using CommonUtil;
 
 namespace SourceGenWPF {
     /// <summary>
-    /// Tracks the items selected in a list view.
+    /// Tracks the items selected in the DisplayList.
     /// 
-    /// Forward the ItemSelectionChanged and VirtualItemsSelectionRangeChanged.
+    /// Forward the SelectionChanged event.  In WPF you can't get indices, only items, so we
+    /// have to store the item index in the item itself.
     /// </summary>
-    public class VirtualListViewSelection {
+    public class DisplayListSelection {
         private BitArray mSelection;
 
         /// <summary>
@@ -47,11 +48,11 @@ namespace SourceGenWPF {
             }
         }
 
-        public VirtualListViewSelection() {
+        public DisplayListSelection() {
             mSelection = new BitArray(0);
         }
 
-        public VirtualListViewSelection(int length) {
+        public DisplayListSelection(int length) {
             mSelection = new BitArray(length);
         }
 
@@ -68,46 +69,20 @@ namespace SourceGenWPF {
             mSelection.Length = length;
         }
 
-#if false // TODO
         /// <summary>
-        /// Handle a state change for a single item.
+        /// Handles selection change.
         /// </summary>
-        public void ItemSelectionChanged(ListViewItemSelectionChangedEventArgs e) {
-            //Debug.WriteLine("ItemSelectionChanged: " + e.ItemIndex + " (" + e.IsSelected + ")");
-            if (e.ItemIndex >= mSelection.Length) {
-                Debug.WriteLine("GLITCH: selection index " + e.ItemIndex + " out of range");
-                Debug.Assert(false);
-                return;
+        /// <param name="e">Argument from SelectionChanged event.</param>
+        public void SelectionChanged(SelectionChangedEventArgs e) {
+            foreach (DisplayList.FormattedParts parts in e.AddedItems) {
+                Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
+                mSelection.Set(parts.ListIndex, true);
             }
-            mSelection.Set(e.ItemIndex, e.IsSelected);
-        }
-
-        /// <summary>
-        /// Handle a state change for a range of items.
-        /// </summary>
-        public void VirtualItemsSelectionRangeChanged(
-                ListViewVirtualItemsSelectionRangeChangedEventArgs e) {
-            //Debug.WriteLine("VirtualRangeChange: " + e.StartIndex + " - " + e.EndIndex +
-            //    " (" + e.IsSelected + ")");
-
-            if (e.StartIndex == 0 && e.EndIndex == mSelection.Length - 1) {
-                // Set all elements.  The list view control seems to like to set all elements
-                // to false whenever working with multi-select, so this should be fast.
-                //Debug.WriteLine("VirtualRangeChange: set all to " + e.IsSelected);
-                mSelection.SetAll(e.IsSelected);
-            } else {
-                if (e.EndIndex >= mSelection.Length) {
-                    Debug.WriteLine("GLITCH: selection end index " + e.EndIndex + " out of range");
-                    Debug.Assert(false);
-                    return;
-                }
-                bool val = e.IsSelected;
-                for (int i = e.StartIndex; i <= e.EndIndex; i++) {
-                    mSelection.Set(i, val);
-                }
+            foreach (DisplayList.FormattedParts parts in e.RemovedItems) {
+                Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
+                mSelection.Set(parts.ListIndex, false);
             }
         }
-#endif
 
         /// <summary>
         /// Confirms that the selection count matches the number of set bits.  Pass

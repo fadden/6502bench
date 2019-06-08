@@ -16,13 +16,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SourceGenWPF {
     /// <summary>
@@ -66,12 +62,18 @@ namespace SourceGenWPF {
         /// </remarks>
         public LineListGen ListGen { get; set; }
 
+        /// <summary>
+        /// Set of selected items, by list index.
+        /// </summary>
+        public DisplayListSelection SelectedIndices { get; private set; }
+
 
         /// <summary>
         /// Constructs an empty collection, with the default initial capacity.
         /// </summary>
         public DisplayList() {
             mList = new List<FormattedParts>();
+            SelectedIndices = new DisplayListSelection();
         }
 
 
@@ -254,12 +256,13 @@ namespace SourceGenWPF {
             FormattedParts parts = mList[index];
             if (parts == null) {
                 parts = mList[index] = ListGen.GetFormattedParts(index);
+                parts.ListIndex = index;
             }
             return parts;
         }
 
         /// <summary>
-        /// Resets the list, filling it with empty elements.
+        /// Resets the list, filling it with empty elements.  Also resets the selected indices.
         /// </summary>
         /// <param name="size">New size of the list.</param>
         public void ResetList(int size) {
@@ -275,6 +278,8 @@ namespace SourceGenWPF {
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
             OnCollectionReset();
+
+            SelectedIndices = new DisplayListSelection(size);
         }
 
         public class FormattedParts {
@@ -288,6 +293,8 @@ namespace SourceGenWPF {
             public string Operand { get; private set; }
             public string Comment { get; private set; }
             public bool IsLongComment { get; private set; }
+
+            public int ListIndex { get; set; } = -1;
 
             // Private constructor -- create instances with factory methods.
             private FormattedParts() { }

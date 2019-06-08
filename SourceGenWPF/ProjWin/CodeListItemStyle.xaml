@@ -133,6 +133,12 @@ See also https://github.com/fadden/DisasmUiTest
     </ControlTemplate>
 
     <Style x:Key="codeListItemStyle" TargetType="{x:Type ListViewItem}">
+        <!-- There's a one-pixel gap between items, possibly space for grid lines, that
+        can't seem to be eliminated.  Declaring a negative margin removes it.  This is
+        necessary because the gap isn't a mouse target, so if your mouse is in just the
+        wrong place you'll feel like you clicked and nothing happened. -->
+        <Setter Property="Margin" Value="0,-1,0,0"/>
+
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
                 <Setter Property="Template" Value="{StaticResource longCommentTemplate}"/>

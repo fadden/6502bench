@@ -231,7 +231,7 @@ namespace SourceGenWPF {
             /// <param name="dl">Display list, with list of Lines.</param>
             /// <param name="sel">Bit vector specifying which lines are selected.</param>
             /// <returns>New SavedSelection object.</returns>
-            public static SavedSelection Generate(LineListGen dl, VirtualListViewSelection sel,
+            public static SavedSelection Generate(LineListGen dl, DisplayListSelection sel,
                     int topOffset) {
                 SavedSelection savedSel = new SavedSelection();
                 //Debug.Assert(topOffset >= 0);
@@ -297,9 +297,9 @@ namespace SourceGenWPF {
             /// </summary>
             /// <param name="dl">Display list, with list of Lines.</param>
             /// <returns>Set of selected lines.</returns>
-            public VirtualListViewSelection Restore(LineListGen dl, out int topIndex) {
+            public DisplayListSelection Restore(LineListGen dl, out int topIndex) {
                 List<Line> lineList = dl.mLineList;
-                VirtualListViewSelection sel = new VirtualListViewSelection(lineList.Count);
+                DisplayListSelection sel = new DisplayListSelection(lineList.Count);
 
                 topIndex = -1;
 

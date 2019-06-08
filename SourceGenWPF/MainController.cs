@@ -822,7 +822,7 @@ namespace SourceGenWPF {
             }
             mReanalysisTimer.EndTask(refreshTaskStr);
 
-            VirtualListViewSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
+            DisplayListSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
             //newSel.DebugDump();
 
             // Refresh the various windows, and restore the selection.

@@ -98,7 +98,7 @@ limitations under the License.
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Command="Undo"/>
-                <MenuItem Command="Redo"/>
+                <MenuItem Command="Redo"/> <!-- want both Ctrl+Y and Ctrl+Shift+Z -->
                 <Separator/>
                 <MenuItem Command="Copy"/>
                 <Separator/>

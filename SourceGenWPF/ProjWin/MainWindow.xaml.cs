@@ -43,10 +43,13 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         public DisplayList CodeDisplayList { get; private set; }
 
+
         /// <summary>
+        /// Reference to controller object.
         /// </summary>
         private MainController mMainCtrl;
 
+        // Handle to protected ListView.SetSelectedItems() method
         private MethodInfo listViewSetSelectedItems;
 
         public MainWindow() {
@@ -179,7 +182,7 @@ namespace SourceGenWPF.ProjWin {
         }
 
         /// <summary>
-        /// Returns true if we should be showing the launch panel.
+        /// Returns the visibility status of the launch panel.
         /// (Intended for use from XAML.)
         /// </summary>
         public Visibility LaunchPanelVisibility {
@@ -187,7 +190,7 @@ namespace SourceGenWPF.ProjWin {
         }
 
         /// <summary>
-        /// Returns true if we should be showing the code ListView.
+        /// Returns the visibility status of the code ListView.
         /// (Intended for use from XAML.)
         /// </summary>
         public Visibility CodeListVisibility {
@@ -206,6 +209,8 @@ namespace SourceGenWPF.ProjWin {
         private void IsProjectOpen(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = mMainCtrl.IsProjectOpen();
         }
+
+        #region Command handlers
 
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             // test
@@ -262,8 +267,13 @@ namespace SourceGenWPF.ProjWin {
             mMainCtrl.OpenRecentProject(recentIndex);
         }
 
+        #endregion Command handlers
+
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            //Debug.WriteLine("SEL: add " + e.AddedItems.Count + ", rem " + e.RemovedItems.Count);
+            CodeDisplayList.SelectedIndices.SelectionChanged(e);
+
+            //Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
+            //    codeListView.SelectedItems.Count));
         }
     }
 }

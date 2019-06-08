@@ -96,7 +96,7 @@
     <Compile Include="SystemDefaults.cs" />
     <Compile Include="SystemDefs.cs" />
     <Compile Include="UndoableChange.cs" />
-    <Compile Include="VirtualListViewSelection.cs" />
+    <Compile Include="DisplayListSelection.cs" />
     <Compile Include="WeakSymbolRef.cs" />
     <Compile Include="XrefSet.cs" />
   </ItemGroup>
