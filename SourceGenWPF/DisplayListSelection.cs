@@ -23,12 +23,14 @@ using CommonUtil;
 
 namespace SourceGenWPF {
     /// <summary>
-    /// Tracks the items selected in the DisplayList.
-    /// 
-    /// Forward the SelectionChanged event.  In WPF you can't get indices, only items, so we
-    /// have to store the item index in the item itself.
+    /// Tracks the items selected in the DisplayList, using forwarded SelectionChanged events.
+    /// When enumerated, provides an ordered list of selected indices.
     /// </summary>
-    public class DisplayListSelection {
+    /// <remarks>
+    /// In WPF you can't get indices, only items, so we have to store the item index in the
+    /// item itself.
+    /// </remarks>
+    public class DisplayListSelection : IEnumerable<int> {
         private BitArray mSelection;
 
         /// <summary>
@@ -49,26 +51,45 @@ namespace SourceGenWPF {
             }
         }
 
+        /// <summary>
+        /// Constructs an empty list.
+        /// </summary>
         public DisplayListSelection() {
             mSelection = new BitArray(0);
         }
 
+        /// <summary>
+        /// Constructs a list of the specified length.
+        /// </summary>
+        /// <param name="length">Number of elements.</param>
         public DisplayListSelection(int length) {
             mSelection = new BitArray(length);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of selected indices, in ascending order.
+        /// </summary>
+        public IEnumerator<int> GetEnumerator() {
+            for (int i = 0; i < mSelection.Length; i++) {
+                if (mSelection[i]) {
+                    yield return i;
+                }
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
 
         /// <summary>
         /// Sets the length of the selection array.
         /// 
         /// If the new length is longer, the new elements are initialized to false.  If the
-        /// new length is shorter, the excess elements are discarded.  (This matches the behavior
-        /// of a virtual ListView selection set.)
+        /// new length is shorter, the excess elements are discarded.
         /// </summary>
         /// <param name="length">New length.</param>
-        public void SetLength(int length) {
-            //Debug.WriteLine("VirtualListViewSelection length now " + length);
-            mSelection.Length = length;
-        }
+        //public void SetLength(int length) {
+        //    mSelection.Length = length;
+        //}
 
         /// <summary>
         /// Handles selection change.

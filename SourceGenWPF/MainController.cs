@@ -51,15 +51,6 @@ namespace SourceGenWPF {
         /// an empty symbol table.
         /// </summary>
         private SymbolTableSubset mSymbolSubset;
-
-        /// <summary>
-        /// Current code list view selection.  The length will match the DisplayList Count.
-        ///
-        /// WinForms was bad -- a simple foreach through SelectedIndices on a 500K-line data set
-        /// took about 2.5 seconds on a fast Win10 x64 machine.  In WPF you get a list of
-        /// selected objects, which is fine unless what you really want is the line number.
-        /// </summary>
-        private VirtualListViewSelection mCodeViewSelection = new VirtualListViewSelection();
 #endif
 
         /// <summary>
@@ -493,7 +484,7 @@ namespace SourceGenWPF {
 #endif
             int topOffset = CodeListGen[topItem].FileOffset;
             LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
-                CodeListGen, null /*mCodeViewSelection*/, topOffset);
+                CodeListGen, mMainWin.CodeDisplayList.SelectedIndices, topOffset);
             //savedSel.DebugDump();
             mReanalysisTimer.EndTask("Save selection");
 
@@ -1051,18 +1042,19 @@ namespace SourceGenWPF {
         /// </summary>
         ///   is selected.</param>
         public SelectionState UpdateSelectionState() {
-            int firstIndex = mMainWin.GetFirstSelectedIndex();
-            Debug.WriteLine("SelectionChanged, firstIndex=" + firstIndex);
+            int selCount = mMainWin.GetSelectionCount();
+            Debug.WriteLine("SelectionChanged, selCount=" + selCount);
 
             SelectionState state = new SelectionState();
 
             // Use IsSingleItemSelected(), rather than just checking sel.Count, because we
             // want the user to be able to e.g. EditData on a multi-line string even if all
             // lines in the string are selected.
-            if (firstIndex == -1) {
+            if (selCount < 0) {
                 // nothing selected, leave everything set to false / 0
                 state.mEntityCounts = new EntityCounts();
             } else if (IsSingleItemSelected()) {
+                int firstIndex = mMainWin.GetFirstSelectedIndex();
                 state.mNumSelected = 1;
                 state.mEntityCounts = GatherEntityCounts(firstIndex);
                 LineListGen.Line line = CodeListGen[firstIndex];
@@ -1148,7 +1140,8 @@ namespace SourceGenWPF {
                 }
 
                 // A single line can span multiple offsets, each of which could have a
-                // different hint.
+                // different hint.  Note the code/data hints are only applied to the first
+                // byte of each selected line, so we're not quite in sync with that.
                 for (int offset = line.FileOffset; offset < line.FileOffset + line.OffsetSpan;
                         offset++) {
                     switch (mProject.TypeHints[offset]) {
@@ -1171,7 +1164,7 @@ namespace SourceGenWPF {
                 }
             }
 
-            //Debug.WriteLine("GatherEntityCounts (len=" + mCodeViewSelection.Length + ") took " +
+            //Debug.WriteLine("GatherEntityCounts (len=" + CodeListGen.Count + ") took " +
             //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
 
             return new EntityCounts() {
@@ -1212,6 +1205,80 @@ namespace SourceGenWPF {
                 return true;
             }
             return false;
+        }
+
+        public void MarkAsType(CodeAnalysis.TypeHint hint, bool firstByteOnly) {
+            RangeSet sel;
+
+            if (firstByteOnly) {
+                sel = new RangeSet();
+                foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
+                    int offset = CodeListGen[index].FileOffset;
+                    if (offset >= 0) {
+                        // Not interested in the header stuff for hinting.
+                        sel.Add(offset);
+                    }
+                }
+            } else {
+                sel = OffsetSetFromSelected();
+            }
+
+            TypedRangeSet newSet = new TypedRangeSet();
+            TypedRangeSet undoSet = new TypedRangeSet();
+
+            foreach (int offset in sel) {
+                if (offset < 0) {
+                    // header comment
+                    continue;
+                }
+                CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
+                if (oldType == hint) {
+                    // no change, don't add to set
+                    continue;
+                }
+                undoSet.Add(offset, (int)oldType);
+                newSet.Add(offset, (int)hint);
+            }
+            if (newSet.Count == 0) {
+                Debug.WriteLine("No changes found (" + hint + ", " + sel.Count + " offsets)");
+                return;
+            }
+
+            UndoableChange uc = UndoableChange.CreateTypeHintChange(undoSet, newSet);
+            ChangeSet cs = new ChangeSet(uc);
+
+            ApplyUndoableChanges(cs);
+        }
+
+        /// <summary>
+        /// Converts the set of selected items into a set of offsets.  If a line
+        /// spans multiple offsets (e.g. a 3-byte instruction), offsets for every
+        /// byte are included.
+        /// 
+        /// Boundaries such as labels and address changes are ignored.
+        /// </summary>
+        /// <returns>RangeSet with all offsets.</returns>
+        private RangeSet OffsetSetFromSelected() {
+            RangeSet rs = new RangeSet();
+
+            foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
+                int offset = CodeListGen[index].FileOffset;
+
+                // Mark every byte of an instruction or multi-byte data item --
+                // everything that is represented by the line the user selected.
+                int len;
+                if (offset >= 0) {
+                    len = mProject.GetAnattrib(offset).Length;
+                } else {
+                    // header area
+                    len = 1;
+                }
+                Debug.Assert(len > 0);
+                for (int i = offset; i < offset + len; i++) {
+                    rs.Add(i);
+                }
+            }
+            return rs;
         }
 
         #endregion Main window UI event handlers

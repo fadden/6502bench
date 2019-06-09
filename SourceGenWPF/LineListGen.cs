@@ -388,13 +388,13 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
-        /// Changes the Formatter object.  Clears the display list, instigating a full re-render.
+        /// Changes the Formatter object.  Clears the line list, instigating a full re-render.
         /// </summary>
         /// <param name="formatter">Formatter object.</param>
         public void SetFormatter(Formatter formatter) {
             mFormatter = formatter;
             mLineList.Clear();
-            // TODO: update display list
+            mDisplayList.Clear();
 
             // We probably just changed settings, so update this as well.
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
@@ -402,14 +402,14 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
-        /// Changes the pseudo-op name object.  Clears the display list, instigating a
+        /// Changes the pseudo-op name object.  Clears the line list, instigating a
         /// full re-render.
         /// </summary>
         /// <param name="opNames">Pseudo-op names.</param>
         public void SetPseudoOpNames(PseudoOp.PseudoOpNames opNames) {
             mPseudoOpNames = opNames;
             mLineList.Clear();
-            // TODO: update display list
+            mDisplayList.Clear();
         }
 
         /// <summary>
@@ -654,7 +654,7 @@ namespace SourceGenWPF {
             // Out with the old, in with the new.
             mLineList.RemoveRange(startIndex, endIndex - startIndex + 1);
             mLineList.InsertRange(startIndex, newLines);
-            // TODO: update display list
+            Debug.Assert(false); // TODO: update display list
 
             Debug.Assert(ValidateLineList(), "Display list failed validation");
         }
@@ -720,7 +720,7 @@ namespace SourceGenWPF {
             }
             Debug.WriteLine("Removing " + endIndex + " header lines");
             mLineList.RemoveRange(0, endIndex);
-            // TODO: update display list
+            Debug.Assert(false); // TODO: update display list
         }
 
         /// <summary>

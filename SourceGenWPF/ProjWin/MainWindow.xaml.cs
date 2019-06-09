@@ -210,6 +210,8 @@ namespace SourceGenWPF.ProjWin {
         }
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            //DateTime startWhen = DateTime.Now;
+
             // Update the selected-item bitmap.
             CodeDisplayList.SelectedIndices.SelectionChanged(e);
 
@@ -218,6 +220,9 @@ namespace SourceGenWPF.ProjWin {
 
             Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
                 codeListView.SelectedItems.Count));
+
+            //Debug.WriteLine("SelectionChanged took " +
+            //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
         }
 
         /// <summary>
@@ -341,18 +346,22 @@ namespace SourceGenWPF.ProjWin {
 
         private void HintAsCodeEntryPoint_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as code entry point");
+            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Code, true);
         }
 
         private void HintAsDataStart_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as data start");
+            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Data, true);
         }
 
         private void HintAsInlineData_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as inline data");
+            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
         }
 
         private void RemoveHints_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
+            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
         }
 
         private void SelectAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
