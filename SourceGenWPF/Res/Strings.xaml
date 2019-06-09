@@ -3,6 +3,7 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:SourceGenWPF.Res">
 
+    <system:String x:Key="str_DefaultValue">Default</system:String>
     <system:String x:Key="str_ErrBadFd">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
     <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
@@ -27,6 +28,10 @@
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
     <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
+    <system:String x:Key="str_InfoFdSumFmt">•Operand format is {0}</system:String>
+    <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
+    <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
+    <system:String x:Key="str_InfoLineSumSingularFmt">Line {0}: {1} byte of {2}</system:String>
     <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
     <system:String x:Key="str_InitialParameters">Default settings:</system:String>
     <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>

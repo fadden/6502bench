@@ -18,6 +18,8 @@ using System.Windows;
 
 namespace SourceGenWPF.Res {
     public static class Strings {
+        public static string DEFAULT_VALUE =
+            (string)Application.Current.FindResource("str_DefaultValue");
         public static string ERR_BAD_FD =
             (string)Application.Current.FindResource("str_ErrBadFd");
         public static string ERR_BAD_FD_FORMAT =
@@ -66,6 +68,14 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_FileFilterSym65");
         public static string GENERATED_FOR_VERSION_FMT =
             (string)Application.Current.FindResource("str_GeneratedForVersion");
+        public static string INFO_FD_SUM_FMT =
+            (string)Application.Current.FindResource("str_InfoFdSumFmt");
+        public static string INFO_LINE_SUM_NON_FMT =
+            (string)Application.Current.FindResource("str_InfoLineSumNonFmt");
+        public static string INFO_LINE_SUM_PLURAL_FMT =
+            (string)Application.Current.FindResource("str_InfoLineSumPluralFmt");
+        public static string INFO_LINE_SUM_SINGULAR_FMT =
+            (string)Application.Current.FindResource("str_InfoLineSumSingularFmt");
         public static string INITIAL_EXTENSION_SCRIPTS =
             (string)Application.Current.FindResource("str_InitialExtensionScripts");
         public static string INITIAL_PARAMETERS =

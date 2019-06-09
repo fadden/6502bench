@@ -43,6 +43,11 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         public DisplayList CodeDisplayList { get; private set; }
 
+        /// Version string, for display.
+        /// </summary>
+        public string ProgramVersionString {
+            get { return App.ProgramVersion.ToString(); }
+        }
 
         /// <summary>
         /// Reference to controller object.
@@ -203,11 +208,20 @@ namespace SourceGenWPF.ProjWin {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
 
-        /// Version string, for display.
+        /// <summary>
+        /// Text to display in the Info panel.  This is a simple TextBox.
         /// </summary>
-        public string ProgramVersionString {
-            get { return App.ProgramVersion.ToString(); }
+        public string InfoBoxContents {
+            get {
+                return mInfoBoxContents;
+            }
+            set {
+                mInfoBoxContents = value;
+                OnPropertyChanged();
+            }
         }
+        private string mInfoBoxContents;
+
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             //DateTime startWhen = DateTime.Now;
@@ -215,8 +229,9 @@ namespace SourceGenWPF.ProjWin {
             // Update the selected-item bitmap.
             CodeDisplayList.SelectedIndices.SelectionChanged(e);
 
-            // Update the selection summary, which is used for can-execute methods.
-            mSelectionState = mMainCtrl.UpdateSelectionState();
+            // Notify MainController that the selection has changed.  This hands back an updated
+            // selection summary, which is used for "can execute" methods.
+            mMainCtrl.SelectionChanged(out mSelectionState);
 
             Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
                 codeListView.SelectedItems.Count));

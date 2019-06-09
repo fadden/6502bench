@@ -24,6 +24,7 @@ using Asm65;
 using CommonUtil;
 using SourceGenWPF.ProjWin;
 using System.Web.Script.Serialization;
+using System.Text;
 
 namespace SourceGenWPF {
     /// <summary>
@@ -1013,6 +1014,12 @@ namespace SourceGenWPF {
             return mProject != null;
         }
 
+        public void SelectionChanged(out SelectionState newState) {
+            newState = UpdateSelectionState();
+
+            UpdateInfoPanel();
+        }
+
         /// <summary>
         /// Gathered facts about the current selection.  Recalculated whenever the selection
         /// changes.
@@ -1282,5 +1289,228 @@ namespace SourceGenWPF {
         }
 
         #endregion Main window UI event handlers
+
+        #region Info panel
+
+        private void UpdateInfoPanel() {
+            if (mMainWin.GetSelectionCount() != 1) {
+                // Nothing selected, or multiple lines selected.
+                mMainWin.InfoBoxContents = string.Empty;
+                return;
+            }
+            int lineIndex = mMainWin.GetFirstSelectedIndex();
+            LineListGen.Line line = CodeListGen[lineIndex];
+            StringBuilder sb = new StringBuilder(250);
+
+            // TODO(someday): this should be made easier to localize
+            string lineTypeStr;
+            string extraStr = string.Empty;
+            switch (line.LineType) {
+                case LineListGen.Line.Type.Code:
+                    lineTypeStr = "code";
+                    break;
+                case LineListGen.Line.Type.Data:
+                    if (mProject.GetAnattrib(line.FileOffset).IsInlineData) {
+                        lineTypeStr = "inline data";
+                    } else {
+                        lineTypeStr = "data";
+                    }
+                    break;
+                case LineListGen.Line.Type.LongComment:
+                    lineTypeStr = "comment";
+                    break;
+                case LineListGen.Line.Type.Note:
+                    lineTypeStr = "note";
+                    break;
+                case LineListGen.Line.Type.Blank:
+                    lineTypeStr = "blank line";
+                    //lineTypeStr = "blank line (+" +
+                    //    mOutputFormatter.FormatOffset24(line.FileOffset) + ")";
+                    break;
+                case LineListGen.Line.Type.OrgDirective:
+                    lineTypeStr = "address directive";
+                    break;
+                case LineListGen.Line.Type.RegWidthDirective:
+                    lineTypeStr = "register width directive";
+                    break;
+                case LineListGen.Line.Type.EquDirective: {
+                        lineTypeStr = "equate";
+                        int symIndex = LineListGen.DefSymIndexFromOffset(line.FileOffset);
+                        DefSymbol defSym = mProject.ActiveDefSymbolList[symIndex];
+                        string sourceStr;
+                        if (defSym.SymbolSource == Symbol.Source.Project) {
+                            sourceStr = "project symbol definition";
+                        } else if (defSym.SymbolSource == Symbol.Source.Platform) {
+                            sourceStr = "platform symbol file";
+                        } else {
+                            sourceStr = "???";
+                        }
+                        extraStr = "Source: " + sourceStr;
+                    }
+                    break;
+                default:
+                    lineTypeStr = "???";
+                    break;
+            }
+
+            // For anything that isn't code or data, show something simple and bail.
+            if (line.OffsetSpan == 0) {
+                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_NON_FMT,
+                    lineIndex, lineTypeStr);
+#if DEBUG
+                sb.Append(" [offset=+" + line.FileOffset.ToString("x6") + "]");
+#endif
+                if (!string.IsNullOrEmpty(extraStr)) {
+                    sb.Append("\r\n\r\n");
+                    sb.Append(extraStr);
+                }
+                mMainWin.InfoBoxContents = sb.ToString();
+                return;
+            }
+            Debug.Assert(line.IsCodeOrData);
+
+            Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+
+            // Show number of bytes of code/data.
+            if (line.OffsetSpan == 1) {
+                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_SINGULAR_FMT,
+                    lineIndex, line.OffsetSpan, lineTypeStr);
+            } else {
+                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_PLURAL_FMT,
+                    lineIndex, line.OffsetSpan, lineTypeStr);
+            }
+            sb.Append("\r\n");
+
+            if (!mProject.OperandFormats.TryGetValue(line.FileOffset, out FormatDescriptor dfd)) {
+                // No user-specified format, but there may be a generated format.
+                sb.AppendFormat(Res.Strings.INFO_FD_SUM_FMT, Res.Strings.DEFAULT_VALUE);
+                if (attr.DataDescriptor != null) {
+                    sb.Append(" [");
+                    sb.Append(attr.DataDescriptor.ToUiString());
+                    sb.Append("]");
+                }
+            } else {
+                // User-specified operand format.
+                // If the descriptor has a weak reference to an unknown symbol, should we
+                // call that out here?
+                sb.AppendFormat(Res.Strings.INFO_FD_SUM_FMT, dfd.ToUiString());
+            }
+            sb.Append("\r\n");
+
+            // Debug only
+            //sb.Append("DEBUG: opAddr=" + attr.OperandAddress.ToString("x4") +
+            //    " opOff=" + attr.OperandOffset.ToString("x4") + "\r\n");
+
+            sb.Append("\u2022Attributes:");
+            if (attr.IsHinted) {
+                sb.Append(" Hinted(");
+                for (int i = 0; i < line.OffsetSpan; i++) {
+                    switch (mProject.TypeHints[line.FileOffset + i]) {
+                        case CodeAnalysis.TypeHint.Code:
+                            sb.Append("C");
+                            break;
+                        case CodeAnalysis.TypeHint.Data:
+                            sb.Append("D");
+                            break;
+                        case CodeAnalysis.TypeHint.InlineData:
+                            sb.Append("I");
+                            break;
+                        default:
+                            break;
+                    }
+                    if (i > 8) {
+                        sb.Append("...");
+                        break;
+                    }
+                }
+                sb.Append(')');
+            }
+            if (attr.IsEntryPoint) {
+                sb.Append(" EntryPoint");
+            }
+            if (attr.IsBranchTarget) {
+                sb.Append(" BranchTarget");
+            }
+            if (attr.DoesNotContinue) {
+                sb.Append(" NoContinue");
+            }
+            if (attr.DoesNotBranch) {
+                sb.Append(" NoBranch");
+            }
+            if (mProject.StatusFlagOverrides[line.FileOffset].AsInt != 0) {
+                sb.Append(" StatusFlags");
+            }
+            sb.Append("\r\n\r\n");
+
+            if (attr.IsInstruction) {
+                Asm65.OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[line.FileOffset]);
+
+                string shortDesc = mOpDesc.GetShortDescription(op.Mnemonic);
+                if (!string.IsNullOrEmpty(shortDesc)) {
+                    if (op.IsUndocumented) {
+                        sb.Append("\u25b6[*] ");
+                    } else {
+                        sb.Append("\u25b6 ");
+                    }
+                    sb.Append(shortDesc);
+                    string addrStr = mOpDesc.GetAddressModeDescription(op.AddrMode);
+                    if (!string.IsNullOrEmpty(addrStr)) {
+                        sb.Append(", ");
+                        sb.Append(addrStr);
+                    }
+                    sb.Append("\r\n");
+                }
+
+                sb.Append("\u2022Cycles: ");
+                int cycles = op.Cycles;
+                Asm65.OpDef.CycleMod cycMods = op.CycleMods;
+                sb.Append(cycles.ToString());
+                if (cycMods != 0) {
+                    sb.Append(" (");
+                    int workBits = (int)cycMods;
+                    while (workBits != 0) {
+                        // Isolate rightmost bit.
+                        int firstBit = (~workBits + 1) & workBits;
+                        sb.Append(mOpDesc.GetCycleModDescription((OpDef.CycleMod)firstBit));
+                        // Remove from set.
+                        workBits &= ~firstBit;
+                        if (workBits != 0) {
+                            // more to come
+                            sb.Append(", ");
+                        }
+                    }
+                    sb.Append(")");
+                }
+                sb.Append("\r\n");
+
+                const string FLAGS = "NVMXDIZC";
+                sb.Append("\u2022Flags affected: ");
+                Asm65.StatusFlags affectedFlags = op.FlagsAffected;
+                for (int i = 0; i < 8; i++) {
+                    if (affectedFlags.GetBit((StatusFlags.FlagBits)(7 - i)) >= 0) {
+                        sb.Append(' ');
+                        sb.Append(FLAGS[i]);
+                    } else {
+                        sb.Append(" -");
+                    }
+                }
+                sb.Append("\r\n");
+
+                string longDesc = mOpDesc.GetLongDescription(op.Mnemonic);
+                if (!string.IsNullOrEmpty(longDesc)) {
+                    sb.Append("\r\n");
+                    sb.Append(longDesc);
+                    sb.Append("\r\n");
+                }
+            } else {
+                // do we want descriptions of the pseudo-ops?
+            }
+
+
+            // Publish
+            mMainWin.InfoBoxContents = sb.ToString();
+        }
+
+        #endregion Info panel
     }
 }

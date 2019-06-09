@@ -314,7 +314,9 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Info">
-                    <TextBox/>
+                    <TextBox Text="{Binding InfoBoxContents}"
+                             FontFamily="{StaticResource GeneralMonoFont}"
+                             TextWrapping="Wrap"/>
                 </GroupBox>
                 
                 <GridSplitter Height="4" Grid.Row="1"
