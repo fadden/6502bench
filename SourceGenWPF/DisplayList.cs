@@ -42,7 +42,7 @@ namespace SourceGenWPF {
     /// LineListGen object.
     /// 
     /// NOTE: it may or may not be possible to implement this trivially with an
-    /// ObservedCollection.  At an earlier iteration it wasn't, and I'd like to keep this
+    /// ObservableCollection.  At an earlier iteration it wasn't, and I'd like to keep this
     /// around even if it is now possible, in case the pendulum swings back the other way.
     /// </remarks>
     public class DisplayList : IList<DisplayList.FormattedParts>, IList,
@@ -156,6 +156,9 @@ namespace SourceGenWPF {
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
             OnCollectionReset();
+
+            // Not strictly necessary, but does free up the memory sooner.
+            SelectedIndices = new DisplayListSelection();
         }
 
         public bool Contains(FormattedParts item) {

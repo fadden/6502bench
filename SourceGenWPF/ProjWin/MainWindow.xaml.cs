@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -208,20 +209,6 @@ namespace SourceGenWPF.ProjWin {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
 
-        /// <summary>
-        /// Text to display in the Info panel.  This is a simple TextBox.
-        /// </summary>
-        public string InfoBoxContents {
-            get {
-                return mInfoBoxContents;
-            }
-            set {
-                mInfoBoxContents = value;
-                OnPropertyChanged();
-            }
-        }
-        private string mInfoBoxContents;
-
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             //DateTime startWhen = DateTime.Now;
@@ -408,5 +395,49 @@ namespace SourceGenWPF.ProjWin {
         }
 
         #endregion Command handlers
+
+
+        #region Info panel
+
+        /// <summary>
+        /// Text to display in the Info panel.  This is a simple TextBox.
+        /// </summary>
+        public string InfoPanelContents {
+            get {
+                return mInfoBoxContents;
+            }
+            set {
+                mInfoBoxContents = value;
+                OnPropertyChanged();
+            }
+        }
+        private string mInfoBoxContents;
+
+        #endregion Info panel
+
+        #region References panel
+
+        public class ReferencesListItem {
+            public string Offset { get; private set; }
+            public string Addr { get; private set; }
+            public string Type { get; private set; }
+
+            public ReferencesListItem(string offset, string addr, string type) {
+                Offset = offset;
+                Addr = addr;
+                Type = type;
+            }
+
+            public override string ToString() {
+                return "[ReferencesListItem: off=" + Offset + " addr=" + Addr + " type=" +
+                    Type + "]";
+            }
+        }
+
+        public ObservableCollection<ReferencesListItem> ReferencesList { get; private set; } =
+            new ObservableCollection<ReferencesListItem>();
+
+        #endregion References panel
+
     }
 }

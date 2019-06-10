@@ -189,7 +189,11 @@ limitations under the License.
 
                 <GroupBox Grid.Row="0" Header="References">
                     <DataGrid Name="referencesList" IsReadOnly="True"
-                              FontFamily="{StaticResource GeneralMonoFont}">
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              ItemsSource="{Binding ReferencesList}"
+                              AutoGenerateColumns="False"
+                              GridLinesVisibility="Vertical" VerticalGridLinesBrush="#FF7F7F7F">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
                             <DataGridTextColumn Header="Addr" Binding="{Binding Addr}"/>
@@ -314,7 +318,7 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Info">
-                    <TextBox Text="{Binding InfoBoxContents}"
+                    <TextBox Text="{Binding InfoPanelContents}"
                              FontFamily="{StaticResource GeneralMonoFont}"
                              TextWrapping="Wrap"/>
                 </GroupBox>

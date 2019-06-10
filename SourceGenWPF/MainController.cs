@@ -992,13 +992,11 @@ namespace SourceGenWPF {
             mProjectPathName = null;
 #if false
             mSymbolSubset = new SymbolTableSubset(new SymbolTable());
-            mCodeViewSelection = new VirtualListViewSelection();
-            mDisplayList = null;
-            codeListView.VirtualListSize = 0;
-            //codeListView.Items.Clear();
-            ShowNoProject();
-            InvalidateControls(null);
 #endif
+            // Clear this to release the memory.
+            mMainWin.CodeDisplayList.Clear();
+
+            mMainWin.InfoPanelContents = String.Empty;
             mMainWin.ShowCodeListView = false;
 
             mGenerationLog = null;
@@ -1017,6 +1015,7 @@ namespace SourceGenWPF {
         public void SelectionChanged(out SelectionState newState) {
             newState = UpdateSelectionState();
 
+            UpdateReferencesPanel();
             UpdateInfoPanel();
         }
 
@@ -1290,12 +1289,107 @@ namespace SourceGenWPF {
 
         #endregion Main window UI event handlers
 
+        #region References panel
+
+        /// <summary>
+        /// Updates the "references" panel to reflect the current selection.
+        /// 
+        /// The number of references to any given address should be relatively small, and
+        /// won't change without a data refresh, so recreating the list every time shouldn't
+        /// be a problem.
+        /// </summary>
+        private void UpdateReferencesPanel() {
+            mMainWin.ReferencesList.Clear();
+
+            if (mMainWin.GetSelectionCount() != 1) {
+                // Nothing selected, or multiple lines selected.
+                return;
+            }
+            int lineIndex = mMainWin.GetFirstSelectedIndex();
+            LineListGen.Line.Type type = CodeListGen[lineIndex].LineType;
+            if (type != LineListGen.Line.Type.Code &&
+                    type != LineListGen.Line.Type.Data &&
+                    type != LineListGen.Line.Type.EquDirective) {
+                // Code, data, and platform symbol EQUs have xrefs.
+                return;
+            }
+
+            // Find the appropriate xref set.
+            int offset = CodeListGen[lineIndex].FileOffset;
+            XrefSet xrefs;
+            if (offset < 0) {
+                int index = LineListGen.DefSymIndexFromOffset(offset);
+                DefSymbol defSym = mProject.ActiveDefSymbolList[index];
+                xrefs = defSym.Xrefs;
+            } else {
+                xrefs = mProject.GetXrefSet(offset);
+            }
+            if (xrefs == null || xrefs.Count == 0) {
+                return;
+            }
+
+            // TODO(someday): localization
+            Asm65.Formatter formatter = mOutputFormatter;
+            bool showBank = !mProject.CpuDef.HasAddr16;
+            for (int i = 0; i < xrefs.Count; i++) {
+                XrefSet.Xref xr = xrefs[i];
+
+                string typeStr;
+                switch (xr.Type) {
+                    case XrefSet.XrefType.SubCallOp:
+                        typeStr = "call ";
+                        break;
+                    case XrefSet.XrefType.BranchOp:
+                        typeStr = "branch ";
+                        break;
+                    case XrefSet.XrefType.RefFromData:
+                        typeStr = "data ";
+                        break;
+                    case XrefSet.XrefType.MemAccessOp:
+                        switch (xr.AccType) {
+                            case OpDef.MemoryEffect.Read:
+                                typeStr = "read ";
+                                break;
+                            case OpDef.MemoryEffect.Write:
+                                typeStr = "write ";
+                                break;
+                            case OpDef.MemoryEffect.ReadModifyWrite:
+                                typeStr = "rmw ";
+                                break;
+                            case OpDef.MemoryEffect.None:   // e.g. LDA #<symbol, PEA addr
+                                typeStr = "ref ";
+                                break;
+                            case OpDef.MemoryEffect.Unknown:
+                            default:
+                                Debug.Assert(false);
+                                typeStr = "??! ";
+                                break;
+                        }
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        typeStr = "??? ";
+                        break;
+                }
+
+                MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(
+                    formatter.FormatOffset24(xr.Offset),
+                    formatter.FormatAddress(mProject.GetAnattrib(xr.Offset).Address, showBank),
+                    (xr.IsSymbolic ? "Sym " : "Num ") + typeStr +
+                        formatter.FormatAdjustment(-xr.Adjustment));
+
+                mMainWin.ReferencesList.Add(rli);
+            }
+        }
+
+        #endregion References panel
+
         #region Info panel
 
         private void UpdateInfoPanel() {
             if (mMainWin.GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
-                mMainWin.InfoBoxContents = string.Empty;
+                mMainWin.InfoPanelContents = string.Empty;
                 return;
             }
             int lineIndex = mMainWin.GetFirstSelectedIndex();
@@ -1364,7 +1458,7 @@ namespace SourceGenWPF {
                     sb.Append("\r\n\r\n");
                     sb.Append(extraStr);
                 }
-                mMainWin.InfoBoxContents = sb.ToString();
+                mMainWin.InfoPanelContents = sb.ToString();
                 return;
             }
             Debug.Assert(line.IsCodeOrData);
@@ -1508,7 +1602,7 @@ namespace SourceGenWPF {
 
 
             // Publish
-            mMainWin.InfoBoxContents = sb.ToString();
+            mMainWin.InfoPanelContents = sb.ToString();
         }
 
         #endregion Info panel
