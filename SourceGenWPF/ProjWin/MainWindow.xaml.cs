@@ -209,6 +209,7 @@ namespace SourceGenWPF.ProjWin {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
 
+        #region Selection management
 
         private void CodeListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             //DateTime startWhen = DateTime.Now;
@@ -295,6 +296,59 @@ namespace SourceGenWPF.ProjWin {
             }
         }
 
+        /// <summary>
+        /// Sets the code list selection.
+        /// </summary>
+        /// <param name="sel">Selection bitmap.</param>
+        public void SetSelection(DisplayListSelection sel) {
+            const int MAX_SEL_COUNT = 2000;
+
+            if (sel.IsAllSelected()) {
+                codeListView.SelectAll();
+                return;
+            }
+            Debug.Assert(codeListView.SelectedItems.Count == 0);    // expected
+            codeListView.SelectedItems.Clear();                     // just in case
+
+            if (sel.Count > MAX_SEL_COUNT) {
+                // Too much for WPF -- only restore the first item.
+                Debug.WriteLine("Not restoring selection (" + sel.Count + " items)");
+                codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
+                return;
+            }
+
+            //DateTime startWhen = DateTime.Now;
+
+            DisplayList.FormattedParts[] tmpArray = new DisplayList.FormattedParts[sel.Count];
+            int ai = 0;
+            foreach (int listIndex in sel) {
+                tmpArray[ai++] = CodeDisplayList[listIndex];
+            }
+
+            // Use a reflection call to provide the full set.  This is much faster than
+            // adding the items one at a time to SelectedItems.  (For one thing, it only
+            // invokes the SelectionChanged method once.)
+            listViewSetSelectedItems.Invoke(codeListView, new object[] { tmpArray });
+
+            //Debug.WriteLine("SetSelection on " + sel.Count + " items took " +
+            //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
+        }
+
+        public int GetCodeListTopIndex() {
+            return codeListView.GetTopItemIndex();
+        }
+
+        public void SetCodeListTopIndex(int index) {
+            // ScrollIntoView does the least amount of scrolling required.  This extension
+            // method scrolls to the bottom, then scrolls back up to the top item.
+            //
+            // NOTE: it looks like scroll-to-bottom (which is done directly on the
+            // ScrollViewer) happens immediately, whiel scroll-to-item (which is done via the
+            // ListView) kicks in later.  So don't try to check the topmost item immediately.
+            codeListView.ScrollToTopItem(CodeDisplayList[index]);
+        }
+
+        #endregion Selection management
 
         #region Can-execute handlers
 

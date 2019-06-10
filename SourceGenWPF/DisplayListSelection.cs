@@ -40,6 +40,11 @@ namespace SourceGenWPF {
         public int Length { get { return mSelection.Length; } }
 
         /// <summary>
+        /// Retrieves the number of values that are set.
+        /// </summary>
+        public int Count { get; private set; }
+
+        /// <summary>
         /// Sets or gets the Nth element.  True means the line is selected.
         /// </summary>
         public bool this[int key] {
@@ -47,7 +52,12 @@ namespace SourceGenWPF {
                 return mSelection[key];
             }
             set {
-                mSelection[key] = value;
+                // If an entry has changed, update the count of set items.
+                if (mSelection[key] != value) {
+                    Count += value ? 1 : -1;
+                    mSelection[key] = value;
+                }
+                Debug.Assert(Count >= 0 && Count <= Length);
             }
         }
 
@@ -98,11 +108,11 @@ namespace SourceGenWPF {
         public void SelectionChanged(SelectionChangedEventArgs e) {
             foreach (DisplayList.FormattedParts parts in e.AddedItems) {
                 Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
-                mSelection.Set(parts.ListIndex, true);
+                this[parts.ListIndex] = true;
             }
             foreach (DisplayList.FormattedParts parts in e.RemovedItems) {
                 Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
-                mSelection.Set(parts.ListIndex, false);
+                this[parts.ListIndex] = false;
             }
         }
 
@@ -136,22 +146,33 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
+        /// Returns true if all items are selected.
+        /// </summary>
+        public bool IsAllSelected() {
+            return Count == Length;
+        }
+
+        /// <summary>
         /// Confirms that the selection count matches the number of set bits.  Pass
         /// in {ListView}.SelectedIndices.Count.
         /// </summary>
         /// <param name="expected">Expected number of selected entries.</param>
         /// <returns>True if count matches.</returns>
         public bool DebugValidateSelectionCount(int expected) {
-            int actual = 0;
+            if (Count != expected) {
+                Debug.WriteLine("SelectionCount expected " + expected + ", count=" + Count);
+            }
+            int computed = 0;
             foreach (bool bit in mSelection) {
                 if (bit) {
-                    actual++;
+                    computed++;
                 }
             }
-            if (actual != expected) {
-                Debug.WriteLine("SelectionCount expected " + expected + ", actual " + actual);
+            if (Count != computed) {
+                Debug.WriteLine("SelectionCount internal error: computed=" + computed +
+                    ", count=" + Count);
             }
-            return (actual == expected);
+            return (Count == expected);
         }
 
         public void DebugDump() {
@@ -161,7 +182,7 @@ namespace SourceGenWPF {
                     rangeSet.Add(i);
                 }
             }
-            Debug.WriteLine("VirtualListViewSelection ranges:");
+            Debug.WriteLine("DisplayListSelection ranges:");
             IEnumerator<RangeSet.Range> iter = rangeSet.RangeListIterator;
             while (iter.MoveNext()) {
                 RangeSet.Range range = iter.Current;

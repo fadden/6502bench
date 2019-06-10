@@ -478,14 +478,10 @@ namespace SourceGenWPF {
             mReanalysisTimer.StartTask("ProjectView.ApplyChanges()");
 
             mReanalysisTimer.StartTask("Save selection");
-#if false
-            int topItem = codeListView.TopItem.Index;
-#else
-            int topItem = 0;
-#endif
-            int topOffset = CodeListGen[topItem].FileOffset;
+            int topItemIndex = mMainWin.GetCodeListTopIndex();
             LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
-                CodeListGen, mMainWin.CodeDisplayList.SelectedIndices, topOffset);
+                CodeListGen, mMainWin.CodeDisplayList.SelectedIndices,
+                CodeListGen[topItemIndex].FileOffset);
             //savedSel.DebugDump();
             mReanalysisTimer.EndTask("Save selection");
 
@@ -506,26 +502,15 @@ namespace SourceGenWPF {
             }
             mReanalysisTimer.EndTask(refreshTaskStr);
 
-            DisplayListSelection newSel = savedSel.Restore(CodeListGen, out int topIndex);
+            DisplayListSelection newSel = savedSel.Restore(CodeListGen, out topItemIndex);
             //newSel.DebugDump();
 
-            // Refresh the various windows, and restore the selection.
-            mReanalysisTimer.StartTask("Invalidate controls");
-#if false
-            InvalidateControls(newSel);
-#endif
-            mReanalysisTimer.EndTask("Invalidate controls");
-
-            // This apparently has to be done after the EndUpdate, and inside try/catch.
-            // See https://stackoverflow.com/questions/626315/ for notes.
-            try {
-                Debug.WriteLine("Setting TopItem to index=" + topIndex);
-#if false
-                codeListView.TopItem = codeListView.Items[topIndex];
-#endif
-            } catch (NullReferenceException) {
-                Debug.WriteLine("Caught an NRE from TopItem");
-            }
+            // Restore the selection.  The selection-changed event will cause updates to the
+            // references, notes, and info panels.
+            mReanalysisTimer.StartTask("Restore selection and top position");
+            mMainWin.SetSelection(newSel);
+            mMainWin.SetCodeListTopIndex(topItemIndex);
+            mReanalysisTimer.EndTask("Restore selection and top position");
 
             mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
 
@@ -651,54 +636,6 @@ namespace SourceGenWPF {
         #endregion Project management
 
         #region Main window UI event handlers
-
-#if false
-        /// <summary>
-        /// Restores the ListView selection by applying a diff between the old and
-        /// new selection bitmaps.
-        /// 
-        /// The virtual list view doesn't change the selection when we rebuild the
-        /// list.  It would be expensive to set all the bits, so we just update the
-        /// entries that changed.
-        /// 
-        /// Before returning, mCodeViewSelection is replaced with curSel.
-        /// </summary>
-        /// <param name="curSel">Selection bits for the current display list.</param>
-        private void RestoreSelection(DisplayListSelection curSel) {
-            Debug.Assert(curSel != null);
-
-            // We have to replace mCodeViewSelection immediately, because changing
-            // the selection will cause ItemSelectionChanged events to fire, invoking
-            // callbacks that expect the new selection object.  Things will explode if
-            // the older list was shorter.
-            DisplayListSelection prevSel = mCodeViewSelection;
-            mCodeViewSelection = curSel;
-
-            // Set everything that has changed between the two sets.
-            int debugNumChanged = 0;
-            int count = Math.Min(prevSel.Length, curSel.Length);
-            int i;
-            for (i = 0; i < count; i++) {
-                if (prevSel[i] != curSel[i]) {
-                    codeListView.Items[i].Selected = curSel[i];
-                    debugNumChanged++;
-                }
-            }
-            // Set everything that wasn't there before.  New entries default to unselected,
-            // so we only need to do this if the new value is "true".
-            for (; i < curSel.Length; i++) {
-                // An ItemSelectionChanged event will fire that will cause curSel[i] to
-                // be assigned.  This is fine.
-                if (curSel[i]) {
-                    codeListView.Items[i].Selected = curSel[i];
-                    debugNumChanged++;
-                }
-            }
-
-            Debug.WriteLine("RestoreSelection: changed " + debugNumChanged +
-                " of " + curSel.Length + " lines");
-        }
-#endif
 
         public void OpenRecentProject(int projIndex) {
             if (!CloseProject()) {
