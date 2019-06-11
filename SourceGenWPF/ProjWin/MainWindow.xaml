@@ -30,6 +30,7 @@ limitations under the License.
             <!-- style and control templates for main code ListView items -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="CodeListItemStyle.xaml"/>
+                <ResourceDictionary Source="../Res/CommandIcons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- don't center the ListView(GridView) column headers
@@ -157,16 +158,42 @@ limitations under the License.
             </MenuItem>
         </Menu>
 
-        <ToolBar DockPanel.Dock="Top">
-            <Button Content="tbb" Width="75"/>
-        </ToolBar>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
+                <Button ToolTip="Navigate backward">
+                    <ContentControl Template="{StaticResource icon_StepBackwards}"/>
+                </Button>
+                <Button ToolTip="Navigate forward">
+                    <ContentControl Template="{StaticResource icon_StepForward}"/>
+                </Button>
+                <Separator/>
+                <Button ToolTip="Create new project">
+                    <ContentControl Template="{StaticResource icon_NewFile}"/>
+                </Button>
+                <Button ToolTip="Open project">
+                    <ContentControl Template="{StaticResource icon_OpenFile}"/>
+                </Button>
+                <Button ToolTip="Save project">
+                    <ContentControl Template="{StaticResource icon_SaveFile}"/>
+                </Button>
+                <Separator/>
+                <Button ToolTip="Copy to clipboard">
+                    <ContentControl Template="{StaticResource icon_CopyToClipboard}"/>
+                </Button>
+                <Separator/>
+                <Button ToolTip="Help - open manual in browser">
+                    <ContentControl Template="{StaticResource icon_F1Help}"/>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
 
         <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
             <TextBlock Text="Ready"/>
         </StatusBar>
 
         <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes
-             size when the window is resized. -->
+        size when the window is resized.  This needs to be the last thing defined in the
+        DockPanel, so that LastChildFill will expand this to fill all available space. -->
         <Grid Name="triptychGrid" DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="168" MinWidth="100"/>

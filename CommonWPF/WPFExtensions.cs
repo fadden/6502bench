@@ -62,6 +62,10 @@ namespace CommonWPF {
         /// Figures out which item index is at the top of the window.  This only works for a
         /// ListView with a VirtualizingStackPanel.
         /// </summary>
+        /// <remarks>
+        /// See https://stackoverflow.com/q/2926722/294248 for an alternative approach that
+        /// uses hit-testing, as well as a copy of this approach.
+        /// </remarks>
         /// <returns>The item index, or -1 if the list is empty.</returns>
         public static int GetTopItemIndex(this ListView lv) {
             if (lv.Items.Count == 0) {
