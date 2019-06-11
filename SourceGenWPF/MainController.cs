@@ -978,6 +978,10 @@ namespace SourceGenWPF {
 
             // Some totals.
             public EntityCounts mEntityCounts;
+
+            public SelectionState() {
+                mEntityCounts = new EntityCounts();
+            }
         }
 
         /// <summary>
@@ -1134,7 +1138,6 @@ namespace SourceGenWPF {
             }
 
             int lastIndex = mMainWin.GetLastSelectedIndex();
-            Debug.WriteLine("CHECK: first=" + firstIndex + ", last=" + lastIndex);
             if (lastIndex == firstIndex) {
                 // only one line is selected
                 return true;
@@ -1150,6 +1153,59 @@ namespace SourceGenWPF {
             return false;
         }
 
+        public bool CanUndo() {
+            return (mProject != null && mProject.CanUndo);
+        }
+
+        /// <summary>
+        /// Handles Edit - Undo.
+        /// </summary>
+        public void UndoChanges() {
+            if (!mProject.CanUndo) {
+                Debug.Assert(false, "Nothing to undo");
+                return;
+            }
+            ChangeSet cs = mProject.PopUndoSet();
+            ApplyChanges(cs, true);
+#if false
+            UpdateMenuItemsAndTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+            }
+#endif
+        }
+
+        public bool CanRedo() {
+            return (mProject != null && mProject.CanRedo);
+        }
+
+        /// <summary>
+        /// Handles Edit - Redo.
+        /// </summary>
+        public void RedoChanges() {
+            if (!mProject.CanRedo) {
+                Debug.Assert(false, "Nothing to redo");
+                return;
+            }
+            ChangeSet cs = mProject.PopRedoSet();
+            ApplyChanges(cs, false);
+#if false
+            UpdateMenuItemsAndTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Handles the four Actions - edit hint commands.
+        /// </summary>
+        /// <param name="hint">Type of hint to apply.</param>
+        /// <param name="firstByteOnly">If set, only the first byte on each line is hinted.</param>
         public void MarkAsType(CodeAnalysis.TypeHint hint, bool firstByteOnly) {
             RangeSet sel;
 
@@ -1222,6 +1278,13 @@ namespace SourceGenWPF {
                 }
             }
             return rs;
+        }
+
+        /// <summary>
+        /// Handles Help - Help
+        /// </summary>
+        public void ShowHelp() {
+            HelpAccess.ShowHelp(HelpAccess.Topic.Contents);
         }
 
         #endregion Main window UI event handlers

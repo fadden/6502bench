@@ -42,6 +42,9 @@ just opens the TOC, and individual UI items don't have help buttons.
 
 What we need in terms of API is a way to say, "show the help for XYZ".  The rest can be
 encapsulated here.
+
+TODO(maybe): the web viewer accessible from WPF appears to be much better, so we could create a
+simple browser window.
 */
 
 namespace SourceGenWPF {

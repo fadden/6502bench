@@ -78,6 +78,8 @@ namespace SourceGenWPF.ProjWin {
 
             mMainCtrl = new MainController(this);
 
+            mSelectionState = new MainController.SelectionState();
+
             AddMultiKeyGestures();
 
             //GridView gv = (GridView)codeListView.View;
@@ -87,25 +89,25 @@ namespace SourceGenWPF.ProjWin {
         private void AddMultiKeyGestures() {
             RoutedUICommand ruic;
 
-            ruic = (RoutedUICommand)FindResource("HintAsCodeEntryPoint");
+            ruic = (RoutedUICommand)FindResource("HintAsCodeEntryPointCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.C, ModifierKeys.Control, "Ctrl+C")
                 }));
-            ruic = (RoutedUICommand)FindResource("HintAsDataStart");
+            ruic = (RoutedUICommand)FindResource("HintAsDataStartCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D")
                 }));
-            ruic = (RoutedUICommand)FindResource("HintAsInlineData");
+            ruic = (RoutedUICommand)FindResource("HintAsInlineDataCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.I, ModifierKeys.Control, "Ctrl+I")
                 }));
-            ruic = (RoutedUICommand)FindResource("RemoveHints");
+            ruic = (RoutedUICommand)FindResource("RemoveHintsCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
@@ -304,6 +306,7 @@ namespace SourceGenWPF.ProjWin {
             const int MAX_SEL_COUNT = 2000;
 
             if (sel.IsAllSelected()) {
+                Debug.WriteLine("SetSelection: re-selecting all items");
                 codeListView.SelectAll();
                 return;
             }
@@ -312,7 +315,7 @@ namespace SourceGenWPF.ProjWin {
 
             if (sel.Count > MAX_SEL_COUNT) {
                 // Too much for WPF -- only restore the first item.
-                Debug.WriteLine("Not restoring selection (" + sel.Count + " items)");
+                Debug.WriteLine("SetSelection: not restoring (" + sel.Count + " items)");
                 codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
                 return;
             }
@@ -360,28 +363,47 @@ namespace SourceGenWPF.ProjWin {
         }
 
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
+            if (!mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
             MainController.EntityCounts counts = mSelectionState.mEntityCounts;
-            e.CanExecute = mMainCtrl.IsProjectOpen() &&
-                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+            e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsDataStart(object sender, CanExecuteRoutedEventArgs e) {
+            if (!mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
             MainController.EntityCounts counts = mSelectionState.mEntityCounts;
-            e.CanExecute = mMainCtrl.IsProjectOpen() &&
-                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+            e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
+            if (!mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
             MainController.EntityCounts counts = mSelectionState.mEntityCounts;
-            e.CanExecute = mMainCtrl.IsProjectOpen() &&
-                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+            e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanRemoveHints(object sender, CanExecuteRoutedEventArgs e) {
+            if (!mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
             MainController.EntityCounts counts = mSelectionState.mEntityCounts;
-            e.CanExecute = mMainCtrl.IsProjectOpen() &&
-                (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
+            e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
+        }
+
+        private void CanRedo(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl.CanRedo();
+        }
+        private void CanUndo(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl.CanUndo();
         }
 
         #endregion Can-execute handlers
@@ -400,24 +422,32 @@ namespace SourceGenWPF.ProjWin {
             }
         }
 
-        private void HintAsCodeEntryPoint_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ShowHelp();
+        }
+
+        private void HintAsCodeEntryPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as code entry point");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Code, true);
         }
 
-        private void HintAsDataStart_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void HintAsDataStartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as data start");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Data, true);
         }
 
-        private void HintAsInlineData_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void HintAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as inline data");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
         }
 
-        private void RemoveHints_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
+        }
+
+        private void RedoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.RedoChanges();
         }
 
         private void SelectAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -446,6 +476,10 @@ namespace SourceGenWPF.ProjWin {
 
             Debug.WriteLine("Recent project #" + recentIndex);
             mMainCtrl.OpenRecentProject(recentIndex);
+        }
+
+        private void UndoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.UndoChanges();
         }
 
         #endregion Command handlers

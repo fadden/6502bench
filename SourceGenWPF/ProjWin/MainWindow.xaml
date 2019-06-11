@@ -47,14 +47,25 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
-            <RoutedUICommand x:Key="HintAsCodeEntryPoint" Text="Hint As Code Entry Point"/>
-            <RoutedUICommand x:Key="HintAsDataStart" Text="Hint As Data Start"/>
-            <RoutedUICommand x:Key="HintAsInlineData" Text="Hint As Inline Data"/>
-            <RoutedUICommand x:Key="RemoveHints" Text="Remove Hints"/>
+            <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
+            <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
+            <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
+            <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="RecentProjectCmd"/>
+            <RoutedUICommand x:Key="RedoCmd" Text="Redo">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Y</KeyGesture>
+                    <KeyGesture>Ctrl+Shift+Z</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="SelectAllCmd" Text="Select All">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+A</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="UndoCmd" Text="Undo">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Z</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
         </ResourceDictionary>
@@ -65,18 +76,24 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsCodeEntryPoint}"
-                        CanExecute="CanHintAsCodeEntryPoint" Executed="HintAsCodeEntryPoint_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsDataStart}"
-                        CanExecute="CanHintAsDataStart" Executed="HintAsDataStart_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsInlineData}"
-                        CanExecute="CanHintAsInlineData" Executed="HintAsInlineData_Executed"/>
-        <CommandBinding Command="{StaticResource RemoveHints}"
-                        CanExecute="CanRemoveHints" Executed="RemoveHints_Executed"/>
+        <CommandBinding Command="Help"
+                        Executed="HelpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
+                        CanExecute="CanHintAsCodeEntryPoint" Executed="HintAsCodeEntryPointCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsDataStartCmd}"
+                        CanExecute="CanHintAsDataStart" Executed="HintAsDataStartCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsInlineDataCmd}"
+                        CanExecute="CanHintAsInlineData" Executed="HintAsInlineDataCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RemoveHintsCmd}"
+                        CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" Executed="RecentProjectCmd_Executed"/>
-        <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView not in focus -->
+        <CommandBinding Command="{StaticResource RedoCmd}"
+                        CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
+        <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
                         CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
+        <CommandBinding Command="{StaticResource UndoCmd}"
+                        CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
     </Window.CommandBindings>
     
     <DockPanel>
@@ -98,8 +115,8 @@ limitations under the License.
                 <MenuItem Header="Exit"/>
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Command="Undo"/>
-                <MenuItem Command="Redo"/> <!-- want both Ctrl+Y and Ctrl+Shift+Z -->
+                <MenuItem Command="{StaticResource UndoCmd}"/>
+                <MenuItem Command="{StaticResource RedoCmd}"/>
                 <Separator/>
                 <MenuItem Command="Copy"/>
                 <Separator/>
@@ -124,10 +141,10 @@ limitations under the License.
                 <MenuItem Header="Edit Note..."/>
                 <MenuItem Header="Edit Project Symbol..."/>
                 <Separator/>
-                <MenuItem Command="{StaticResource HintAsCodeEntryPoint}" InputGestureText="Ctrl+H, Ctrl+C"/>
-                <MenuItem Command="{StaticResource HintAsDataStart}" InputGestureText="Ctrl+H, Ctrl+D"/>
-                <MenuItem Command="{StaticResource HintAsInlineData}" InputGestureText="Ctrl+H, Ctrl+I"/>
-                <MenuItem Command="{StaticResource RemoveHints}" InputGestureText="Ctrl+H, Ctrl+R"/>
+                <MenuItem Command="{StaticResource HintAsCodeEntryPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>
+                <MenuItem Command="{StaticResource HintAsDataStartCmd}" InputGestureText="Ctrl+H, Ctrl+D"/>
+                <MenuItem Command="{StaticResource HintAsInlineDataCmd}" InputGestureText="Ctrl+H, Ctrl+I"/>
+                <MenuItem Command="{StaticResource RemoveHintsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
                 <Separator/>
                 <MenuItem Header="Format Split-Address Table..."/>
                 <MenuItem Header="Toggle Single-Byte Format"/>
