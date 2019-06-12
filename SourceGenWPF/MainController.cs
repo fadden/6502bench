@@ -401,16 +401,14 @@ namespace SourceGenWPF {
             CodeListGen = new LineListGen(mProject, mMainWin.CodeDisplayList,
                 mOutputFormatter, mPseudoOpNames);
 
-            // Prep the symbol table subset object.  Replace the old one with a new one.
-            //mSymbolSubset = new SymbolTableSubset(mProject.SymbolTable);
-
             RefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
-            //ShowProject();
-            //InvalidateControls(null);
+
+            // Populate the Symbols list.
+            PopulateSymbolsList();
+
             mMainWin.ShowCodeListView = true;
             mNavStack.Clear();
 
-            // Want to do this after ShowProject() or we see a weird glitch.
             UpdateRecentProjectList(mProjectPathName);
         }
 
@@ -1387,6 +1385,21 @@ namespace SourceGenWPF {
         }
 
         #endregion References panel
+
+        #region Symbols panel
+
+        private void PopulateSymbolsList() {
+            mMainWin.SymbolsList.Clear();
+            foreach (Symbol sym in mProject.SymbolTable) {
+                MainWindow.SymbolsListItem sli = new MainWindow.SymbolsListItem(sym,
+                    sym.SourceTypeString,
+                    mOutputFormatter.FormatHexValue(sym.Value, 0),
+                    sym.Label);
+                mMainWin.SymbolsList.Add(sli);
+            }
+        }
+
+        #endregion Symbols panel
 
         #region Info panel
 

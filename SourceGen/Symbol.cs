@@ -122,7 +122,6 @@ namespace SourceGen {
             SourceTypeString = sts;
         }
 
-
         public override string ToString() {
             return Label + "{" + SymbolSource  + "," + SymbolType +
                 ",val=$" + Value.ToString("x4") + "}";

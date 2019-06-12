@@ -69,6 +69,9 @@ limitations under the License.
                     <KeyGesture>Ctrl+Z</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+
+            <CollectionViewSource x:Key="SymbolTableSource" Source="{Binding SymbolsList}"
+                                  Filter="SymbolsList_Filter"/>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -344,26 +347,38 @@ limitations under the License.
                         </Grid.RowDefinitions>
                         
                         <WrapPanel Grid.Row="0">
-                            <ToggleButton Content="User" Width="40" Margin="2,2"/>
-                            <ToggleButton Content="Proj" Width="40" Margin="2,2"/>
-                            <ToggleButton Content="Plat" Width="40" Margin="2,2"/>
-                            <ToggleButton Content="Auto" Width="40" Margin="2,2"/>
-                            <ToggleButton Content="Addr" Width="40" Margin="2,2"/>
-                            <ToggleButton Content="Cnst" Width="40" Margin="2,2"/>
+                            <ToggleButton Name="symUserLabels" Content="User" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Name="symProjectSymbols" Content="Proj" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Name="symPlatformSymbols" Content="Plat" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Name="symAutoLabels" Content="Auto" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Name="symAddresses" Content="Addr" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Name="symConstants" Content="Cnst" Width="40" Margin="2,2"
+                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
                         </WrapPanel>
 
-                        <ScrollViewer Grid.Row="1"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      HorizontalScrollBarVisibility="Auto" Margin="0,4,0,0">
-                            <DataGrid Name="SymbolsList" IsReadOnly="True"
-                                FontFamily="{StaticResource GeneralMonoFont}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </ScrollViewer>
+                        <DataGrid Grid.Row="1" Name="symbolsList"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding Source={StaticResource SymbolTableSource}}"
+                                  FontFamily="{StaticResource GeneralMonoFont}"
+                                  SnapsToDevicePixels="True"
+                                  GridLinesVisibility="Vertical"
+                                  VerticalGridLinesBrush="#FF7F7F7F"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  CanUserReorderColumns="False"
+                                  SelectionMode="Single"
+                                  Sorting="SymbolsList_Sorting">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Grid>
                 </GroupBox>
 

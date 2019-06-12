@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -516,24 +517,6 @@ namespace SourceGenWPF.ProjWin {
         #endregion Command handlers
 
 
-        #region Info panel
-
-        /// <summary>
-        /// Text to display in the Info panel.  This is a simple TextBox.
-        /// </summary>
-        public string InfoPanelContents {
-            get {
-                return mInfoBoxContents;
-            }
-            set {
-                mInfoBoxContents = value;
-                OnPropertyChanged();
-            }
-        }
-        private string mInfoBoxContents;
-
-        #endregion Info panel
-
         #region References panel
 
         public class ReferencesListItem {
@@ -557,5 +540,192 @@ namespace SourceGenWPF.ProjWin {
             new ObservableCollection<ReferencesListItem>();
 
         #endregion References panel
+
+
+        #region Notes panel
+        // TODO
+        #endregion Notes panel
+
+
+        #region Symbols panel
+
+        public class SymbolsListItem {
+            public Symbol Sym { get; private set; }
+            public string Type { get; private set; }
+            public string Value { get; private set; }
+            public string Name { get; private set; }
+
+            public SymbolsListItem(Symbol sym, string type, string value, string name) {
+                Sym = sym;
+
+                Type = type;
+                Value = value;
+                Name = name;
+            }
+
+            public override string ToString() {
+                return "[SymbolsListItem: type=" + Type + " value=" + Value + " name=" +
+                    Name + "]";
+            }
+        }
+
+        public ObservableCollection<SymbolsListItem> SymbolsList { get; private set; } =
+            new ObservableCollection<SymbolsListItem>();
+
+        private void SymbolsList_Filter(object sender, FilterEventArgs e) {
+            SymbolsListItem sli = (SymbolsListItem)e.Item;
+            if (sli == null) {
+                return;
+            }
+            if ((symUserLabels.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.User) ||
+                (symProjectSymbols.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
+                (symPlatformSymbols.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
+                (symAutoLabels.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
+                (symConstants.IsChecked != true && sli.Sym.SymbolType == Symbol.Type.Constant) ||
+                (symAddresses.IsChecked != true && sli.Sym.SymbolType != Symbol.Type.Constant))
+            {
+                e.Accepted = false;
+            } else {
+                e.Accepted = true;
+            }
+        }
+
+        /// <summary>
+        /// Refreshes the symbols list when a filter option changes.  Set this to be called
+        /// for Checked/Unchecked events on the filter option buttons.
+        /// </summary>
+        private void SymbolsListFilter_Changed(object sender, RoutedEventArgs e) {
+            // This delightfully obscure call causes the list to refresh.  See
+            // https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/how-to-group-sort-and-filter-data-in-the-datagrid-control
+            CollectionViewSource.GetDefaultView(symbolsList.ItemsSource).Refresh();
+        }
+
+        /// <summary>
+        /// Handles a Sorting event.  We want to do a secondary sort on Name when one of the
+        /// other columns is the primary sort key.
+        /// </summary>
+        private void SymbolsList_Sorting(object sender, DataGridSortingEventArgs e) {
+            DataGridColumn col = e.Column;
+
+            // Set the SortDirection to a specific value.  If we don't do this, SortDirection
+            // remains un-set, and the column header doesn't show up/down arrows or change
+            // direction when clicked twice.
+            ListSortDirection direction = (col.SortDirection != ListSortDirection.Ascending) ?
+                ListSortDirection.Ascending : ListSortDirection.Descending;
+            col.SortDirection = direction;
+
+            bool isAscending = direction != ListSortDirection.Descending;
+
+            IComparer comparer;
+
+            switch (col.Header) {
+                case "Type":
+                    comparer = new SymTabSortComparer(SymTabSortField.CombinedType, isAscending);
+                    break;
+                case "Value":
+                    comparer = new SymTabSortComparer(SymTabSortField.Value, isAscending);
+                    break;
+                case "Name":
+                    comparer = new SymTabSortComparer(SymTabSortField.Name, isAscending);
+                    break;
+                default:
+                    comparer = null;
+                    Debug.Assert(false);
+                    break;
+            }
+
+            ListCollectionView lcv =
+                (ListCollectionView)CollectionViewSource.GetDefaultView(symbolsList.ItemsSource);
+            lcv.CustomSort = comparer;
+            e.Handled = true;
+        }
+
+        // Symbol table sort comparison helper.
+        private enum SymTabSortField { CombinedType, Value, Name };
+        private class SymTabSortComparer : IComparer {
+            private SymTabSortField mSortField;
+            private bool mIsAscending;
+
+            public SymTabSortComparer(SymTabSortField prim, bool isAscending) {
+                mSortField = prim;
+                mIsAscending = isAscending;
+            }
+
+            // IComparer interface
+            public int Compare(object oa, object ob) {
+                Symbol a = ((SymbolsListItem)oa).Sym;
+                Symbol b = ((SymbolsListItem)ob).Sym;
+
+                // Label is always unique, so we use it as a secondary sort.
+                if (mSortField == SymTabSortField.CombinedType) {
+                    if (mIsAscending) {
+                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
+                        if (cmp == 0) {
+                            cmp = string.Compare(a.Label, b.Label);
+                        }
+                        return cmp;
+                    } else {
+                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
+                        if (cmp == 0) {
+                            // secondary sort is always ascending, so negate
+                            cmp = -string.Compare(a.Label, b.Label);
+                        }
+                        return -cmp;
+                    }
+                } else if (mSortField == SymTabSortField.Value) {
+                    if (mIsAscending) {
+                        int cmp;
+                        if (a.Value < b.Value) {
+                            cmp = -1;
+                        } else if (a.Value > b.Value) {
+                            cmp = 1;
+                        } else {
+                            cmp = string.Compare(a.Label, b.Label);
+                        }
+                        return cmp;
+                    } else {
+                        int cmp;
+                        if (a.Value < b.Value) {
+                            cmp = -1;
+                        } else if (a.Value > b.Value) {
+                            cmp = 1;
+                        } else {
+                            cmp = -string.Compare(a.Label, b.Label);
+                        }
+                        return -cmp;
+                    }
+                } else if (mSortField == SymTabSortField.Name) {
+                    if (mIsAscending) {
+                        return string.Compare(a.Label, b.Label);
+                    } else {
+                        return -string.Compare(a.Label, b.Label);
+                    }
+                } else {
+                    Debug.Assert(false);
+                    return 0;
+                }
+            }
+        }
+
+        #endregion Symbols panel
+
+
+        #region Info panel
+
+        /// <summary>
+        /// Text to display in the Info panel.  This is a simple TextBox.
+        /// </summary>
+        public string InfoPanelContents {
+            get {
+                return mInfoBoxContents;
+            }
+            set {
+                mInfoBoxContents = value;
+                OnPropertyChanged();
+            }
+        }
+        private string mInfoBoxContents;
+
+        #endregion Info panel
     }
 }
