@@ -75,6 +75,7 @@ namespace SourceGenWPF.ProjWin {
 
             CodeDisplayList = new DisplayList();
             codeListView.ItemsSource = CodeDisplayList;
+            // https://dlaa.me/blog/post/9425496 to re-auto-size after data added
 
             mMainCtrl = new MainController(this);
 
@@ -210,6 +211,36 @@ namespace SourceGenWPF.ProjWin {
         public Visibility CodeListVisibility {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
+
+        /// <summary>
+        /// Catch mouse-down events so we can treat the fourth mouse button as "back".
+        /// </summary>
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e) {
+            if (e.ChangedButton == MouseButton.XButton1) {
+                Debug.WriteLine("TODO: navigate back");
+            }
+        }
+
+        /// <summary>
+        /// Handles a double-click on the code list.  We have to figure out which row and
+        /// column were clicked, which is not easy in WPF.
+        /// </summary>
+        private void CodeListView_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            Debug.Assert(sender == codeListView);
+
+            ListViewItem lvi = codeListView.GetClickedItem(e);
+            if (lvi == null) {
+                return;
+            }
+            DisplayList.FormattedParts parts = (DisplayList.FormattedParts)lvi.Content;
+            int row = parts.ListIndex;
+            int col = codeListView.GetClickEventColumn(e);
+            if (col < 0) {
+                return;
+            }
+            mMainCtrl.HandleDoubleClick(row, col);
+        }
+
 
         #region Selection management
 
@@ -526,6 +557,5 @@ namespace SourceGenWPF.ProjWin {
             new ObservableCollection<ReferencesListItem>();
 
         #endregion References panel
-
     }
 }

@@ -637,6 +637,10 @@ namespace SourceGenWPF {
 
         #region Main window UI event handlers
 
+        public void HandleDoubleClick(int row, int col) {
+            Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
+        }
+
         public void OpenRecentProject(int projIndex) {
             if (!CloseProject()) {
                 return;

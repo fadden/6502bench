@@ -17,6 +17,8 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CommonWPF {
@@ -54,8 +56,11 @@ namespace CommonWPF {
     }
 
     /// <summary>
-    /// Add functions to get the element that's currently shown at the top of the ListView
-    /// window, and to scroll the list so that a specific item is at the top.
+    /// Helper functions for working with a ListView.
+    /// 
+    /// ListViews are generalized to an absurd degree, so simple things like "what column did
+    /// I click on" and "what row is at the top" that were easy in WinForms are not provided
+    /// by WPF.
     /// </summary>
     public static class ListViewExtensions {
         /// <summary>
@@ -92,6 +97,56 @@ namespace CommonWPF {
             ScrollViewer sv = lv.GetVisualChild<ScrollViewer>();
             sv.ScrollToBottom();
             lv.ScrollIntoView(item);
+        }
+
+        /// <summary>
+        /// Returns the ListViewItem that was clicked on, or null if an LVI wasn't the target
+        /// of a click (e.g. off the bottom of the list).
+        /// </summary>
+        public static ListViewItem GetClickedItem(this ListView lv, MouseButtonEventArgs e) {
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // Should start at something like a TextBlock.  Walk up the tree until we hit the
+            // ListViewItem.
+            while (dep != null && !(dep is ListViewItem)) {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            if (dep == null) {
+                return null;
+            }
+            return (ListViewItem)dep;
+        }
+
+        /// <summary>
+        /// Determines which column was the target of a mouse click.  Only works for ListView
+        /// with GridView.
+        /// </summary>
+        /// <remarks>
+        /// There's just no other way to do this with ListView.  With DataGrid you can do this
+        /// somewhat reasonably
+        /// (https://blog.scottlogic.com/2008/12/02/wpf-datagrid-detecting-clicked-cell-and-row.html),
+        /// but ListView just doesn't want to help.
+        /// </remarks>
+        /// <returns>Column index, or -1 if the click was outside the columns (e.g. off the right
+        ///   edge).</returns>
+        public static int GetClickEventColumn(this ListView lv, MouseButtonEventArgs e) {
+            // There's a bit of padding that seems to offset things.  Not sure how to account
+            // for it, so for now just fudge it.
+            const int FUDGE = 4;
+
+            Point p = e.GetPosition(lv);
+            GridView gv = (GridView)lv.View;
+            double startPos = FUDGE;
+            for (int index = 0; index < gv.Columns.Count; index++) {
+                GridViewColumn col = gv.Columns[index];
+
+                if (p.X < startPos + col.ActualWidth) {
+                    return index;
+                }
+                startPos += col.ActualWidth;
+            }
+
+            return -1;
         }
     }
 }
