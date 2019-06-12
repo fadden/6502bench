@@ -256,10 +256,24 @@ limitations under the License.
 
                 <GroupBox Grid.Row="2" Header="Notes">
                     <DataGrid Name="notesList" IsReadOnly="True"
-                              FontFamily="{StaticResource GeneralMonoFont}">
+                              ItemsSource="{Binding NotesList}"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="#FF7F7F7F"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              SelectionMode="Single">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
-                            <DataGridTextColumn Header="Note" Binding="{Binding Note}"/>
+                            <DataGridTextColumn Header="Note" Binding="{Binding Note}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Background" Value="{Binding BackBrush}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>

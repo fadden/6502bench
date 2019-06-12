@@ -543,7 +543,27 @@ namespace SourceGenWPF.ProjWin {
 
 
         #region Notes panel
-        // TODO
+
+        public class NotesListItem {
+            public string Offset { get; private set; }
+            public string Note { get; private set; }
+            public SolidColorBrush BackBrush { get; private set; }
+
+            public NotesListItem(string offset, string note, Color backColor) {
+                Offset = offset;
+                Note = note;
+                BackBrush = new SolidColorBrush(backColor);
+            }
+
+            public override string ToString() {
+                return "[NotesListItem: off=" + Offset + " note=" + Note + " brush=" +
+                    BackBrush + "]";
+            }
+        }
+
+        public ObservableCollection<NotesListItem> NotesList { get; private set; } =
+            new ObservableCollection<NotesListItem>();
+
         #endregion Notes panel
 
 

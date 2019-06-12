@@ -406,6 +406,9 @@ namespace SourceGenWPF {
             // Populate the Symbols list.
             PopulateSymbolsList();
 
+            // Load initial contents of Notes panel.
+            PopulateNotesList();
+
             mMainWin.ShowCodeListView = true;
             mNavStack.Clear();
 
@@ -509,6 +512,9 @@ namespace SourceGenWPF {
             mMainWin.SetSelection(newSel);
             mMainWin.SetCodeListTopIndex(topItemIndex);
             mReanalysisTimer.EndTask("Restore selection and top position");
+
+            // Update the Notes list as well.
+            PopulateNotesList();
 
             mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
 
@@ -1385,6 +1391,32 @@ namespace SourceGenWPF {
         }
 
         #endregion References panel
+
+        #region Notes panel
+
+        private void PopulateNotesList() {
+            mMainWin.NotesList.Clear();
+            foreach (KeyValuePair<int, MultiLineComment> kvp in mProject.Notes) {
+                int offset = kvp.Key;
+                MultiLineComment mlc = kvp.Value;
+
+                // Replace line break with bullet.  If there's a single CRLF at the end, strip it.
+                string nocrlfStr;
+                if (mlc.Text.EndsWith("\r\n")) {
+                    nocrlfStr = mlc.Text.Substring(0, mlc.Text.Length - 2).Replace("\r\n", " \u2022 ");
+                } else {
+                    nocrlfStr = mlc.Text.Replace("\r\n", " \u2022 ");
+                }
+
+                MainWindow.NotesListItem nli = new MainWindow.NotesListItem(
+                    mOutputFormatter.FormatOffset24(offset),
+                    nocrlfStr,
+                    mlc.BackgroundColor);
+                mMainWin.NotesList.Add(nli);
+            }
+        }
+
+        #endregion Notes panel
 
         #region Symbols panel
 
