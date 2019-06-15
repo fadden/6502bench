@@ -51,6 +51,18 @@ limitations under the License.
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
+            <RoutedUICommand x:Key="NavigateBackwardCmd" Text="Nav Backward">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Alt+Left</KeyGesture>
+                    <KeyGesture>Ctrl+Minus</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="NavigateForwardCmd" Text="Nav Forward">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Alt+Right</KeyGesture>
+                    <KeyGesture>Ctrl+Shift+Minus</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="RecentProjectCmd"/>
             <RoutedUICommand x:Key="RedoCmd" Text="Redo">
@@ -88,6 +100,10 @@ limitations under the License.
                         CanExecute="CanHintAsDataStart" Executed="HintAsDataStartCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsInlineDataCmd}"
                         CanExecute="CanHintAsInlineData" Executed="HintAsInlineDataCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NavigateBackwardCmd}"
+                        CanExecute="CanNavigateBackward" Executed="NavigateBackwardCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NavigateForwardCmd}"
+                        CanExecute="CanNavigateForward" Executed="NavigateForwardCmd_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
                         CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" Executed="RecentProjectCmd_Executed"/>
@@ -181,10 +197,10 @@ limitations under the License.
 
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
-                <Button ToolTip="Navigate backward">
+                <Button ToolTip="Navigate backward" Command="{StaticResource NavigateBackwardCmd}">
                     <ContentControl Template="{StaticResource icon_StepBackwards}"/>
                 </Button>
-                <Button ToolTip="Navigate forward">
+                <Button ToolTip="Navigate forward" Command="{StaticResource NavigateForwardCmd}">
                     <ContentControl Template="{StaticResource icon_StepForward}"/>
                 </Button>
                 <Separator/>
@@ -236,7 +252,7 @@ limitations under the License.
                 </Grid.RowDefinitions>
 
                 <GroupBox Grid.Row="0" Header="References">
-                    <DataGrid Name="referencesList" IsReadOnly="True"
+                    <DataGrid Name="referencesGrid" IsReadOnly="True"
                               ItemsSource="{Binding ReferencesList}"
                               FontFamily="{StaticResource GeneralMonoFont}"
                               SnapsToDevicePixels="True"
@@ -245,7 +261,8 @@ limitations under the License.
                               AutoGenerateColumns="False"
                               HeadersVisibility="Column"
                               CanUserReorderColumns="False"
-                              SelectionMode="Single">
+                              SelectionMode="Single"
+                              MouseDoubleClick="ReferencesList_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
                             <DataGridTextColumn Header="Addr" Binding="{Binding Addr}"/>
@@ -255,7 +272,7 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Notes">
-                    <DataGrid Name="notesList" IsReadOnly="True"
+                    <DataGrid Name="notesGrid" IsReadOnly="True"
                               ItemsSource="{Binding NotesList}"
                               FontFamily="{StaticResource GeneralMonoFont}"
                               SnapsToDevicePixels="True"
@@ -264,13 +281,18 @@ limitations under the License.
                               AutoGenerateColumns="False"
                               HeadersVisibility="Column"
                               CanUserReorderColumns="False"
-                              SelectionMode="Single">
+                              SelectionMode="Single"
+                              MouseDoubleClick="NotesList_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
                             <DataGridTextColumn Header="Note" Binding="{Binding Note}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="{x:Type TextBlock}">
+                                        <!-- The default highlight uses dark blue background with
+                                        white text, but our highlight colors are meant to work
+                                        with black text.  So override Foreground as well. -->
                                         <Setter Property="Background" Value="{Binding BackBrush}"/>
+                                        <Setter Property="Foreground" Value="Black"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
@@ -375,7 +397,7 @@ limitations under the License.
                                           Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
                         </WrapPanel>
 
-                        <DataGrid Grid.Row="1" Name="symbolsList"
+                        <DataGrid Grid.Row="1" Name="symbolsGrid"
                                   IsReadOnly="True"
                                   ItemsSource="{Binding Source={StaticResource SymbolTableSource}}"
                                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -386,7 +408,8 @@ limitations under the License.
                                   HeadersVisibility="Column"
                                   CanUserReorderColumns="False"
                                   SelectionMode="Single"
-                                  Sorting="SymbolsList_Sorting">
+                                  Sorting="SymbolsList_Sorting"
+                                  MouseDoubleClick="SymbolsList_MouseDoubleClick">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
                                 <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>

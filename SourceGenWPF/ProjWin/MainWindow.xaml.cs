@@ -223,6 +223,13 @@ namespace SourceGenWPF.ProjWin {
         }
 
         /// <summary>
+        /// Sets the focus on the code list.
+        /// </summary>
+        //public void CodeListView_Focus() {
+        //    codeListView.Focus();
+        //}
+
+        /// <summary>
         /// Handles a double-click on the code list.  We have to figure out which row and
         /// column were clicked, which is not easy in WPF.
         /// </summary>
@@ -239,7 +246,7 @@ namespace SourceGenWPF.ProjWin {
             if (col < 0) {
                 return;
             }
-            mMainCtrl.HandleDoubleClick(row, col);
+            mMainCtrl.HandleCodeListDoubleClick(row, col);
         }
 
 
@@ -268,7 +275,7 @@ namespace SourceGenWPF.ProjWin {
         /// <returns>
         /// The SelectedItems list appears to hold the full set, so we can just return the count.
         /// </returns>
-        public int GetSelectionCount() {
+        public int CodeListView_GetSelectionCount() {
             return codeListView.SelectedItems.Count;
         }
 
@@ -288,7 +295,7 @@ namespace SourceGenWPF.ProjWin {
         /// common cases will be short selections and select-all, so this should handle both
         /// efficiently.
         /// </remarks>
-        public int GetFirstSelectedIndex() {
+        public int CodeListView_GetFirstSelectedIndex() {
             int count = codeListView.SelectedItems.Count;
             if (count == 0) {
                 return -1;
@@ -312,7 +319,7 @@ namespace SourceGenWPF.ProjWin {
         /// <remarks>
         /// Again, the ListView does not provide what we need.
         /// </remarks>
-        public int GetLastSelectedIndex() {
+        public int CodeListView_GetLastSelectedIndex() {
             int count = codeListView.SelectedItems.Count;
             if (count == 0) {
                 return -1;
@@ -331,10 +338,33 @@ namespace SourceGenWPF.ProjWin {
         }
 
         /// <summary>
+        /// De-selects all items.
+        /// </summary>
+        public void CodeListView_DeselectAll() {
+            codeListView.SelectedItems.Clear();
+        }
+
+        /// <summary>
+        /// Selects a range of values.  Does not clear the previous selection.
+        /// </summary>
+        /// <param name="start">First line to select.</param>
+        /// <param name="count">Number of lines to select.</param>
+        public void CodeListView_SelectRange(int start, int count) {
+            Debug.Assert(start >= 0 && start < CodeDisplayList.Count);
+            Debug.Assert(count > 0 && start + count <= CodeDisplayList.Count);
+
+            DisplayList.FormattedParts[] tmpArray = new DisplayList.FormattedParts[count];
+            for (int index = 0; index < count; index++) {
+                tmpArray[index] = CodeDisplayList[start + index];
+            }
+            listViewSetSelectedItems.Invoke(codeListView, new object[] { tmpArray });
+        }
+
+        /// <summary>
         /// Sets the code list selection.
         /// </summary>
         /// <param name="sel">Selection bitmap.</param>
-        public void SetSelection(DisplayListSelection sel) {
+        public void CodeListView_SetSelection(DisplayListSelection sel) {
             const int MAX_SEL_COUNT = 2000;
 
             if (sel.IsAllSelected()) {
@@ -369,11 +399,11 @@ namespace SourceGenWPF.ProjWin {
             //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
         }
 
-        public int GetCodeListTopIndex() {
+        public int CodeListView_GetTopIndex() {
             return codeListView.GetTopItemIndex();
         }
 
-        public void SetCodeListTopIndex(int index) {
+        public void CodeListView_SetTopIndex(int index) {
             // ScrollIntoView does the least amount of scrolling required.  This extension
             // method scrolls to the bottom, then scrolls back up to the top item.
             //
@@ -381,6 +411,11 @@ namespace SourceGenWPF.ProjWin {
             // ScrollViewer) happens immediately, whiel scroll-to-item (which is done via the
             // ListView) kicks in later.  So don't try to check the topmost item immediately.
             codeListView.ScrollToTopItem(CodeDisplayList[index]);
+        }
+
+        public void CodeListView_EnsureVisible(int index) {
+            Debug.Assert(index >= 0 && index < CodeDisplayList.Count);
+            codeListView.ScrollIntoView(CodeDisplayList[index]);
         }
 
         #endregion Selection management
@@ -391,11 +426,11 @@ namespace SourceGenWPF.ProjWin {
         /// Returns true if the project is open.  Intended for use in XAML CommandBindings.
         /// </summary>
         private void IsProjectOpen(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl.IsProjectOpen();
+            e.CanExecute = mMainCtrl != null && mMainCtrl.IsProjectOpen();
         }
 
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
-            if (!mMainCtrl.IsProjectOpen()) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -404,7 +439,7 @@ namespace SourceGenWPF.ProjWin {
                 (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsDataStart(object sender, CanExecuteRoutedEventArgs e) {
-            if (!mMainCtrl.IsProjectOpen()) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -413,7 +448,7 @@ namespace SourceGenWPF.ProjWin {
                 (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
-            if (!mMainCtrl.IsProjectOpen()) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -422,7 +457,7 @@ namespace SourceGenWPF.ProjWin {
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanRemoveHints(object sender, CanExecuteRoutedEventArgs e) {
-            if (!mMainCtrl.IsProjectOpen()) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -432,10 +467,17 @@ namespace SourceGenWPF.ProjWin {
         }
 
         private void CanRedo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl.CanRedo();
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanRedo();
         }
         private void CanUndo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl.CanUndo();
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanUndo();
+        }
+
+        private void CanNavigateBackward(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateBackward();
+        }
+        private void CanNavigateForward(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateForward();
         }
 
         #endregion Can-execute handlers
@@ -471,6 +513,14 @@ namespace SourceGenWPF.ProjWin {
         private void HintAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as inline data");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
+        }
+
+        private void NavigateBackwardCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.NavigateBackward();
+        }
+
+        private void NavigateForwardCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.NavigateForward();
         }
 
         private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -520,11 +570,13 @@ namespace SourceGenWPF.ProjWin {
         #region References panel
 
         public class ReferencesListItem {
+            public int OffsetValue { get; private set; }
             public string Offset { get; private set; }
             public string Addr { get; private set; }
             public string Type { get; private set; }
 
-            public ReferencesListItem(string offset, string addr, string type) {
+            public ReferencesListItem(int offsetValue, string offset, string addr, string type) {
+                OffsetValue = offsetValue;
                 Offset = offset;
                 Addr = addr;
                 Type = type;
@@ -539,17 +591,32 @@ namespace SourceGenWPF.ProjWin {
         public ObservableCollection<ReferencesListItem> ReferencesList { get; private set; } =
             new ObservableCollection<ReferencesListItem>();
 
+        private void ReferencesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (!referencesGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+                    out object item)) {
+                // Header or empty area; ignore.
+                return;
+            }
+            ReferencesListItem rli = (ReferencesListItem)item;
+
+            // Jump to the offset, then shift the focus back to the code list.
+            mMainCtrl.GoToOffset(rli.OffsetValue, false, true);
+            codeListView.Focus();
+        }
+
         #endregion References panel
 
 
         #region Notes panel
 
         public class NotesListItem {
+            public int OffsetValue { get; private set; }
             public string Offset { get; private set; }
             public string Note { get; private set; }
             public SolidColorBrush BackBrush { get; private set; }
 
-            public NotesListItem(string offset, string note, Color backColor) {
+            public NotesListItem(int offsetValue, string offset, string note, Color backColor) {
+                OffsetValue = offsetValue;
                 Offset = offset;
                 Note = note;
                 BackBrush = new SolidColorBrush(backColor);
@@ -563,6 +630,19 @@ namespace SourceGenWPF.ProjWin {
 
         public ObservableCollection<NotesListItem> NotesList { get; private set; } =
             new ObservableCollection<NotesListItem>();
+
+        private void NotesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (!notesGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+                    out object item)) {
+                // Header or empty area; ignore.
+                return;
+            }
+            NotesListItem nli = (NotesListItem)item;
+
+            // Jump to the offset, then shift the focus back to the code list.
+            mMainCtrl.GoToOffset(nli.OffsetValue, true, true);
+            codeListView.Focus();
+        }
 
         #endregion Notes panel
 
@@ -592,6 +672,18 @@ namespace SourceGenWPF.ProjWin {
         public ObservableCollection<SymbolsListItem> SymbolsList { get; private set; } =
             new ObservableCollection<SymbolsListItem>();
 
+        private void SymbolsList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (!symbolsGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+                    out object item)) {
+                // Header or empty area; ignore.
+                return;
+            }
+            SymbolsListItem sli = (SymbolsListItem)item;
+
+            mMainCtrl.GoToLabel(sli.Sym);
+            codeListView.Focus();
+        }
+
         private void SymbolsList_Filter(object sender, FilterEventArgs e) {
             SymbolsListItem sli = (SymbolsListItem)e.Item;
             if (sli == null) {
@@ -617,7 +709,7 @@ namespace SourceGenWPF.ProjWin {
         private void SymbolsListFilter_Changed(object sender, RoutedEventArgs e) {
             // This delightfully obscure call causes the list to refresh.  See
             // https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/how-to-group-sort-and-filter-data-in-the-datagrid-control
-            CollectionViewSource.GetDefaultView(symbolsList.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(symbolsGrid.ItemsSource).Refresh();
         }
 
         /// <summary>
@@ -655,7 +747,7 @@ namespace SourceGenWPF.ProjWin {
             }
 
             ListCollectionView lcv =
-                (ListCollectionView)CollectionViewSource.GetDefaultView(symbolsList.ItemsSource);
+                (ListCollectionView)CollectionViewSource.GetDefaultView(symbolsGrid.ItemsSource);
             lcv.CustomSort = comparer;
             e.Handled = true;
         }

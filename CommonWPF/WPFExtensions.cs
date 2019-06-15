@@ -82,7 +82,7 @@ namespace CommonWPF {
                 Debug.Assert(false, "ListView does not have a VirtualizingStackPanel");
                 return -1;
             }
-            return (int) vsp.VerticalOffset;
+            return (int)vsp.VerticalOffset;
         }
 
         /// <summary>
@@ -123,9 +123,7 @@ namespace CommonWPF {
         /// </summary>
         /// <remarks>
         /// There's just no other way to do this with ListView.  With DataGrid you can do this
-        /// somewhat reasonably
-        /// (https://blog.scottlogic.com/2008/12/02/wpf-datagrid-detecting-clicked-cell-and-row.html),
-        /// but ListView just doesn't want to help.
+        /// somewhat reasonably (see below), but ListView just doesn't want to help.
         /// </remarks>
         /// <returns>Column index, or -1 if the click was outside the columns (e.g. off the right
         ///   edge).</returns>
@@ -148,5 +146,75 @@ namespace CommonWPF {
 
             return -1;
         }
+    }
+
+    /// <summary>
+    /// Helper functions for working with DataGrids.
+    /// </summary>
+    /// <remarks>
+    /// It's tempting to handle double-click actions by using the selected row.  This gets a
+    /// little weird, though, because double-clicking on a header or blank area doesn't
+    /// clear the selection.
+    /// </remarks>
+    public static class DataGridExtensions {
+        /// <summary>
+        /// Determines which row and column was the target of a mouse button action.
+        /// </summary>
+        /// <remarks>
+        /// Based on https://blog.scottlogic.com/2008/12/02/wpf-datagrid-detecting-clicked-cell-and-row.html
+        /// </remarks>
+        /// <returns>True if the click was on a data item.</returns>
+        public static bool GetClickRowColItem(this DataGrid dg, MouseButtonEventArgs e,
+                out int rowIndex, out int colIndex, out object item) {
+            rowIndex = colIndex = -1;
+            item = null;
+
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // The initial dep will likely be a TextBlock.  Walk up the tree until we find
+            // an object for the cell.  If we don't find one, this might be a click in the
+            // header or off the bottom of the list.
+            while (!(dep is DataGridCell)) {
+                dep = VisualTreeHelper.GetParent(dep);
+                if (dep == null) {
+                    return false;
+                }
+            }
+            DataGridCell cell = (DataGridCell)dep;
+
+            // Now search up for the DataGridRow object.
+            do {
+                dep = VisualTreeHelper.GetParent(dep);
+                if (dep == null) {
+                    Debug.Assert(false, "Found cell but not row?");
+                    return false;
+                }
+            } while (!(dep is DataGridRow));
+            DataGridRow row = (DataGridRow)dep;
+
+            // Get a row index for the entry.
+            DataGrid rowGrid = (DataGrid)ItemsControl.ItemsControlFromItemContainer(row);
+            rowIndex = rowGrid.ItemContainerGenerator.IndexFromContainer(row);
+
+            // Column index is, weirdly enough, just sitting in a property.
+            colIndex = cell.Column.DisplayIndex;
+
+            // Item is part of the row.
+            item = row.Item;
+            return true;
+        }
+
+#if false
+        public static DataGridRow GetRow(this DataGrid grid, int index) {
+            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(index);
+            if (row == null) {
+                // May be virtualized, bring into view and try again.
+                grid.UpdateLayout();
+                grid.ScrollIntoView(grid.Items[index]);
+                row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(index);
+            }
+            return row;
+        }
+#endif
     }
 }

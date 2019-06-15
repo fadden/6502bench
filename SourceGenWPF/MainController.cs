@@ -479,7 +479,7 @@ namespace SourceGenWPF {
             mReanalysisTimer.StartTask("ProjectView.ApplyChanges()");
 
             mReanalysisTimer.StartTask("Save selection");
-            int topItemIndex = mMainWin.GetCodeListTopIndex();
+            int topItemIndex = mMainWin.CodeListView_GetTopIndex();
             LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
                 CodeListGen, mMainWin.CodeDisplayList.SelectedIndices,
                 CodeListGen[topItemIndex].FileOffset);
@@ -509,8 +509,8 @@ namespace SourceGenWPF {
             // Restore the selection.  The selection-changed event will cause updates to the
             // references, notes, and info panels.
             mReanalysisTimer.StartTask("Restore selection and top position");
-            mMainWin.SetSelection(newSel);
-            mMainWin.SetCodeListTopIndex(topItemIndex);
+            mMainWin.CodeListView_SetSelection(newSel);
+            mMainWin.CodeListView_SetTopIndex(topItemIndex);
             mReanalysisTimer.EndTask("Restore selection and top position");
 
             // Update the Notes list as well.
@@ -640,10 +640,6 @@ namespace SourceGenWPF {
         #endregion Project management
 
         #region Main window UI event handlers
-
-        public void HandleDoubleClick(int row, int col) {
-            Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
-        }
 
         public void OpenRecentProject(int projIndex) {
             if (!CloseProject()) {
@@ -957,6 +953,105 @@ namespace SourceGenWPF {
             return mProject != null;
         }
 
+        public void HandleCodeListDoubleClick(int row, int col) {
+            Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
+        }
+
+        /// <summary>
+        /// Moves the view and selection to the specified offset.  We want to select stuff
+        /// differently if we're jumping to a note vs. jumping to an instruction.
+        /// </summary>
+        /// <param name="gotoOffset">Offset to jump to.</param>
+        /// <param name="doPush">If set, push new offset onto navigation stack.</param>
+        public void GoToOffset(int gotoOffset, bool jumpToNote, bool doPush) {
+            int curSelIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+
+            int topLineIndex = CodeListGen.FindLineIndexByOffset(gotoOffset);
+            if (topLineIndex < 0) {
+                Debug.Assert(false, "failed goto offset +" + gotoOffset.ToString("x6"));
+                return;
+            }
+            int lastLineIndex;
+            if (jumpToNote) {
+                // Select all note lines, disregard the rest.
+                while (CodeListGen[topLineIndex].LineType != LineListGen.Line.Type.Note) {
+                    topLineIndex++;
+                    Debug.Assert(CodeListGen[topLineIndex].FileOffset == gotoOffset);
+                }
+                lastLineIndex = topLineIndex + 1;
+                while (lastLineIndex < CodeListGen.Count &&
+                        CodeListGen[lastLineIndex].LineType == LineListGen.Line.Type.Note) {
+                    lastLineIndex++;
+                }
+            } else if (gotoOffset < 0) {
+                // This is the offset of the header comment or a .EQ directive. Don't mess with it.
+                lastLineIndex = topLineIndex + 1;
+            } else {
+                // Advance to the code or data line.
+                while (CodeListGen[topLineIndex].LineType != LineListGen.Line.Type.Code &&
+                        CodeListGen[topLineIndex].LineType != LineListGen.Line.Type.Data) {
+                    topLineIndex++;
+                }
+                lastLineIndex = topLineIndex + 1;
+            }
+
+            // Make sure the item is visible.  For notes, this can span multiple lines.
+            mMainWin.CodeListView_EnsureVisible(lastLineIndex - 1);
+            mMainWin.CodeListView_EnsureVisible(topLineIndex);
+
+            // Update the selection.
+            mMainWin.CodeListView_DeselectAll();
+            mMainWin.CodeListView_SelectRange(topLineIndex, lastLineIndex - topLineIndex);
+
+            if (doPush) {
+                if (curSelIndex >= 0) {
+                    // Update the back stack and associated controls.
+                    mNavStack.Push(CodeListGen[curSelIndex].FileOffset, gotoOffset);
+#if false
+                    UpdateMenuItemsAndTitle();
+#endif
+                } else {
+                    // This can happen when the project is first opened and nothing is selected.
+                    Debug.WriteLine("no selection to go back to");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Scrolls the code list so that the specified label is shown.
+        /// </summary>
+        /// <param name="sym">Label symbol.</param>
+        public void GoToLabel(Symbol sym) {
+            if (sym.IsInternalLabel) {
+                int offset = mProject.FindLabelOffsetByName(sym.Label);
+                if (offset >= 0) {
+                    GoToOffset(offset, false, true);
+                } else {
+                    Debug.WriteLine("DClick symbol: " + sym + ": label not found");
+                }
+            } else {
+                Debug.WriteLine("DClick symbol: " + sym + ": not label");
+            }
+        }
+
+        public bool CanNavigateBackward() {
+            return mNavStack.HasBackward;
+        }
+        public void NavigateBackward() {
+            Debug.Assert(mNavStack.HasBackward);
+            int backOff = mNavStack.Pop();
+            GoToOffset(backOff, false, false);
+        }
+
+        public bool CanNavigateForward() {
+            return mNavStack.HasForward;
+        }
+        public void NavigateForward() {
+            Debug.Assert(mNavStack.HasForward);
+            int fwdOff = mNavStack.PushPrevious();
+            GoToOffset(fwdOff, false, false);
+        }
+
         public void SelectionChanged(out SelectionState newState) {
             newState = UpdateSelectionState();
 
@@ -997,7 +1092,7 @@ namespace SourceGenWPF {
         /// </summary>
         ///   is selected.</param>
         public SelectionState UpdateSelectionState() {
-            int selCount = mMainWin.GetSelectionCount();
+            int selCount = mMainWin.CodeListView_GetSelectionCount();
             Debug.WriteLine("SelectionChanged, selCount=" + selCount);
 
             SelectionState state = new SelectionState();
@@ -1009,7 +1104,7 @@ namespace SourceGenWPF {
                 // nothing selected, leave everything set to false / 0
                 state.mEntityCounts = new EntityCounts();
             } else if (IsSingleItemSelected()) {
-                int firstIndex = mMainWin.GetFirstSelectedIndex();
+                int firstIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
                 state.mNumSelected = 1;
                 state.mEntityCounts = GatherEntityCounts(firstIndex);
                 LineListGen.Line line = CodeListGen[firstIndex];
@@ -1139,13 +1234,13 @@ namespace SourceGenWPF {
         /// single-line item or a multi-line item.
         /// </summary>
         private bool IsSingleItemSelected() {
-            int firstIndex = mMainWin.GetFirstSelectedIndex();
+            int firstIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (firstIndex < 0) {
                 // empty selection
                 return false;
             }
 
-            int lastIndex = mMainWin.GetLastSelectedIndex();
+            int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
             if (lastIndex == firstIndex) {
                 // only one line is selected
                 return true;
@@ -1309,11 +1404,11 @@ namespace SourceGenWPF {
         private void UpdateReferencesPanel() {
             mMainWin.ReferencesList.Clear();
 
-            if (mMainWin.GetSelectionCount() != 1) {
+            if (mMainWin.CodeListView_GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
                 return;
             }
-            int lineIndex = mMainWin.GetFirstSelectedIndex();
+            int lineIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             LineListGen.Line.Type type = CodeListGen[lineIndex].LineType;
             if (type != LineListGen.Line.Type.Code &&
                     type != LineListGen.Line.Type.Data &&
@@ -1380,7 +1475,7 @@ namespace SourceGenWPF {
                         break;
                 }
 
-                MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(
+                MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(xr.Offset,
                     formatter.FormatOffset24(xr.Offset),
                     formatter.FormatAddress(mProject.GetAnattrib(xr.Offset).Address, showBank),
                     (xr.IsSymbolic ? "Sym " : "Num ") + typeStr +
@@ -1403,12 +1498,13 @@ namespace SourceGenWPF {
                 // Replace line break with bullet.  If there's a single CRLF at the end, strip it.
                 string nocrlfStr;
                 if (mlc.Text.EndsWith("\r\n")) {
-                    nocrlfStr = mlc.Text.Substring(0, mlc.Text.Length - 2).Replace("\r\n", " \u2022 ");
+                    nocrlfStr =
+                        mlc.Text.Substring(0, mlc.Text.Length - 2).Replace("\r\n", " \u2022 ");
                 } else {
                     nocrlfStr = mlc.Text.Replace("\r\n", " \u2022 ");
                 }
 
-                MainWindow.NotesListItem nli = new MainWindow.NotesListItem(
+                MainWindow.NotesListItem nli = new MainWindow.NotesListItem(offset,
                     mOutputFormatter.FormatOffset24(offset),
                     nocrlfStr,
                     mlc.BackgroundColor);
@@ -1436,12 +1532,12 @@ namespace SourceGenWPF {
         #region Info panel
 
         private void UpdateInfoPanel() {
-            if (mMainWin.GetSelectionCount() != 1) {
+            if (mMainWin.CodeListView_GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
                 mMainWin.InfoPanelContents = string.Empty;
                 return;
             }
-            int lineIndex = mMainWin.GetFirstSelectedIndex();
+            int lineIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             LineListGen.Line line = CodeListGen[lineIndex];
             StringBuilder sb = new StringBuilder(250);
 
