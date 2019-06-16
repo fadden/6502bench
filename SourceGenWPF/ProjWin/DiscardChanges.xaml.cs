@@ -31,8 +31,9 @@ namespace SourceGenWPF.ProjWin {
         }
         public Choice UserChoice { get; private set; }
 
-        public DiscardChanges() {
+        public DiscardChanges(Window owner) {
             InitializeComponent();
+            Owner = owner;
         }
 
         // TODO:

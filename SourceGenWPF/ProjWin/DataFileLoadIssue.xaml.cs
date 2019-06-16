@@ -32,8 +32,9 @@ namespace SourceGenWPF.ProjWin {
         private string mMessage;
 
 
-        public DataFileLoadIssue(string pathName, string message) {
+        public DataFileLoadIssue(Window owner, string pathName, string message) {
             InitializeComponent();
+            Owner = owner;
 
             mPathName = pathName;
             mMessage = message;

@@ -402,7 +402,7 @@ namespace SourceGenWPF {
             string messages = mProject.LoadExternalFiles();
             if (messages.Length != 0) {
                 // ProjectLoadIssues isn't quite the right dialog, but it'll do.
-                ProjectLoadIssues dlg = new ProjectLoadIssues(messages,
+                ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, messages,
                     ProjectLoadIssues.Buttons.Continue);
                 dlg.ShowDialog();
             }
@@ -711,7 +711,7 @@ namespace SourceGenWPF {
                 // Should probably use a less-busy dialog for something simple like
                 // "permission denied", but the open file dialog handles most simple
                 // stuff directly.
-                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
+                ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, report.Format(),
                     ProjectLoadIssues.Buttons.Cancel);
                 dlg.ShowDialog();
                 // ignore dlg.DialogResult
@@ -741,7 +741,7 @@ namespace SourceGenWPF {
 
             // If there were warnings, notify the user and give the a chance to cancel.
             if (report.Count != 0) {
-                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
+                ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, report.Format(),
                     ProjectLoadIssues.Buttons.ContinueOrCancel);
                 bool? ok = dlg.ShowDialog();
 
@@ -818,7 +818,7 @@ namespace SourceGenWPF {
         /// <param name="errorMsg">Message to display in the message box.</param>
         /// <returns>Full path of file to open.</returns>
         private string ChooseDataFile(string origPath, string errorMsg) {
-            DataFileLoadIssue dlg = new DataFileLoadIssue(origPath, errorMsg);
+            DataFileLoadIssue dlg = new DataFileLoadIssue(mMainWin, origPath, errorMsg);
             bool? ok = dlg.ShowDialog();
             if (ok != true) {
                 return null;
@@ -909,7 +909,7 @@ namespace SourceGenWPF {
             Debug.WriteLine("ProjectView.DoClose() - dirty=" +
                 (mProject == null ? "N/A" : mProject.IsDirty.ToString()));
             if (mProject != null && mProject.IsDirty) {
-                DiscardChanges dlg = new DiscardChanges();
+                DiscardChanges dlg = new DiscardChanges(mMainWin);
                 bool? ok = dlg.ShowDialog();
                 if (ok != true) {
                     return false;
@@ -1118,8 +1118,7 @@ namespace SourceGenWPF {
             int offset = CodeLineList[selIndex].FileOffset;
             Anattrib attr = mProject.GetAnattrib(offset);
 
-            EditAddress dlg = new EditAddress(attr.Address, mProject.CpuDef.MaxAddressValue);
-            dlg.Owner = mMainWin;
+            EditAddress dlg = new EditAddress(mMainWin, attr.Address, mProject.CpuDef.MaxAddressValue);
             bool? ok = dlg.ShowDialog();
             if (ok != true) {
                 return;

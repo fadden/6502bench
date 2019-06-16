@@ -36,8 +36,9 @@ namespace SourceGenWPF.ProjWin {
         }
 
 
-        public ProjectLoadIssues(string msgs, Buttons allowedButtons) {
+        public ProjectLoadIssues(Window owner, string msgs, Buttons allowedButtons) {
             InitializeComponent();
+            Owner = owner;
 
             mMessages = msgs;
             mAllowedButtons = allowedButtons;

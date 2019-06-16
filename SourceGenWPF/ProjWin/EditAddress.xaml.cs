@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -43,7 +40,7 @@ namespace SourceGenWPF.ProjWin {
         public string AddressText { get; set; }
 
 
-        public EditAddress(int initialAddr, int maxAddressValue) {
+        public EditAddress(Window owner, int initialAddr, int maxAddressValue) {
             // Set the property before initializing the window -- we don't have a property
             // change notifier.
             Address = -2;
@@ -52,6 +49,7 @@ namespace SourceGenWPF.ProjWin {
 
             this.DataContext = this;
             InitializeComponent();
+            Owner = owner;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
