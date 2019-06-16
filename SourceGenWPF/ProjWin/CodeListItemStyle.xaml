@@ -1,5 +1,6 @@
 ﻿<!--
 Copyright 2019 faddenSoft
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -153,13 +154,18 @@ See also https://github.com/fadden/DisasmUiTest
     </Style>
 
     <!-- Highlighting for individual cells. -->
+    <LinearGradientBrush x:Key="HighlightedCellFill" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#FFD9Fff4" Offset="0"/>
+        <GradientStop Color="#FF9Bfbdd" Offset="1"/>
+    </LinearGradientBrush>
+
     <DataTemplate x:Key="addrHighlightTemplate">
         <TextBlock>
             <TextBlock.Style>
                 <Style>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
-                            <Setter Property="TextBlock.Background" Value="{StaticResource ListItemSelectedFill}"/>
+                            <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -175,7 +181,7 @@ See also https://github.com/fadden/DisasmUiTest
                 <Style>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
-                            <Setter Property="TextBlock.Background" Value="{StaticResource ListItemSelectedFill}"/>
+                            <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

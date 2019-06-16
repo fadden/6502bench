@@ -56,11 +56,6 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         private MainController mMainCtrl;
 
-        /// <summary>
-        /// Analyzed selection state.
-        /// </summary>
-        private MainController.SelectionState mSelectionState;
-
         // Handle to protected ListView.SetSelectedItems() method
         private MethodInfo listViewSetSelectedItems;
 
@@ -79,8 +74,6 @@ namespace SourceGenWPF.ProjWin {
             // https://dlaa.me/blog/post/9425496 to re-auto-size after data added
 
             mMainCtrl = new MainController(this);
-
-            mSelectionState = new MainController.SelectionState();
 
             AddMultiKeyGestures();
 
@@ -258,9 +251,8 @@ namespace SourceGenWPF.ProjWin {
             // Update the selected-item bitmap.
             CodeDisplayList.SelectedIndices.SelectionChanged(e);
 
-            // Notify MainController that the selection has changed.  This hands back an updated
-            // selection summary, which is used for "can execute" methods.
-            mMainCtrl.SelectionChanged(out mSelectionState);
+            // Notify MainController that the selection has changed.
+            mMainCtrl.SelectionChanged();
 
             Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
                 codeListView.SelectedItems.Count));
@@ -474,12 +466,20 @@ namespace SourceGenWPF.ProjWin {
             e.CanExecute = mMainCtrl != null && mMainCtrl.IsProjectOpen();
         }
 
+        private void CanEditAddress(object sender, CanExecuteRoutedEventArgs e) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = mMainCtrl.CanEditAddress();
+        }
+
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
-            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
@@ -488,7 +488,7 @@ namespace SourceGenWPF.ProjWin {
                 e.CanExecute = false;
                 return;
             }
-            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
@@ -497,7 +497,7 @@ namespace SourceGenWPF.ProjWin {
                 e.CanExecute = false;
                 return;
             }
-            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
         }
@@ -506,7 +506,7 @@ namespace SourceGenWPF.ProjWin {
                 e.CanExecute = false;
                 return;
             }
-            MainController.EntityCounts counts = mSelectionState.mEntityCounts;
+            MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
         }
@@ -539,6 +539,10 @@ namespace SourceGenWPF.ProjWin {
             if (!mMainCtrl.CloseProject()) {
                 Debug.WriteLine("Close canceled");
             }
+        }
+
+        private void EditAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditAddress();
         }
 
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

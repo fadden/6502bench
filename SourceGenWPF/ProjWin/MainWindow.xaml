@@ -1,5 +1,6 @@
 ﻿<!--
 Copyright 2019 faddenSoft
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -48,6 +49,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
+            <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
@@ -92,6 +94,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditAddressCmd}"
+                        CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
         <CommandBinding Command="Help"
                         Executed="HelpCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
@@ -152,7 +156,7 @@ limitations under the License.
                 <MenuItem Header="Settings..."/>
             </MenuItem>
             <MenuItem Name="ActionsMenu" Header="_Actions">
-                <MenuItem Header="Set Address..."/>
+                <MenuItem Command="{StaticResource EditAddressCmd}"/>
                 <MenuItem Header="Override Status Flags..."/>
                 <MenuItem Header="Edit Label..."/>
                 <MenuItem Header="Edit Operand..."/>

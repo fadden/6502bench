@@ -81,6 +81,9 @@
     <Compile Include="ProjWin\DiscardChanges.xaml.cs">
       <DependentUpon>DiscardChanges.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProjWin\EditAddress.xaml.cs">
+      <DependentUpon>EditAddress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProjWin\ProjectLoadIssue.xaml.cs">
       <DependentUpon>ProjectLoadIssue.xaml</DependentUpon>
     </Compile>
@@ -158,6 +161,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProjWin\DiscardChanges.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProjWin\EditAddress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
