@@ -1057,6 +1057,7 @@ namespace SourceGenWPF {
 
             UpdateReferencesPanel();
             UpdateInfoPanel();
+            UpdateSelectionHighlight();
         }
 
         /// <summary>
@@ -1254,6 +1255,49 @@ namespace SourceGenWPF {
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Updates the selection highlight.  When a code item with an operand offset is
+        /// selected, such as a branch, we want to highlight the address and label of the
+        /// target.
+        /// </summary>
+        private void UpdateSelectionHighlight() {
+            int targetIndex = FindSelectionHighlight();
+
+            if (mTargetHighlightIndex != targetIndex) {
+                mMainWin.CodeListView_RemoveSelectionHighlight(mTargetHighlightIndex);
+                mMainWin.CodeListView_AddSelectionHighlight(targetIndex);
+
+                mTargetHighlightIndex = targetIndex;
+                Debug.WriteLine("Selection highlight now " + targetIndex);
+            }
+        }
+
+        private int FindSelectionHighlight() {
+            if (mMainWin.CodeListView_GetSelectionCount() != 1) {
+                return -1;
+            }
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            LineListGen.Line line = CodeListGen[selIndex];
+            if (!line.IsCodeOrData) {
+                return -1;
+            }
+            Debug.Assert(line.FileOffset >= 0);
+
+            // Does this have an operand with an in-file target offset?
+            Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+            if (attr.OperandOffset >= 0) {
+                return CodeListGen.FindCodeDataIndexByOffset(attr.OperandOffset);
+            } else if (attr.IsDataStart || attr.IsInlineDataStart) {
+                // If it's an Address or Symbol, we can try to resolve
+                // the value.
+                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
+                if (operandOffset >= 0) {
+                    return CodeListGen.FindCodeDataIndexByOffset(operandOffset);
+                }
+            }
+            return -1;
         }
 
         public bool CanUndo() {

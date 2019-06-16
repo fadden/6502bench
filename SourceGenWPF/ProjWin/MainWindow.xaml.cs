@@ -413,9 +413,54 @@ namespace SourceGenWPF.ProjWin {
             codeListView.ScrollToTopItem(CodeDisplayList[index]);
         }
 
+        /// <summary>
+        /// Scrolls the code list to ensure that the specified index is visible.
+        /// </summary>
+        /// <param name="index">Line index of item.</param>
         public void CodeListView_EnsureVisible(int index) {
             Debug.Assert(index >= 0 && index < CodeDisplayList.Count);
             codeListView.ScrollIntoView(CodeDisplayList[index]);
+        }
+
+        /// <summary>
+        /// Adds an address/label selection highlight to the specified line.
+        /// </summary>
+        /// <param name="index">Line index.  If &lt; 0, method has no effect.</param>
+        public void CodeListView_AddSelectionHighlight(int index) {
+            if (index < 0) {
+                return;
+            }
+            CodeListView_ReplaceEntry(index,
+                DisplayList.FormattedParts.AddSelectionHighlight(CodeDisplayList[index]));
+        }
+
+        /// <summary>
+        /// Removes an address/label selection highlight from the specified line.
+        /// </summary>
+        /// <param name="index">Line index.  If &lt; 0, method has no effect.</param>
+        public void CodeListView_RemoveSelectionHighlight(int index) {
+            if (index < 0) {
+                return;
+            }
+            CodeListView_ReplaceEntry(index,
+                DisplayList.FormattedParts.RemoveSelectionHighlight(CodeDisplayList[index]));
+        }
+
+        /// <summary>
+        /// Replaces an entry in the code list.  If the item was selected, the selection is
+        /// cleared and restored.
+        /// </summary>
+        /// <param name="index">List index.</param>
+        /// <param name="newParts">Replacement parts.</param>
+        private void CodeListView_ReplaceEntry(int index, DisplayList.FormattedParts newParts) {
+            bool isSelected = CodeDisplayList.SelectedIndices[index];
+            if (isSelected) {
+                codeListView.SelectedItems.Remove(CodeDisplayList[index]);
+            }
+            CodeDisplayList[index] = newParts;
+            if (isSelected) {
+                codeListView.SelectedItems.Add(newParts);
+            }
         }
 
         #endregion Selection management

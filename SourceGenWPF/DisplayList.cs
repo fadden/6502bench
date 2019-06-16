@@ -285,6 +285,9 @@ namespace SourceGenWPF {
             SelectedIndices = new DisplayListSelection(size);
         }
 
+        /// <summary>
+        /// List elements.  Instances are immutable.
+        /// </summary>
         public class FormattedParts {
             public string Offset { get; private set; }
             public string Addr { get; private set; }
@@ -297,10 +300,28 @@ namespace SourceGenWPF {
             public string Comment { get; private set; }
             public bool IsLongComment { get; private set; }
 
+            // Set to true if we want to highlight the address and label fields.
+            public bool HasAddrLabelHighlight { get; private set; }
+
             public int ListIndex { get; set; } = -1;
 
             // Private constructor -- create instances with factory methods.
             private FormattedParts() { }
+
+            /// <summary>
+            /// Clones the specified object.
+            /// </summary>
+            private static FormattedParts Clone(FormattedParts orig) {
+                FormattedParts newParts = FormattedParts.Create(orig.Offset, orig.Addr,
+                    orig.Bytes, orig.Flags, orig.Attr, orig.Label, orig.Opcode, orig.Operand,
+                    orig.Comment);
+
+                newParts.IsLongComment = orig.IsLongComment;
+                newParts.HasAddrLabelHighlight = orig.HasAddrLabelHighlight;
+
+                newParts.ListIndex = orig.ListIndex;
+                return newParts;
+            }
 
             public static FormattedParts Create(string offset, string addr, string bytes,
                     string flags, string attr, string label, string opcode, string operand,
@@ -347,6 +368,18 @@ namespace SourceGenWPF {
                 parts.Operand = addrStr;
                 parts.Comment = comment;
                 return parts;
+            }
+
+            public static FormattedParts AddSelectionHighlight(FormattedParts orig) {
+                FormattedParts newParts = Clone(orig);
+                newParts.HasAddrLabelHighlight = true;
+                return newParts;
+            }
+
+            public static FormattedParts RemoveSelectionHighlight(FormattedParts orig) {
+                FormattedParts newParts = Clone(orig);
+                newParts.HasAddrLabelHighlight = false;
+                return newParts;
             }
         }
     }

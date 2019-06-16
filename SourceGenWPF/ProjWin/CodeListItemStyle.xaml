@@ -66,6 +66,7 @@ See also https://github.com/fadden/DisasmUiTest
         <GridViewColumn Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
                 }, Path=View.Columns[4].ActualWidth}" DisplayMemberBinding="{Binding Attr}"/>
+        <!-- This column holds the long comment.  Leave the width unset. -->
         <GridViewColumn Header="two" DisplayMemberBinding="{Binding Path=Comment}"/>
     </GridViewColumnCollection>
 
@@ -139,10 +140,49 @@ See also https://github.com/fadden/DisasmUiTest
         wrong place you'll feel like you clicked and nothing happened. -->
         <Setter Property="Margin" Value="0,-1,0,0"/>
 
+        <!-- This causes individual TextBoxes to stretch to fill the column.  This is nice
+        because the cell-highlight stuff will set the background on the full cell rather than
+        just the bit with the text. -->
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
                 <Setter Property="Template" Value="{StaticResource longCommentTemplate}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <!-- Highlighting for individual cells. -->
+    <DataTemplate x:Key="addrHighlightTemplate">
+        <TextBlock>
+            <TextBlock.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
+                            <Setter Property="TextBlock.Background" Value="{StaticResource ListItemSelectedFill}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+            <TextBlock.Text>
+                <Binding Path="Addr"/>
+            </TextBlock.Text>
+        </TextBlock>
+    </DataTemplate>
+    <DataTemplate x:Key="labelHighlightTemplate">
+        <TextBlock>
+            <TextBlock.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
+                            <Setter Property="TextBlock.Background" Value="{StaticResource ListItemSelectedFill}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+            <TextBlock.Text>
+                <Binding Path="Label"/>
+            </TextBlock.Text>
+        </TextBlock>
+    </DataTemplate>
 </ResourceDictionary>

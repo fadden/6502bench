@@ -350,11 +350,11 @@ limitations under the License.
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
                         <GridViewColumn Header="Offset" DisplayMemberBinding="{Binding Offset}"/>
-                        <GridViewColumn Header="Addr" DisplayMemberBinding="{Binding Addr}"/>
+                        <GridViewColumn Header="Addr" CellTemplate="{StaticResource addrHighlightTemplate}"/>
                         <GridViewColumn Header="Bytes" DisplayMemberBinding="{Binding Bytes}"/>
                         <GridViewColumn Header="Flags" DisplayMemberBinding="{Binding Flags}"/>
                         <GridViewColumn Header="Attr" DisplayMemberBinding="{Binding Attr}"/>
-                        <GridViewColumn Header="Label" DisplayMemberBinding="{Binding Label}"/>
+                        <GridViewColumn Header="Label" CellTemplate="{StaticResource labelHighlightTemplate}"/>
                         <GridViewColumn Header="Opcode" DisplayMemberBinding="{Binding Opcode}"/>
                         <GridViewColumn Header="Operand" DisplayMemberBinding="{Binding Operand}"/>
                         <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
