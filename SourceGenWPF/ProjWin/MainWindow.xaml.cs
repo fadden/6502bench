@@ -781,13 +781,14 @@ namespace SourceGenWPF.ProjWin {
 
             switch (col.Header) {
                 case "Type":
-                    comparer = new SymTabSortComparer(SymTabSortField.CombinedType, isAscending);
+                    comparer = new SymTabSortComparer(Symbol.SymbolSortField.CombinedType,
+                        isAscending);
                     break;
                 case "Value":
-                    comparer = new SymTabSortComparer(SymTabSortField.Value, isAscending);
+                    comparer = new SymTabSortComparer(Symbol.SymbolSortField.Value, isAscending);
                     break;
                 case "Name":
-                    comparer = new SymTabSortComparer(SymTabSortField.Name, isAscending);
+                    comparer = new SymTabSortComparer(Symbol.SymbolSortField.Name, isAscending);
                     break;
                 default:
                     comparer = null;
@@ -802,12 +803,11 @@ namespace SourceGenWPF.ProjWin {
         }
 
         // Symbol table sort comparison helper.
-        private enum SymTabSortField { CombinedType, Value, Name };
         private class SymTabSortComparer : IComparer {
-            private SymTabSortField mSortField;
+            private Symbol.SymbolSortField mSortField;
             private bool mIsAscending;
 
-            public SymTabSortComparer(SymTabSortField prim, bool isAscending) {
+            public SymTabSortComparer(Symbol.SymbolSortField prim, bool isAscending) {
                 mSortField = prim;
                 mIsAscending = isAscending;
             }
@@ -817,54 +817,7 @@ namespace SourceGenWPF.ProjWin {
                 Symbol a = ((SymbolsListItem)oa).Sym;
                 Symbol b = ((SymbolsListItem)ob).Sym;
 
-                // Label is always unique, so we use it as a secondary sort.
-                if (mSortField == SymTabSortField.CombinedType) {
-                    if (mIsAscending) {
-                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
-                        if (cmp == 0) {
-                            cmp = string.Compare(a.Label, b.Label);
-                        }
-                        return cmp;
-                    } else {
-                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
-                        if (cmp == 0) {
-                            // secondary sort is always ascending, so negate
-                            cmp = -string.Compare(a.Label, b.Label);
-                        }
-                        return -cmp;
-                    }
-                } else if (mSortField == SymTabSortField.Value) {
-                    if (mIsAscending) {
-                        int cmp;
-                        if (a.Value < b.Value) {
-                            cmp = -1;
-                        } else if (a.Value > b.Value) {
-                            cmp = 1;
-                        } else {
-                            cmp = string.Compare(a.Label, b.Label);
-                        }
-                        return cmp;
-                    } else {
-                        int cmp;
-                        if (a.Value < b.Value) {
-                            cmp = -1;
-                        } else if (a.Value > b.Value) {
-                            cmp = 1;
-                        } else {
-                            cmp = -string.Compare(a.Label, b.Label);
-                        }
-                        return -cmp;
-                    }
-                } else if (mSortField == SymTabSortField.Name) {
-                    if (mIsAscending) {
-                        return string.Compare(a.Label, b.Label);
-                    } else {
-                        return -string.Compare(a.Label, b.Label);
-                    }
-                } else {
-                    Debug.Assert(false);
-                    return 0;
-                }
+                return Symbol.Compare(mSortField, mIsAscending, a, b);
             }
         }
 

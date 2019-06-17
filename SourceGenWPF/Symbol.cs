@@ -152,5 +152,66 @@ namespace SourceGenWPF {
             return Asm65.Label.ToNormal(Label).GetHashCode() ^
                 Value ^ (int)SymbolType ^ (int)SymbolSource;
         }
+
+
+        //
+        // Comparison function, used when sorting the symbol table.
+        //
+
+        public enum SymbolSortField { CombinedType, Value, Name };
+
+        public static int Compare(SymbolSortField sortField, bool isAscending,
+                Symbol a, Symbol b) {
+            // In the symbol table, only the label field is guaranteed to be unique.  We
+            // use it as a secondary sort key when comparing the other fields.
+            switch (sortField) {
+                case SymbolSortField.CombinedType:
+                    if (isAscending) {
+                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
+                        if (cmp == 0) {
+                            cmp = string.Compare(a.Label, b.Label);
+                        }
+                        return cmp;
+                    } else {
+                        int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
+                        if (cmp == 0) {
+                            // secondary sort is always ascending, so negate
+                            cmp = -string.Compare(a.Label, b.Label);
+                        }
+                        return -cmp;
+                    }
+                case SymbolSortField.Value:
+                    if (isAscending) {
+                        int cmp;
+                        if (a.Value < b.Value) {
+                            cmp = -1;
+                        } else if (a.Value > b.Value) {
+                            cmp = 1;
+                        } else {
+                            cmp = string.Compare(a.Label, b.Label);
+                        }
+                        return cmp;
+                    } else {
+                        int cmp;
+                        if (a.Value < b.Value) {
+                            cmp = -1;
+                        } else if (a.Value > b.Value) {
+                            cmp = 1;
+                        } else {
+                            cmp = -string.Compare(a.Label, b.Label);
+                        }
+                        return -cmp;
+                    }
+                case SymbolSortField.Name:
+                    if (isAscending) {
+                        return string.Compare(a.Label, b.Label);
+                    } else {
+                        return -string.Compare(a.Label, b.Label);
+                    }
+                default:
+                    Debug.Assert(false);
+                    return 0;
+            }
+        }
     }
 }
