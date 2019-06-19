@@ -102,6 +102,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_OpenDataWrongLengthFmt");
         public static string OPERATION_FAILED =
             (string)Application.Current.FindResource("str_OperationFailed");
+        public static string PLUGIN_DIR_FAIL_FMT =
+            (string)Application.Current.FindResource("str_PluginDirFailFmt");
+        public static string PLUGIN_DIR_FAIL_CAPTION =
+            (string)Application.Current.FindResource("str_PluginDirFailCaption");
         public static string PROGRESS_ASSEMBLING =
             (string)Application.Current.FindResource("str_ProgressAssembling");
         public static string PROGRESS_GENERATING_FMT =

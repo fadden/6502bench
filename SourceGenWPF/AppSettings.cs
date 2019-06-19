@@ -37,15 +37,11 @@ namespace SourceGenWPF {
         // makes it easy to find all uses.
 
         // Main window.
-        public const string MAIN_WINDOW_WIDTH = "main-window-width";
-        public const string MAIN_WINDOW_HEIGHT = "main-window-height";
-        public const string MAIN_WINDOW_LOC_X = "main-window-loc-x";
-        public const string MAIN_WINDOW_LOC_Y = "main-window-loc-y";
-        public const string MAIN_WINDOW_MAXIMIZED = "main-window-maximized";
+        public const string MAIN_WINDOW_PLACEMENT = "main-window-placement";
         public const string MAIN_LEFT_PANEL_WIDTH = "main-left-panel-width";
         public const string MAIN_RIGHT_PANEL_WIDTH = "main-right-panel-width";
-        public const string MAIN_LEFT_SIDE_SPLITTER_DIST = "main-left-side-splitter-dist";
-        public const string MAIN_RIGHT_SIDE_SPLITTER_DIST = "main-right-side-splitter-dist";
+        public const string MAIN_REFERENCES_HEIGHT = "main-references-height";
+        public const string MAIN_SYMBOLS_HEIGHT = "main-symbols-height";
 
         // New project dialog.
         public const string NEWP_SELECTED_SYSTEM = "newp-selected-system";

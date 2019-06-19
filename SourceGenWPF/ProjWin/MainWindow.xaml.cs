@@ -77,6 +77,20 @@ namespace SourceGenWPF.ProjWin {
 
             AddMultiKeyGestures();
 
+            // Get an event when the splitters move.  Because of the way things are set up, it's
+            // actually best to get an event when the grid row/column sizes change.
+            // https://stackoverflow.com/a/22495586/294248
+            DependencyPropertyDescriptor widthDesc = DependencyPropertyDescriptor.FromProperty(
+                ColumnDefinition.WidthProperty, typeof(ItemsControl));
+            DependencyPropertyDescriptor heightDesc = DependencyPropertyDescriptor.FromProperty(
+                RowDefinition.HeightProperty, typeof(ItemsControl));
+            // main window, left/right panels
+            widthDesc.AddValueChanged(triptychGrid.ColumnDefinitions[0], GridSizeChanged);
+            widthDesc.AddValueChanged(triptychGrid.ColumnDefinitions[4], GridSizeChanged);
+            // references vs. notes
+            heightDesc.AddValueChanged(leftPanel.RowDefinitions[0], GridSizeChanged);
+            heightDesc.AddValueChanged(rightPanel.RowDefinitions[0], GridSizeChanged);
+
             //GridView gv = (GridView)codeListView.View;
             //gv.Columns[0].Width = 50;
         }
@@ -108,18 +122,6 @@ namespace SourceGenWPF.ProjWin {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R")
                 }));
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
-            mMainCtrl.WindowLoaded();
-            CreateCodeListContextMenu();
-
-#if DEBUG
-            // Get more info on CollectionChanged events that do not agree with current
-            // state of Items collection.
-            PresentationTraceSources.SetTraceLevel(codeListView.ItemContainerGenerator,
-                PresentationTraceLevel.High);
-#endif
         }
 
         private void CreateCodeListContextMenu() {
@@ -206,6 +208,46 @@ namespace SourceGenWPF.ProjWin {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
 
+
+        /// <summary>
+        /// Handles source-initialized event.  This happens before Loaded, before the window
+        /// is visible, which makes it a good time to set the size and position.
+        /// </summary>
+        private void Window_SourceInitialized(object sender, EventArgs e) {
+            mMainCtrl.WindowSourceInitialized();
+        }
+
+        /// <summary>
+        /// Handles window-loaded event.  Window is ready to go, so we can start doing things
+        /// that involve user interaction.
+        /// </summary>
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            mMainCtrl.WindowLoaded();
+            CreateCodeListContextMenu();
+
+#if DEBUG
+            // Get more info on CollectionChanged events that do not agree with current
+            // state of Items collection.
+            PresentationTraceSources.SetTraceLevel(codeListView.ItemContainerGenerator,
+                PresentationTraceLevel.High);
+#endif
+        }
+
+        /// <summary>
+        /// Handles window-close event.  The user has an opportunity to cancel.
+        /// </summary>
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            Debug.WriteLine("Main app window closing");
+            if (mMainCtrl == null) {
+                // early failure?
+                return;
+            }
+            if (!mMainCtrl.WindowClosing()) {
+                e.Cancel = true;
+                return;
+            }
+        }
+
         /// <summary>
         /// Catch mouse-down events so we can treat the fourth mouse button as "back".
         /// </summary>
@@ -214,6 +256,61 @@ namespace SourceGenWPF.ProjWin {
                 Debug.WriteLine("TODO: navigate back");
             }
         }
+
+        #region Window placement
+
+        //
+        // We record the location and size of the window, and the sizes of the panels, in
+        // the settings file.  All we need to do here is note that something has changed.
+        //
+        private void Window_LocationChanged(object sender, EventArgs e) {
+            Debug.WriteLine("Main window location changed");
+            AppSettings.Global.Dirty = true;
+        }
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e) {
+            Debug.WriteLine("Main window size changed");
+            AppSettings.Global.Dirty = true;
+        }
+        private void GridSizeChanged(object sender, EventArgs e) {
+            Debug.WriteLine("Splitter size change");
+            AppSettings.Global.Dirty = true;
+        }
+
+        public double LeftPanelWidth {
+            get { return triptychGrid.ColumnDefinitions[0].ActualWidth; }
+            set { triptychGrid.ColumnDefinitions[0].Width = new GridLength(value); }
+        }
+        public double RightPanelWidth {
+            get { return triptychGrid.ColumnDefinitions[4].ActualWidth; }
+            set { triptychGrid.ColumnDefinitions[4].Width = new GridLength(value); }
+        }
+        public double ReferencesPanelHeight {
+            get { return leftPanel.RowDefinitions[0].ActualHeight; }
+            set {
+                // If you set the height to a pixel value, you lose the auto-sizing behavior,
+                // and the splitter will happily shove the bottom panel off the bottom of the
+                // main window.  The trick is to use "star" units.
+                // Thanks: https://stackoverflow.com/q/35000893/294248
+                double totalHeight = leftPanel.RowDefinitions[0].ActualHeight +
+                    leftPanel.RowDefinitions[2].ActualHeight;
+                leftPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
+                leftPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
+                    GridUnitType.Star);
+            }
+        }
+        public double SymbolsPanelHeight {
+            get { return rightPanel.RowDefinitions[0].ActualHeight; }
+            set {
+                double totalHeight = rightPanel.RowDefinitions[0].ActualHeight +
+                    rightPanel.RowDefinitions[2].ActualHeight;
+                rightPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
+                rightPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
+                    GridUnitType.Star);
+            }
+        }
+
+        #endregion Window placement
+
 
         /// <summary>
         /// Sets the focus on the code list.

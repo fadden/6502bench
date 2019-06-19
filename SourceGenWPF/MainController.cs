@@ -24,7 +24,9 @@ using System.Windows;
 
 using Asm65;
 using CommonUtil;
+using CommonWPF;
 using SourceGenWPF.ProjWin;
+using SourceGenWPF.Sandbox;
 
 namespace SourceGenWPF {
     /// <summary>
@@ -35,6 +37,8 @@ namespace SourceGenWPF {
     /// There is some Windows-specific stuff, like MessageBox and OpenFileDialog.
     /// </summary>
     public class MainController {
+        private const string SETTINGS_FILE_NAME = "SourceGen-settings";
+
         #region Project state
 
         // Currently open project, or null if none.
@@ -45,14 +49,6 @@ namespace SourceGenWPF {
 
         // Pathname of .dis65 file.  This will be empty for a new project.
         private string mProjectPathName;
-
-#if false
-        /// <summary>
-        /// Symbol subset, used to supply data to the symbol ListView.  Initialized with
-        /// an empty symbol table.
-        /// </summary>
-        private SymbolTableSubset mSymbolSubset;
-#endif
 
         /// <summary>
         /// Data backing the code list.
@@ -156,6 +152,18 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
+        /// Early initialization, before the window is visible.  Notably, we want to get the
+        /// window placement data, so we can position and size the window before it's first
+        /// drawn (avoids a blink).
+        /// </summary>
+        public void WindowSourceInitialized() {
+            // Load the settings from the file.  If this fails we have no way to tell the user,
+            // so just keep going.
+            LoadAppSettings();
+            SetAppWindowLocation();
+        }
+
+        /// <summary>
         /// Perform one-time initialization after the Window has finished loading.  We defer
         /// to this point so we can report fatal errors directly to the user.
         /// </summary>
@@ -167,7 +175,6 @@ namespace SourceGenWPF {
                 Application.Current.Shutdown();
                 return;
             }
-#if false
             try {
                 PluginDllCache.PreparePluginDir();
             } catch (Exception ex) {
@@ -175,61 +182,20 @@ namespace SourceGenWPF {
                 if (pluginPath == null) {
                     pluginPath = "<???>";
                 }
-                string msg = string.Format(Properties.Resources.PLUGIN_DIR_FAIL,
+                string msg = string.Format(Res.Strings.PLUGIN_DIR_FAIL_FMT,
                     pluginPath + ": " + ex.Message);
-                MessageBox.Show(this, msg, Properties.Resources.PLUGIN_DIR_FAIL_CAPTION,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
+                MessageBox.Show(msg, Res.Strings.PLUGIN_DIR_FAIL_CAPTION,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Shutdown();
                 return;
             }
-#endif
-
-#if false
-            logoPictureBox.ImageLocation = RuntimeDataAccess.GetPathName(LOGO_FILE_NAME);
-            versionLabel.Text = string.Format(Properties.Resources.VERSION_FMT,
-                Program.ProgramVersion);
-
-            toolStripStatusLabel.Text = Properties.Resources.STATUS_READY;
-
-            mProjectControl = this.codeListView;
-            mNoProjectControl = this.noProjectPanel;
-
-            // Clone the menu structure from the designer.  The same items are used for
-            // both Edit > Actions and the right-click context menu in codeListView.
-            mActionsMenuItems = new ToolStripItem[actionsToolStripMenuItem.DropDownItems.Count];
-            for (int i = 0; i < actionsToolStripMenuItem.DropDownItems.Count; i++) {
-                mActionsMenuItems[i] = actionsToolStripMenuItem.DropDownItems[i];
-            }
-#endif
-
-#if false
-            // Load the settings from the file.  Some things (like the symbol subset) need
-            // these.  The general "apply settings" doesn't happen until a bit later, after
-            // the sub-windows have been initialized.
-            LoadAppSettings();
-
-            // Init primary ListView (virtual, ownerdraw)
-            InitCodeListView();
-
-            // Init Symbols ListView (virtual, non-ownerdraw)
-            mSymbolSubset = new SymbolTableSubset(new SymbolTable());
-            symbolListView.SetDoubleBuffered(true);
-            InitSymbolListView();
-
-            // Init References ListView (non-virtual, non-ownerdraw)
-            referencesListView.SetDoubleBuffered(true);
 
             // Place the main window and apply the various settings.
-            SetAppWindowLocation();
-#endif
             ApplyAppSettings();
 
 #if false
-            UpdateActionMenu();
             UpdateMenuItemsAndTitle();
             UpdateRecentLinks();
-
-            ShowNoProject();
 #endif
 
             ProcessCommandLine();
@@ -240,6 +206,163 @@ namespace SourceGenWPF {
             if (args.Length == 2) {
                 DoOpenFile(Path.GetFullPath(args[1]));
             }
+        }
+
+
+        /// <summary>
+        /// Loads settings from the settings file into AppSettings.Global.  Does not apply
+        /// them to the ProjectView.
+        /// </summary>
+        private void LoadAppSettings() {
+            AppSettings settings = AppSettings.Global;
+
+            // Set some default settings for first-time use.  The general rule is to set
+            // a default value of false, 0, or the empty string, so we only need to set
+            // values here when that isn't the case.  The point at which the setting is
+            // actually used is expected to do something reasonable by default.
+
+            settings.SetBool(AppSettings.SYMWIN_SHOW_USER, true);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, true);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_CONST, true);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_ADDR, true);
+            settings.SetBool(AppSettings.SYMWIN_SORT_ASCENDING, true);
+            settings.SetInt(AppSettings.SYMWIN_SORT_COL, (int)Symbol.SymbolSortField.Name);
+
+            settings.SetBool(AppSettings.FMT_UPPER_OPERAND_A, true);
+            settings.SetBool(AppSettings.FMT_UPPER_OPERAND_S, true);
+            settings.SetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
+            settings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, "l");
+            settings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, "a:");
+            settings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, "f:");
+
+            settings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, true);
+            settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, true);
+
+#if DEBUG
+            settings.SetBool(AppSettings.DEBUG_MENU_ENABLED, true);
+#else
+            settings.SetBool(AppSettings.DEBUG_MENU_ENABLED, false);
+#endif
+
+            // Load the settings file, and merge it into the globals.
+            string runtimeDataDir = RuntimeDataAccess.GetDirectory();
+            if (runtimeDataDir == null) {
+                Debug.WriteLine("Unable to load settings file");
+                return;
+            }
+            string settingsDir = Path.GetDirectoryName(runtimeDataDir);
+            string settingsPath = Path.Combine(settingsDir, SETTINGS_FILE_NAME);
+            try {
+                string text = File.ReadAllText(settingsPath);
+                AppSettings fileSettings = AppSettings.Deserialize(text);
+                AppSettings.Global.MergeSettings(fileSettings);
+                Debug.WriteLine("Settings file loaded and merged");
+            } catch (Exception ex) {
+                Debug.WriteLine("Unable to read settings file: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Saves AppSettings to a file.
+        /// </summary>
+        private void SaveAppSettings() {
+            if (!AppSettings.Global.Dirty) {
+                Debug.WriteLine("Settings not dirty, not saving");
+                return;
+            }
+
+            // Main window position and size.
+            AppSettings.Global.SetString(AppSettings.MAIN_WINDOW_PLACEMENT,
+                mMainWin.GetPlacement());
+
+            // Horizontal splitters.
+            AppSettings.Global.SetInt(AppSettings.MAIN_LEFT_PANEL_WIDTH,
+                (int)mMainWin.LeftPanelWidth);
+            AppSettings.Global.SetInt(AppSettings.MAIN_RIGHT_PANEL_WIDTH,
+                (int)mMainWin.RightPanelWidth);
+
+            // Vertical splitters.
+            AppSettings.Global.SetInt(AppSettings.MAIN_REFERENCES_HEIGHT,
+                (int)mMainWin.ReferencesPanelHeight);
+            AppSettings.Global.SetInt(AppSettings.MAIN_SYMBOLS_HEIGHT,
+                (int)mMainWin.SymbolsPanelHeight);
+
+#if false
+            SerializeCodeListColumnWidths();
+            SerializeReferencesColumnWidths();
+            SerializeNotesColumnWidths();
+            SerializeSymbolColumnWidths();
+#endif
+
+            string runtimeDataDir = RuntimeDataAccess.GetDirectory();
+            if (runtimeDataDir == null) {
+                Debug.WriteLine("Unable to save settings file");
+                return;
+            }
+            string settingsDir = Path.GetDirectoryName(runtimeDataDir);
+            string settingsPath = Path.Combine(settingsDir, SETTINGS_FILE_NAME);
+            try {
+                string cereal = AppSettings.Global.Serialize();
+                File.WriteAllText(settingsPath, cereal);
+                AppSettings.Global.Dirty = false;
+                Debug.WriteLine("Saved settings (" + settingsPath + ")");
+            } catch (Exception ex) {
+                Debug.WriteLine("Failed to save settings: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Replaces the contents of the global settings object with the new settings,
+        /// then applies them to the project.
+        /// </summary>
+        /// <param name="settings"></param>
+        public void SetAppSettings(AppSettings settings) {
+            AppSettings.Global.ReplaceSettings(settings);
+            ApplyAppSettings();
+
+            // We get called whenever Apply or OK is hit in the settings editor, so it's
+            // a pretty good time to save the settings out.
+            SaveAppSettings();
+        }
+
+        /// <summary>
+        /// Sets the app window's location and size.  This should be called before the window has
+        /// finished initialization.
+        /// </summary>
+        private void SetAppWindowLocation() {
+            const int DEFAULT_SPLIT = 250;
+
+            AppSettings settings = AppSettings.Global;
+
+            string placement = settings.GetString(AppSettings.MAIN_WINDOW_PLACEMENT, null);
+            if (placement != null) {
+                mMainWin.SetPlacement(placement);
+            }
+
+            mMainWin.LeftPanelWidth =
+                settings.GetInt(AppSettings.MAIN_LEFT_PANEL_WIDTH, DEFAULT_SPLIT);
+            mMainWin.RightPanelWidth =
+                settings.GetInt(AppSettings.MAIN_RIGHT_PANEL_WIDTH, DEFAULT_SPLIT);
+            mMainWin.ReferencesPanelHeight =
+                settings.GetInt(AppSettings.MAIN_REFERENCES_HEIGHT, 350);
+            mMainWin.SymbolsPanelHeight =
+                settings.GetInt(AppSettings.MAIN_SYMBOLS_HEIGHT, 400);
+
+#if false
+            // Configure column widths.
+            string widthStr = settings.GetString(AppSettings.CDLV_COL_WIDTHS, null);
+            if (!string.IsNullOrEmpty(widthStr)) {
+                CodeListColumnWidths widths = CodeListColumnWidths.Deserialize(widthStr);
+                if (widths != null) {
+                    SetCodeListHeaderWidths(widths);
+                }
+            }
+            DeserializeReferencesColumnWidths();
+            DeserializeNotesColumnWidths();
+            DeserializeSymbolColumnWidths();
+#endif
         }
 
         /// <summary>
@@ -361,8 +484,6 @@ namespace SourceGenWPF {
         }
 
         #endregion Init and settings
-
-
 
 
         #region Project management
@@ -891,12 +1012,19 @@ namespace SourceGenWPF {
             // Update this, in case this was a new project.
             UpdateRecentProjectList(pathName);
 
-#if false
             // Seems like a good time to save this off too.
             SaveAppSettings();
-#endif
 
             return true;
+        }
+
+        /// <summary>
+        /// Handles main window closing.
+        /// </summary>
+        /// <returns>True if it's okay for the window to close, false to cancel it.</returns>
+        public bool WindowClosing() {
+            SaveAppSettings();
+            return CloseProject();
         }
 
         /// <summary>

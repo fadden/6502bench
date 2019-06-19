@@ -36,8 +36,8 @@ namespace CommonWPF {
         /// From https://social.msdn.microsoft.com/Forums/vstudio/en-US/7d0626cb-67e8-4a09-a01e-8e56ee7411b2/gridviewcolumheader-radiobuttons?forum=wpf
         /// </remarks>
         /// <typeparam name="T"></typeparam>
-        /// <param name="referenceVisual"></param>
-        /// <returns></returns>
+        /// <param name="referenceVisual">Start point.</param>
+        /// <returns>Object of appropriate type, or null if not found.</returns>
         public static T GetVisualChild<T>(this Visual referenceVisual) where T : Visual {
             Visual child = null;
             for (Int32 i = 0; i < VisualTreeHelper.GetChildrenCount(referenceVisual); i++) {
