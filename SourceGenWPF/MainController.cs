@@ -289,12 +289,7 @@ namespace SourceGenWPF {
             AppSettings.Global.SetInt(AppSettings.MAIN_SYMBOLS_HEIGHT,
                 (int)mMainWin.SymbolsPanelHeight);
 
-#if false
-            SerializeCodeListColumnWidths();
-            SerializeReferencesColumnWidths();
-            SerializeNotesColumnWidths();
-            SerializeSymbolColumnWidths();
-#endif
+            mMainWin.CaptureColumnWidths();
 
             string runtimeDataDir = RuntimeDataAccess.GetDirectory();
             if (runtimeDataDir == null) {
@@ -350,19 +345,7 @@ namespace SourceGenWPF {
             mMainWin.SymbolsPanelHeight =
                 settings.GetInt(AppSettings.MAIN_SYMBOLS_HEIGHT, 400);
 
-#if false
-            // Configure column widths.
-            string widthStr = settings.GetString(AppSettings.CDLV_COL_WIDTHS, null);
-            if (!string.IsNullOrEmpty(widthStr)) {
-                CodeListColumnWidths widths = CodeListColumnWidths.Deserialize(widthStr);
-                if (widths != null) {
-                    SetCodeListHeaderWidths(widths);
-                }
-            }
-            DeserializeReferencesColumnWidths();
-            DeserializeNotesColumnWidths();
-            DeserializeSymbolColumnWidths();
-#endif
+            mMainWin.RestoreColumnWidths();
         }
 
         /// <summary>

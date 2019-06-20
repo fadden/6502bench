@@ -19,20 +19,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
+using CommonUtil;
 using CommonWPF;
 
 namespace SourceGenWPF.ProjWin {
@@ -71,7 +66,8 @@ namespace SourceGenWPF.ProjWin {
 
             CodeDisplayList = new DisplayList();
             codeListView.ItemsSource = CodeDisplayList;
-            // https://dlaa.me/blog/post/9425496 to re-auto-size after data added
+            // https://dlaa.me/blog/post/9425496 to re-auto-size after data added (this may
+            //  not work with virtual items)
 
             mMainCtrl = new MainController(this);
 
@@ -91,8 +87,29 @@ namespace SourceGenWPF.ProjWin {
             heightDesc.AddValueChanged(leftPanel.RowDefinitions[0], GridSizeChanged);
             heightDesc.AddValueChanged(rightPanel.RowDefinitions[0], GridSizeChanged);
 
-            //GridView gv = (GridView)codeListView.View;
-            //gv.Columns[0].Width = 50;
+            // Add events that fire when column headers change size.  We want this for
+            // the DataGrids and the main ListView.
+            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(
+                DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
+            AddColumnWidthChangeCallback(pd, referencesGrid);
+            AddColumnWidthChangeCallback(pd, notesGrid);
+            AddColumnWidthChangeCallback(pd, symbolsGrid);
+
+            // Same for the ListView.  cf. https://stackoverflow.com/a/56694219/294248
+            pd = DependencyPropertyDescriptor.FromProperty(
+                GridViewColumn.WidthProperty, typeof(GridViewColumn));
+            AddColumnWidthChangeCallback(pd, (GridView)codeListView.View);
+        }
+
+        private void AddColumnWidthChangeCallback(PropertyDescriptor pd, DataGrid dg) {
+            foreach (DataGridColumn col in dg.Columns) {
+                pd.AddValueChanged(col, ColumnWidthChanged);
+            }
+        }
+        private void AddColumnWidthChangeCallback(PropertyDescriptor pd, GridView gv) {
+            foreach (GridViewColumn col in gv.Columns) {
+                pd.AddValueChanged(col, ColumnWidthChanged);
+            }
         }
 
         private void AddMultiKeyGestures() {
@@ -176,7 +193,6 @@ namespace SourceGenWPF.ProjWin {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private bool mShowCodeListView;
 
         /// <summary>
         /// Which panel are we showing, launchPanel or codeListView?
@@ -191,6 +207,7 @@ namespace SourceGenWPF.ProjWin {
                 OnPropertyChanged("CodeListVisibility");
             }
         }
+        private bool mShowCodeListView;
 
         /// <summary>
         /// Returns the visibility status of the launch panel.
@@ -260,19 +277,24 @@ namespace SourceGenWPF.ProjWin {
         #region Window placement
 
         //
-        // We record the location and size of the window, and the sizes of the panels, in
-        // the settings file.  All we need to do here is note that something has changed.
+        // We record the location and size of the window, the sizes of the panels, and the
+        // widths of the various columns.  These events may fire rapidly while the user is
+        // resizing them, so we just want to set a flag noting that a change has been made.
         //
         private void Window_LocationChanged(object sender, EventArgs e) {
-            Debug.WriteLine("Main window location changed");
+            //Debug.WriteLine("Main window location changed");
             AppSettings.Global.Dirty = true;
         }
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) {
-            Debug.WriteLine("Main window size changed");
+            //Debug.WriteLine("Main window size changed");
             AppSettings.Global.Dirty = true;
         }
         private void GridSizeChanged(object sender, EventArgs e) {
-            Debug.WriteLine("Splitter size change");
+            //Debug.WriteLine("Splitter size change");
+            AppSettings.Global.Dirty = true;
+        }
+        private void ColumnWidthChanged(object sender, EventArgs e) {
+            //Debug.WriteLine("Column width change " + sender);
             AppSettings.Global.Dirty = true;
         }
 
@@ -311,6 +333,86 @@ namespace SourceGenWPF.ProjWin {
 
         #endregion Window placement
 
+        /// <summary>
+        /// Grabs the widths of the columns of the various grids and saves them in the
+        /// global AppSettings.
+        /// </summary>
+        public void CaptureColumnWidths() {
+            string widthStr;
+
+            widthStr = CaptureColumnWidths((GridView)codeListView.View);
+            AppSettings.Global.SetString(AppSettings.CDLV_COL_WIDTHS, widthStr);
+
+            widthStr = CaptureColumnWidths(referencesGrid);
+            AppSettings.Global.SetString(AppSettings.REFWIN_COL_WIDTHS, widthStr);
+            widthStr = CaptureColumnWidths(notesGrid);
+            AppSettings.Global.SetString(AppSettings.NOTEWIN_COL_WIDTHS, widthStr);
+            widthStr = CaptureColumnWidths(symbolsGrid);
+            AppSettings.Global.SetString(AppSettings.SYMWIN_COL_WIDTHS, widthStr);
+        }
+        private string CaptureColumnWidths(GridView gv) {
+            int[] widths = new int[gv.Columns.Count];
+            for (int i = 0; i < gv.Columns.Count; i++) {
+                widths[i] = (int)Math.Round(gv.Columns[i].ActualWidth);
+            }
+            return TextUtil.SerializeIntArray(widths);
+        }
+        private string CaptureColumnWidths(DataGrid dg) {
+            int[] widths = new int[dg.Columns.Count];
+            for (int i = 0; i < dg.Columns.Count; i++) {
+                widths[i] = (int)Math.Round(dg.Columns[i].ActualWidth);
+            }
+            return TextUtil.SerializeIntArray(widths);
+        }
+
+        /// <summary>
+        /// Applies column widths from the global AppSettings to the various grids.
+        /// </summary>
+        public void RestoreColumnWidths() {
+            RestoreColumnWidths((GridView)codeListView.View,
+                AppSettings.Global.GetString(AppSettings.CDLV_COL_WIDTHS, null));
+
+            RestoreColumnWidths(referencesGrid,
+                AppSettings.Global.GetString(AppSettings.REFWIN_COL_WIDTHS, null));
+            RestoreColumnWidths(notesGrid,
+                AppSettings.Global.GetString(AppSettings.NOTEWIN_COL_WIDTHS, null));
+            RestoreColumnWidths(symbolsGrid,
+                AppSettings.Global.GetString(AppSettings.SYMWIN_COL_WIDTHS, null));
+        }
+        private void RestoreColumnWidths(GridView gv, string str) {
+            int[] widths = null;
+            try {
+                widths = TextUtil.DeserializeIntArray(str);
+            } catch (Exception ex) {
+                Debug.WriteLine("Unable to deserialize widths for GridView");
+                return;
+            }
+            if (widths.Length != gv.Columns.Count) {
+                Debug.WriteLine("Incorrect column count for GridView");
+                return;
+            }
+
+            for (int i = 0; i < widths.Length; i++) {
+                gv.Columns[i].Width = widths[i];
+            }
+        }
+        private void RestoreColumnWidths(DataGrid dg, string str) {
+            int[] widths = null;
+            try {
+                widths = TextUtil.DeserializeIntArray(str);
+            } catch (Exception ex) {
+                Debug.WriteLine("Unable to deserialize widths for " + dg.Name);
+                return;
+            }
+            if (widths.Length != dg.Columns.Count) {
+                Debug.WriteLine("Incorrect column count for " + dg.Name);
+                return;
+            }
+
+            for (int i = 0; i < widths.Length; i++) {
+                dg.Columns[i].Width = widths[i];
+            }
+        }
 
         /// <summary>
         /// Sets the focus on the code list.

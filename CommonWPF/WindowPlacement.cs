@@ -1,15 +1,16 @@
 ﻿/*
- * This comes from "David Rickard's Tech Blog", posted by RandomEngy on March 8 2010:
+ * This comes from a blog entry, posted by RandomEngy on March 8 2010:
  * https://blogs.msdn.microsoft.com/davidrickard/2010/03/08/saving-window-size-and-location-in-wpf-and-winforms/
+ * (see https://stackoverflow.com/a/2406604/294248 for discussion)
  * 
  * Saving and restoring a window's size and position can be tricky when there are multiple
  * displays involved.  This uses the Win32 system functions to do the job properly and
  * consistently.  (In theory.)
  * 
  * The code works for WinForms (save on FormClosing, restore on Load, using the native handle
- * from the Handle property) and WPF (use the Window extension methods in Closing and
- * SourceInitialized).  Besides convenience, it has the added benefit of being able to
- * capture the non-maximized values for a maximized window.
+ * from the Handle property) and WPF (use the Window extension methods provided below, in
+ * Closing and SourceInitialized).  Besides convenience, it has the added benefit of being able
+ * to capture the non-maximized values for a maximized window.
  */
 
 using System;
@@ -116,9 +117,11 @@ namespace CommonWPF {
         // Extension methods for WPF.
         //
 
+        // Call from Closing event.  Returns XML string with placement info.
         public static string GetPlacement(this Window window) {
             return GetPlacement(new WindowInteropHelper(window).Handle);
         }
+        // Call from SourceInitialized event, passing in string from GetPlacement().
         public static void SetPlacement(this Window window, string placementXml) {
             SetPlacement(new WindowInteropHelper(window).Handle, placementXml);
         }

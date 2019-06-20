@@ -23,7 +23,7 @@ limitations under the License.
         mc:Ignorable="d"
         Title="6502bench SourceGen"
         Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
-        Width="1000" Height="600" MinWidth="800" MinHeight="500"
+        Width="1000" Height="700" MinWidth="800" MinHeight="500"
         SourceInitialized="Window_SourceInitialized"
         Loaded="Window_Loaded"
         LocationChanged="Window_LocationChanged"
@@ -241,11 +241,11 @@ limitations under the License.
         DockPanel, so that LastChildFill will expand this to fill all available space. -->
         <Grid Name="triptychGrid" DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="168" MinWidth="100"/>
+                <ColumnDefinition Width="256" MinWidth="100"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*" MinWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="187" MinWidth="100"/>
+                <ColumnDefinition Width="256" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             
 
@@ -272,9 +272,9 @@ limitations under the License.
                               SelectionMode="Single"
                               MouseDoubleClick="ReferencesList_MouseDoubleClick">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
-                            <DataGridTextColumn Header="Addr" Binding="{Binding Addr}"/>
-                            <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
+                            <DataGridTextColumn Header="Addr" Width="53" Binding="{Binding Addr}"/>
+                            <DataGridTextColumn Header="Type" Width="119" Binding="{Binding Type}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
@@ -292,8 +292,8 @@ limitations under the License.
                               SelectionMode="Single"
                               MouseDoubleClick="NotesList_MouseDoubleClick">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Offset" Binding="{Binding Offset}"/>
-                            <DataGridTextColumn Header="Note" Binding="{Binding Note}">
+                            <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
+                            <DataGridTextColumn Header="Note" Width="400" Binding="{Binding Note}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="{x:Type TextBlock}">
                                         <!-- The default highlight uses dark blue background with
@@ -357,15 +357,24 @@ limitations under the License.
                       MouseDoubleClick="CodeListView_MouseDoubleClick">
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
-                        <GridViewColumn Header="Offset" DisplayMemberBinding="{Binding Offset}"/>
-                        <GridViewColumn Header="Addr" CellTemplate="{StaticResource addrHighlightTemplate}"/>
-                        <GridViewColumn Header="Bytes" DisplayMemberBinding="{Binding Bytes}"/>
-                        <GridViewColumn Header="Flags" DisplayMemberBinding="{Binding Flags}"/>
-                        <GridViewColumn Header="Attr" DisplayMemberBinding="{Binding Attr}"/>
-                        <GridViewColumn Header="Label" CellTemplate="{StaticResource labelHighlightTemplate}"/>
-                        <GridViewColumn Header="Opcode" DisplayMemberBinding="{Binding Opcode}"/>
-                        <GridViewColumn Header="Operand" DisplayMemberBinding="{Binding Operand}"/>
-                        <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
+                        <GridViewColumn Header="Offset" Width="58"
+                                        DisplayMemberBinding="{Binding Offset}"/>
+                        <GridViewColumn Header="Addr" Width="58"
+                                        CellTemplate="{StaticResource addrHighlightTemplate}"/>
+                        <GridViewColumn Header="Bytes" Width="104"
+                                        DisplayMemberBinding="{Binding Bytes}"/>
+                        <GridViewColumn Header="Flags" Width="78"
+                                        DisplayMemberBinding="{Binding Flags}"/>
+                        <GridViewColumn Header="Attr" Width="45"
+                                        DisplayMemberBinding="{Binding Attr}"/>
+                        <GridViewColumn Header="Label" Width="91"
+                                        CellTemplate="{StaticResource labelHighlightTemplate}"/>
+                        <GridViewColumn Header="Opcode" Width="45"
+                                        DisplayMemberBinding="{Binding Opcode}"/>
+                        <GridViewColumn Header="Operand" Width="98"
+                                        DisplayMemberBinding="{Binding Operand}"/>
+                        <GridViewColumn Header="Comment" Width="300"
+                                        DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>
 
@@ -419,9 +428,9 @@ limitations under the License.
                                   Sorting="SymbolsList_Sorting"
                                   MouseDoubleClick="SymbolsList_MouseDoubleClick">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-                                <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                                <DataGridTextColumn Header="Type" Width="36" Binding="{Binding Type}"/>
+                                <DataGridTextColumn Header="Value" Width="66" Binding="{Binding Value}"/>
+                                <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

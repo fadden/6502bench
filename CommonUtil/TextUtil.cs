@@ -215,10 +215,11 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Deserializes an integer array from a string.
+        /// Deserializes an integer array from a string.  Throws an exception if the format
+        /// is incorrect.
         /// </summary>
-        /// <param name="cereal"></param>
-        /// <returns></returns>
+        /// <param name="cereal">Serialized data.</param>
+        /// <returns>Integer array with contents.</returns>
         public static int[] DeserializeIntArray(string cereal) {
             string[] splitted = cereal.Split(',');
             if (splitted.Length == 0) {
