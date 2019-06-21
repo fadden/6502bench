@@ -21,13 +21,14 @@ limitations under the License.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
         mc:Ignorable="d"
-        Title="Project Load Issues" ShowInTaskbar="False"
-        Width="570" Height="231" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Title="Project Load Issues"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="ProjectLoadIssues_Loaded">
     <DockPanel LastChildFill="False" Margin="8">
         <TextBlock DockPanel.Dock="Top">Problems were detected while loading the project file:</TextBlock>
-        <TextBox Name="messageTextBox" DockPanel.Dock="Top" Margin="0,8,0,0" Height="107"
-                 IsReadOnly="True" TextWrapping="Wrap" Text=""/>
+        <TextBox Name="messageTextBox" DockPanel.Dock="Top" Margin="0,8,0,0"
+                 Width="540" Height="110" IsReadOnly="True" TextWrapping="Wrap" Text=""/>
         <TextBlock Name="invalidDiscardLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Foreground="Red">
             Invalid data items will be discarded when you save the project.
         </TextBlock>

@@ -21,11 +21,13 @@ limitations under the License.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
         mc:Ignorable="d"
-        Title="Data File Load Issue" ShowInTaskbar="False"
-        Width="570" Height="143" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="Data File Load Issue"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
     <DockPanel Margin="8" LastChildFill="False">
         <TextBlock DockPanel.Dock="Top">There was an error while loading the data file:</TextBlock>
-        <TextBox Name="pathNameTextBox" DockPanel.Dock="Top" Margin="0,8,0,0" IsReadOnly="True" MaxLines="1" Text="(filename)"/>
+        <TextBox Name="pathNameTextBox" DockPanel.Dock="Top" Margin="0,8,0,0" IsReadOnly="True"
+                 Width="540" MaxLines="1" Text="(filename)"/>
         <TextBlock Name="problemLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Text="(reason)"/>
         <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
