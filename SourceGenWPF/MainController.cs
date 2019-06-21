@@ -966,7 +966,10 @@ namespace SourceGenWPF {
             return false;
         }
 
-        // Save the project.  If it hasn't been saved before, use save-as behavior instead.
+        /// <summary>
+        /// Save the project.  If it hasn't been saved before, use save-as behavior instead.
+        /// </summary>
+        /// <returns>True on success, false if the save attempt failed.</returns>
         private bool DoSave() {
             if (string.IsNullOrEmpty(mProjectPathName)) {
                 return DoSaveAs();
@@ -1054,6 +1057,7 @@ namespace SourceGenWPF {
             }
             mDataPathName = null;
             mProjectPathName = null;
+            mTargetHighlightIndex = -1;
 #if false
             mSymbolSubset = new SymbolTableSubset(new SymbolTable());
 #endif
@@ -1101,11 +1105,9 @@ namespace SourceGenWPF {
                     }
                     break;
                 case LineListGen.Line.Type.RegWidthDirective:
-#if false
-                    if (overrideStatusFlagsToolStripMenuItem.Enabled) {
-                        EditStatusFlags_Click(sender, e);
+                    if (CanEditStatusFlags()) {
+                        EditStatusFlags();
                     }
-#endif
                     break;
                 case LineListGen.Line.Type.LongComment:
 #if false
@@ -1143,11 +1145,9 @@ namespace SourceGenWPF {
 #endif
                             break;
                         case ColumnIndex.Flags:
-#if false
-                            if (overrideStatusFlagsToolStripMenuItem.Enabled) {
-                                EditStatusFlags_Click(sender, e);
+                            if (CanEditStatusFlags()) {
+                                EditStatusFlags();
                             }
-#endif
                             break;
                         case ColumnIndex.Attributes:
                             // does nothing
@@ -1230,8 +1230,7 @@ namespace SourceGenWPF {
             Anattrib attr = mProject.GetAnattrib(offset);
 
             EditAddress dlg = new EditAddress(mMainWin, attr.Address, mProject.CpuDef.MaxAddressValue);
-            bool? ok = dlg.ShowDialog();
-            if (ok != true) {
+            if (dlg.ShowDialog() != true) {
                 return;
             }
 
@@ -1255,6 +1254,34 @@ namespace SourceGenWPF {
                 ApplyUndoableChanges(cs);
             } else {
                 Debug.WriteLine("EditAddress: no change");
+            }
+        }
+
+        public bool CanEditStatusFlags() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Line must be code, or a RegWidth directive.
+            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.RegWidthDirective);
+        }
+
+        public void EditStatusFlags() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+
+            EditStatusFlags dlg = new EditStatusFlags(mMainWin,
+                mProject.StatusFlagOverrides[offset], mProject.CpuDef.HasEmuFlag);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+
+            if (dlg.FlagValue != mProject.StatusFlagOverrides[offset]) {
+                UndoableChange uc = UndoableChange.CreateStatusFlagChange(offset,
+                    mProject.StatusFlagOverrides[offset], dlg.FlagValue);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
             }
         }
 
@@ -1318,23 +1345,6 @@ namespace SourceGenWPF {
             }
         }
 
-        /// <summary>
-        /// Scrolls the code list so that the specified label is shown.
-        /// </summary>
-        /// <param name="sym">Label symbol.</param>
-        public void GoToLabel(Symbol sym) {
-            if (sym.IsInternalLabel) {
-                int offset = mProject.FindLabelOffsetByName(sym.Label);
-                if (offset >= 0) {
-                    GoToOffset(offset, false, true);
-                } else {
-                    Debug.WriteLine("DClick symbol: " + sym + ": label not found");
-                }
-            } else {
-                Debug.WriteLine("DClick symbol: " + sym + ": not label");
-            }
-        }
-
         public bool CanNavigateBackward() {
             return mNavStack.HasBackward;
         }
@@ -1351,6 +1361,23 @@ namespace SourceGenWPF {
             Debug.Assert(mNavStack.HasForward);
             int fwdOff = mNavStack.PushPrevious();
             GoToOffset(fwdOff, false, false);
+        }
+
+        /// <summary>
+        /// Scrolls the code list so that the specified label is shown.
+        /// </summary>
+        /// <param name="sym">Label symbol.</param>
+        public void GoToLabel(Symbol sym) {
+            if (sym.IsInternalLabel) {
+                int offset = mProject.FindLabelOffsetByName(sym.Label);
+                if (offset >= 0) {
+                    GoToOffset(offset, false, true);
+                } else {
+                    Debug.WriteLine("DClick symbol: " + sym + ": label not found");
+                }
+            } else {
+                Debug.WriteLine("DClick symbol: " + sym + ": not label");
+            }
         }
 
         public void SelectionChanged() {

@@ -270,7 +270,9 @@ namespace SourceGenWPF.ProjWin {
         /// </summary>
         private void Window_MouseDown(object sender, MouseButtonEventArgs e) {
             if (e.ChangedButton == MouseButton.XButton1) {
-                Debug.WriteLine("TODO: navigate back");
+                if (mMainCtrl.CanNavigateBackward()) {
+                    mMainCtrl.NavigateBackward();
+                }
             }
         }
 
@@ -673,6 +675,14 @@ namespace SourceGenWPF.ProjWin {
             e.CanExecute = mMainCtrl.CanEditAddress();
         }
 
+        private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = mMainCtrl.CanEditStatusFlags();
+        }
+
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
@@ -742,6 +752,10 @@ namespace SourceGenWPF.ProjWin {
 
         private void EditAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditAddress();
+        }
+
+        private void EditStatusFlags_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditStatusFlags();
         }
 
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

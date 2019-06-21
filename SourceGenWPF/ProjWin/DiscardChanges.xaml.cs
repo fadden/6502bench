@@ -36,10 +36,6 @@ namespace SourceGenWPF.ProjWin {
             Owner = owner;
         }
 
-        // TODO:
-        // https://stackoverflow.com/questions/817610/wpf-and-initial-focus
-        // FocusManager.FocusedElement={Binding ElementName=cancelButton}"
-
         private void SaveButton_Click(object sender, RoutedEventArgs e) {
             UserChoice = Choice.SaveAndContinue;
             DialogResult = true;

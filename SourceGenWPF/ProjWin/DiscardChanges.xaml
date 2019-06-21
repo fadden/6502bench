@@ -22,15 +22,20 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGenWPF.ProjWin"
         mc:Ignorable="d"
         Title="Discard Changes?"
+        FocusManager.FocusedElement="{Binding ElementName=cancelButton}"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+
     <StackPanel Margin="8">
         <TextBlock Text="You have unsaved changes that will be lost if you continue."/>
         <TextBlock Margin="0,8,0,0" Text="How do you wish to proceed?"/>
         <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
-            <Button Name="dontSaveButton" Width="120" Content="_Save &amp; Continue" Click="DontSaveButton_Click"/>
-            <Button Name="saveButton" Width="120" Margin="8,0,0,0" Content="_Discard &amp; Continue" Click="SaveButton_Click"/>
-            <Button Name="cancelButton" Width="120" Margin="8,0,0,0" Content="Cancel" IsCancel="True"/>
+            <Button Name="saveButton" Width="120"
+                    Content="_Save &amp; Continue" Click="SaveButton_Click"/>
+            <Button Name="dontSaveButton" Width="120" Margin="8,0,0,0"
+                    Content="_Discard &amp; Continue" Click="DontSaveButton_Click"/>
+            <Button Name="cancelButton" Width="120" Margin="8,0,0,0"
+                    Content="Cancel" IsCancel="True"/>
         </StackPanel>
     </StackPanel>
 </Window>
