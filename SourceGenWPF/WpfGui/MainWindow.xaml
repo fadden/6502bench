@@ -70,6 +70,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+Minus</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="OpenCmd" Text="Open"/>
             <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="RecentProjectCmd"/>
             <RoutedUICommand x:Key="RedoCmd" Text="Redo">
@@ -115,11 +116,18 @@ limitations under the License.
                         CanExecute="CanNavigateBackward" Executed="NavigateBackwardCmd_Executed"/>
         <CommandBinding Command="{StaticResource NavigateForwardCmd}"
                         CanExecute="CanNavigateForward" Executed="NavigateForwardCmd_Executed"/>
+        <CommandBinding Command="{StaticResource OpenCmd}"
+                        Executed="OpenCmd_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
                         CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
-        <CommandBinding Command="{StaticResource RecentProjectCmd}" Executed="RecentProjectCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RecentProjectCmd}"
+                        Executed="RecentProjectCmd_Executed"/>
         <CommandBinding Command="{StaticResource RedoCmd}"
                         CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
+        <CommandBinding Command="Save"
+                        CanExecute="IsProjectOpen" Executed="SaveCmd_Executed"/>
+        <CommandBinding Command="SaveAs"
+                        CanExecute="IsProjectOpen" Executed="SaveAsCmd_Executed"/>
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
                         CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
@@ -131,7 +139,7 @@ limitations under the License.
         <Menu Name="appMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="New"/>
-                <MenuItem Header="Open"/>
+                <MenuItem Command="{StaticResource OpenCmd}"/>
                 <MenuItem Command="Save"/>
                 <MenuItem Command="SaveAs"/>
                 <MenuItem Command="{StaticResource CloseCmd}"/>
@@ -218,10 +226,10 @@ limitations under the License.
                 <Button ToolTip="Create new project">
                     <ContentControl Template="{StaticResource icon_NewFile}"/>
                 </Button>
-                <Button ToolTip="Open project">
+                <Button ToolTip="Open project" Command="{StaticResource OpenCmd}">
                     <ContentControl Template="{StaticResource icon_OpenFile}"/>
                 </Button>
-                <Button ToolTip="Save project">
+                <Button ToolTip="Save project" Command="Save">
                     <ContentControl Template="{StaticResource icon_SaveFile}"/>
                 </Button>
                 <Separator/>
@@ -229,7 +237,7 @@ limitations under the License.
                     <ContentControl Template="{StaticResource icon_CopyToClipboard}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Help - open manual in browser">
+                <Button ToolTip="Help - open manual in browser" Command="Help">
                     <ContentControl Template="{StaticResource icon_F1Help}"/>
                 </Button>
             </ToolBar>

@@ -720,18 +720,18 @@ namespace SourceGenWPF.WpfGui {
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
         }
 
-        private void CanRedo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanRedo();
-        }
-        private void CanUndo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanUndo();
-        }
-
         private void CanNavigateBackward(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateBackward();
         }
         private void CanNavigateForward(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateForward();
+        }
+
+        private void CanRedo(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanRedo();
+        }
+        private void CanUndo(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl != null && mMainCtrl.CanUndo();
         }
 
         #endregion Can-execute handlers
@@ -785,6 +785,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.NavigateForward();
         }
 
+        private void OpenCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.OpenProject();
+        }
+
         private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
@@ -792,6 +796,14 @@ namespace SourceGenWPF.WpfGui {
 
         private void RedoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.RedoChanges();
+        }
+
+        private void SaveCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.SaveProject();
+        }
+
+        private void SaveAsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.SaveProjectAs();
         }
 
         private void SelectAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

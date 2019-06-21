@@ -772,7 +772,7 @@ namespace SourceGenWPF {
         /// <summary>
         /// Handles opening an existing project by letting the user select the project file.
         /// </summary>
-        private void DoOpen() {
+        public void OpenProject() {
             if (!CloseProject()) {
                 return;
             }
@@ -941,7 +941,11 @@ namespace SourceGenWPF {
             return newPath;
         }
 
-        private bool DoSaveAs() {
+        /// <summary>
+        /// Saves the project, querying for the filename.
+        /// </summary>
+        /// <returns>True on success, false if the save attempt failed or was canceled.</returns>
+        public bool SaveProjectAs() {
             SaveFileDialog fileDlg = new SaveFileDialog() {
                 Filter = ProjectFile.FILENAME_FILTER + "|" + Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 1,
@@ -949,30 +953,33 @@ namespace SourceGenWPF {
                 AddExtension = true,
                 FileName = Path.GetFileName(mDataPathName) + ProjectFile.FILENAME_EXT
             };
-            if (fileDlg.ShowDialog() == true) {
-                string pathName = Path.GetFullPath(fileDlg.FileName);
-                Debug.WriteLine("Project save path: " + pathName);
-                if (DoSave(pathName)) {
-                    // Success, record the path name.
-                    mProjectPathName = mProject.ProjectPathName = pathName;
-
-                    // add it to the title bar
-#if false
-                    UpdateMenuItemsAndTitle();
-#endif
-                    return true;
-                }
+            if (fileDlg.ShowDialog() != true) {
+                Debug.WriteLine("SaveAs canceled by user");
+                return false;
             }
-            return false;
+            string pathName = Path.GetFullPath(fileDlg.FileName);
+            Debug.WriteLine("Project save path: " + pathName);
+            if (!DoSave(pathName)) {
+                return false;
+            }
+
+            // Success, record the path name.
+            mProjectPathName = mProject.ProjectPathName = pathName;
+
+            // add it to the title bar
+#if false
+            UpdateMenuItemsAndTitle();
+#endif
+            return true;
         }
 
         /// <summary>
-        /// Save the project.  If it hasn't been saved before, use save-as behavior instead.
+        /// Saves the project.  If it hasn't been saved before, use save-as behavior instead.
         /// </summary>
         /// <returns>True on success, false if the save attempt failed.</returns>
-        private bool DoSave() {
+        public bool SaveProject() {
             if (string.IsNullOrEmpty(mProjectPathName)) {
-                return DoSaveAs();
+                return SaveProjectAs();
             }
             return DoSave(mProjectPathName);
         }
@@ -1028,7 +1035,7 @@ namespace SourceGenWPF {
                 if (ok != true) {
                     return false;
                 } else if (dlg.UserChoice == DiscardChanges.Choice.SaveAndContinue) {
-                    if (!DoSave()) {
+                    if (!SaveProject()) {
                         return false;
                     }
                 }

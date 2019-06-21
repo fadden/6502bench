@@ -24,25 +24,25 @@ namespace SourceGenWPF.WpfGui {
         /// <summary>
         /// Path name of problematic file.
         /// </summary>
-        private string mPathName;
+        public string PathName { get; set; }
 
         /// <summary>
         /// Message to show in the dialog.
         /// </summary>
-        private string mMessage;
+        public string Message { get; set; }
 
 
         public DataFileLoadIssue(Window owner, string pathName, string message) {
+            PathName = pathName;
+            Message = message;
+
+            this.DataContext = this;
             InitializeComponent();
             Owner = owner;
-
-            mPathName = pathName;
-            mMessage = message;
         }
 
-        private void DataFileLoadIssue_Load(object sender, EventArgs e) {
-            pathNameTextBox.Text = mPathName;
-            problemLabel.Text = mMessage;
+        private void OkButton_Click(object sender, RoutedEventArgs e) {
+            DialogResult = true;
         }
     }
 }
