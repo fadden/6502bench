@@ -16,7 +16,7 @@
 using System;
 using System.Windows;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Display errors and warnings generated while attempting to open a project.
     /// </summary>

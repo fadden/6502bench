@@ -25,8 +25,8 @@ using System.Windows;
 using Asm65;
 using CommonUtil;
 using CommonWPF;
-using SourceGenWPF.ProjWin;
 using SourceGenWPF.Sandbox;
+using SourceGenWPF.WpfGui;
 
 namespace SourceGenWPF {
     /// <summary>

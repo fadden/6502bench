@@ -30,7 +30,7 @@ using System.Windows.Media;
 using CommonUtil;
 using CommonWPF;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -386,7 +386,7 @@ namespace SourceGenWPF.ProjWin {
             try {
                 widths = TextUtil.DeserializeIntArray(str);
             } catch (Exception ex) {
-                Debug.WriteLine("Unable to deserialize widths for GridView");
+                Debug.WriteLine("Unable to deserialize widths for GridView: " + ex.Message);
                 return;
             }
             if (widths.Length != gv.Columns.Count) {
@@ -403,7 +403,7 @@ namespace SourceGenWPF.ProjWin {
             try {
                 widths = TextUtil.DeserializeIntArray(str);
             } catch (Exception ex) {
-                Debug.WriteLine("Unable to deserialize widths for " + dg.Name);
+                Debug.WriteLine("Unable to deserialize widths for " + dg.Name + ": " + ex.Message);
                 return;
             }
             if (widths.Length != dg.Columns.Count) {

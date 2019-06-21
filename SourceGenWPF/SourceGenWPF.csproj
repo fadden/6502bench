@@ -75,19 +75,19 @@
     <Compile Include="AsmGen\StringGather.cs" />
     <Compile Include="DisplayList.cs" />
     <Compile Include="MainController.cs" />
-    <Compile Include="ProjWin\DataFileLoadIssue.xaml.cs">
+    <Compile Include="WpfGui\DataFileLoadIssue.xaml.cs">
       <DependentUpon>DataFileLoadIssue.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ProjWin\DiscardChanges.xaml.cs">
+    <Compile Include="WpfGui\DiscardChanges.xaml.cs">
       <DependentUpon>DiscardChanges.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ProjWin\EditAddress.xaml.cs">
+    <Compile Include="WpfGui\EditAddress.xaml.cs">
       <DependentUpon>EditAddress.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ProjWin\EditStatusFlags.xaml.cs">
+    <Compile Include="WpfGui\EditStatusFlags.xaml.cs">
       <DependentUpon>EditStatusFlags.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ProjWin\ProjectLoadIssue.xaml.cs">
+    <Compile Include="WpfGui\ProjectLoadIssue.xaml.cs">
       <DependentUpon>ProjectLoadIssue.xaml</DependentUpon>
     </Compile>
     <Compile Include="PseudoOp.cs" />
@@ -123,7 +123,7 @@
     <Compile Include="PlatformSymbols.cs" />
     <Compile Include="ProjectFile.cs" />
     <Compile Include="ProjectProperties.cs" />
-    <Compile Include="ProjWin\MainWindow.xaml.cs">
+    <Compile Include="WpfGui\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -155,31 +155,31 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ProjWin\CodeListItemStyle.xaml">
+    <Page Include="WpfGui\CodeListItemStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ProjWin\DataFileLoadIssue.xaml">
+    <Page Include="WpfGui\DataFileLoadIssue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProjWin\DiscardChanges.xaml">
+    <Page Include="WpfGui\DiscardChanges.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProjWin\EditAddress.xaml">
+    <Page Include="WpfGui\EditAddress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProjWin\EditStatusFlags.xaml">
+    <Page Include="WpfGui\EditStatusFlags.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProjWin\MainWindow.xaml">
+    <Page Include="WpfGui\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProjWin\ProjectLoadIssue.xaml">
+    <Page Include="WpfGui\ProjectLoadIssue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

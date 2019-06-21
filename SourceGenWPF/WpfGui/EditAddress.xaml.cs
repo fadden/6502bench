@@ -18,7 +18,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Edit Address dialog.
     /// </summary>

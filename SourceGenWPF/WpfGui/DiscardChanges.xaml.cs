@@ -16,7 +16,7 @@
 using System;
 using System.Windows;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Prompt the user before discarding changes.
     /// 

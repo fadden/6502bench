@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<Window x:Class="SourceGenWPF.ProjWin.EditAddress"
+<Window x:Class="SourceGenWPF.WpfGui.EditAddress"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SourceGenWPF.ProjWin"
+        xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
         mc:Ignorable="d"
         Title="Set Address"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"

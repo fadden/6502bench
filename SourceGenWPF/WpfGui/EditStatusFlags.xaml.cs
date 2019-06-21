@@ -19,7 +19,7 @@ using System.Windows.Controls;
 
 using Asm65;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Edit Status Flags dialog.
     /// </summary>

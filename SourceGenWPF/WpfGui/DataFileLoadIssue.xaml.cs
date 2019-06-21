@@ -16,7 +16,7 @@
 using System;
 using System.Windows;
 
-namespace SourceGenWPF.ProjWin {
+namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Report a problem encountered while loading a data file.
     /// </summary>
