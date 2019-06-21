@@ -46,7 +46,7 @@ limitations under the License.
             use a StackPanel with one of each to make the buttons line up with the labels.
             Unfortunately this foils the automatic grouping. -->
             <StackPanel Margin="8,0,0,0">
-                <TextBlock HorizontalAlignment="Center" FontSize="16">N</TextBlock>
+                <TextBlock HorizontalAlignment="Center" FontSize="16" Margin="-1,0,0,0">N</TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton Name="radioNDefault" GroupName="N" Margin="{StaticResource Spacer}"/>
                     <TextBlock Margin="{StaticResource Spacer}"/>
@@ -147,7 +147,7 @@ limitations under the License.
             </StackPanel>
 
             <StackPanel Margin="8,0,0,0">
-                <TextBlock FontSize="16" HorizontalAlignment="Center">I</TextBlock>
+                <TextBlock FontSize="16" HorizontalAlignment="Center" Margin="-1,0,0,0">I</TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton Name="radioIDefault" GroupName="I" Margin="{StaticResource Spacer}"/>
                     <TextBlock Margin="{StaticResource Spacer}"/>
@@ -207,7 +207,7 @@ limitations under the License.
             </StackPanel>
 
             <StackPanel Name="panelE" Margin="16,0,0,0">
-                <TextBlock HorizontalAlignment="Center" FontSize="16">E</TextBlock>
+                <TextBlock HorizontalAlignment="Center" FontSize="16" Margin="-1,0,0,0">E</TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton Name="radioEDefault" GroupName="E" Margin="{StaticResource Spacer}"/>
                     <TextBlock Margin="{StaticResource Spacer}"/>
