@@ -123,7 +123,7 @@ namespace Asm65 {
         char mSregChar;
 
         // Format string for offsets.
-        private string mOffset20Format;
+        private string mOffset24Format;
 
         // Format strings for addresses.
         private string mAddrFormatNoBank;
@@ -231,7 +231,7 @@ namespace Asm65 {
         private void Reset() {
             // Clear old data.  (No longer needed.)
             //mAddrFormatNoBank = mAddrFormatWithBank = null;
-            //mOffset20Format = null;
+            //mOffset24Format = null;
             //mOpcodeStrings.Clear();
             //mPseudoOpStrings.Clear();
             //mOperandFormats.Clear();
@@ -274,10 +274,10 @@ namespace Asm65 {
         /// <param name="offset">Offset to format.</param>
         /// <returns>Formatted string.</returns>
         public string FormatOffset24(int offset) {
-            if (string.IsNullOrEmpty(mOffset20Format)) {
-                mOffset20Format = "+{0:" + mHexFmtChar + "6}";
+            if (string.IsNullOrEmpty(mOffset24Format)) {
+                mOffset24Format = "+{0:" + mHexFmtChar + "6}";
             }
-            return string.Format(mOffset20Format, offset & 0x0fffff);
+            return string.Format(mOffset24Format, offset & 0x0fffff);
         }
 
         /// <summary>

@@ -23,43 +23,60 @@ namespace SourceGenWPF {
     /// Maintains a record of interesting places we've been.
     /// </summary>
     public class NavStack {
-        // If you're at offset 10, and you jump to offset 20, we push offset 10 onto the
-        // back list.  If you hit back, you want to be at offset 10.  If you then hit
-        // forward, you want to jump to offset 20.  So how does 20 get on there?
+        // It's tempting to use a single stack, and just move a cursor up and down.  However,
+        // that doesn't quite work.  We always want to record where you came from, so we're
+        // pushing locations on when moving both forward and backward.
         //
-        // The trick is to record the "from" and "to" position at each step.  When moving
-        // backward we go the previous "from" position.  When moving forward we move to
-        // the next "to" position.  This makes the movement asymmetric, but it means that
-        // that forward movement is always to places we've jumped to, and backward movement
-        // is to places we jumped away from.
+        // If you move backward and then jump somewhere else, we want to discard the list of
+        // previously-recorded forward places.
+        //
+        // Jumping to Notes is a little different from jumping to anything else, because we
+        // want to highlight the note rather than the code at the associated offset.  This
+        // is especially important when moving upward through the file, or the note will be
+        // off the top of the screen.
 
-        // TODO(someday): this can be simplified(?) to use a pair of stacks, one for moving
-        //   forward, one for moving backward.  Traversing the stack requires popping off one
-        //   and pushing onto the other, rather than moving the cursor.  No change in
-        //   behavior, but potentially easier to make sense of.
-        // TODO(someday): record more about what was selected, so e.g. when we move back or
-        //   forward to a Note we can highlight it appropriately.
-        // TODO(someday): once we have the above, we can change the back button to a pop-up
-        //   list of locations (like the way VS 2017 does it).
+        // TODO(someday): change the back button to a pop-up list of locations (like the way
+        //   VS 2017 does it).
 
-        private class OffsetPair {
-            public int From { get; set; }
-            public int To { get; set; }
+        /// <summary>
+        /// Holds enough information to get us back where we were, in style.
+        /// </summary>
+        public class Location {
+            public int Offset { get; set; }
+            public bool IsNote { get; set; }
 
-            public OffsetPair(int from, int to) {
-                From = from;
-                To = to;
+            public Location(int offset, bool isNote) {
+                Offset = offset;
+                IsNote = isNote;
             }
+
             public override string ToString() {
-                return "[fr=+" + From.ToString("x6") + " to=+" + To.ToString("x6") + "]";
+                return string.Format("[+{0:x6},{1}]", Offset, IsNote);
+            }
+
+            public static bool operator ==(Location a, Location b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;    // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;   // one is null
+                }
+                return a.Offset == b.Offset && a.IsNote == b.IsNote;
+            }
+            public static bool operator !=(Location a, Location b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is Location && this == (Location)obj;
+            }
+            public override int GetHashCode() {
+                return Offset + (IsNote ? 65536 : 0);
             }
         }
 
-        // Offset stack.  Popped items remain in place temporarily.
-        private List<OffsetPair> mStack = new List<OffsetPair>();
-
-        // Current stack position.  This is one past the most-recently-pushed element.
-        private int mCursor = 0;
+        // Location stacks.
+        private List<Location> mBackStack = new List<Location>();
+        private List<Location> mFwdStack = new List<Location>();
 
 
         public NavStack() { }
@@ -69,7 +86,7 @@ namespace SourceGenWPF {
         /// </summary>
         public bool HasBackward {
             get {
-                return mCursor > 0;
+                return mBackStack.Count > 0;
             }
         }
 
@@ -78,78 +95,77 @@ namespace SourceGenWPF {
         /// </summary>
         public bool HasForward {
             get {
-                return mCursor < mStack.Count;
+                return mFwdStack.Count > 0;
             }
         }
 
         /// <summary>
-        /// Clears the back stack.
+        /// Clears the stacks.
         /// </summary>
         public void Clear() {
-            mStack.Clear();
-            mCursor = 0;
+            mBackStack.Clear();
+            mFwdStack.Clear();
         }
 
         /// <summary>
-        /// Pops the top entry off the stack.  This moves the cursor but doesn't actually
-        /// remove the item.
-        /// </summary>
-        /// <returns>The "from" element of the popped entry.</returns>
-        public int Pop() {
-            if (mCursor == 0) {
-                throw new Exception("Stack is empty");
-            }
-            mCursor--;
-            //Debug.WriteLine("NavStack popped +" + mStack[mCursor] +
-            //    " (now cursor=" + mCursor + ") -- " + this);
-            return mStack[mCursor].From;
-        }
-
-        /// <summary>
-        /// Pushes a new entry onto the stack at the cursor.  If there were additional
-        /// entries past the cursor, they will be discarded.
+        /// Pushes a new entry onto the back stack.  Clears the forward stack.
         /// 
         /// If the same entry is already at the top of the stack, the entry will not be added.
         /// </summary>
-        /// <param name="fromOffset">File offset associated with line we are moving from.
-        ///   This may be negative if we're moving from a header comment or .EQ directive.</param>
-        /// <param name="toOffset">File offset associated with line we are moving to.  This
-        ///   may be negative if we're moving to the header comment or a .EQ directive.</param>
-        public void Push(int fromOffset, int toOffset) {
-            if (mStack.Count > mCursor) {
-                mStack.RemoveRange(mCursor, mStack.Count - mCursor);
+        /// <param name="curLoc">Current location.</param>
+        public void Push(Location curLoc) {
+            if (mBackStack.Count > 0 && mBackStack[mBackStack.Count - 1] == curLoc) {
+                Debug.WriteLine("Not re-pushing " + curLoc);
+                return;
             }
-            OffsetPair newPair = new OffsetPair(fromOffset, toOffset);
-            mStack.Add(newPair);
-            mCursor++;
-            //Debug.WriteLine("NavStack pushed +" + newPair + " -- " + this);
+
+            mBackStack.Add(curLoc);
+            mFwdStack.Clear();
+
+            //Debug.WriteLine("Stack now: " + this);
         }
 
         /// <summary>
-        /// Pushes a previous entry back onto the stack.
+        /// Pops the top element from the back stack, and pushes the current position
+        /// onto the forward stack.
         /// </summary>
-        /// <returns>The "to" element of the pushed entry.</returns>
-        public int PushPrevious() {
-            if (mCursor == mStack.Count) {
-                throw new Exception("At top of stack");
+        /// <param name="fromLoc">Current location.</param>
+        /// <returns>The location to move to.</returns>
+        public Location MoveBackward(Location fromLoc) {
+            if (mBackStack.Count == 0) {
+                throw new Exception("Stack is empty");
             }
-            int fwdOff = mStack[mCursor].To;
-            mCursor++;
-            //Debug.WriteLine("NavStack pushed prev (now cursor=" + mCursor + ") -- " + this);
-            return fwdOff;
+            Location toLoc = mBackStack[mBackStack.Count - 1];
+            mBackStack.RemoveAt(mBackStack.Count - 1);
+            mFwdStack.Add(fromLoc);
+            return toLoc;
+        }
+
+        /// <summary>
+        /// Pops the top element from the forward stack, and pushes the current position
+        /// onto the back stack.
+        /// </summary>
+        /// <param name="fromLoc">Current location.</param>
+        /// <returns>The location to move to.</returns>
+        public Location MoveForward(Location fromLoc) {
+            if (mFwdStack.Count == 0) {
+                throw new Exception("Stack is empty");
+            }
+            Location toLoc = mFwdStack[mFwdStack.Count - 1];
+            mFwdStack.RemoveAt(mFwdStack.Count - 1);
+            mBackStack.Add(fromLoc);
+            return toLoc;
         }
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.Append("NavStack:");
-            for (int i = 0; i < mStack.Count; i++) {
-                if (i == mCursor) {
-                    sb.Append(" [*]");
-                }
-                sb.Append(mStack[i]);
+            sb.Append("Back:");
+            foreach (Location loc in mBackStack) {
+                sb.Append(loc);
             }
-            if (mCursor == mStack.Count) {
-                sb.Append(" [*]");
+            sb.Append(" Fwd:");
+            foreach (Location loc in mFwdStack) {
+                sb.Append(loc);
             }
             return sb.ToString();
         }

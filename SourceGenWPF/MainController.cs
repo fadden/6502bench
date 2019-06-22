@@ -1299,7 +1299,12 @@ namespace SourceGenWPF {
         /// <param name="gotoOffset">Offset to jump to.</param>
         /// <param name="doPush">If set, push new offset onto navigation stack.</param>
         public void GoToOffset(int gotoOffset, bool jumpToNote, bool doPush) {
-            int curSelIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            NavStack.Location prevLoc = GetCurrentlySelectedLocation();
+            if (gotoOffset == prevLoc.Offset && jumpToNote == prevLoc.IsNote) {
+                // we're jumping to ourselves?
+                Debug.WriteLine("Ignoring goto to current position");
+                return;
+            }
 
             int topLineIndex = CodeLineList.FindLineIndexByOffset(gotoOffset);
             if (topLineIndex < 0) {
@@ -1339,17 +1344,20 @@ namespace SourceGenWPF {
             mMainWin.CodeListView_SelectRange(topLineIndex, lastLineIndex - topLineIndex);
 
             if (doPush) {
-                if (curSelIndex >= 0) {
-                    // Update the back stack and associated controls.
-                    mNavStack.Push(CodeLineList[curSelIndex].FileOffset, gotoOffset);
-#if false
-                    UpdateMenuItemsAndTitle();
-#endif
-                } else {
-                    // This can happen when the project is first opened and nothing is selected.
-                    Debug.WriteLine("no selection to go back to");
-                }
+                // Update the back stack and associated controls.
+                mNavStack.Push(prevLoc);
             }
+        }
+
+        private NavStack.Location GetCurrentlySelectedLocation() {
+            int index = mMainWin.CodeListView_GetFirstSelectedIndex();
+            if (index < 0) {
+                // nothing selected, use top instead
+                index = mMainWin.CodeListView_GetTopIndex();
+            }
+            int offset = CodeLineList[index].FileOffset;
+            bool isNote = (CodeLineList[index].LineType == LineListGen.Line.Type.Note);
+            return new NavStack.Location(offset, isNote);
         }
 
         public bool CanNavigateBackward() {
@@ -1357,8 +1365,8 @@ namespace SourceGenWPF {
         }
         public void NavigateBackward() {
             Debug.Assert(mNavStack.HasBackward);
-            int backOff = mNavStack.Pop();
-            GoToOffset(backOff, false, false);
+            NavStack.Location backLoc = mNavStack.MoveBackward(GetCurrentlySelectedLocation());
+            GoToOffset(backLoc.Offset, backLoc.IsNote, false);
         }
 
         public bool CanNavigateForward() {
@@ -1366,8 +1374,8 @@ namespace SourceGenWPF {
         }
         public void NavigateForward() {
             Debug.Assert(mNavStack.HasForward);
-            int fwdOff = mNavStack.PushPrevious();
-            GoToOffset(fwdOff, false, false);
+            NavStack.Location fwdLoc = mNavStack.MoveForward(GetCurrentlySelectedLocation());
+            GoToOffset(fwdLoc.Offset, fwdLoc.IsNote, false);
         }
 
         /// <summary>
