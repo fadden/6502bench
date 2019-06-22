@@ -754,8 +754,12 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.EditAddress();
         }
 
-        private void EditStatusFlags_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditStatusFlags();
+        }
+
+        private void ExitCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Close();
         }
 
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

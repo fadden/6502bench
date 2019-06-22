@@ -54,7 +54,8 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
-            <RoutedUICommand x:Key="EditStatusFlags" Text="Override Status Flags..."/>
+            <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
+            <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
@@ -102,8 +103,10 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
-        <CommandBinding Command="{StaticResource EditStatusFlags}"
-                        CanExecute="CanEditStatusFlags" Executed="EditStatusFlags_Executed"/>
+        <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
+                        CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ExitCmd}"
+                        Executed="ExitCmd_Executed"/>
         <CommandBinding Command="Help"
                         Executed="HelpCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
@@ -151,7 +154,7 @@ limitations under the License.
                     <MenuItem Header="(none)"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Exit"/>
+                <MenuItem Command="{StaticResource ExitCmd}" InputGestureText="Alt+F4"/>
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Command="{StaticResource UndoCmd}"/>
@@ -172,7 +175,7 @@ limitations under the License.
             </MenuItem>
             <MenuItem Name="ActionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
-                <MenuItem Command="{StaticResource EditStatusFlags}"/>
+                <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Header="Edit Label..."/>
                 <MenuItem Header="Edit Operand..."/>
                 <MenuItem Header="Edit Comment..."/>
