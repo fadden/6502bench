@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -142,20 +143,19 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void CreateCodeListContextMenu() {
-            // Find Actions menu.
-            ItemCollection mainItems = this.appMenu.Items;
-            MenuItem actionsMenu = null;
-            foreach (object obj in mainItems) {
-                if (!(obj is MenuItem)) {
-                    continue;
-                }
-                MenuItem mi = (MenuItem)obj;
-                if (mi.Name.Equals("ActionsMenu")) {
-                    actionsMenu = mi;
-                    break;
-                }
-            }
-            Debug.Assert(actionsMenu != null);
+            //// Find Actions menu.
+            //ItemCollection mainItems = this.appMenu.Items;
+            //foreach (object obj in mainItems) {
+            //    if (!(obj is MenuItem)) {
+            //        continue;
+            //    }
+            //    MenuItem mi = (MenuItem)obj;
+            //    if (mi.Name.Equals("actionsMenu")) {
+            //        actionsMenu = mi;
+            //        break;
+            //    }
+            //}
+            //Debug.Assert(actionsMenu != null);
 
             // Clone the Actions menu into the codeListView context menu.
             ContextMenu ctxt = this.codeListView.ContextMenu;
@@ -335,6 +335,8 @@ namespace SourceGenWPF.WpfGui {
 
         #endregion Window placement
 
+        #region Column widths
+
         /// <summary>
         /// Grabs the widths of the columns of the various grids and saves them in the
         /// global AppSettings.
@@ -416,32 +418,7 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
-        /// <summary>
-        /// Sets the focus on the code list.
-        /// </summary>
-        //public void CodeListView_Focus() {
-        //    codeListView.Focus();
-        //}
-
-        /// <summary>
-        /// Handles a double-click on the code list.  We have to figure out which row and
-        /// column were clicked, which is not easy in WPF.
-        /// </summary>
-        private void CodeListView_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            Debug.Assert(sender == codeListView);
-
-            ListViewItem lvi = codeListView.GetClickedItem(e);
-            if (lvi == null) {
-                return;
-            }
-            DisplayList.FormattedParts parts = (DisplayList.FormattedParts)lvi.Content;
-            int row = parts.ListIndex;
-            int col = codeListView.GetClickEventColumn(e);
-            if (col < 0) {
-                return;
-            }
-            mMainCtrl.HandleCodeListDoubleClick(row, col);
-        }
+        #endregion Column widths
 
 
         #region Selection management
@@ -658,6 +635,7 @@ namespace SourceGenWPF.WpfGui {
 
         #endregion Selection management
 
+
         #region Can-execute handlers
 
         /// <summary>
@@ -829,8 +807,15 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            if (!int.TryParse((string)e.Parameter, out int recentIndex) ||
-                    recentIndex < 0 || recentIndex >= MainController.MAX_RECENT_PROJECTS) {
+            int recentIndex;
+            if (e.Parameter is int) {
+                recentIndex = (int)e.Parameter;
+            } else if (e.Parameter is string) {
+                recentIndex = int.Parse((string)e.Parameter);
+            } else {
+                throw new Exception("Bad parameter: " + e.Parameter);
+            }
+            if (recentIndex < 0 || recentIndex >= MainController.MAX_RECENT_PROJECTS) {
                 throw new Exception("Bad parameter: " + e.Parameter);
             }
 
@@ -843,6 +828,69 @@ namespace SourceGenWPF.WpfGui {
         }
 
         #endregion Command handlers
+
+        #region Misc
+
+        /// <summary>
+        /// Handles a double-click on the code list.  We have to figure out which row and
+        /// column were clicked, which is not easy in WPF.
+        /// </summary>
+        private void CodeListView_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            Debug.Assert(sender == codeListView);
+
+            ListViewItem lvi = codeListView.GetClickedItem(e);
+            if (lvi == null) {
+                return;
+            }
+            DisplayList.FormattedParts parts = (DisplayList.FormattedParts)lvi.Content;
+            int row = parts.ListIndex;
+            int col = codeListView.GetClickEventColumn(e);
+            if (col < 0) {
+                return;
+            }
+            mMainCtrl.HandleCodeListDoubleClick(row, col);
+        }
+
+        private void RecentProjectsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
+            MenuItem recents = (MenuItem)sender;
+            recents.Items.Clear();
+
+            Debug.WriteLine("COUNT is " + mMainCtrl.RecentProjectPaths.Count);
+            if (mMainCtrl.RecentProjectPaths.Count == 0) {
+                MenuItem mi = new MenuItem();
+                mi.Header = "(none)";
+                recents.Items.Add(mi);
+            } else {
+                for (int i = 0; i < mMainCtrl.RecentProjectPaths.Count; i++) {
+                    MenuItem mi = new MenuItem();
+                    mi.Header = string.Format("{0}: {1}", i + 1, mMainCtrl.RecentProjectPaths[i]);
+                    mi.Command = recentProjectCmd.Command;
+                    mi.CommandParameter = i;
+                    recents.Items.Add(mi);
+                }
+            }
+        }
+
+        public void UpdateRecentLinks() {
+            List<string> pathList = mMainCtrl.RecentProjectPaths;
+
+            if (pathList.Count >= 1) {
+                recentProjectName1.Text = Path.GetFileName(pathList[0]);
+                recentProjectButton1.Visibility = Visibility.Visible;
+            } else {
+                recentProjectName1.Text = string.Empty;
+                recentProjectButton1.Visibility = Visibility.Collapsed;
+            }
+            if (pathList.Count >= 2) {
+                recentProjectName2.Text = Path.GetFileName(pathList[1]);
+                recentProjectButton2.Visibility = Visibility.Visible;
+            } else {
+                recentProjectName2.Text = string.Empty;
+                recentProjectButton2.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        #endregion Misc
 
 
         #region References panel

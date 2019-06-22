@@ -66,7 +66,7 @@ namespace SourceGenWPF {
         /// <summary>
         /// List of recently-opened projects.
         /// </summary>
-        private List<string> mRecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
+        public List<string> RecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
         public const int MAX_RECENT_PROJECTS = 6;
 
         /// <summary>
@@ -195,8 +195,8 @@ namespace SourceGenWPF {
 
 #if false
             UpdateMenuItemsAndTitle();
-            UpdateRecentLinks();
 #endif
+            mMainWin.UpdateRecentLinks();
 
             ProcessCommandLine();
         }
@@ -405,10 +405,12 @@ namespace SourceGenWPF {
                     Debug.WriteLine("Font convert failed: " + ex.Message);
                 }
             }
+#endif
 
             // Unpack the recent-project list.
             UnpackRecentProjectList();
 
+#if false
             // Enable the DEBUG menu if configured.
             bool showDebugMenu = AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
             if (dEBUGToolStripMenuItem.Visible != showDebugMenu) {
@@ -427,6 +429,24 @@ namespace SourceGenWPF {
             }
         }
 
+        private void UnpackRecentProjectList() {
+            RecentProjectPaths.Clear();
+
+            string cereal = AppSettings.Global.GetString(
+                AppSettings.PRVW_RECENT_PROJECT_LIST, null);
+            if (string.IsNullOrEmpty(cereal)) {
+                return;
+            }
+
+            try {
+                JavaScriptSerializer ser = new JavaScriptSerializer();
+                RecentProjectPaths = ser.Deserialize<List<string>>(cereal);
+            } catch (Exception ex) {
+                Debug.WriteLine("Failed deserializing recent projects: " + ex.Message);
+                return;
+            }
+        }
+
         /// <summary>
         /// Ensures that the named project is at the top of the list.  If it's elsewhere
         /// in the list, move it to the top.  Excess items are removed.
@@ -438,32 +458,30 @@ namespace SourceGenWPF {
                 // without having saved it.
                 return;
             }
-            int index = mRecentProjectPaths.IndexOf(projectPath);
+            int index = RecentProjectPaths.IndexOf(projectPath);
             if (index == 0) {
                 // Already in the list, nothing changes.  No need to update anything else.
                 return;
             }
             if (index > 0) {
-                mRecentProjectPaths.RemoveAt(index);
+                RecentProjectPaths.RemoveAt(index);
             }
-            mRecentProjectPaths.Insert(0, projectPath);
+            RecentProjectPaths.Insert(0, projectPath);
 
             // Trim the list to the max allowed.
-            while (mRecentProjectPaths.Count > MAX_RECENT_PROJECTS) {
+            while (RecentProjectPaths.Count > MAX_RECENT_PROJECTS) {
                 Debug.WriteLine("Recent projects: dropping " +
-                    mRecentProjectPaths[MAX_RECENT_PROJECTS]);
-                mRecentProjectPaths.RemoveAt(MAX_RECENT_PROJECTS);
+                    RecentProjectPaths[MAX_RECENT_PROJECTS]);
+                RecentProjectPaths.RemoveAt(MAX_RECENT_PROJECTS);
             }
 
             // Store updated list in app settings.  JSON-in-JSON is ugly and inefficient,
             // but it'll do for now.
             JavaScriptSerializer ser = new JavaScriptSerializer();
-            string cereal = ser.Serialize(mRecentProjectPaths);
+            string cereal = ser.Serialize(RecentProjectPaths);
             AppSettings.Global.SetString(AppSettings.PRVW_RECENT_PROJECT_LIST, cereal);
 
-#if false
-            UpdateRecentLinks();
-#endif
+            mMainWin.UpdateRecentLinks();
         }
 
         #endregion Init and settings
@@ -761,12 +779,7 @@ namespace SourceGenWPF {
             if (!CloseProject()) {
                 return;
             }
-            //DoOpenFile(mRecentProjectPaths[projIndex]);
-            if (projIndex == 0) {
-                DoOpenFile(@"C:\Src\6502bench\EXTRA\ZIPPY#ff2000.dis65");
-            } else {
-                DoOpenFile(@"C:\Src\6502bench\EXTRA\CRYLLAN.MISSION#b30100.dis65");
-            }
+            DoOpenFile(RecentProjectPaths[projIndex]);
         }
 
         /// <summary>
@@ -1027,7 +1040,7 @@ namespace SourceGenWPF {
         /// </summary>
         /// <returns>True if the project was closed, false if the user chose to cancel.</returns>
         public bool CloseProject() {
-            Debug.WriteLine("ProjectView.DoClose() - dirty=" +
+            Debug.WriteLine("CloseProject() - dirty=" +
                 (mProject == null ? "N/A" : mProject.IsDirty.ToString()));
             if (mProject != null && mProject.IsDirty) {
                 DiscardChanges dlg = new DiscardChanges(mMainWin);
@@ -1065,13 +1078,11 @@ namespace SourceGenWPF {
             mDataPathName = null;
             mProjectPathName = null;
             mTargetHighlightIndex = -1;
-#if false
-            mSymbolSubset = new SymbolTableSubset(new SymbolTable());
-#endif
+
             // Clear this to release the memory.
             mMainWin.CodeDisplayList.Clear();
 
-            mMainWin.InfoPanelContents = String.Empty;
+            mMainWin.InfoPanelContents = string.Empty;
             mMainWin.ShowCodeListView = false;
 
             mGenerationLog = null;

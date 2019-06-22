@@ -126,6 +126,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ProjectFieldUserLabel");
         public static string PROJECT_FROM_NEWER_APP =
             (string)Application.Current.FindResource("str_ProjectFromNewerApp");
+        //public static string RECENT_PROJECT_LINK_FMT =
+        //    (string)Application.Current.FindResource("str_RecentProjectLinkFmt");
         public static string RUNTIME_DIR_NOT_FOUND =
             (string)Application.Current.FindResource("str_RuntimeDirNotFound");
         public static string RUNTIME_DIR_NOT_FOUND_CAPTION =

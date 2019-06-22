@@ -123,7 +123,7 @@ limitations under the License.
                         Executed="OpenCmd_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
                         CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
-        <CommandBinding Command="{StaticResource RecentProjectCmd}"
+        <CommandBinding Command="{StaticResource RecentProjectCmd}" x:Name="recentProjectCmd"
                         Executed="RecentProjectCmd_Executed"/>
         <CommandBinding Command="{StaticResource RedoCmd}"
                         CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
@@ -150,7 +150,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource AssembleCmd}"/>
                 <MenuItem Command="Print"/>
                 <Separator/>
-                <MenuItem Header="Recent Projects">
+                <MenuItem Name="recentProjectsMenu" Header="Recent Projects" SubmenuOpened="RecentProjectsMenu_SubmenuOpened">
                     <MenuItem Header="(none)"/>
                 </MenuItem>
                 <Separator/>
@@ -173,7 +173,7 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Header="Settings..."/>
             </MenuItem>
-            <MenuItem Name="ActionsMenu" Header="_Actions">
+            <MenuItem Name="actionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
                 <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Header="Edit Label..."/>
@@ -351,14 +351,27 @@ limitations under the License.
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Left">
-                    <Button Content="Start new project" Width="200" Height="50" Margin="10,30,10,10"/>
-                    <Button Content="Open existing project" Width="200" Height="50" Margin="10"/>
-                    <Button Content="Recent project #1" Width="200" Height="50" Margin="10"
-                            CommandParameter="0"
-                            Command="{DynamicResource RecentProjectCmd}"/>
-                    <Button Content="Recent project #2" Width="200" Height="50" Margin="10"
-                            CommandParameter="1"
-                            Command="{DynamicResource RecentProjectCmd}"/>
+                    <Button Content="Start new project" Width="240" Height="50" Margin="10,30,10,10"/>
+                    <Button Content="Open existing project" Width="240" Height="50" Margin="10"
+                            Command="{StaticResource OpenCmd}"/>
+                    <Button Name="recentProjectButton1" Width="240" Height="50" Margin="10"
+                            Command="{DynamicResource RecentProjectCmd}" CommandParameter="0">
+                        <Button.Content>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center">Recent project #1</TextBlock>
+                                <TextBlock Name="recentProjectName1" HorizontalAlignment="Center">???</TextBlock>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    <Button Name="recentProjectButton2" Width="240" Height="50" Margin="10"
+                            Command="{DynamicResource RecentProjectCmd}" CommandParameter="1">
+                        <Button.Content>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center">Recent project #2</TextBlock>
+                                <TextBlock Name="recentProjectName2" HorizontalAlignment="Center">???</TextBlock>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
                 </StackPanel>
             </Grid>
 
