@@ -45,9 +45,9 @@ namespace SourceGenWPF.WpfGui {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             if (!mHasEmuFlag) {
-                panelM.IsEnabled = false;
-                panelX.IsEnabled = false;
-                panelE.IsEnabled = false;
+                DisableColumn(radioMDefault, radioMZero, radioMOne, radioMIndeterminate);
+                DisableColumn(radioXDefault, radioXZero, radioXOne, radioXIndeterminate);
+                DisableColumn(radioEDefault, radioEZero, radioEOne, radioEIndeterminate);
 
                 // I'm not going to force the M/X/E flags to have a particular value based
                 // on the CPU definition.  The flags aren't used for non-65802/65816, so
@@ -58,6 +58,11 @@ namespace SourceGenWPF.WpfGui {
             }
 
             SetCheckedButtons();
+        }
+
+        private void DisableColumn(RadioButton def, RadioButton zero, RadioButton one,
+                RadioButton indeterminate) {
+            def.IsEnabled = zero.IsEnabled = one.IsEnabled = indeterminate.IsEnabled = false;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
