@@ -50,6 +50,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ErrInvalidIntValue");
         public static string ERR_INVALID_KEY_VALUE =
             (string)Application.Current.FindResource("str_ErrInvalidKeyValue");
+        public static string ERR_INVALID_SYSDEF =
+            (string)Application.Current.FindResource("str_ErrInvalidSysdef");
+        public static string ERR_LOAD_CONFIG_FILE =
+            (string)Application.Current.FindResource("str_ErrLoadConfigFile");
         public static string ERR_NOT_PROJECT_FILE =
             (string)Application.Current.FindResource("str_ErrNotProjectFile");
         public static string ERR_PROJECT_FILE_CORRUPT =
@@ -66,6 +70,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_FileFilterDis65");
         public static string FILE_FILTER_SYM65 =
             (string)Application.Current.FindResource("str_FileFilterSym65");
+        public static string FILE_INFO_FMT =
+            (string)Application.Current.FindResource("str_FileInfoFmt");
         public static string GENERATED_FOR_VERSION_FMT =
             (string)Application.Current.FindResource("str_GeneratedForVersion");
         public static string INFO_FD_SUM_FMT =

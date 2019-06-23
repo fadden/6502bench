@@ -87,6 +87,9 @@
     <Compile Include="WpfGui\EditStatusFlags.xaml.cs">
       <DependentUpon>EditStatusFlags.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\NewProject.xaml.cs">
+      <DependentUpon>NewProject.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\ProjectLoadIssue.xaml.cs">
       <DependentUpon>ProjectLoadIssue.xaml</DependentUpon>
     </Compile>
@@ -176,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\NewProject.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

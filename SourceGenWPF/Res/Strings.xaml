@@ -35,6 +35,8 @@ limitations under the License.
     <system:String x:Key="str_ErrFileReadOnlyFmt">Cannot write to read-only file {0}.</system:String>
     <system:String x:Key="str_ErrInvalidIntValue">Could not convert value to integer</system:String>
     <system:String x:Key="str_ErrInvalidKeyValue">Key value is out of range</system:String>
+    <system:String x:Key="str_ErrInvalidSysdef" xml:space="preserve"> - INVALID DEFINITION</system:String>
+    <system:String x:Key="str_ErrLoadConfigFile">Unable to load config file</system:String>
     <system:String x:Key="str_ErrNotProjectFile">This does not appear to be a valid .dis65 project file</system:String>
     <system:String x:Key="str_ErrProjectFileCorrupt">Project file may be corrupt</system:String>
     <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
@@ -43,6 +45,7 @@ limitations under the License.
     <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
+    <system:String x:Key="str_FileInfoFmt">File is {0:N1} KB of raw data.</system:String>
     <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
     <system:String x:Key="str_InfoFdSumFmt">•Operand format is {0}</system:String>
     <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>

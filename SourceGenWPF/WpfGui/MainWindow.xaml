@@ -71,6 +71,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+Minus</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="NewProjectCmd" Text="New"/>
             <RoutedUICommand x:Key="OpenCmd" Text="Open"/>
             <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="RecentProjectCmd"/>
@@ -119,6 +120,8 @@ limitations under the License.
                         CanExecute="CanNavigateBackward" Executed="NavigateBackwardCmd_Executed"/>
         <CommandBinding Command="{StaticResource NavigateForwardCmd}"
                         CanExecute="CanNavigateForward" Executed="NavigateForwardCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NewProjectCmd}"
+                        Executed="NewProjectCmd_Executed"/>
         <CommandBinding Command="{StaticResource OpenCmd}"
                         Executed="OpenCmd_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
@@ -141,7 +144,7 @@ limitations under the License.
     <DockPanel>
         <Menu Name="appMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="New"/>
+                <MenuItem Command="{StaticResource NewProjectCmd}"/>
                 <MenuItem Command="{StaticResource OpenCmd}"/>
                 <MenuItem Command="Save"/>
                 <MenuItem Command="SaveAs"/>
@@ -351,7 +354,8 @@ limitations under the License.
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Left">
-                    <Button Content="Start new project" Width="240" Height="50" Margin="10,30,10,10"/>
+                    <Button Content="Start new project" Width="240" Height="50" Margin="10,30,10,10"
+                            Command="{StaticResource NewProjectCmd}"/>
                     <Button Content="Open existing project" Width="240" Height="50" Margin="10"
                             Command="{StaticResource OpenCmd}"/>
                     <Button Name="recentProjectButton1" Width="240" Height="50" Margin="10"

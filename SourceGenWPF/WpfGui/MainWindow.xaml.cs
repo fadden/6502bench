@@ -767,6 +767,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.NavigateForward();
         }
 
+        private void NewProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.NewProject();
+        }
+
         private void OpenCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.OpenProject();
         }

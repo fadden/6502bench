@@ -775,6 +775,38 @@ namespace SourceGenWPF {
 
         #region Main window UI event handlers
 
+        public void NewProject() {
+            if (!CloseProject()) {
+                return;
+            }
+
+            string sysDefsPath = RuntimeDataAccess.GetPathName("SystemDefs.json");
+            if (sysDefsPath == null) {
+                MessageBox.Show(Res.Strings.ERR_LOAD_CONFIG_FILE, Res.Strings.OPERATION_FAILED,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            SystemDefSet sds = null;
+            try {
+                sds = SystemDefSet.ReadFile(sysDefsPath);
+            } catch (Exception ex) {
+                Debug.WriteLine("Failed loading system def set: " + ex);
+                MessageBox.Show(Res.Strings.ERR_LOAD_CONFIG_FILE, Res.Strings.OPERATION_FAILED,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            NewProject dlg = new NewProject(mMainWin, sds);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+            bool ok = PrepareNewProject(Path.GetFullPath(dlg.DataFileName), dlg.SystemDef);
+            if (ok) {
+                FinishPrep();
+            }
+        }
+
         public void OpenRecentProject(int projIndex) {
             if (!CloseProject()) {
                 return;
