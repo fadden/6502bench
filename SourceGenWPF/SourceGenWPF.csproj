@@ -73,6 +73,9 @@
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
     <Compile Include="AsmGen\StringGather.cs" />
+    <Compile Include="AsmGen\WpfGui\GenAndAsm.xaml.cs">
+      <DependentUpon>GenAndAsm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DisplayList.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="WpfGui\DataFileLoadIssue.xaml.cs">
@@ -158,6 +161,10 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AsmGen\WpfGui\GenAndAsm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WpfGui\CodeListItemStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

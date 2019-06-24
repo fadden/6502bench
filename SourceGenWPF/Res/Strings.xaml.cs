@@ -18,6 +18,8 @@ using System.Windows;
 
 namespace SourceGenWPF.Res {
     public static class Strings {
+        public static string ASM_LATEST_VERSION =
+            (string)Application.Current.FindResource("str_AsmLatestVersion");
         public static string DEFAULT_VALUE =
             (string)Application.Current.FindResource("str_DefaultValue");
         public static string ERR_BAD_FD =
@@ -62,6 +64,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ErrProjectLoadFail");
         public static string ERR_PROJECT_SAVE_FAIL =
             (string)Application.Current.FindResource("str_ErrProjectSaveFail");
+        public static string ERR_TOO_LARGE_FOR_PREVIEW =
+            (string)Application.Current.FindResource("str_ErrTooLargeForPreview");
         public static string FILE_FILTER_ALL =
             (string)Application.Current.FindResource("str_FileFilterAll");
         public static string FILE_FILTER_CS =
@@ -88,6 +92,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_InitialParameters");
         public static string INITIAL_SYMBOL_FILES =
             (string)Application.Current.FindResource("str_InitialSymbolFiles");
+        public static string NO_FILES_AVAILABLE =
+            (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string OPEN_DATA_DOESNT_EXIST =
             (string)Application.Current.FindResource("str_OpenDataDoesntExist");
         public static string OPEN_DATA_EMPTY =
@@ -138,6 +144,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_RuntimeDirNotFound");
         public static string RUNTIME_DIR_NOT_FOUND_CAPTION =
             (string)Application.Current.FindResource("str_RuntimeDirNotFoundCaption");
+        public static string SAVE_BEFORE_ASM =
+            (string)Application.Current.FindResource("str_SaveBeforeAsm");
+        public static string SAVE_BEFORE_ASM_CAPTION =
+            (string)Application.Current.FindResource("str_SaveBeforeAsmCaption");
         public static string SETUP_SYSTEM_SUMMARY_FMT =
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
     }

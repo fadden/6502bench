@@ -238,5 +238,27 @@ namespace CommonUtil {
             }
             return arr;
         }
+
+        /// <summary>
+        /// Converts a char[] to a string, inserting line numbers at the start of each line.
+        /// Assumes lines end with '\n' (with or without a preceding '\r').
+        /// </summary>
+        /// <param name="data">Character data to process.</param>
+        /// <returns>String with line numbers.</returns>
+        public static string CharArrayToLineNumberedString(char[] data) {
+            StringBuilder sb = new StringBuilder(data.Length + data.Length / 40);   // guess
+            int lineStart = 0;
+            int lineNum = 0;
+
+            for (int i = 0; i < data.Length; i++) {
+                if (data[i] == '\n') {
+                    sb.AppendFormat("{0,4:D0}  ", ++lineNum);
+                    sb.Append(data, lineStart, i - lineStart + 1);
+                    lineStart = i + 1;
+                }
+            }
+
+            return sb.ToString();
+        }
     }
 }

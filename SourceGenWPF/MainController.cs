@@ -1130,6 +1130,24 @@ namespace SourceGenWPF {
             return mProject != null;
         }
 
+        public void AssembleProject() {
+            if (string.IsNullOrEmpty(mProjectPathName)) {
+                // We need a project pathname so we know where to write the assembler
+                // source files, and what to call the output files.  We could just pop up the
+                // Save As dialog, but that seems confusing unless we do a custom dialog with
+                // an explanation, or have some annoying click-through.
+                //
+                // This only appears for never-saved projects, not projects with unsaved data.
+                MessageBox.Show(Res.Strings.SAVE_BEFORE_ASM, Res.Strings.SAVE_BEFORE_ASM_CAPTION,
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            AsmGen.WpfGui.GenAndAsm dlg =
+                new AsmGen.WpfGui.GenAndAsm(mMainWin, mProject, mProjectPathName);
+            dlg.ShowDialog();
+        }
+
         public void HandleCodeListDoubleClick(int row, int col) {
             Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
 

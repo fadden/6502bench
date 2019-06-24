@@ -718,8 +718,7 @@ namespace SourceGenWPF.WpfGui {
         #region Command handlers
 
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            // test
-            Debug.WriteLine("assembling");
+            mMainCtrl.AssembleProject();
         }
 
         private void CloseCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
