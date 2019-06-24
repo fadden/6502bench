@@ -717,6 +717,10 @@ namespace SourceGenWPF.WpfGui {
 
         #region Command handlers
 
+        private void AppSettingsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditSettings();
+        }
+
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.AssembleProject();
         }

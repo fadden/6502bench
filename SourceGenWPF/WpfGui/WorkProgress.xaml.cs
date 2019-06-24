@@ -48,7 +48,7 @@ namespace SourceGenWPF.WpfGui {
 
         public WorkProgress(Window owner, IWorker callbacks, bool indeterminate) {
             InitializeComponent();
-            Owner = Owner;
+            Owner = owner;
 
             progressBar.IsIndeterminate = indeterminate;
 

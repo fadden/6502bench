@@ -1148,6 +1148,16 @@ namespace SourceGenWPF {
             dlg.ShowDialog();
         }
 
+        /// <summary>
+        /// Opens the application settings dialog.  All changes to settings are made directly
+        /// to the AppSettings.Global object.
+        /// </summary>
+        public void EditSettings() {
+            EditAppSettings dlg = new EditAppSettings(mMainWin, EditAppSettings.Tab.Unknown,
+                AsmGen.AssemblerInfo.Id.Unknown);
+            dlg.ShowDialog();
+        }
+
         public void HandleCodeListDoubleClick(int row, int col) {
             Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
 

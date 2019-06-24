@@ -47,6 +47,7 @@ limitations under the License.
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
             </Style>
 
+            <RoutedUICommand x:Key="AppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Shift+A</KeyGesture>
@@ -98,6 +99,8 @@ limitations under the License.
     </Window.Resources>
 
     <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource AppSettingsCmd}"
+                        Executed="AppSettingsCmd_Executed"/>
         <CommandBinding Command="{StaticResource AssembleCmd}"
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
@@ -174,7 +177,7 @@ limitations under the License.
                 <MenuItem Command="Properties" Header="Project Properties..."/>
                 <MenuItem Header="Toggle Data Scan"/>
                 <Separator/>
-                <MenuItem Header="Settings..."/>
+                <MenuItem Command="{StaticResource AppSettingsCmd}"/>
             </MenuItem>
             <MenuItem Name="actionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>

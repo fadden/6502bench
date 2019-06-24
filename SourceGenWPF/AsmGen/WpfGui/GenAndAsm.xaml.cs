@@ -250,8 +250,8 @@ namespace SourceGenWPF.AsmGen.WpfGui {
                 mGenerator = gen;
             }
             public object DoWork(BackgroundWorker worker) {
-                worker.ReportProgress(50, "Halfway there!");
-                System.Threading.Thread.Sleep(3000);
+                //worker.ReportProgress(50, "Halfway there!");
+                //System.Threading.Thread.Sleep(5000);
                 return mGenerator.GenerateSource(worker);
             }
             public void RunWorkerCompleted(object results) {
