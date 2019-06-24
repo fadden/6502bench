@@ -17,9 +17,26 @@ using System;
 using System.Windows;
 
 namespace SourceGenWPF.Res {
+    /// <summary>
+    /// This is a bridge between the XAML definitions and the C# code that uses the strings.
+    /// FindResource() throws an exception if the resource isn't found, so typos and missing
+    /// resources will cause the app to fail at launch.
+    /// </summary>
     public static class Strings {
         public static string ASM_LATEST_VERSION =
             (string)Application.Current.FindResource("str_AsmLatestVersion");
+        public static string ASM_MATCH_FAILURE =
+            (string)Application.Current.FindResource("str_AsmMatchFailure");
+        public static string ASM_MATCH_SUCCESS =
+            (string)Application.Current.FindResource("str_AsmMatchSuccess");
+        public static string ASM_MISMATCH_CAPTION =
+            (string)Application.Current.FindResource("str_AsmMismatchCaption");
+        public static string ASM_MISMATCH_DATA_FMT =
+            (string)Application.Current.FindResource("str_AsmMismatchDataFmt");
+        public static string ASM_MISMATCH_LENGTH_FMT =
+            (string)Application.Current.FindResource("str_AsmMismatchLengthFmt");
+        public static string ASM_OUTPUT_NOT_FOUND =
+            (string)Application.Current.FindResource("str_AsmOutputNotFound");
         public static string DEFAULT_VALUE =
             (string)Application.Current.FindResource("str_DefaultValue");
         public static string ERR_BAD_FD =

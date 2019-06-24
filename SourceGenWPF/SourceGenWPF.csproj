@@ -73,6 +73,9 @@
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
     <Compile Include="AsmGen\StringGather.cs" />
+    <Compile Include="WpfGui\WorkProgress.xaml.cs">
+      <DependentUpon>WorkProgress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AsmGen\WpfGui\GenAndAsm.xaml.cs">
       <DependentUpon>GenAndAsm.xaml</DependentUpon>
     </Compile>
@@ -161,6 +164,10 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="WpfGui\WorkProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AsmGen\WpfGui\GenAndAsm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

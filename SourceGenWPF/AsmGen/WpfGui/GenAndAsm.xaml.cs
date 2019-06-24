@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -22,6 +23,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using CommonUtil;
+using SourceGenWPF.WpfGui;
 
 namespace SourceGenWPF.AsmGen.WpfGui {
     /// <summary>
@@ -240,8 +242,24 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             PopulateAssemblerComboBox(item.AssemblerId.ToString());
         }
 
+        private class GenWorker : WorkProgress.IWorker {
+            IGenerator mGenerator;
+            public List<string> Results { get; private set; }
+
+            public GenWorker(IGenerator gen) {
+                mGenerator = gen;
+            }
+            public object DoWork(BackgroundWorker worker) {
+                worker.ReportProgress(50, "Halfway there!");
+                System.Threading.Thread.Sleep(3000);
+                return mGenerator.GenerateSource(worker);
+            }
+            public void RunWorkerCompleted(object results) {
+                Results = (List<string>)results;
+            }
+        }
+
         private void GenerateButton_Click(object sender, RoutedEventArgs e) {
-#if false
             IGenerator gen = AssemblerInfo.GetGenerator(mSelectedAssemblerId);
             if (gen == null) {
                 Debug.WriteLine("Unable to get generator for " + mSelectedAssemblerId);
@@ -250,15 +268,15 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             gen.Configure(mProject, mWorkDirectory, mBaseFileName,
                 AssemblerVersionCache.GetVersion(mSelectedAssemblerId), AppSettings.Global);
 
-            GeneratorProgress dlg = new GeneratorProgress(gen);
+            GenWorker gw = new GenWorker(gen);
+            WorkProgress dlg = new WorkProgress(this, gw, false);
             dlg.ShowDialog();
-            Debug.WriteLine("Dialog returned: " + dlg.DialogResult);
+            //Debug.WriteLine("Dialog returned: " + dlg.DialogResult);
 
-            List<string> pathNames = dlg.Results;
-            dlg.Dispose();
+            List<string> pathNames = gw.Results;
 
             if (pathNames == null) {
-                // errors already reported
+                // error or cancelation; errors already reported
                 return;
             }
 
@@ -271,9 +289,6 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             previewFileComboBox.SelectedIndex = 0;      // should trigger update
 
             UpdateAssemblerControls();
-#else
-            Debug.WriteLine("GENERATE");
-#endif
         }
 
         private void LoadPreviewFile(string pathName) {
@@ -296,8 +311,22 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             }
         }
 
+        private class AsmWorker : WorkProgress.IWorker {
+            IAssembler mAssembler;
+            public AssemblerResults Results { get; private set; }
+
+            public AsmWorker(IAssembler asm) {
+                mAssembler = asm;
+            }
+            public object DoWork(BackgroundWorker worker) {
+                return mAssembler.RunAssembler(worker);
+            }
+            public void RunWorkerCompleted(object results) {
+                Results = (AssemblerResults)results;
+            }
+        }
+
         private void RunAssemblerButton_Click(object sender, RoutedEventArgs e) {
-#if false
             IAssembler asm = AssemblerInfo.GetAssembler(mSelectedAssemblerId);
             if (asm == null) {
                 Debug.WriteLine("Unable to get assembler for " + mSelectedAssemblerId);
@@ -305,15 +334,17 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             }
 
             asm.Configure(mGenerationResults, mWorkDirectory);
-            AssemblerProgress dlg = new AssemblerProgress(asm);
+
+            AsmWorker aw = new AsmWorker(asm);
+            WorkProgress dlg = new WorkProgress(this, aw, true);
             dlg.ShowDialog();
-            Debug.WriteLine("Dialog returned: " + dlg.DialogResult);
-            if (dlg.DialogResult != DialogResult.OK) {
-                // Cancelled, or failed to even run the assembler.
+            //Debug.WriteLine("Dialog returned: " + dlg.DialogResult);
+            if (dlg.DialogResult != true) {
+                // Canceled, or failed to even run the assembler.
                 return;
             }
 
-            AssemblerResults results = dlg.Results;
+            AssemblerResults results = aw.Results;
             if (results == null) {
                 Debug.WriteLine("Dialog returned OK, but no assembler results found");
                 Debug.Assert(false);
@@ -328,29 +359,29 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             if (results.ExitCode == 0) {
                 FileInfo fi = new FileInfo(results.OutputPathName);
                 if (!fi.Exists) {
-                    MessageBox.Show(this, Properties.Resources.ASM_OUTPUT_NOT_FOUND,
-                        Properties.Resources.ASM_MISMATCH_CAPTION,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    sb.Append(Properties.Resources.ASM_MATCH_FAILURE);
+                    MessageBox.Show(this, Res.Strings.ASM_OUTPUT_NOT_FOUND,
+                        Res.Strings.ASM_MISMATCH_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    sb.Append(Res.Strings.ASM_MATCH_FAILURE);
                 } else if (!CommonUtil.FileUtil.CompareBinaryFile(mProject.FileData,
                         results.OutputPathName, out int offset, out byte fileVal)) {
                     if (fi.Length != mProject.FileData.Length &&
                             offset == fi.Length || offset == mProject.FileData.Length) {
                         // The files matched up to the point where one ended.
-                        string msg = string.Format(Properties.Resources.ASM_MISMATCH_LENGTH_FMT,
+                        string msg = string.Format(Res.Strings.ASM_MISMATCH_LENGTH_FMT,
                             fi.Length, mProject.FileData.Length);
-                        MessageBox.Show(this, msg, Properties.Resources.ASM_MISMATCH_CAPTION,
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(msg, Res.Strings.ASM_MISMATCH_CAPTION,
+                            MessageBoxButton.OK, MessageBoxImage.Error);
                         sb.Append(msg);
                     } else {
-                        string msg = string.Format(Properties.Resources.ASM_MISMATCH_DATA_FMT,
+                        string msg = string.Format(Res.Strings.ASM_MISMATCH_DATA_FMT,
                             offset, fileVal, mProject.FileData[offset]);
-                        MessageBox.Show(this, msg, Properties.Resources.ASM_MISMATCH_CAPTION,
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(msg, Res.Strings.ASM_MISMATCH_CAPTION,
+                            MessageBoxButton.OK, MessageBoxImage.Error);
                         sb.Append(msg);
                     }
                 } else {
-                    sb.Append(Properties.Resources.ASM_MATCH_SUCCESS);
+                    sb.Append(Res.Strings.ASM_MATCH_SUCCESS);
                 }
             }
             sb.Append("\r\n\r\n");
@@ -367,10 +398,6 @@ namespace SourceGenWPF.AsmGen.WpfGui {
             }
 
             cmdOutputTextBox.Text = sb.ToString();
-            cmdOutputTextBox.BackColor = SystemColors.Window;
-#else
-            Debug.WriteLine("ASSEMBLE");
-#endif
         }
     }
 }

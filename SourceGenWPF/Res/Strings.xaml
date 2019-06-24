@@ -20,6 +20,12 @@ limitations under the License.
                     xmlns:local="clr-namespace:SourceGenWPF.Res">
 
     <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
+    <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
+    <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>
+    <system:String x:Key="str_AsmMismatchCaption">Output Mismatch</system:String>
+    <system:String x:Key="str_AsmMismatchDataFmt">Assembled output does not match: offset +{0:x6} has value ${1:x2}, expected ${2:x2}.</system:String>
+    <system:String x:Key="str_AsmMismatchLengthFmt">Assembled output does not match: length is {0}, expected {1}.</system:String>
+    <system:String x:Key="str_AsmOutputNotFound">Expected output file wasn't created</system:String>
     <system:String x:Key="str_DefaultValue">Default</system:String>
     <system:String x:Key="str_ErrBadFd">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
