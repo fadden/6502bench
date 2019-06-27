@@ -135,6 +135,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_OpenDataWrongLengthFmt");
         public static string OPERATION_FAILED =
             (string)Application.Current.FindResource("str_OperationFailed");
+        public static string PARENTHETICAL_NONE =
+            (string)Application.Current.FindResource("str_ParentheticalNone");
         public static string PLUGIN_DIR_FAIL_FMT =
             (string)Application.Current.FindResource("str_PluginDirFailFmt");
         public static string PLUGIN_DIR_FAIL_CAPTION =

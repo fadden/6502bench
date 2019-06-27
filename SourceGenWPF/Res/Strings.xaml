@@ -75,6 +75,7 @@ limitations under the License.
     <system:String x:Key="str_OpenDataWrongLengthFmt">The file is {0:N0} bytes long, but the project expected {1:N0}.</system:String>
     <system:String x:Key="str_OpenDataWrongCrcFmt">The file has CRC {0}, but the project expected {1}.</system:String>
     <system:String x:Key="str_OperationFailed">Failed</system:String>
+    <system:String x:Key="str_ParentheticalNone">(none)</system:String>
     <system:String x:Key="str_PluginDirFailFmt">Failed while preparing the plugin directory {0}</system:String>
     <system:String x:Key="str_PluginDirFailCaption">Failed Preparing Plugin Directory</system:String>
     <system:String x:Key="str_ProgressAssembling">Executing assembler...</system:String>

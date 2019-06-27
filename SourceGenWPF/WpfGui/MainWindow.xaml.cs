@@ -917,7 +917,7 @@ namespace SourceGenWPF.WpfGui {
             Debug.WriteLine("COUNT is " + mMainCtrl.RecentProjectPaths.Count);
             if (mMainCtrl.RecentProjectPaths.Count == 0) {
                 MenuItem mi = new MenuItem();
-                mi.Header = "(none)";
+                mi.Header = Res.Strings.PARENTHETICAL_NONE;
                 recents.Items.Add(mi);
             } else {
                 for (int i = 0; i < mMainCtrl.RecentProjectPaths.Count; i++) {

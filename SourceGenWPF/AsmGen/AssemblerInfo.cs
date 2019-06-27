@@ -26,7 +26,8 @@ namespace SourceGenWPF.AsmGen {
     /// </summary>
     public class AssemblerInfo {
         /// <summary>
-        /// Enumeration of supported assemblers.  Alphabetical order looks nicest.
+        /// Enumeration of supported assemblers.  Sorted alphabetically by human-readable name
+        /// looks nicest.
         /// </summary>
         public enum Id {
             Unknown = 0,

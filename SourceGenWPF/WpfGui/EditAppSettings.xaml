@@ -147,34 +147,49 @@ limitations under the License.
 
                             <TextBlock Grid.Column="0" Grid.Row="0" Text="Assembler:"
                                        HorizontalAlignment="Right" Margin="0,5,4,0"/>
-                            <ComboBox Grid.Column="1" Grid.Row="0" IsReadOnly="True"
-                                      Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"/>
+                            <ComboBox Name="asmConfigComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True"
+                                      Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"
+                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"
+                                      SelectionChanged="AsmConfigComboBox_SelectionChanged"/>
 
                             <TextBlock Grid.Column="0" Grid.Row="1" Text="Executable:"
                                        HorizontalAlignment="Right" Margin="0,0,4,0"/>
                             <DockPanel Grid.Column="1" Grid.Row="1">
                                 <Button DockPanel.Dock="Right" Content="Browse..." Width="75"
-                                        Margin="8,0,0,8"/>
-                                <TextBox DockPanel.Dock="Left" Margin="0,0,0,8">C:\something</TextBox>
+                                        Margin="8,0,0,8" Click="AsmExeBrowseButton_Click"/>
+                                <TextBox Name="asmExePathTextBox" DockPanel.Dock="Left" Margin="0,0,0,8"
+                                         Text="C:\something"/>
                             </DockPanel>
 
                             <TextBlock Grid.Column="0" Grid.Row="2" Text="Column widths:"
                                        HorizontalAlignment="Right" Margin="0,0,4,0"/>
                             <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
-                                <TextBox Width="60" Margin="0,0,4,0"/>
-                                <TextBox Width="60" Margin="0,0,4,0"/>
-                                <TextBox Width="60" Margin="0,0,4,0"/>
-                                <TextBox Width="60" Margin="0,0,8,0"/>
+                                <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0"
+                                         PreviewTextInput="CheckWidthInput"
+                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0"
+                                         PreviewTextInput="CheckWidthInput"
+                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0"
+                                         PreviewTextInput="CheckWidthInput"
+                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0"
+                                         PreviewTextInput="CheckWidthInput"
+                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
                                 <TextBlock Text="(label, opcode, operand, comment)"/>
                             </StackPanel>
                         </Grid>
                     </GroupBox>
 
                     <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
-                    <CheckBox Content="Show cycle counts" Margin="4,8,0,0"/>
-                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"/>
-                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"/>
-                    <CheckBox Content="Disable label localization" Margin="4,8,0,0"/>
+                    <CheckBox Content="Show cycle counts" Margin="4,8,0,0"
+                              IsChecked="{Binding ShowCycleCounts}"/>
+                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"
+                              IsChecked="{Binding LongLabelNewLine}"/>
+                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
+                              IsChecked="{Binding AddIdentComment}"/>
+                    <CheckBox Content="Disable label localization" Margin="4,8,0,0"
+                              IsChecked="{Binding DisableLabelLocalization}"/>
                 </StackPanel>
             </TabItem>
 
