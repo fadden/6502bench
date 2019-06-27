@@ -48,6 +48,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="MultiKeyInputGesture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

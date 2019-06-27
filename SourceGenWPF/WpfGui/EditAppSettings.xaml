@@ -22,21 +22,22 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
         mc:Ignorable="d"
         Title="Edit Application Settings"
-        Width="680" Height="480" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+        Width="700" Height="440" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded">
     <DockPanel Margin="8">
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="applyButton" Content="Apply" Margin="0,0,20,0"
-                    Width="70"/>
+                    Width="70" IsEnabled="{Binding IsDirty}" Click="ApplyButton_Click"/>
             <Button Name="okButton" Content="OK" IsDefault="True"
-                    Width="70"/>
+                    Width="70" Click="OkButton_Click"/>
             <Button Name="cancelButton" Content="Cancel" IsCancel="True"
                     Width="70" Margin="4,0,0,0"/>
         </StackPanel>
 
-        <TabControl DockPanel.Dock="Top" Margin="0,0,0,8">
-            <TabItem Header="Code View">
+        <TabControl Name="tabControl" DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TabItem Name="codeViewTab" Header="Code View">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.75*"/>
@@ -53,15 +54,24 @@ limitations under the License.
                     <GroupBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Header="Column Visibility"
                               Margin="0,0,10,0">
                         <StackPanel>
-                            <Button Content="{}{0} Offset" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Address" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Bytes" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Flags" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Attributes" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Label" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Opcode" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Operand" Width="120" Margin="0,4"/>
-                            <Button Content="{}{0} Comment" Width="120" Margin="0,4"/>
+                            <Button Name="showCol0" Content="{}{0} Offset" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol1" Content="{}{0} Address" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol2" Content="{}{0} Bytes" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol3" Content="{}{0} Flags" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol4" Content="{}{0} Attributes" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol5" Content="{}{0} Label" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol6" Content="{}{0} Opcode" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol7" Content="{}{0} Operand" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
+                            <Button Name="showCol8" Content="{}{0} Comment" Width="120" Margin="0,4"
+                                    Click="ColumnVisibilityButton_Click"/>
                         </StackPanel>
                     </GroupBox>
 
@@ -69,24 +79,30 @@ limitations under the License.
                               Margin="5,0,5,0">
                         <StackPanel>
                             <TextBlock Margin="0,4,0,0">Current font:</TextBlock>
-                            <TextBlock Margin="0,4,0,0">Constantia, 10pt</TextBlock>
+                            <TextBlock Name="codeListFontDesc" Margin="0,4,0,0">10-pt Hoser Sans</TextBlock>
                             <Button Content="Select Font..." Width="120" Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"/>
+                                    HorizontalAlignment="Left" Click="SelectFontButton_Click"/>
                         </StackPanel>
                     </GroupBox>
 
                     <GroupBox Grid.Column="1" Grid.Row="1" Header="Upper Case Display"
                               Margin="5,0,5,0">
                         <StackPanel>
-                            <CheckBox Content="Hexadecimal Values" Margin="0,4"/>
-                            <CheckBox Content="Opcodes" Margin="0,4"/>
-                            <CheckBox Content="Pseudo-opcodes" Margin="0,4"/>
-                            <CheckBox Content="Operand A" Margin="0,4"/>
-                            <CheckBox Content="Operand S" Margin="0,4"/>
-                            <CheckBox Content="Operand X/Y" Margin="0,4"/>
+                            <CheckBox Content="Hexadecimal Values" Margin="0,4"
+                                      IsChecked="{Binding UpperHexValues}"/>
+                            <CheckBox Content="Opcodes" Margin="0,4"
+                                      IsChecked="{Binding UpperOpcodes}"/>
+                            <CheckBox Content="Pseudo-opcodes" Margin="0,4"
+                                      IsChecked="{Binding UpperPseudoOps}"/>
+                            <CheckBox Content="Operand A" Margin="0,4"
+                                      IsChecked="{Binding UpperOperandA}"/>
+                            <CheckBox Content="Operand S" Margin="0,4"
+                                      IsChecked="{Binding UpperOperandS}"/>
+                            <CheckBox Content="Operand X/Y" Margin="0,4"
+                                      IsChecked="{Binding UpperOperandXY}"/>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="All Lower" Width="75" Margin="0,4,0,0"/>
-                                <Button Content="All Upper" Width="75" Margin="8,4,0,0"/>
+                                <Button Content="All Lower" Width="75" Margin="0,4,0,0" Click="AllLower_Click"/>
+                                <Button Content="All Upper" Width="75" Margin="8,4,0,0" Click="AllUpper_Click"/>
                             </StackPanel>
                         </StackPanel>
                     </GroupBox>
@@ -95,7 +111,8 @@ limitations under the License.
                               Margin="10,0,0,0">
                         <StackPanel>
                             <TextBlock Margin="0,4,0,0">Format for lines copied to clipboard:</TextBlock>
-                            <ComboBox IsReadOnly="True" Margin="0,8,0,0">
+                            <ComboBox Name="clipboardFormatComboBox" IsReadOnly="True" Margin="0,8,0,0"
+                                      SelectionChanged="ClipboardFormatComboBox_SelectionChanged">
                                 <ComboBoxItem>Assembler Source</ComboBoxItem>
                                 <ComboBoxItem>Disassembly</ComboBoxItem>
                             </ComboBox>
@@ -104,15 +121,17 @@ limitations under the License.
 
                     <GroupBox Grid.Column="2" Grid.Row="1" Header="Miscellaneous"
                               Margin="10,0,0,0">
-                        <CheckBox Content="Add spaces in bytes column" Margin="0,4,0,0"/>
+                        <CheckBox Content="Add spaces in bytes column" Margin="0,4,0,0"
+                                  IsChecked="{Binding SpacesBetweenBytes}"/>
                     </GroupBox>
 
-                    <CheckBox Grid.Column="0" Grid.Row="3" Margin="0,16,0,0" Content="Enable DEBUG menu"/>
+                    <CheckBox Grid.Column="0" Grid.Row="3" Content="Enable DEBUG menu" Margin="4,16,0,0"
+                              IsChecked="{Binding EnableDebugMenu}"/>
                 </Grid>
             </TabItem>
 
 
-            <TabItem Header="Asm Config">
+            <TabItem Name="asmConfigTab" Header="Asm Config">
                 <StackPanel>
                     <GroupBox Header="Assembler Configuration">
                         <Grid Margin="0,4,0,0">
@@ -151,20 +170,21 @@ limitations under the License.
                         </Grid>
                     </GroupBox>
 
-                    <TextBlock Text="General code generation:" Margin="0,16,0,0"/>
-                    <CheckBox Content="Show cycle counts" Margin="0,8,0,0"/>
-                    <CheckBox Content="Put long labels on separate line" Margin="0,8,0,0"/>
-                    <CheckBox Content="Identify assembler in output" Margin="0,8,0,0"/>
-                    <CheckBox Content="Disable label localization" Margin="0,8,0,0"/>
+                    <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
+                    <CheckBox Content="Show cycle counts" Margin="4,8,0,0"/>
+                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"/>
+                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"/>
+                    <CheckBox Content="Disable label localization" Margin="4,8,0,0"/>
                 </StackPanel>
             </TabItem>
 
         
-            <TabItem Header="Display Format">
+            <TabItem Name="displayFormatTab" Header="Display Format">
                 <DockPanel LastChildFill="False">
-                    <TextBlock DockPanel.Dock="Top"
+                    <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
                                Text="Configure display format options. This does not affect source code generation."/>
-                    <GroupBox Header="Operand Width Disambiguator" Width="300" DockPanel.Dock="Top" HorizontalAlignment="Left">
+                    <GroupBox Header="Operand Width Disambiguator" Width="300" DockPanel.Dock="Top"
+                              HorizontalAlignment="Left" Margin="0,8,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -204,24 +224,33 @@ limitations under the License.
                         </Grid>
                     </GroupBox>
 
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,16,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
                         <TextBlock Text="Expression style:"/>
                         <ComboBox Width="120" Margin="8,0,0,0"/>
                     </StackPanel>
+
+                    <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
+                              Width="400" HorizontalAlignment="Right">
+                        <DockPanel LastChildFill="False" Margin="8">
+                            <Button DockPanel.Dock="Left" Content="Default" Width="75"/>
+                            <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"/>
+                            <ComboBox DockPanel.Dock="Right" Width="170"/>
+                        </DockPanel>
+                    </GroupBox>
                 </DockPanel>
             </TabItem>
 
 
-            <TabItem Header="Pseudo-Op">
+            <TabItem Name="pseudoOpTab" Header="Pseudo-Op">
                 <TabItem.Resources>
                     <!-- TextBox spacer -->
                     <Thickness x:Key="TBS" Left="6" Top="0" Right="0" Bottom="0"/>
                 </TabItem.Resources>
                 <DockPanel LastChildFill="False">
-                    <TextBlock DockPanel.Dock="Top"
+                    <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
                                Text="Select pseudo-op names for display. This does not affect source code generation. Blank entries get a default value."/>
 
-                    <Grid DockPanel.Dock="Top" Height="240">
+                    <Grid DockPanel.Dock="Top" Height="240" Margin="4,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>

@@ -389,25 +389,31 @@ limitations under the License.
                       ItemContainerStyle="{StaticResource codeListItemStyle}"
                       SelectionChanged="CodeListView_SelectionChanged"
                       MouseDoubleClick="CodeListView_MouseDoubleClick">
+                <ListView.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                        <!-- <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" /> -->
+                    </Style>
+                </ListView.Resources>
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
                         <GridViewColumn Header="Offset" Width="58"
                                         DisplayMemberBinding="{Binding Offset}"/>
                         <GridViewColumn Header="Addr" Width="58"
                                         CellTemplate="{StaticResource addrHighlightTemplate}"/>
-                        <GridViewColumn Header="Bytes" Width="104"
+                        <GridViewColumn Header="Bytes" Width="85"
                                         DisplayMemberBinding="{Binding Bytes}"/>
                         <GridViewColumn Header="Flags" Width="78"
                                         DisplayMemberBinding="{Binding Flags}"/>
-                        <GridViewColumn Header="Attr" Width="45"
+                        <GridViewColumn Header="Attr" Width="52"
                                         DisplayMemberBinding="{Binding Attr}"/>
-                        <GridViewColumn Header="Label" Width="91"
+                        <GridViewColumn Header="Label" Width="71"
                                         CellTemplate="{StaticResource labelHighlightTemplate}"/>
-                        <GridViewColumn Header="Opcode" Width="45"
+                        <GridViewColumn Header="Opcode" Width="58"
                                         DisplayMemberBinding="{Binding Opcode}"/>
                         <GridViewColumn Header="Operand" Width="98"
                                         DisplayMemberBinding="{Binding Operand}"/>
-                        <GridViewColumn Header="Comment" Width="300"
+                        <GridViewColumn Header="Comment" Width="342"
                                         DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>

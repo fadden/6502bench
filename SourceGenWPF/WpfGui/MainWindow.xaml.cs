@@ -225,6 +225,19 @@ namespace SourceGenWPF.WpfGui {
             get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
         }
 
+        public FontFamily CodeListFontFamily {
+            get { return codeListView.FontFamily; }
+        }
+        public double CodeListFontSize {
+            get { return codeListView.FontSize; }
+        }
+
+        public void SetCodeListFont(string familyName, int size) {
+            FontFamily fam = new FontFamily(familyName);
+            codeListView.FontFamily = fam;
+            codeListView.FontSize = size;
+        }
+
 
         /// <summary>
         /// Handles source-initialized event.  This happens before Loaded, before the window
@@ -416,6 +429,45 @@ namespace SourceGenWPF.WpfGui {
             for (int i = 0; i < widths.Length; i++) {
                 dg.Columns[i].Width = widths[i];
             }
+        }
+
+        private static string[] sSampleStrings = {
+            "+000000",         // Offset
+            "00/0000",         // Address
+            "00 00 00 00.",    // Bytes (optional spaces or ellipsis, but not both)
+            "00000000 0",      // Flags
+            "######",          // Attributes
+            "MMMMMMMMM",       // Label (9 chars)
+            "MMMMMMM",         // Opcode
+            "MMMMMMMMMMMMM",   // Operand
+            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"   // Comment (50 chars)
+        };
+
+        /// <summary>
+        /// Computes the default code list column widths, using the currently configured
+        /// code list font.
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetDefaultCodeListColumnWidths() {
+            // Fudge factor, in DIPs.  This is necessary because the list view style applies
+            // a margin to the column border.
+            const double FUDGE = 14.0;
+
+            GridView gv = (GridView)codeListView.View;
+            int[] widths = new int[gv.Columns.Count];
+            Debug.Assert(widths.Length == (int)MainController.CodeListColumn.COUNT);
+            Debug.Assert(widths.Length == sSampleStrings.Length);
+
+            Typeface typeface = new Typeface(codeListView.FontFamily, codeListView.FontStyle,
+                codeListView.FontWeight, codeListView.FontStretch);
+            Debug.WriteLine("Default column widths (FUDGE=" + FUDGE + "):");
+            for (int i = 0; i < widths.Length; i++) {
+                 double strLen = Helper.MeasureStringWidth(sSampleStrings[i],
+                    typeface, codeListView.FontSize);
+                widths[i] = (int)Math.Round(strLen + FUDGE);
+                Debug.WriteLine(" " + i + ":" + widths[i] + " " + sSampleStrings[i]);
+            }
+            return widths;
         }
 
         #endregion Column widths

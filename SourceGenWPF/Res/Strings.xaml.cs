@@ -93,8 +93,12 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_FileFilterSym65");
         public static string FILE_INFO_FMT =
             (string)Application.Current.FindResource("str_FileInfoFmt");
+        public static string FONT_DESCRIPTOR_FMT =
+            (string)Application.Current.FindResource("str_FontDescriptorFmt");
         public static string GENERATED_FOR_VERSION_FMT =
             (string)Application.Current.FindResource("str_GeneratedForVersion");
+        public static string HIDE_COL =
+            (string)Application.Current.FindResource("str_HideCol");
         public static string INFO_FD_SUM_FMT =
             (string)Application.Current.FindResource("str_InfoFdSumFmt");
         public static string INFO_LINE_SUM_NON_FMT =
@@ -167,5 +171,7 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_SaveBeforeAsmCaption");
         public static string SETUP_SYSTEM_SUMMARY_FMT =
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
+        public static string SHOW_COL =
+            (string)Application.Current.FindResource("str_ShowCol");
     }
 }

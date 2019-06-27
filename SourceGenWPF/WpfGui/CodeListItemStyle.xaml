@@ -162,7 +162,8 @@ See also https://github.com/fadden/DisasmUiTest
     <DataTemplate x:Key="addrHighlightTemplate">
         <TextBlock>
             <TextBlock.Style>
-                <Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
@@ -178,7 +179,8 @@ See also https://github.com/fadden/DisasmUiTest
     <DataTemplate x:Key="labelHighlightTemplate">
         <TextBlock>
             <TextBlock.Style>
-                <Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>

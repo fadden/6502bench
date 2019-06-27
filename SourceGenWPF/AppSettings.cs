@@ -86,7 +86,8 @@ namespace SourceGenWPF {
 
         // Code List View settings.
         public const string CDLV_COL_WIDTHS = "cdlv-col-widths";
-        public const string CDLV_FONT = "cdlv-font";
+        public const string CDLV_FONT_FAMILY = "cdlv-font-family";
+        public const string CDLV_FONT_SIZE = "cdlv-font-size";
 
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";

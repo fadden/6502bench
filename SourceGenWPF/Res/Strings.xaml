@@ -54,7 +54,9 @@ limitations under the License.
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
     <system:String x:Key="str_FileInfoFmt">File is {0:N1} KB of raw data.</system:String>
+    <system:String x:Key="str_FontDescriptorFmt">{0}-point {1}</system:String>
     <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
+    <system:String x:Key="str_HideCol">Hide</system:String>
     <system:String x:Key="str_InfoFdSumFmt">•Operand format is {0}</system:String>
     <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
     <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
@@ -91,4 +93,5 @@ limitations under the License.
     <system:String x:Key="str_SaveBeforeAsm">Please save your project before assembling. The generated source code will be placed in the same directory as the project file.</system:String>
     <system:String x:Key="str_SaveBeforeAsmCaption">Save Project First</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
+    <system:String x:Key="str_ShowCol">Show</system:String>
 </ResourceDictionary>

@@ -140,8 +140,18 @@ namespace SourceGenWPF {
         /// </summary>
         private bool mUseMainAppDomainForPlugins = false;
 
-        private enum ColumnIndex {
-            Offset = 0, Address, Bytes, Flags, Attributes, Label, Opcode, Operand, Comment
+        public enum CodeListColumn {
+            Offset = 0, Address, Bytes, Flags, Attributes, Label, Opcode, Operand, Comment,
+            COUNT       // must be last; must equal number of columns
+        }
+
+        /// <summary>
+        /// Clipboard format enumeration.
+        /// </summary>
+        public enum ClipLineFormat {
+            Unknown = -1,
+            AssemblerSource = 0,
+            Disassembly = 1
         }
 
 
@@ -245,6 +255,11 @@ namespace SourceGenWPF {
 #else
             settings.SetBool(AppSettings.DEBUG_MENU_ENABLED, false);
 #endif
+
+            // Make sure we have entries for these.
+            settings.SetString(AppSettings.CDLV_FONT_FAMILY,
+                mMainWin.CodeListFontFamily.ToString());
+            settings.SetInt(AppSettings.CDLV_FONT_SIZE, (int)mMainWin.CodeListFontSize);
 
             // Load the settings file, and merge it into the globals.
             string runtimeDataDir = RuntimeDataAccess.GetDirectory();
@@ -392,20 +407,24 @@ namespace SourceGenWPF {
                 settings.GetBool(AppSettings.SYMWIN_SHOW_CONST, false);
             symbolAddressCheckBox.Checked =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_ADDR, false);
-
-            // Set the code list view font.
-            string fontStr = settings.GetString(AppSettings.CDLV_FONT, null);
-            if (!string.IsNullOrEmpty(fontStr)) {
-                FontConverter cvt = new FontConverter();
-                try {
-                    Font font = cvt.ConvertFromInvariantString(fontStr) as Font;
-                    codeListView.Font = font;
-                    Debug.WriteLine("Set font to " + font.ToString());
-                } catch (Exception ex) {
-                    Debug.WriteLine("Font convert failed: " + ex.Message);
-                }
-            }
 #endif
+
+            // Get the configured font info.  If nothing is configured, use whatever the
+            // code list happens to be using now.
+            string fontFamilyName = settings.GetString(AppSettings.CDLV_FONT_FAMILY, null);
+            if (fontFamilyName == null) {
+                fontFamilyName = mMainWin.CodeListFontFamily.ToString();
+            }
+            int size = settings.GetInt(AppSettings.CDLV_FONT_SIZE, -1);
+            if (size <= 0) {
+                size = (int)mMainWin.CodeListFontSize;
+            }
+
+            mMainWin.SetCodeListFont(fontFamilyName, size);
+
+            // Update the column widths.  This was done earlier during init, but may need to be
+            // repeated if the show/hide buttons were used in Settings.
+            mMainWin.RestoreColumnWidths();
 
             // Unpack the recent-project list.
             UnpackRecentProjectList();
@@ -1153,8 +1172,8 @@ namespace SourceGenWPF {
         /// to the AppSettings.Global object.
         /// </summary>
         public void EditSettings() {
-            EditAppSettings dlg = new EditAppSettings(mMainWin, EditAppSettings.Tab.Unknown,
-                AsmGen.AssemblerInfo.Id.Unknown);
+            EditAppSettings dlg = new EditAppSettings(mMainWin, mMainWin, this,
+                EditAppSettings.Tab.Unknown, AsmGen.AssemblerInfo.Id.Unknown);
             dlg.ShowDialog();
         }
 
@@ -1205,39 +1224,39 @@ namespace SourceGenWPF {
                 case LineListGen.Line.Type.Code:
                 case LineListGen.Line.Type.Data:
                     // For code and data, we have to break it down by column.
-                    switch ((ColumnIndex)col) {
-                        case ColumnIndex.Offset:
+                    switch ((CodeListColumn)col) {
+                        case CodeListColumn.Offset:
                             // does nothing
                             break;
-                        case ColumnIndex.Address:
+                        case CodeListColumn.Address:
                             // edit address
                             if (CanEditAddress()) {
                                 EditAddress();
                             }
                             break;
-                        case ColumnIndex.Bytes:
+                        case CodeListColumn.Bytes:
 #if false
                             if (showHexDumpToolStripMenuItem.Enabled) {
                                 ShowHexDump_Click(sender, e);
                             }
 #endif
                             break;
-                        case ColumnIndex.Flags:
+                        case CodeListColumn.Flags:
                             if (CanEditStatusFlags()) {
                                 EditStatusFlags();
                             }
                             break;
-                        case ColumnIndex.Attributes:
+                        case CodeListColumn.Attributes:
                             // does nothing
                             break;
-                        case ColumnIndex.Label:
+                        case CodeListColumn.Label:
 #if false
                             if (editLabelToolStripMenuItem.Enabled) {
                                 EditLabel_Click(sender, e);
                             }
 #endif
                             break;
-                        case ColumnIndex.Opcode:
+                        case CodeListColumn.Opcode:
                             // File offset should always be valid, since we excluded the EQU
                             // statements and header comment earlier.
                             if (line.FileOffset >= 0) {
@@ -1268,14 +1287,14 @@ namespace SourceGenWPF {
                                 }
                             }
                             break;
-                        case ColumnIndex.Operand:
+                        case CodeListColumn.Operand:
 #if false
                             if (editOperandToolStripMenuItem.Enabled) {
                                 EditInstrDataOperand_Click(sender, e);
                             }
 #endif
                             break;
-                        case ColumnIndex.Comment:
+                        case CodeListColumn.Comment:
 #if false
                             if (editCommentToolStripMenuItem.Enabled) {
                                 EditComment_Click(sender, e);
