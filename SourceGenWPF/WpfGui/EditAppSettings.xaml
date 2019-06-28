@@ -165,17 +165,45 @@ limitations under the License.
                                        HorizontalAlignment="Right" Margin="0,0,4,0"/>
                             <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
                                 <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         PreviewTextInput="CheckWidthInput"
-                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmLabelColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         PreviewTextInput="CheckWidthInput"
-                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmOpcodeColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         PreviewTextInput="CheckWidthInput"
-                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmOperandColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0"
-                                         PreviewTextInput="CheckWidthInput"
-                                         TextChanged="AsmLabelColWidthTextBox_TextChanged"/>
+                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmCommentColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <TextBlock Text="(label, opcode, operand, comment)"/>
                             </StackPanel>
                         </Grid>

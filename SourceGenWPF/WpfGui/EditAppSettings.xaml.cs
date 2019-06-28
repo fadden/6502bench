@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Microsoft.Win32;
 
 using CommonUtil;
@@ -448,44 +448,113 @@ namespace SourceGenWPF.WpfGui {
 
         #region Asm Config
 
+        public const int ASM_COL_MIN_WIDTH = 1;
+        public const int ASM_COL_MAX_WIDTH = 200;
+
+        //
+        // Numeric input fields, bound directly to TextBox.Text.  This performs the basic
+        // validation, but we also do our own so we can cap min/max.  The custom validation
+        // rule seems to fire ahead of the field assignment, so if our rule fails we won't
+        // try to assign here at all.
+        //
+        // The validation approach seems to make the most sense here because we don't dim the
+        // Apply/OK buttons when invalid input is present.  Instead we just set the width to
+        // the minimum value when validation fails.
+        //
+        // See also https://stackoverflow.com/a/44586784/294248
+        //
+        private int mAsmLabelColWidth;
+        public int AsmLabelColWidth {
+            get { return mAsmLabelColWidth; }
+            set {
+                if (mAsmLabelColWidth != value) {
+                    mAsmLabelColWidth = value;
+                    OnPropertyChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        private int mAsmOpcodeColWidth;
+        public int AsmOpcodeColWidth {
+            get { return mAsmOpcodeColWidth; }
+            set {
+                if (mAsmOpcodeColWidth != value) {
+                    mAsmOpcodeColWidth = value;
+                    OnPropertyChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        private int mAsmOperandColWidth;
+        public int AsmOperandColWidth {
+            get { return mAsmOperandColWidth; }
+            set {
+                if (mAsmOperandColWidth != value) {
+                    mAsmOperandColWidth = value;
+                    OnPropertyChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        private int mAsmCommentColWidth;
+        public int AsmCommentColWidth {
+            get { return mAsmCommentColWidth; }
+            set {
+                if (mAsmCommentColWidth != value) {
+                    mAsmCommentColWidth = value;
+                    OnPropertyChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+
+        // checkboxes
         private bool mShowCycleCounts;
         public bool ShowCycleCounts {
             get { return mShowCycleCounts; }
             set {
-                mShowCycleCounts = value;
-                OnPropertyChanged();
-                mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, value);
-                IsDirty = true;
+                if (mShowCycleCounts != value) {
+                    mShowCycleCounts = value;
+                    OnPropertyChanged();
+                    mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, value);
+                    IsDirty = true;
+                }
             }
         }
         private bool mLongLabelNewLine;
         public bool LongLabelNewLine {
             get { return mLongLabelNewLine; }
             set {
-                mLongLabelNewLine = value;
-                OnPropertyChanged();
-                mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, value);
-                IsDirty = true;
+                if (mLongLabelNewLine != value) {
+                    mLongLabelNewLine = value;
+                    OnPropertyChanged();
+                    mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, value);
+                    IsDirty = true;
+                }
             }
         }
         private bool mAddIdentComment;
         public bool AddIdentComment {
             get { return mAddIdentComment; }
             set {
-                mAddIdentComment = value;
-                OnPropertyChanged();
-                mSettings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, value);
-                IsDirty = true;
+                if (mAddIdentComment != value) {
+                    mAddIdentComment = value;
+                    OnPropertyChanged();
+                    mSettings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, value);
+                    IsDirty = true;
+                }
             }
         }
         private bool mDisableLabelLocalization;
         public bool DisableLabelLocalization {
             get { return mDisableLabelLocalization; }
             set {
-                mDisableLabelLocalization = value;
-                OnPropertyChanged();
-                mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, value);
-                IsDirty = true;
+                if (mDisableLabelLocalization != value) {
+                    mDisableLabelLocalization = value;
+                    OnPropertyChanged();
+                    mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, value);
+                    IsDirty = true;
+                }
             }
         }
 
@@ -535,36 +604,19 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
-        /// Checks whether the character typed into a column width entry field is allowed.
-        /// This is only useful for screening the character set, not the field contents.
-        /// </summary>
-        /// <remarks>
-        /// This just screens the character.  Doesn't handle selection operations like pasting.
-        /// Also, doesn't fire when you hit the space bar.  This is only slightly better than
-        /// useless, but since we don't otherwise give an indication of wrongness it's nice
-        /// to have.
-        ///
-        /// Another approach is to bind Text to an integer property.  This enables the validation
-        /// mechanism, which puts a red box around the field when it contains bad things, but
-        /// only after focus leaves the field.
-        ///
-        /// See also https://stackoverflow.com/q/1268552/294248
-        /// </remarks>
-        private void CheckWidthInput(object sender, TextCompositionEventArgs e) {
-            // Set e.Handled to true if the character is invalid.
-            char ch = e.Text[0];
-            e.Handled = (ch < '0' || ch > '9');
-        }
-
-        /// <summary>
-        /// Updates the assembler config settings whenever one of the text fields is edited.
+        /// Updates the assembler config settings whenever one of the width text fields is edited.
         /// </summary>
         /// <remarks>
         /// This fires 4x every time the combo box selection changes, as the new fields are
-        /// populated.  That should work out correctly.
+        /// populated.  That means we'll have incorrect intermediate states, but should
+        /// finish up correctly.
         /// </remarks>
-        private void AsmLabelColWidthTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+        private void AsmColWidthTextBox_TextChanged(object sender, TextChangedEventArgs e) {
             AssemblerInfo asm = (AssemblerInfo)asmConfigComboBox.SelectedItem;
+            if (asm == null) {
+                // fires during dialog initialization, before anything is selected
+                return;
+            }
             AssemblerConfig.SetConfig(mSettings, asm.AssemblerId, GetAsmConfigFromUi());
             IsDirty = true;
         }
@@ -574,31 +626,27 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         /// <returns></returns>
         private AssemblerConfig GetAsmConfigFromUi() {
-            const int MIN_WIDTH = 1;
-            const int MAX_WIDTH = 200;
-
-
             int[] widths = new int[4];
-            for (int i = 0; i < widths.Length; i++) {
-                widths[i] = MIN_WIDTH;
-            }
 
-            int result;
-            if (int.TryParse(asmLabelColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
-                    result <= MAX_WIDTH) {
-                widths[0] = result;
+            if (!Validation.GetHasError(asmLabelColWidthTextBox)) {
+                widths[0] = AsmLabelColWidth;
+            } else {
+                widths[0] = ASM_COL_MIN_WIDTH;
             }
-            if (int.TryParse(asmOpcodeColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
-                    result <= MAX_WIDTH) {
-                widths[1] = result;
+            if (!Validation.GetHasError(asmOpcodeColWidthTextBox)) {
+                widths[1] = AsmOpcodeColWidth;
+            } else {
+                widths[1] = ASM_COL_MIN_WIDTH;
             }
-            if (int.TryParse(asmOperandColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
-                    result <= MAX_WIDTH) {
-                widths[2] = result;
+            if (!Validation.GetHasError(asmOperandColWidthTextBox)) {
+                widths[2] = AsmOperandColWidth;
+            } else {
+                widths[2] = ASM_COL_MIN_WIDTH;
             }
-            if (int.TryParse(asmCommentColWidthTextBox.Text, out result) && result >= MIN_WIDTH &&
-                    result <= MAX_WIDTH) {
-                widths[3] = result;
+            if (!Validation.GetHasError(asmCommentColWidthTextBox)) {
+                widths[3] = AsmCommentColWidth;
+            } else {
+                widths[3] = ASM_COL_MIN_WIDTH;
             }
 
             return new AssemblerConfig(asmExePathTextBox.Text, widths);
@@ -690,5 +738,28 @@ namespace SourceGenWPF.WpfGui {
         private TextBoxPropertyMap[] mPseudoNameMap;
 
         #endregion PseudoOp
+    }
+
+    public class AsmColWidthRule : ValidationRule {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+            // Validating TextBox input, so value should always be a string.  Check anyway.
+            string strValue = Convert.ToString(value);
+            if (string.IsNullOrEmpty(strValue)) {
+                //Debug.WriteLine("VVV not string");
+                return new ValidationResult(false, "Could not convert to string");
+            }
+
+            if (int.TryParse(strValue, out int result)) {
+                if (result >= EditAppSettings.ASM_COL_MIN_WIDTH &&
+                        result <= EditAppSettings.ASM_COL_MAX_WIDTH) {
+                    return ValidationResult.ValidResult;
+                }
+                //Debug.WriteLine("VVV out of range: '" + strValue + "' (" + result + ")");
+                return new ValidationResult(false, "Column width out of range");
+            }
+
+            //Debug.WriteLine("VVV not valid integer: '" + strValue + "'");
+            return new ValidationResult(false, "Invalid integer value: '" + strValue + "'");
+        }
     }
 }
