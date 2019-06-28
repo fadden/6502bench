@@ -112,10 +112,8 @@ limitations under the License.
                         <StackPanel>
                             <TextBlock Margin="0,4,0,0">Format for lines copied to clipboard:</TextBlock>
                             <ComboBox Name="clipboardFormatComboBox" IsReadOnly="True" Margin="0,8,0,0"
-                                      SelectionChanged="ClipboardFormatComboBox_SelectionChanged">
-                                <ComboBoxItem>Assembler Source</ComboBoxItem>
-                                <ComboBoxItem>Disassembly</ComboBoxItem>
-                            </ComboBox>
+                                      ItemsSource="{Binding ClipboardFormatItems}" DisplayMemberPath="Name"
+                                      SelectionChanged="ClipboardFormatComboBox_SelectionChanged"/>
                         </StackPanel>
                     </GroupBox>
 

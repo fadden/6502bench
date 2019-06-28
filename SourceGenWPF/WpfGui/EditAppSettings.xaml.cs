@@ -245,6 +245,30 @@ namespace SourceGenWPF.WpfGui {
 
         #region Code View
 
+        /// <summary>
+        /// Entries for the clipboard format item combo box.
+        /// </summary>
+        public class ClipboardFormatItem {
+            public string Name { get; private set; }
+            public MainController.ClipLineFormat Value { get; private set; }
+
+            public ClipboardFormatItem(string name, MainController.ClipLineFormat value) {
+                Name = name;
+                Value = value;
+            }
+        }
+        // NOTE: in the current implementation, the array index must match the enum value
+        private static ClipboardFormatItem[] sClipboardFormatItems = {
+            new ClipboardFormatItem(Res.Strings.CLIPFORMAT_ASSEMBLER_SOURCE,
+                MainController.ClipLineFormat.AssemblerSource),
+            new ClipboardFormatItem(Res.Strings.CLIPFORMAT_DISASSEMBLY,
+                MainController.ClipLineFormat.Disassembly)
+        };
+        // ItemsSource for combo box
+        public ClipboardFormatItem[] ClipboardFormatItems {
+            get { return sClipboardFormatItems; }
+        }
+
         private void Loaded_CodeView() {
             // Column widths.  We called CaptureColumnWidths() during init, so this
             // should always be a valid serialized string.
@@ -271,10 +295,12 @@ namespace SourceGenWPF.WpfGui {
             UpperOperandS = mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_S, false);
             UpperOperandXY = mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
 
+            Debug.Assert(clipboardFormatComboBox.Items.Count == sClipboardFormatItems.Length);
             int clipIndex = mSettings.GetEnum(AppSettings.CLIP_LINE_FORMAT,
                 typeof(MainController.ClipLineFormat), 0);
-            if (clipIndex >= 0 && clipIndex < clipboardFormatComboBox.Items.Count) {
-                // NOTE: this couples the ClipLineFormat enum to the XAML.
+            if (clipIndex >= 0 && clipIndex < sClipboardFormatItems.Length) {
+                // require Value == clipIndex because we're lazy and don't want to search
+                Debug.Assert((int)sClipboardFormatItems[clipIndex].Value == clipIndex);
                 clipboardFormatComboBox.SelectedIndex = clipIndex;
             }
 
@@ -416,9 +442,9 @@ namespace SourceGenWPF.WpfGui {
 
         private void ClipboardFormatComboBox_SelectionChanged(object sender,
                 SelectionChangedEventArgs e) {
-            // NOTE: again, this ties the combo box index to the enum value
+            ClipboardFormatItem item = (ClipboardFormatItem)clipboardFormatComboBox.SelectedItem;
             mSettings.SetEnum(AppSettings.CLIP_LINE_FORMAT, typeof(MainController.ClipLineFormat),
-                clipboardFormatComboBox.SelectedIndex);
+                (int)item.Value);
             IsDirty = true;
         }
 

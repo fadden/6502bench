@@ -39,6 +39,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
         public static string DEFAULT_VALUE =
             (string)Application.Current.FindResource("str_DefaultValue");
+        public static string CLIPFORMAT_ASSEMBLER_SOURCE =
+            (string)Application.Current.FindResource("str_ClipformatAssemblerSource");
+        public static string CLIPFORMAT_DISASSEMBLY =
+            (string)Application.Current.FindResource("str_ClipformatDisassembly");
         public static string ERR_BAD_FD =
             (string)Application.Current.FindResource("str_ErrBadFd");
         public static string ERR_BAD_FD_FORMAT =
