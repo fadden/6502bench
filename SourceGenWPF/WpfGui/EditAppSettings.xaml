@@ -247,35 +247,50 @@ limitations under the License.
 
                             <TextBlock Grid.Column="0" Grid.Row="1" Text="16-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="1" Grid.Row="1" Text=".placeho"
-                                     Margin="0,4,0,0" FontFamily="{StaticResource GeneralMonoFont}"/>
+                            <TextBox Name="disambSuffix16TextBox" Grid.Column="1" Grid.Row="1"
+                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                                     FontFamily="{StaticResource GeneralMonoFont}"
+                                     TextChanged="WidthDisamControlChanged"/>
                             <TextBlock Grid.Column="3" Grid.Row="1" Text="16-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="4" Grid.Row="1" Text=".placeho"
-                                     Margin="0,4,0,0" FontFamily="{StaticResource GeneralMonoFont}"/>
+                            <TextBox Name="disambPrefix16TextBox" Grid.Column="4" Grid.Row="1"
+                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                                     FontFamily="{StaticResource GeneralMonoFont}"
+                                     TextChanged="WidthDisamControlChanged"/>
 
                             <TextBlock Grid.Column="0" Grid.Row="2" Text="24-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="1" Grid.Row="2" Text=".placeho"
-                                     Margin="0,4,0,0" FontFamily="{StaticResource GeneralMonoFont}"/>
+                            <TextBox Name="disambSuffix24TextBox" Grid.Column="1" Grid.Row="2"
+                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                                     FontFamily="{StaticResource GeneralMonoFont}"
+                                     TextChanged="WidthDisamControlChanged"/>
                             <TextBlock Grid.Column="3" Grid.Row="2" Text="24-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="4" Grid.Row="2" Text=".placeho"
-                                     Margin="0,4,0,0" FontFamily="{StaticResource GeneralMonoFont}"/>
+                            <TextBox Name="disambPrefix24TextBox" Grid.Column="4" Grid.Row="2"
+                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                                     FontFamily="{StaticResource GeneralMonoFont}"
+                                     TextChanged="WidthDisamControlChanged"/>
                         </Grid>
                     </GroupBox>
 
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
                         <TextBlock Text="Expression style:"/>
-                        <ComboBox Width="120" Margin="8,0,0,0"/>
+                        <ComboBox Name="expressionStyleComboBox" Width="120" Margin="8,0,0,0"
+                                  ItemsSource="{Binding ExpressionStyleItems}" DisplayMemberPath="Name"
+                                  IsReadOnly="True"
+                                  SelectionChanged="ExpressionStyleComboBox_SelectionChanged"/>
                     </StackPanel>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
                               Width="400" HorizontalAlignment="Right">
                         <DockPanel LastChildFill="False" Margin="8">
-                            <Button DockPanel.Dock="Left" Content="Default" Width="75"/>
-                            <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"/>
-                            <ComboBox DockPanel.Dock="Right" Width="170"/>
+                            <Button DockPanel.Dock="Left" Content="Default" Width="75"
+                                    Click="QuickFmtDefaultButton_Click"/>
+                            <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"
+                                    Click="DisplayFmtSetButton_Click"/>
+                            <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
+                                      Width="170" IsReadOnly="True"
+                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"/>
                         </DockPanel>
                     </GroupBox>
                 </DockPanel>

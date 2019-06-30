@@ -172,6 +172,7 @@ namespace SourceGenWPF.WpfGui {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             Loaded_CodeView();
             Loaded_AsmConfig();
+            Loaded_DisplayFormat();
 
 #if false
 
@@ -185,15 +186,6 @@ namespace SourceGenWPF.WpfGui {
                 //PseudoOp.PseudoOpNames opNames = PseudoOp.sDefaultPseudoOpNames;
                 ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
             }
-
-            PopulateWidthDisamSettings();
-
-            string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
-            ExpressionMode mode;
-            if (!Enum.TryParse<ExpressionMode>(exprMode, out mode)) {
-                mode = ExpressionMode.Common;
-            }
-            SetExpressionStyle(mode);
 #endif
 
             switch (mInitialTab) {
@@ -727,7 +719,7 @@ namespace SourceGenWPF.WpfGui {
         /// <summary>
         /// Holds an item for the expression style selection combo box.
         /// </summary>
-        private struct ExpressionStyleItem {
+        public class ExpressionStyleItem {
             // Enumerated mode.
             public ExpressionMode ExpMode { get; private set; }
 
@@ -744,6 +736,118 @@ namespace SourceGenWPF.WpfGui {
             new ExpressionStyleItem(ExpressionMode.Cc65, "cc65"),
             new ExpressionStyleItem(ExpressionMode.Merlin, "Merlin"),
         };
+        public ExpressionStyleItem[] ExpressionStyleItems {
+            get { return sExpStyleItems; }
+        }
+
+        private void Loaded_DisplayFormat() {
+            PopulateWidthDisamSettings();
+
+            string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
+            ExpressionMode mode;
+            if (!Enum.TryParse<ExpressionMode>(exprMode, out mode)) {
+                mode = ExpressionMode.Common;
+            }
+            SelectExpressionStyle(mode);
+
+            // No need to set this to anything specific.
+            displayFmtQuickComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Populates the width disambiguation text boxes.
+        /// </summary>
+        private void PopulateWidthDisamSettings() {
+            // Operand width disambiguation.  This is a little tricky -- we have to query all
+            // settings then set all controls, or the field-updated callback may interfere
+            // with us by changing AppSettings.
+            string opcSuffixAbs = mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_ABS,
+                string.Empty);
+            string opcSuffixLong = mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_LONG,
+                string.Empty);
+            string opPrefixAbs = mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_ABS,
+                string.Empty);
+            string opPrefixLong = mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG,
+                string.Empty);
+
+            disambSuffix16TextBox.Text = opcSuffixAbs;
+            disambSuffix24TextBox.Text = opcSuffixLong;
+            disambPrefix16TextBox.Text = opPrefixAbs;
+            disambPrefix24TextBox.Text = opPrefixLong;
+        }
+
+        /// <summary>
+        /// Sets all of the width disambiguation settings.  Used for the quick-set feature.
+        /// </summary>
+        private void SetWidthDisamSettings(string opcodeSuffixAbs, string opcodeSuffixLong,
+                string operandPrefixAbs, string operandPrefixLong) {
+            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, opcodeSuffixAbs);
+            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, opcodeSuffixLong);
+            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, operandPrefixAbs);
+            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, operandPrefixLong);
+            PopulateWidthDisamSettings();
+        }
+
+        /// <summary>
+        /// Exports the current state of the width controls to the settings object whenever
+        /// text is typed.
+        /// </summary>
+        private void WidthDisamControlChanged(object sender, TextChangedEventArgs e) {
+            if (mSettings == null) {
+                // initialization
+                return;
+            }
+            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, disambSuffix16TextBox.Text);
+            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, disambSuffix24TextBox.Text);
+            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, disambPrefix16TextBox.Text);
+            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, disambPrefix24TextBox.Text);
+            IsDirty = true;
+        }
+
+        /// <summary>
+        /// Changes the combo box selection to the desired mode.
+        /// </summary>
+        private void SelectExpressionStyle(ExpressionMode mode) {
+            foreach (ExpressionStyleItem esi in expressionStyleComboBox.Items) {
+                if (esi.ExpMode == mode) {
+                    expressionStyleComboBox.SelectedItem = esi;
+                    return;
+                }
+            }
+            Debug.Assert(false, "Expression mode " + mode + " not found");
+            expressionStyleComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Handles a change to the expression style.
+        /// </summary>
+        private void ExpressionStyleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            ExpressionStyleItem esi = (ExpressionStyleItem)expressionStyleComboBox.SelectedItem;
+            mSettings.SetString(AppSettings.FMT_EXPRESSION_MODE, esi.ExpMode.ToString());
+            IsDirty = true;
+        }
+
+        private void DisplayFmtSetButton_Click(object sender, RoutedEventArgs e) {
+            AssemblerInfo asmInfo = (AssemblerInfo)displayFmtQuickComboBox.SelectedItem;
+            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+
+            PseudoOp.PseudoOpNames opNames;
+            Asm65.Formatter.FormatConfig formatConfig;
+            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
+
+            SetWidthDisamSettings(formatConfig.mForceAbsOpcodeSuffix,
+                formatConfig.mForceLongOpcodeSuffix,
+                formatConfig.mForceAbsOperandPrefix,
+                formatConfig.mForceLongOperandPrefix);
+            SelectExpressionStyle(formatConfig.mExpressionMode);
+            // dirty flag set by change watchers if one or more fields have changed
+        }
+
+        private void QuickFmtDefaultButton_Click(object sender, RoutedEventArgs e) {
+            SetWidthDisamSettings(null, "l", "a:", "f:");
+            SelectExpressionStyle(ExpressionMode.Common);
+            // dirty flag set by change watchers if one or more fields have changed
+        }
 
         #endregion Display Format
 
