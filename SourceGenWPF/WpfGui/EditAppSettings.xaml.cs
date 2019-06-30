@@ -124,7 +124,15 @@ namespace SourceGenWPF.WpfGui {
                 mColumnFormats[i] = (string) mColButtons[i].Content;
             }
 
-#if false
+            // Create an assembler list for the assembler-config combo box and the two
+            // "quick set" combo boxes.
+            AssemblerList = new List<AssemblerInfo>();
+            IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
+            while (iter.MoveNext()) {
+                AssemblerList.Add(iter.Current);
+            }
+            // Can't set the selected item yet.
+
             // Map text boxes to PseudoOpName fields.
             mPseudoNameMap = new TextBoxPropertyMap[] {
                 new TextBoxPropertyMap(equDirectiveTextBox, "EquDirective"),
@@ -150,43 +158,13 @@ namespace SourceGenWPF.WpfGui {
                 new TextBoxPropertyMap(strDciTextBox, "StrDci"),
                 new TextBoxPropertyMap(strDciHiTextBox, "StrDciHi"),
             };
-#endif
-
-            // Create an assembler list for the assembler-config combo box and the two
-            // "quick set" combo boxes.
-            AssemblerList = new List<AssemblerInfo>();
-            IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
-            while (iter.MoveNext()) {
-                AssemblerList.Add(iter.Current);
-            }
-            // Can't set the selected item yet.
-
-#if false
-            expressionStyleComboBox.DisplayMember = "Name";
-            foreach (ExpressionStyleItem esi in sExpStyleItems) {
-                expressionStyleComboBox.Items.Add(esi);
-            }
-#endif
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             Loaded_CodeView();
             Loaded_AsmConfig();
             Loaded_DisplayFormat();
-
-#if false
-
-            // Pseudo ops.
-            string opStrCereal = mSettings.GetString(AppSettings.FMT_PSEUDO_OP_NAMES, null);
-            if (!string.IsNullOrEmpty(opStrCereal)) {
-                PseudoOp.PseudoOpNames opNames = PseudoOp.PseudoOpNames.Deserialize(opStrCereal);
-                ImportPseudoOpNames(opNames);
-            } else {
-                // no data available, populate with blanks
-                //PseudoOp.PseudoOpNames opNames = PseudoOp.sDefaultPseudoOpNames;
-                ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
-            }
-#endif
+            Loaded_PseudoOp();
 
             switch (mInitialTab) {
                 case Tab.CodeView:
@@ -223,11 +201,9 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void ApplySettings() {
-#if false
             PseudoOp.PseudoOpNames opNames = ExportPseudoOpNames();
             string pseudoCereal = opNames.Serialize();
             mSettings.SetString(AppSettings.FMT_PSEUDO_OP_NAMES, pseudoCereal);
-#endif
 
             mMainCtrl.SetAppSettings(mSettings);
             AsmGen.AssemblerVersionCache.QueryVersions();
@@ -866,6 +842,67 @@ namespace SourceGenWPF.WpfGui {
             }
         }
         private TextBoxPropertyMap[] mPseudoNameMap;
+
+        private void Loaded_PseudoOp() {
+            string opStrCereal = mSettings.GetString(AppSettings.FMT_PSEUDO_OP_NAMES, null);
+            if (!string.IsNullOrEmpty(opStrCereal)) {
+                PseudoOp.PseudoOpNames opNames = PseudoOp.PseudoOpNames.Deserialize(opStrCereal);
+                ImportPseudoOpNames(opNames);
+            } else {
+                // no data available, populate with blanks
+                //PseudoOp.PseudoOpNames opNames = PseudoOp.sDefaultPseudoOpNames;
+                ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
+            }
+
+            // No need to set this to anything specific.
+            pseudoOpQuickComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Imports values from PseudoOpNames struct into text fields.
+        /// </summary>
+        private void ImportPseudoOpNames(PseudoOp.PseudoOpNames opNames) {
+            for (int i = 0; i < mPseudoNameMap.Length; i++) {
+                string str = (string)mPseudoNameMap[i].PropInfo.GetValue(opNames);
+                mPseudoNameMap[i].TextBox.Text = (str == null) ? string.Empty : str;
+            }
+        }
+
+        /// <summary>
+        /// Exports values from text fields to a PseudoOpNames object.
+        /// </summary>
+        private PseudoOp.PseudoOpNames ExportPseudoOpNames() {
+            PseudoOp.PseudoOpNames opNames = new PseudoOp.PseudoOpNames();
+            for (int i = 0; i < mPseudoNameMap.Length; i++) {
+                // NOTE: PseudoOpNames must be a class (not a struct) or this will fail.
+                // SetValue() would be invoked on a boxed copy that is discarded afterward.
+                mPseudoNameMap[i].PropInfo.SetValue(opNames, mPseudoNameMap[i].TextBox.Text);
+            }
+            return opNames;
+        }
+
+        // Invoked when text is changed in any pseudo-op text box.
+        private void PseudoOpTextChanged(object sender, EventArgs e) {
+            // Just set the dirty flag.  The (somewhat expensive) export will happen
+            // on Apply/OK.
+            IsDirty = true;
+        }
+
+        private void PseudoOpDefaultButton_Click(object sender, RoutedEventArgs e) {
+            ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
+        }
+
+        private void PseudoOpSetButton_Click(object sender, RoutedEventArgs e) {
+            AssemblerInfo asmInfo = (AssemblerInfo)pseudoOpQuickComboBox.SelectedItem;
+            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+
+            PseudoOp.PseudoOpNames opNames;
+            Asm65.Formatter.FormatConfig formatConfig;
+            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
+            ImportPseudoOpNames(opNames);
+
+            // dirty flag set by change watchers if one or more fields have changed
+        }
 
         #endregion PseudoOp
     }
