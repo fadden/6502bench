@@ -127,6 +127,8 @@ limitations under the License.
                         Executed="NewProjectCmd_Executed"/>
         <CommandBinding Command="{StaticResource OpenCmd}"
                         Executed="OpenCmd_Executed"/>
+        <CommandBinding Command="Properties"
+                        CanExecute="IsProjectOpen" Executed="EditProjectProperties_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
                         CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" x:Name="recentProjectCmd"

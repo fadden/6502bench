@@ -1382,6 +1382,25 @@ namespace SourceGenWPF {
             }
         }
 
+        public void EditProjectProperties() {
+            string projectDir = string.Empty;
+            if (!string.IsNullOrEmpty(mProjectPathName)) {
+                projectDir = Path.GetDirectoryName(mProjectPathName);
+            }
+            EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
+                projectDir, mOutputFormatter);
+            dlg.ShowDialog();
+            ProjectProperties newProps = dlg.NewProps;
+
+            // The dialog result doesn't matter, because the user might have hit "apply"
+            // before hitting "cancel".
+            if (newProps != null) {
+                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
+                    mProject.ProjectProps, newProps);
+                ApplyUndoableChanges(new ChangeSet(uc));
+            }
+        }
+
         /// <summary>
         /// Moves the view and selection to the specified offset.  We want to select stuff
         /// differently if we're jumping to a note vs. jumping to an instruction.

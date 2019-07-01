@@ -830,6 +830,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.OpenProject();
         }
 
+        private void EditProjectProperties_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditProjectProperties();
+        }
+
         private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
@@ -1177,5 +1181,6 @@ namespace SourceGenWPF.WpfGui {
         private string mInfoBoxContents;
 
         #endregion Info panel
+
     }
 }

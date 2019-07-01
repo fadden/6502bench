@@ -1,0 +1,193 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Window x:Class="SourceGenWPF.WpfGui.EditProjectProperties"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
+        mc:Ignorable="d"
+        Title="Edit Project Properties"
+        Width="700" Height="440" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded">
+
+    <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Bottom">
+            <Button DockPanel.Dock="Right" Name="cancelButton" Content="Cancel" IsCancel="True"
+                    Width="70" Margin="4,0,0,0"/>
+            <Button DockPanel.Dock="Right" Name="okButton" Content="OK" IsDefault="True"
+                    Width="70" Click="OkButton_Click"/>
+            <Button DockPanel.Dock="Right" Name="applyButton" Content="Apply" Margin="0,0,20,0"
+                    Width="70" IsEnabled="{Binding IsDirty}" Click="ApplyButton_Click"/>
+            <TextBlock DockPanel.Dock="Left" Text="NOTE: changes are added to the undo/redo buffer"/>
+        </DockPanel>
+
+        <TabControl Name="tabControl" DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TabItem Name="generalTab" Header="General">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Header="CPU" Grid.Column="0" Grid.Row="0">
+                        <StackPanel>
+                            <ComboBox Name="cpuComboBox"/>
+                            <CheckBox Content="Enable undocumented instructions"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Entry Flags" Grid.Column="0" Grid.Row="1">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Flags:"/>
+                                <TextBlock Text="N- V- M- X- D- I- Z- C- E-"
+                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                            </StackPanel>
+                            <Button Width="75" Content="Change"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Analysis Parameters" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                        <StackPanel>
+                            <CheckBox Content="Analyze uncategorized data"/>
+                            <CheckBox Content="Seek nearby targets"/>
+                            <TextBlock Text="Minimum characters for string:"/>
+                            <ComboBox Name="minStringCharsComboBox"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Miscellaneous" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="Auto-label style:"/>
+                            <ComboBox DockPanel.Dock="Left" Name="autoLabelStyleComboBox"/>
+                        </DockPanel>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Name="projectSymbolsTab" Header="Project Symbols">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
+                               Text="Symbols defined in project:"/>
+
+                    <ListView Grid.Column="0" Grid.Row="1"
+                              FontFamily="{StaticResource GeneralMonoFont}">
+                        <ListView.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            </Style>
+                        </ListView.Resources>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Header="Name"/>
+                                <GridViewColumn Header="Value"/>
+                                <GridViewColumn Header="Type"/>
+                                <GridViewColumn Header="Comment"/>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.Items>
+                            <ListViewItem>abcdefg</ListViewItem>
+                        </ListView.Items>
+                    </ListView>
+
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <Button Width="120" Content="_New Symbol..."/>
+                        <Button Width="120" Content="_Edit Symbol..."/>
+                        <Button Width="120" Content="_Remove"/>
+                        <Button Width="120" Content="_Import..."/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Name="symbolFilesTab" Header="Symbol Files">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Currently configured symbol files:"/>
+
+                    <ListBox Name="symbolFilesListBox" Grid.Column="0" Grid.Row="1">
+
+                    </ListBox>
+
+                    <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
+                            Content="Add Symbol Files..."/>
+
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <Button Width="75" Content="Up"/>
+                        <Button Width="75" Content="Down"/>
+                        <Button Width="75" Content="Remove"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Name="extensionScriptsTab" Header="Extension Scripts">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Currently configured symbol files:"/>
+
+                    <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1">
+
+                    </ListBox>
+
+                    <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
+                            Content="Add Scripts..."/>
+
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <Button Width="75" Content="Remove"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </DockPanel>
+</Window>

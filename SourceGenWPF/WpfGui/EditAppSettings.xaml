@@ -25,8 +25,8 @@ limitations under the License.
         Width="700" Height="440" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
-    <DockPanel Margin="8">
 
+    <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="applyButton" Content="Apply" Margin="0,0,20,0"
                     Width="70" IsEnabled="{Binding IsDirty}" Click="ApplyButton_Click"/>
@@ -219,7 +219,7 @@ limitations under the License.
                 </StackPanel>
             </TabItem>
 
-        
+
             <TabItem Name="displayFormatTab" Header="Display Format">
                 <DockPanel LastChildFill="False">
                     <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
