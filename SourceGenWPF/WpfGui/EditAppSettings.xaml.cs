@@ -337,63 +337,51 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
-        private bool mUpperHexValues;
         public bool UpperHexValues {
-            get { return mUpperHexValues; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_HEX_DIGITS, false); }
             set {
-                mUpperHexValues = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_HEX_DIGITS, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
-        private bool mUpperOpcodes;
         public bool UpperOpcodes {
-            get { return mUpperOpcodes; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_OP_MNEMONIC, false); }
             set {
-                mUpperOpcodes = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_OP_MNEMONIC, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
-        private bool mUpperPseudoOps;
         public bool UpperPseudoOps {
-            get { return mUpperPseudoOps; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_PSEUDO_OP_MNEMONIC, false); }
             set {
-                mUpperPseudoOps = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_PSEUDO_OP_MNEMONIC, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
-        private bool mUpperOperandA;
         public bool UpperOperandA {
-            get { return mUpperOperandA; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_A, false); }
             set {
-                mUpperOperandA = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_OPERAND_A, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
-        private bool mUpperOperandS;
         public bool UpperOperandS {
-            get { return mUpperOperandS; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_S, false); }
             set {
-                mUpperOperandS = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_OPERAND_S, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
-        private bool mUpperOperandXY;
         public bool UpperOperandXY {
-            get { return mUpperOperandXY; }
+            get { return mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false); }
             set {
-                mUpperOperandXY = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_UPPER_OPERAND_XY, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
@@ -416,24 +404,20 @@ namespace SourceGenWPF.WpfGui {
             IsDirty = true;
         }
 
-        private bool mSpacesBetweenBytes;
         public bool SpacesBetweenBytes {
-            get { return mSpacesBetweenBytes; }
+            get { return mSettings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false); }
             set {
-                mSpacesBetweenBytes = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
 
-        private bool mEnableDebugMenu;
         public bool EnableDebugMenu {
-            get { return mEnableDebugMenu; }
+            get { return mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false); }
             set {
-                mEnableDebugMenu = value;
-                OnPropertyChanged();
                 mSettings.SetBool(AppSettings.DEBUG_MENU_ENABLED, value);
+                OnPropertyChanged();
                 IsDirty = true;
             }
         }
@@ -503,52 +487,36 @@ namespace SourceGenWPF.WpfGui {
         }
 
         // checkboxes
-        private bool mShowCycleCounts;
         public bool ShowCycleCounts {
-            get { return mShowCycleCounts; }
+            get { return mSettings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false); }
             set {
-                if (mShowCycleCounts != value) {
-                    mShowCycleCounts = value;
-                    OnPropertyChanged();
-                    mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, value);
-                    IsDirty = true;
-                }
+                mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, value);
+                OnPropertyChanged();
+                IsDirty = true;
             }
         }
-        private bool mLongLabelNewLine;
         public bool LongLabelNewLine {
-            get { return mLongLabelNewLine; }
+            get { return mSettings.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false); }
             set {
-                if (mLongLabelNewLine != value) {
-                    mLongLabelNewLine = value;
-                    OnPropertyChanged();
-                    mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, value);
-                    IsDirty = true;
-                }
+                mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, value);
+                OnPropertyChanged();
+                IsDirty = true;
             }
         }
-        private bool mAddIdentComment;
         public bool AddIdentComment {
-            get { return mAddIdentComment; }
+            get { return mSettings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false); }
             set {
-                if (mAddIdentComment != value) {
-                    mAddIdentComment = value;
-                    OnPropertyChanged();
-                    mSettings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, value);
-                    IsDirty = true;
-                }
+                mSettings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, value);
+                OnPropertyChanged();
+                IsDirty = true;
             }
         }
-        private bool mDisableLabelLocalization;
         public bool DisableLabelLocalization {
-            get { return mDisableLabelLocalization; }
+            get { return mSettings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false); }
             set {
-                if (mDisableLabelLocalization != value) {
-                    mDisableLabelLocalization = value;
-                    OnPropertyChanged();
-                    mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, value);
-                    IsDirty = true;
-                }
+                mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, value);
+                OnPropertyChanged();
+                IsDirty = true;
             }
         }
 

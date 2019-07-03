@@ -24,7 +24,7 @@ namespace SourceGenWPF {
     /// </summary>
     public static class AutoLabel {
         /// <summary>
-        /// Auto-label style enumeration.  Values were chosen to map directly to a combo box.
+        /// Auto-label style enumeration.
         /// </summary>
         public enum Style {
             Unknown = -1,

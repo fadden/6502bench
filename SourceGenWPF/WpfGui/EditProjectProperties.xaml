@@ -22,9 +22,16 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGenWPF.WpfGui"
         mc:Ignorable="d"
         Title="Edit Project Properties"
-        Width="700" Height="440" ResizeMode="NoResize"
+        Width="600" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <!-- don't center the column headers -->
+        <Style TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+    </Window.Resources>
 
     <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Bottom">
@@ -51,36 +58,48 @@ limitations under the License.
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <GroupBox Header="CPU" Grid.Column="0" Grid.Row="0">
+                    <GroupBox Header="CPU" Grid.Column="0" Grid.Row="0" Padding="2,4">
                         <StackPanel>
-                            <ComboBox Name="cpuComboBox"/>
-                            <CheckBox Content="Enable undocumented instructions"/>
+                            <ComboBox Name="cpuComboBox" ItemsSource="{Binding CpuItems}" DisplayMemberPath="Name"
+                                      SelectionChanged="CpuComboBox_SelectionChanged"/>
+                            <CheckBox Margin="0,4,0,0" Content="Enable undocumented instructions"
+                                      IsChecked="{Binding IncludeUndocumentedInstr}"/>
                         </StackPanel>
                     </GroupBox>
-                    <GroupBox Header="Entry Flags" Grid.Column="0" Grid.Row="1">
+                    <GroupBox Header="Entry Flags" Grid.Column="0" Grid.Row="1" Padding="2,4">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Flags:"/>
-                                <TextBlock Text="N- V- M- X- D- I- Z- C- E-"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                                <TextBlock Name="currentFlagsText" Margin="4,2,0,0"
+                                           Text="N- V- M- X- D- I- Z- C- E-"
+                                           FontFamily="{StaticResource GeneralMonoFont}"/>
                             </StackPanel>
-                            <Button Width="75" Content="Change"/>
+                            <Button Width="75" Content="Change" Margin="0,4,0,0"
+                                    HorizontalAlignment="Left" Click="ChangeFlagButton_Click"/>
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Analysis Parameters" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                    <GroupBox Header="Analysis Parameters" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                              Margin="4,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Analyze uncategorized data"/>
-                            <CheckBox Content="Seek nearby targets"/>
-                            <TextBlock Text="Minimum characters for string:"/>
-                            <ComboBox Name="minStringCharsComboBox"/>
+                            <CheckBox Name="analyzeUncategorizedCheckBox" Content="Analyze uncategorized data"
+                                      IsChecked="{Binding AnalyzeUncategorizedData}"/>
+                            <CheckBox Name="seekAltTargetCheckBox" Margin="0,4,0,0" Content="Seek nearby targets"
+                                      IsChecked="{Binding SeekNearbyTargets}"/>
+                            <TextBlock Margin="0,8,0,0" Text="Minimum characters for string:"/>
+                            <ComboBox Name="minStringCharsComboBox" Margin="0,2,0,0"
+                                      ItemsSource="{Binding MinCharsItems}" DisplayMemberPath="Name"
+                                      SelectionChanged="MinStringCharsComboBox_SelectionChanged"/>
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Miscellaneous" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+                    <GroupBox Header="Miscellaneous" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                              Padding="2,4">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Auto-label style:"/>
-                            <ComboBox DockPanel.Dock="Left" Name="autoLabelStyleComboBox"/>
+                            <TextBlock DockPanel.Dock="Left" Text="Auto-label style:" Margin="0,2,8,0"/>
+                            <ComboBox DockPanel.Dock="Left" Name="autoLabelStyleComboBox"
+                                      ItemsSource="{Binding AutoLabelItems}" DisplayMemberPath="Name"
+                                      SelectionChanged="AutoLabelStyleComboBox_SelectionChanged"/>
                         </DockPanel>
                     </GroupBox>
                 </Grid>
@@ -95,13 +114,13 @@ limitations under the License.
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
-                               Text="Symbols defined in project:"/>
+                               Margin="4,0,0,0" Text="Symbols defined in project:"/>
 
-                    <ListView Grid.Column="0" Grid.Row="1"
+                    <ListView Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
                               FontFamily="{StaticResource GeneralMonoFont}">
                         <ListView.Resources>
                             <Style TargetType="TextBlock">
@@ -122,10 +141,10 @@ limitations under the License.
                     </ListView>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
-                        <Button Width="120" Content="_New Symbol..."/>
-                        <Button Width="120" Content="_Edit Symbol..."/>
-                        <Button Width="120" Content="_Remove"/>
-                        <Button Width="120" Content="_Import..."/>
+                        <Button Name="newSymbolButton" Width="120" Margin="4" Content="_New Symbol..."/>
+                        <Button Name="editSymbolButton" Width="120" Margin="4,4" Content="_Edit Symbol..."/>
+                        <Button Name="removeSymbolButton" Width="120" Margin="4,4" Content="_Remove"/>
+                        <Button Name="importSymbolsButton" Width="120" Margin="4,20,4,0" Content="_Import..."/>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -143,19 +162,20 @@ limitations under the License.
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Currently configured symbol files:"/>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Margin="4,0,0,0"
+                               Text="Currently configured symbol files:"/>
 
-                    <ListBox Name="symbolFilesListBox" Grid.Column="0" Grid.Row="1">
+                    <ListBox Name="symbolFilesListBox" Grid.Column="0" Grid.Row="1" Margin="4">
 
                     </ListBox>
 
-                    <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
-                            Content="Add Symbol Files..."/>
+                    <Button Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left"
+                            Margin="4" Content="Add Symbol Files..."/>
 
-                    <StackPanel Grid.Column="1" Grid.Row="1">
-                        <Button Width="75" Content="Up"/>
-                        <Button Width="75" Content="Down"/>
-                        <Button Width="75" Content="Remove"/>
+                    <StackPanel Grid.Column="2" Grid.Row="1">
+                        <Button Name="symbolFileUpButton" Width="75" Margin="4" Content="_Up"/>
+                        <Button Name="symbolFileDownButton" Width="75" Margin="4,4" Content="_Down"/>
+                        <Button Name="symbolFileRemoveButton" Width="75" Margin="4,20,4,0" Content="_Remove"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -173,17 +193,18 @@ limitations under the License.
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Currently configured symbol files:"/>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Margin="4,0,0,0"
+                               Text="Currently configured symbol files:"/>
 
-                    <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1">
+                    <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1" Margin="4">
 
                     </ListBox>
 
                     <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
-                            Content="Add Scripts..."/>
+                            Margin="4" Content="Add Scripts..."/>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
-                        <Button Width="75" Content="Remove"/>
+                        <Button Name="extensionScriptRemoveButton" Width="75" Margin="4" Content="_Remove"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
