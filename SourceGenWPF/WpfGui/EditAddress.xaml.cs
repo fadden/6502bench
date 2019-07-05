@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -22,7 +24,7 @@ namespace SourceGenWPF.WpfGui {
     /// <summary>
     /// Edit Address dialog.
     /// </summary>
-    public partial class EditAddress : Window {
+    public partial class EditAddress : Window, INotifyPropertyChanged {
         /// <summary>
         /// Address typed by user. Only valid after the dialog returns OK.  Will be set to -1
         /// if the user is attempting to delete the address.
@@ -39,6 +41,24 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         public string AddressText { get; set; }
 
+        /// <summary>
+        /// Set to true when input is valid.  Controls whether the OK button is enabled.
+        /// </summary>
+        public bool IsValid {
+            get { return mIsValid; }
+            set {
+                mIsValid = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mIsValid;
+
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         public EditAddress(Window owner, int initialAddr, int maxAddressValue) {
             // Set the property before initializing the window -- we don't have a property
@@ -47,9 +67,9 @@ namespace SourceGenWPF.WpfGui {
             mMaxAddressValue = maxAddressValue;
             AddressText = Asm65.Address.AddressToString(initialAddr, false);
 
-            this.DataContext = this;
             InitializeComponent();
             Owner = owner;
+            DataContext = this;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
@@ -71,14 +91,10 @@ namespace SourceGenWPF.WpfGui {
         /// </remarks>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
             if (IsLoaded) {
-                UpdateOkEnabled();
+                string text = AddressText;
+                IsValid = (text.Length == 0) ||
+                    Asm65.Address.ParseAddress(text, mMaxAddressValue, out int unused);
             }
-        }
-
-        private void UpdateOkEnabled() {
-            string text = AddressText;
-            okButton.IsEnabled = (text.Length == 0) ||
-                Asm65.Address.ParseAddress(text, mMaxAddressValue, out int unused);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -88,18 +104,12 @@ namespace SourceGenWPF.WpfGui {
     }
 
 
-    // I briefly played with the validation rules.  However, they're primarily designed for
-    // form entry, which means they fire when focus leaves the text box.  [note: not sure if
-    // this would change with UpdateSourceTrigger=PropertyChanged]  I want the OK button to be
-    // kept constantly up to date as the user types, so this didn't really work.  It's also a
-    // lot bigger and uglier than just handling an event.
-    //
-    // It's also sort of awkward to pass parameters, like MaxAddressValue, into the
-    // validation rule.
+    // This might be better with validation rules, but it's sort of awkward to pass parameters
+    // (like MaxAddressValue) in.
     // https://social.technet.microsoft.com/wiki/contents/articles/31422.wpf-passing-a-data-bound-value-to-a-validation-rule.aspx
     //
-    // Speaking of awkward, updating the OK button enable/disable through validation
-    // is possible via MultiDataTrigger.
+    // Speaking of awkward, updating the OK button's IsEnable value through validation
+    // requires MultiDataTrigger.
 
 
     //public class AddressValidationRule : ValidationRule {
