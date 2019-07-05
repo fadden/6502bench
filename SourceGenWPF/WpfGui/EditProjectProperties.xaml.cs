@@ -102,6 +102,8 @@ namespace SourceGenWPF.WpfGui {
             LoadProjectSymbols();
             LoadPlatformSymbolFiles();
             LoadExtensionScriptNames();
+
+            UpdateControls();
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e) {
@@ -127,13 +129,37 @@ namespace SourceGenWPF.WpfGui {
             //
             // Project symbols tab
             //
-
             // Enable or disable the edit/remove buttons based on how many items are selected.
             // (We're currently configured for single-select, so this is really just a != 0 test.)
             int symSelCount = projectSymbolsListView.SelectedItems.Count;
             removeSymbolButton.IsEnabled = (symSelCount == 1);
             editSymbolButton.IsEnabled = (symSelCount == 1);
+
+            //
+            // Platform symbol files tab
+            //
+            int fileSelCount = symbolFilesListBox.SelectedItems.Count;
+            symbolFileRemoveButton.IsEnabled = (fileSelCount != 0);
+            symbolFileUpButton.IsEnabled = (fileSelCount == 1 &&
+                symbolFilesListBox.SelectedIndex != 0);
+            symbolFileDownButton.IsEnabled = (fileSelCount == 1 &&
+                symbolFilesListBox.SelectedIndex != symbolFilesListBox.Items.Count - 1);
+
+            //
+            // Extension Scripts tab
+            //
+            fileSelCount = extensionScriptsListBox.SelectedItems.Count;
+            extensionScriptRemoveButton.IsEnabled = (fileSelCount != 0);
         }
+
+        /// <summary>
+        /// Handles a change in the selection of any of the lists.
+        /// </summary>
+        private void List_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            // Enable/disable buttons as the selection changes.
+            UpdateControls();
+        }
+
 
         #region General
 
@@ -486,41 +512,29 @@ namespace SourceGenWPF.WpfGui {
 
         #endregion Project Symbols
 
-
         #region Platform symbol files
+
+        public ObservableCollection<string> PlatformSymbolIdentifiers { get; private set; } =
+            new ObservableCollection<string>();
 
         /// <summary>
         /// Loads the platform symbol file names into the list control.
         /// </summary>
         private void LoadPlatformSymbolFiles() {
-#if false
-            symbolFilesListBox.BeginUpdate();
-            symbolFilesListBox.Items.Clear();
-
+            PlatformSymbolIdentifiers.Clear();
             foreach (string fileName in mWorkProps.PlatformSymbolFileIdentifiers) {
-                symbolFilesListBox.Items.Add(fileName);
+                PlatformSymbolIdentifiers.Add(fileName);
             }
-
-            symbolFilesListBox.EndUpdate();
-#endif
         }
 
-        private void ProjectSymbolsListView_SelectionChanged(object sender,
-                SelectionChangedEventArgs e) {
-            // Enable/disable buttons as the selection changes.
-            UpdateControls();
-        }
-
-#if false
-
-        private void addSymbolFilesButton_Click(object sender, EventArgs e) {
+        private void AddSymbolFilesButton_Click(object sender, RoutedEventArgs e) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = PlatformSymbols.FILENAME_FILTER,
                 Multiselect = true,
                 InitialDirectory = RuntimeDataAccess.GetDirectory(),
                 RestoreDirectory = true     // doesn't seem to work?
             };
-            if (fileDlg.ShowDialog() != DialogResult.OK) {
+            if (fileDlg.ShowDialog() != true) {
                 return;
             }
 
@@ -533,12 +547,12 @@ namespace SourceGenWPF.WpfGui {
                     // Files not found in runtime or project directory.
                     string projDir = mProjectDir;
                     if (string.IsNullOrEmpty(projDir)) {
-                        projDir = Properties.Resources.UNSET;
+                        projDir = Res.Strings.UNSET;
                     }
-                    string msg = string.Format(Properties.Resources.EXTERNAL_FILE_BAD_DIR,
+                    string msg = string.Format(Res.Strings.EXTERNAL_FILE_BAD_DIR_FMT,
                             RuntimeDataAccess.GetDirectory(), projDir, pathName);
-                    MessageBox.Show(this, msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(msg, Res.Strings.EXTERNAL_FILE_BAD_DIR_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -551,149 +565,85 @@ namespace SourceGenWPF.WpfGui {
 
                 Debug.WriteLine("Adding symbol file: " + ident);
                 mWorkProps.PlatformSymbolFileIdentifiers.Add(ident);
-                mDirty = true;
+                IsDirty = true;
             }
 
-            if (mDirty) {
+            if (IsDirty) {
                 LoadPlatformSymbolFiles();
                 UpdateControls();
             }
         }
 
-        private void symbolFileUpButton_Click(object sender, EventArgs e) {
-            Debug.Assert(symbolFilesListBox.SelectedIndices.Count == 1);
-            int selIndex = symbolFilesListBox.SelectedIndices[0];
+        private void SymbolFileUpButton_Click(object sender, EventArgs e) {
+            Debug.Assert(symbolFilesListBox.SelectedItems.Count == 1);
+            int selIndex = symbolFilesListBox.SelectedIndex;
             Debug.Assert(selIndex > 0);
 
             MoveSingleItem(selIndex, symbolFilesListBox.SelectedItem, -1);
         }
 
-        private void symbolFileDownButton_Click(object sender, EventArgs e) {
-            Debug.Assert(symbolFilesListBox.SelectedIndices.Count == 1);
-            int selIndex = symbolFilesListBox.SelectedIndices[0];
+        private void SymbolFileDownButton_Click(object sender, EventArgs e) {
+            Debug.Assert(symbolFilesListBox.SelectedItems.Count == 1);
+            int selIndex = symbolFilesListBox.SelectedIndex;
             Debug.Assert(selIndex < symbolFilesListBox.Items.Count - 1);
 
             MoveSingleItem(selIndex, symbolFilesListBox.SelectedItem, +1);
         }
 
         private void MoveSingleItem(int selIndex, object selectedItem, int adj) {
-            object selected = symbolFilesListBox.SelectedItem;
-            symbolFilesListBox.Items.Remove(selected);
-            symbolFilesListBox.Items.Insert(selIndex + adj, selected);
-            symbolFilesListBox.SetSelected(selIndex + adj, true);
+            string selected = (string)symbolFilesListBox.SelectedItem;
+            PlatformSymbolIdentifiers.Remove(selected);
+            PlatformSymbolIdentifiers.Insert(selIndex + adj, selected);
+            symbolFilesListBox.SelectedIndex = selIndex + adj;
 
             // do the same operation in the file name list
             string str = mWorkProps.PlatformSymbolFileIdentifiers[selIndex];
             mWorkProps.PlatformSymbolFileIdentifiers.RemoveAt(selIndex);
             mWorkProps.PlatformSymbolFileIdentifiers.Insert(selIndex + adj, str);
 
-            mDirty = true;
+            IsDirty = true;
             UpdateControls();
         }
 
-        private void symbolFileRemoveButton_Click(object sender, EventArgs e) {
-            Debug.Assert(symbolFilesListBox.SelectedIndices.Count > 0);
-            for (int i = symbolFilesListBox.SelectedIndices.Count - 1; i >= 0; i--) {
-                int index = symbolFilesListBox.SelectedIndices[i];
-                symbolFilesListBox.Items.RemoveAt(index);
-                mWorkProps.PlatformSymbolFileIdentifiers.RemoveAt(index);
+        private void SymbolFileRemoveButton_Click(object sender, EventArgs e) {
+            Debug.Assert(symbolFilesListBox.SelectedItems.Count > 0);
+            for (int i = symbolFilesListBox.SelectedItems.Count - 1; i >= 0; i--) {
+                string selItem = (string)symbolFilesListBox.SelectedItems[i];
+                PlatformSymbolIdentifiers.Remove(selItem);
+                mWorkProps.PlatformSymbolFileIdentifiers.Remove(selItem);
             }
 
-            mDirty = true;
+            IsDirty = true;
             UpdateControls();
         }
-
-        private void importSymbolsButton_Click(object sender, EventArgs e) {
-            OpenFileDialog fileDlg = new OpenFileDialog() {
-                Filter = ProjectFile.FILENAME_FILTER + "|" + Properties.Resources.FILE_FILTER_ALL,
-                FilterIndex = 1
-            };
-            if (fileDlg.ShowDialog() != DialogResult.OK) {
-                return;
-            }
-            string projPathName = Path.GetFullPath(fileDlg.FileName);
-
-            DisasmProject newProject = new DisasmProject();
-            if (!ProjectFile.DeserializeFromFile(projPathName, newProject,
-                    out FileLoadReport report)) {
-                // Unable to open project file.  Report error and bail.
-                ProjectLoadIssues dlg = new ProjectLoadIssues(report.Format(),
-                    ProjectLoadIssues.Buttons.Cancel);
-                dlg.ShowDialog();
-                // ignore dlg.DialogResult
-                dlg.Dispose();
-                return;
-            }
-
-            // Import all user labels that were marked as "global export".  These become
-            // external-address project symbols.
-            int foundCount = 0;
-            foreach (KeyValuePair<int, Symbol> kvp in newProject.UserLabels) {
-                if (kvp.Value.SymbolType == Symbol.Type.GlobalAddrExport) {
-                    Symbol sym = kvp.Value;
-                    DefSymbol defSym = new DefSymbol(sym.Label, sym.Value, Symbol.Source.Project,
-                        Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
-                        string.Empty, string.Empty);
-                    mWorkProps.ProjectSyms[defSym.Label] = defSym;
-                    foundCount++;
-                }
-            }
-            if (foundCount != 0) {
-                mDirty = true;
-                LoadProjectSymbols();
-                UpdateControls();
-            }
-
-            newProject.Cleanup();
-
-            // Tell the user we did something.  Might be nice to tell them how many weren't
-            // already present.
-            string msg;
-            if (foundCount == 0) {
-                msg = Properties.Resources.SYMBOL_IMPORT_NONE;
-            } else {
-                msg = string.Format(Properties.Resources.SYMBOL_IMPORT_GOOD, foundCount);
-            }
-            MessageBox.Show(this, msg, Properties.Resources.SYMBOL_IMPORT_CAPTION,
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-#endif
 
         #endregion Platform symbol files
 
 
         #region Extension scripts
 
+        public ObservableCollection<string> ExtensionScriptIdentifiers { get; private set; } =
+            new ObservableCollection<string>();
+
         /// <summary>
         /// Loads the extension script file names into the list control.
         /// </summary>
         private void LoadExtensionScriptNames() {
-#if false
-            extensionScriptsListBox.BeginUpdate();
-            extensionScriptsListBox.Items.Clear();
+            ExtensionScriptIdentifiers.Clear();
 
             foreach (string fileName in mWorkProps.ExtensionScriptFileIdentifiers) {
-                extensionScriptsListBox.Items.Add(fileName);
+                ExtensionScriptIdentifiers.Add(fileName);
             }
-
-            extensionScriptsListBox.EndUpdate();
-#endif
         }
 
-#if false
-        private void extensionScriptsListBox_SelectedIndexChanged(object sender, EventArgs e) {
-            // Enable/disable buttons as the selection changes.
-            UpdateControls();
-        }
-
-        private void addExtensionScriptsButton_Click(object sender, EventArgs e) {
+        private void AddExtensionScriptsButton_Click(object sender, EventArgs e) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Sandbox.ScriptManager.FILENAME_FILTER,
                 Multiselect = true,
                 InitialDirectory = RuntimeDataAccess.GetDirectory(),
                 RestoreDirectory = true     // doesn't seem to work?
             };
-            if (fileDlg.ShowDialog() != DialogResult.OK) {
+            if (fileDlg.ShowDialog() != true) {
                 return;
             }
 
@@ -706,12 +656,12 @@ namespace SourceGenWPF.WpfGui {
                     // Files not found in runtime or project directory.
                     string projDir = mProjectDir;
                     if (string.IsNullOrEmpty(projDir)) {
-                        projDir = Properties.Resources.UNSET;
+                        projDir = Res.Strings.UNSET;
                     }
-                    string msg = string.Format(Properties.Resources.EXTERNAL_FILE_BAD_DIR,
+                    string msg = string.Format(Res.Strings.EXTERNAL_FILE_BAD_DIR_FMT,
                             RuntimeDataAccess.GetDirectory(), projDir, pathName);
-                    MessageBox.Show(this, msg, Properties.Resources.EXTERNAL_FILE_BAD_DIR_CAPTION,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, msg, Res.Strings.EXTERNAL_FILE_BAD_DIR_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -724,27 +674,26 @@ namespace SourceGenWPF.WpfGui {
 
                 Debug.WriteLine("Adding extension script: " + ident);
                 mWorkProps.ExtensionScriptFileIdentifiers.Add(ident);
-                mDirty = true;
+                IsDirty = true;
             }
 
-            if (mDirty) {
+            if (IsDirty) {
                 LoadExtensionScriptNames();
                 UpdateControls();
             }
         }
 
-        private void extensionScriptRemoveButton_Click(object sender, EventArgs e) {
-            Debug.Assert(extensionScriptsListBox.SelectedIndices.Count > 0);
-            for (int i = extensionScriptsListBox.SelectedIndices.Count - 1; i >= 0; i--) {
-                int index = extensionScriptsListBox.SelectedIndices[i];
-                extensionScriptsListBox.Items.RemoveAt(index);
-                mWorkProps.ExtensionScriptFileIdentifiers.RemoveAt(index);
+        private void ExtensionScriptRemoveButton_Click(object sender, EventArgs e) {
+            Debug.Assert(extensionScriptsListBox.SelectedItems.Count > 0);
+            for (int i = extensionScriptsListBox.SelectedItems.Count - 1; i >= 0; i--) {
+                string selItem = (string)extensionScriptsListBox.SelectedItems[i];
+                ExtensionScriptIdentifiers.Remove(selItem);
+                mWorkProps.ExtensionScriptFileIdentifiers.Remove(selItem);
             }
 
-            mDirty = true;
+            IsDirty = true;
             UpdateControls();
         }
-#endif
 
         #endregion Extension scripts
     }

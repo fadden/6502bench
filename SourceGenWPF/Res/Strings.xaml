@@ -53,6 +53,8 @@ limitations under the License.
     <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
     <system:String x:Key="str_ErrProjectSaveFail">Unable to save project file</system:String>
     <system:String x:Key="str_ErrTooLargeForPreview">[File was too large for preview window]</system:String>
+    <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
+    <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
     <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>
     <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
@@ -102,4 +104,5 @@ limitations under the License.
     <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
     <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
     <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>
+    <system:String x:Key="str_Unset">[unset]</system:String>
 </ResourceDictionary>

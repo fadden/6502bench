@@ -124,7 +124,7 @@ limitations under the License.
                               FontFamily="{StaticResource GeneralMonoFont}"
                               ItemsSource="{Binding ProjectSymbols}"
                               SnapsToDevicePixels="True" SelectionMode="Single"
-                              SelectionChanged="ProjectSymbolsListView_SelectionChanged"
+                              SelectionChanged="List_SelectionChanged"
                               MouseDoubleClick="ProjectSymbolsListView_MouseDoubleClick">
                         <ListView.Resources>
                             <Style TargetType="TextBlock">
@@ -170,17 +170,22 @@ limitations under the License.
                     <TextBlock Grid.Column="0" Grid.Row="0" Margin="4,0,0,0"
                                Text="Currently configured symbol files:"/>
 
-                    <ListBox Name="symbolFilesListBox" Grid.Column="0" Grid.Row="1" Margin="4">
-
-                    </ListBox>
+                    <ListBox Name="symbolFilesListBox" Grid.Column="0" Grid.Row="1" Margin="4"
+                             SelectionMode="Extended"
+                             ItemsSource="{Binding PlatformSymbolIdentifiers}"
+                             SelectionChanged="List_SelectionChanged"/>
 
                     <Button Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left"
-                            Margin="4" Content="Add Symbol Files..."/>
+                            Margin="4" Content="Add Symbol Files..."
+                            Click="AddSymbolFilesButton_Click"/>
 
                     <StackPanel Grid.Column="2" Grid.Row="1">
-                        <Button Name="symbolFileUpButton" Width="75" Margin="4" Content="_Up"/>
-                        <Button Name="symbolFileDownButton" Width="75" Margin="4,4" Content="_Down"/>
-                        <Button Name="symbolFileRemoveButton" Width="75" Margin="4,20,4,0" Content="_Remove"/>
+                        <Button Name="symbolFileUpButton" Width="75" Margin="4" Content="_Up"
+                                Click="SymbolFileUpButton_Click"/>
+                        <Button Name="symbolFileDownButton" Width="75" Margin="4,4" Content="_Down"
+                                Click="SymbolFileDownButton_Click"/>
+                        <Button Name="symbolFileRemoveButton" Width="75" Margin="4,20,4,0" Content="_Remove"
+                                Click="SymbolFileRemoveButton_Click"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -201,15 +206,18 @@ limitations under the License.
                     <TextBlock Grid.Column="0" Grid.Row="0" Margin="4,0,0,0"
                                Text="Currently configured symbol files:"/>
 
-                    <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1" Margin="4">
-
-                    </ListBox>
+                    <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1" Margin="4"
+                             SelectionMode="Extended"
+                             ItemsSource="{Binding ExtensionScriptIdentifiers}"
+                             SelectionChanged="List_SelectionChanged"/>
 
                     <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
-                            Margin="4" Content="Add Scripts..."/>
+                            Margin="4" Content="Add Scripts..."
+                            Click="AddExtensionScriptsButton_Click"/>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
-                        <Button Name="extensionScriptRemoveButton" Width="75" Margin="4" Content="_Remove"/>
+                        <Button Name="extensionScriptRemoveButton" Width="75" Margin="4" Content="_Remove"
+                                Click="ExtensionScriptRemoveButton_Click"/>
                     </StackPanel>
                 </Grid>
             </TabItem>

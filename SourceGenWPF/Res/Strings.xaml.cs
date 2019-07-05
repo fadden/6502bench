@@ -91,6 +91,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ErrProjectSaveFail");
         public static string ERR_TOO_LARGE_FOR_PREVIEW =
             (string)Application.Current.FindResource("str_ErrTooLargeForPreview");
+        public static string EXTERNAL_FILE_BAD_DIR_FMT =
+            (string)Application.Current.FindResource("str_ExternalFileBadDirFmt");
+        public static string EXTERNAL_FILE_BAD_DIR_CAPTION =
+            (string)Application.Current.FindResource("str_ExternalFileBadDirCaption");
         public static string FILE_FILTER_ALL =
             (string)Application.Current.FindResource("str_FileFilterAll");
         public static string FILE_FILTER_CS =
@@ -189,5 +193,7 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_SymbolImportGoodFmt");
         public static string SYMBOL_IMPORT_NONE =
             (string)Application.Current.FindResource("str_SymbolImportNone");
+        public static string UNSET =
+            (string)Application.Current.FindResource("str_Unset");
     }
 }
