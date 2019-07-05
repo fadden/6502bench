@@ -19,6 +19,8 @@ limitations under the License.
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:SourceGenWPF.Res">
 
+    <system:String x:Key="str_AbbrevAddress">Addr</system:String>
+    <system:String x:Key="str_AbbrevConstant">Const</system:String>
     <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
     <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
     <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>
@@ -97,4 +99,7 @@ limitations under the License.
     <system:String x:Key="str_SaveBeforeAsmCaption">Save Project First</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
     <system:String x:Key="str_ShowCol">Show</system:String>
+    <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
+    <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
+    <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>
 </ResourceDictionary>

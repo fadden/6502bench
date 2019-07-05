@@ -23,6 +23,10 @@ namespace SourceGenWPF.Res {
     /// resources will cause the app to fail at launch.
     /// </summary>
     public static class Strings {
+        public static string ABBREV_ADDRESS =
+            (string)Application.Current.FindResource("str_AbbrevAddress");
+        public static string ABBREV_CONSTANT =
+            (string)Application.Current.FindResource("str_AbbrevConstant");
         public static string ASM_LATEST_VERSION =
             (string)Application.Current.FindResource("str_AsmLatestVersion");
         public static string ASM_MATCH_FAILURE =
@@ -179,5 +183,11 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
         public static string SHOW_COL =
             (string)Application.Current.FindResource("str_ShowCol");
+        public static string SYMBOL_IMPORT_CAPTION =
+            (string)Application.Current.FindResource("str_SymbolImportCaption");
+        public static string SYMBOL_IMPORT_GOOD_FMT =
+            (string)Application.Current.FindResource("str_SymbolImportGoodFmt");
+        public static string SYMBOL_IMPORT_NONE =
+            (string)Application.Current.FindResource("str_SymbolImportNone");
     }
 }

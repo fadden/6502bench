@@ -120,8 +120,12 @@ limitations under the License.
                     <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
                                Margin="4,0,0,0" Text="Symbols defined in project:"/>
 
-                    <ListView Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
-                              FontFamily="{StaticResource GeneralMonoFont}">
+                    <ListView Name="projectSymbolsListView" Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              ItemsSource="{Binding ProjectSymbols}"
+                              SnapsToDevicePixels="True" SelectionMode="Single"
+                              SelectionChanged="ProjectSymbolsListView_SelectionChanged"
+                              MouseDoubleClick="ProjectSymbolsListView_MouseDoubleClick">
                         <ListView.Resources>
                             <Style TargetType="TextBlock">
                                 <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -129,22 +133,23 @@ limitations under the License.
                         </ListView.Resources>
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
-                                <GridViewColumn Header="Name"/>
-                                <GridViewColumn Header="Value"/>
-                                <GridViewColumn Header="Type"/>
-                                <GridViewColumn Header="Comment"/>
+                                <GridViewColumn Header="Name" Width="118" DisplayMemberBinding="{Binding Label}"/>
+                                <GridViewColumn Header="Value" Width="72" DisplayMemberBinding="{Binding Value}"/>
+                                <GridViewColumn Header="Type" Width="45" DisplayMemberBinding="{Binding Type}"/>
+                                <GridViewColumn Header="Comment" Width="300" DisplayMemberBinding="{Binding Comment}"/>
                             </GridView>
                         </ListView.View>
-                        <ListView.Items>
-                            <ListViewItem>abcdefg</ListViewItem>
-                        </ListView.Items>
                     </ListView>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
-                        <Button Name="newSymbolButton" Width="120" Margin="4" Content="_New Symbol..."/>
-                        <Button Name="editSymbolButton" Width="120" Margin="4,4" Content="_Edit Symbol..."/>
-                        <Button Name="removeSymbolButton" Width="120" Margin="4,4" Content="_Remove"/>
-                        <Button Name="importSymbolsButton" Width="120" Margin="4,20,4,0" Content="_Import..."/>
+                        <Button Name="newSymbolButton" Width="120" Margin="4" Content="_New Symbol..."
+                                Click="NewSymbolButton_Click"/>
+                        <Button Name="editSymbolButton" Width="120" Margin="4,4" Content="_Edit Symbol..."
+                                Click="EditSymbolButton_Click"/>
+                        <Button Name="removeSymbolButton" Width="120" Margin="4,4" Content="_Remove"
+                                Click="RemoveSymbolButton_Click"/>
+                        <Button Name="importSymbolsButton" Width="120" Margin="4,20,4,0" Content="_Import..."
+                                Click="ImportSymbolsButton_Click"/>
                     </StackPanel>
                 </Grid>
             </TabItem>

@@ -76,6 +76,9 @@
     <Compile Include="WpfGui\EditAppSettings.xaml.cs">
       <DependentUpon>EditAppSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\EditDefSymbol.xaml.cs">
+      <DependentUpon>EditDefSymbol.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditProjectProperties.xaml.cs">
       <DependentUpon>EditProjectProperties.xaml</DependentUpon>
     </Compile>
@@ -105,8 +108,8 @@
     <Compile Include="WpfGui\NewProject.xaml.cs">
       <DependentUpon>NewProject.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WpfGui\ProjectLoadIssue.xaml.cs">
-      <DependentUpon>ProjectLoadIssue.xaml</DependentUpon>
+    <Compile Include="WpfGui\ProjectLoadIssues.xaml.cs">
+      <DependentUpon>ProjectLoadIssues.xaml</DependentUpon>
     </Compile>
     <Compile Include="PseudoOp.cs" />
     <Compile Include="Res\Strings.xaml.cs" />
@@ -177,6 +180,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="WpfGui\EditDefSymbol.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WpfGui\EditProjectProperties.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -221,7 +228,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WpfGui\ProjectLoadIssue.xaml">
+    <Page Include="WpfGui\ProjectLoadIssues.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
