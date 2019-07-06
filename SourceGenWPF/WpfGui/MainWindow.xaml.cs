@@ -41,6 +41,7 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         public DisplayList CodeDisplayList { get; private set; }
 
+        /// <summary>
         /// Version string, for display.
         /// </summary>
         public string ProgramVersionString {
@@ -769,8 +770,8 @@ namespace SourceGenWPF.WpfGui {
 
         #region Command handlers
 
-        private void AppSettingsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.EditSettings();
+        private void AboutCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ShowAboutBox();
         }
 
         private void AssembleCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -783,12 +784,17 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
-        private void DebugSourceGenerationTests_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void DebugSourceGenerationTestsCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
             mMainCtrl.RunSourceGenerationTests();
         }
 
         private void EditAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditAddress();
+        }
+
+        private void EditAppSettingsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditSettings();
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -834,7 +840,7 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.OpenProject();
         }
 
-        private void EditProjectProperties_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void EditProjectPropertiesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditProjectProperties();
         }
 

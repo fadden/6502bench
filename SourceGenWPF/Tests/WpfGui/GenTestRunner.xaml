@@ -25,6 +25,7 @@ limitations under the License.
         Title="Source Generation Test"
         Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
         Width="640" Height="480" MinWidth="640" MinHeight="480"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Closing="Window_Closing">
 
     <Window.Resources>

@@ -47,7 +47,7 @@ limitations under the License.
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
             </Style>
 
-            <RoutedUICommand x:Key="AppSettingsCmd" Text="Settings..."/>
+            <RoutedUICommand x:Key="AboutCmd" Text="About..."/>
             <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Shift+A</KeyGesture>
@@ -56,6 +56,7 @@ limitations under the License.
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
             <RoutedUICommand x:Key="DebugSourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
+            <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
             <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
@@ -100,14 +101,16 @@ limitations under the License.
     </Window.Resources>
 
     <Window.CommandBindings>
-        <CommandBinding Command="{StaticResource AppSettingsCmd}"
-                        Executed="AppSettingsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource AboutCmd}"
+                        Executed="AboutCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditAppSettingsCmd}"
+                        Executed="EditAppSettingsCmd_Executed"/>
         <CommandBinding Command="{StaticResource AssembleCmd}"
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
         <CommandBinding Command="{StaticResource DebugSourceGenerationTestsCmd}"
-                        Executed="DebugSourceGenerationTests_Executed"/>
+                        Executed="DebugSourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
@@ -131,7 +134,7 @@ limitations under the License.
         <CommandBinding Command="{StaticResource OpenCmd}"
                         Executed="OpenCmd_Executed"/>
         <CommandBinding Command="Properties"
-                        CanExecute="IsProjectOpen" Executed="EditProjectProperties_Executed"/>
+                        CanExecute="IsProjectOpen" Executed="EditProjectPropertiesCmd_Executed"/>
         <CommandBinding Command="{StaticResource RemoveHintsCmd}"
                         CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" x:Name="recentProjectCmd"
@@ -182,7 +185,7 @@ limitations under the License.
                 <MenuItem Command="Properties" Header="Project Properties..."/>
                 <MenuItem Header="Toggle Data Scan"/>
                 <Separator/>
-                <MenuItem Command="{StaticResource AppSettingsCmd}"/>
+                <MenuItem Command="{StaticResource EditAppSettingsCmd}"/>
             </MenuItem>
             <MenuItem Name="actionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
@@ -212,7 +215,7 @@ limitations under the License.
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>
-                <MenuItem Header="About..."/>
+                <MenuItem Command="{StaticResource AboutCmd}"/>
             </MenuItem>
             <MenuItem Header="_DEBUG" Name="DebugMenu">
                 <MenuItem Command="Refresh" Header="Re-analyze"/>

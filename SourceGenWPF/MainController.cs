@@ -1887,6 +1887,14 @@ namespace SourceGenWPF {
             HelpAccess.ShowHelp(HelpAccess.Topic.Contents);
         }
 
+        /// <summary>
+        /// Handles Help - About
+        /// </summary>
+        public void ShowAboutBox() {
+            AboutBox dlg = new AboutBox(mMainWin);
+            dlg.ShowDialog();
+        }
+
         #endregion Main window UI event handlers
 
 

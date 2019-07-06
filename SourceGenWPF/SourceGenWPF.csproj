@@ -78,6 +78,9 @@
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditAppSettings.xaml.cs">
       <DependentUpon>EditAppSettings.xaml</DependentUpon>
     </Compile>
@@ -185,6 +188,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="WpfGui\AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WpfGui\EditAppSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -270,6 +277,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Res\SourceGenIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\AboutImage.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
