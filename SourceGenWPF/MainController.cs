@@ -2249,5 +2249,14 @@ namespace SourceGenWPF {
         }
 
         #endregion Info panel
+
+        #region Debug features
+
+        public void RunSourceGenerationTests() {
+            Tests.WpfGui.GenTestRunner dlg = new Tests.WpfGui.GenTestRunner(mMainWin);
+            dlg.ShowDialog();
+        }
+
+        #endregion
     }
 }

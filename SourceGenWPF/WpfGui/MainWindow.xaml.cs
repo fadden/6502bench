@@ -783,6 +783,10 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
+        private void DebugSourceGenerationTests_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.RunSourceGenerationTests();
+        }
+
         private void EditAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditAddress();
         }

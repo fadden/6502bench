@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -216,5 +217,32 @@ namespace CommonWPF {
             return row;
         }
 #endif
+    }
+
+    /// <summary>
+    /// RichTextBox extensions.
+    /// </summary>
+    public static class RichTextBoxExtensions {
+        /// <summary>
+        /// Overloads RichTextBox.AppendText() with a version that takes a color as an argument.
+        /// NOTE: color is "sticky", and will affect the next call to the built-in AppendText()
+        /// method.
+        /// </summary>
+        /// <remarks>
+        /// Adapted from https://stackoverflow.com/a/23402165/294248
+        ///
+        /// TODO(someday): figure out how to reset the color for future calls.
+        /// </remarks>
+        public static void AppendText(this RichTextBox box, string text, Color color) {
+
+            TextRange tr = new TextRange(box.Document.ContentEnd, box.Document.ContentEnd);
+            tr.Text = text;
+            try {
+                tr.ApplyPropertyValue(TextElement.ForegroundProperty,
+                    new SolidColorBrush(color));
+            } catch (FormatException ex) {
+                Debug.WriteLine("RTB AppendText extension failed: " + ex);
+            }
+        }
     }
 }

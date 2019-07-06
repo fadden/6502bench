@@ -73,6 +73,11 @@
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
     <Compile Include="AsmGen\StringGather.cs" />
+    <Compile Include="Tests\GenTest.cs" />
+    <Compile Include="Tests\ProgressMessage.cs" />
+    <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
+      <DependentUpon>GenTestRunner.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditAppSettings.xaml.cs">
       <DependentUpon>EditAppSettings.xaml</DependentUpon>
     </Compile>
@@ -176,6 +181,10 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Tests\WpfGui\GenTestRunner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WpfGui\EditAppSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -54,6 +54,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
+            <RoutedUICommand x:Key="DebugSourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
             <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
@@ -105,6 +106,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="{StaticResource DebugSourceGenerationTestsCmd}"
+                        Executed="DebugSourceGenerationTests_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
@@ -221,7 +224,7 @@ limitations under the License.
                 <MenuItem Header="Toggle Comment Rulers"/>
                 <MenuItem Header="Use Keep-Alive Hack"/>
                 <Separator/>
-                <MenuItem Header="Source Generation Tests..."/>
+                <MenuItem Command="{StaticResource DebugSourceGenerationTestsCmd}"/>
             </MenuItem>
         </Menu>
 
