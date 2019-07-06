@@ -32,8 +32,8 @@ limitations under the License.
         <TextBox Margin="0,8,0,0" IsReadOnly="True" Text="{Binding Message}"/>
         <DockPanel Margin="0,8,0,0" LastChildFill="False">
             <TextBlock DockPanel.Dock="Left" Text="Do you want to locate the data file?"/>
-            <Button DockPanel.Dock="Right" Content="Cancel" Width="75" Margin="8,0,0,0" IsCancel="True"/>
-            <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="75"
+            <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
+            <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" Click="OkButton_Click"/>
         </DockPanel>
     </StackPanel>

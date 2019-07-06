@@ -15,8 +15,11 @@
 
 <h2><a name="overview">Settings Overview</a></h2>
 
-<p>There are two classes of settings: application settings, and
+<p>There are two kinds of settings: application settings, and
 project properties.</p>
+
+
+<h2><a name="app-settings">Application Settings</a></h2>
 
 <p>Application settings are stored in a file called "SourceGen-settings"
 in the SourceGen installation directory.  If the file is missing or
@@ -25,15 +28,6 @@ to your system, and include everything from window sizes to whether or not
 you prefer hexadecimal values to be shown in upper case.  None of them
 affect the way the project analyzes code and data, though they may affect
 the way generated assembly sources look.</p>
-
-<p>Project properties are stored in each individual .dis65 project file.
-They specify which CPU to use, which extension scripts to load, and a
-variety of other things that directly impact how SourceGen processes
-the project.  Because of the potential impact, all changes to
-the project properties are made through the undo/redo buffer.</p>
-
-
-<h2><a name="app-settings">Application Settings</a></h2>
 
 <p>The settings editor is divided into four tabs.  Changes aren't pushed
 out to the main application until you hit Apply or OK.</p>
@@ -44,14 +38,14 @@ out to the main application until you hit Apply or OK.</p>
 <p>These settings change the way the code looks on screen.</p>
 
 <p>Click the Column Visibility buttons to hide columns.  Click them
-again to restore the column to a default width.  A "hidden" column just
-has a width of zero, so with careful mouse positioning you can show and
-hide columns from the code list.  The buttons may be more convenient
-though.</p>
+again to restore the column to a width appropriate for the current font.
+A "hidden" column just has a width of zero, so with careful mouse
+positioning you can show and hide columns from the code list.  The buttons
+may be more convenient though.</p>
 
 <p>You can select a different font for the code list.  Make it as large
 or small as you want.  Mono-space fonts like Courier or Consolas are
-recommended.</p>
+recommended (and will be the only ones shown).</p>
 
 <p>You can choose to display different parts of the display in upper or
 lower case, using the "all lower" and "all upper" buttons as a quick way
@@ -111,9 +105,11 @@ directive, so those might stay on one line.)</p>
 
 <p>If you enable "identify assembler in output", a comment will be
 added to the top of the generated assembly output that identifies the
-target assembler and version.  This can be very helpful if the source
+target assembler and version.  It also shows the command-line options
+passed to the assembler.  This can be very helpful if the source
 file is sent to other people, since it may not otherwise be obvious from
-the source file what the intended target assembler is.</p>
+the source file what the intended target assembler is, or what options
+are required to process the file correctly.</p>
 
 <p>"Disable label localization" turns off the
 <a href="codegen.html#localizer">label localizer</a>.</p>
@@ -156,9 +152,15 @@ with the combox box, then click "set" to set the fields.</p>
 
 <h2><a name="project-properties">Project Properties</a></h2>
 
+<p>Project properties are stored in the .dis65 project file.
+They specify which CPU to use, which extension scripts to load, and a
+variety of other things that directly impact how SourceGen processes
+the project.  Because of the potential impact, all changes to
+the project properties are made through the undo/redo buffer.</p>
+
 <p>The properties editor is divided into four tabs.  Changes aren't pushed
 out to the main application until you close the dialog.  Clicking Apply
-will "latch" the current changes, ensuring that they're applied even if
+will capture the current changes, ensuring that they're applied even if
 you later hit Cancel, but the changes are not applied immediately.</p>
 <p>All changes are subject to undo/redo.</p>
 
@@ -185,11 +187,11 @@ opcodes are recognized on the 6502 and 65C02.  These instructions are
 not part of the chip specification, but most of them have consistent
 behavior and can be used.  If the box is not checked, the instructions
 are treated as invalid and cause the code analyzer to assume that it
-has run into a data area.</p>
+has run into a data area.  This option has no effect on the 65816.</p>
 
 <p>The entry flags determine the initial value for the processor status
 flag register.  Code that is unreachable internally (requiring a code
-entry point hint) will use this value.  This is chiefly of use for
+entry point hint) will use this value.  This is chiefly of value for
 65816 code, where the initial value of the M/X/E flags is significant.</p>
 
 <p>If "analyze uncategorized data" is checked, SourceGen will attempt to

@@ -28,7 +28,7 @@ limitations under the License.
     <StackPanel Margin="8">
         <TextBlock Name="messageText" HorizontalAlignment="Left" Text="Preparing..."/>
         <ProgressBar Name="progressBar" Width="600" Height="23" Margin="0,8,0,0"/>
-        <Button Name="cancelButton" Width="75" Margin="0,8,0,0" HorizontalAlignment="Center"
+        <Button Name="cancelButton" Width="70" Margin="0,8,0,0" HorizontalAlignment="Center"
                 Content="Cancel" Click="CancelButton_Click"/>
     </StackPanel>
 </Window>
