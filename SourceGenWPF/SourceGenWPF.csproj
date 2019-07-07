@@ -99,6 +99,9 @@
     <Compile Include="WpfGui\FontPicker.xaml.cs">
       <DependentUpon>FontPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\GotoBox.xaml.cs">
+      <DependentUpon>GotoBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\WorkProgress.xaml.cs">
       <DependentUpon>WorkProgress.xaml</DependentUpon>
     </Compile>
@@ -219,6 +222,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\FontPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\GotoBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

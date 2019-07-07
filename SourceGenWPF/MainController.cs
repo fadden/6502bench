@@ -1506,6 +1506,14 @@ namespace SourceGenWPF {
             mMainWin.CodeListView_Focus();
         }
 
+        public void Goto() {
+            GotoBox dlg = new GotoBox(mMainWin, mProject, mOutputFormatter);
+            if (dlg.ShowDialog() == true) {
+                GoToOffset(dlg.TargetOffset, false, true);
+                mMainWin.CodeListView_Focus();
+            }
+        }
+
         /// <summary>
         /// Moves the view and selection to the specified offset.  We want to select stuff
         /// differently if we're jumping to a note vs. jumping to an instruction.

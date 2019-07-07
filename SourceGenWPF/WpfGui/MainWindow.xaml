@@ -69,6 +69,11 @@ limitations under the License.
                     <KeyGesture>F3</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="GotoCmd" Text="Go To...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+G</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
@@ -133,6 +138,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindNextCmd}"
                         CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
+        <CommandBinding Command="{StaticResource GotoCmd}"
+                        CanExecute="IsProjectOpen" Executed="GotoCmd_Executed"/>
         <CommandBinding Command="Help"
                         Executed="HelpCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
@@ -193,9 +200,9 @@ limitations under the License.
                 <MenuItem Command="Copy"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource SelectAllCmd}"/>
-                <MenuItem Command="Find"/> <!-- Ctrl+F -->
-                <MenuItem Header="Find Next"/> <!-- F3 -->
-                <MenuItem Header="Go To..."/> <!-- Ctrl+G -->
+                <MenuItem Command="Find"/>
+                <MenuItem Command="{StaticResource FindNextCmd}"/>
+                <MenuItem Command="{StaticResource GotoCmd}"/>
                 <Separator/>
                 <MenuItem Header="Edit Header Comment..."/>
                 <MenuItem Command="Properties" Header="Project Properties..."/>

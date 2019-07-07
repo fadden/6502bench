@@ -864,6 +864,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.FindNext();
         }
 
+        private void GotoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Goto();
+        }
+
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ShowHelp();
         }
