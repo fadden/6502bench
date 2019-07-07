@@ -286,6 +286,33 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
+        /// A range of lines has been replaced with a new range of lines.  The new set may be
+        /// the same size, larger, or smaller than the previous.
+        /// </summary>
+        /// <param name="startIndex">Start index of change area.</param>
+        /// <param name="oldCount">Number of old lines.</param>
+        /// <param name="newCount">Number of new lines.  May be zero.</param>
+        public void ClearListSegment(int startIndex, int oldCount, int newCount) {
+            Debug.WriteLine("ClearListSegment start=" + startIndex + " old=" + oldCount +
+                " new=" + newCount);
+
+            Debug.Assert(startIndex >= 0 && startIndex < mList.Count);
+            Debug.Assert(oldCount > 0 && startIndex + oldCount < mList.Count);
+            Debug.Assert(newCount >= 0);
+
+            // Remove the old elements to clear them.
+            mList.RemoveRange(startIndex, oldCount);
+            // Replace with the appropriate number of null entries.
+            for (int i = 0; i < newCount; i++) {
+                mList.Insert(startIndex, null);
+            }
+            // TODO: can we null out existing entries, and just insert/remove when counts differ?
+            OnPropertyChanged(CountString);
+            OnPropertyChanged(IndexerName);
+            OnCollectionReset();
+        }
+
+        /// <summary>
         /// List elements.  Instances are immutable.
         /// </summary>
         public class FormattedParts {

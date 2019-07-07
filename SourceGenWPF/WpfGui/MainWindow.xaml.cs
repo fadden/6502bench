@@ -49,6 +49,26 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
+        /// Width of long comment fields.
+        /// </summary>
+        /// <remarks>
+        /// We need this to be the sum of the leftmost four columns.  If we don't set it, the
+        /// text may be cut off, or -- worse -- extend off the side of the window.  If it
+        /// extends off the end, a scrollbar appears that will scroll the GridView contents
+        /// without scrolling the GridView headers, which looks terrible.
+        ///
+        /// XAML doesn't do math, so we need to do it here, whenever the column widths change.
+        /// </remarks>
+        public double LongCommentWidth {
+            get { return mLongCommentWidth; }
+            set {
+                mLongCommentWidth = value;
+                OnPropertyChanged();
+            }
+        }
+        private double mLongCommentWidth;
+
+        /// <summary>
         /// Reference to controller object.
         /// </summary>
         private MainController mMainCtrl;
@@ -101,6 +121,8 @@ namespace SourceGenWPF.WpfGui {
             pd = DependencyPropertyDescriptor.FromProperty(
                 GridViewColumn.WidthProperty, typeof(GridViewColumn));
             AddColumnWidthChangeCallback(pd, (GridView)codeListView.View);
+
+            UpdateLongCommentWidth();
         }
 
         private void AddColumnWidthChangeCallback(PropertyDescriptor pd, DataGrid dg) {
@@ -312,6 +334,7 @@ namespace SourceGenWPF.WpfGui {
         private void ColumnWidthChanged(object sender, EventArgs e) {
             //Debug.WriteLine("Column width change " + sender);
             AppSettings.Global.Dirty = true;
+            UpdateLongCommentWidth();
         }
 
         public double LeftPanelWidth {
@@ -345,6 +368,16 @@ namespace SourceGenWPF.WpfGui {
                 rightPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
                     GridUnitType.Star);
             }
+        }
+
+        private void UpdateLongCommentWidth() {
+            GridView gv = (GridView)(codeListView.View);
+            double totalWidth = 0;
+            for (int i = (int)MainController.CodeListColumn.Label; i < gv.Columns.Count; i++) {
+                totalWidth += gv.Columns[i].ActualWidth;
+            }
+            LongCommentWidth = totalWidth;
+            //Debug.WriteLine("Long comment width: " + LongCommentWidth);
         }
 
         #endregion Window placement
@@ -461,12 +494,12 @@ namespace SourceGenWPF.WpfGui {
 
             Typeface typeface = new Typeface(codeListView.FontFamily, codeListView.FontStyle,
                 codeListView.FontWeight, codeListView.FontStretch);
-            Debug.WriteLine("Default column widths (FUDGE=" + FUDGE + "):");
+            //Debug.WriteLine("Default column widths (FUDGE=" + FUDGE + "):");
             for (int i = 0; i < widths.Length; i++) {
                  double strLen = Helper.MeasureStringWidth(sSampleStrings[i],
                     typeface, codeListView.FontSize);
                 widths[i] = (int)Math.Round(strLen + FUDGE);
-                Debug.WriteLine(" " + i + ":" + widths[i] + " " + sSampleStrings[i]);
+                //Debug.WriteLine(" " + i + ":" + widths[i] + " " + sSampleStrings[i]);
             }
             return widths;
         }
@@ -706,6 +739,14 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = mMainCtrl.CanEditAddress();
         }
 
+        private void CanEditLabel(object sender, CanExecuteRoutedEventArgs e) {
+            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = mMainCtrl.CanEditLabel();
+        }
+
         private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
             if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
                 e.CanExecute = false;
@@ -794,7 +835,11 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void EditAppSettingsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.EditSettings();
+            mMainCtrl.EditAppSettings();
+        }
+
+        private void EditLabelCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditLabel();
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

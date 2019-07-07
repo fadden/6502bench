@@ -72,6 +72,11 @@ namespace SourceGenWPF.WpfGui {
             DataContext = this;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            addrTextBox.SelectAll();
+            addrTextBox.Focus();
+        }
+
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             if (AddressText.Length == 0) {
                 Address = -1;
@@ -95,11 +100,6 @@ namespace SourceGenWPF.WpfGui {
                 IsValid = (text.Length == 0) ||
                     Asm65.Address.ParseAddress(text, mMaxAddressValue, out int unused);
             }
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
-            addrTextBox.SelectAll();
-            addrTextBox.Focus();
         }
     }
 

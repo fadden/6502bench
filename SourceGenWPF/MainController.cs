@@ -140,6 +140,9 @@ namespace SourceGenWPF {
         /// </summary>
         private bool mUseMainAppDomainForPlugins = false;
 
+        /// <summary>
+        /// Code list column numbers.
+        /// </summary>
         public enum CodeListColumn {
             Offset = 0, Address, Bytes, Flags, Attributes, Label, Opcode, Operand, Comment,
             COUNT       // must be last; must equal number of columns
@@ -1171,9 +1174,9 @@ namespace SourceGenWPF {
         /// Opens the application settings dialog.  All changes to settings are made directly
         /// to the AppSettings.Global object.
         /// </summary>
-        public void EditSettings() {
+        public void EditAppSettings() {
             EditAppSettings dlg = new EditAppSettings(mMainWin, mMainWin, this,
-                EditAppSettings.Tab.Unknown, AsmGen.AssemblerInfo.Id.Unknown);
+                WpfGui.EditAppSettings.Tab.Unknown, AsmGen.AssemblerInfo.Id.Unknown);
             dlg.ShowDialog();
         }
 
@@ -1250,11 +1253,9 @@ namespace SourceGenWPF {
                             // does nothing
                             break;
                         case CodeListColumn.Label:
-#if false
-                            if (editLabelToolStripMenuItem.Enabled) {
-                                EditLabel_Click(sender, e);
+                            if (CanEditLabel()) {
+                                EditLabel();
                             }
-#endif
                             break;
                         case CodeListColumn.Opcode:
                             // File offset should always be valid, since we excluded the EQU
@@ -1351,6 +1352,46 @@ namespace SourceGenWPF {
                 ApplyUndoableChanges(cs);
             } else {
                 Debug.WriteLine("EditAddress: no change");
+            }
+        }
+
+        public bool CanEditLabel() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Single line, code or data.
+            return (counts.mDataLines > 0 || counts.mCodeLines > 0);
+        }
+
+        public void EditLabel() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+
+            Anattrib attr = mProject.GetAnattrib(offset);
+            EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, attr.Address,
+                mProject.SymbolTable);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+
+            // NOTE: if label matching is case-insensitive, we want to allow a situation
+            // where a label is being renamed from "FOO" to "Foo".  (We should be able to
+            // test for object equality on the Symbol.)
+            if (attr.Symbol != dlg.LabelSym) {
+                Debug.WriteLine("Changing label at offset +" + offset.ToString("x6"));
+
+                // For undo/redo, we want to update the UserLabels value.  This may
+                // be different from the Anattrib symbol, which can have an auto-generated
+                // value.
+                Symbol oldUserValue = null;
+                if (mProject.UserLabels.ContainsKey(offset)) {
+                    oldUserValue = mProject.UserLabels[offset];
+                }
+                UndoableChange uc = UndoableChange.CreateLabelChange(offset,
+                    oldUserValue, dlg.LabelSym);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
             }
         }
 

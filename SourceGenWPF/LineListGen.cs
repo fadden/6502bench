@@ -609,7 +609,8 @@ namespace SourceGenWPF {
             //Debug.WriteLine("DL gen range [" + startOffset + "," + endOffset + "]");
 
             // Find the start index.  The start offset should always appear at the
-            // start of a Line because it comes from item selection.
+            // start of a Line (as opposed to being in the middle of a multi-byte instruction)
+            // because it comes from item selection.
             int startIndex = FindLineByOffset(mLineList, startOffset);
             if (startIndex < 0) {
                 Debug.Assert(false, "Unable to find startOffset " + startOffset);
@@ -654,7 +655,7 @@ namespace SourceGenWPF {
             // Out with the old, in with the new.
             mLineList.RemoveRange(startIndex, endIndex - startIndex + 1);
             mLineList.InsertRange(startIndex, newLines);
-            Debug.Assert(false); // TODO: update display list
+            mDisplayList.ClearListSegment(startIndex, endIndex - startIndex + 1, newLines.Count);
 
             Debug.Assert(ValidateLineList(), "Display list failed validation");
         }
@@ -720,7 +721,7 @@ namespace SourceGenWPF {
             }
             Debug.WriteLine("Removing " + endIndex + " header lines");
             mLineList.RemoveRange(0, endIndex);
-            Debug.Assert(false); // TODO: update display list
+            mDisplayList.ClearListSegment(0, endIndex, 0);
         }
 
         /// <summary>

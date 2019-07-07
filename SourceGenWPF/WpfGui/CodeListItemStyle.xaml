@@ -52,23 +52,27 @@ See also https://github.com/fadden/DisasmUiTest
     If you don't set DisplayMemberBinding, it will try to ToString() the entire object.
     -->
     <GridViewColumnCollection x:Key="gvcc">
-        <GridViewColumn Width="{Binding
+        <GridViewColumn DisplayMemberBinding="{Binding Offset}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
-                }, Path=View.Columns[0].ActualWidth}" DisplayMemberBinding="{Binding Offset}"/>
-        <GridViewColumn Width="{Binding
+                }, Path=View.Columns[0].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Addr}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
-                }, Path=View.Columns[1].ActualWidth}" DisplayMemberBinding="{Binding Addr}"/>
-        <GridViewColumn Width="{Binding
+                }, Path=View.Columns[1].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Bytes}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
-                }, Path=View.Columns[2].ActualWidth}" DisplayMemberBinding="{Binding Bytes}"/>
-        <GridViewColumn Width="{Binding
+                }, Path=View.Columns[2].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Flags}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
-                }, Path=View.Columns[3].ActualWidth}" DisplayMemberBinding="{Binding Flags}"/>
-        <GridViewColumn Width="{Binding
+                }, Path=View.Columns[3].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Attr}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
-                }, Path=View.Columns[4].ActualWidth}" DisplayMemberBinding="{Binding Attr}"/>
-        <!-- This column holds the long comment.  Leave the width unset. -->
-        <GridViewColumn Header="two" DisplayMemberBinding="{Binding Path=Comment}"/>
+                }, Path=View.Columns[4].ActualWidth}"/>
+        <!-- This column holds the long comment.  There's no easy way to set its width, so we
+        have to let the main window take care of that.  (It's tempting to just make its width
+        very large, but that causes the GridView contents to horizontally scroll independently
+        of the GridView header when you reach the edge of the "normal" column set.) -->
+        <GridViewColumn Header="(long comment)" DisplayMemberBinding="{Binding Path=Comment}"
+                        Width="{Binding LongCommentWidth}"/>
     </GridViewColumnCollection>
 
     <!-- Template for long lines.  This is a modification of the default style, with
