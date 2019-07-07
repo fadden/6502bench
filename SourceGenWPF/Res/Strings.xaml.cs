@@ -105,6 +105,10 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_FileFilterSym65");
         public static string FILE_INFO_FMT =
             (string)Application.Current.FindResource("str_FileInfoFmt");
+        public static string FIND_REACHED_START =
+            (string)Application.Current.FindResource("str_FindReachedStart");
+        public static string FIND_REACHED_START_CAPTION =
+            (string)Application.Current.FindResource("str_FindReachedStartCaption");
         public static string FONT_DESCRIPTOR_FMT =
             (string)Application.Current.FindResource("str_FontDescriptorFmt");
         public static string GENERATED_FOR_VERSION_FMT =

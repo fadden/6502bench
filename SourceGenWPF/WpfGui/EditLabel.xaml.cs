@@ -56,20 +56,17 @@ namespace SourceGenWPF.WpfGui {
         }
         private bool mIsValid;
 
-        // Doing it this way prevents the SelectAll+Focus on the field from working,
-        // presumably because the text change notification kills the selection.  There may
-        // be a way around it, but I'm just going to use the WinForms approach for now.
-        ///// <summary>
-        ///// Property backing the text in the text entry box.
-        ///// </summary>
-        //public string LabelText {
-        //    get { return mLabelText; }
-        //    set {
-        //        mLabelText = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        //string mLabelText;
+        /// <summary>
+        /// Property backing the text in the text entry box.
+        /// </summary>
+        public string LabelText {
+            get { return mLabelText; }
+            set {
+                mLabelText = value;
+                OnPropertyChanged();
+            }
+        }
+        string mLabelText;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -92,10 +89,10 @@ namespace SourceGenWPF.WpfGui {
             mDefaultLabelColor = maxLengthLabel.Foreground;
 
             if (LabelSym == null) {
-                labelTextBox.Text = string.Empty;
+                LabelText = string.Empty;
                 radioButtonLocal.IsChecked = true;
             } else {
-                labelTextBox.Text = LabelSym.Label;
+                LabelText = LabelSym.Label;
                 switch (LabelSym.SymbolType) {
                     case Symbol.Type.LocalOrGlobalAddr:
                         radioButtonLocal.IsChecked = true;
@@ -112,13 +109,15 @@ namespace SourceGenWPF.WpfGui {
                         break;
                 }
             }
+        }
 
+        private void Window_ContentRendered(object sender, EventArgs e) {
             labelTextBox.SelectAll();
             labelTextBox.Focus();
         }
 
         private void LabelTextBox_TextChanged(object sender, RoutedEventArgs e) {
-            string str = labelTextBox.Text;
+            string str = LabelText;
             bool valid = true;
 
             if (str.Length == 1 || str.Length > Asm65.Label.MAX_LABEL_LEN) {
@@ -174,7 +173,7 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrEmpty(labelTextBox.Text)) {
+            if (string.IsNullOrEmpty(LabelText)) {
                 LabelSym = null;
             } else {
                 Symbol.Type symbolType;
@@ -188,7 +187,7 @@ namespace SourceGenWPF.WpfGui {
                     Debug.Assert(false);        // WTF
                     symbolType = Symbol.Type.LocalOrGlobalAddr;
                 }
-                LabelSym = new Symbol(labelTextBox.Text, mAddress, Symbol.Source.User, symbolType);
+                LabelSym = new Symbol(LabelText, mAddress, Symbol.Source.User, symbolType);
             }
             DialogResult = true;
         }

@@ -60,6 +60,8 @@ limitations under the License.
     <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
     <system:String x:Key="str_FileInfoFmt">File is {0:N1} KB of raw data.</system:String>
+    <system:String x:Key="str_FindReachedStart">Find reached the starting point of the search.</system:String>
+    <system:String x:Key="str_FindReachedStartCaption">Find...</system:String>
     <system:String x:Key="str_FontDescriptorFmt">{0}-point {1}</system:String>
     <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
     <system:String x:Key="str_HideCol">Hide</system:String>

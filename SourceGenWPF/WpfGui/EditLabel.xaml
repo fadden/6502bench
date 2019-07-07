@@ -24,7 +24,8 @@ limitations under the License.
         Title="Edit Label"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered">
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -38,15 +39,15 @@ limitations under the License.
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
             <TextBlock Text="Enter label:"/>
             <TextBox Name="labelTextBox" Margin="0,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
-                     FontSize="16" TextChanged="LabelTextBox_TextChanged"/>
+                     Text="{Binding LabelText}" TextChanged="LabelTextBox_TextChanged"/>
             <TextBlock Name="maxLengthLabel" Text="• Must be 2-32 characters long (or blank to remove)"
-                       Margin="0,3,0,0"/>
+                       Margin="0,7,0,0"/>
             <TextBlock Name="firstLetterLabel" Text="• Must start with a letter or underscore"/>
             <TextBlock Name="validCharsLabel" Text="• Valid characters are ASCII letters, numbers, and underscore"/>
             <TextBlock Name="notDuplicateLabel" Text="• Must not be a duplicate of an existing label"/>
         </StackPanel>
 
-        <GroupBox Grid.Column="0" Grid.Row="1" Header="Label Type" Margin="0,8,0,0">
+        <GroupBox Grid.Column="0" Grid.Row="1" Header="Label Type" Margin="0,12,0,0">
             <StackPanel>
                 <RadioButton Name="radioButtonLocal" Content="_Local (if possible)" Margin="0,4,0,0"/>
                 <RadioButton Name="radioButtonGlobal" Content="_Global" Margin="0,4,0,0"/>

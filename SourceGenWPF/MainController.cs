@@ -1442,6 +1442,70 @@ namespace SourceGenWPF {
             }
         }
 
+        public void Find() {
+            FindBox dlg = new FindBox(mMainWin, mFindString);
+            if (dlg.ShowDialog() == true) {
+                mFindString = dlg.TextToFind;
+                mFindStartIndex = -1;
+                FindText();
+            }
+        }
+
+        public void FindNext() {
+            FindText();
+        }
+
+        private void FindText() {
+            if (string.IsNullOrEmpty(mFindString)) {
+                return;
+            }
+
+            // Start from the topmost selected line, or the start of the file if nothing
+            // is selected.
+            int index = mMainWin.CodeListView_GetFirstSelectedIndex();
+            if (index < 0) {
+                index = 0;
+            }
+
+            // Start one past the selected item.
+            index++;
+            if (index == CodeLineList.Count) {
+                index = 0;
+            }
+            //Debug.WriteLine("FindText index=" + index + " start=" + mFindStartIndex +
+            //    " str=" + mFindString);
+            while (index != mFindStartIndex) {
+                if (mFindStartIndex < 0) {
+                    // need to latch this inside the loop so the initial test doesn't fail
+                    mFindStartIndex = index;
+                }
+
+                string searchStr = CodeLineList.GetSearchString(index);
+                int matchPos = searchStr.IndexOf(mFindString,
+                    StringComparison.InvariantCultureIgnoreCase);
+                if (matchPos >= 0) {
+                    //Debug.WriteLine("Match " + index + ": " + searchStr);
+                    mMainWin.CodeListView_EnsureVisible(index);
+                    mMainWin.CodeListView_DeselectAll();
+                    mMainWin.CodeListView_SelectRange(index, 1);
+                    return;
+                }
+
+                index++;
+                if (index == CodeLineList.Count) {
+                    index = 0;
+                }
+            }
+
+            // Announce that we've wrapped around, then clear the start index.
+            MessageBox.Show(Res.Strings.FIND_REACHED_START,
+                Res.Strings.FIND_REACHED_START_CAPTION, MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            mFindStartIndex = -1;
+
+            mMainWin.CodeListView_Focus();
+        }
+
         /// <summary>
         /// Moves the view and selection to the specified offset.  We want to select stuff
         /// differently if we're jumping to a note vs. jumping to an instruction.

@@ -617,7 +617,7 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
-        /// Sets the code list selection.
+        /// Sets the code list selection to match the selection bitmap.
         /// </summary>
         /// <param name="sel">Selection bitmap.</param>
         public void CodeListView_SetSelection(DisplayListSelection sel) {
@@ -628,11 +628,10 @@ namespace SourceGenWPF.WpfGui {
                 codeListView.SelectAll();
                 return;
             }
-            Debug.Assert(codeListView.SelectedItems.Count == 0);    // expected
-            codeListView.SelectedItems.Clear();                     // just in case
+            codeListView.SelectedItems.Clear();
 
             if (sel.Count > MAX_SEL_COUNT) {
-                // Too much for WPF -- only restore the first item.
+                // Too much for WPF ListView -- only restore the first item.
                 Debug.WriteLine("SetSelection: not restoring (" + sel.Count + " items)");
                 codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
                 return;
@@ -717,6 +716,13 @@ namespace SourceGenWPF.WpfGui {
             if (isSelected) {
                 codeListView.SelectedItems.Add(newParts);
             }
+        }
+
+        /// <summary>
+        /// Ensures the the code ListView control has input focus.
+        /// </summary>
+        public void CodeListView_Focus() {
+            codeListView.Focus();
         }
 
         #endregion Selection management
@@ -848,6 +854,14 @@ namespace SourceGenWPF.WpfGui {
 
         private void ExitCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Close();
+        }
+
+        private void FindCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Find();
+        }
+
+        private void FindNextCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FindNext();
         }
 
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
