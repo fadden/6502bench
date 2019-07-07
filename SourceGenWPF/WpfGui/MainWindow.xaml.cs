@@ -731,38 +731,38 @@ namespace SourceGenWPF.WpfGui {
         #region Can-execute handlers
 
         /// <summary>
+        /// Returns true if the project is open.
+        /// </summary>
+        /// <returns></returns>
+        private bool IsProjectOpen() {
+            return mMainCtrl != null && mMainCtrl.IsProjectOpen();
+        }
+
+        /// <summary>
         /// Returns true if the project is open.  Intended for use in XAML CommandBindings.
         /// </summary>
         private void IsProjectOpen(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.IsProjectOpen();
+            e.CanExecute = IsProjectOpen();
         }
 
         private void CanEditAddress(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
-                e.CanExecute = false;
-                return;
-            }
-            e.CanExecute = mMainCtrl.CanEditAddress();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditAddress();
         }
 
         private void CanEditLabel(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
-                e.CanExecute = false;
-                return;
-            }
-            e.CanExecute = mMainCtrl.CanEditLabel();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLabel();
+        }
+
+        private void CanEditLongComment(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLongComment();
         }
 
         private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
-                e.CanExecute = false;
-                return;
-            }
-            e.CanExecute = mMainCtrl.CanEditStatusFlags();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
         }
 
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+            if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -771,7 +771,7 @@ namespace SourceGenWPF.WpfGui {
                 (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsDataStart(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+            if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -780,7 +780,7 @@ namespace SourceGenWPF.WpfGui {
                 (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanHintAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+            if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -789,7 +789,7 @@ namespace SourceGenWPF.WpfGui {
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
         }
         private void CanRemoveHints(object sender, CanExecuteRoutedEventArgs e) {
-            if (mMainCtrl == null || !mMainCtrl.IsProjectOpen()) {
+            if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
             }
@@ -799,17 +799,17 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void CanNavigateBackward(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateBackward();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanNavigateBackward();
         }
         private void CanNavigateForward(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanNavigateForward();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanNavigateForward();
         }
 
         private void CanRedo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanRedo();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanRedo();
         }
         private void CanUndo(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.CanUndo();
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanUndo();
         }
 
         #endregion Can-execute handlers
@@ -844,8 +844,16 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.EditAppSettings();
         }
 
+        private void EditHeaderCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditHeaderComment();
+        }
+
         private void EditLabelCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditLabel();
+        }
+
+        private void EditLongCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditLongComment();
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

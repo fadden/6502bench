@@ -277,12 +277,12 @@ namespace SourceGenWPF {
                 mList.Add(null);
             }
 
+            SelectedIndices = new DisplayListSelection(size);
+
             // send one big notification at the end; "reset" means "forget everything you knew"
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
             OnCollectionReset();
-
-            SelectedIndices = new DisplayListSelection(size);
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace SourceGenWPF {
         /// <param name="newCount">Number of new lines.  May be zero.</param>
         public void ClearListSegment(int startIndex, int oldCount, int newCount) {
             Debug.WriteLine("ClearListSegment start=" + startIndex + " old=" + oldCount +
-                " new=" + newCount);
+                " new=" + newCount + " (mList.Count=" + mList.Count + ")");
 
             Debug.Assert(startIndex >= 0 && startIndex < mList.Count);
             Debug.Assert(oldCount > 0 && startIndex + oldCount < mList.Count);
@@ -307,6 +307,11 @@ namespace SourceGenWPF {
                 mList.Insert(startIndex, null);
             }
             // TODO: can we null out existing entries, and just insert/remove when counts differ?
+
+            if (oldCount != newCount) {
+                SelectedIndices = new DisplayListSelection(mList.Count);
+            }
+
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
             OnCollectionReset();

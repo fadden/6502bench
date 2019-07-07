@@ -576,7 +576,9 @@ namespace SourceGenWPF {
         /// </summary>
         public void GenerateAll() {
             mLineList.Clear();
-            GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames, mLineList);
+            List<Line> headerLines = GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames);
+            mLineList.InsertRange(0, headerLines);
+
             GenerateLineList(mProject, mFormatter, mPseudoOpNames,
                 0, mProject.FileData.Length - 1, mLineList);
 
@@ -594,10 +596,22 @@ namespace SourceGenWPF {
         /// <param name="endOffset">End offset (inclusive).</param>
         public void GenerateRange(int startOffset, int endOffset) {
             if (startOffset < 0) {
-                ClearHeaderLines();
-                GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames, mLineList);
+                // Clear existing header lines. Find the first non-header item.
+                int headerEndIndex = FindLineByOffset(mLineList, 0);
+                if (headerEndIndex == 0) {
+                    // no header lines present
+                    Debug.WriteLine("No header lines found");
+                } else {
+                    Debug.WriteLine("Removing " + headerEndIndex + " header lines");
+                    mLineList.RemoveRange(0, headerEndIndex);
+                }
+
+                List<Line> headerLines = GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames);
+                mLineList.InsertRange(0, headerLines);
+                mDisplayList.ClearListSegment(0, headerEndIndex, headerLines.Count);
+
                 if (endOffset < 0) {
-                    // nothing else to do
+                    // nothing else to do -- header-only change
                     return;
                 }
                 // do the rest
@@ -708,21 +722,20 @@ namespace SourceGenWPF {
             return true;
         }
 
-        /// <summary>
-        /// Removes all header lines from the display list.
-        /// </summary>
-        private void ClearHeaderLines() {
-            // Find the first non-header item.
-            int endIndex = FindLineByOffset(mLineList, 0);
-            if (endIndex == 0) {
-                // no header lines present
-                Debug.WriteLine("No header lines found");
-                return;
-            }
-            Debug.WriteLine("Removing " + endIndex + " header lines");
-            mLineList.RemoveRange(0, endIndex);
-            mDisplayList.ClearListSegment(0, endIndex, 0);
-        }
+        ///// <summary>
+        ///// Removes all header lines from the line list.
+        ///// </summary>
+        //private void ClearHeaderLines() {
+        //    // Find the first non-header item.
+        //    int endIndex = FindLineByOffset(mLineList, 0);
+        //    if (endIndex == 0) {
+        //        // no header lines present
+        //        Debug.WriteLine("No header lines found");
+        //        return;
+        //    }
+        //    Debug.WriteLine("Removing " + endIndex + " header lines");
+        //    mLineList.RemoveRange(0, endIndex);
+        //}
 
         /// <summary>
         /// Generates a synthetic offset for the FileOffset field from an index value.  The
@@ -745,18 +758,14 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
-        /// Generates the header lines (header comment, EQU directives), and inserts them at
-        /// the top of the list.
-        /// 
-        /// This does not currently do incremental generation.  Call ClearHeaderLines() before
-        /// calling here if you're not starting with an empty list.
+        /// Generates the header lines (header comment, EQU directives).
         /// </summary>
         /// <param name="proj">Project reference.</param>
         /// <param name="formatter">Output formatter.</param>
         /// <param name="opNames">Pseudo-op names.</param>
-        /// <param name="fullLines">List to add output lines to.</param>
-        private static void GenerateHeaderLines(DisasmProject proj, Formatter formatter,
-                PseudoOp.PseudoOpNames opNames, List<Line> fullLines) {
+        /// <returns>List with header lines.</returns>
+        private static List<Line> GenerateHeaderLines(DisasmProject proj, Formatter formatter,
+                PseudoOp.PseudoOpNames opNames) {
             List<Line> tmpLines = new List<Line>();
             Line line;
             FormattedParts parts;
@@ -793,7 +802,7 @@ namespace SourceGenWPF {
                 tmpLines.Add(line);
             }
 
-            fullLines.InsertRange(0, tmpLines);
+            return tmpLines;
         }
 
         /// <summary>

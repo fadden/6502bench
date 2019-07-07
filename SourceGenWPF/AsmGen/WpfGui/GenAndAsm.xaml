@@ -23,7 +23,8 @@ limitations under the License.
         mc:Ignorable="d"
         Title="Generate and Assemble"
         Width="800" Height="700" MinWidth="600" MinHeight="600" ResizeMode="CanResizeWithGrip"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded">
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

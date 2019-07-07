@@ -57,9 +57,15 @@ limitations under the License.
             <RoutedUICommand x:Key="DebugSourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
+            <RoutedUICommand x:Key="EditHeaderCommentCmd" Text="Edit Header Comment..."/>
             <RoutedUICommand x:Key="EditLabelCmd" Text="Edit Label...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+L</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditLongCommentCmd" Text="Edit Long Comment...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+M</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
@@ -128,8 +134,12 @@ limitations under the License.
                         Executed="DebugSourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditHeaderCommentCmd}"
+                        CanExecute="IsProjectOpen" Executed="EditHeaderCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditLabelCmd}"
                         CanExecute="CanEditLabel" Executed="EditLabelCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditLongCommentCmd}"
+                        CanExecute="CanEditLongComment" Executed="EditLongCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
                         CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
         <CommandBinding Command="{StaticResource ExitCmd}"
@@ -204,7 +214,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource FindNextCmd}"/>
                 <MenuItem Command="{StaticResource GotoCmd}"/>
                 <Separator/>
-                <MenuItem Header="Edit Header Comment..."/>
+                <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>
                 <MenuItem Command="Properties" Header="Project Properties..."/>
                 <MenuItem Header="Toggle Data Scan"/> <!-- Ctrl+D -->
                 <Separator/>
@@ -216,7 +226,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditLabelCmd}"/>
                 <MenuItem Header="Edit Operand..."/> <!-- Ctrl+O -->
                 <MenuItem Header="Edit Comment..."/> <!-- Ctrl+; -->
-                <MenuItem Header="Edit Long Comment..."/> <!-- Ctrl+M -->
+                <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
                 <MenuItem Header="Edit Note..."/>    <!-- Ctrl+N -->
                 <MenuItem Header="Edit Project Symbol..."/>
                 <Separator/>
@@ -428,23 +438,23 @@ limitations under the License.
                 </ListView.Resources>
                 <ListView.View>
                     <GridView AllowsColumnReorder="False">
-                        <GridViewColumn Header="Offset" Width="58"
+                        <GridViewColumn Header="Offset" Width="60"
                                         DisplayMemberBinding="{Binding Offset}"/>
-                        <GridViewColumn Header="Addr" Width="58"
+                        <GridViewColumn Header="Addr" Width="60"
                                         CellTemplate="{StaticResource addrHighlightTemplate}"/>
-                        <GridViewColumn Header="Bytes" Width="85"
+                        <GridViewColumn Header="Bytes" Width="93"
                                         DisplayMemberBinding="{Binding Bytes}"/>
-                        <GridViewColumn Header="Flags" Width="78"
+                        <GridViewColumn Header="Flags" Width="80"
                                         DisplayMemberBinding="{Binding Flags}"/>
-                        <GridViewColumn Header="Attr" Width="52"
+                        <GridViewColumn Header="Attr" Width="54"
                                         DisplayMemberBinding="{Binding Attr}"/>
-                        <GridViewColumn Header="Label" Width="71"
+                        <GridViewColumn Header="Label" Width="73"
                                         CellTemplate="{StaticResource labelHighlightTemplate}"/>
-                        <GridViewColumn Header="Opcode" Width="58"
+                        <GridViewColumn Header="Opcode" Width="60"
                                         DisplayMemberBinding="{Binding Opcode}"/>
-                        <GridViewColumn Header="Operand" Width="98"
+                        <GridViewColumn Header="Operand" Width="100"
                                         DisplayMemberBinding="{Binding Operand}"/>
-                        <GridViewColumn Header="Comment" Width="342"
+                        <GridViewColumn Header="Comment" Width="344"
                                         DisplayMemberBinding="{Binding Comment}"/>
                     </GridView>
                 </ListView.View>

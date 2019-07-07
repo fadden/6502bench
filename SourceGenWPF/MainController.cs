@@ -212,6 +212,9 @@ namespace SourceGenWPF {
             mMainWin.UpdateRecentLinks();
 
             ProcessCommandLine();
+
+            // Create an initial value.
+            SelectionAnalysis = UpdateSelectionState();
         }
 
         private void ProcessCommandLine() {
@@ -1210,11 +1213,9 @@ namespace SourceGenWPF {
                     }
                     break;
                 case LineListGen.Line.Type.LongComment:
-#if false
-                    if (editLongCommentToolStripMenuItem.Enabled) {
-                        EditLongComment_Click(sender, e);
+                    if (CanEditLongComment()) {
+                        EditLongComment();
                     }
-#endif
                     break;
                 case LineListGen.Line.Type.Note:
 #if false
@@ -1355,6 +1356,10 @@ namespace SourceGenWPF {
             }
         }
 
+        public void EditHeaderComment() {
+            EditLongComment(LineListGen.Line.HEADER_COMMENT_OFFSET);
+        }
+
         public bool CanEditLabel() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
@@ -1395,12 +1400,48 @@ namespace SourceGenWPF {
             }
         }
 
+        public bool CanEditLongComment() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Single line, code or data, or a long comment.
+            return (counts.mDataLines > 0 || counts.mCodeLines > 0 ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.LongComment);
+        }
+
+        public void EditLongComment() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            EditLongComment(offset);
+        }
+
+        private void EditLongComment(int offset) {
+            EditLongComment dlg = new EditLongComment(mMainWin, mOutputFormatter);
+            if (mProject.LongComments.TryGetValue(offset, out MultiLineComment oldComment)) {
+                dlg.LongComment = oldComment;
+            }
+            dlg.ShowDialog();
+
+            if (dlg.DialogResult == true) {
+                MultiLineComment newComment = dlg.LongComment;
+                if (oldComment != newComment) {
+                    Debug.WriteLine("Changing long comment at +" + offset.ToString("x6"));
+
+                    UndoableChange uc = UndoableChange.CreateLongCommentChange(offset,
+                        oldComment, newComment);
+                    ChangeSet cs = new ChangeSet(uc);
+                    ApplyUndoableChanges(cs);
+                }
+            }
+        }
+
         public bool CanEditStatusFlags() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
             EntityCounts counts = SelectionAnalysis.mEntityCounts;
-            // Line must be code, or a RegWidth directive.
+            // Single line, must be code or a RegWidth directive.
             return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
                 SelectionAnalysis.mLineType == LineListGen.Line.Type.RegWidthDirective);
         }
