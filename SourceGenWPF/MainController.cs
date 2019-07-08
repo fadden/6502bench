@@ -157,6 +157,18 @@ namespace SourceGenWPF {
             Disassembly = 1
         }
 
+        /// <summary>
+        /// True if a project is open and AnalyzeUncategorizedData is enabled.
+        /// </summary>
+        public bool IsAnalyzeUncategorizedDataEnabled {
+            get {
+                if (mProject == null) {
+                    return false;
+                }
+                return mProject.ProjectProps.AnalysisParams.AnalyzeUncategorizedData;
+            }
+        }
+
 
         #region Init and settings
 
@@ -2047,6 +2059,15 @@ namespace SourceGenWPF {
         public void ShowAboutBox() {
             AboutBox dlg = new AboutBox(mMainWin);
             dlg.ShowDialog();
+        }
+
+        public void ToggleDataScan() {
+            ProjectProperties oldProps = mProject.ProjectProps;
+            ProjectProperties newProps = new ProjectProperties(oldProps);
+            newProps.AnalysisParams.AnalyzeUncategorizedData =
+                !newProps.AnalysisParams.AnalyzeUncategorizedData;
+            UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(oldProps, newProps);
+            ApplyUndoableChanges(new ChangeSet(uc));
         }
 
         #endregion Main window UI event handlers

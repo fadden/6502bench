@@ -110,6 +110,11 @@ limitations under the License.
                     <KeyGesture>Ctrl+A</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+D</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="UndoCmd" Text="Undo">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Z</KeyGesture>
@@ -181,6 +186,8 @@ limitations under the License.
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
                         CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
+                        CanExecute="IsProjectOpen" Executed="ToggleDataScanCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
     </Window.CommandBindings>
@@ -203,7 +210,7 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Command="{StaticResource ExitCmd}" InputGestureText="Alt+F4"/>
             </MenuItem>
-            <MenuItem Header="_Edit">
+            <MenuItem Header="_Edit" SubmenuOpened="EditMenu_SubmenuOpened">
                 <MenuItem Command="{StaticResource UndoCmd}"/>
                 <MenuItem Command="{StaticResource RedoCmd}"/>
                 <Separator/>
@@ -216,7 +223,9 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>
                 <MenuItem Command="Properties" Header="Project Properties..."/>
-                <MenuItem Header="Toggle Data Scan"/> <!-- Ctrl+D -->
+                <!-- IsChecked is set whenever the menu is opened -->
+                <MenuItem Name="toggleDataScanMenuItem"
+                          Command="{StaticResource ToggleDataScanCmd}" IsCheckable="True"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource EditAppSettingsCmd}"/>
             </MenuItem>

@@ -967,6 +967,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.OpenRecentProject(recentIndex);
         }
 
+        private void ToggleDataScanCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ToggleDataScan();
+        }
+
         private void UndoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.UndoChanges();
         }
@@ -1032,6 +1036,24 @@ namespace SourceGenWPF.WpfGui {
                 recentProjectName2.Text = string.Empty;
                 recentProjectButton2.Visibility = Visibility.Collapsed;
             }
+        }
+
+        /// <summary>
+        /// Update menu items when the "edit" menu is opened.
+        /// </summary>
+        private void EditMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
+            // Set the checkbox on the "Toggle Data Scan" item.
+            //
+            // I initially bound a property to the menu item's IsChecked, but that caused
+            // us to get "set" calls when the menu was selected.  I want to get activity
+            // through ICommand, not property set, so things are consistent for menus and
+            // keyboard shortcuts.  So we just drive the checkbox manually.  I don't know
+            // if there's a better way.
+            //
+            // The project's AnalyzeUncategorizedData property can be set in various ways
+            // (project property dialog, undo, redo), so we want to query it when we need
+            // it rather than try to push changes around.
+            toggleDataScanMenuItem.IsChecked = mMainCtrl.IsAnalyzeUncategorizedDataEnabled;
         }
 
         #endregion Misc
@@ -1262,6 +1284,5 @@ namespace SourceGenWPF.WpfGui {
         private string mInfoBoxContents;
 
         #endregion Info panel
-
     }
 }
