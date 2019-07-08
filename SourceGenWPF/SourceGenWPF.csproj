@@ -87,6 +87,9 @@
     <Compile Include="WpfGui\EditDefSymbol.xaml.cs">
       <DependentUpon>EditDefSymbol.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\EditInstructionOperand.xaml.cs">
+      <DependentUpon>EditInstructionOperand.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditLabel.xaml.cs">
       <DependentUpon>EditLabel.xaml</DependentUpon>
     </Compile>
@@ -209,6 +212,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditDefSymbol.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditInstructionOperand.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

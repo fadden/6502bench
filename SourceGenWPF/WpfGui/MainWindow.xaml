@@ -58,6 +58,11 @@ limitations under the License.
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="EditHeaderCommentCmd" Text="Edit Header Comment..."/>
+            <RoutedUICommand x:Key="EditOperandCmd" Text="Edit Operand...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+O</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="EditLabelCmd" Text="Edit Label...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+L</KeyGesture>
@@ -145,6 +150,8 @@ limitations under the License.
                         CanExecute="CanEditLabel" Executed="EditLabelCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditLongCommentCmd}"
                         CanExecute="CanEditLongComment" Executed="EditLongCommentCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditOperandCmd}"
+                        CanExecute="CanEditOperand" Executed="EditOperandCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
                         CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
         <CommandBinding Command="{StaticResource ExitCmd}"
@@ -233,7 +240,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
                 <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Command="{StaticResource EditLabelCmd}"/>
-                <MenuItem Header="Edit Operand..."/> <!-- Ctrl+O -->
+                <MenuItem Command="{StaticResource EditOperandCmd}"/>
                 <MenuItem Header="Edit Comment..."/> <!-- Ctrl+; -->
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
                 <MenuItem Header="Edit Note..."/>    <!-- Ctrl+N -->

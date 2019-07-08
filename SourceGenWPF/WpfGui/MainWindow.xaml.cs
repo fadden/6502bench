@@ -757,6 +757,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLongComment();
         }
 
+        private void CanEditOperand(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditOperand();
+        }
+
         private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
         }
@@ -854,6 +858,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void EditLongCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditLongComment();
+        }
+
+        private void EditOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditOperand();
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

@@ -686,8 +686,10 @@ namespace SourceGenWPF {
             mMainWin.CodeListView_SetTopIndex(topItemIndex);
             mReanalysisTimer.EndTask("Restore selection and top position");
 
-            // Update the Notes list as well.
+            // Update the Notes and Symbols windows.
+            // TODO: references?
             PopulateNotesList();
+            PopulateSymbolsList();
 
             mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
 
@@ -1304,11 +1306,9 @@ namespace SourceGenWPF {
                             }
                             break;
                         case CodeListColumn.Operand:
-#if false
-                            if (editOperandToolStripMenuItem.Enabled) {
-                                EditInstrDataOperand_Click(sender, e);
+                            if (CanEditOperand()) {
+                                EditOperand();
                             }
-#endif
                             break;
                         case CodeListColumn.Comment:
 #if false
@@ -1448,6 +1448,108 @@ namespace SourceGenWPF {
                     ApplyUndoableChanges(cs);
                 }
             }
+        }
+
+        public bool CanEditOperand() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int selOffset = CodeLineList[selIndex].FileOffset;
+
+            bool editInstr = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Code &&
+                mProject.GetAnattrib(selOffset).IsInstructionWithOperand);
+            bool editData = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
+            return editInstr || editData;
+        }
+
+        public void EditOperand() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int selOffset = CodeLineList[selIndex].FileOffset;
+            if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Code) {
+                EditInstructionOperand(selOffset);
+            } else {
+                Debug.Assert(CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
+                EditDataOperand(selOffset);
+            }
+        }
+
+        private void EditInstructionOperand(int offset) {
+            EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, offset,
+                mProject, mOutputFormatter);
+
+            // We'd really like to pass in an indication of what the "default" format actually
+            // resolved to, but we don't always know.  If this offset has a FormatDescriptor,
+            // we might not have auto-generated the label that would have been used otherwise.
+
+            // We're editing the FormatDescriptor from OperandFormats, not Anattribs;
+            // the latter may have auto-generated stuff.
+            if (mProject.OperandFormats.TryGetValue(offset, out FormatDescriptor dfd)) {
+                dlg.FormatDescriptor = dfd;
+            }
+
+            dlg.ShowDialog();
+            if (dlg.DialogResult != true) {
+                return;
+            }
+
+            ChangeSet cs = new ChangeSet(1);
+
+            // Handle shortcut actions.
+
+            if (dlg.FormatDescriptor != dfd && dlg.ShortcutAction !=
+                    WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead) {
+                // Note EditOperand returns a null descriptor when the user selects Default.
+                // This is different from how EditData works, since that has to deal with
+                // multiple regions.
+                Debug.WriteLine("Changing " + dfd + " to " + dlg.FormatDescriptor);
+                UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
+                    dfd, dlg.FormatDescriptor);
+                cs.Add(uc);
+            } else if (dfd != null && dlg.ShortcutAction ==
+                    WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead) {
+                Debug.WriteLine("Removing existing label for CreateLabelInstead");
+                UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
+                    dfd, null);
+                cs.Add(uc);
+            } else {
+                Debug.WriteLine("No change to format descriptor");
+            }
+
+            switch (dlg.ShortcutAction) {
+                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead:
+                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelAlso:
+                    Debug.Assert(!mProject.UserLabels.ContainsKey(dlg.ShortcutArg));
+                    Anattrib targetAttr = mProject.GetAnattrib(dlg.ShortcutArg);
+                    Symbol newLabel = new Symbol(dlg.FormatDescriptor.SymbolRef.Label,
+                        targetAttr.Address, Symbol.Source.User, Symbol.Type.LocalOrGlobalAddr);
+                    UndoableChange uc = UndoableChange.CreateLabelChange(dlg.ShortcutArg,
+                        null, newLabel);
+                    cs.Add(uc);
+                    break;
+                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateProjectSymbolAlso:
+                    Debug.Assert(!mProject.ProjectProps.ProjectSyms.ContainsKey(
+                        dlg.FormatDescriptor.SymbolRef.Label));
+                    DefSymbol defSym = new DefSymbol(dlg.FormatDescriptor.SymbolRef.Label,
+                        dlg.ShortcutArg, Symbol.Source.Project, Symbol.Type.ExternalAddr,
+                        FormatDescriptor.SubType.Hex, string.Empty, string.Empty);
+                    ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
+                    newProps.ProjectSyms.Add(defSym.Label, defSym);
+                    uc = UndoableChange.CreateProjectPropertiesChange(
+                        mProject.ProjectProps, newProps);
+                    cs.Add(uc);
+                    break;
+                case WpfGui.EditInstructionOperand.SymbolShortcutAction.None:
+                    break;
+            }
+
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            }
+        }
+
+        private void EditDataOperand(int offset) {
+            // TODO
         }
 
         public bool CanEditStatusFlags() {
