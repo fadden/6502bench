@@ -63,6 +63,7 @@ namespace SourceGenWPF.WpfGui {
             get { return mLabelText; }
             set {
                 mLabelText = value;
+                LabelTextBox_TextChanged();
                 OnPropertyChanged();
             }
         }
@@ -116,7 +117,7 @@ namespace SourceGenWPF.WpfGui {
             labelTextBox.Focus();
         }
 
-        private void LabelTextBox_TextChanged(object sender, RoutedEventArgs e) {
+        private void LabelTextBox_TextChanged() {
             string str = LabelText;
             bool valid = true;
 

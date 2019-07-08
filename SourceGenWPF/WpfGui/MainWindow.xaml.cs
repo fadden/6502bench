@@ -1003,7 +1003,7 @@ namespace SourceGenWPF.WpfGui {
             MenuItem recents = (MenuItem)sender;
             recents.Items.Clear();
 
-            Debug.WriteLine("COUNT is " + mMainCtrl.RecentProjectPaths.Count);
+            //Debug.WriteLine("COUNT is " + mMainCtrl.RecentProjectPaths.Count);
             if (mMainCtrl.RecentProjectPaths.Count == 0) {
                 MenuItem mi = new MenuItem();
                 mi.Header = Res.Strings.PARENTHETICAL_NONE;

@@ -174,6 +174,8 @@ namespace SourceGenWPF {
 
         public MainController(MainWindow win) {
             mMainWin = win;
+
+            ScriptManager.UseKeepAliveHack = true;
         }
 
         /// <summary>
