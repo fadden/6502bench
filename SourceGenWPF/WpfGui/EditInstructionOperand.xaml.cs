@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+
 using Asm65;
 
 namespace SourceGenWPF.WpfGui {
@@ -28,7 +29,7 @@ namespace SourceGenWPF.WpfGui {
     /// 
     /// This is a pretty direct port from WinForms.
     /// </summary>
-    public partial class EditInstructionOperand : Window, INotifyPropertyChanged {
+    public partial class EditInstructionOperand : Window {
         /// <summary>
         /// In/out.  May be null on entry if the offset doesn't have a format descriptor
         /// specified.  Will be null on exit if "default" is selected.
@@ -123,12 +124,6 @@ namespace SourceGenWPF.WpfGui {
         /// Set to true if the user has entered a symbol that matches an auto-generated symbol.
         /// </summary>
         private bool mIsSymbolAuto;
-
-        // INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
 
         public EditInstructionOperand(Window owner, int offset, DisasmProject project,

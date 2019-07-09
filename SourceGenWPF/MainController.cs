@@ -1451,16 +1451,23 @@ namespace SourceGenWPF {
         }
 
         public bool CanEditOperand() {
-            if (SelectionAnalysis.mNumItemsSelected != 1) {
+            if (SelectionAnalysis.mNumItemsSelected == 0) {
                 return false;
-            }
-            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
-            int selOffset = CodeLineList[selIndex].FileOffset;
+            } else if (SelectionAnalysis.mNumItemsSelected == 1) {
+                int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+                int selOffset = CodeLineList[selIndex].FileOffset;
 
-            bool editInstr = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Code &&
-                mProject.GetAnattrib(selOffset).IsInstructionWithOperand);
-            bool editData = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
-            return editInstr || editData;
+                bool editInstr = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Code &&
+                    mProject.GetAnattrib(selOffset).IsInstructionWithOperand);
+                bool editData = (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
+                return editInstr || editData;
+            } else {
+                // Data operands are one of the few things we can edit in bulk.  It's okay
+                // if meta-data like ORGs and Notes are selected, but we don't allow it if
+                // any code is selected.
+                EntityCounts counts = SelectionAnalysis.mEntityCounts;
+                return (counts.mDataLines > 0 && counts.mCodeLines == 0);
+            }
         }
 
         public void EditOperand() {
@@ -1549,7 +1556,46 @@ namespace SourceGenWPF {
         }
 
         private void EditDataOperand(int offset) {
-            // TODO
+            Debug.Assert(mMainWin.CodeListView_GetSelectionCount() > 0);
+
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                Debug.Assert(false, "EditDataOperand found nothing to edit"); // shouldn't happen
+                return;
+            }
+
+            // If the first offset has a FormatDescriptor, pass that in as a recommendation
+            // for the default value in the dialog.  This allows single-item editing to work
+            // as expected.  If the format can't be applied to the full selection (which
+            // would disable that radio button), the dialog will have to pick something
+            // that does work.
+            //
+            // We could pull this out of Anattribs, which would let the dialog reflect the
+            // auto-format that the user was just looking at.  However, I think it's better
+            // if the dialog shows what's actually there, i.e. no formatting at all.
+            IEnumerator<TypedRangeSet.Tuple> iter =
+                (IEnumerator<TypedRangeSet.Tuple>)trs.GetEnumerator();
+            iter.MoveNext();
+            TypedRangeSet.Tuple firstOffset = iter.Current;
+            mProject.OperandFormats.TryGetValue(firstOffset.Value, out FormatDescriptor dfd);
+
+            EditDataOperand dlg = new EditDataOperand(mMainWin, mProject.FileData,
+                mProject.SymbolTable, mOutputFormatter, trs, dfd);
+            dlg.ShowDialog();
+            if (dlg.DialogResult == true) {
+                // Merge the changes into the OperandFormats list.  We need to remove all
+                // FormatDescriptors that overlap the selected region.  We don't need to
+                // pass the selection set in, because the dlg.Results list spans the exact
+                // set of ranges.
+                //
+                // If nothing actually changed, don't generate an undo record.
+                ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.Results);
+                if (cs.Count != 0) {
+                    ApplyUndoableChanges(cs);
+                } else {
+                    Debug.WriteLine("No change to data formats");
+                }
+            }
         }
 
         public bool CanEditStatusFlags() {
@@ -2172,6 +2218,92 @@ namespace SourceGenWPF {
                 !newProps.AnalysisParams.AnalyzeUncategorizedData;
             UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(oldProps, newProps);
             ApplyUndoableChanges(new ChangeSet(uc));
+        }
+
+        /// <summary>
+        /// Converts the ListView's selected items into a set of offsets.  If a line
+        /// spans multiple offsets (e.g. a 3-byte instruction), offsets for every
+        /// byte are included.
+        ///
+        /// Contiguous regions with user labels or address changes are split into
+        /// independent regions by using a serial number for the range type.  Same for
+        /// long comments and notes.
+        ///
+        /// We don't split based on existing data format items.  That would make it impossible
+        /// to convert from (say) a collection of single bytes to a collection of double bytes
+        /// or a string.  It should not be possible to select part of a formatted section,
+        /// unless the user has been playing weird games with type hints to get overlapping
+        /// format descriptors.
+        /// </summary>
+        /// <returns>TypedRangeSet with all offsets.</returns>
+        private TypedRangeSet GroupedOffsetSetFromSelected() {
+            TypedRangeSet rs = new TypedRangeSet();
+            int groupNum = 0;
+            int expectedAddr = -1;
+
+            DateTime startWhen = DateTime.Now;
+            int prevOffset = -1;
+            foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
+                // Don't add an offset to the set if the only part of it that is selected
+                // is a directive or blank line.  We only care about file offsets, so skip
+                // anything that isn't code or data.
+                if (!CodeLineList[index].IsCodeOrData) {
+                    continue;
+                }
+
+                int offset = CodeLineList[index].FileOffset;
+                if (offset == prevOffset) {
+                    // This is a continuation of a multi-line item like a string.  We've
+                    // already accounted for all bytes associated with this offset.
+                    continue;
+                }
+                Anattrib attr = mProject.GetAnattrib(offset);
+
+                if (expectedAddr == -1) {
+                    expectedAddr = attr.Address;
+                }
+                // Check for user labels.
+                if (mProject.UserLabels.ContainsKey(offset)) {
+                    //if (mProject.GetAnattrib(offset).Symbol != null) {
+                    // We consider auto labels when splitting regions for the data analysis,
+                    // but I don't think we want to take them into account here.  The specific
+                    // example that threw me was loading a 16-bit value from an address table.
+                    // The code does "LDA table,X / STA / LDA table+1,X / STA", which puts auto
+                    // labels at the first two addresses -- splitting the region.  That's good
+                    // for the uncategorized data analyzer, but very annoying if you want to
+                    // slap a 16-bit numeric format on all entries in a table.
+                    groupNum++;
+                } else if (mProject.HasCommentOrNote(offset)) {
+                    // Don't carry across a long comment or note.
+                    groupNum++;
+                } else if (attr.Address != expectedAddr) {
+                    // For a contiguous selection, this should only happen if there's a .ORG
+                    // address change.  For non-contiguous selection this is expected.  In the
+                    // latter case, incrementing the group number is unnecessary but harmless.
+                    Debug.WriteLine("Address break: " + attr.Address + " vs. " + expectedAddr);
+                    //Debug.Assert(mProject.AddrMap.Get(offset) >= 0);
+
+                    expectedAddr = attr.Address;
+                    groupNum++;
+                }
+
+                // Mark every byte of an instruction or multi-byte data item --
+                // everything that is represented by the line the user selected.  Control
+                // statements and blank lines aren't relevant here, as we only care about
+                // file offsets.
+                int len = CodeLineList[index].OffsetSpan; // attr.Length;
+                Debug.Assert(len > 0);
+                for (int i = offset; i < offset + len; i++) {
+                    rs.Add(i, groupNum);
+                }
+                // Advance the address.
+                expectedAddr += len;
+
+                prevOffset = offset;
+            }
+            Debug.WriteLine("Offset selection conv took " +
+                (DateTime.Now - startWhen).TotalMilliseconds + " ms");
+            return rs;
         }
 
         #endregion Main window UI event handlers
