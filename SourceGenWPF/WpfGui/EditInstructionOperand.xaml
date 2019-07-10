@@ -29,15 +29,15 @@ limitations under the License.
     <StackPanel Margin="8">
         <TextBlock Text="Select operand format:"/>
         <RadioButton Name="defaultButton" GroupName="Format" Content="Default" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
         <RadioButton Name="hexButton" GroupName="Format" Content="Hexadecimal" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
         <RadioButton Name="decimalButton" GroupName="Format" Content="Decimal" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
         <RadioButton Name="binaryButton" GroupName="Format" Content="Binary" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
         <RadioButton Name="asciiButton" GroupName="Format" Content="ASCII character" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -49,16 +49,16 @@ limitations under the License.
             </Grid.RowDefinitions>
             <RadioButton Name="symbolButton" Grid.Column="0" Grid.Row="0" Margin="0,2,0,0"
                          GroupName="Format" Content="Symbol"
-                         Checked="MainGroup_CheckedChanged" Unchecked="MainGroup_CheckedChanged"/>
+                         Checked="MainGroup_CheckedChanged"/>
             <TextBox Name="symbolTextBox" Grid.Column="1" Grid.Row="0" Margin="8,1,0,0"
                      FontFamily="{StaticResource GeneralMonoFont}" TextChanged="SymbolTextBox_TextChanged"/>
             <StackPanel Name="symbolPartPanel" Grid.Column="1" Grid.Row="1" Orientation="Horizontal" Margin="8,4,0,0">
                 <RadioButton Name="lowButton" GroupName="Part" Content="Low"
-                             Checked="MainGroup_CheckedChanged" Unchecked="PartGroup_CheckedChanged"/>
+                             Checked="MainGroup_CheckedChanged"/>
                 <RadioButton Name="highButton" GroupName="Part" Content="High" Margin="8,0,0,0"
-                             Checked="MainGroup_CheckedChanged" Unchecked="PartGroup_CheckedChanged"/>
+                             Checked="MainGroup_CheckedChanged"/>
                 <RadioButton Name="bankButton" GroupName="Part" Content="Bank" Margin="8,0,0,0"
-                             Checked="MainGroup_CheckedChanged" Unchecked="PartGroup_CheckedChanged"/>
+                             Checked="MainGroup_CheckedChanged"/>
             </StackPanel>
         </Grid>
 

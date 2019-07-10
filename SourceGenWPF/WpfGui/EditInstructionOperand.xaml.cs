@@ -428,6 +428,8 @@ namespace SourceGenWPF.WpfGui {
                 ShortcutArg = mAttr.OperandAddress;
             } else {
                 // Probably an immediate operand.
+                // ?? Should operandAndProjButton be enabled for 8-bit constants?  We'd want
+                //    to add it as a constant rather than an address.
                 labelInsteadButton.IsEnabled = operandAndLabelButton.IsEnabled =
                     operandAndProjButton.IsEnabled = false;
             }
