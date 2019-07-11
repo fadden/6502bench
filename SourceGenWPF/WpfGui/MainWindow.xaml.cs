@@ -749,6 +749,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditAddress();
         }
 
+        private void CanEditComment(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditComment();
+        }
+
         private void CanEditLabel(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLabel();
         }
@@ -850,6 +854,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void EditAppSettingsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditAppSettings();
+        }
+
+        private void EditCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditComment();
         }
 
         private void EditHeaderCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

@@ -84,6 +84,9 @@
     <Compile Include="WpfGui\EditAppSettings.xaml.cs">
       <DependentUpon>EditAppSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\EditComment.xaml.cs">
+      <DependentUpon>EditComment.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditDataOperand.xaml.cs">
       <DependentUpon>EditDataOperand.xaml</DependentUpon>
     </Compile>
@@ -211,6 +214,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditAppSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditComment.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

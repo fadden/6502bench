@@ -57,6 +57,12 @@ limitations under the License.
             <RoutedUICommand x:Key="DebugSourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
+            <RoutedUICommand x:Key="EditCommentCmd" Text="Edit Comment...">
+                <RoutedUICommand.InputGestures>
+                    <!-- this works, but appears as "Ctrl+Oem1", so override tip in menu items -->
+                    <KeyGesture>Ctrl+Semicolon</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="EditHeaderCommentCmd" Text="Edit Header Comment..."/>
             <RoutedUICommand x:Key="EditOperandCmd" Text="Edit Operand...">
                 <RoutedUICommand.InputGestures>
@@ -146,6 +152,8 @@ limitations under the License.
                         Executed="DebugSourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditCommentCmd}"
+                        CanExecute="CanEditComment" Executed="EditCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditHeaderCommentCmd}"
                         CanExecute="IsProjectOpen" Executed="EditHeaderCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditLabelCmd}"
@@ -243,7 +251,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Command="{StaticResource EditLabelCmd}"/>
                 <MenuItem Command="{StaticResource EditOperandCmd}"/>
-                <MenuItem Header="Edit Comment..."/> <!-- Ctrl+; -->
+                <MenuItem Command="{StaticResource EditCommentCmd}" InputGestureText="Ctrl+;"/>
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
                 <MenuItem Header="Edit Note..."/>    <!-- Ctrl+N -->
                 <MenuItem Header="Edit Project Symbol..."/>

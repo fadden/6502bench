@@ -1427,11 +1427,9 @@ namespace SourceGenWPF {
                             }
                             break;
                         case CodeListColumn.Comment:
-#if false
-                            if (editCommentToolStripMenuItem.Enabled) {
-                                EditComment_Click(sender, e);
+                            if (CanEditComment()) {
+                                EditComment();
                             }
-#endif
                             break;
 
                     }
@@ -1483,6 +1481,33 @@ namespace SourceGenWPF {
                 ApplyUndoableChanges(cs);
             } else {
                 Debug.WriteLine("EditAddress: no change");
+            }
+        }
+
+        public bool CanEditComment() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            // Line must be code or data.
+            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.Data);
+        }
+
+        public void EditComment() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+
+            string oldComment = mProject.Comments[offset];
+            EditComment dlg = new EditComment(mMainWin, oldComment);
+            if (dlg.ShowDialog() == true) {
+                if (!oldComment.Equals(dlg.CommentText)) {
+                    Debug.WriteLine("Changing comment at +" + offset.ToString("x6"));
+
+                    UndoableChange uc = UndoableChange.CreateCommentChange(offset,
+                        oldComment, dlg.CommentText);
+                    ChangeSet cs = new ChangeSet(uc);
+                    ApplyUndoableChanges(cs);
+                }
             }
         }
 
