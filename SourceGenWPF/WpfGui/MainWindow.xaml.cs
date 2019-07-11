@@ -835,6 +835,10 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
+        private void CopyCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.CopyToClipboard();
+        }
+
         private void DebugSourceGenerationTestsCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
             mMainCtrl.RunSourceGenerationTests();

@@ -140,6 +140,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="Copy"
+                        CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
         <CommandBinding Command="{StaticResource DebugSourceGenerationTestsCmd}"
                         Executed="DebugSourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
@@ -282,28 +284,30 @@ limitations under the License.
 
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
-                <Button ToolTip="Navigate backward" Command="{StaticResource NavigateBackwardCmd}">
+                <Button Command="{StaticResource NavigateBackwardCmd}"
+                        ToolTip="Navigate backward (Alt+Left, Ctrl+Minus, or back button on mouse)">
                     <ContentControl Template="{StaticResource icon_StepBackwards}"/>
                 </Button>
-                <Button ToolTip="Navigate forward" Command="{StaticResource NavigateForwardCmd}">
+                <Button Command="{StaticResource NavigateForwardCmd}"
+                        ToolTip="Navigate forward (Alt+Right or Ctrl+Shift+Minus)">
                     <ContentControl Template="{StaticResource icon_StepForward}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Create new project">
+                <Button Command="{StaticResource NewProjectCmd}" ToolTip="Create new project">
                     <ContentControl Template="{StaticResource icon_NewFile}"/>
                 </Button>
-                <Button ToolTip="Open project" Command="{StaticResource OpenCmd}">
+                <Button Command="{StaticResource OpenCmd}" ToolTip="Open project">
                     <ContentControl Template="{StaticResource icon_OpenFile}"/>
                 </Button>
-                <Button ToolTip="Save project" Command="Save">
+                <Button Command="Save" ToolTip="Save project (Ctrl+S)">
                     <ContentControl Template="{StaticResource icon_SaveFile}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Copy to clipboard">
+                <Button Command="Copy" ToolTip="Copy to clipboard (Ctrl+C)">
                     <ContentControl Template="{StaticResource icon_CopyToClipboard}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Help - open manual in browser" Command="Help">
+                <Button Command="Help" ToolTip="Help - open manual in browser (F1)">
                     <ContentControl Template="{StaticResource icon_F1Help}"/>
                 </Button>
             </ToolBar>

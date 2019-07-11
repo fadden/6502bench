@@ -1190,6 +1190,122 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
+        /// Copies the selection to the clipboard as formatted text.
+        /// </summary>
+        public void CopyToClipboard() {
+            const bool addCsv = true;
+
+            ClipLineFormat format = (ClipLineFormat)AppSettings.Global.GetEnum(
+                    AppSettings.CLIP_LINE_FORMAT,
+                    typeof(ClipLineFormat),
+                    (int)ClipLineFormat.AssemblerSource);
+            DisplayListSelection selection = mMainWin.CodeDisplayList.SelectedIndices;
+            StringBuilder fullText = new StringBuilder(selection.Count * 50);
+            StringBuilder csv = new StringBuilder(selection.Count * 40);
+            StringBuilder sb = new StringBuilder(100);
+
+            int addrAdj = mProject.CpuDef.HasAddr16 ? 6 : 9;
+            int disAdj = 0;
+            int bytesWidth = 0;
+            if (format == ClipLineFormat.Disassembly) {
+                // A limit of 8 gets us 4 bytes from dense display ("20edfd60") and 3 if spaces
+                // are included ("20 ed fd") with no excess.  We want to increase it to 11 so
+                // we can always show 4 bytes.
+                bytesWidth = (mFormatterConfig.mSpacesBetweenBytes ? 11 : 8);
+                disAdj = addrAdj + bytesWidth + 2;
+            }
+
+            // Walking through the selected indices can be slow for a large file, so we
+            // run through the full list and pick out the selected items with our parallel
+            // structure.  (I'm assuming that "select all" will be a common precursor.)
+            foreach (int index in selection) {
+                LineListGen.Line line = CodeLineList[index];
+                DisplayList.FormattedParts parts = CodeLineList.GetFormattedParts(index);
+                switch (line.LineType) {
+                    case LineListGen.Line.Type.Code:
+                    case LineListGen.Line.Type.Data:
+                    case LineListGen.Line.Type.EquDirective:
+                    case LineListGen.Line.Type.RegWidthDirective:
+                    case LineListGen.Line.Type.OrgDirective:
+                        if (format == ClipLineFormat.Disassembly) {
+                            if (!string.IsNullOrEmpty(parts.Addr)) {
+                                sb.Append(parts.Addr);
+                                sb.Append(": ");
+                            }
+
+                            // Shorten the "...".
+                            string bytesStr = parts.Bytes;
+                            if (bytesStr != null && bytesStr.Length > bytesWidth) {
+                                bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
+                            }
+                            TextUtil.AppendPaddedString(sb, bytesStr, disAdj);
+                        }
+                        TextUtil.AppendPaddedString(sb, parts.Label, disAdj + 9);
+                        TextUtil.AppendPaddedString(sb, parts.Opcode, disAdj + 9 + 8);
+                        TextUtil.AppendPaddedString(sb, parts.Operand, disAdj + 9 + 8 + 11);
+                        if (string.IsNullOrEmpty(parts.Comment)) {
+                            // Trim trailing spaces off opcode or operand.
+                            TextUtil.TrimEnd(sb);
+                        } else {
+                            sb.Append(parts.Comment);
+                        }
+                        sb.Append("\r\n");
+                        break;
+                    case LineListGen.Line.Type.LongComment:
+                        if (format == ClipLineFormat.Disassembly) {
+                            TextUtil.AppendPaddedString(sb, string.Empty, disAdj);
+                        }
+                        sb.Append(parts.Comment);
+                        sb.Append("\r\n");
+                        break;
+                    case LineListGen.Line.Type.Note:
+                        // don't include notes
+                        break;
+                    case LineListGen.Line.Type.Blank:
+                        sb.Append("\r\n");
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+                fullText.Append(sb);
+
+                if (addCsv) {
+                    csv.Append(TextUtil.EscapeCSV(parts.Offset)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Addr)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Bytes)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Flags)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Attr)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Label)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Opcode)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Operand)); csv.Append(',');
+                    csv.Append(TextUtil.EscapeCSV(parts.Comment));
+                    csv.Append("\r\n");
+                }
+
+                sb.Clear();
+            }
+
+            DataObject dataObject = new DataObject();
+            dataObject.SetText(fullText.ToString());
+
+            // We want to have both plain text and CSV data on the clipboard.  To add both
+            // formats we need to stream it to a DataObject.  Complicating matters is Excel's
+            // entirely reasonable desire to have data in UTF-8 rather than UTF-16.
+            //
+            // (I'm not sure pasting assembly bits into Excel is actually useful, so this
+            // should probably be optional.)
+            //
+            // https://stackoverflow.com/a/369219/294248
+            if (addCsv) {
+                byte[] csvData = Encoding.UTF8.GetBytes(csv.ToString());
+                MemoryStream stream = new MemoryStream(csvData);
+                dataObject.SetData(DataFormats.CommaSeparatedValue, stream);
+            }
+            Clipboard.SetDataObject(dataObject, true);
+        }
+
+        /// <summary>
         /// Opens the application settings dialog.  All changes to settings are made directly
         /// to the AppSettings.Global object.
         /// </summary>

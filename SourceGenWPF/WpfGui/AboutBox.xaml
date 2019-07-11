@@ -40,7 +40,7 @@ limitations under the License.
         <Image Grid.Column="0" Grid.Row="0"
                Source="/SourceGenWPF;component/Res/Logo.png"/>
 
-        <StackPanel Grid.Column="1" Grid.Row="0" Margin="8,0,0,0">
+        <StackPanel Grid.Column="1" Grid.Row="0" Margin="8,12,0,0">
             <TextBlock Text="6502bench SourceGen" FontSize="30"/>
             <TextBlock FontSize="24"
                        Text="{Binding ProgramVersionString, StringFormat={}Version {0},
