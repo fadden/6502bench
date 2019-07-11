@@ -36,29 +36,17 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         public SortedList<int, FormatDescriptor> Results { get; private set; }
 
-        ///// <summary>
-        ///// Number of bytes selected.
-        ///// </summary>
-        //public int NumBytes {
-        //    get { return mNumBytes; }
-        //    set {
-        //        mNumBytes = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        //private int mNumBytes;
-
-        ///// <summary>
-        ///// Number of groups selected.
-        ///// </summary>
-        //public int NumGroups {
-        //    get { return mNumGroups; }
-        //    set {
-        //        mNumGroups = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        //private int mNumGroups;
+        /// <summary>
+        /// Set to true when input is valid.  Controls whether the OK button is enabled.
+        /// </summary>
+        public bool IsValid {
+            get { return mIsValid; }
+            set {
+                mIsValid = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mIsValid;
 
         /// <summary>
         /// Selected offsets.  An otherwise contiguous range of offsets can be broken up
@@ -123,28 +111,15 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            // TODO
-        }
-        private void Window_ContentRendered(object sender, EventArgs e) {
-            // TODO
-        }
-        private void OkButton_Click(object sender, RoutedEventArgs e) {
-            // TODO
-        }
-
-#if false
-        private void EditData_Load(object sender, EventArgs e) {
             DateTime startWhen = DateTime.Now;
-
-            mIsInitialSetup = true;
 
             // Determine which of the various options is suitable for the selected offsets.
             // Disable any radio buttons that won't work.
             AnalyzeRanges();
 
             // Configure the dialog from the FormatDescriptor, if one is available.
-            Debug.WriteLine("First FD: " + FirstFormatDescriptor);
-            SetControlsFromDescriptor(FirstFormatDescriptor);
+            Debug.WriteLine("First FD: " + mFirstFormatDescriptor);
+            SetControlsFromDescriptor(mFirstFormatDescriptor);
 
             if (mPreferredFormatUnavailable) {
                 // This can happen when e.g. a bunch of stuff is formatted as null-terminated
@@ -155,25 +130,22 @@ namespace SourceGenWPF.WpfGui {
                 Debug.WriteLine("NOTE: preferred format unavailable");
             }
 
-            mIsInitialSetup = false;
             UpdateControls();
 
             Debug.WriteLine("EditData dialog load time: " +
                 (DateTime.Now - startWhen).TotalMilliseconds + " ms");
         }
 
-        private void EditData_Shown(object sender, EventArgs e) {
+        private void Window_ContentRendered(object sender, EventArgs e) {
             // Start with the focus in the text box if the initial format allows for a
             // symbolic reference.  This way they can start typing immediately.
-            if (simpleDisplayAsGroupBox.Enabled) {
+            if (simpleDisplayAsGroupBox.IsEnabled) {
                 symbolEntryTextBox.Focus();
             }
         }
 
         /// <summary>
-        /// Handles CheckedChanged event for all radio buttons in main group.  This will
-        /// fire twice when a radio button is clicked (once to un-check the old, once
-        /// to check the new).
+        /// Handles Checked event for all buttons in Main group.
         /// </summary>
         private void MainGroup_CheckedChanged(object sender, EventArgs e) {
             // Enable/disable the style group and the low/high/bank radio group.
@@ -182,7 +154,7 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
-        /// Handles CheckedChanged event for radio buttons in the simple-data "display as"
+        /// Handles Checked event for radio buttons in the Display group.
         /// group box.
         /// </summary>
         private void SimpleDisplay_CheckedChanged(object sender, EventArgs e) {
@@ -190,31 +162,25 @@ namespace SourceGenWPF.WpfGui {
             UpdateControls();
         }
 
-        /// <summary>
-        /// Handles CheckedChanged event for all radio buttons in symbol-part group.
-        /// </summary>
-        private void PartGroup_CheckedChanged(object sender, EventArgs e) {
-            // not currently using a preview window; could add one for single items?
-        }
-
-        private void symbolEntryTextBox_TextChanged(object sender, EventArgs e) {
+        private void SymbolEntryTextBox_TextChanged(object sender, TextChangedEventArgs e) {
             // Make sure Symbol is checked if they're typing text in.
-            Debug.Assert(radioSimpleDataSymbolic.Enabled);
-            radioSimpleDataSymbolic.Checked = true;
+            //Debug.Assert(radioSimpleDataSymbolic.IsEnabled);
+            radioSimpleDataSymbolic.IsChecked = true;
             // Update OK button based on symbol validity.
             UpdateControls();
         }
 
-        private void okButton_Click(object sender, EventArgs e) {
+        private void OkButton_Click(object sender, RoutedEventArgs e) {
             CreateDescriptorListFromControls();
             FormatDescriptor.DebugDumpSortedList(Results);
+            DialogResult = true;
         }
 
         /// <summary>
         /// Updates all of the controls to reflect the current internal state.
         /// </summary>
         private void UpdateControls() {
-            if (mIsInitialSetup) {
+            if (!IsLoaded) {
                 return;
             }
 
@@ -222,36 +188,36 @@ namespace SourceGenWPF.WpfGui {
             bool wantStyle = false;
             int simpleWidth = -1;
             bool isBigEndian = false;
-            if (radioSingleBytes.Checked) {
+            if (radioSingleBytes.IsChecked == true) {
                 wantStyle = true;
                 simpleWidth = 1;
-            } else if (radio16BitLittle.Checked) {
+            } else if (radio16BitLittle.IsChecked == true) {
                 wantStyle = true;
                 simpleWidth = 2;
-            } else if (radio16BitBig.Checked) {
+            } else if (radio16BitBig.IsChecked == true) {
                 wantStyle = true;
                 simpleWidth = 2;
                 isBigEndian = true;
-            } else if (radio24BitLittle.Checked) {
+            } else if (radio24BitLittle.IsChecked == true) {
                 wantStyle = true;
                 simpleWidth = 3;
-            } else if (radio32BitLittle.Checked) {
+            } else if (radio32BitLittle.IsChecked == true) {
                 wantStyle = true;
                 simpleWidth = 4;
             }
-            bool focusOnSymbol = !simpleDisplayAsGroupBox.Enabled && wantStyle;
-            simpleDisplayAsGroupBox.Enabled = wantStyle;
+            bool focusOnSymbol = !simpleDisplayAsGroupBox.IsEnabled && wantStyle;
+            simpleDisplayAsGroupBox.IsEnabled = wantStyle;
             if (wantStyle) {
-                // TODO(soon): compute on first need and save results; this is getting called
-                //   2x as radio buttons are hit, and might be slow on large data sets
-                radioSimpleDataAscii.Enabled = IsRawAsciiCompatible(simpleWidth, isBigEndian);
+                radioSimpleDataAscii.IsEnabled = IsRawAsciiCompatible(simpleWidth, isBigEndian);
             }
 
             // Enable the symbolic reference entry box if the "display as" group is enabled.
             // That way instead of "click 16-bit", "click symbol", "enter symbol", the user
             // can skip the second step.
-            symbolEntryTextBox.Enabled = simpleDisplayAsGroupBox.Enabled;
-            symbolPartPanel.Enabled = radioSimpleDataSymbolic.Checked;
+            symbolEntryTextBox.IsEnabled = simpleDisplayAsGroupBox.IsEnabled;
+
+            // Part panel is enabled when Symbol is checked.  (Now handled in XAML.)
+            //symbolPartPanel.IsEnabled = (radioSimpleDataSymbolic.IsChecked == true);
 
             // If we just enabled the group box, set the focus on the symbol entry box.  This
             // removes another click from the steps, though it's a bit aggressive if you're
@@ -261,7 +227,7 @@ namespace SourceGenWPF.WpfGui {
             }
 
             bool isOk = true;
-            if (radioSimpleDataSymbolic.Checked) {
+            if (radioSimpleDataSymbolic.IsChecked == true) {
                 // Just check for correct format.  References to non-existent labels are allowed.
                 isOk = Asm65.Label.ValidateLabel(symbolEntryTextBox.Text);
 
@@ -270,8 +236,10 @@ namespace SourceGenWPF.WpfGui {
                     isOk = sym.SymbolSource != Symbol.Source.Auto;
                 }
             }
-            okButton.Enabled = isOk;
+            IsValid = isOk;
         }
+
+        #region Setup
 
         /// <summary>
         /// Analyzes the selection to see which data formatting options are suitable.
@@ -280,14 +248,21 @@ namespace SourceGenWPF.WpfGui {
         /// Call this once, when the dialog is first loaded.
         /// </summary>
         private void AnalyzeRanges() {
-            Debug.Assert(Selection.Count != 0);
+            Debug.Assert(mSelection.Count != 0);
 
-            string fmt = (Selection.RangeCount == 1) ?
-                Properties.Resources.FMT_FORMAT_SINGLE_GROUP :
-                Properties.Resources.FMT_FORMAT_MULTIPLE_GROUPS;
-            selectFormatLabel.Text = string.Format(fmt, Selection.Count, Selection.RangeCount);
+            string fmt, infoStr;
+            if (mSelection.RangeCount == 1 && mSelection.Count == 1) {
+                infoStr = (string)FindResource("str_SingleByte");
+            } else if (mSelection.RangeCount == 1) {
+                fmt = (string)FindResource("str_SingleGroup");
+                infoStr = string.Format(fmt, mSelection.Count);
+            } else {
+                fmt = (string)FindResource("str_MultiGroup");
+                infoStr = string.Format(fmt, mSelection.Count, mSelection.RangeCount);
+            }
+            selectFormatLabel.Text = infoStr;
 
-            IEnumerator<TypedRangeSet.TypedRange> iter = Selection.RangeListIterator;
+            IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
 
             int mixedAsciiOkCount = 0;
             int mixedAsciiNotCount = 0;
@@ -295,7 +270,6 @@ namespace SourceGenWPF.WpfGui {
             int len8StringCount = 0;
             int len16StringCount = 0;
             int dciStringCount = 0;
-            //int revDciStringCount = 0;
 
             // For each range, check to see if the data within qualifies for the various
             // options.  If any of them fail to meet the criteria, the option is disabled
@@ -310,27 +284,27 @@ namespace SourceGenWPF.WpfGui {
                 Debug.Assert(count > 0);
                 if ((count & 0x01) != 0) {
                     // not divisible by 2, disallow 16-bit entries
-                    radio16BitLittle.Enabled = false;
-                    radio16BitBig.Enabled = false;
+                    radio16BitLittle.IsEnabled = false;
+                    radio16BitBig.IsEnabled = false;
                 }
                 if ((count & 0x03) != 0) {
                     // not divisible by 4, disallow 32-bit entries
-                    radio32BitLittle.Enabled = false;
+                    radio32BitLittle.IsEnabled = false;
                 }
                 if ((count / 3) * 3 != count) {
                     // not divisible by 3, disallow 24-bit entries
-                    radio24BitLittle.Enabled = false;
+                    radio24BitLittle.IsEnabled = false;
                 }
 
 
                 // Check for run of bytes (2 or more of the same thing).  Remember that
                 // we check this one region at a time, and each region could have different
                 // bytes, but so long as the bytes are all the same within a region we're good.
-                if (radioFill.Enabled && count > 1 &&
+                if (radioFill.IsEnabled && count > 1 &&
                         DataAnalysis.RecognizeRun(mFileData, rng.Low, rng.High) == count) {
                     // LGTM
                 } else {
-                    radioFill.Enabled = false;
+                    radioFill.IsEnabled = false;
                 }
 
                 // See if there's enough string data to make it worthwhile.  We use an
@@ -341,7 +315,7 @@ namespace SourceGenWPF.WpfGui {
                 // but I'm trying to hide the option when the buffer doesn't really seem
                 // to be holding strings.  Could replace with some sort of minimum string
                 // length requirement?)
-                if (radioStringMixed.Enabled) {
+                if (radioStringMixed.IsEnabled) {
                     int asciiCount;
                     DataAnalysis.CountAsciiBytes(mFileData, rng.Low, rng.High,
                         out int lowAscii, out int highAscii, out int nonAscii);
@@ -359,8 +333,8 @@ namespace SourceGenWPF.WpfGui {
                         mixedAsciiNotCount += nonAscii;
                     } else {
                         // Fail
-                        radioStringMixed.Enabled = false;
-                        radioStringMixedReverse.Enabled = false;
+                        radioStringMixed.IsEnabled = false;
+                        radioStringMixedReverse.IsEnabled = false;
                         mixedAsciiOkCount = mixedAsciiNotCount = -1;
                     }
                 }
@@ -369,120 +343,104 @@ namespace SourceGenWPF.WpfGui {
                 // not counted -- we want to have some actual character data.  Individual
                 // strings need to be entirely high-ASCII or low-ASCII, but not all strings
                 // in a region have to be the same.
-                if (radioStringNullTerm.Enabled) {
+                if (radioStringNullTerm.IsEnabled) {
                     int strCount = DataAnalysis.RecognizeNullTerminatedStrings(mFileData,
                         rng.Low, rng.High);
                     if (strCount > 0) {
                         nullTermStringCount += strCount;
                     } else {
-                        radioStringNullTerm.Enabled = false;
+                        radioStringNullTerm.IsEnabled = false;
                         nullTermStringCount = -1;
                     }
                 }
 
                 // Check for strings prefixed with an 8-bit length.
-                if (radioStringLen8.Enabled) {
+                if (radioStringLen8.IsEnabled) {
                     int strCount = DataAnalysis.RecognizeLen8Strings(mFileData, rng.Low, rng.High);
                     if (strCount > 0) {
                         len8StringCount += strCount;
                     } else {
-                        radioStringLen8.Enabled = false;
+                        radioStringLen8.IsEnabled = false;
                         len8StringCount = -1;
                     }
                 }
 
                 // Check for strings prefixed with a 16-bit length.
-                if (radioStringLen16.Enabled) {
+                if (radioStringLen16.IsEnabled) {
                     int strCount = DataAnalysis.RecognizeLen16Strings(mFileData, rng.Low, rng.High);
                     if (strCount > 0) {
                         len16StringCount += strCount;
                     } else {
-                        radioStringLen16.Enabled = false;
+                        radioStringLen16.IsEnabled = false;
                         len16StringCount = -1;
                     }
                 }
 
                 // Check for DCI strings.  All strings within a single range must have the
                 // same "polarity", e.g. low ASCII terminated by high ASCII.
-                if (radioStringDci.Enabled) {
+                if (radioStringDci.IsEnabled) {
                     int strCount = DataAnalysis.RecognizeDciStrings(mFileData, rng.Low, rng.High);
                     if (strCount > 0) {
                         dciStringCount += strCount;
                     } else {
-                        radioStringDci.Enabled = false;
+                        radioStringDci.IsEnabled = false;
                         dciStringCount = -1;
                     }
                 }
-
-                //// Check for reverse DCI strings.  All strings within a single range must have the
-                //// same "polarity", e.g. low ASCII terminated by high ASCII.
-                //if (radioStringDciReverse.Enabled) {
-                //    int strCount = DataAnalysis.RecognizeReverseDciStrings(mFileData,
-                //            rng.Low, rng.High);
-                //    if (strCount > 0) {
-                //        revDciStringCount += strCount;
-                //    } else {
-                //        radioStringDciReverse.Enabled = false;
-                //        revDciStringCount = -1;
-                //    }
-                //}
             }
 
             // Update the dialog with string and character counts, summed across all regions.
 
+            const string UNSUP_STR = "xx";
+            fmt = (string)FindResource("str_StringMixed");
+            string revfmt = (string)FindResource("str_StringMixedReverse");
             if (mixedAsciiOkCount > 0) {
-                Debug.Assert(radioStringMixed.Enabled);
-                radioStringMixed.Text = string.Format(radioStringMixed.Text,
+                Debug.Assert(radioStringMixed.IsEnabled);
+                radioStringMixed.Content = string.Format(fmt,
                     mixedAsciiOkCount, mixedAsciiNotCount);
-                radioStringMixedReverse.Text = string.Format(radioStringMixedReverse.Text,
+                radioStringMixedReverse.Content = string.Format(revfmt,
                     mixedAsciiOkCount, mixedAsciiNotCount);
             } else {
-                Debug.Assert(!radioStringMixed.Enabled);
-                radioStringMixed.Text = string.Format(radioStringMixed.Text, "xx", "xx");
-                radioStringMixedReverse.Text = string.Format(radioStringMixedReverse.Text,
-                    "xx", "xx");
+                Debug.Assert(!radioStringMixed.IsEnabled);
+                radioStringMixed.Content = string.Format(fmt, UNSUP_STR, UNSUP_STR);
+                radioStringMixedReverse.Content = string.Format(revfmt, UNSUP_STR, UNSUP_STR);
             }
 
+            fmt = (string)FindResource("str_StringNullTerm");
             if (nullTermStringCount > 0) {
-                Debug.Assert(radioStringNullTerm.Enabled);
-                radioStringNullTerm.Text = string.Format(radioStringNullTerm.Text, nullTermStringCount);
+                Debug.Assert(radioStringNullTerm.IsEnabled);
+                radioStringNullTerm.Content = string.Format(fmt, nullTermStringCount);
             } else {
-                Debug.Assert(!radioStringNullTerm.Enabled);
-                radioStringNullTerm.Text = string.Format(radioStringNullTerm.Text, "xx");
+                Debug.Assert(!radioStringNullTerm.IsEnabled);
+                radioStringNullTerm.Content = string.Format(fmt, UNSUP_STR);
             }
 
+            fmt = (string)FindResource("str_StringLen8");
             if (len8StringCount > 0) {
-                Debug.Assert(radioStringLen8.Enabled);
-                radioStringLen8.Text = string.Format(radioStringLen8.Text, len8StringCount);
+                Debug.Assert(radioStringLen8.IsEnabled);
+                radioStringLen8.Content = string.Format(fmt, len8StringCount);
             } else {
-                Debug.Assert(!radioStringLen8.Enabled);
-                radioStringLen8.Text = string.Format(radioStringLen8.Text, "xx");
+                Debug.Assert(!radioStringLen8.IsEnabled);
+                radioStringLen8.Content = string.Format(fmt, UNSUP_STR);
             }
 
+            fmt = (string)FindResource("str_StringLen16");
             if (len16StringCount > 0) {
-                Debug.Assert(radioStringLen16.Enabled);
-                radioStringLen16.Text = string.Format(radioStringLen16.Text, len16StringCount);
+                Debug.Assert(radioStringLen16.IsEnabled);
+                radioStringLen16.Content = string.Format(fmt, len16StringCount);
             } else {
-                Debug.Assert(!radioStringLen16.Enabled);
-                radioStringLen16.Text = string.Format(radioStringLen16.Text, "xx");
+                Debug.Assert(!radioStringLen16.IsEnabled);
+                radioStringLen16.Content = string.Format(fmt, UNSUP_STR);
             }
 
+            fmt = (string)FindResource("str_StringDci");
             if (dciStringCount > 0) {
-                Debug.Assert(radioStringDci.Enabled);
-                radioStringDci.Text = string.Format(radioStringDci.Text, dciStringCount);
+                Debug.Assert(radioStringDci.IsEnabled);
+                radioStringDci.Content = string.Format(fmt, dciStringCount);
             } else {
-                Debug.Assert(!radioStringDci.Enabled);
-                radioStringDci.Text = string.Format(radioStringDci.Text, "xx");
+                Debug.Assert(!radioStringDci.IsEnabled);
+                radioStringDci.Content = string.Format(fmt, UNSUP_STR);
             }
-
-            //if (revDciStringCount > 0) {
-            //    Debug.Assert(radioStringDciReverse.Enabled);
-            //    radioStringDciReverse.Text =
-            //        string.Format(radioStringDciReverse.Text, revDciStringCount);
-            //} else {
-            //    Debug.Assert(!radioStringDciReverse.Enabled);
-            //    radioStringDciReverse.Text = string.Format(radioStringDciReverse.Text, "xx");
-            //}
         }
 
         /// <summary>
@@ -501,7 +459,7 @@ namespace SourceGenWPF.WpfGui {
         /// <param name="isBigEndian">Word endian-ness.</param>
         /// <returns>True if data in all regions can be represented as high or low ASCII.</returns>
         private bool IsRawAsciiCompatible(int wordWidth, bool isBigEndian) {
-            IEnumerator<TypedRangeSet.TypedRange> iter = Selection.RangeListIterator;
+            IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
                 Debug.Assert(((rng.High - rng.Low + 1) / wordWidth) * wordWidth ==
@@ -520,15 +478,16 @@ namespace SourceGenWPF.WpfGui {
         /// <summary>
         /// Configures the dialog controls based on the provided format descriptor.  If
         /// the desired options are unavailable, a suitable default is selected instead.
+        ///
+        /// Call from the Loaded event.
         /// </summary>
         /// <param name="dfd">FormatDescriptor to use.</param>
         private void SetControlsFromDescriptor(FormatDescriptor dfd) {
-            Debug.Assert(mIsInitialSetup);
-            radioSimpleDataHex.Checked = true;
-            radioSymbolPartLow.Checked = true;
+            radioSimpleDataHex.IsChecked = true;
+            radioSymbolPartLow.IsChecked = true;
 
             if (dfd == null) {
-                radioDefaultFormat.Checked = true;
+                radioDefaultFormat.IsChecked = true;
                 return;
             }
 
@@ -557,35 +516,35 @@ namespace SourceGenWPF.WpfGui {
                             preferredFormat = radioDefaultFormat;
                             break;
                     }
-                    if (preferredFormat.Enabled) {
+                    if (preferredFormat.IsEnabled) {
                         switch (dfd.FormatSubType) {
                             case FormatDescriptor.SubType.None:
                             case FormatDescriptor.SubType.Hex:
-                                radioSimpleDataHex.Checked = true;
+                                radioSimpleDataHex.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Decimal:
-                                radioSimpleDataDecimal.Checked = true;
+                                radioSimpleDataDecimal.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Binary:
-                                radioSimpleDataBinary.Checked = true;
+                                radioSimpleDataBinary.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Ascii:
-                                radioSimpleDataAscii.Checked = true;
+                                radioSimpleDataAscii.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Address:
-                                radioSimpleDataAddress.Checked = true;
+                                radioSimpleDataAddress.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Symbol:
-                                radioSimpleDataSymbolic.Checked = true;
+                                radioSimpleDataSymbolic.IsChecked = true;
                                 switch (dfd.SymbolRef.ValuePart) {
                                     case WeakSymbolRef.Part.Low:
-                                        radioSymbolPartLow.Checked = true;
+                                        radioSymbolPartLow.IsChecked = true;
                                         break;
                                     case WeakSymbolRef.Part.High:
-                                        radioSymbolPartHigh.Checked = true;
+                                        radioSymbolPartHigh.IsChecked = true;
                                         break;
                                     case WeakSymbolRef.Part.Bank:
-                                        radioSymbolPartBank.Checked = true;
+                                        radioSymbolPartBank.IsChecked = true;
                                         break;
                                     default:
                                         Debug.Assert(false);
@@ -644,13 +603,17 @@ namespace SourceGenWPF.WpfGui {
                     break;
             }
 
-            if (preferredFormat.Enabled) {
-                preferredFormat.Checked = true;
+            if (preferredFormat.IsEnabled) {
+                preferredFormat.IsChecked = true;
             } else {
                 mPreferredFormatUnavailable = true;
-                radioDefaultFormat.Checked = true;
+                radioDefaultFormat.IsChecked = true;
             }
         }
+
+        #endregion Setup
+
+        #region FormatDescriptor creation
 
         /// <summary>
         /// Creates a list of FormatDescriptors, based on the current control configuration.
@@ -669,24 +632,24 @@ namespace SourceGenWPF.WpfGui {
             int chunkLength = -1;
 
             // Decode the "display as" panel, if it's relevant.
-            if (radioSimpleDataHex.Enabled) {
-                if (radioSimpleDataHex.Checked) {
+            if (radioSimpleDataHex.IsEnabled) {
+                if (radioSimpleDataHex.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Hex;
-                } else if (radioSimpleDataDecimal.Checked) {
+                } else if (radioSimpleDataDecimal.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Decimal;
-                } else if (radioSimpleDataBinary.Checked) {
+                } else if (radioSimpleDataBinary.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Binary;
-                } else if (radioSimpleDataAscii.Checked) {
+                } else if (radioSimpleDataAscii.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Ascii;
-                } else if (radioSimpleDataAddress.Checked) {
+                } else if (radioSimpleDataAddress.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Address;
-                } else if (radioSimpleDataSymbolic.Checked) {
+                } else if (radioSimpleDataSymbolic.IsChecked == true) {
                     WeakSymbolRef.Part part;
-                    if (radioSymbolPartLow.Checked) {
+                    if (radioSymbolPartLow.IsChecked == true) {
                         part = WeakSymbolRef.Part.Low;
-                    } else if (radioSymbolPartHigh.Checked) {
+                    } else if (radioSymbolPartHigh.IsChecked == true) {
                         part = WeakSymbolRef.Part.High;
-                    } else if (radioSymbolPartBank.Checked) {
+                    } else if (radioSymbolPartBank.IsChecked == true) {
                         part = WeakSymbolRef.Part.Bank;
                     } else {
                         Debug.Assert(false);
@@ -702,45 +665,45 @@ namespace SourceGenWPF.WpfGui {
             }
 
             // Decode the main format.
-            if (radioDefaultFormat.Checked) {
+            if (radioDefaultFormat.IsChecked == true) {
                 // Default/None; note this would create a multi-byte Default format, which isn't
                 // really allowed.  What we actually want to do is remove the explicit formatting
                 // from all spanned offsets, so we use a dedicated type for that.
                 type = FormatDescriptor.Type.REMOVE;
-            } else if (radioSingleBytes.Checked) {
+            } else if (radioSingleBytes.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericLE;
                 chunkLength = 1;
-            } else if (radio16BitLittle.Checked) {
+            } else if (radio16BitLittle.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericLE;
                 chunkLength = 2;
-            } else if (radio16BitBig.Checked) {
+            } else if (radio16BitBig.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericBE;
                 chunkLength = 2;
-            } else if (radio24BitLittle.Checked) {
+            } else if (radio24BitLittle.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericLE;
                 chunkLength = 3;
-            } else if (radio32BitLittle.Checked) {
+            } else if (radio32BitLittle.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericLE;
                 chunkLength = 4;
-            } else if (radioDenseHex.Checked) {
+            } else if (radioDenseHex.IsChecked == true) {
                 type = FormatDescriptor.Type.Dense;
-            } else if (radioFill.Checked) {
+            } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
-            } else if (radioStringMixed.Checked) {
+            } else if (radioStringMixed.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
-            } else if (radioStringMixedReverse.Checked) {
+            } else if (radioStringMixedReverse.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
                 subType = FormatDescriptor.SubType.Reverse;
-            } else if (radioStringNullTerm.Checked) {
+            } else if (radioStringNullTerm.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
                 subType = FormatDescriptor.SubType.CString;
-            } else if (radioStringLen8.Checked) {
+            } else if (radioStringLen8.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
                 subType = FormatDescriptor.SubType.L8String;
-            } else if (radioStringLen16.Checked) {
+            } else if (radioStringLen16.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
                 subType = FormatDescriptor.SubType.L16String;
-            } else if (radioStringDci.Checked) {
+            } else if (radioStringDci.IsChecked == true) {
                 type = FormatDescriptor.Type.String;
                 subType = FormatDescriptor.SubType.Dci;
             //} else if (radioStringDciReverse.Checked) {
@@ -754,7 +717,7 @@ namespace SourceGenWPF.WpfGui {
 
             Results = new SortedList<int, FormatDescriptor>();
 
-            IEnumerator<TypedRangeSet.TypedRange> iter = Selection.RangeListIterator;
+            IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
 
@@ -1000,6 +963,7 @@ namespace SourceGenWPF.WpfGui {
 
             Debug.Assert(stringStart == end);
         }
-#endif
+
+        #endregion FormatDescriptor creation
     }
 }
