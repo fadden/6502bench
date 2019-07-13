@@ -64,6 +64,11 @@ namespace SourceGenWPF {
         private MainWindow mMainWin;
 
         /// <summary>
+        /// Hex dump viewer window.
+        /// </summary>
+        private Tools.WpfGui.HexDumpViewer mHexDumpDialog;
+
+        /// <summary>
         /// List of recently-opened projects.
         /// </summary>
         public List<string> RecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
@@ -1138,10 +1143,10 @@ namespace SourceGenWPF {
             if (mShowAnalyzerOutputDialog != null) {
                 mShowAnalyzerOutputDialog.Close();
             }
+#endif
             if (mHexDumpDialog != null) {
                 mHexDumpDialog.Close();
             }
-#endif
 
             // Discard all project state.
             if (mProject != null) {
@@ -1371,11 +1376,7 @@ namespace SourceGenWPF {
                             }
                             break;
                         case CodeListColumn.Bytes:
-#if false
-                            if (showHexDumpToolStripMenuItem.Enabled) {
-                                ShowHexDump_Click(sender, e);
-                            }
-#endif
+                            ShowHexDump();
                             break;
                         case CodeListColumn.Flags:
                             if (CanEditStatusFlags()) {
@@ -2208,6 +2209,38 @@ namespace SourceGenWPF {
                 }
             }
             return -1;
+        }
+
+        public void ShowHexDump() {
+            if (mHexDumpDialog == null) {
+                // Create and show modeless dialog.  This one is "always on top" by default,
+                // to allow the user to click around to various points.
+                mHexDumpDialog = new Tools.WpfGui.HexDumpViewer(mMainWin,
+                    mProject.FileData, mOutputFormatter);
+                mHexDumpDialog.Closing += (sender, e) => {
+                    Debug.WriteLine("Hex dump dialog closed");
+                    //showHexDumpToolStripMenuItem.Checked = false;
+                    mHexDumpDialog = null;
+                };
+                mHexDumpDialog.Topmost = true;
+                mHexDumpDialog.Show();
+            }
+
+            // Bring it to the front of the window stack.  This also transfers focus to the
+            // window.
+            mHexDumpDialog.Activate();
+
+            // Set the dialog's position.
+            if (mMainWin.CodeListView_GetSelectionCount() > 0) {
+                int firstIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+                int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
+                // offsets can be < 0 if they've selected EQU statements
+                int firstOffset = Math.Max(0, CodeLineList[firstIndex].FileOffset);
+                int lastOffset = Math.Max(firstOffset, CodeLineList[lastIndex].FileOffset +
+                    CodeLineList[lastIndex].OffsetSpan - 1);
+                mHexDumpDialog.ShowOffsetRange(firstOffset, lastOffset);
+
+            }
         }
 
         public bool CanUndo() {

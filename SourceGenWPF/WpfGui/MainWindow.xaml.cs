@@ -935,6 +935,23 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.EditProjectProperties();
         }
 
+        private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            int recentIndex;
+            if (e.Parameter is int) {
+                recentIndex = (int)e.Parameter;
+            } else if (e.Parameter is string) {
+                recentIndex = int.Parse((string)e.Parameter);
+            } else {
+                throw new Exception("Bad parameter: " + e.Parameter);
+            }
+            if (recentIndex < 0 || recentIndex >= MainController.MAX_RECENT_PROJECTS) {
+                throw new Exception("Bad parameter: " + e.Parameter);
+            }
+
+            Debug.WriteLine("Recent project #" + recentIndex);
+            mMainCtrl.OpenRecentProject(recentIndex);
+        }
+
         private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
@@ -970,21 +987,8 @@ namespace SourceGenWPF.WpfGui {
             Debug.WriteLine("Select All cmd: " + (DateTime.Now - start).TotalMilliseconds + " ms");
         }
 
-        private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            int recentIndex;
-            if (e.Parameter is int) {
-                recentIndex = (int)e.Parameter;
-            } else if (e.Parameter is string) {
-                recentIndex = int.Parse((string)e.Parameter);
-            } else {
-                throw new Exception("Bad parameter: " + e.Parameter);
-            }
-            if (recentIndex < 0 || recentIndex >= MainController.MAX_RECENT_PROJECTS) {
-                throw new Exception("Bad parameter: " + e.Parameter);
-            }
-
-            Debug.WriteLine("Recent project #" + recentIndex);
-            mMainCtrl.OpenRecentProject(recentIndex);
+        private void ShowHexDumpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ShowHexDump();
         }
 
         private void ToggleDataScanCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

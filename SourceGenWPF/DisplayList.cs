@@ -44,6 +44,11 @@ namespace SourceGenWPF {
     /// NOTE: it may or may not be possible to implement this trivially with an
     /// ObservableCollection.  At an earlier iteration it wasn't, and I'd like to keep this
     /// around even if it is now possible, in case the pendulum swings back the other way.
+    ///
+    /// Additional reading on data virtualization:
+    ///  https://www.codeproject.com/Articles/34405/WPF-Data-Virtualization?msg=5635751
+    ///  https://web.archive.org/web/20121216034305/http://www.zagstudio.com/blog/498
+    ///  https://web.archive.org/web/20121107200359/http://www.zagstudio.com/blog/378
     /// </remarks>
     public class DisplayList : IList<DisplayList.FormattedParts>, IList,
             INotifyCollectionChanged, INotifyPropertyChanged {

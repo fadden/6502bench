@@ -23,7 +23,6 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGenWPF.Tests.WpfGui"
         mc:Ignorable="d"
         Title="Source Generation Test"
-        Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
         Width="640" Height="480" MinWidth="640" MinHeight="480"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Closing="Window_Closing">

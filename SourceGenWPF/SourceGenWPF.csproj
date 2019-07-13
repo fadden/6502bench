@@ -78,6 +78,7 @@
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\VirtualHexDump.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
@@ -113,6 +114,9 @@
     </Compile>
     <Compile Include="WpfGui\GotoBox.xaml.cs">
       <DependentUpon>GotoBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\WpfGui\HexDumpViewer.xaml.cs">
+      <DependentUpon>HexDumpViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\WorkProgress.xaml.cs">
       <DependentUpon>WorkProgress.xaml</DependentUpon>
@@ -254,6 +258,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\GotoBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\HexDumpViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
