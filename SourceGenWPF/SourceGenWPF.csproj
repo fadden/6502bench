@@ -112,6 +112,9 @@
     <Compile Include="WpfGui\FontPicker.xaml.cs">
       <DependentUpon>FontPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\FormatSplitAddress.xaml.cs">
+      <DependentUpon>FormatSplitAddress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\GotoBox.xaml.cs">
       <DependentUpon>GotoBox.xaml</DependentUpon>
     </Compile>
@@ -254,6 +257,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\FontPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\FormatSplitAddress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

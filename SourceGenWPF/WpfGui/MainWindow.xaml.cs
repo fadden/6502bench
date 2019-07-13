@@ -769,6 +769,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
         }
 
+        private void CanFormatSplitAddress(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatSplitAddress();
+        }
+
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
                 e.CanExecute = false;
@@ -890,6 +894,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void FindNextCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.FindNext();
+        }
+
+        private void FormatSplitAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FormatSplitAddress();
         }
 
         private void GotoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

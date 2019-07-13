@@ -1851,6 +1851,72 @@ namespace SourceGenWPF {
             mMainWin.CodeListView_Focus();
         }
 
+        public bool CanFormatSplitAddress() {
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Must be at least one byte of data, and no code.
+            return (counts.mDataLines > 0 && counts.mCodeLines == 0);
+
+        }
+
+        public void FormatSplitAddress() {
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                // shouldn't happen
+                Debug.Assert(false, "FormatSplitAddressTable found nothing to edit");
+                return;
+            }
+
+            FormatSplitAddress dlg = new FormatSplitAddress(mMainWin, mProject, trs,
+                mOutputFormatter);
+
+            dlg.ShowDialog();
+            if (dlg.DialogResult != true) {
+                return;
+            }
+
+            // Start with the format descriptors.
+            ChangeSet cs = mProject.GenerateFormatMergeSet(dlg.NewFormatDescriptors);
+
+            // Add in the user labels.
+            foreach (KeyValuePair<int, Symbol> kvp in dlg.NewUserLabels) {
+                Symbol oldUserValue = null;
+                if (mProject.UserLabels.ContainsKey(kvp.Key)) {
+                    Debug.Assert(false, "should not be replacing label");
+                    oldUserValue = mProject.UserLabels[kvp.Key];
+                }
+                UndoableChange uc = UndoableChange.CreateLabelChange(kvp.Key,
+                    oldUserValue, kvp.Value);
+                cs.Add(uc);
+            }
+
+            // Apply code hints.
+            if (dlg.WantCodeHints) {
+                TypedRangeSet newSet = new TypedRangeSet();
+                TypedRangeSet undoSet = new TypedRangeSet();
+
+                foreach (int offset in dlg.AllTargetOffsets) {
+                    if (!mProject.GetAnattrib(offset).IsInstruction) {
+                        CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
+                        if (oldType == CodeAnalysis.TypeHint.Code) {
+                            continue;       // already set
+                        }
+                        undoSet.Add(offset, (int)oldType);
+                        newSet.Add(offset, (int)CodeAnalysis.TypeHint.Code);
+                    }
+                }
+                if (newSet.Count != 0) {
+                    cs.Add(UndoableChange.CreateTypeHintChange(undoSet, newSet));
+                }
+            }
+
+            // Finally, apply the change.
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            } else {
+                Debug.WriteLine("No changes found");
+            }
+        }
+
         public void Goto() {
             GotoBox dlg = new GotoBox(mMainWin, mProject, mOutputFormatter);
             if (dlg.ShowDialog() == true) {
