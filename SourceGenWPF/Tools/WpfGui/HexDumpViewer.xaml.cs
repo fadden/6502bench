@@ -125,6 +125,13 @@ namespace SourceGenWPF.Tools.WpfGui {
         //    Debug.WriteLine("Column width: " + hexDumpData.Columns[0].ActualWidth);
         //}
 
+        /// <summary>
+        /// Sets the filename associated with the data.  This is for display purposes only.
+        /// </summary>
+        public void SetFileName(string fileName) {
+            Title = fileName;
+        }
+
         private void CharConvComboBox_SelectionChanged(object sender,
                 SelectionChangedEventArgs e) {
             ReplaceFormatter();

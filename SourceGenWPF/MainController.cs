@@ -2211,6 +2211,39 @@ namespace SourceGenWPF {
             return -1;
         }
 
+        public void ShowFileHexDump() {
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+            string fileName = fileDlg.FileName;
+            FileInfo fi = new FileInfo(fileName);
+            if (fi.Length > Tools.WpfGui.HexDumpViewer.MAX_LENGTH) {
+                string msg = string.Format(Res.Strings.OPEN_DATA_TOO_LARGE_FMT,
+                    fi.Length / 1024, Tools.WpfGui.HexDumpViewer.MAX_LENGTH / 1024);
+                MessageBox.Show(msg, Res.Strings.OPEN_DATA_FAIL_CAPTION,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            byte[] data;
+            try {
+                data = File.ReadAllBytes(fileName);
+            } catch (Exception ex) {
+                // not expecting this to happen
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+            // Fire and forget.
+            Tools.WpfGui.HexDumpViewer dlg = new Tools.WpfGui.HexDumpViewer(mMainWin,
+                data, mOutputFormatter);
+            dlg.SetFileName(Path.GetFileName(fileName));
+            dlg.Show();
+        }
+
         public void ShowHexDump() {
             if (mHexDumpDialog == null) {
                 // Create and show modeless dialog.  This one is "always on top" by default,

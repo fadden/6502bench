@@ -987,6 +987,10 @@ namespace SourceGenWPF.WpfGui {
             Debug.WriteLine("Select All cmd: " + (DateTime.Now - start).TotalMilliseconds + " ms");
         }
 
+        private void ShowFileHexDumpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ShowFileHexDump();
+        }
+
         private void ShowHexDumpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ShowHexDump();
         }

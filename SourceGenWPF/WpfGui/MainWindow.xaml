@@ -121,6 +121,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+A</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="Hex Dump..."/>
             <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
             <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
                 <RoutedUICommand.InputGestures>
@@ -204,6 +205,8 @@ limitations under the License.
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
                         CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ShowFileHexDumpCmd}"
+                        Executed="ShowFileHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource ShowHexDumpCmd}"
                         CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
@@ -272,7 +275,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource ShowHexDumpCmd}"/>
             </MenuItem>
             <MenuItem Header="_Tools">
-                <MenuItem Header="Hex Dump..."/>
+                <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
                 <MenuItem Header="ASCII Chart"/>
             </MenuItem>
             <MenuItem Header="_Help">
