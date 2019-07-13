@@ -1853,9 +1853,9 @@ namespace SourceGenWPF {
 
         public bool CanFormatSplitAddress() {
             EntityCounts counts = SelectionAnalysis.mEntityCounts;
-            // Must be at least one byte of data, and no code.
+            // Must be at least one line of data, and no code.  Note this is lines, not bytes,
+            // so we can't screen out single-byte lines without additional work.
             return (counts.mDataLines > 0 && counts.mCodeLines == 0);
-
         }
 
         public void FormatSplitAddress() {

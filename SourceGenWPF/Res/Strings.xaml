@@ -74,6 +74,7 @@ limitations under the License.
     <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
     <system:String x:Key="str_InitialParameters">Default settings:</system:String>
     <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>
+    <system:String x:Key="str_InvalidAddress">(unknown address)</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
     <system:String x:Key="str_OpenDataEmpty">File is empty</system:String>

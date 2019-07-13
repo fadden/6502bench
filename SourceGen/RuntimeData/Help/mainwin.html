@@ -343,12 +343,17 @@ jmptabh  .dd1    &gt;func1
 <p>Sometimes the tables contain <code>address - 1</code>, because the
 values are to be pushed onto the stack for an RTS call.</p>
 
-<p>The split-address table formatter helps you associate symbols with the
+<p>While the .dd2 case is easy to format with the data operand editor,
+formatting addresses whose components are split into multiple tables can
+be tedious.</p>
+
+<p>The Split-Address Table Formatter helps you associate symbols with the
 addresses in the table.  To use it, start by selecting the entire table.
 In the example above, you would select all 6 bytes.  The number of bytes
 in each part must be equal: here, it's 3 low bytes, followed by 3 high
 bytes.  If the number of bytes selected can't be evenly divided by the
-number of parts, the formatter will report an error.</p>
+number of parts -- two parts for 16-bit data, three parts for 24-bit data --
+the formatter will report an error.</p>
 <p>With the data selected, open the format dialog with
 Actions &gt; Format Split-Address Table.  The rather complicated dialog
 is split into sections.</p>
@@ -358,17 +363,17 @@ is split into sections.</p>
   don't have the CPU set to 65816.)  If the address parts are being pushed
   on the stack for an RTS/RTL, check the "Adjusted for RTS/RTL" box to
   adjust them by 1.</li>
-  <li>Low Bytes: indicate which part of the table holds the low bytes.  In
+  <li>Low Byte Source: indicate which part of the table holds the low bytes.  In
   the example above, the low bytes came first, followed by the high bytes,
   so you would select "first part of selection".  If they were stored the
   other way around, you would click "second part" instead.</li>
-  <li>High Bytes: indicate which part of the table holds the high bytes.  For
+  <li>High Byte Source: indicate which part of the table holds the high bytes.  For
   a 16-bit address this will be the part you didn't pick for the low bytes.
   Sometimes, if all addresses land on the same 256-byte page, the high byte
   will be a constant in the code, and only the low bytes will be stored in
   a table.  If that's the case, select "Constant", and enter the high byte
   in the text box.  (Decimal, hex, and binary are accepted.)</li>
-  <li>Bank Bytes: for 24-bit addresses, you can select "Nth part of
+  <li>Bank Byte Source: for 24-bit addresses, you can select "Nth part of
   selection", which will just use whichever part you didn't specify for
   the low and high bytes.  If the table holds 16-bit addresses, you can
   use the "Constant" field to specify the data bank.</li>
@@ -394,7 +399,7 @@ It also tells you how many groups there are, but unlike the data operand
 formatter, the split-address table formatter doesn't care about group
 boundaries.  For this reason, tables do not have to be contiguous in
 memory.  The low bytes and high bytes could be on separate 256-byte
-pages.</p>
+pages.  You just need to have all of the data selected.</p>
 
 <p>It should be mentioned that SourceGen does not record the fact that the
 data in question is part of a table.  The formatting, labels, and code hints

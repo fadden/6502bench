@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -43,19 +44,59 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         public List<int> AllTargetOffsets { get; private set; }
 
-        public bool WantCodeHints = true;   // TODO
-#if false
-        {
-            get {
-                return addCodeHintCheckBox.Checked;
+        /// <summary>
+        /// If set, targets are offset by one for RTS/RTL.
+        /// </summary>
+        public bool AdjustedForReturn {
+            get { return mAdjustedForReturn; }
+            set {
+                mAdjustedForReturn = value;
+                OnPropertyChanged();
+                UpdateControls();
             }
         }
+        private bool mAdjustedForReturn;
+
+        /// <summary>
+        /// If set, caller will add code entry hints to targets.
+        /// </summary>
+        public bool WantCodeHints {
+            get { return mWantCodeHints; }
+            set {
+                mWantCodeHints = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mWantCodeHints;
+
+        /// <summary>
+        /// Set to true to make the "incompatible with selection" message visible.
+        /// </summary>
+        public bool IncompatibleSelectionVisibility {
+            get { return mIncompatibleSelectionVisibility; }
+            set {
+                mIncompatibleSelectionVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mIncompatibleSelectionVisibility;
+
+        /// <summary>
+        /// Set to true to make the "invalid constant" message visible.
+        /// </summary>
+        public bool InvalidConstantVisibility {
+            get { return mInvalidConstantVisibility; }
+            set {
+                mInvalidConstantVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mInvalidConstantVisibility;
 
         /// <summary>
         /// Set to true when valid output is available.
         /// </summary>
         private bool mOutputReady;
-#endif
 
         /// <summary>
         /// Set to true when input is valid.  Controls whether the OK button is enabled.
@@ -68,6 +109,19 @@ namespace SourceGenWPF.WpfGui {
             }
         }
         private bool mIsValid;
+
+        public class OutputPreviewItem {
+            public string Addr { get; private set; }
+            public string Offset { get; private set; }
+            public string Symbol { get; private set; }
+
+            public OutputPreviewItem(string addr, string offset, string symbol) {
+                Addr = addr;
+                Offset = offset;
+                Symbol = symbol;
+            }
+        }
+        public ObservableCollection<OutputPreviewItem> OutputPreviewList { get; private set; }
 
         /// <summary>
         /// Selected offsets.  An otherwise contiguous range of offsets can be broken up
@@ -86,6 +140,11 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         private Formatter mFormatter;
 
+        /// <summary>
+        /// Reentrancy block for UpdateControls().
+        /// </summary>
+        private bool mUpdating;
+
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
@@ -103,145 +162,147 @@ namespace SourceGenWPF.WpfGui {
             mFormatter = formatter;
             mSelection = selection;
             IsValid = false;
+
+            OutputPreviewList = new ObservableCollection<OutputPreviewItem>();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            // TDOO
+            mUpdating = true;
+
+            string fmt, infoStr;
+            if (mSelection.RangeCount == 1 && mSelection.Count == 1) {
+                infoStr = (string)FindResource("str_SingleByte");
+            } else if (mSelection.RangeCount == 1) {
+                fmt = (string)FindResource("str_SingleGroup");
+                infoStr = string.Format(fmt, mSelection.Count);
+            } else {
+                fmt = (string)FindResource("str_MultiGroup");
+                infoStr = string.Format(fmt, mSelection.Count, mSelection.RangeCount);
+            }
+            selectionInfoLabel.Text = infoStr;
+
+            width16Radio.IsChecked = true;
+            lowFirstPartRadio.IsChecked = true;
+            highSecondPartRadio.IsChecked = true;
+            bankNthPartRadio.IsChecked = true;
+
+            IncompatibleSelectionVisibility = InvalidConstantVisibility = false;
+
+            if (mProject.CpuDef.HasAddr16) {
+                // Disable the 24-bit option.  Having 16-bit selected will disable the rest.
+                width24Radio.IsEnabled = false;
+            }
+
+            mUpdating = false;
+            UpdateControls();
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             DialogResult = true;
         }
 
-#if false
-        private void FormatSplitAddress_Load(object sender, EventArgs e) {
-            mInitializing = true;
-
-            string fmt = selectionInfoLabel.Text;
-            selectionInfoLabel.Text = string.Format(fmt, mSelection.Count, mSelection.RangeCount);
-
-            width16Radio.Checked = true;
-            lowFirstPartRadio.Checked = true;
-            highSecondPartRadio.Checked = true;
-            bankNthPartRadio.Checked = true;
-
-            incompatibleSelectionLabel.Visible = invalidConstantLabel.Visible = false;
-
-            if (mProject.CpuDef.HasAddr16) {
-                // Disable the 24-bit option.  Having 16-bit selected will disable the rest.
-                width24Radio.Enabled = false;
-            }
-
-            outputPreviewListView.SetDoubleBuffered(true);
-
-            mInitializing = false;
-            UpdateControls();
-        }
-
         private void UpdateControls() {
-            if (mInitializing) {
+            if (mUpdating) {
                 return;
             }
-            mInitializing = true;   // no re-entry
+            mUpdating = true;   // no re-entry
 
-            lowThirdPartRadio.Enabled = width24Radio.Checked;
-            highThirdPartRadio.Enabled = width24Radio.Checked;
-            bankByteGroupBox.Enabled = width24Radio.Checked;
+            // handled with XAML bindings
+            //lowThirdPartRadio.Enabled = width24Radio.Checked;
+            //highThirdPartRadio.Enabled = width24Radio.Checked;
+            //bankByteGroupBox.Enabled = width24Radio.Checked;
 
-            lowSecondPartRadio.Enabled = true;
+            lowSecondPartRadio.IsEnabled = true;
 
             // If the user selects "constant" for high byte or bank byte, then there is no
             // 3rd part available for low/high, so we need to turn those back off.
-            if (width24Radio.Checked) {
-                bool haveThree = !(highConstantRadio.Checked || bankConstantRadio.Checked);
-                lowThirdPartRadio.Enabled = haveThree;
-                highThirdPartRadio.Enabled = haveThree;
+            if (width24Radio.IsChecked == true) {
+                bool haveThree = !(highConstantRadio.IsChecked == true ||
+                                   bankConstantRadio.IsChecked == true);
+                lowThirdPartRadio.IsEnabled = haveThree;
+                highThirdPartRadio.IsEnabled = haveThree;
 
                 // If "constant" is selected for high byte *and* bank byte, then there's no
                 // 2nd part available for low.
-                if (highConstantRadio.Checked && bankConstantRadio.Checked) {
-                    lowSecondPartRadio.Enabled = false;
+                if (highConstantRadio.IsChecked == true && bankConstantRadio.IsChecked == true) {
+                    lowSecondPartRadio.IsEnabled = false;
                 }
             } else {
                 // For 16-bit address, if high byte is constant, then there's no second
                 // part for the low byte.
-                if (highConstantRadio.Checked) {
-                    lowSecondPartRadio.Enabled = false;
+                if (highConstantRadio.IsChecked == true) {
+                    lowSecondPartRadio.IsEnabled = false;
                 }
             }
 
             // Was a now-invalidated radio button selected before?
-            if (!lowThirdPartRadio.Enabled && lowThirdPartRadio.Checked) {
+            if (!lowThirdPartRadio.IsEnabled && lowThirdPartRadio.IsChecked == true) {
                 // low now invalid, switch to whatever high isn't using
-                if (highFirstPartRadio.Checked) {
-                    lowSecondPartRadio.Checked = true;
+                if (highFirstPartRadio.IsChecked == true) {
+                    lowSecondPartRadio.IsChecked = true;
                 } else {
-                    lowFirstPartRadio.Checked = true;
+                    lowFirstPartRadio.IsChecked = true;
                 }
             }
-            if (!highThirdPartRadio.Enabled && highThirdPartRadio.Checked) {
+            if (width16Radio.IsChecked == true && highThirdPartRadio.IsChecked == true) {
                 // high now invalid, switch to whatever low isn't using
-                if (lowFirstPartRadio.Checked) {
-                    highSecondPartRadio.Checked = true;
+                if (lowFirstPartRadio.IsChecked == true) {
+                    highSecondPartRadio.IsChecked = true;
                 } else {
-                    highFirstPartRadio.Checked = true;
+                    highFirstPartRadio.IsChecked = true;
                 }
             }
-            if (!lowSecondPartRadio.Enabled && lowSecondPartRadio.Checked) {
+            if (!lowSecondPartRadio.IsEnabled && lowSecondPartRadio.IsChecked == true) {
                 // Should only happen when high part is constant.
-                Debug.Assert(highFirstPartRadio.Checked == false);
-                lowFirstPartRadio.Checked = true;
+                Debug.Assert(highFirstPartRadio.IsChecked == false);
+                lowFirstPartRadio.IsChecked = true;
             }
 
-            mInitializing = false;
+            mUpdating = false;
             UpdatePreview();
 
-            okButton.Enabled = mOutputReady;
+            IsValid = mOutputReady;
         }
 
-        private void widthRadio_CheckedChanged(object sender, EventArgs e) {
+        private void WidthRadio_CheckedChanged(object sender, RoutedEventArgs e) {
             UpdateControls();
         }
 
-        private void pushRtsCheckBox_CheckedChanged(object sender, EventArgs e) {
-            UpdateControls();
-        }
-
-        private void lowByte_CheckedChanged(object sender, EventArgs e) {
+        private void LowByte_CheckedChanged(object sender, RoutedEventArgs e) {
             // If we conflict with the high byte, change the high byte.
-            if (lowFirstPartRadio.Checked && highFirstPartRadio.Checked) {
-                highSecondPartRadio.Checked = true;
-            } else if (lowSecondPartRadio.Checked && highSecondPartRadio.Checked) {
-                highFirstPartRadio.Checked = true;
-            } else if (lowThirdPartRadio.Checked && highThirdPartRadio.Checked) {
-                highFirstPartRadio.Checked = true;
+            if (lowFirstPartRadio.IsChecked == true && highFirstPartRadio.IsChecked == true) {
+                highSecondPartRadio.IsChecked = true;
+            } else if (lowSecondPartRadio.IsChecked == true && highSecondPartRadio.IsChecked == true) {
+                highFirstPartRadio.IsChecked = true;
+            } else if (lowThirdPartRadio.IsChecked == true && highThirdPartRadio.IsChecked == true) {
+                highFirstPartRadio.IsChecked = true;
             }
             UpdateControls();
         }
 
-        private void highByte_CheckedChanged(object sender, EventArgs e) {
+        private void HighByte_CheckedChanged(object sender, RoutedEventArgs e) {
             // If we conflict with the low byte, change the low byte.
-            if (lowFirstPartRadio.Checked && highFirstPartRadio.Checked) {
-                lowSecondPartRadio.Checked = true;
-            } else if (lowSecondPartRadio.Checked && highSecondPartRadio.Checked) {
-                lowFirstPartRadio.Checked = true;
-            } else if (lowThirdPartRadio.Checked && highThirdPartRadio.Checked) {
-                lowFirstPartRadio.Checked = true;
+            if (lowFirstPartRadio.IsChecked == true && highFirstPartRadio.IsChecked == true) {
+                lowSecondPartRadio.IsChecked = true;
+            } else if (lowSecondPartRadio.IsChecked == true && highSecondPartRadio.IsChecked == true) {
+                lowFirstPartRadio.IsChecked = true;
+            } else if (lowThirdPartRadio.IsChecked == true && highThirdPartRadio.IsChecked == true) {
+                lowFirstPartRadio.IsChecked = true;
             }
             UpdateControls();
         }
 
-        private void bankByte_CheckedChanged(object sender, EventArgs e) {
+        private void BankByte_CheckedChanged(object sender, EventArgs e) {
             UpdateControls();
         }
 
-        private void highConstantTextBox_TextChanged(object sender, EventArgs e) {
-            highConstantRadio.Checked = true;
+        private void HighConstantTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+            highConstantRadio.IsChecked = true;
             UpdateControls();
         }
 
-        private void bankConstantTextBox_TextChanged(object sender, EventArgs e) {
-            bankConstantRadio.Checked = true;
+        private void BankConstantTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+            bankConstantRadio.IsChecked = true;
             UpdateControls();
         }
 
@@ -250,21 +311,21 @@ namespace SourceGenWPF.WpfGui {
 
             int minDiv;
 
-            if (width16Radio.Checked) {
-                if (highConstantRadio.Checked) {
+            if (width16Radio.IsChecked == true) {
+                if (highConstantRadio.IsChecked == true) {
                     minDiv = 1;
                 } else {
                     minDiv = 2;
                 }
             } else {
-                if (highConstantRadio.Checked) {
-                    if (bankConstantRadio.Checked) {
+                if (highConstantRadio.IsChecked == true) {
+                    if (bankConstantRadio.IsChecked == true) {
                         minDiv = 1;
                     } else {
                         minDiv = 2;
                     }
                 } else {
-                    if (bankConstantRadio.Checked) {
+                    if (bankConstantRadio.IsChecked == true) {
                         minDiv = 2;
                     } else {
                         minDiv = 3;
@@ -272,42 +333,37 @@ namespace SourceGenWPF.WpfGui {
                 }
             }
 
-            incompatibleSelectionLabel.Visible = invalidConstantLabel.Visible = false;
+            IncompatibleSelectionVisibility = InvalidConstantVisibility = false;
 
-            try {
-                // Start by clearing the previous contents of the list.  If something goes
-                // wrong, we want to show the error messages on an empty list.
-                outputPreviewListView.BeginUpdate();
-                outputPreviewListView.Items.Clear();
+            // Start by clearing the previous contents of the list.  If something goes
+            // wrong, we want to show the error messages on an empty list.
+            OutputPreviewList.Clear();
 
-                if ((mSelection.Count % minDiv) != 0) {
-                    incompatibleSelectionLabel.Visible = true;
+            if ((mSelection.Count % minDiv) != 0) {
+                IncompatibleSelectionVisibility = true;
+                return;
+            }
+
+            int highConstant = -1;
+            if (highConstantRadio.IsChecked == true) {
+                if (!Number.TryParseInt(highConstantTextBox.Text, out highConstant,
+                        out int unused) || (highConstant != (byte) highConstant)) {
+                    InvalidConstantVisibility = true;
                     return;
                 }
-
-                int highConstant = -1;
-                if (highConstantRadio.Checked) {
-                    if (!Number.TryParseInt(highConstantTextBox.Text, out highConstant,
-                            out int unused) || (highConstant != (byte) highConstant)) {
-                        invalidConstantLabel.Visible = true;
-                        return;
-                    }
-                }
-
-                int bankConstant = -1;
-                if (bankConstantRadio.Enabled && bankConstantRadio.Checked) {
-                    if (!Number.TryParseInt(bankConstantTextBox.Text, out bankConstant,
-                            out int unused) || (bankConstant != (byte) bankConstant)) {
-                        invalidConstantLabel.Visible = true;
-                        return;
-                    }
-                }
-
-                // Looks valid, generate format list.
-                GenerateFormats(minDiv, highConstant, bankConstant);
-            } finally {
-                outputPreviewListView.EndUpdate();
             }
+
+            int bankConstant = -1;
+            if (bankConstantRadio.IsEnabled && bankConstantRadio.IsChecked == true) {
+                if (!Number.TryParseInt(bankConstantTextBox.Text, out bankConstant,
+                        out int unused) || (bankConstant != (byte) bankConstant)) {
+                    InvalidConstantVisibility = true;
+                    return;
+                }
+            }
+
+            // Looks valid, generate format list.
+            GenerateFormats(minDiv, highConstant, bankConstant);
         }
 
         private void GenerateFormats(int div, int highConst, int bankConst) {
@@ -319,27 +375,27 @@ namespace SourceGenWPF.WpfGui {
             int span = mSelection.Count / div;
             int lowOff, highOff, bankOff;
 
-            if (lowFirstPartRadio.Checked) {
+            if (lowFirstPartRadio.IsChecked == true) {
                 lowOff = 0;
-            } else if (lowSecondPartRadio.Checked) {
+            } else if (lowSecondPartRadio.IsChecked == true) {
                 lowOff = span;
-            } else if (lowThirdPartRadio.Checked) {
+            } else if (lowThirdPartRadio.IsChecked == true) {
                 lowOff = span * 2;
             } else {
                 Debug.Assert(false);
                 lowOff = -1;
             }
-            if (highFirstPartRadio.Checked) {
+            if (highFirstPartRadio.IsChecked == true) {
                 highOff = 0;
-            } else if (highSecondPartRadio.Checked) {
+            } else if (highSecondPartRadio.IsChecked == true) {
                 highOff = span;
-            } else if (highThirdPartRadio.Checked) {
+            } else if (highThirdPartRadio.IsChecked == true) {
                 highOff = span * 2;
             } else {
                 highOff = -1;   // use constant
             }
-            if (width24Radio.Checked) {
-                if (bankNthPartRadio.Checked) {
+            if (width24Radio.IsChecked == true) {
+                if (bankNthPartRadio.IsChecked == true) {
                     // Use whichever part isn't being used by the other two.
                     if (lowOff != 0 && highOff != 0) {
                         bankOff = 0;
@@ -369,7 +425,7 @@ namespace SourceGenWPF.WpfGui {
             }
 
             int adj = 0;
-            if (pushRtsCheckBox.Checked) {
+            if (AdjustedForReturn) {
                 adj = 1;
             }
 
@@ -396,7 +452,7 @@ namespace SourceGenWPF.WpfGui {
                 if (targetOffset < 0) {
                     // Address not within file bounds.
                     // TODO(maybe): look for matching platform/project symbols
-                    AddPreviewItem(addr, -1, Properties.Resources.INVALID_ADDRESS);
+                    AddPreviewItem(addr, -1, Res.Strings.INVALID_ADDRESS);
                 } else {
                     // Note the same target offset may appear more than once.
                     targetOffsets.Add(targetOffset);
@@ -447,17 +503,11 @@ namespace SourceGenWPF.WpfGui {
         }
 
         private void AddPreviewItem(int addr, int offset, string label) {
-            ListViewItem lvi = new ListViewItem(mFormatter.FormatAddress(addr,
-                !mProject.CpuDef.HasAddr16));
-            if (offset >= 0) {
-                lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi,
-                    mFormatter.FormatOffset24(offset)));
-            } else {
-                lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "---"));
-            }
-            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, label));
-            outputPreviewListView.Items.Add(lvi);
+            OutputPreviewItem newItem = new OutputPreviewItem(
+                mFormatter.FormatAddress(addr, !mProject.CpuDef.HasAddr16),
+                (offset >= 0 ? mFormatter.FormatOffset24(offset) : "---"),
+                label);
+            OutputPreviewList.Add(newItem);
         }
-#endif
     }
 }

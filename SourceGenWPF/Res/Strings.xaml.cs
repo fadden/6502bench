@@ -129,6 +129,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_InitialParameters");
         public static string INITIAL_SYMBOL_FILES =
             (string)Application.Current.FindResource("str_InitialSymbolFiles");
+        public static string INVALID_ADDRESS =
+            (string)Application.Current.FindResource("str_InvalidAddress");
         public static string NO_FILES_AVAILABLE =
             (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string OPEN_DATA_DOESNT_EXIST =
