@@ -620,7 +620,7 @@ namespace SourceGenWPF {
                 }
                 if (intKey < 0 || intKey + dfd.Length > spf.FileDataLength) {
                     report.Add(FileLoadItem.Type.Warning,
-                        string.Format(Res.Strings.ERR_BAD_FD, intKey));
+                        string.Format(Res.Strings.ERR_BAD_FD_FMT, intKey));
                     continue;
                 }
 

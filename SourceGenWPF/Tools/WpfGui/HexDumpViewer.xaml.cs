@@ -39,14 +39,18 @@ namespace SourceGenWPF.Tools.WpfGui {
         public VirtualHexDump HexDumpLines { get; private set; }
 
         /// <summary>
-        /// Hex formatter.
+        /// Formatter that handles the actual string formatting.
+        ///
+        /// There's currently no way to update this after the dialog is opened, which means
+        /// we won't track changes to hex case preference if the app settings are updated.
+        /// I'm okay with that.
         /// </summary>
         private Formatter mFormatter;
 
 
         /// <summary>
         /// If true, don't include non-ASCII characters in text area.  (Without this we might
-        /// use Unicode bullets or other glyphs for unprintable text.)
+        /// use Unicode bullets or other glyphs for unprintable text.)  Bound to a CheckBox.
         /// </summary>
         public bool AsciiOnlyDump {
             get { return mAsciiOnlyDump; }
@@ -64,6 +68,10 @@ namespace SourceGenWPF.Tools.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        /// <summary>
+        /// Character conversion modes.  These determine how we interpret bytes for the
+        /// ASCII portion of the dump.
+        /// </summary>
         public enum CharConvMode {
             Unknown = 0,
             PlainAscii,
@@ -188,6 +196,7 @@ namespace SourceGenWPF.Tools.WpfGui {
             // Make sure it's visible.
             hexDumpData.ScrollIntoView(HexDumpLines[endLine]);
             hexDumpData.ScrollIntoView(HexDumpLines[startLine]);
+            hexDumpData.Focus();
         }
 
 #if false   // DataGrid provides this automatically

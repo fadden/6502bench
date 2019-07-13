@@ -45,14 +45,13 @@ namespace SourceGenWPF.Tools {
 
         /// <summary>
         /// Data formatter object.
-        /// 
-        /// There's currently no way to update this after the dialog is opened, which means
-        /// we won't track changes to hex case preference.  I'm okay with that.
         /// </summary>
         private Formatter mFormatter;
 
         private string[] mLines;
 
+        // Tracks the number of lines we've generated, so we can see if virtualization is
+        // actually happening.
         private int mDebugGenLineCount;
 
 
@@ -87,9 +86,9 @@ namespace SourceGenWPF.Tools {
             if (mLines[index] == null) {
                 mLines[index] = mFormatter.FormatHexDump(mData, index * 16);
 
-                //if ((++mDebugGenLineCount % 1000) == 0) {
-                //    Debug.WriteLine("DebugGenLineCount: " + mDebugGenLineCount);
-                //}
+                if ((++mDebugGenLineCount % 1000) == 0) {
+                    //Debug.WriteLine("DebugGenLineCount: " + mDebugGenLineCount);
+                }
             }
             //Debug.WriteLine("GET LINE " + index + ": " + mLines[index]);
             return mLines[index];
@@ -155,13 +154,15 @@ namespace SourceGenWPF.Tools {
             //Debug.WriteLine("VHD IndexOf " + value);
             // This gets called sometimes when the selection changes, because the selection
             // mechanism tracks objects rather than indices.  Fortunately we can convert the
-            // value string to an index by parsing the first six characters.
+            // value string to an index by parsing the first six characters.  (This is
+            // somewhat fragile as it relies on the way Formatter formats the string.  Might
+            // want to make offset-from-hexdump-string a Formatter method.)
             int offset = Convert.ToInt32(((string)value).Substring(0, 6), 16);
             int index = offset / 16;
 
             // Either the object at the target location matches, or it doesn't; no need to
             // search.  We'll get requests for nonexistent objects after we reformat the
-            // collection.
+            // collection, when the list control tries to find the selected items.
             //
             // Object equality is what's desired; no need for string comparison
             if ((object)mLines[index] == value) {

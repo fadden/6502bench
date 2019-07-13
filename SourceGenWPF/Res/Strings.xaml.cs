@@ -20,7 +20,7 @@ namespace SourceGenWPF.Res {
     /// <summary>
     /// This is a bridge between the XAML definitions and the C# code that uses the strings.
     /// FindResource() throws an exception if the resource isn't found, so typos and missing
-    /// resources will cause the app to fail at launch.
+    /// resources will cause the app to fail the first time any string is referenced.
     /// </summary>
     public static class Strings {
         public static string ABBREV_ADDRESS =
@@ -47,8 +47,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_ClipformatAssemblerSource");
         public static string CLIPFORMAT_DISASSEMBLY =
             (string)Application.Current.FindResource("str_ClipformatDisassembly");
-        public static string ERR_BAD_FD =
-            (string)Application.Current.FindResource("str_ErrBadFd");
+        public static string ERR_BAD_FD_FMT =
+            (string)Application.Current.FindResource("str_ErrBadFdFmt");
         public static string ERR_BAD_FD_FORMAT =
             (string)Application.Current.FindResource("str_ErrBadFdFormat");
         public static string ERR_BAD_FILE_LENGTH =

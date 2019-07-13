@@ -820,13 +820,18 @@ namespace Asm65 {
             } else if (mFormatConfig.mHexDumpAsciiOnly) {
                 return '.';
             } else {
-                // These values makes the hex dump ListView freak out.
+                // Certain values make the hex dump ListView freak out in WinForms, but work
+                // fine in WPF.  The "control pictures" are a nice idea, but in practice they're
+                // unreadably small and provide no benefit.  The black-diamond "replacement
+                // character" is dark and makes everything feel noisy.  Middle-dot is subtle,
+                // but sufficiently different from a '.' to be useful.
+
                 //if (ch < 0x20) {
                 //    return (char)(ch + '\u2400');   // Unicode "control pictures" block
                 //}
                 //return '\ufffd';                    // Unicode "replacement character"
-
                 //return '\u00bf';    // INVERTED QUESTION MARK
+
                 return '\u00b7';    // MIDDLE DOT
             }
         }
