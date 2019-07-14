@@ -85,13 +85,13 @@ namespace SourceGenWPF {
         public const string NOTEWIN_COL_WIDTHS = "notewin-col-widths";
 
         // Code List View settings.
-        public const string CDLV_COL_WIDTHS = "cdlv-col-widths";
+        public const string CDLV_COL_WIDTHS = "cdlv-col-widths1";
         public const string CDLV_FONT_FAMILY = "cdlv-font-family";
         public const string CDLV_FONT_SIZE = "cdlv-font-size";
 
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";
-        public const string HEXD_CHAR_CONV = "hexd-char-conv";
+        public const string HEXD_CHAR_CONV = "hexd-char-conv1";
 
         // ASCII chart viewer settings.
         public const string ASCCH_MODE = "ascch-mode";
