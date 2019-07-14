@@ -1438,6 +1438,42 @@ namespace SourceGenWPF {
             }
         }
 
+        public bool CanDeleteMlc() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            Debug.WriteLine("LINE TYPE " + SelectionAnalysis.mLineType);
+            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.LongComment ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.Note);
+        }
+
+        // Delete multi-line comment (Note or LongComment)
+        public void DeleteMlc() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            LineListGen.Line line = CodeLineList[selIndex];
+            int offset = line.FileOffset;
+
+            UndoableChange uc;
+            if (line.LineType == LineListGen.Line.Type.Note) {
+                if (!mProject.Notes.TryGetValue(offset, out MultiLineComment oldNote)) {
+                    Debug.Assert(false);
+                    return;
+                }
+                uc = UndoableChange.CreateNoteChange(offset, oldNote, null);
+            } else if (line.LineType == LineListGen.Line.Type.LongComment) {
+                if (!mProject.LongComments.TryGetValue(offset, out MultiLineComment oldComment)) {
+                    Debug.Assert(false);
+                    return;
+                }
+                uc = UndoableChange.CreateLongCommentChange(offset, oldComment, null);
+            } else {
+                Debug.Assert(false);
+                return;
+            }
+            ChangeSet cs = new ChangeSet(uc);
+            ApplyUndoableChanges(cs);
+        }
+
         public bool CanEditAddress() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
@@ -1915,6 +1951,100 @@ namespace SourceGenWPF {
             mFindStartIndex = -1;
 
             mMainWin.CodeListView_Focus();
+        }
+
+        public bool CanFormatAsWord() {
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // This is insufficient -- we need to know how many bytes are selected, and
+            // whether they're already formatted as multi-byte items.  Too expensive to
+            // deal with here, so we'll need to show failure dialogs instead (ugh).
+            return (counts.mDataLines > 0 && counts.mCodeLines == 0);
+        }
+
+        public void FormatAsWord() {
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                Debug.Assert(false, "nothing to edit");         // shouldn't happen
+                return;
+            }
+
+            // If the user has only selected a single byte, we want to add the following byte
+            // to the selection, then proceed as usual.  We can't simply modify the ListView
+            // selection because the following item might be an auto-detected string or fill,
+            // and we'd be adding multiple bytes.  We have to be careful when grabbing the byte
+            // in case there's a region-split at that point (e.g. user label or .ORG).
+            //
+            // We could expand this to allow multiple regions, each of which is a single byte,
+            // but we'd need to deal with the case where the user selects two adjacent bytes that
+            // cross a region boundary.
+            if (trs.RangeCount == 1) {
+                // Exactly one range entry.  Check its size.
+                IEnumerator<TypedRangeSet.TypedRange> checkIter = trs.RangeListIterator;
+                checkIter.MoveNext();
+                TypedRangeSet.TypedRange rng = checkIter.Current;
+                if (rng.Low == rng.High && rng.Low < mProject.FileDataLength - 1) {
+                    // Single byte selected.  Check to see if it's okay to grab the next byte.
+                    Anattrib thisAttr = mProject.GetAnattrib(rng.Low);
+                    Debug.Assert(thisAttr.DataDescriptor.Length == 1);
+
+                    int nextOffset = rng.Low + 1;
+                    Anattrib nextAttr = mProject.GetAnattrib(nextOffset);
+                    // This must match what GroupedOffsetSetFromSelected() does.
+                    if (!mProject.UserLabels.ContainsKey(nextOffset) &&
+                            !mProject.HasCommentOrNote(nextOffset) &&
+                            thisAttr.Address == nextAttr.Address - 1) {
+                        // Good to go.
+                        Debug.WriteLine("Grabbing second byte from +" + nextOffset.ToString("x6"));
+                        trs.Add(nextOffset, rng.Type);
+                    }
+                }
+            }
+
+            // Confirm that every selected byte is a single-byte data item (either set by
+            // the user or as part of the uncategorized data scan).
+            foreach (TypedRangeSet.Tuple tup in trs) {
+                FormatDescriptor dfd = mProject.GetAnattrib(tup.Value).DataDescriptor;
+                if (dfd != null && dfd.Length != 1) {
+                    Debug.WriteLine("Can't format as word: offset +" + tup.Value.ToString("x6") +
+                        " has len=" + dfd.Length + " (must be 1)");
+                    MessageBox.Show(Res.Strings.INVALID_FORMAT_WORD_SEL_NON1,
+                        Res.Strings.INVALID_FORMAT_WORD_SEL_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            // Confirm that, in each region, an even number of bytes are selected.
+            IEnumerator<TypedRangeSet.TypedRange> rngIter = trs.RangeListIterator;
+            while (rngIter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = rngIter.Current;
+                int rangeLen = rng.High - rng.Low + 1;
+                if ((rangeLen & 0x01) != 0) {
+                    string msg = string.Format(Res.Strings.INVALID_FORMAT_WORD_SEL_UNEVEN_FMT,
+                        trs.RangeCount);
+                    MessageBox.Show(msg,
+                        Res.Strings.INVALID_FORMAT_WORD_SEL_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            // Selection is good, generate changes.
+            SortedList<int, FormatDescriptor> newFmts = new SortedList<int, FormatDescriptor>();
+            rngIter.Reset();
+            FormatDescriptor newDfd = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
+                FormatDescriptor.SubType.None);
+            while (rngIter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = rngIter.Current;
+                for (int i = rng.Low; i <= rng.High; i += 2) {
+                    newFmts.Add(i, newDfd);
+                }
+            }
+
+            ChangeSet cs = mProject.GenerateFormatMergeSet(newFmts);
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            }
         }
 
         public bool CanFormatSplitAddress() {
@@ -2408,54 +2538,6 @@ namespace SourceGenWPF {
             }
         }
 
-        public bool CanUndo() {
-            return (mProject != null && mProject.CanUndo);
-        }
-
-        /// <summary>
-        /// Handles Edit - Undo.
-        /// </summary>
-        public void UndoChanges() {
-            if (!mProject.CanUndo) {
-                Debug.Assert(false, "Nothing to undo");
-                return;
-            }
-            ChangeSet cs = mProject.PopUndoSet();
-            ApplyChanges(cs, true);
-#if false
-            UpdateMenuItemsAndTitle();
-
-            // If the debug dialog is visible, update it.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
-            }
-#endif
-        }
-
-        public bool CanRedo() {
-            return (mProject != null && mProject.CanRedo);
-        }
-
-        /// <summary>
-        /// Handles Edit - Redo.
-        /// </summary>
-        public void RedoChanges() {
-            if (!mProject.CanRedo) {
-                Debug.Assert(false, "Nothing to redo");
-                return;
-            }
-            ChangeSet cs = mProject.PopRedoSet();
-            ApplyChanges(cs, false);
-#if false
-            UpdateMenuItemsAndTitle();
-
-            // If the debug dialog is visible, update it.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
-            }
-#endif
-        }
-
         /// <summary>
         /// Handles the four Actions - edit hint commands.
         /// </summary>
@@ -2557,6 +2639,61 @@ namespace SourceGenWPF {
                 !newProps.AnalysisParams.AnalyzeUncategorizedData;
             UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(oldProps, newProps);
             ApplyUndoableChanges(new ChangeSet(uc));
+        }
+
+        public bool CanToggleSingleByteFormat() {
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            return (counts.mDataLines > 0 && counts.mCodeLines == 0);
+        }
+
+        public void ToggleSingleByteFormat() {
+            TypedRangeSet trs = GroupedOffsetSetFromSelected();
+            if (trs.Count == 0) {
+                Debug.Assert(false, "nothing to edit");         // shouldn't happen
+                return;
+            }
+
+            // Check the format descriptor of the first selected offset.
+            int firstOffset = -1;
+            foreach (TypedRangeSet.Tuple tup in trs) {
+                firstOffset = tup.Value;
+                break;
+            }
+            Debug.Assert(mProject.GetAnattrib(firstOffset).IsDataStart);
+            bool toDefault = false;
+            if (mProject.OperandFormats.TryGetValue(firstOffset, out FormatDescriptor curDfd)) {
+                if (curDfd.FormatType == FormatDescriptor.Type.NumericLE &&
+                        curDfd.FormatSubType == FormatDescriptor.SubType.None &&
+                        curDfd.Length == 1) {
+                    // Currently single-byte, toggle to default.
+                    toDefault = true;
+                }
+            }
+
+            // Iterate through the selected regions.
+            SortedList<int, FormatDescriptor> newFmts = new SortedList<int, FormatDescriptor>();
+            IEnumerator<TypedRangeSet.TypedRange> rngIter = trs.RangeListIterator;
+            while (rngIter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = rngIter.Current;
+                if (toDefault) {
+                    // Create a single REMOVE descriptor that covers the full span.
+                    FormatDescriptor newDfd = FormatDescriptor.Create(rng.High - rng.Low + 1,
+                        FormatDescriptor.Type.REMOVE, FormatDescriptor.SubType.None);
+                    newFmts.Add(rng.Low, newDfd);
+                } else {
+                    // Add individual single-byte format descriptors for everything.
+                    FormatDescriptor newDfd = FormatDescriptor.Create(1,
+                        FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.None);
+                    for (int i = rng.Low; i <= rng.High; i++) {
+                        newFmts.Add(i, newDfd);
+                    }
+                }
+            }
+
+            ChangeSet cs = mProject.GenerateFormatMergeSet(newFmts);
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            }
         }
 
         /// <summary>
@@ -2739,6 +2876,54 @@ namespace SourceGenWPF {
 
                 mMainWin.ReferencesList.Add(rli);
             }
+        }
+
+        public bool CanUndo() {
+            return (mProject != null && mProject.CanUndo);
+        }
+
+        /// <summary>
+        /// Handles Edit - Undo.
+        /// </summary>
+        public void UndoChanges() {
+            if (!mProject.CanUndo) {
+                Debug.Assert(false, "Nothing to undo");
+                return;
+            }
+            ChangeSet cs = mProject.PopUndoSet();
+            ApplyChanges(cs, true);
+#if false
+            UpdateMenuItemsAndTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+            }
+#endif
+        }
+
+        public bool CanRedo() {
+            return (mProject != null && mProject.CanRedo);
+        }
+
+        /// <summary>
+        /// Handles Edit - Redo.
+        /// </summary>
+        public void RedoChanges() {
+            if (!mProject.CanRedo) {
+                Debug.Assert(false, "Nothing to redo");
+                return;
+            }
+            ChangeSet cs = mProject.PopRedoSet();
+            ApplyChanges(cs, false);
+#if false
+            UpdateMenuItemsAndTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+            }
+#endif
         }
 
         #endregion References panel

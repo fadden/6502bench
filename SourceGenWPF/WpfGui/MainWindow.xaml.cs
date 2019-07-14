@@ -745,6 +745,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen();
         }
 
+        private void CanDeleteMlc(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanDeleteMlc();
+        }
+
         private void CanEditAddress(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditAddress();
         }
@@ -775,6 +779,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
+        }
+
+        private void CanFormatAsWord(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatAsWord();
         }
 
         private void CanFormatSplitAddress(object sender, CanExecuteRoutedEventArgs e) {
@@ -818,6 +826,10 @@ namespace SourceGenWPF.WpfGui {
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
         }
 
+        private void CanToggleSingleByteFormat(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanToggleSingleByteFormat();
+        }
+
         private void CanNavigateBackward(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanNavigateBackward();
         }
@@ -858,6 +870,10 @@ namespace SourceGenWPF.WpfGui {
         private void DebugSourceGenerationTestsCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
             mMainCtrl.RunSourceGenerationTests();
+        }
+
+        private void DeleteMlcCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.DeleteMlc();
         }
 
         private void EditAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -910,6 +926,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void FindNextCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.FindNext();
+        }
+
+        private void FormatAsWordCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FormatAsWord();
         }
 
         private void FormatSplitAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -1021,6 +1041,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void ToggleDataScanCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ToggleDataScan();
+        }
+
+        private void ToggleSingleByteFormatCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ToggleSingleByteFormat();
         }
 
         private void UndoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

@@ -55,6 +55,11 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
             <RoutedUICommand x:Key="DebugSourceGenerationTestsCmd" Text="Source Generation Tests..."/>
+            <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Del</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="EditCommentCmd" Text="Edit Comment...">
@@ -90,6 +95,11 @@ limitations under the License.
             <RoutedUICommand x:Key="FindNextCmd" Text="Find Next">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>F3</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="FormatAsWordCmd" Text="Format As Word">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+W</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="FormatSplitAddressCmd" Text="Format Split-Address Table..."/>
@@ -135,6 +145,11 @@ limitations under the License.
                     <KeyGesture>Ctrl+D</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ToggleSingleByteFormatCmd" Text="Toggle Single-Byte Format">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+B</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="UndoCmd" Text="Undo">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Z</KeyGesture>
@@ -157,6 +172,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
         <CommandBinding Command="Copy"
                         CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
+        <CommandBinding Command="{StaticResource DeleteMlcCmd}"
+                        CanExecute="CanDeleteMlc" Executed="DeleteMlcCmd_Executed"/>
         <CommandBinding Command="{StaticResource DebugSourceGenerationTestsCmd}"
                         Executed="DebugSourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
@@ -183,6 +200,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindNextCmd}"
                         CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FormatAsWordCmd}"
+                        CanExecute="CanFormatAsWord" Executed="FormatAsWordCmd_Executed"/>
         <CommandBinding Command="{StaticResource FormatSplitAddressCmd}"
                         CanExecute="CanFormatSplitAddress" Executed="FormatSplitAddressCmd_Executed"/>
         <CommandBinding Command="{StaticResource GotoCmd}"
@@ -224,6 +243,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
                         CanExecute="IsProjectOpen" Executed="ToggleDataScanCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleSingleByteFormatCmd}"
+                        CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
     </Window.CommandBindings>
@@ -281,9 +302,9 @@ limitations under the License.
                 <MenuItem Command="{StaticResource RemoveHintsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource FormatSplitAddressCmd}"/>
-                <MenuItem Header="Toggle Single-Byte Format"/> <!-- Ctrl+B -->
-                <MenuItem Header="Format As Word"/> <!-- Ctrl+W -->
-                <MenuItem Header="Delete Note/Long Comment"/> <!-- Del -->
+                <MenuItem Command="{StaticResource ToggleSingleByteFormatCmd}"/>
+                <MenuItem Command="{StaticResource FormatAsWordCmd}"/>
+                <MenuItem Command="{StaticResource DeleteMlcCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource ShowHexDumpCmd}"/>
             </MenuItem>

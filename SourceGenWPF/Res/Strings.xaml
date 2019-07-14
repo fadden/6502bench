@@ -75,6 +75,9 @@ limitations under the License.
     <system:String x:Key="str_InitialParameters">Default settings:</system:String>
     <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>
     <system:String x:Key="str_InvalidAddress">(unknown address)</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelCaption">Invalid Selection</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelNon1" xml:space="preserve">Unable to format as word: selection must be an even number of bytes that have not previously been formatted as multi-byte values.&#x0d;&#x0d;Use Toggle Data Scan (Ctrl+D) to turn off auto-detection of strings and memory fill.</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelUnevenFmt">Unable to format as word: each selected region must have an even number of bytes ({0} region(s) are selected).</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
     <system:String x:Key="str_OpenDataEmpty">File is empty</system:String>

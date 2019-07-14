@@ -131,6 +131,12 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_InitialSymbolFiles");
         public static string INVALID_ADDRESS =
             (string)Application.Current.FindResource("str_InvalidAddress");
+        public static string INVALID_FORMAT_WORD_SEL_CAPTION =
+            (string)Application.Current.FindResource("str_InvalidFormatWordSelCaption");
+        public static string INVALID_FORMAT_WORD_SEL_NON1 =
+            (string)Application.Current.FindResource("str_InvalidFormatWordSelNon1");
+        public static string INVALID_FORMAT_WORD_SEL_UNEVEN_FMT =
+            (string)Application.Current.FindResource("str_InvalidFormatWordSelUnevenFmt");
         public static string NO_FILES_AVAILABLE =
             (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string OPEN_DATA_DOESNT_EXIST =
