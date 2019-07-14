@@ -103,6 +103,9 @@
     <Compile Include="WpfGui\EditLongComment.xaml.cs">
       <DependentUpon>EditLongComment.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\EditNote.xaml.cs">
+      <DependentUpon>EditNote.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditProjectProperties.xaml.cs">
       <DependentUpon>EditProjectProperties.xaml</DependentUpon>
     </Compile>
@@ -245,6 +248,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditLongComment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditNote.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

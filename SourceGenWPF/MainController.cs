@@ -1355,11 +1355,9 @@ namespace SourceGenWPF {
                     }
                     break;
                 case LineListGen.Line.Type.Note:
-#if false
-                    if (editNoteToolStripMenuItem.Enabled) {
-                        EditNote_Click(sender, e);
+                    if (CanEditNote()) {
+                        EditNote();
                     }
-#endif
                     break;
 
                 case LineListGen.Line.Type.Code:
@@ -1589,6 +1587,42 @@ namespace SourceGenWPF {
                     ChangeSet cs = new ChangeSet(uc);
                     ApplyUndoableChanges(cs);
                 }
+            }
+        }
+
+        public bool CanEditNote() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Single line, code or data, or a note.
+            return (counts.mDataLines > 0 || counts.mCodeLines > 0 ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.Note);
+        }
+
+        public void EditNote() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+
+            MultiLineComment oldNote;
+            if (!mProject.Notes.TryGetValue(offset, out oldNote)) {
+                oldNote = new MultiLineComment(string.Empty);
+            }
+            EditNote dlg = new EditNote(mMainWin, oldNote);
+            dlg.ShowDialog();
+
+            if (dlg.DialogResult != true) {
+                return;
+            }
+
+            MultiLineComment newNote = dlg.Note;
+            if (oldNote != newNote) {
+                Debug.WriteLine("Changing note at +" + offset.ToString("x6"));
+
+                UndoableChange uc = UndoableChange.CreateNoteChange(offset,
+                    oldNote, newNote);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
             }
         }
 

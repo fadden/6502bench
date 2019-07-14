@@ -71,7 +71,7 @@ limitations under the License.
                  IsReadOnly="True"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-            <Button Content="OK" IsDefault="True" Width="70" Click="OkButton_Clicked"/>
+            <Button Content="OK" IsDefault="True" Width="70" Click="OkButton_Click"/>
             <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>
         </StackPanel>
     </Grid>

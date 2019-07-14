@@ -110,7 +110,7 @@ namespace SourceGenWPF.WpfGui {
             entryTextBox.Focus();
         }
 
-        private void OkButton_Clicked(object sender, RoutedEventArgs e) {
+        private void OkButton_Click(object sender, RoutedEventArgs e) {
             DialogResult = true;
         }
 

@@ -761,6 +761,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLongComment();
         }
 
+        private void CanEditNote(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditNote();
+        }
+
         private void CanEditOperand(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditOperand();
         }
@@ -874,6 +878,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void EditLongCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditLongComment();
+        }
+
+        private void EditNoteCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditNote();
         }
 
         private void EditOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
