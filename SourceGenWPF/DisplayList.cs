@@ -315,11 +315,24 @@ namespace SourceGenWPF {
 
             if (oldCount != newCount) {
                 SelectedIndices = new DisplayListSelection(mList.Count);
+                RecalculateListIndices();
             }
 
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
             OnCollectionReset();
+        }
+
+        /// <summary>
+        /// Recalculates the list index fields after lines are added or removed.
+        /// </summary>
+        private void RecalculateListIndices() {
+            Debug.WriteLine("Recalculating list indices");
+            for (int i = 0; i < mList.Count; i++) {
+                if (mList[i] != null) {
+                    mList[i].ListIndex = i;
+                }
+            }
         }
 
         /// <summary>

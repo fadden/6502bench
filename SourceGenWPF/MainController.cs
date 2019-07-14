@@ -2267,7 +2267,7 @@ namespace SourceGenWPF {
         ///   is selected.</param>
         public SelectionState UpdateSelectionState() {
             int selCount = mMainWin.CodeListView_GetSelectionCount();
-            Debug.WriteLine("SelectionChanged, selCount=" + selCount);
+            Debug.WriteLine("SelectionChanged: selCount=" + selCount);
 
             SelectionState state = new SelectionState();
 
