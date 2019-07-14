@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -90,6 +91,10 @@ namespace SourceGenWPF.WpfGui {
             codeListView.ItemsSource = CodeDisplayList;
             // https://dlaa.me/blog/post/9425496 to re-auto-size after data added (this may
             //  not work with virtual items)
+
+            // Obscure tweak to make the arrow keys work right after a change.
+            codeListView.ItemContainerGenerator.StatusChanged +=
+                ItemContainerGenerator_StatusChanged;
 
             mMainCtrl = new MainController(this);
 
@@ -518,8 +523,8 @@ namespace SourceGenWPF.WpfGui {
             // Notify MainController that the selection has changed.
             mMainCtrl.SelectionChanged();
 
-            Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
-                codeListView.SelectedItems.Count));
+            // Don't try to call CodeDisplayList.SelectedIndices.DebugValidateSelectionCount()
+            // here.  Events arrive while pieces are still moving.
 
             //Debug.WriteLine("SelectionChanged took " +
             //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
@@ -654,7 +659,46 @@ namespace SourceGenWPF.WpfGui {
             //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
         }
 
-        public int CodeListView_GetTopIndex() {
+        public void CodeListView_DebugValidateSelectionCount() {
+            Debug.Assert(CodeDisplayList.SelectedIndices.DebugValidateSelectionCount(
+                codeListView.SelectedItems.Count));
+        }
+
+        /// <summary>
+        /// Sets the focus to the ListViewItem identified by SelectedIndex.  This must be done
+        /// when the ItemContainerGenerator's StatusChanged event fires.
+        /// </summary>
+        /// <remarks>
+        /// Steps to cause problem:
+        ///  1. select note
+        ///  2. delete note
+        ///  3. select nearby line
+        ///  4. edit > undo
+        ///  5. hit the down-arrow key
+        ///
+        /// Without this event handler, the list jumps to line zero.  The original article
+        /// was dealing with a different problem, where you'd have to hit the down-arrow twice
+        /// to make it move, because the focus was on the control rather than the item.  The
+        /// same fix seems to apply for this issue as well.
+        ///
+        /// From http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
+        /// </remarks>
+        private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e) {
+            if (codeListView.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated) {
+                int index = codeListView.SelectedIndex;
+
+                if (index >= 0) {
+                    ListViewItem item =
+                        (ListViewItem)codeListView.ItemContainerGenerator.ContainerFromIndex(index);
+
+                    if (item != null) {
+                        item.Focus();
+                    }
+                }
+            }
+        }
+
+    public int CodeListView_GetTopIndex() {
             return codeListView.GetTopItemIndex();
         }
 

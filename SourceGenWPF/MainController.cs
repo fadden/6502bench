@@ -1322,6 +1322,7 @@ namespace SourceGenWPF {
 
         public void HandleCodeListDoubleClick(int row, int col) {
             Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
+            mMainWin.CodeListView_DebugValidateSelectionCount();
 
             // Clicking on some types of lines, such as ORG directives, results in
             // specific behavior regardless of which column you click in.  We're just
@@ -2267,7 +2268,7 @@ namespace SourceGenWPF {
         ///   is selected.</param>
         public SelectionState UpdateSelectionState() {
             int selCount = mMainWin.CodeListView_GetSelectionCount();
-            Debug.WriteLine("SelectionChanged: selCount=" + selCount);
+            Debug.WriteLine("UpdateSelectionState: selCount=" + selCount);
 
             SelectionState state = new SelectionState();
 
