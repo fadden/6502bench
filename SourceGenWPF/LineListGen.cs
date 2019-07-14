@@ -1025,7 +1025,7 @@ namespace SourceGenWPF {
                 Color color, List<Line> lines) {
             foreach (string str in list) {
                 Line line = new Line(offset, 0, lineType);
-                FormattedParts parts = FormattedParts.CreateLongComment(str);
+                FormattedParts parts = FormattedParts.CreateNote(str, color);
                 line.Parts = parts;
                 line.BackgroundColor = color;
                 lines.Add(line);

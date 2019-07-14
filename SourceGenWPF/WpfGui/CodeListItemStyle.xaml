@@ -154,6 +154,9 @@ See also https://github.com/fadden/DisasmUiTest
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
                 <Setter Property="Template" Value="{StaticResource longCommentTemplate}"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding Path=HasBackgroundColor}" Value="True">
+                <Setter Property="Background" Value="{Binding Path=BackgroundBrush}"/>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 

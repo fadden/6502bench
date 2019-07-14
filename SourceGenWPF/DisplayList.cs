@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Windows.Media;
 
 namespace SourceGenWPF {
     /// <summary>
@@ -349,11 +350,16 @@ namespace SourceGenWPF {
             public string Operand { get; private set; }
             public string Comment { get; private set; }
             public bool IsLongComment { get; private set; }
+            public bool HasBackgroundColor { get; private set; }
+            public Brush BackgroundBrush { get; private set; }
 
             // Set to true if we want to highlight the address and label fields.
             public bool HasAddrLabelHighlight { get; private set; }
 
             public int ListIndex { get; set; } = -1;
+
+            private static Color NoColor = Color.FromArgb(0, 0, 0, 0);
+
 
             // Private constructor -- create instances with factory methods.
             private FormattedParts() { }
@@ -400,6 +406,17 @@ namespace SourceGenWPF {
                 FormattedParts parts = new FormattedParts();
                 parts.Comment = comment;
                 parts.IsLongComment = true;
+                return parts;
+            }
+
+            public static FormattedParts CreateNote(string comment, Color color) {
+                FormattedParts parts = new FormattedParts();
+                parts.Comment = comment;
+                parts.IsLongComment = true;
+                if (color != NoColor) {
+                    parts.HasBackgroundColor = true;
+                    parts.BackgroundBrush = new SolidColorBrush(color);
+                }
                 return parts;
             }
 
