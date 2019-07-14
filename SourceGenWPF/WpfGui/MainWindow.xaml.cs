@@ -769,6 +769,10 @@ namespace SourceGenWPF.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditOperand();
         }
 
+        private void CanEditProjectSymbol(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditProjectSymbol();
+        }
+
         private void CanEditStatusFlags(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
         }
@@ -886,6 +890,10 @@ namespace SourceGenWPF.WpfGui {
 
         private void EditOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditOperand();
+        }
+
+        private void EditProjectSymbolCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditProjectSymbol();
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

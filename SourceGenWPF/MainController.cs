@@ -1333,11 +1333,9 @@ namespace SourceGenWPF {
                 case LineListGen.Line.Type.EquDirective:
                     // Currently only does something for project symbols; platform symbols
                     // do nothing.
-#if false
-                    if (editProjectSymbolToolStripMenuItem.Enabled) {
-                        EditProjectSymbol_Click(sender, e);
+                    if (CanEditProjectSymbol()) {
+                        EditProjectSymbol();
                     }
-#endif
                     break;
                 case LineListGen.Line.Type.OrgDirective:
                     if (CanEditAddress()) {
@@ -1771,6 +1769,40 @@ namespace SourceGenWPF {
                 } else {
                     Debug.WriteLine("No change to data formats");
                 }
+            }
+        }
+
+        public bool CanEditProjectSymbol() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            if (SelectionAnalysis.mLineType != LineListGen.Line.Type.EquDirective) {
+                return false;
+            }
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int symIndex = LineListGen.DefSymIndexFromOffset(CodeLineList[selIndex].FileOffset);
+            DefSymbol defSym = mProject.ActiveDefSymbolList[symIndex];
+            return (defSym.SymbolSource == Symbol.Source.Project);
+        }
+
+        public void EditProjectSymbol() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int symIndex = LineListGen.DefSymIndexFromOffset(CodeLineList[selIndex].FileOffset);
+            DefSymbol origDefSym = mProject.ActiveDefSymbolList[symIndex];
+            Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
+
+            EditDefSymbol dlg = new EditDefSymbol(mMainWin, mOutputFormatter,
+                mProject.ProjectProps.ProjectSyms);
+            dlg.DefSym = origDefSym;
+            if (dlg.ShowDialog() == true) {
+                ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
+                newProps.ProjectSyms.Remove(origDefSym.Label);
+                newProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+
+                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
+                    mProject.ProjectProps, newProps);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
             }
         }
 
