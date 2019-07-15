@@ -94,7 +94,7 @@ namespace SourceGenWPF {
         public const string HEXD_CHAR_CONV = "hexd-char-conv1";
 
         // ASCII chart viewer settings.
-        public const string ASCCH_MODE = "ascch-mode";
+        public const string ASCCH_MODE = "ascch-mode1";
 
         // Source generation settings.
         public const string SRCGEN_DEFAULT_ASM = "srcgen-default-asm";

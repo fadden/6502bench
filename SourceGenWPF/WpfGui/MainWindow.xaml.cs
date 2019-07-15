@@ -1083,6 +1083,10 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.ShowHexDump();
         }
 
+        private void ToggleAsciiChartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ToggleAsciiChart();
+        }
+
         private void ToggleDataScanCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ToggleDataScan();
         }
@@ -1174,6 +1178,9 @@ namespace SourceGenWPF.WpfGui {
             // (project property dialog, undo, redo), so we want to query it when we need
             // it rather than try to push changes around.
             toggleDataScanMenuItem.IsChecked = mMainCtrl.IsAnalyzeUncategorizedDataEnabled;
+        }
+        private void ToolsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
+            toggleAsciiChartMenuItem.IsChecked = mMainCtrl.IsAsciiChartOpen;
         }
 
         #endregion Misc

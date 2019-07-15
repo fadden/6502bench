@@ -64,9 +64,26 @@ namespace SourceGenWPF {
         private MainWindow mMainWin;
 
         /// <summary>
-        /// Hex dump viewer window.
+        /// Hex dump viewer window.  This is used for the currently open project.
         /// </summary>
         private Tools.WpfGui.HexDumpViewer mHexDumpDialog;
+
+        /// <summary>
+        /// This holds any un-owned Windows that we don't otherwise track.  It's used for
+        /// hex dump windows of arbitrary files.  We need to close them when the main window
+        /// is closed.
+        /// </summary>
+        private List<Window> mUnownedWindows = new List<Window>();
+
+        /// <summary>
+        /// ASCII chart reference window.  Not tied to the project.
+        /// </summary>
+        private Tools.WpfGui.AsciiChart mAsciiChartDialog;
+
+        /// <summary>
+        /// Returns true if the ASCII chart window is currently open.
+        /// </summary>
+        public bool IsAsciiChartOpen { get { return mAsciiChartDialog != null; } }
 
         /// <summary>
         /// List of recently-opened projects.
@@ -1108,7 +1125,30 @@ namespace SourceGenWPF {
         /// <returns>True if it's okay for the window to close, false to cancel it.</returns>
         public bool WindowClosing() {
             SaveAppSettings();
-            return CloseProject();
+            if (!CloseProject()) {
+                return false;
+            }
+
+            // WPF won't exit until all windows are closed, so any unowned windows need
+            // to be cleaned up here.
+            if (mAsciiChartDialog != null) {
+                mAsciiChartDialog.Close();
+            }
+            if (mHexDumpDialog != null) {
+                mHexDumpDialog.Close();
+            }
+            while (mUnownedWindows.Count > 0) {
+                int count = mUnownedWindows.Count;
+                mUnownedWindows[0].Close();
+                if (count == mUnownedWindows.Count) {
+                    // Window failed to remove itself; this will cause an infinite loop.
+                    // The user will have to close them manually.
+                    Debug.Assert(false, "Failed to close window " + mUnownedWindows[0]);
+                    break;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -2500,18 +2540,26 @@ namespace SourceGenWPF {
                 return;
             }
 
-            // Fire and forget.
-            Tools.WpfGui.HexDumpViewer dlg = new Tools.WpfGui.HexDumpViewer(mMainWin,
+            // Create the dialog without an owner, and add it to the "unowned" list.
+            Tools.WpfGui.HexDumpViewer dlg = new Tools.WpfGui.HexDumpViewer(null,
                 data, mOutputFormatter);
             dlg.SetFileName(Path.GetFileName(fileName));
+            dlg.Closing += (sender, e) => {
+                Debug.WriteLine("Window " + dlg + " closed, removing from unowned list");
+                mUnownedWindows.Remove(dlg);
+            };
+            mUnownedWindows.Add(dlg);
             dlg.Show();
         }
 
         public void ShowHexDump() {
             if (mHexDumpDialog == null) {
                 // Create and show modeless dialog.  This one is "always on top" by default,
-                // to allow the user to click around to various points.
-                mHexDumpDialog = new Tools.WpfGui.HexDumpViewer(mMainWin,
+                // to allow the user to click around to various points.  Note that "on top"
+                // means on top of *everything*.  We create this without an owner so that,
+                // when it's not on top, it can sit behind the main app window until you
+                // double-click something else.
+                mHexDumpDialog = new Tools.WpfGui.HexDumpViewer(null,
                     mProject.FileData, mOutputFormatter);
                 mHexDumpDialog.Closing += (sender, e) => {
                     Debug.WriteLine("Hex dump dialog closed");
@@ -2631,6 +2679,20 @@ namespace SourceGenWPF {
         public void ShowAboutBox() {
             AboutBox dlg = new AboutBox(mMainWin);
             dlg.ShowDialog();
+        }
+
+        public void ToggleAsciiChart() {
+            if (mAsciiChartDialog == null) {
+                // Create without owner so it doesn't have to be in front of main window.
+                mAsciiChartDialog = new Tools.WpfGui.AsciiChart(null);
+                mAsciiChartDialog.Closing += (sender, e) => {
+                    Debug.WriteLine("ASCII chart closed");
+                    mAsciiChartDialog = null;
+                };
+                mAsciiChartDialog.Show();
+            } else {
+                mAsciiChartDialog.Close();
+            }
         }
 
         public void ToggleDataScan() {

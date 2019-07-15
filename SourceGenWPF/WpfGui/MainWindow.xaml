@@ -140,6 +140,7 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="Hex Dump..."/>
             <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
+            <RoutedUICommand x:Key="ToggleAsciiChartCmd" Text="ASCII Chart"/>
             <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+D</KeyGesture>
@@ -241,6 +242,8 @@ limitations under the License.
                         Executed="ShowFileHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource ShowHexDumpCmd}"
                         CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleAsciiChartCmd}"
+                        Executed="ToggleAsciiChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
                         CanExecute="IsProjectOpen" Executed="ToggleDataScanCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleSingleByteFormatCmd}"
@@ -308,9 +311,10 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Command="{StaticResource ShowHexDumpCmd}"/>
             </MenuItem>
-            <MenuItem Header="_Tools">
+            <MenuItem Header="_Tools" SubmenuOpened="ToolsMenu_SubmenuOpened">
                 <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
-                <MenuItem Header="ASCII Chart"/>
+                <MenuItem Name="toggleAsciiChartMenuItem"
+                          Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>

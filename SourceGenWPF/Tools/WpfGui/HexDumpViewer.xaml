@@ -25,7 +25,7 @@ limitations under the License.
         Title="Hex Dump Viewer"
         Icon="/SourceGenWPF;component/Res/SourceGenIcon.ico"
         Width="542" Height="600" MinWidth="542" MinHeight="180"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="True"
         Loaded="Window_Loaded">
 
     <Window.Resources>
