@@ -63,6 +63,10 @@ namespace SourceGenWPF.AsmGen {
 
         /// <summary>
         /// Queries the versions from all known assemblers, replacing any previously held data.
+        ///
+        /// WARNING: this will execute all configured assemblers, and may cause a noticeable
+        /// pause while running.  Should only be a fraction of a second on a modern system,
+        /// but it's something to bear in mind.
         /// </summary>
         public static void QueryVersions() {
             IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();

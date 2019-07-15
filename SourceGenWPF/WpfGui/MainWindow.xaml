@@ -39,6 +39,8 @@ limitations under the License.
                 <ResourceDictionary Source="../Res/CommandIcons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
             <!-- don't center the ListView(GridView) column headers
             https://stackoverflow.com/q/44119146/294248
             (style without ID applies to all instances of that type)
@@ -157,6 +159,9 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
 
+            <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
+            <RoutedUICommand x:Key="Debug_ToggleKeepAliveHackCmd" Text="Use Keep-Alive Hack"/>
+
             <CollectionViewSource x:Key="SymbolTableSource" Source="{Binding SymbolsList}"
                                   Filter="SymbolsList_Filter"/>
         </ResourceDictionary>
@@ -250,6 +255,13 @@ limitations under the License.
                         CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
+
+        <CommandBinding Command="Refresh"
+                        CanExecute="IsProjectOpen" Executed="Debug_RefreshCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ToggleCommentRulersCmd}"
+                        Executed="Debug_ToggleCommentRulersCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ToggleKeepAliveHackCmd}"
+                        Executed="Debug_ToggleKeepAliveHackCmd_Executed"/>
     </Window.CommandBindings>
     
     <DockPanel>
@@ -320,15 +332,18 @@ limitations under the License.
                 <MenuItem Command="Help"/>
                 <MenuItem Command="{StaticResource AboutCmd}"/>
             </MenuItem>
-            <MenuItem Header="_DEBUG" Name="DebugMenu">
+            <MenuItem Header="_DEBUG" Name="DebugMenu" SubmenuOpened="DebugMenu_SubmenuOpened"
+                      Visibility="{Binding ShowDebugMenu, Converter={StaticResource BoolToVis}}">
                 <MenuItem Command="Refresh" Header="Re-analyze"/>
                 <MenuItem Header="Show Undo/Redo History"/>
                 <MenuItem Header="Show Analyzer Output"/>
                 <MenuItem Header="Show Analysis Timers"/>
                 <MenuItem Header="Extension Script Info..."/>
                 <Separator/>
-                <MenuItem Header="Toggle Comment Rulers"/>
-                <MenuItem Header="Use Keep-Alive Hack"/>
+                <MenuItem Name="debugCommentRulersMenuItem"
+                          Command="{StaticResource Debug_ToggleCommentRulersCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugKeepAliveHackMenuItem"
+                          Command="{StaticResource Debug_ToggleKeepAliveHackCmd}" IsCheckable="True"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource DebugSourceGenerationTestsCmd}"/>
             </MenuItem>

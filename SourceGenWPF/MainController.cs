@@ -471,14 +471,9 @@ namespace SourceGenWPF {
             // Unpack the recent-project list.
             UnpackRecentProjectList();
 
-#if false
             // Enable the DEBUG menu if configured.
-            bool showDebugMenu = AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
-            if (dEBUGToolStripMenuItem.Visible != showDebugMenu) {
-                dEBUGToolStripMenuItem.Visible = showDebugMenu;
-                mainMenuStrip.Refresh();
-            }
-#endif
+            mMainWin.ShowDebugMenu =
+                AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
 
             // Finally, update the display list generator with all the fancy settings.
             if (CodeLineList != null) {
@@ -2987,6 +2982,30 @@ namespace SourceGenWPF {
                 mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
             }
 #endif
+        }
+
+        public void Debug_Refresh() {
+            Debug.WriteLine("Reanalyzing...");
+            // Call through ApplyChanges so we update the timer task output.
+            UndoableChange uc =
+                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
+            ApplyChanges(new ChangeSet(uc), false);
+#if false
+            UpdateMenuItemsAndTitle();  // in case something changed
+#endif
+        }
+
+        public void Debug_ToggleCommentRulers() {
+            MultiLineComment.DebugShowRuler = !MultiLineComment.DebugShowRuler;
+            // Don't need to repeat the analysis, but we do want to save/restore the
+            // selection and top position when the comment fields change size.
+            UndoableChange uc =
+                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DataOnly);
+            ApplyChanges(new ChangeSet(uc), false);
+        }
+
+        public void Debug_ToggleKeepAliveHack() {
+            ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
         }
 
         #endregion References panel

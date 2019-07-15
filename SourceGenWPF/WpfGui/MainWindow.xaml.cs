@@ -70,6 +70,18 @@ namespace SourceGenWPF.WpfGui {
         private double mLongCommentWidth;
 
         /// <summary>
+        /// Set to true if the DEBUG menu should be visible on the main menu strip.
+        /// </summary>
+        public bool ShowDebugMenu {
+            get { return mShowDebugMenu; }
+            set {
+                mShowDebugMenu = value;
+                OnPropertyChanged();
+            }
+        }
+        bool mShowDebugMenu;
+
+        /// <summary>
         /// Reference to controller object.
         /// </summary>
         private MainController mMainCtrl;
@@ -669,17 +681,19 @@ namespace SourceGenWPF.WpfGui {
         /// when the ItemContainerGenerator's StatusChanged event fires.
         /// </summary>
         /// <remarks>
-        /// Steps to cause problem:
+        /// Sample steps to reproduce problem:
         ///  1. select note
         ///  2. delete note
         ///  3. select nearby line
         ///  4. edit > undo
         ///  5. hit the down-arrow key
         ///
-        /// Without this event handler, the list jumps to line zero.  The original article
-        /// was dealing with a different problem, where you'd have to hit the down-arrow twice
-        /// to make it move, because the focus was on the control rather than the item.  The
-        /// same fix seems to apply for this issue as well.
+        /// Without this event handler, the list jumps to line zero.  Apparently the keyboard
+        /// navigation is not based on which element(s) are selected.
+        ///
+        /// The original article was dealing with a different problem, where you'd have to hit
+        /// the down-arrow twice to make it move the first time, because the focus was on the
+        /// control rather than an item.  The same fix seems to apply for this issue as well.
         ///
         /// From http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
         /// </remarks>
@@ -698,7 +712,7 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
-    public int CodeListView_GetTopIndex() {
+        public int CodeListView_GetTopIndex() {
             return codeListView.GetTopItemIndex();
         }
 
@@ -1099,6 +1113,18 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.UndoChanges();
         }
 
+        private void Debug_RefreshCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_Refresh();
+        }
+
+        private void Debug_ToggleCommentRulersCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ToggleCommentRulers();
+        }
+
+        private void Debug_ToggleKeepAliveHackCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ToggleKeepAliveHack();
+        }
+
         #endregion Command handlers
 
         #region Misc
@@ -1181,6 +1207,10 @@ namespace SourceGenWPF.WpfGui {
         }
         private void ToolsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             toggleAsciiChartMenuItem.IsChecked = mMainCtrl.IsAsciiChartOpen;
+        }
+        private void DebugMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
+            debugCommentRulersMenuItem.IsChecked = MultiLineComment.DebugShowRuler;
+            debugKeepAliveHackMenuItem.IsChecked = Sandbox.ScriptManager.UseKeepAliveHack;
         }
 
         #endregion Misc
