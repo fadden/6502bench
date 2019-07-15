@@ -2984,30 +2984,6 @@ namespace SourceGenWPF {
 #endif
         }
 
-        public void Debug_Refresh() {
-            Debug.WriteLine("Reanalyzing...");
-            // Call through ApplyChanges so we update the timer task output.
-            UndoableChange uc =
-                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
-            ApplyChanges(new ChangeSet(uc), false);
-#if false
-            UpdateMenuItemsAndTitle();  // in case something changed
-#endif
-        }
-
-        public void Debug_ToggleCommentRulers() {
-            MultiLineComment.DebugShowRuler = !MultiLineComment.DebugShowRuler;
-            // Don't need to repeat the analysis, but we do want to save/restore the
-            // selection and top position when the comment fields change size.
-            UndoableChange uc =
-                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DataOnly);
-            ApplyChanges(new ChangeSet(uc), false);
-        }
-
-        public void Debug_ToggleKeepAliveHack() {
-            ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
-        }
-
         #endregion References panel
 
         #region Notes panel
@@ -3277,9 +3253,41 @@ namespace SourceGenWPF {
 
         #region Debug features
 
-        public void RunSourceGenerationTests() {
+        public void Debug_ExtensionScriptInfo() {
+            string info = mProject.DebugGetLoadedScriptInfo();
+
+            Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(mMainWin, info);
+            dlg.Title = "Loaded Extension Script Info";
+            dlg.ShowDialog();
+        }
+
+        public void Debug_RunSourceGenerationTests() {
             Tests.WpfGui.GenTestRunner dlg = new Tests.WpfGui.GenTestRunner(mMainWin);
             dlg.ShowDialog();
+        }
+
+        public void Debug_Refresh() {
+            Debug.WriteLine("Reanalyzing...");
+            // Call through ApplyChanges so we update the timer task output.
+            UndoableChange uc =
+                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
+            ApplyChanges(new ChangeSet(uc), false);
+#if false
+            UpdateMenuItemsAndTitle();  // in case something changed
+#endif
+        }
+
+        public void Debug_ToggleCommentRulers() {
+            MultiLineComment.DebugShowRuler = !MultiLineComment.DebugShowRuler;
+            // Don't need to repeat the analysis, but we do want to save/restore the
+            // selection and top position when the comment fields change size.
+            UndoableChange uc =
+                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DataOnly);
+            ApplyChanges(new ChangeSet(uc), false);
+        }
+
+        public void Debug_ToggleKeepAliveHack() {
+            ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
         }
 
         #endregion

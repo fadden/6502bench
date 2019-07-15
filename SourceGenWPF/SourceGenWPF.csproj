@@ -82,6 +82,9 @@
     <Compile Include="Tools\WpfGui\AsciiChart.xaml.cs">
       <DependentUpon>AsciiChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\WpfGui\ShowText.xaml.cs">
+      <DependentUpon>ShowText.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
@@ -223,6 +226,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\WpfGui\AsciiChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\ShowText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

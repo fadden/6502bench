@@ -925,11 +925,6 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.CopyToClipboard();
         }
 
-        private void DebugSourceGenerationTestsCmd_Executed(object sender,
-                ExecutedRoutedEventArgs e) {
-            mMainCtrl.RunSourceGenerationTests();
-        }
-
         private void DeleteMlcCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.DeleteMlc();
         }
@@ -1113,8 +1108,17 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.UndoChanges();
         }
 
+        private void Debug_ExtensionScriptInfoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ExtensionScriptInfo();
+        }
+
         private void Debug_RefreshCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_Refresh();
+        }
+
+        private void Debug_SourceGenerationTestsCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_RunSourceGenerationTests();
         }
 
         private void Debug_ToggleCommentRulersCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
