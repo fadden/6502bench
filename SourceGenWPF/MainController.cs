@@ -441,21 +441,19 @@ namespace SourceGenWPF {
                 }
             }
 
-#if false
             // Configure the Symbols window.
-            symbolUserCheckBox.Checked =
+            mMainWin.SymFilterUserLabels =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_USER, false);
-            symbolAutoCheckBox.Checked =
+            mMainWin.SymFilterAutoLabels =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
-            symbolProjectCheckBox.Checked =
+            mMainWin.SymFilterProjectSymbols =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_PROJECT, false);
-            symbolPlatformCheckBox.Checked =
+            mMainWin.SymFilterPlatformSymbols =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
-            symbolConstantCheckBox.Checked =
+            mMainWin.SymFilterConstants =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_CONST, false);
-            symbolAddressCheckBox.Checked =
+            mMainWin.SymFilterAddresses =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_ADDR, false);
-#endif
 
             // Get the configured font info.  If nothing is configured, use whatever the
             // code list happens to be using now.

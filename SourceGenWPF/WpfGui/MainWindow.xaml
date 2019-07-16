@@ -583,18 +583,18 @@ limitations under the License.
                         </Grid.RowDefinitions>
                         
                         <WrapPanel Grid.Row="0">
-                            <ToggleButton Name="symUserLabels" Content="User" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
-                            <ToggleButton Name="symProjectSymbols" Content="Proj" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
-                            <ToggleButton Name="symPlatformSymbols" Content="Plat" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
-                            <ToggleButton Name="symAutoLabels" Content="Auto" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
-                            <ToggleButton Name="symAddresses" Content="Addr" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
-                            <ToggleButton Name="symConstants" Content="Cnst" Width="40" Margin="2,2"
-                                          Checked="SymbolsListFilter_Changed" Unchecked="SymbolsListFilter_Changed"/>
+                            <ToggleButton Content="User" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterUserLabels}"/>
+                            <ToggleButton Content="Proj" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterProjectSymbols}"/>
+                            <ToggleButton Content="Plat" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterPlatformSymbols}"/>
+                            <ToggleButton Content="Auto" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterAutoLabels}"/>
+                            <ToggleButton Content="Addr" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterAddresses}"/>
+                            <ToggleButton Content="Cnst" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterConstants}"/>
                         </WrapPanel>
 
                         <DataGrid Grid.Row="1" Name="symbolsGrid"

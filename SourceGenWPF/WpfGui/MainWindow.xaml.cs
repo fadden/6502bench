@@ -62,10 +62,7 @@ namespace SourceGenWPF.WpfGui {
         /// </remarks>
         public double LongCommentWidth {
             get { return mLongCommentWidth; }
-            set {
-                mLongCommentWidth = value;
-                OnPropertyChanged();
-            }
+            set { mLongCommentWidth = value; OnPropertyChanged(); }
         }
         private double mLongCommentWidth;
 
@@ -74,12 +71,74 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         public bool ShowDebugMenu {
             get { return mShowDebugMenu; }
+            set { mShowDebugMenu = value; OnPropertyChanged(); }
+        }
+        bool mShowDebugMenu;
+
+        //
+        // Symbols list filter options.
+        //
+        public bool SymFilterUserLabels {
+            get { return mSymFilterUserLabels; }
             set {
-                mShowDebugMenu = value;
+                mSymFilterUserLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_USER, value);
+                SymbolsListFilterChanged();
                 OnPropertyChanged();
             }
         }
-        bool mShowDebugMenu;
+        private bool mSymFilterUserLabels;
+        public bool SymFilterProjectSymbols {
+            get { return mSymFilterProjectSymbols; }
+            set {
+                mSymFilterProjectSymbols = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterProjectSymbols;
+        public bool SymFilterPlatformSymbols {
+            get { return mSymFilterPlatformSymbols; }
+            set {
+                mSymFilterPlatformSymbols = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterPlatformSymbols;
+        public bool SymFilterAutoLabels {
+            get { return mSymFilterAutoLabels; }
+            set {
+                mSymFilterAutoLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_AUTO, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterAutoLabels;
+        public bool SymFilterAddresses {
+            get { return mSymFilterAddresses; }
+            set {
+                mSymFilterAddresses = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_ADDR, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterAddresses;
+        public bool SymFilterConstants {
+            get { return mSymFilterConstants; }
+            set {
+                mSymFilterConstants = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_CONST, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterConstants;
+
 
         /// <summary>
         /// Reference to controller object.
@@ -1360,12 +1419,12 @@ namespace SourceGenWPF.WpfGui {
             if (sli == null) {
                 return;
             }
-            if ((symUserLabels.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.User) ||
-                (symProjectSymbols.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
-                (symPlatformSymbols.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
-                (symAutoLabels.IsChecked != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
-                (symConstants.IsChecked != true && sli.Sym.SymbolType == Symbol.Type.Constant) ||
-                (symAddresses.IsChecked != true && sli.Sym.SymbolType != Symbol.Type.Constant))
+            if ((SymFilterUserLabels != true && sli.Sym.SymbolSource == Symbol.Source.User) ||
+                (SymFilterProjectSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
+                (SymFilterPlatformSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
+                (SymFilterAutoLabels != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
+                (SymFilterAddresses != true && sli.Sym.SymbolType != Symbol.Type.Constant) ||
+                (SymFilterConstants != true && sli.Sym.SymbolType == Symbol.Type.Constant))
             {
                 e.Accepted = false;
             } else {
@@ -1374,10 +1433,9 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
-        /// Refreshes the symbols list when a filter option changes.  Set this to be called
-        /// for Checked/Unchecked events on the filter option buttons.
+        /// Refreshes the symbols list when a filter option changes.
         /// </summary>
-        private void SymbolsListFilter_Changed(object sender, RoutedEventArgs e) {
+        private void SymbolsListFilterChanged() {
             // This delightfully obscure call causes the list to refresh.  See
             // https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/how-to-group-sort-and-filter-data-in-the-datagrid-control
             CollectionViewSource.GetDefaultView(symbolsGrid.ItemsSource).Refresh();
