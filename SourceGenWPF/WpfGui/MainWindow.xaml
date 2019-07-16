@@ -56,7 +56,6 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
-            <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Del</KeyGesture>
@@ -160,6 +159,10 @@ limitations under the License.
             </RoutedUICommand>
 
             <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
+            <RoutedUICommand x:Key="Debug_ShowAnalysisTimersCmd" Text="Show Analysis Timers"/>
+            <RoutedUICommand x:Key="Debug_ShowAnalyzerOutputCmd" Text="Show Analyzer Output"/>
+            <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
+            <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
             <RoutedUICommand x:Key="Debug_ToggleKeepAliveHackCmd" Text="Use Keep-Alive Hack"/>
 
@@ -261,6 +264,12 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="Debug_RefreshCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ExtensionScriptInfoCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ExtensionScriptInfoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowAnalysisTimersCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowAnalysisTimersCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowAnalyzerOutputCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowAnalyzerOutputCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowUndoRedoHistoryCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ToggleCommentRulersCmd}"
                         Executed="Debug_ToggleCommentRulersCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ToggleKeepAliveHackCmd}"
@@ -338,9 +347,12 @@ limitations under the License.
             <MenuItem Header="_DEBUG" Name="DebugMenu" SubmenuOpened="DebugMenu_SubmenuOpened"
                       Visibility="{Binding ShowDebugMenu, Converter={StaticResource BoolToVis}}">
                 <MenuItem Command="Refresh" Header="Re-analyze"/>
-                <MenuItem Header="Show Undo/Redo History"/>
-                <MenuItem Header="Show Analyzer Output"/>
-                <MenuItem Header="Show Analysis Timers"/>
+                <MenuItem Name ="debugUndoRedoHistoryMenuItem"
+                          Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugAnalyzerOutputMenuItem"
+                          Command="{StaticResource Debug_ShowAnalyzerOutputCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugAnalysisTimersMenuItem"
+                          Command="{StaticResource Debug_ShowAnalysisTimersCmd}" IsCheckable="True"/>
                 <MenuItem Command="{StaticResource Debug_ExtensionScriptInfoCmd}"/>
                 <Separator/>
                 <MenuItem Name="debugCommentRulersMenuItem"

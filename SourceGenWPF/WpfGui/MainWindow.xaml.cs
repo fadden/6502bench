@@ -1116,6 +1116,21 @@ namespace SourceGenWPF.WpfGui {
             mMainCtrl.Debug_Refresh();
         }
 
+        private void Debug_ShowAnalysisTimersCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ShowAnalysisTimers();
+        }
+
+        private void Debug_ShowAnalyzerOutputCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ShowAnalyzerOutput();
+        }
+
+        private void Debug_ShowUndoRedoHistoryCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ShowUndoRedoHistory();
+        }
+
         private void Debug_SourceGenerationTestsCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_RunSourceGenerationTests();
@@ -1215,6 +1230,9 @@ namespace SourceGenWPF.WpfGui {
         private void DebugMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             debugCommentRulersMenuItem.IsChecked = MultiLineComment.DebugShowRuler;
             debugKeepAliveHackMenuItem.IsChecked = Sandbox.ScriptManager.UseKeepAliveHack;
+            debugAnalysisTimersMenuItem.IsChecked = mMainCtrl.IsDebugAnalysisTimersOpen;
+            debugAnalyzerOutputMenuItem.IsChecked = mMainCtrl.IsDebugAnalyzerOutputOpen;
+            debugUndoRedoHistoryMenuItem.IsChecked = mMainCtrl.IsDebugUndoRedoHistoryOpen;
         }
 
         #endregion Misc

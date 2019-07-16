@@ -68,6 +68,14 @@ namespace SourceGenWPF {
         /// </summary>
         private Tools.WpfGui.HexDumpViewer mHexDumpDialog;
 
+        // Debug windows.
+        private Tools.WpfGui.ShowText mShowAnalysisTimersDialog;
+        public bool IsDebugAnalysisTimersOpen {  get { return mShowAnalysisTimersDialog != null; } }
+        private Tools.WpfGui.ShowText mShowAnalyzerOutputDialog;
+        public bool IsDebugAnalyzerOutputOpen { get { return mShowAnalyzerOutputDialog != null; } }
+        private Tools.WpfGui.ShowText mShowUndoRedoHistoryDialog;
+        public bool IsDebugUndoRedoHistoryOpen { get { return mShowUndoRedoHistoryDialog != null; } }
+
         /// <summary>
         /// This holds any un-owned Windows that we don't otherwise track.  It's used for
         /// hex dump windows of arbitrary files.  We need to close them when the main window
@@ -645,12 +653,12 @@ namespace SourceGenWPF {
             mProject.PushChangeSet(cs);
 #if false
             UpdateMenuItemsAndTitle();
+#endif
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
-#endif
         }
 
         /// <summary>
@@ -711,12 +719,10 @@ namespace SourceGenWPF {
             mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
 
             //mReanalysisTimer.DumpTimes("ProjectView timers:", mGenerationLog);
-#if false
             if (mShowAnalysisTimersDialog != null) {
                 string timerStr = mReanalysisTimer.DumpToString("ProjectView timers:");
-                mShowAnalysisTimersDialog.BodyText = timerStr;
+                mShowAnalysisTimersDialog.DisplayText = timerStr;
             }
-#endif
 
             // Lines may have moved around.  Update the selection highlight.  It's important
             // we do it here, and not down in DoRefreshProject(), because at that point the
@@ -817,11 +823,9 @@ namespace SourceGenWPF {
                 //mGenerationLog.WriteToFile(@"C:\Src\WorkBench\SourceGen\TestData\_log.txt");
                 //mReanalysisTimer.EndTask("Save _log");
 
-#if false
                 if (mShowAnalyzerOutputDialog != null) {
-                    mShowAnalyzerOutputDialog.BodyText = mGenerationLog.WriteToString();
+                    mShowAnalyzerOutputDialog.DisplayText = mGenerationLog.WriteToString();
                 }
-#endif
             }
 
             mReanalysisTimer.StartTask("Generate DisplayList");
@@ -1097,11 +1101,11 @@ namespace SourceGenWPF {
             }
 
             mProject.ResetDirtyFlag();
-#if false
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
+#if false
             UpdateMenuItemsAndTitle();
 #endif
 
@@ -1126,12 +1130,12 @@ namespace SourceGenWPF {
 
             // WPF won't exit until all windows are closed, so any unowned windows need
             // to be cleaned up here.
-            if (mAsciiChartDialog != null) {
-                mAsciiChartDialog.Close();
-            }
-            if (mHexDumpDialog != null) {
-                mHexDumpDialog.Close();
-            }
+            mAsciiChartDialog?.Close();
+            mHexDumpDialog?.Close();
+            mShowAnalysisTimersDialog?.Close();
+            mShowAnalyzerOutputDialog?.Close();
+            mShowUndoRedoHistoryDialog?.Close();
+
             while (mUnownedWindows.Count > 0) {
                 int count = mUnownedWindows.Count;
                 mUnownedWindows[0].Close();
@@ -1167,21 +1171,11 @@ namespace SourceGenWPF {
                 }
             }
 
-#if false
             // Close modeless dialogs that depend on project.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.Close();
-            }
-            if (mShowAnalysisTimersDialog != null) {
-                mShowAnalysisTimersDialog.Close();
-            }
-            if (mShowAnalyzerOutputDialog != null) {
-                mShowAnalyzerOutputDialog.Close();
-            }
-#endif
-            if (mHexDumpDialog != null) {
-                mHexDumpDialog.Close();
-            }
+            mHexDumpDialog?.Close();
+            mShowAnalysisTimersDialog?.Close();
+            mShowAnalyzerOutputDialog?.Close();
+            mShowUndoRedoHistoryDialog?.Close();
 
             // Discard all project state.
             if (mProject != null) {
@@ -2952,12 +2946,12 @@ namespace SourceGenWPF {
             ApplyChanges(cs, true);
 #if false
             UpdateMenuItemsAndTitle();
+#endif
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
-#endif
         }
 
         public bool CanRedo() {
@@ -2976,12 +2970,12 @@ namespace SourceGenWPF {
             ApplyChanges(cs, false);
 #if false
             UpdateMenuItemsAndTitle();
+#endif
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.BodyText = mProject.DebugGetUndoRedoHistory();
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
-#endif
         }
 
         #endregion References panel
@@ -3259,6 +3253,55 @@ namespace SourceGenWPF {
             Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(mMainWin, info);
             dlg.Title = "Loaded Extension Script Info";
             dlg.ShowDialog();
+        }
+
+        public void Debug_ShowAnalysisTimers() {
+            if (mShowAnalysisTimersDialog == null) {
+                Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(null, "(no data yet)");
+                dlg.Title = "Analysis Timers";
+                dlg.Closing += (sender, e) => {
+                    Debug.WriteLine("Analysis timers dialog closed");
+                    mShowAnalysisTimersDialog = null;
+                };
+                dlg.Show();
+                mShowAnalysisTimersDialog = dlg;
+            } else {
+                // Ask the dialog to close.  Do the cleanup in the event.
+                mShowAnalysisTimersDialog.Close();
+            }
+        }
+
+        public void Debug_ShowAnalyzerOutput() {
+            if (mShowAnalyzerOutputDialog == null) {
+                Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(null, "(no data yet)");
+                dlg.Title = "Analyzer Output";
+                dlg.Closing += (sender, e) => {
+                    Debug.WriteLine("Analyzer output dialog closed");
+                    mShowAnalyzerOutputDialog = null;
+                };
+                dlg.Show();
+                mShowAnalyzerOutputDialog = dlg;
+            } else {
+                // Ask the dialog to close.  Do the cleanup in the event.
+                mShowAnalyzerOutputDialog.Close();
+            }
+        }
+
+        public void Debug_ShowUndoRedoHistory() {
+            if (mShowUndoRedoHistoryDialog == null) {
+                Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(null,
+                    mProject.DebugGetUndoRedoHistory());
+                dlg.Title = "Undo/Redo History";
+                dlg.Closing += (sender, e) => {
+                    Debug.WriteLine("Undo/redo history dialog closed");
+                    mShowUndoRedoHistoryDialog = null;
+                };
+                dlg.Show();
+                mShowUndoRedoHistoryDialog = dlg;
+            } else {
+                // Ask the dialog to close.  Do the cleanup in the event.
+                mShowUndoRedoHistoryDialog.Close();
+            }
         }
 
         public void Debug_RunSourceGenerationTests() {

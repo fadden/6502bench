@@ -53,7 +53,9 @@ namespace SourceGenWPF.Tools.WpfGui {
             DataContext = this;
 
             if (owner == null) {
-                // Modeless dialogs can get lost, so show them in the task bar.
+                // Modeless dialogs can get lost, so show them in the task bar.  There's no
+                // "is modal" property in WPF, though we can fake it with a hack:
+                // https://stackoverflow.com/a/1266900/294248
                 ShowInTaskbar = true;
             }
 
