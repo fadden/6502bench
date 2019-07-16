@@ -41,6 +41,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_AsmMismatchLengthFmt");
         public static string ASM_OUTPUT_NOT_FOUND =
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
+        public static string DEFAULT_HEADER_COMMENT_FMT =
+            (string)Application.Current.FindResource("str_DefaultHeaderCommentFmt");
         public static string DEFAULT_VALUE =
             (string)Application.Current.FindResource("str_DefaultValue");
         public static string CLIPFORMAT_ASSEMBLER_SOURCE =
@@ -205,6 +207,12 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_SymbolImportGoodFmt");
         public static string SYMBOL_IMPORT_NONE =
             (string)Application.Current.FindResource("str_SymbolImportNone");
+        public static string TITLE_BASE =
+            (string)Application.Current.FindResource("str_TitleBase");
+        public static string TITLE_MODIFIED =
+            (string)Application.Current.FindResource("str_TitleModified");
+        public static string TITLE_NEW_PROJECT =
+            (string)Application.Current.FindResource("str_TitleNewProject");
         public static string UNSET =
             (string)Application.Current.FindResource("str_Unset");
     }

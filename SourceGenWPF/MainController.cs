@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,6 +20,7 @@ using System.IO;
 using System.Text;
 using System.Web.Script.Serialization;
 using System.Windows;
+using Microsoft.Win32;
 
 using Asm65;
 using CommonUtil;
@@ -70,7 +70,7 @@ namespace SourceGenWPF {
 
         // Debug windows.
         private Tools.WpfGui.ShowText mShowAnalysisTimersDialog;
-        public bool IsDebugAnalysisTimersOpen {  get { return mShowAnalysisTimersDialog != null; } }
+        public bool IsDebugAnalysisTimersOpen { get { return mShowAnalysisTimersDialog != null; } }
         private Tools.WpfGui.ShowText mShowAnalyzerOutputDialog;
         public bool IsDebugAnalyzerOutputOpen { get { return mShowAnalyzerOutputDialog != null; } }
         private Tools.WpfGui.ShowText mShowUndoRedoHistoryDialog;
@@ -250,9 +250,7 @@ namespace SourceGenWPF {
             // Place the main window and apply the various settings.
             ApplyAppSettings();
 
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
             mMainWin.UpdateRecentLinks();
 
             ProcessCommandLine();
@@ -548,6 +546,29 @@ namespace SourceGenWPF {
             mMainWin.UpdateRecentLinks();
         }
 
+        /// <summary>
+        /// Updates the main form title to show project name and modification status.
+        /// </summary>
+        private void UpdateTitle() {
+            // Update main window title.
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Res.Strings.TITLE_BASE);
+            if (mProject != null) {
+                sb.Append(" - ");
+                if (string.IsNullOrEmpty(mProjectPathName)) {
+                    sb.Append(Res.Strings.TITLE_NEW_PROJECT);
+                } else {
+                    sb.Append(Path.GetFileName(mProjectPathName));
+                }
+
+                if (mProject.IsDirty) {
+                    sb.Append(" ");
+                    sb.Append(Res.Strings.TITLE_MODIFIED);
+                }
+            }
+            mMainWin.Title = sb.ToString();
+        }
+
         #endregion Init and settings
 
 
@@ -572,8 +593,10 @@ namespace SourceGenWPF {
             proj.Initialize(fileData.Length);
             proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
 
+            // Initial header comment is the program name and version.
+            string cmt = string.Format(Res.Strings.DEFAULT_HEADER_COMMENT_FMT, App.ProgramVersion);
             proj.LongComments.Add(LineListGen.Line.HEADER_COMMENT_OFFSET,
-                new MultiLineComment("6502bench SourceGen v" + App.ProgramVersion));
+                new MultiLineComment(cmt));
 
             // The system definition provides a set of defaults that can be overridden.
             // We pull everything of interest out and then discard the object.
@@ -608,6 +631,8 @@ namespace SourceGenWPF {
             mNavStack.Clear();
 
             UpdateRecentProjectList(mProjectPathName);
+
+            UpdateTitle();
         }
 
         /// <summary>
@@ -651,9 +676,7 @@ namespace SourceGenWPF {
             }
             ApplyChanges(cs, false);
             mProject.PushChangeSet(cs);
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
@@ -727,9 +750,8 @@ namespace SourceGenWPF {
             // Lines may have moved around.  Update the selection highlight.  It's important
             // we do it here, and not down in DoRefreshProject(), because at that point the
             // ListView's selection index could be referencing a line off the end.
-#if false
+            // (This may not be necessary with WPF, because the way highlights work changed.)
             UpdateSelectionHighlight();
-#endif
         }
 
         /// <summary>
@@ -1074,9 +1096,7 @@ namespace SourceGenWPF {
             mProjectPathName = mProject.ProjectPathName = pathName;
 
             // add it to the title bar
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
             return true;
         }
 
@@ -1105,9 +1125,7 @@ namespace SourceGenWPF {
             if (mShowUndoRedoHistoryDialog != null) {
                 mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
 
             // Update this, in case this was a new project.
             UpdateRecentProjectList(pathName);
@@ -2944,9 +2962,7 @@ namespace SourceGenWPF {
             }
             ChangeSet cs = mProject.PopUndoSet();
             ApplyChanges(cs, true);
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
@@ -2968,9 +2984,7 @@ namespace SourceGenWPF {
             }
             ChangeSet cs = mProject.PopRedoSet();
             ApplyChanges(cs, false);
-#if false
-            UpdateMenuItemsAndTitle();
-#endif
+            UpdateTitle();
 
             // If the debug dialog is visible, update it.
             if (mShowUndoRedoHistoryDialog != null) {
@@ -3315,9 +3329,7 @@ namespace SourceGenWPF {
             UndoableChange uc =
                 UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
             ApplyChanges(new ChangeSet(uc), false);
-#if false
-            UpdateMenuItemsAndTitle();  // in case something changed
-#endif
+            UpdateTitle();  // in case something changed
         }
 
         public void Debug_ToggleCommentRulers() {
