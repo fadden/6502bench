@@ -171,7 +171,9 @@ namespace SourceGenWPF.Sandbox {
                 try {
                     lease.Unregister(this);
                 } catch (InvalidOperationException ex) {
-                    // TODO: not expected -- why did this start happening?
+                    // TODO(someday): not expected -- why did this start happening?  (Might
+                    // be related to the timer hack not being enabled during early stages of
+                    // WPF port?  Seems to have stopped.)
                     Debug.WriteLine("WARNING: lease.Unregister threw " + ex);
                 }
             }

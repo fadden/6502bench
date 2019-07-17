@@ -732,8 +732,8 @@ namespace SourceGenWPF {
             mMainWin.CodeListView_SetTopIndex(topItemIndex);
             mReanalysisTimer.EndTask("Restore selection and top position");
 
-            // Update the Notes and Symbols windows.
-            // TODO: references?
+            // Update the Notes and Symbols windows.  References should refresh automatically
+            // when the selection is restored.
             PopulateNotesList();
             PopulateSymbolsList();
 
@@ -1235,7 +1235,7 @@ namespace SourceGenWPF {
             }
 
             AsmGen.WpfGui.GenAndAsm dlg =
-                new AsmGen.WpfGui.GenAndAsm(mMainWin, mProject, mProjectPathName);
+                new AsmGen.WpfGui.GenAndAsm(mMainWin, this, mProject, mProjectPathName);
             dlg.ShowDialog();
         }
 
@@ -1360,8 +1360,14 @@ namespace SourceGenWPF {
         /// to the AppSettings.Global object.
         /// </summary>
         public void EditAppSettings() {
-            EditAppSettings dlg = new EditAppSettings(mMainWin, mMainWin, this,
-                WpfGui.EditAppSettings.Tab.Unknown, AsmGen.AssemblerInfo.Id.Unknown);
+            ShowAppSettings(mMainWin, WpfGui.EditAppSettings.Tab.Unknown,
+                AsmGen.AssemblerInfo.Id.Unknown);
+        }
+
+        public void ShowAppSettings(Window owner, EditAppSettings.Tab initialTab,
+                    AsmGen.AssemblerInfo.Id initialAsmId) {
+            EditAppSettings dlg = new EditAppSettings(owner, mMainWin, this,
+                initialTab, initialAsmId);
             dlg.ShowDialog();
         }
 

@@ -53,6 +53,11 @@ namespace SourceGenWPF.AsmGen.WpfGui {
         }
 
         /// <summary>
+        /// Main controller object, used to open app settings dialog.
+        /// </summary>
+        private MainController mMainCtrl;
+
+        /// <summary>
         /// Project with data.
         /// </summary>
         private DisasmProject mProject;
@@ -107,10 +112,12 @@ namespace SourceGenWPF.AsmGen.WpfGui {
         /// </summary>
         /// <param name="project">Project reference.</param>
         /// <param name="projectPathName">Full path to the project file.</param>
-        public GenAndAsm(Window owner, DisasmProject project, string projectPathName) {
+        public GenAndAsm(Window owner, MainController mainCtrl, DisasmProject project,
+                string projectPathName) {
             InitializeComponent();
             Owner = owner;
 
+            mMainCtrl = mainCtrl;
             mProject = project;
             mWorkDirectory = Path.GetDirectoryName(projectPathName);
             mBaseFileName = Path.GetFileNameWithoutExtension(projectPathName);
@@ -230,10 +237,8 @@ namespace SourceGenWPF.AsmGen.WpfGui {
 
         private void AssemblerSettingsButton_Click(object sender, RoutedEventArgs e) {
             // Pop open the app settings dialog, with the appropriate tab selected.
-#if false
-            mMainCtrl.ShowAppSettings(AppForms.EditAppSettings.Tab.AsmConfig,
+            mMainCtrl.ShowAppSettings(this, EditAppSettings.Tab.AsmConfig,
                 mSelectedAssemblerId);
-#endif
 
             // Update the controls based on whether or not the assembler is now available.
             UpdateAssemblerControls();
