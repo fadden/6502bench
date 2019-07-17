@@ -32,9 +32,9 @@ limitations under the License.
         <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
             <Button Name="saveButton" Width="120"
                     Content="_Save &amp; Continue" Click="SaveButton_Click"/>
-            <Button Name="dontSaveButton" Width="120" Margin="8,0,0,0"
+            <Button Name="dontSaveButton" Width="120" Margin="12,0,0,0"
                     Content="_Discard &amp; Continue" Click="DontSaveButton_Click"/>
-            <Button Name="cancelButton" Width="120" Margin="8,0,0,0"
+            <Button Name="cancelButton" Width="120" Margin="12,0,0,0"
                     Content="Cancel" IsCancel="True"/>
         </StackPanel>
     </StackPanel>

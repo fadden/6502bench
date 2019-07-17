@@ -75,6 +75,8 @@ namespace SourceGenWPF {
             // Extremely-negative offset value ensures it's at the very top.
             public const int HEADER_COMMENT_OFFSET = int.MinValue + 1;
 
+            // These need to be bit flags so we can record which parts associated with a
+            // given offset are selected.
             [FlagsAttribute]
             public enum Type {
                 Unclassified            = 0,
@@ -131,7 +133,7 @@ namespace SourceGenWPF {
             public FormattedParts Parts { get; set; }
 
             /// <summary>
-            /// Background color, used for notes.
+            /// Background color, used for Notes.
             /// </summary>
             public Color BackgroundColor { get; set; }
 
@@ -213,11 +215,28 @@ namespace SourceGenWPF {
 
             private List<Tag> mSelectionTags = new List<Tag>();
 
+            private class Top {
+                // File offset of line.
+                public int FileOffset { get; private set; }
+                // Number of lines between the first line at the specified offset and the
+                // target line.
+                public int LineDelta { get; private set; }
+
+                public Top(int fileOffset, int lineDelta) {
+                    FileOffset = fileOffset;
+                    LineDelta = lineDelta;
+                    Debug.WriteLine("New Top: " + this);
+                }
+                public override string ToString() {
+                    return "[Top: off=+" + FileOffset.ToString("x6") + " delta=" + LineDelta + "]";
+                }
+            }
+
             /// <summary>
             /// This is a place to save the file offset associated with the ListView's
             /// TopItem, so we can position the list appropriately.
             /// </summary>
-            private int mTopOffset;
+            private Top mTopPosition;
 
             // Use Generate().
             private SavedSelection() { }
@@ -230,12 +249,18 @@ namespace SourceGenWPF {
             /// </summary>
             /// <param name="dl">Display list, with list of Lines.</param>
             /// <param name="sel">Bit vector specifying which lines are selected.</param>
+            /// <param name="topIndex">Index of line that appears at the top of the list
+            ///   control.</param>
             /// <returns>New SavedSelection object.</returns>
             public static SavedSelection Generate(LineListGen dl, DisplayListSelection sel,
-                    int topOffset) {
+                    int topIndex) {
                 SavedSelection savedSel = new SavedSelection();
                 //Debug.Assert(topOffset >= 0);
-                savedSel.mTopOffset = topOffset;
+
+                int topOffset = dl[topIndex].FileOffset;
+                int firstIndex = dl.FindLineIndexByOffset(topOffset);
+                Debug.Assert(topIndex >= firstIndex);
+                savedSel.mTopPosition = new Top(topOffset, topIndex - firstIndex);
 
                 List<Line> lineList = dl.mLineList;
                 Debug.Assert(lineList.Count == sel.Length);
@@ -313,7 +338,7 @@ namespace SourceGenWPF {
 
                     // If a line encompassing this offset was at the top of the ListView
                     // control before, use this line's index as the top.
-                    if (topIndex < 0 && lineList[lineIndex].Contains(mTopOffset)) {
+                    if (topIndex < 0 && lineList[lineIndex].Contains(mTopPosition.FileOffset)) {
                         topIndex = lineIndex;
                     }
 
@@ -336,14 +361,29 @@ namespace SourceGenWPF {
 
                 // Continue search for topIndex, if necessary.
                 while (topIndex < 0 && lineIndex < lineList.Count) {
-                    if (lineList[lineIndex].Contains(mTopOffset)) {
+                    if (lineList[lineIndex].Contains(mTopPosition.FileOffset)) {
                         topIndex = lineIndex;
                         break;
                     }
                     lineIndex++;
                 }
-                Debug.WriteLine("TopOffset +" + mTopOffset.ToString("x6") +
-                    " --> index " + topIndex);
+                Debug.WriteLine("TopOffset " + mTopPosition + " --> index " + topIndex);
+
+                // Adjust position within an element.  This is necessary so we don't jump to
+                // the top of multi-line long comments or notes whenever any part of that
+                // comment or note is at the top of the list.
+                if (topIndex >= 0 && mTopPosition.LineDelta > 0) {
+                    int adjIndex = topIndex + mTopPosition.LineDelta;
+                    if (adjIndex >= lineList.Count ||
+                            lineList[adjIndex].FileOffset != mTopPosition.FileOffset) {
+                        Debug.WriteLine("Can't adjust top position");
+                        // can't adjust; maybe they deleted several lines from comment
+                    } else {
+                        topIndex = adjIndex;
+                        Debug.WriteLine("Top index adjusted to " + adjIndex);
+                    }
+                }
+
                 if (topIndex < 0) {
                     // This can happen if you delete the header comment while scrolled
                     // to the top of the list.
@@ -775,7 +815,7 @@ namespace SourceGenWPF {
                     out MultiLineComment headerComment)) {
                 List<string> formatted = headerComment.FormatText(formatter, string.Empty);
                 StringListToLines(formatted, Line.HEADER_COMMENT_OFFSET, Line.Type.LongComment,
-                    Color.FromArgb(0, 0, 0, 0), tmpLines);
+                    CommonWPF.Helper.ZeroColor, tmpLines);
             }
 
             // Format symbols.

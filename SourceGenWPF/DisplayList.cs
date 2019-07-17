@@ -303,7 +303,7 @@ namespace SourceGenWPF {
                 " new=" + newCount + " (mList.Count=" + mList.Count + ")");
 
             Debug.Assert(startIndex >= 0 && startIndex < mList.Count);
-            Debug.Assert(oldCount > 0 && startIndex + oldCount < mList.Count);
+            Debug.Assert(oldCount > 0 && startIndex + oldCount <= mList.Count);
             Debug.Assert(newCount >= 0);
 
             // Remove the old elements to clear them.
@@ -358,7 +358,7 @@ namespace SourceGenWPF {
 
             public int ListIndex { get; set; } = -1;
 
-            private static Color NoColor = Color.FromArgb(0, 0, 0, 0);
+            private static Color NoColor = CommonWPF.Helper.ZeroColor;
 
 
             // Private constructor -- create instances with factory methods.
@@ -447,6 +447,10 @@ namespace SourceGenWPF {
                 FormattedParts newParts = Clone(orig);
                 newParts.HasAddrLabelHighlight = false;
                 return newParts;
+            }
+
+            public override string ToString() {
+                return "[Parts: index=" + ListIndex + " off=" + Offset + "]";
             }
         }
     }

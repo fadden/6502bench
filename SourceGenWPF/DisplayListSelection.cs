@@ -111,8 +111,12 @@ namespace SourceGenWPF {
                 this[parts.ListIndex] = true;
             }
             foreach (DisplayList.FormattedParts parts in e.RemovedItems) {
-                Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
-                this[parts.ListIndex] = false;
+                Debug.Assert(parts.ListIndex >= 0);
+                if (parts.ListIndex < mSelection.Length) {
+                    this[parts.ListIndex] = false;
+                } else {
+                    Debug.WriteLine("Attempted to remove selected item off end of list: " + parts);
+                }
             }
         }
 

@@ -24,6 +24,8 @@ namespace CommonWPF {
     /// Miscellaneous helper functions.
     /// </summary>
     public static class Helper {
+        public static Color ZeroColor = Color.FromArgb(0, 0, 0, 0);
+
         /// <summary>
         /// Measures the size of a string when rendered with the specified parameters.  Uses
         /// the current culture, left-to-right flow, and 1 pixel per DIP.

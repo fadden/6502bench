@@ -697,8 +697,7 @@ namespace SourceGenWPF {
             mReanalysisTimer.StartTask("Save selection");
             int topItemIndex = mMainWin.CodeListView_GetTopIndex();
             LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
-                CodeLineList, mMainWin.CodeDisplayList.SelectedIndices,
-                CodeLineList[topItemIndex].FileOffset);
+                CodeLineList, mMainWin.CodeDisplayList.SelectedIndices, topItemIndex);
             //savedSel.DebugDump();
 
             // Clear this so we don't try to fiddle with it later.
@@ -1692,7 +1691,7 @@ namespace SourceGenWPF {
 
             MultiLineComment oldNote;
             if (!mProject.Notes.TryGetValue(offset, out oldNote)) {
-                oldNote = new MultiLineComment(string.Empty);
+                oldNote = null;
             }
             EditNote dlg = new EditNote(mMainWin, oldNote);
             dlg.ShowDialog();

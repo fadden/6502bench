@@ -70,7 +70,7 @@ namespace SourceGenWPF {
                 return obj is Location && this == (Location)obj;
             }
             public override int GetHashCode() {
-                return Offset + (IsNote ? 65536 : 0);
+                return Offset + (IsNote ? (1<<24) : 0);
             }
         }
 

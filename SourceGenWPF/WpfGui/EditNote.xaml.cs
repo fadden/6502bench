@@ -53,7 +53,7 @@ namespace SourceGenWPF.WpfGui {
             None = 0, Green, Blue, Yellow, Pink, Orange
         }
         private static Color[] sColors = new Color[] {
-            Color.FromArgb(0, 0, 0, 0),     // no highlight
+            CommonWPF.Helper.ZeroColor,     // no highlight
             Colors.LightGreen,
             Colors.LightBlue,
             Colors.Yellow, //LightGoldenrodYellow,
@@ -74,7 +74,11 @@ namespace SourceGenWPF.WpfGui {
             Owner = owner;
             DataContext = this;
 
-            Note = note;
+            if (note == null) {
+                Note = new MultiLineComment(string.Empty);
+            } else {
+                Note = note;
+            }
 
             mColorButtons = new RadioButton[] {
                 colorDefaultRadio,
@@ -102,6 +106,7 @@ namespace SourceGenWPF.WpfGui {
                 }
             }
 
+            inputTextBox.Focus();
         }
 
         // Handle Ctrl+Enter as a way to close the dialog, since plain Enter just

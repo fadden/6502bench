@@ -26,7 +26,7 @@ namespace SourceGenWPF.Tests {
         public Color Color { get; private set; }
         public bool HasColor { get { return Color.A != 0; } }
 
-        public ProgressMessage(string msg) : this(msg, Color.FromArgb(0, 0, 0, 0)) { }
+        public ProgressMessage(string msg) : this(msg, CommonWPF.Helper.ZeroColor) { }
 
         public ProgressMessage(string msg, Color color) {
             Text = msg;

@@ -772,7 +772,9 @@ namespace SourceGenWPF.WpfGui {
         }
 
         public int CodeListView_GetTopIndex() {
-            return codeListView.GetTopItemIndex();
+            int index = codeListView.GetTopItemIndex();
+            Debug.Assert(index >= 0);
+            return index;
         }
 
         public void CodeListView_SetTopIndex(int index) {

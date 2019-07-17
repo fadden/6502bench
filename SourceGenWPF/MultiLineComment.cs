@@ -62,7 +62,7 @@ namespace SourceGenWPF {
             Text = text;
             BoxMode = false;
             MaxWidth = 80;
-            BackgroundColor = Color.FromArgb(0, 0, 0, 0);
+            BackgroundColor = CommonWPF.Helper.ZeroColor;
         }
 
         /// <summary>
