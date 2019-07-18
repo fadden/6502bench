@@ -106,6 +106,8 @@ namespace SourceGenWPF {
         /// </summary>
         /// <param name="e">Argument from SelectionChanged event.</param>
         public void SelectionChanged(SelectionChangedEventArgs e) {
+            Debug.WriteLine("SelectionChanged event: Add=" + e.AddedItems.Count +
+                " Rem=" + e.RemovedItems.Count);
             foreach (DisplayList.FormattedParts parts in e.AddedItems) {
                 Debug.Assert(parts.ListIndex >= 0 && parts.ListIndex < mSelection.Length);
                 this[parts.ListIndex] = true;

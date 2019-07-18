@@ -697,14 +697,21 @@ namespace SourceGenWPF.WpfGui {
         /// </summary>
         /// <param name="sel">Selection bitmap.</param>
         public void CodeListView_SetSelection(DisplayListSelection sel) {
-            const int MAX_SEL_COUNT = 2000;
+            // Time required increases non-linearly.  Quick test:
+            //   50K: 10 seconds, 20K: 1.6 sec, 10K: 0.6 sec, 5K: 0.2 sec
+            const int MAX_SEL_COUNT = 5000;
+
+            // The caller will clear the DisplayListSelection before calling here, so we
+            // need to clear the ListView selection to match, even if we're about to call
+            // SelectAll.  If we don't, the SelectAll() call won't generate the necessary
+            // events, and our DisplayListSelection will get out of sync.
+            codeListView.SelectedItems.Clear();
 
             if (sel.IsAllSelected()) {
                 Debug.WriteLine("SetSelection: re-selecting all items");
                 codeListView.SelectAll();
                 return;
             }
-            codeListView.SelectedItems.Clear();
 
             if (sel.Count > MAX_SEL_COUNT) {
                 // Too much for WPF ListView -- only restore the first item.
@@ -712,6 +719,9 @@ namespace SourceGenWPF.WpfGui {
                 codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
                 return;
             }
+
+            Debug.WriteLine("SetSelection: selecting " + sel.Count + " of " +
+                CodeDisplayList.Count);
 
             //DateTime startWhen = DateTime.Now;
 
@@ -771,20 +781,33 @@ namespace SourceGenWPF.WpfGui {
             }
         }
 
+        /// <summary>
+        /// Returns the index of the line that's currently at the top of the control.
+        /// </summary>
         public int CodeListView_GetTopIndex() {
             int index = codeListView.GetTopItemIndex();
             Debug.Assert(index >= 0);
             return index;
         }
 
+        /// <summary>
+        /// Scrolls the code list so that the specified index is at the top of the control.
+        /// </summary>
+        /// <param name="index">Line index.</param>
         public void CodeListView_SetTopIndex(int index) {
+            //Debug.WriteLine("CodeListView_SetTopIndex(" + index + "): " + CodeDisplayList[index]);
+
             // ScrollIntoView does the least amount of scrolling required.  This extension
             // method scrolls to the bottom, then scrolls back up to the top item.
             //
-            // NOTE: it looks like scroll-to-bottom (which is done directly on the
-            // ScrollViewer) happens immediately, whiel scroll-to-item (which is done via the
-            // ListView) kicks in later.  So don't try to check the topmost item immediately.
-            codeListView.ScrollToTopItem(CodeDisplayList[index]);
+            // It looks like scroll-to-bottom (which is done directly on the ScrollViewer)
+            // happens immediately, while scroll-to-item (which is done via the ListView)
+            // kicks in later.  So you can't immediately query the top item to see where
+            // we were moved to.
+            //codeListView.ScrollToTopItem(CodeDisplayList[index]);
+
+            // This works much better.
+            codeListView.ScrollToIndex(index);
         }
 
         /// <summary>

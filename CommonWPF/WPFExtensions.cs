@@ -71,6 +71,9 @@ namespace CommonWPF {
         /// <remarks>
         /// See https://stackoverflow.com/q/2926722/294248 for an alternative approach that
         /// uses hit-testing, as well as a copy of this approach.
+        ///
+        /// Looks like we get the same values from ScrollViewer.VerticalOffset.  I don't know
+        /// if there's a reason to favor one over the other.
         /// </remarks>
         /// <returns>The item index, or -1 if the list is empty.</returns>
         public static int GetTopItemIndex(this ListView lv) {
@@ -92,12 +95,23 @@ namespace CommonWPF {
         /// specific placement.
         /// </summary>
         /// <remarks>
-        /// Equivalent to setting myListView.TopItem in WinForms.
+        /// Equivalent to setting myListView.TopItem in WinForms.  Unfortunately, the
+        /// ScrollIntoView call takes 60-100ms on a list with fewer than 1,000 items.  And
+        /// sometimes it just silently fails.  Prefer ScrollToIndex() to this.
         /// </remarks>
         public static void ScrollToTopItem(this ListView lv, object item) {
             ScrollViewer sv = lv.GetVisualChild<ScrollViewer>();
             sv.ScrollToBottom();
             lv.ScrollIntoView(item);
+        }
+
+        /// <summary>
+        /// Scrolls the ListView to the specified vertical index.  The ScrollViewer should
+        /// be operating in "logical" units (lines) rather than "physical" units (pixels).
+        /// </summary>
+        public static void ScrollToIndex(this ListView lv, int index) {
+            ScrollViewer sv = lv.GetVisualChild<ScrollViewer>();
+            sv.ScrollToVerticalOffset(index);
         }
 
         /// <summary>

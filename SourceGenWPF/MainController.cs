@@ -695,6 +695,7 @@ namespace SourceGenWPF {
             mReanalysisTimer.StartTask("ProjectView.ApplyChanges()");
 
             mReanalysisTimer.StartTask("Save selection");
+            mMainWin.CodeListView_DebugValidateSelectionCount();
             int topItemIndex = mMainWin.CodeListView_GetTopIndex();
             LineListGen.SavedSelection savedSel = LineListGen.SavedSelection.Generate(
                 CodeLineList, mMainWin.CodeDisplayList.SelectedIndices, topItemIndex);
@@ -1493,7 +1494,6 @@ namespace SourceGenWPF {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
-            Debug.WriteLine("LINE TYPE " + SelectionAnalysis.mLineType);
             return (SelectionAnalysis.mLineType == LineListGen.Line.Type.LongComment ||
                 SelectionAnalysis.mLineType == LineListGen.Line.Type.Note);
         }
