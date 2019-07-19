@@ -110,6 +110,7 @@ limitations under the License.
     <system:String x:Key="str_SaveBeforeAsmCaption">Save Project First</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
     <system:String x:Key="str_ShowCol">Show</system:String>
+    <system:String x:Key="str_StatusReady">Ready</system:String>
     <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
     <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
     <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>

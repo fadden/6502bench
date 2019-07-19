@@ -50,6 +50,15 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
+        /// Text for status bar at bottom of window.
+        /// </summary>
+        public string StatusBarText {
+            get { return mStatusBarText; }
+            set { mStatusBarText = value; OnPropertyChanged(); }
+        }
+        private string mStatusBarText;
+
+        /// <summary>
         /// Width of long comment fields.
         /// </summary>
         /// <remarks>
@@ -168,6 +177,8 @@ namespace SourceGenWPF.WpfGui {
                 ItemContainerGenerator_StatusChanged;
 
             mMainCtrl = new MainController(this);
+
+            StatusBarText = Res.Strings.STATUS_READY;
 
             AddMultiKeyGestures();
 

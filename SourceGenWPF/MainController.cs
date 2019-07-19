@@ -27,6 +27,7 @@ using CommonUtil;
 using CommonWPF;
 using SourceGenWPF.Sandbox;
 using SourceGenWPF.WpfGui;
+using System.Windows.Input;
 
 namespace SourceGenWPF {
     /// <summary>
@@ -779,31 +780,16 @@ namespace SourceGenWPF {
                 mOutputFormatterCpuDef = mProject.CpuDef;
             }
 
-#if false
-            if (mDisplayList.Count > 200000) {
-                string prevStatus = toolStripStatusLabel.Text;
-
-                // The Windows stuff can take 50-100ms, potentially longer than the actual
-                // work, so don't bother unless the file is very large.
+            if (CodeLineList.Count > 40000) {
                 try {
-                    mReanalysisTimer.StartTask("Do Windows stuff");
-                    Application.UseWaitCursor = true;
-                    Cursor.Current = Cursors.WaitCursor;
-                    toolStripStatusLabel.Text = Res.Strings.STATUS_RECALCULATING;
-                    Refresh();      // redraw status label
-                    mReanalysisTimer.EndTask("Do Windows stuff");
-
+                    Mouse.OverrideCursor = Cursors.Wait;
                     DoRefreshProject(reanalysisRequired);
                 } finally {
-                    Application.UseWaitCursor = false;
-                    toolStripStatusLabel.Text = prevStatus;
+                    Mouse.OverrideCursor = null;
                 }
             } else {
-#endif
                 DoRefreshProject(reanalysisRequired);
-#if false
-        }
-#endif
+            }
 
             if (FormatDescriptor.DebugCreateCount != 0) {
                 Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +

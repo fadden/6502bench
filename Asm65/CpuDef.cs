@@ -341,7 +341,8 @@ namespace Asm65 {
         }
 
         public override string ToString() {
-            return Name + " (has16=" + HasAddr16 + ", hasEmu=" + HasEmuFlag + ")";
+            return Name + " (has16=" + HasAddr16 + ", hasEmu=" + HasEmuFlag + ", hasUndoc=" +
+                HasUndocumented + ")";
         }
 
         /// <summary>

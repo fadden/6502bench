@@ -201,6 +201,8 @@ namespace SourceGenWPF.Res {
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
         public static string SHOW_COL =
             (string)Application.Current.FindResource("str_ShowCol");
+        public static string STATUS_READY =
+            (string)Application.Current.FindResource("str_StatusReady");
         public static string SYMBOL_IMPORT_CAPTION =
             (string)Application.Current.FindResource("str_SymbolImportCaption");
         public static string SYMBOL_IMPORT_GOOD_FMT =

@@ -396,7 +396,7 @@ limitations under the License.
         </ToolBarTray>
 
         <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
-            <TextBlock Text="Ready"/>
+            <TextBlock Text="{Binding StatusBarText, FallbackValue=Ready}"/>
         </StatusBar>
 
         <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes
