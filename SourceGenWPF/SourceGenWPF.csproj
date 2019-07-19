@@ -130,9 +130,6 @@
     <Compile Include="Tools\WpfGui\HexDumpViewer.xaml.cs">
       <DependentUpon>HexDumpViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WpfGui\WorkProgress.xaml.cs">
-      <DependentUpon>WorkProgress.xaml</DependentUpon>
-    </Compile>
     <Compile Include="AsmGen\WpfGui\GenAndAsm.xaml.cs">
       <DependentUpon>GenAndAsm.xaml</DependentUpon>
     </Compile>
@@ -290,10 +287,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\WpfGui\HexDumpViewer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WpfGui\WorkProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

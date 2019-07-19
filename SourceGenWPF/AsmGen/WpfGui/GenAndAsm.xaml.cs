@@ -23,6 +23,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using CommonUtil;
+using CommonWPF;
 using SourceGenWPF.WpfGui;
 
 namespace SourceGenWPF.AsmGen.WpfGui {

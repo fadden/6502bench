@@ -18,7 +18,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 
-namespace SourceGenWPF.WpfGui {
+namespace CommonWPF {
     /// <summary>
     /// Cancelable progress dialog.
     /// </summary>
@@ -127,7 +127,8 @@ namespace SourceGenWPF.WpfGui {
                 }
             } else if (e.Error != null) {
                 // Unexpected; success/failure should be passed through e.Result.
-                MessageBox.Show(e.Error.ToString(), Res.Strings.OPERATION_FAILED,
+                string failMsg = (string)FindResource("str_OperationFailedCaption");
+                MessageBox.Show(e.Error.ToString(), failMsg,
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 DialogResult = false;
             } else {
