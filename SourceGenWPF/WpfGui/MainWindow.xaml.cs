@@ -389,6 +389,22 @@ namespace SourceGenWPF.WpfGui {
         }
 
         /// <summary>
+        /// Cleans up state when MainController decides to close the project.
+        /// </summary>
+        public void ProjectClosing() {
+            // Clear this to release the memory.
+            CodeDisplayList.Clear();
+
+            InfoPanelContents = string.Empty;
+
+            // If you open a new project while one is already open, the ListView apparently
+            // doesn't reset certain state, possibly because it's never asked to draw after
+            // the list is cleared.  This results in the new project being open at the same
+            // line as the previous project.  This is a little weird, so we reset it here.
+            CodeListView_SetTopIndex(0);
+        }
+
+        /// <summary>
         /// Catch mouse-down events so we can treat the fourth mouse button as "back".
         /// </summary>
         private void Window_MouseDown(object sender, MouseButtonEventArgs e) {

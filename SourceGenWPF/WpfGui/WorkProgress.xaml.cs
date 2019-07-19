@@ -126,7 +126,7 @@ namespace SourceGenWPF.WpfGui {
                     DialogResult = false;
                 }
             } else if (e.Error != null) {
-                // Unexpected -- shell command execution shouldn't throw exceptions.
+                // Unexpected; success/failure should be passed through e.Result.
                 MessageBox.Show(e.Error.ToString(), Res.Strings.OPERATION_FAILED,
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 DialogResult = false;

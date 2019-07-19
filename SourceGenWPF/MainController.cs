@@ -606,18 +606,41 @@ namespace SourceGenWPF {
             return true;
         }
 
+#if false
+        private class FinishPrepProgress : WorkProgress.IWorker {
+            public string ExtMessages { get; private set; }
+            private MainController mMainCtrl;
+
+            public FinishPrepProgress(MainController mainCtrl) {
+                mMainCtrl = mainCtrl;
+            }
+            public object DoWork(BackgroundWorker worker) {
+                string messages = mMainCtrl.mProject.LoadExternalFiles();
+                mMainCtrl.DoRefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
+                return messages;
+            }
+
+            public void RunWorkerCompleted(object results) {
+                ExtMessages = (string)results;
+            }
+        }
+#endif
+
         private void FinishPrep() {
+            CodeLineList = new LineListGen(mProject, mMainWin.CodeDisplayList,
+                mOutputFormatter, mPseudoOpNames);
+
             string messages = mProject.LoadExternalFiles();
             if (messages.Length != 0) {
-                // ProjectLoadIssues isn't quite the right dialog, but it'll do.
+                // ProjectLoadIssues isn't quite the right dialog, but it'll do.  This is
+                // purely informative; no decision needs to be made.
                 ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, messages,
                     ProjectLoadIssues.Buttons.Continue);
                 dlg.ShowDialog();
             }
 
-            CodeLineList = new LineListGen(mProject, mMainWin.CodeDisplayList,
-                mOutputFormatter, mPseudoOpNames);
-
+            // Ideally we'd call DoRefreshProject (and LoadExternalFiles) from a progress
+            // dialog, but we're not allowed to update the DisplayList from a different thread.
             RefreshProject(UndoableChange.ReanalysisScope.CodeAndData);
 
             // Populate the Symbols list.
@@ -754,6 +777,20 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
+        /// Updates all of the specified ListView entries.  This is called after minor changes,
+        /// such as editing a comment or renaming a label, that can be handled by regenerating
+        /// selected parts of the DisplayList.
+        /// </summary>
+        /// <param name="offsetSet"></param>
+        private void RefreshCodeListViewEntries(RangeSet offsetSet) {
+            IEnumerator<RangeSet.Range> iter = offsetSet.RangeListIterator;
+            while (iter.MoveNext()) {
+                RangeSet.Range range = iter.Current;
+                CodeLineList.GenerateRange(range.Low, range.High);
+            }
+        }
+
+        /// <summary>
         /// Refreshes the project after something of substance has changed.  Some
         /// re-analysis will be done, followed by a complete rebuild of the DisplayList.
         /// </summary>
@@ -768,6 +805,47 @@ namespace SourceGenWPF {
             // reanalysis after many common operations, the program becomes unpleasant to
             // use if we miss this goal, and progress bars won't make it less so.
 
+            if (mProject.FileDataLength > 65536) {
+                try {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    DoRefreshProject(reanalysisRequired);
+                } finally {
+                    Mouse.OverrideCursor = null;
+                }
+            } else {
+                DoRefreshProject(reanalysisRequired);
+            }
+
+            if (mGenerationLog != null) {
+                //mReanalysisTimer.StartTask("Save _log");
+                //mGenerationLog.WriteToFile(@"C:\Src\WorkBench\SourceGen\TestData\_log.txt");
+                //mReanalysisTimer.EndTask("Save _log");
+
+                if (mShowAnalyzerOutputDialog != null) {
+                    mShowAnalyzerOutputDialog.DisplayText = mGenerationLog.WriteToString();
+                }
+            }
+
+            if (FormatDescriptor.DebugCreateCount != 0) {
+                Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +
+                    " prefab=" + FormatDescriptor.DebugPrefabCount + " (" +
+                    (FormatDescriptor.DebugPrefabCount * 100) / FormatDescriptor.DebugCreateCount +
+                    "%)");
+            }
+        }
+
+        /// <summary>
+        /// Refreshes the project after something of substance has changed.
+        /// </summary>
+        /// <remarks>
+        /// Ideally from this point on we can run on a background thread.  The tricky part
+        /// is the close relationship between LineListGen and DisplayList -- we can't update
+        /// DisplayList from a background thread.  Until that's fixed, putting up a "working..."
+        /// dialog or other UI will be awkward.
+        /// </remarks>
+        /// <param name="reanalysisRequired">Indicates whether reanalysis is required, and
+        ///   what level.</param>
+        private void DoRefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
             // Changing the CPU type or whether undocumented instructions are supported
             // invalidates the Formatter's mnemonic cache.  We can change these values
             // through undo/redo, so we need to check it here.
@@ -780,40 +858,6 @@ namespace SourceGenWPF {
                 mOutputFormatterCpuDef = mProject.CpuDef;
             }
 
-            if (CodeLineList.Count > 40000) {
-                try {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    DoRefreshProject(reanalysisRequired);
-                } finally {
-                    Mouse.OverrideCursor = null;
-                }
-            } else {
-                DoRefreshProject(reanalysisRequired);
-            }
-
-            if (FormatDescriptor.DebugCreateCount != 0) {
-                Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +
-                    " prefab=" + FormatDescriptor.DebugPrefabCount + " (" +
-                    (FormatDescriptor.DebugPrefabCount * 100) / FormatDescriptor.DebugCreateCount +
-                    "%)");
-            }
-        }
-
-        /// <summary>
-        /// Updates all of the specified ListView entries.  This is called after minor changes,
-        /// such as editing a comment or renaming a label, that can be handled by regenerating
-        /// selected parts of the DisplayList.
-        /// </summary>
-        /// <param name="offsetSet"></param>
-        private void RefreshCodeListViewEntries(RangeSet offsetSet) {
-            IEnumerator<RangeSet.Range> iter = offsetSet.RangeListIterator;
-            while (iter.MoveNext()) {
-                RangeSet.Range range = iter.Current;
-                CodeLineList.GenerateRange(range.Low, range.High);
-            }
-        }
-
-        private void DoRefreshProject(UndoableChange.ReanalysisScope reanalysisRequired) {
             if (reanalysisRequired != UndoableChange.ReanalysisScope.DisplayOnly) {
                 mGenerationLog = new CommonUtil.DebugLog();
                 mGenerationLog.SetMinPriority(CommonUtil.DebugLog.Priority.Debug);
@@ -822,16 +866,6 @@ namespace SourceGenWPF {
                 mReanalysisTimer.StartTask("Call DisasmProject.Analyze()");
                 mProject.Analyze(reanalysisRequired, mGenerationLog, mReanalysisTimer);
                 mReanalysisTimer.EndTask("Call DisasmProject.Analyze()");
-            }
-
-            if (mGenerationLog != null) {
-                //mReanalysisTimer.StartTask("Save _log");
-                //mGenerationLog.WriteToFile(@"C:\Src\WorkBench\SourceGen\TestData\_log.txt");
-                //mReanalysisTimer.EndTask("Save _log");
-
-                if (mShowAnalyzerOutputDialog != null) {
-                    mShowAnalyzerOutputDialog.DisplayText = mGenerationLog.WriteToString();
-                }
             }
 
             mReanalysisTimer.StartTask("Generate DisplayList");
@@ -903,13 +937,14 @@ namespace SourceGenWPF {
         }
 
         /// <summary>
-        /// Handles opening an existing project, given a pathname to the project file.
+        /// Handles opening an existing project, given a full pathname to the project file.
         /// </summary>
         private void DoOpenFile(string projPathName) {
             Debug.WriteLine("DoOpenFile: " + projPathName);
             Debug.Assert(mProject == null);
 
             if (!File.Exists(projPathName)) {
+                // Should only happen for projects in "recents".
                 string msg = string.Format(Res.Strings.ERR_FILE_NOT_FOUND_FMT, projPathName);
                 MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                     MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1188,11 +1223,8 @@ namespace SourceGenWPF {
             mProjectPathName = null;
             mTargetHighlightIndex = -1;
 
-            // Clear this to release the memory.
-            mMainWin.CodeDisplayList.Clear();
-
-            mMainWin.InfoPanelContents = string.Empty;
             mMainWin.ShowCodeListView = false;
+            mMainWin.ProjectClosing();
 
             mGenerationLog = null;
 
