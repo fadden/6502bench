@@ -19,7 +19,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
-namespace MakeDistWPF {
+namespace MakeDist {
     /// <summary>
     /// Distribution maker.
     /// </summary>

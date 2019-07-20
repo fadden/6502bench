@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenWPF", "SourceGenWP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonWPF", "CommonWPF\CommonWPF.csproj", "{1299AA2E-606D-4F3E-B3A9-3F9421E44667}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeDistWPF", "MakeDistWPF\MakeDistWPF.csproj", "{D9A0BD5E-8CA8-4207-81C8-DDF4BE6AB02A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeDist", "MakeDist\MakeDist.csproj", "{D9A0BD5E-8CA8-4207-81C8-DDF4BE6AB02A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

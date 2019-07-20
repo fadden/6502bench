@@ -22,7 +22,7 @@ using System.Windows.Media;
 
 using CommonWPF;
 
-namespace MakeDistWPF {
+namespace MakeDist {
     /// <summary>
     /// Show progress log while copying files.
     /// </summary>

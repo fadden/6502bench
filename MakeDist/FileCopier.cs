@@ -20,7 +20,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 
-namespace MakeDistWPF {
+namespace MakeDist {
     public class FileCopier {
         private const string SOURCEGEN_DIRNAME = "SourceGen";
 
