@@ -16,7 +16,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace MakeDist {
+namespace MakeDistWF {
     static class Program {
         /// <summary>
         /// The main entry point for the application.

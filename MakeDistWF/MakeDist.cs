@@ -16,7 +16,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace MakeDist {
+namespace MakeDistWF {
     public partial class MakeDist : Form {
         public MakeDist() {
             InitializeComponent();

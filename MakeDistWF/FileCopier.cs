@@ -23,7 +23,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MakeDist {
+namespace MakeDistWF {
     public class FileCopier {
         private const string SOURCEGEN_DIRNAME = "SourceGen";
 
