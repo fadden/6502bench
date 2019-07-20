@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019 faddenSoft
+ * Copyright 2018 faddenSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace SourceGenWPF {
+namespace SourceGenWF {
     /// <summary>
     /// Facilitates access to the contents of the RuntimeData directory, which is located
     /// relative to the executable process pathname.
@@ -55,10 +55,10 @@ namespace SourceGenWPF {
                 return sBasePath;
             }
 
-            // Hack during development: remove bin/Debug, and convert SourceGenWPF to SourceGen.
+            // Hack during development: remove bin/Debug, and convert SourceGenWF to SourceGen.
             string upTwo = Path.GetDirectoryName(Path.GetDirectoryName(baseDir));
-            if (upTwo.EndsWith("WPF")) {
-                upTwo = upTwo.Substring(0, upTwo.Length - "WPF".Length);
+            if (upTwo.EndsWith("WF")) {
+                upTwo = upTwo.Substring(0, upTwo.Length - "WF".Length);
             }
             tryPath = Path.Combine(upTwo, RUNTIME_DATA_FILENAME);
             if (Directory.Exists(tryPath)) {

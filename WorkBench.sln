@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGen", "SourceGen\SourceGen.csproj", "{C2851438-4925-4205-8885-C7322D6A56C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenWF", "SourceGenWF\SourceGenWF.csproj", "{C2851438-4925-4205-8885-C7322D6A56C0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{70F04543-9E46-4AD3-875A-160FD198C0FF} = {70F04543-9E46-4AD3-875A-160FD198C0FF}
 	EndProjectSection
