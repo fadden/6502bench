@@ -41,7 +41,7 @@ limitations under the License.
                       IsChecked="{Binding IsOutputRetained}"/>
         </StackPanel>
 
-        <RichTextBox Name="progressRichTextBox" DockPanel.Dock="Top" Height="130" Margin="0,8,0,0"
+        <RichTextBox Name="progressRichTextBox" DockPanel.Dock="Top" Height="160" Margin="0,8,0,0"
                      VerticalScrollBarVisibility="Auto" IsReadOnly="True">
             <RichTextBox.Resources>
                 <!-- remove excess vertical space between paragraphs -->
