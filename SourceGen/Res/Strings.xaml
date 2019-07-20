@@ -1,0 +1,121 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!-- Global string table.  The goal is to have all English text in XAML.  Strings used by C#
+    should either be here or in a Window-specific resource dictionary. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:SourceGen.Res">
+
+    <system:String x:Key="str_AbbrevAddress">Addr</system:String>
+    <system:String x:Key="str_AbbrevConstant">Const</system:String>
+    <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
+    <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
+    <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>
+    <system:String x:Key="str_AsmMismatchCaption">Output Mismatch</system:String>
+    <system:String x:Key="str_AsmMismatchDataFmt">Assembled output does not match: offset +{0:x6} has value ${1:x2}, expected ${2:x2}.</system:String>
+    <system:String x:Key="str_AsmMismatchLengthFmt">Assembled output does not match: length is {0}, expected {1}.</system:String>
+    <system:String x:Key="str_AsmOutputNotFound">Expected output file wasn't created</system:String>
+    <system:String x:Key="str_ClipformatAssemblerSource">Assembler Source</system:String>
+    <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>
+    <system:String x:Key="str_DefaultHeaderCommentFmt">6502bench SourceGen v{0}</system:String>
+    <system:String x:Key="str_DefaultValue">Default</system:String>
+    <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
+    <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
+    <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
+    <system:String x:Key="str_ErrBadIdent">Invalid file identifier</system:String>
+    <system:String x:Key="str_ErrBadRange">Bad range</system:String>
+    <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
+    <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
+    <system:String x:Key="str_ErrBadTypeHint">Type hint not recognized</system:String>
+    <system:String x:Key="str_ErrDuplicateLabelFmt">Removing duplicate label '{0}' (offset +{1:x6})</system:String>
+    <system:String x:Key="str_ErrFileExistsNotDirFmt">The file {0} exists, but is not a directory.</system:String>
+    <system:String x:Key="str_ErrFileGenericCaption">File Error</system:String>
+    <system:String x:Key="str_ErrFileNotFoundFmt">File not found: {0}</system:String>
+    <system:String x:Key="str_ErrFileReadOnlyFmt">Cannot write to read-only file {0}.</system:String>
+    <system:String x:Key="str_ErrInvalidIntValue">Could not convert value to integer</system:String>
+    <system:String x:Key="str_ErrInvalidKeyValue">Key value is out of range</system:String>
+    <system:String x:Key="str_ErrInvalidSysdef" xml:space="preserve"> - INVALID DEFINITION</system:String>
+    <system:String x:Key="str_ErrLoadConfigFile">Unable to load config file</system:String>
+    <system:String x:Key="str_ErrNotProjectFile">This does not appear to be a valid .dis65 project file</system:String>
+    <system:String x:Key="str_ErrProjectFileCorrupt">Project file may be corrupt</system:String>
+    <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
+    <system:String x:Key="str_ErrProjectSaveFail">Unable to save project file</system:String>
+    <system:String x:Key="str_ErrTooLargeForPreview">[File was too large for preview window]</system:String>
+    <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
+    <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
+    <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>
+    <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
+    <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
+    <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
+    <system:String x:Key="str_FileInfoFmt">File is {0:N1} KB of raw data.</system:String>
+    <system:String x:Key="str_FindReachedStart">Find reached the starting point of the search.</system:String>
+    <system:String x:Key="str_FindReachedStartCaption">Find...</system:String>
+    <system:String x:Key="str_FontDescriptorFmt">{0}-point {1}</system:String>
+    <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
+    <system:String x:Key="str_HideCol">Hide</system:String>
+    <system:String x:Key="str_InfoFdSumFmt">•Operand format is {0}</system:String>
+    <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
+    <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
+    <system:String x:Key="str_InfoLineSumSingularFmt">Line {0}: {1} byte of {2}</system:String>
+    <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
+    <system:String x:Key="str_InitialParameters">Default settings:</system:String>
+    <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>
+    <system:String x:Key="str_InvalidAddress">(unknown address)</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelCaption">Invalid Selection</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelNon1" xml:space="preserve">Unable to format as word: selection must be an even number of bytes that have not previously been formatted as multi-byte values.&#x0d;&#x0d;Use Toggle Data Scan (Ctrl+D) to turn off auto-detection of strings and memory fill.</system:String>
+    <system:String x:Key="str_InvalidFormatWordSelUnevenFmt">Unable to format as word: each selected region must have an even number of bytes ({0} region(s) are selected).</system:String>
+    <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
+    <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
+    <system:String x:Key="str_OpenDataEmpty">File is empty</system:String>
+    <system:String x:Key="str_OpenDataFailCaption">Unable to load data file</system:String>
+    <system:String x:Key="str_OpenDataFailMessage">Unable to load contents of data file</system:String>
+    <system:String x:Key="str_OpenDataLoadFailedFmt">The file could not be opened: {0}.</system:String>
+    <system:String x:Key="str_OpenDataPartialRead">Unable to read the entire file</system:String>
+    <system:String x:Key="str_OpenDataTooLargeFmt">File is too large ({0:N0} KiB, max is {1:N0} KiB).</system:String>
+    <system:String x:Key="str_OpenDataWrongLengthFmt">The file is {0:N0} bytes long, but the project expected {1:N0}.</system:String>
+    <system:String x:Key="str_OpenDataWrongCrcFmt">The file has CRC {0}, but the project expected {1}.</system:String>
+    <system:String x:Key="str_OperationFailed">Failed</system:String>
+    <system:String x:Key="str_ParentheticalNone">(none)</system:String>
+    <system:String x:Key="str_PluginDirFailFmt">Failed while preparing the plugin directory {0}</system:String>
+    <system:String x:Key="str_PluginDirFailCaption">Failed Preparing Plugin Directory</system:String>
+    <system:String x:Key="str_ProgressAssembling">Executing assembler...</system:String>
+    <system:String x:Key="str_ProgressGeneratingFmt">Generating {0}...</system:String>
+    <system:String x:Key="str_ProjectFieldComment">comment</system:String>
+    <system:String x:Key="str_ProjectFieldLongComment">long comment</system:String>
+    <system:String x:Key="str_ProjectFieldNote">note</system:String>
+    <system:String x:Key="str_ProjectFieldOperandFormat">operand format</system:String>
+    <system:String x:Key="str_ProjectFieldStatusFlags">status flag override</system:String>
+    <system:String x:Key="str_ProjectFieldTypeHint">type hint</system:String>
+    <system:String x:Key="str_ProjectFieldUserLabel">user-defined label</system:String>
+    <system:String x:Key="str_ProjectFromNewerApp">This project was created by a newer version of SourceGen. It may contain data that will be lost if the project is edited.</system:String>
+    <!--<system:String x:Key="str_RecentProjectLinkFmt">#{0}: {1}</system:String>-->
+    <system:String x:Key="str_RuntimeDirNotFound">The RuntimeData directory was not found. It should be in the same directory as the executable.</system:String>
+    <system:String x:Key="str_RuntimeDirNotFoundCaption">RuntimeData Not Found</system:String>
+    <system:String x:Key="str_SaveBeforeAsm">Please save your project before assembling. The generated source code will be placed in the same directory as the project file.</system:String>
+    <system:String x:Key="str_SaveBeforeAsmCaption">Save Project First</system:String>
+    <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
+    <system:String x:Key="str_ShowCol">Show</system:String>
+    <system:String x:Key="str_StatusReady">Ready</system:String>
+    <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
+    <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
+    <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>
+    <system:String x:Key="str_TitleBase">6502bench SourceGen</system:String>
+    <system:String x:Key="str_TitleModified">(save needed)</system:String>
+    <system:String x:Key="str_TitleNewProject">[new project]</system:String>
+    <system:String x:Key="str_Unset">[unset]</system:String>
+</ResourceDictionary>

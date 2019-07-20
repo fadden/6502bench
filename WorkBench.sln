@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeDistWF", "MakeDistWF\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonWinForms", "CommonWinForms\CommonWinForms.csproj", "{08EC328D-078E-4236-B574-BE6B3FD85915}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenWPF", "SourceGenWPF\SourceGenWPF.csproj", "{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGen", "SourceGen\SourceGen.csproj", "{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1299AA2E-606D-4F3E-B3A9-3F9421E44667} = {1299AA2E-606D-4F3E-B3A9-3F9421E44667}
 	EndProjectSection

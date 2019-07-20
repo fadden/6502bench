@@ -1,0 +1,74 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Window x:Class="SourceGen.Tools.WpfGui.HexDumpViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:SourceGen.WpfGui"
+        mc:Ignorable="d"
+        Title="Hex Dump Viewer"
+        Width="542" Height="600" MinWidth="542" MinHeight="180"
+        ShowInTaskbar="True"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <system:String x:Key="str_PlainAscii">Basic ASCII</system:String>
+        <system:String x:Key="str_HighLowAscii">High/Low ASCII</system:String>
+    </Window.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- DataGrid gives us Ctrl+A select-all and Ctrl+C text-copy built in. -->
+        <DataGrid Name="hexDumpData" Grid.Row="0"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding HexDumpLines}"
+                  FontFamily="{StaticResource GeneralMonoFont}"
+                  SnapsToDevicePixels="True"
+                  GridLinesVisibility="None"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserReorderColumns="False"
+                  CanUserSortColumns="False"
+                  SelectionMode="Extended"
+                  EnableRowVirtualization="True"
+                  ScrollViewer.CanContentScroll="True"
+                  VerticalScrollBarVisibility="Visible">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Offset   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  ASCII"
+                                    Width="491" Binding="{Binding}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Margin="0,5,0,0" Orientation="Horizontal">
+            <TextBlock Text="Character conversion:" Margin="0,3,0,0"/>
+            <ComboBox Name="charConvComboBox" Width="120" Margin="4,0,0,0"
+                      ItemsSource="{Binding CharConvItems}" DisplayMemberPath="Name"
+                      SelectionChanged="CharConvComboBox_SelectionChanged"/>
+            
+            <CheckBox Content="ASCII-only dump" Margin="16,4,0,0" IsChecked="{Binding AsciiOnlyDump}"/>
+            
+            <!-- Bind the checkbox directly to the window's Topmost property. -->
+            <CheckBox Content="Always on top" Margin="16,4,0,0" IsChecked="{Binding Path=Topmost}"/>
+        </StackPanel>
+    </Grid>
+</Window>

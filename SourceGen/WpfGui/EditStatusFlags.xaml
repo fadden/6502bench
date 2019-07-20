@@ -1,0 +1,181 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Window x:Class="SourceGen.WpfGui.EditStatusFlags"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceGen.WpfGui"
+        mc:Ignorable="d"
+        Title="Override Status Flags"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <!-- RadioButton spacer -->
+        <Thickness x:Key="RBS" Left="1" Top="1" Right="0" Bottom="0"/>
+    </Window.Resources>
+    
+    <StackPanel Margin="8">
+        <TextBlock>Override the processor state values determined by the code analyzer.</TextBlock>
+
+        <!-- There's no margin/padding for rows and columns, so the margins are applied to
+        elements in the grid.  For the large gaps, we have a couple of fixed-width empty
+        columns. -->
+        <Grid Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">N</TextBlock>
+            <TextBlock Grid.Column="3" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">V</TextBlock>
+            <TextBlock Grid.Column="4" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">M</TextBlock>
+            <TextBlock Grid.Column="5" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">X</TextBlock>
+            <TextBlock Grid.Column="6" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">D</TextBlock>
+            <TextBlock Grid.Column="7" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">I</TextBlock>
+            <TextBlock Grid.Column="8" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">Z</TextBlock>
+            <TextBlock Grid.Column="9" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">C</TextBlock>
+            <TextBlock Grid.Column="11" Grid.Row="0" HorizontalAlignment="Center" Margin="6,0,6,0"
+                       FontFamily="{StaticResource GeneralMonoFont}" FontSize="16">E</TextBlock>
+
+            <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,0,2">Default</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" Margin="0,0,0,2">Zero</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" Margin="0,0,0,2">One</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" Margin="0,0,0,2">Indeterminate</TextBlock>
+
+            <RadioButton Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioNDefault" GroupName="N"/>
+            <RadioButton Grid.Column="2" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioNZero" GroupName="N"/>
+            <RadioButton Grid.Column="2" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioNOne" GroupName="N"/>
+            <RadioButton Grid.Column="2" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioNIndeterminate" GroupName="N"/>
+
+            <RadioButton Grid.Column="3" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioVDefault" GroupName="V"/>
+            <RadioButton Grid.Column="3" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioVZero" GroupName="V"/>
+            <RadioButton Grid.Column="3" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioVOne" GroupName="V"/>
+            <RadioButton Grid.Column="3" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioVIndeterminate" GroupName="V"/>
+
+            <RadioButton Grid.Column="4" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioMDefault" GroupName="M"/>
+            <RadioButton Grid.Column="4" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioMZero" GroupName="M"/>
+            <RadioButton Grid.Column="4" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioMOne" GroupName="M"/>
+            <RadioButton Grid.Column="4" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioMIndeterminate" GroupName="M"/>
+
+            <RadioButton Grid.Column="5" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioXDefault" GroupName="X"/>
+            <RadioButton Grid.Column="5" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioXZero" GroupName="X"/>
+            <RadioButton Grid.Column="5" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioXOne" GroupName="X"/>
+            <RadioButton Grid.Column="5" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioXIndeterminate" GroupName="X"/>
+
+            <RadioButton Grid.Column="6" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioDDefault" GroupName="D"/>
+            <RadioButton Grid.Column="6" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioDZero" GroupName="D"/>
+            <RadioButton Grid.Column="6" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioDOne" GroupName="D"/>
+            <RadioButton Grid.Column="6" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioDIndeterminate" GroupName="D"/>
+
+            <RadioButton Grid.Column="7" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioIDefault" GroupName="I"/>
+            <RadioButton Grid.Column="7" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioIZero" GroupName="I"/>
+            <RadioButton Grid.Column="7" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioIOne" GroupName="I"/>
+            <RadioButton Grid.Column="7" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioIIndeterminate" GroupName="I"/>
+
+            <RadioButton Grid.Column="8" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioZDefault" GroupName="Z"/>
+            <RadioButton Grid.Column="8" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioZZero" GroupName="Z"/>
+            <RadioButton Grid.Column="8" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioZOne" GroupName="Z"/>
+            <RadioButton Grid.Column="8" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioZIndeterminate" GroupName="Z"/>
+
+            <RadioButton Grid.Column="9" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioCDefault" GroupName="C"/>
+            <RadioButton Grid.Column="9" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioCZero" GroupName="C"/>
+            <RadioButton Grid.Column="9" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioCOne" GroupName="C"/>
+            <RadioButton Grid.Column="9" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioCIndeterminate" GroupName="C"/>
+
+            <RadioButton Grid.Column="11" Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioEDefault" GroupName="E"/>
+            <RadioButton Grid.Column="11" Grid.Row="2" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioEZero" GroupName="E"/>
+            <RadioButton Grid.Column="11" Grid.Row="3" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioEOne" GroupName="E"/>
+            <RadioButton Grid.Column="11" Grid.Row="4" HorizontalAlignment="Center" Margin="{StaticResource RBS}"
+                         Name="radioEIndeterminate" GroupName="E"/>
+        </Grid>
+
+        <TextBlock Margin="0,8,0,0">Tip: to configure 16-bit wide regs on 65802/65816, set M, X, and E to 0.</TextBlock>
+
+        <DockPanel Margin="0,16,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Name="resetButton" Content="Reset to Default"
+                    Width="120" Click="ResetButton_Click" HorizontalAlignment="Left"/>
+            <Button DockPanel.Dock="Right" Name="cancelButton" Content="Cancel" IsCancel="True"
+                    Width="70" Margin="4,0,0,0"/>
+            <Button DockPanel.Dock="Right" Name="okButton" Content="OK" IsDefault="True"
+                    Width="70" Click="OkButton_Click"/>
+
+        </DockPanel>
+    </StackPanel>
+</Window>

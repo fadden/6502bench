@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{30C35BBC-B9ED-4723-8F9D-597D51CCB13A}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>SourceGen</RootNamespace>
+    <AssemblyName>SourceGen</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="AddressMap.cs" />
+    <Compile Include="Anattrib.cs" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AsmGen\AsmCc65.cs" />
+    <Compile Include="AsmGen\AsmMerlin32.cs" />
+    <Compile Include="AsmGen\AsmTass64.cs" />
+    <Compile Include="AsmGen\AssemblerConfig.cs" />
+    <Compile Include="AsmGen\AssemblerInfo.cs" />
+    <Compile Include="AsmGen\AssemblerVersion.cs" />
+    <Compile Include="AsmGen\GenCommon.cs" />
+    <Compile Include="AsmGen\IAssembler.cs" />
+    <Compile Include="AsmGen\IGenerator.cs" />
+    <Compile Include="AsmGen\LabelLocalizer.cs" />
+    <Compile Include="AsmGen\StringGather.cs" />
+    <Compile Include="Tests\GenTest.cs" />
+    <Compile Include="Tests\ProgressMessage.cs" />
+    <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
+      <DependentUpon>GenTestRunner.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\VirtualHexDump.cs" />
+    <Compile Include="Tools\WpfGui\AsciiChart.xaml.cs">
+      <DependentUpon>AsciiChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\WpfGui\ShowText.xaml.cs">
+      <DependentUpon>ShowText.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditAppSettings.xaml.cs">
+      <DependentUpon>EditAppSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditComment.xaml.cs">
+      <DependentUpon>EditComment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditDataOperand.xaml.cs">
+      <DependentUpon>EditDataOperand.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditDefSymbol.xaml.cs">
+      <DependentUpon>EditDefSymbol.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditInstructionOperand.xaml.cs">
+      <DependentUpon>EditInstructionOperand.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditLabel.xaml.cs">
+      <DependentUpon>EditLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditLongComment.xaml.cs">
+      <DependentUpon>EditLongComment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditNote.xaml.cs">
+      <DependentUpon>EditNote.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditProjectProperties.xaml.cs">
+      <DependentUpon>EditProjectProperties.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\FindBox.xaml.cs">
+      <DependentUpon>FindBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\FontPicker.xaml.cs">
+      <DependentUpon>FontPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\FormatSplitAddress.xaml.cs">
+      <DependentUpon>FormatSplitAddress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\GotoBox.xaml.cs">
+      <DependentUpon>GotoBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\WpfGui\HexDumpViewer.xaml.cs">
+      <DependentUpon>HexDumpViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AsmGen\WpfGui\GenAndAsm.xaml.cs">
+      <DependentUpon>GenAndAsm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DisplayList.cs" />
+    <Compile Include="MainController.cs" />
+    <Compile Include="WpfGui\DataFileLoadIssue.xaml.cs">
+      <DependentUpon>DataFileLoadIssue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\DiscardChanges.xaml.cs">
+      <DependentUpon>DiscardChanges.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditAddress.xaml.cs">
+      <DependentUpon>EditAddress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditStatusFlags.xaml.cs">
+      <DependentUpon>EditStatusFlags.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\NewProject.xaml.cs">
+      <DependentUpon>NewProject.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\ProjectLoadIssues.xaml.cs">
+      <DependentUpon>ProjectLoadIssues.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PseudoOp.cs" />
+    <Compile Include="Res\Strings.xaml.cs" />
+    <Compile Include="RuntimeDataAccess.cs" />
+    <Compile Include="Sandbox\DomainManager.cs" />
+    <Compile Include="Sandbox\PluginDllCache.cs" />
+    <Compile Include="Sandbox\ScriptManager.cs" />
+    <Compile Include="Sandbox\Sponsor.cs" />
+    <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolTable.cs" />
+    <Compile Include="SystemDefaults.cs" />
+    <Compile Include="SystemDefs.cs" />
+    <Compile Include="UndoableChange.cs" />
+    <Compile Include="DisplayListSelection.cs" />
+    <Compile Include="WeakSymbolRef.cs" />
+    <Compile Include="XrefSet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppSettings.cs" />
+    <Compile Include="AutoLabel.cs" />
+    <Compile Include="ChangeSet.cs" />
+    <Compile Include="CodeAnalysis.cs" />
+    <Compile Include="DataAnalysis.cs" />
+    <Compile Include="DefSymbol.cs" />
+    <Compile Include="DisasmProject.cs" />
+    <Compile Include="LineListGen.cs" />
+    <Compile Include="ExternalFile.cs" />
+    <Compile Include="FormatDescriptor.cs" />
+    <Compile Include="HelpAccess.cs" />
+    <Compile Include="MultiLineComment.cs" />
+    <Compile Include="NavStack.cs" />
+    <Compile Include="PlatformSymbols.cs" />
+    <Compile Include="ProjectFile.cs" />
+    <Compile Include="ProjectProperties.cs" />
+    <Compile Include="WpfGui\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Tests\WpfGui\GenTestRunner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\AsciiChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\ShowText.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditAppSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditComment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditDataOperand.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditDefSymbol.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditInstructionOperand.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditLongComment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditNote.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditProjectProperties.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\FindBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\FontPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\FormatSplitAddress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\GotoBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\HexDumpViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AsmGen\WpfGui\GenAndAsm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\CodeListItemStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WpfGui\DataFileLoadIssue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\DiscardChanges.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditAddress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditStatusFlags.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\NewProject.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\ProjectLoadIssues.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Res\CommandIcons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Res\Strings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Asm65\Asm65.csproj">
+      <Project>{65a50bd0-ab07-492b-b51c-4ca1b700224d}</Project>
+      <Name>Asm65</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtil\CommonUtil.csproj">
+      <Project>{a2993eac-35d8-4768-8c54-152b4e14d69c}</Project>
+      <Name>CommonUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonWPF\CommonWPF.csproj">
+      <Project>{1299aa2e-606d-4f3e-b3a9-3f9421e44667}</Project>
+      <Name>CommonWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PluginCommon\PluginCommon.csproj">
+      <Project>{70f04543-9e46-4ad3-875a-160fd198c0ff}</Project>
+      <Name>PluginCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\SourceGenIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Res\AboutImage.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

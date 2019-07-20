@@ -1,0 +1,633 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Window x:Class="SourceGen.WpfGui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceGen.WpfGui"
+        mc:Ignorable="d"
+        Title="6502bench SourceGen"
+        Icon="/SourceGen;component/Res/SourceGenIcon.ico"
+        Width="1000" Height="700" MinWidth="800" MinHeight="500"
+        SourceInitialized="Window_SourceInitialized"
+        Loaded="Window_Loaded"
+        LocationChanged="Window_LocationChanged"
+        SizeChanged="Window_SizeChanged"
+        MouseDown="Window_MouseDown"
+        Closing="Window_Closing">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <!-- style and control templates for main code ListView items -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CodeListItemStyle.xaml"/>
+                <ResourceDictionary Source="../Res/CommandIcons.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!-- don't center the ListView(GridView) column headers
+            https://stackoverflow.com/q/44119146/294248
+            (style without ID applies to all instances of that type)
+            -->
+            <Style TargetType="{x:Type GridViewColumnHeader}">
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+
+            <RoutedUICommand x:Key="AboutCmd" Text="About..."/>
+            <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Shift+A</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
+            <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Del</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
+            <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
+            <RoutedUICommand x:Key="EditCommentCmd" Text="Edit Comment...">
+                <RoutedUICommand.InputGestures>
+                    <!-- this works, but appears as "Ctrl+Oem1", so override tip in menu items -->
+                    <KeyGesture>Ctrl+Semicolon</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditHeaderCommentCmd" Text="Edit Header Comment..."/>
+            <RoutedUICommand x:Key="EditOperandCmd" Text="Edit Operand...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+O</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditLabelCmd" Text="Edit Label...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+L</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditLongCommentCmd" Text="Edit Long Comment...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+M</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditNoteCmd" Text="Edit Note...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+N</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="EditProjectSymbolCmd" Text="Edit Project Symbol..."/>
+            <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
+            <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
+            <RoutedUICommand x:Key="FindNextCmd" Text="Find Next">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>F3</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="FormatAsWordCmd" Text="Format As Word">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+W</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="FormatSplitAddressCmd" Text="Format Split-Address Table..."/>
+            <RoutedUICommand x:Key="GotoCmd" Text="Go To...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+G</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
+            <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
+            <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
+            <RoutedUICommand x:Key="NavigateBackwardCmd" Text="Nav Backward">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Alt+Left</KeyGesture>
+                    <KeyGesture>Ctrl+Minus</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="NavigateForwardCmd" Text="Nav Forward">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Alt+Right</KeyGesture>
+                    <KeyGesture>Ctrl+Shift+Minus</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="NewProjectCmd" Text="New"/>
+            <RoutedUICommand x:Key="OpenCmd" Text="Open"/>
+            <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
+            <RoutedUICommand x:Key="RecentProjectCmd"/>
+            <RoutedUICommand x:Key="RedoCmd" Text="Redo">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Y</KeyGesture>
+                    <KeyGesture>Ctrl+Shift+Z</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="SelectAllCmd" Text="Select All">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+A</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="Hex Dump..."/>
+            <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
+            <RoutedUICommand x:Key="ToggleAsciiChartCmd" Text="ASCII Chart"/>
+            <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+D</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="ToggleSingleByteFormatCmd" Text="Toggle Single-Byte Format">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+B</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="UndoCmd" Text="Undo">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Z</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+
+            <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
+            <RoutedUICommand x:Key="Debug_ShowAnalysisTimersCmd" Text="Show Analysis Timers"/>
+            <RoutedUICommand x:Key="Debug_ShowAnalyzerOutputCmd" Text="Show Analyzer Output"/>
+            <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
+            <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
+            <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
+            <RoutedUICommand x:Key="Debug_ToggleKeepAliveHackCmd" Text="Use Keep-Alive Hack"/>
+
+            <CollectionViewSource x:Key="SymbolTableSource" Source="{Binding SymbolsList}"
+                                  Filter="SymbolsList_Filter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource AboutCmd}"
+                        Executed="AboutCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditAppSettingsCmd}"
+                        Executed="EditAppSettingsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource AssembleCmd}"
+                        CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
+        <CommandBinding Command="{StaticResource CloseCmd}"
+                        CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="Copy"
+                        CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
+        <CommandBinding Command="{StaticResource DeleteMlcCmd}"
+                        CanExecute="CanDeleteMlc" Executed="DeleteMlcCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_SourceGenerationTestsCmd}"
+                        Executed="Debug_SourceGenerationTestsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditAddressCmd}"
+                        CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditCommentCmd}"
+                        CanExecute="CanEditComment" Executed="EditCommentCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditHeaderCommentCmd}"
+                        CanExecute="IsProjectOpen" Executed="EditHeaderCommentCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditLabelCmd}"
+                        CanExecute="CanEditLabel" Executed="EditLabelCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditLongCommentCmd}"
+                        CanExecute="CanEditLongComment" Executed="EditLongCommentCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditNoteCmd}"
+                        CanExecute="CanEditNote" Executed="EditNoteCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditOperandCmd}"
+                        CanExecute="CanEditOperand" Executed="EditOperandCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditProjectSymbolCmd}"
+                        CanExecute="CanEditProjectSymbol" Executed="EditProjectSymbolCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
+                        CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ExitCmd}"
+                        Executed="ExitCmd_Executed"/>
+        <CommandBinding Command="Find"
+                        CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FindNextCmd}"
+                        CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FormatAsWordCmd}"
+                        CanExecute="CanFormatAsWord" Executed="FormatAsWordCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FormatSplitAddressCmd}"
+                        CanExecute="CanFormatSplitAddress" Executed="FormatSplitAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource GotoCmd}"
+                        CanExecute="IsProjectOpen" Executed="GotoCmd_Executed"/>
+        <CommandBinding Command="Help"
+                        Executed="HelpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
+                        CanExecute="CanHintAsCodeEntryPoint" Executed="HintAsCodeEntryPointCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsDataStartCmd}"
+                        CanExecute="CanHintAsDataStart" Executed="HintAsDataStartCmd_Executed"/>
+        <CommandBinding Command="{StaticResource HintAsInlineDataCmd}"
+                        CanExecute="CanHintAsInlineData" Executed="HintAsInlineDataCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NavigateBackwardCmd}"
+                        CanExecute="CanNavigateBackward" Executed="NavigateBackwardCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NavigateForwardCmd}"
+                        CanExecute="CanNavigateForward" Executed="NavigateForwardCmd_Executed"/>
+        <CommandBinding Command="{StaticResource NewProjectCmd}"
+                        Executed="NewProjectCmd_Executed"/>
+        <CommandBinding Command="{StaticResource OpenCmd}"
+                        Executed="OpenCmd_Executed"/>
+        <CommandBinding Command="Properties"
+                        CanExecute="IsProjectOpen" Executed="EditProjectPropertiesCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RemoveHintsCmd}"
+                        CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RecentProjectCmd}" x:Name="recentProjectCmd"
+                        Executed="RecentProjectCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RedoCmd}"
+                        CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
+        <CommandBinding Command="Save"
+                        CanExecute="IsProjectOpen" Executed="SaveCmd_Executed"/>
+        <CommandBinding Command="SaveAs"
+                        CanExecute="IsProjectOpen" Executed="SaveAsCmd_Executed"/>
+        <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
+        <CommandBinding Command="{StaticResource SelectAllCmd}"
+                        CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ShowFileHexDumpCmd}"
+                        Executed="ShowFileHexDumpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ShowHexDumpCmd}"
+                        CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleAsciiChartCmd}"
+                        Executed="ToggleAsciiChartCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
+                        CanExecute="IsProjectOpen" Executed="ToggleDataScanCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleSingleByteFormatCmd}"
+                        CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
+        <CommandBinding Command="{StaticResource UndoCmd}"
+                        CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
+
+        <CommandBinding Command="Refresh"
+                        CanExecute="IsProjectOpen" Executed="Debug_RefreshCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ExtensionScriptInfoCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ExtensionScriptInfoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowAnalysisTimersCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowAnalysisTimersCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowAnalyzerOutputCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowAnalyzerOutputCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowUndoRedoHistoryCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ToggleCommentRulersCmd}"
+                        Executed="Debug_ToggleCommentRulersCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ToggleKeepAliveHackCmd}"
+                        Executed="Debug_ToggleKeepAliveHackCmd_Executed"/>
+    </Window.CommandBindings>
+    
+    <DockPanel>
+        <Menu Name="appMenu" DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="{StaticResource NewProjectCmd}"/>
+                <MenuItem Command="{StaticResource OpenCmd}"/>
+                <MenuItem Command="Save"/>
+                <MenuItem Command="SaveAs"/>
+                <MenuItem Command="{StaticResource CloseCmd}"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource AssembleCmd}"/>
+                <MenuItem Command="Print"/>
+                <Separator/>
+                <MenuItem Name="recentProjectsMenu" Header="Recent Projects" SubmenuOpened="RecentProjectsMenu_SubmenuOpened">
+                    <MenuItem Header="(none)"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Command="{StaticResource ExitCmd}" InputGestureText="Alt+F4"/>
+            </MenuItem>
+            <MenuItem Header="_Edit" SubmenuOpened="EditMenu_SubmenuOpened">
+                <MenuItem Command="{StaticResource UndoCmd}"/>
+                <MenuItem Command="{StaticResource RedoCmd}"/>
+                <Separator/>
+                <MenuItem Command="Copy"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource SelectAllCmd}"/>
+                <MenuItem Command="Find"/>
+                <MenuItem Command="{StaticResource FindNextCmd}"/>
+                <MenuItem Command="{StaticResource GotoCmd}"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>
+                <MenuItem Command="Properties" Header="Project Properties..."/>
+                <!-- IsChecked is set whenever the menu is opened -->
+                <MenuItem Name="toggleDataScanMenuItem"
+                          Command="{StaticResource ToggleDataScanCmd}" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource EditAppSettingsCmd}"/>
+            </MenuItem>
+            <MenuItem Name="actionsMenu" Header="_Actions">
+                <MenuItem Command="{StaticResource EditAddressCmd}"/>
+                <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
+                <MenuItem Command="{StaticResource EditLabelCmd}"/>
+                <MenuItem Command="{StaticResource EditOperandCmd}"/>
+                <MenuItem Command="{StaticResource EditCommentCmd}" InputGestureText="Ctrl+;"/>
+                <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
+                <MenuItem Command="{StaticResource EditNoteCmd}"/>
+                <MenuItem Command="{StaticResource EditProjectSymbolCmd}"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource HintAsCodeEntryPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>
+                <MenuItem Command="{StaticResource HintAsDataStartCmd}" InputGestureText="Ctrl+H, Ctrl+D"/>
+                <MenuItem Command="{StaticResource HintAsInlineDataCmd}" InputGestureText="Ctrl+H, Ctrl+I"/>
+                <MenuItem Command="{StaticResource RemoveHintsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource FormatSplitAddressCmd}"/>
+                <MenuItem Command="{StaticResource ToggleSingleByteFormatCmd}"/>
+                <MenuItem Command="{StaticResource FormatAsWordCmd}"/>
+                <MenuItem Command="{StaticResource DeleteMlcCmd}"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource ShowHexDumpCmd}"/>
+            </MenuItem>
+            <MenuItem Header="_Tools" SubmenuOpened="ToolsMenu_SubmenuOpened">
+                <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
+                <MenuItem Name="toggleAsciiChartMenuItem"
+                          Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Command="Help"/>
+                <MenuItem Command="{StaticResource AboutCmd}"/>
+            </MenuItem>
+            <MenuItem Header="_DEBUG" Name="DebugMenu" SubmenuOpened="DebugMenu_SubmenuOpened"
+                      Visibility="{Binding ShowDebugMenu, Converter={StaticResource BoolToVis}}">
+                <MenuItem Command="Refresh" Header="Re-analyze"/>
+                <MenuItem Name ="debugUndoRedoHistoryMenuItem"
+                          Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugAnalyzerOutputMenuItem"
+                          Command="{StaticResource Debug_ShowAnalyzerOutputCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugAnalysisTimersMenuItem"
+                          Command="{StaticResource Debug_ShowAnalysisTimersCmd}" IsCheckable="True"/>
+                <MenuItem Command="{StaticResource Debug_ExtensionScriptInfoCmd}"/>
+                <Separator/>
+                <MenuItem Name="debugCommentRulersMenuItem"
+                          Command="{StaticResource Debug_ToggleCommentRulersCmd}" IsCheckable="True"/>
+                <MenuItem Name="debugKeepAliveHackMenuItem"
+                          Command="{StaticResource Debug_ToggleKeepAliveHackCmd}" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource Debug_SourceGenerationTestsCmd}"/>
+            </MenuItem>
+        </Menu>
+
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
+                <Button Command="{StaticResource NavigateBackwardCmd}"
+                        ToolTip="Navigate backward (Alt+Left, Ctrl+Minus, or back button on mouse)">
+                    <ContentControl Template="{StaticResource icon_StepBackwards}"/>
+                </Button>
+                <Button Command="{StaticResource NavigateForwardCmd}"
+                        ToolTip="Navigate forward (Alt+Right or Ctrl+Shift+Minus)">
+                    <ContentControl Template="{StaticResource icon_StepForward}"/>
+                </Button>
+                <Separator/>
+                <Button Command="{StaticResource NewProjectCmd}" ToolTip="Create new project">
+                    <ContentControl Template="{StaticResource icon_NewFile}"/>
+                </Button>
+                <Button Command="{StaticResource OpenCmd}" ToolTip="Open project">
+                    <ContentControl Template="{StaticResource icon_OpenFile}"/>
+                </Button>
+                <Button Command="Save" ToolTip="Save project (Ctrl+S)">
+                    <ContentControl Template="{StaticResource icon_SaveFile}"/>
+                </Button>
+                <Separator/>
+                <Button Command="Copy" ToolTip="Copy to clipboard (Ctrl+C)">
+                    <ContentControl Template="{StaticResource icon_CopyToClipboard}"/>
+                </Button>
+                <Separator/>
+                <Button Command="Help" ToolTip="Help - open manual in browser (F1)">
+                    <ContentControl Template="{StaticResource icon_F1Help}"/>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+
+        <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
+            <TextBlock Text="{Binding StatusBarText, FallbackValue=Ready}"/>
+        </StatusBar>
+
+        <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes
+        size when the window is resized.  This needs to be the last thing defined in the
+        DockPanel, so that LastChildFill will expand this to fill all available space. -->
+        <Grid Name="triptychGrid" DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="256" MinWidth="100"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="150"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="256" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+            
+
+            <GridSplitter Name="leftSplitter" Width="4" Grid.Column="1" HorizontalAlignment="Left"/>
+            <GridSplitter Name="rightSplitter" Width="4" Grid.Column="3" HorizontalAlignment="Center"/>
+
+            <Grid Name="leftPanel" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="100"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" MinHeight="100"/>
+                </Grid.RowDefinitions>
+
+                <GroupBox Grid.Row="0" Header="References">
+                    <DataGrid Name="referencesGrid" IsReadOnly="True"
+                              ItemsSource="{Binding ReferencesList}"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="#FF7F7F7F"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              SelectionMode="Single"
+                              MouseDoubleClick="ReferencesList_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
+                            <DataGridTextColumn Header="Addr" Width="53" Binding="{Binding Addr}"/>
+                            <DataGridTextColumn Header="Type" Width="119" Binding="{Binding Type}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <GroupBox Grid.Row="2" Header="Notes">
+                    <DataGrid Name="notesGrid" IsReadOnly="True"
+                              ItemsSource="{Binding NotesList}"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="#FF7F7F7F"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              SelectionMode="Single"
+                              MouseDoubleClick="NotesList_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
+                            <DataGridTextColumn Header="Note" Width="400" Binding="{Binding Note}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <!-- The default highlight uses dark blue background with
+                                        white text, but our highlight colors are meant to work
+                                        with black text.  So override Foreground as well. -->
+                                        <Setter Property="Background" Value="{Binding BackBrush}"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <GridSplitter Height="4" Grid.Row="1"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid Name="launchPanel" Grid.Column="2"
+                  Visibility="{Binding Path=LaunchPanelVisibility}" d:IsHidden="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Image Source="/SourceGen;component/Res/Logo.png" Height="100"/>
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" VerticalAlignment="Center"
+                                   Text="6502bench SourceGen" FontSize="36"/>
+                        <TextBlock Grid.Row="1" VerticalAlignment="Center"
+                                   Text="{Binding ProgramVersionString, StringFormat={}Version {0},
+                                       RelativeSource={RelativeSource FindAncestor, AncestorType=Window},
+                                       FallbackValue=Version X.Y.Z-alpha1}"
+                                   FontSize="24"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Left">
+                    <Button Content="Start new project" Width="240" Height="50" Margin="10,30,10,10"
+                            Command="{StaticResource NewProjectCmd}"/>
+                    <Button Content="Open existing project" Width="240" Height="50" Margin="10"
+                            Command="{StaticResource OpenCmd}"/>
+                    <Button Name="recentProjectButton1" Width="240" Height="50" Margin="10"
+                            Command="{DynamicResource RecentProjectCmd}" CommandParameter="0">
+                        <Button.Content>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center">Recent project #1</TextBlock>
+                                <TextBlock Name="recentProjectName1" HorizontalAlignment="Center">???</TextBlock>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    <Button Name="recentProjectButton2" Width="240" Height="50" Margin="10"
+                            Command="{DynamicResource RecentProjectCmd}" CommandParameter="1">
+                        <Button.Content>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center">Recent project #2</TextBlock>
+                                <TextBlock Name="recentProjectName2" HorizontalAlignment="Center">???</TextBlock>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <ListView Name="codeListView" Grid.Column="2"
+                      FontFamily="{StaticResource GeneralMonoFont}"
+                      Visibility="{Binding Path=CodeListVisibility}"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      ItemContainerStyle="{StaticResource codeListItemStyle}"
+                      SelectionChanged="CodeListView_SelectionChanged"
+                      MouseDoubleClick="CodeListView_MouseDoubleClick">
+                <ListView.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                        <!-- <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" /> -->
+                    </Style>
+                </ListView.Resources>
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridViewColumn Header="Offset" Width="60"
+                                        DisplayMemberBinding="{Binding Offset}"/>
+                        <GridViewColumn Header="Addr" Width="60"
+                                        CellTemplate="{StaticResource addrHighlightTemplate}"/>
+                        <GridViewColumn Header="Bytes" Width="93"
+                                        DisplayMemberBinding="{Binding Bytes}"/>
+                        <GridViewColumn Header="Flags" Width="80"
+                                        DisplayMemberBinding="{Binding Flags}"/>
+                        <GridViewColumn Header="Attr" Width="54"
+                                        DisplayMemberBinding="{Binding Attr}"/>
+                        <GridViewColumn Header="Label" Width="73"
+                                        CellTemplate="{StaticResource labelHighlightTemplate}"/>
+                        <GridViewColumn Header="Opcode" Width="60"
+                                        DisplayMemberBinding="{Binding Opcode}"/>
+                        <GridViewColumn Header="Operand" Width="100"
+                                        DisplayMemberBinding="{Binding Operand}"/>
+                        <GridViewColumn Header="Comment" Width="344"
+                                        DisplayMemberBinding="{Binding Comment}"/>
+                    </GridView>
+                </ListView.View>
+
+                <ListView.ContextMenu>
+                    <!-- this is populated as a clone of the Actions menu during init -->
+                    <ContextMenu/>
+                </ListView.ContextMenu>
+
+            </ListView>
+
+            <Grid Name="rightPanel" Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="100"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" MinHeight="100"/>
+                </Grid.RowDefinitions>
+
+                <GroupBox Grid.Row="0" Header="Symbols">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <WrapPanel Grid.Row="0">
+                            <ToggleButton Content="User" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterUserLabels}"/>
+                            <ToggleButton Content="Proj" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterProjectSymbols}"/>
+                            <ToggleButton Content="Plat" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterPlatformSymbols}"/>
+                            <ToggleButton Content="Auto" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterAutoLabels}"/>
+                            <ToggleButton Content="Addr" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterAddresses}"/>
+                            <ToggleButton Content="Cnst" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterConstants}"/>
+                        </WrapPanel>
+
+                        <DataGrid Grid.Row="1" Name="symbolsGrid"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding Source={StaticResource SymbolTableSource}}"
+                                  FontFamily="{StaticResource GeneralMonoFont}"
+                                  SnapsToDevicePixels="True"
+                                  GridLinesVisibility="Vertical"
+                                  VerticalGridLinesBrush="#FF7F7F7F"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  CanUserReorderColumns="False"
+                                  SelectionMode="Single"
+                                  Sorting="SymbolsList_Sorting"
+                                  MouseDoubleClick="SymbolsList_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Type" Width="36" Binding="{Binding Type}"/>
+                                <DataGridTextColumn Header="Value" Width="66" Binding="{Binding Value}"/>
+                                <DataGridTextColumn Header="Name" Width="120" Binding="{Binding Name}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Grid.Row="2" Header="Info">
+                    <TextBox Text="{Binding InfoPanelContents}"
+                             FontFamily="{StaticResource GeneralMonoFont}"
+                             TextWrapping="Wrap"/>
+                </GroupBox>
+                
+                <GridSplitter Height="4" Grid.Row="1"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>
