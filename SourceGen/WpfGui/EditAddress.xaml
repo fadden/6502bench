@@ -24,7 +24,7 @@ limitations under the License.
         Title="Set Address"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        ContentRendered="Window_ContentRendered">
 
     <StackPanel Margin="8">
         <TextBlock Text="Enter 16-bit or 24-bit address in hexadecimal, e.g. $1000 or 00/be00."/>

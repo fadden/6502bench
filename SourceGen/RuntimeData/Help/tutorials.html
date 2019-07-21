@@ -114,11 +114,12 @@ operand, comment).</p>
 Enter "100b" to set the selection to $100B.</p>
 
 <p>Near the top-left of the SourceGen window is a set of toolbar icons.
-Click the left-arrow, and watch the selection moves.  Click it again.  Then
-click the right-arrow a couple of times.  Whenever you jump around in the
-file by using the Go To feature, or by double-clicking on opcodes or
-lines in side-windows, the locations are added to a navigation history.  The
-arrows let you move forward and backward through it.</p>
+Click the curly left-pointing arrow, and watch the selection move.  Click
+it again.  Then click the curly right-arrow a couple of times.  Whenever
+you jump around in the file by using the Go To feature, or by double-clicking
+on opcodes or lines in the side windows, the locations are added to a
+navigation history.  The arrows let you move forward and backward
+through it.</p>
 
 
 <h3>Editing</h3>
@@ -172,8 +173,8 @@ to $2000, then jumping to $2000.  It appears to be relocating the next
 part of the code before
 executing it.  We want to let the disassembler know what's going on, so
 select the line at address $1017 and then
-Edit &gt; Edit Address.  (Or double-click the "1017" in the addr column.)
-In the Edit Address dialog, type "2000", and hit Enter.)</p>
+Edit &gt; Set Address.  (Or double-click the "1017" in the Addr column.)
+In the Set Address dialog, type "2000", and hit Enter.)</p>
 
 <p>Note the way the code list has changed.  When you changed the address,
 the "JMP $2000" at L1014 found a home inside the bounds of the file, so
@@ -190,8 +191,8 @@ so you'll be forgiven if you reduce the offset column width to zero.)</p>
 <p>On the line at address $2000, select Actions &gt; Edit Label, or
 double-click on the label "L2000".  Change the label to "MAIN", and hit
 Enter.  The label changes on that line, and on the two lines that refer
-to address $2000.  (If you're not sure what refers to line $2000, select
-it and check the References window.)</p>
+to address $2000.  (If you're not sure what refers to address $2000, select
+that line and check the References window.)</p>
 <p>On that same line, select Actions &gt; Edit Comment.  Type a short
 comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
@@ -219,7 +220,8 @@ carefully you would have noticed that the label at $2009 ("L2009") has
 disappeared.  This happened because the code at $2005 used to have a
 <i>numeric</i> reference to $2009, and SourceGen automatically created a
 label.  However, you changed the code at $2005 to have a <i>symbolic</i>
-reference to a symbol called "IS_OK", so the auto-label was no longer
+reference to a symbol called "IS_OK", and there were no other numeric
+references to $2009, so the auto-label was no longer
 needed.  Because IS_OK doesn't exist, the operand at $2005 is just formatted
 as a hexadecimal value.</p>
 <p>Let's fix this.  Select the line at address $2009, then
@@ -300,7 +302,7 @@ separate ".STR" statements.</p>
 <h3>Generating Assembly Code</h3>
 
 <p>You can generate assembly source code from the disassembled data.
-Select File &gt; Assembler (or hit Ctrl+Shift+A) to open the generation
+Select File &gt; Assembler (or hit Ctrl+Shift+A) to open the source generation
 and assembly dialog.</p>
 <p>Pick your favorite assembler from the drop list at the top right,
 then click "Generate".  An assembly source file will be generated in the
@@ -368,7 +370,8 @@ the data item (double-click on "$b4"), click "Single bytes", then type "FUNC"
 (note the text field gets focus immediately, and the radio button
 automatically switches to "symbolic reference" when you start typing).
 Click OK.  The operand at $1d97 should now say <code>&lt;FUNC-1</code>.
-Repeat the process at $1da6, this time clicking the "High" part button,
+Repeat the process at $1da6, this time clicking the "High" part radio button
+below the symbol entry text box,
 to make the operand there say <code>&gt;FUNC</code>.  (If it says
 <code>&lt;FUNC-152</code>, you forgot to select the High part.)</p>
 
@@ -386,11 +389,11 @@ that location, so a label will be generated automatically.</p>
 <p>Down near the bottom, check the "add code entry hint if needed" checkbox.
 Because we saw the table contents being pushed onto the stack for RTS,
 we know that they're all code entry points.</p>
-<p>Click OK.  The table of address bytes should now all be references to
-symbols -- 15 low parts followed by 15 high parts.  If you scroll down,
-you should see nothing but instructions until you get to the last dozen
-bytes at the end of the file.  (If this isn't the case, use Edit &gt; Undo,
-then work through the steps again.)</p>
+<p>Click OK.  The table of address bytes at $1d97 should now all be
+references to symbols -- 15 low parts followed by 15 high parts.  If you
+scroll down, you should see nothing but instructions until you get to the
+last dozen bytes at the end of the file.  (If this isn't the case, use
+Edit &gt; Undo, then work through the steps again.)</p>
 <p>The formatter did the same steps you went through earlier -- set a
 label, apply the label to the low and high bytes in the table, add a
 code entry point hint -- but did several of them at once.</p>
@@ -439,10 +442,9 @@ the words "last string").</p>
 option is not available.  This is because we didn't include the null byte
 on the last string.  To be recognized as one of the "special" string types,
 every selected string must match the expected pattern.</p>
-<p>Cancel out of the dialog.  Hold the control key down, and double-click
-on the operand on line $203c (<code>.DD1 $00</code>).  Control-clicking
-adds the line to the selection, and double-clicking the operand reopens
-the dialog.  You should see "Null-terminated strings (4)" as an available
+<p>Cancel out of the dialog.  Hold the shift key down, and double-click
+on the operand on line $203c (<code>$00</code>).
+You should see "Null-terminated strings (4)" as an available
 option now.  Click on that, then click OK.  The strings are now shown
 as .ZSTR operands.</p>
 
@@ -455,9 +457,9 @@ a project file for Tutorial2.</p>
 values into direct page address $02/03.  This appears to be setting up a
 pointer to $2063, which is a data area inside the file.  So let's make it
 official.</p>
-<p>Select line $2063, and use Actions &gt; Edit Label to give it the
-label "XDATA".  Now edit the operand on line $203d, and set it to the
-symbol "XDATA", with the part "low".  Edit the operand on line $2043,
+<p>Select the line at address $2063, and use Actions &gt; Edit Label to
+give it the label "XDATA".  Now edit the operand on line $203d, and set it
+to the symbol "XDATA", with the part "low".  Edit the operand on line $2043,
 and set it to "XDATA" with the part "high".  (Note the symbol text box
 gets focus immediately, so you can start typing the symbol name as soon
 as the dialog opens; you don't need to click around first.)  If all
@@ -485,7 +487,8 @@ This confirms our idea that XDATA holds 16-bit addresses, so let's
 format it.  Select lines $2063 to $2066, and Actions &gt; Edit Operand.
 It should say "8 bytes selected" at the top.  Select "16-bit words,
 little-endian", and then from the Display As box, select "Address".
-Click OK.  If you scroll up, you'll see that your .ZSTR strings now have
+Click OK.  XDATA should now be four <code>.dd2</code> 16-bit addresses.
+If you scroll up, you'll see that the .ZSTR strings near the top now have
 labels that match the labels in XDATA.</p>
 <p>Now that we know what XDATA holds, let's rename it.  Change the label
 to STRADDR.  The symbol parts in the operands at $203d and $2041 update
@@ -511,11 +514,12 @@ you add an end-of-line comment, it appears after the cycle count.</p>
 <p>The rest of the code isn't really intended to do anything useful.  It
 just exists to illustrate some odd situations.</p>
 <p>Look at the code starting at $206b.  It ends with a BRK at $2074, which
-as noted earlier is a bad sign.  If you look up two lines, you'll see that
-it's loading the accumulator with zero, then doing a BNE, which should never
-be taken (note the cycle count for the BNE is 2).  The trick is in the
-two lines before that, which use self-modifying code to change the LDA
-immediate operand from $00 to $ff.  The BNE is actually a branch-always.</p>
+as noted earlier is a bad sign.  If you look two lines above the BRK,
+you'll see that it's loading the accumulator with zero, then doing a BNE,
+which should never be taken (note the cycle count for the BNE is 2).  The
+trick is in the two lines before that, which use self-modifying code to
+change the LDA immediate operand from $00 to $ff.  The BNE is actually
+a branch-always.</p>
 <p>We can fix this by correcting the status flags.  Select line $2072,
 and then Actions &gt; Override Status Flags.  This lets us specify what
 the flags should be before the instruction is executed.  For each flag,

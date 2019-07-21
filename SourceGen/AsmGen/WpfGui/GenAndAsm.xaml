@@ -91,7 +91,7 @@ limitations under the License.
             <DockPanel DockPanel.Dock="Top" LastChildFill="False">
                 <Button DockPanel.Dock="Left" Name="runAssemblerButton" Width="120"
                         FontWeight="Bold" Content="Run Assembler" Click="RunAssemblerButton_Click"/>
-                <TextBlock Name="asmNotConfiguredText" DockPanel.Dock="Left" Margin="16,0,0,0"
+                <TextBlock Name="asmNotConfiguredText" DockPanel.Dock="Left" Margin="16,2,0,0"
                            Foreground="Red">Assembler not configured</TextBlock>
             </DockPanel>
 

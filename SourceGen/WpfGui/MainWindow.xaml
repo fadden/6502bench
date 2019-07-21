@@ -180,8 +180,6 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
-        <CommandBinding Command="Copy"
-                        CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
         <CommandBinding Command="{StaticResource DeleteMlcCmd}"
                         CanExecute="CanDeleteMlc" Executed="DeleteMlcCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_SourceGenerationTestsCmd}"
@@ -259,6 +257,10 @@ limitations under the License.
                         CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
+
+        <!-- must come after code hint Ctrl+H Ctrl+C -->
+        <CommandBinding Command="Copy"
+                        CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
 
         <CommandBinding Command="Refresh"
                         CanExecute="IsProjectOpen" Executed="Debug_RefreshCmd_Executed"/>
