@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace CommonUtil {
@@ -26,6 +28,40 @@ namespace CommonUtil {
             var namespaces = typeList.Select(t => t.Namespace).Distinct();
             foreach (string ns in namespaces) {
                 Console.WriteLine("  " + ns);
+            }
+        }
+
+        /// <summary>
+        /// Writes an unhandled exception trace to a crash file.
+        /// </summary>
+        /// <remarks>
+        /// Usage:
+        ///   AppDomain.CurrentDomain.UnhandledException +=
+        ///       new UnhandledExceptionEventHandler(CommonUtil.Misc.CrashReporter);
+        ///
+        /// Thanks: https://stackoverflow.com/a/21308327/294248
+        /// </remarks>
+        public static void CrashReporter(object sender, UnhandledExceptionEventArgs e) {
+            const string CRASH_PATH = @"CrashLog.txt";
+
+            Exception ex = (Exception)e.ExceptionObject;
+            Debug.WriteLine("CRASHING (term=" + e.IsTerminating + "): " + ex);
+
+            try {
+                using (StreamWriter writer = new StreamWriter(CRASH_PATH, true)) {
+                    writer.WriteLine("*** " + DateTime.Now.ToLocalTime() + " ***");
+                    while (ex != null) {
+                        writer.WriteLine(ex.GetType().FullName + ": " + ex.Message);
+                        writer.WriteLine("Trace:");
+                        writer.WriteLine(ex.StackTrace);
+                        writer.WriteLine(string.Empty);
+
+                        ex = ex.InnerException;
+                    }
+                }
+            } catch {
+                // damn it
+                Debug.WriteLine("Crashed while crashing");
             }
         }
     }

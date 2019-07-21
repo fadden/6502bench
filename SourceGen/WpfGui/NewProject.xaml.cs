@@ -57,8 +57,10 @@ namespace SourceGen.WpfGui {
                 "[nothing!selected]");
 
             TreeViewItem selItem = PopulateNodes(prevSelSystem);
-            selItem.IsSelected = true;
-            selItem.BringIntoView();
+            if (selItem != null) {
+                selItem.IsSelected = true;
+                selItem.BringIntoView();
+            }
 
             targetSystemTree.Focus();
 
@@ -70,7 +72,8 @@ namespace SourceGen.WpfGui {
         /// </summary>
         /// <param name="tv">TreeView to add items to</param>
         /// <param name="prevSelSystem">Name of previously-selected system.</param>
-        /// <returns>The node that matches prevSelSystem, or null if not found.</returns>
+        /// <returns>The node that matches prevSelSystem, or the first leaf node if no node
+        ///   matches, or null if no leaf nodes are found.</returns>
         private TreeViewItem PopulateNodes(string prevSelSystem) {
             TreeViewItem selItem = null;
 
@@ -105,7 +108,7 @@ namespace SourceGen.WpfGui {
                 newItem.Tag = sd;
                 groupItem.Items.Add(newItem);
 
-                if (isValid && sd.Name == prevSelSystem) {
+                if ((isValid && sd.Name == prevSelSystem) || selItem == null) {
                     selItem = newItem;
                 }
             }

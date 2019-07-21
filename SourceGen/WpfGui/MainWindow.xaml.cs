@@ -159,7 +159,11 @@ namespace SourceGen.WpfGui {
 
 
         public MainWindow() {
+            Debug.WriteLine("START at " + DateTime.Now.ToLocalTime());
             InitializeComponent();
+
+            AppDomain.CurrentDomain.UnhandledException +=
+                new UnhandledExceptionEventHandler(CommonUtil.Misc.CrashReporter);
 
             listViewSetSelectedItems = codeListView.GetType().GetMethod("SetSelectedItems",
                 BindingFlags.NonPublic | BindingFlags.Instance);
