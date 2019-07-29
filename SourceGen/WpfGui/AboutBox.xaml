@@ -45,7 +45,7 @@ limitations under the License.
             <TextBlock FontSize="24"
                        Text="{Binding ProgramVersionString, StringFormat={}Version {0},
                            FallbackValue=Version X.Y.Z-alpha1}"/>
-            <TextBlock Text="Copyright 2018 faddenSoft" Margin="0,30,0,0"/>
+            <TextBlock Text="Copyright 2019 faddenSoft" Margin="0,30,0,0"/>
             <TextBlock Text="Created by Andy McFadden"/>
         </StackPanel>
 
