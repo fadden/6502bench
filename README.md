@@ -4,14 +4,11 @@
 
 [6502bench](https://6502bench.com/) is a code development "workbench"
 for 6502, 65C02, and 65802/65816 code.  It currently features one tool,
-the SourceGen disassembler.
+the SourceGen disassembler, and runs on Windows 7 or later.
 
 You can download the source code and build it yourself, or click the
 [Releases tab](https://github.com/fadden/6502bench/releases) for
 pre-built downloads.
-
-**NEEDED:** ROM/OS symbols for various systems, notably Commodore and Atari
-home computers.
 
 
 ## SourceGen ##
@@ -99,20 +96,20 @@ There is currently no installer -- just unzip the archive and run the
 executable.  The data files used by the program are found automatically
 based on the path to the .EXE file.
 
-SourceGen relies on the .NET Framework.  For Windows, you need to have
-Microsoft .NET Framework v4.6.2 or later installed.  Many people will already
-have this installed.  If SourceGen doesn't seem to want to start, download
-the latest version (v4.7.2)
+You need to have Microsoft .NET Framework v4.6.2 or later installed.  Most
+people will already have this.  If SourceGen doesn't seem to want to start,
+download the latest version (currently v4.7.2)
 [directly from Microsoft](https://www.microsoft.com/net/download/dotnet-framework-runtime).
 The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
 the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
 installer was able to get the 4.6.2 installer to work.)
 
-In theory, SourceGen can work with Mono under Linux and Mac OS X.  There
-appear to be many incompatibilities between .NET and Mono, which have to
-be worked around in SourceGen.  Sometimes these are straightforward,
-sometimes they're [a little weird](https://faddensoft.com/sgbug/).  Until
-these issues are handled, running SourceGen under Mono is not recommended.
+SourceGen does not currently run on Linux or Mac OS X.  Versions 1.0 and 1.1
+used the WinForms API, which has been implemented for Mono, but after
+encountering significant bugs that I wasn't able to work around I abandoned
+the idea and switched to WPF.  Besides working better under Windows, WPF
+uses a more modern approach (XAML) that may ease the transition to a modern
+cross-platform GUI like Avalonia.
 
 
 ## Getting Started ##
@@ -133,8 +130,7 @@ display it.
 
 All of the code is written in C# .NET, using the (free to download) Visual
 Studio Community 2017 IDE as the primary development environment.  The user
-interface uses the WinForms API.  Efforts have been made to avoid doing
-anything Windows-specific, in the hope of running it under Mono.
+interface uses the WPF API.
 
 The Solution file is called "WorkBench.sln" rather than "6502bench.sln"
 because some things in Visual Studio got weird when it didn't start with a
