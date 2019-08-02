@@ -201,7 +201,9 @@ namespace MakeDist {
                         }
                         break;
                     case SourceFileSpec.AsmSources:
-                        if (!fileName.ToUpperInvariant().EndsWith(".S")) {
+                        // Need the sources and the ca65 config files.
+                        if (!(fileName.ToUpperInvariant().EndsWith(".S") ||
+                                !fileName.ToUpperInvariant().EndsWith("_cc65.cfg"))) {
                             continue;
                         }
                         break;
@@ -210,7 +212,7 @@ namespace MakeDist {
                         if (matches.Count != 1) {
                             continue;
                         }
-                        // Could probably do this with regex... but why.
+                        // Skip project files. Could probably do this with regex... but why.
                         if (fileName.StartsWith("1") && fileName.EndsWith(".dis65")) {
                             continue;
                         }
