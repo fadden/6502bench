@@ -34,7 +34,7 @@ limitations under the License.
         </TextBlock>
         <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0"
                     Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Name="okButton" Width="70" Content="Continue" IsDefault="True"/>
+            <Button Name="okButton" Width="70" Content="Continue" IsDefault="True" Click="OkButton_Click"/>
             <Button Name="cancelButton" Margin="8,0,0,0" Width="70" Content="Cancel" IsCancel="True"/>
         </StackPanel>
     </DockPanel>

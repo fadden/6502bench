@@ -62,5 +62,9 @@ namespace SourceGen.WpfGui {
                 invalidDiscardLabel.Visibility = Visibility.Hidden;
             }
         }
+
+        private void OkButton_Click(object sender, RoutedEventArgs e) {
+            DialogResult = true;
+        }
     }
 }
