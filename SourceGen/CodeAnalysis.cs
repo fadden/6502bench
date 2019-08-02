@@ -644,6 +644,13 @@ namespace SourceGen {
                     }
                 }
 
+                // On first visit, check for BRK inline call.
+                if (firstVisit) {
+                    if (op == OpDef.OpBRK_StackInt) {
+                        CheckForInlineCall(op, offset, out bool unused);
+                    }
+                }
+
                 if (!doContinue) {
                     mAnattribs[offset].DoesNotContinue = true;
                     break;
@@ -899,14 +906,15 @@ namespace SourceGen {
             noContinue = false;
             for (int i = 0; i < mScriptArray.Length; i++) {
                 IPlugin script = mScriptArray[i];
-                if (op == OpDef.OpJSR_Abs) {
-                    script.CheckJsr(offset, out bool noCont);
+                if (op == OpDef.OpJSR_Abs && script is IPlugin_InlineJsr) {
+                    ((IPlugin_InlineJsr)script).CheckJsr(offset, out bool noCont);
                     noContinue |= noCont;
-                } else if (op == OpDef.OpJSR_AbsLong) {
-                    script.CheckJsl(offset, out bool noCont);
+                } else if (op == OpDef.OpJSR_AbsLong && script is IPlugin_InlineJsl) {
+                    ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
                     noContinue |= noCont;
-                } else {
-                    Debug.Assert(false);
+                } else if (op == OpDef.OpBRK_StackInt && script is IPlugin_InlineBrk) {
+                    ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
+                    noContinue &= noCont;
                 }
             }
         }

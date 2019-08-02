@@ -90,6 +90,7 @@
         "RT:Apple/SOS.sym65"
       ],
       "ExtensionScripts" : [
+        "RT:Apple/SOS.cs"
       ],
       "Parameters" : {
         "load-address":"0x2000"

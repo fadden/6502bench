@@ -29,7 +29,7 @@ parm_block
 */
 
 namespace RuntimeData.Apple {
-    public class ProDOS8 : MarshalByRefObject, IPlugin {
+    public class ProDOS8 : MarshalByRefObject, IPlugin, IPlugin_InlineJsr {
         private const string P8_MLI_TAG = "ProDOS8-MLI-Functions";   // tag used in .sym65 file
         private bool VERBOSE = false;
 
@@ -81,11 +81,6 @@ namespace RuntimeData.Apple {
                     noContinue = true;
                 }
             }
-        }
-
-        public void CheckJsl(int offset, out bool noContinue) {
-            // Not used by ProDOS 8.
-            noContinue = false;
         }
     }
 }

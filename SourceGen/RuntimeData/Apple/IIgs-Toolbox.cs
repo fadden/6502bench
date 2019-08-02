@@ -27,7 +27,7 @@ using PluginCommon;
 */
 
 namespace RuntimeData.Apple {
-    public class IIgsToolbox : MarshalByRefObject, IPlugin {
+    public class IIgsToolbox : MarshalByRefObject, IPlugin, IPlugin_InlineJsl {
         private const string TOOLBOX_FUNC_TAG = "AppleIIgs-Toolbox-Functions";    // tag used in .sym65 file
         private bool VERBOSE = false;
 
@@ -48,11 +48,6 @@ namespace RuntimeData.Apple {
             mAppRef.DebugLog("IIgsToolbox(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
 
             mFunctionList = PlatSym.GenerateValueList(platSyms, TOOLBOX_FUNC_TAG, appRef);
-        }
-
-        public void CheckJsr(int offset, out bool noContinue) {
-            // Not used
-            noContinue = false;
         }
 
         public void CheckJsl(int offset, out bool noContinue) {

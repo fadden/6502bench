@@ -34,7 +34,7 @@ using PluginCommon;
 */
 
 namespace RuntimeData.Apple {
-    public class GSOS : MarshalByRefObject, IPlugin {
+    public class GSOS : MarshalByRefObject, IPlugin, IPlugin_InlineJsl {
         private const string GSOS_FUNC_TAG = "AppleIIgs-GSOS-Functions";  // tag used in .sym65 file
         private bool VERBOSE = false;
 
@@ -56,11 +56,6 @@ namespace RuntimeData.Apple {
             //System.Diagnostics.Debugger.Break();
 
             mFunctionList = PlatSym.GenerateValueList(platSyms, GSOS_FUNC_TAG, appRef);
-        }
-
-        public void CheckJsr(int offset, out bool noContinue) {
-            // Not used by GS/OS
-            noContinue = false;
         }
 
         public void CheckJsl(int offset, out bool noContinue) {

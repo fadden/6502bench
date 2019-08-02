@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using PluginCommon;
 
 namespace RuntimeData.Test2011 {
-    public class Test2011 : MarshalByRefObject, IPlugin {
+    public class Test2011 : MarshalByRefObject, IPlugin, IPlugin_InlineJsr {
         private IApplication mAppRef;
         private byte[] mFileData;
 
@@ -31,10 +31,6 @@ namespace RuntimeData.Test2011 {
                 mAppRef.SetInlineDataFormat(offset + 3, 4, DataType.NumericLE,
                     DataSubType.None, null);
             }
-        }
-
-        public void CheckJsl(int offset, out bool noContinue) {
-            noContinue = false;
         }
     }
 }

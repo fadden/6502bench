@@ -45,24 +45,39 @@ namespace PluginCommon {
         /// <param name="fileData">65xx code and data.</param>
         /// <param name="platSyms">Platform symbols, in no particular order.</param>
         void Prepare(IApplication appRef, byte[] fileData, List<PlatSym> platSyms);
+    }
 
+    public interface IPlugin_InlineJsr {
         /// <summary>
         /// Checks to see if code/data near a JSR instruction should be formatted.
-        /// 
-        /// The file data is guaranteed to hold the JSR (offset + 2).
+        ///
+        /// The file data is guaranteed to hold all bytes of the JSR (offset + 2).
         /// </summary>
         /// <param name="offset">Offset of the JSR instruction.</param>
         /// <param name="noContinue">Set to true if the JSR doesn't actually return.</param>
         void CheckJsr(int offset, out bool noContinue);
+    }
 
+    public interface IPlugin_InlineJsl {
         /// <summary>
         /// Checks to see if code/data near a JSL instruction should be formatted.
-        /// 
-        /// The file data is guaranteed to hold the JSL (offset + 3).
+        ///
+        /// The file data is guaranteed to hold all bytes of the JSL (offset + 3).
         /// </summary>
         /// <param name="offset">Offset of the JSL instruction.</param>
         /// <param name="noContinue">Set to true if the JSL doesn't actually return.</param>
         void CheckJsl(int offset, out bool noContinue);
+    }
+
+    public interface IPlugin_InlineBrk {
+        /// <summary>
+        /// Checks to see if code/data near a BRK instruction should be formatted.
+        ///
+        /// The file data is only guaranteed to hold the BRK opcode byte.
+        /// </summary>
+        /// <param name="offset">Offset of the BRK instruction.</param>
+        /// <param name="noContinue">Set to true if the BRK doesn't actually return.</param>
+        void CheckBrk(int offset, out bool noContinue);
     }
 
     /// <summary>
