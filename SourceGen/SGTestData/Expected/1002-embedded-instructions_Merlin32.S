@@ -19,7 +19,7 @@ L101C    sep   #$30
          lda   $00
          beq   L1025
          lda   #$00
-         dfb   $00
+         brk
 
 L1025    stal  $012345
          rts

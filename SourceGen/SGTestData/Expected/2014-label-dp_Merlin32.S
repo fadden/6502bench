@@ -13,7 +13,9 @@
          nop
          nop
          nop
-         brk   $80
+         brk
+
+         dfb   $80
 
 L101F    dfb   $01,$80
          cop   $80

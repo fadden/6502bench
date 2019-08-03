@@ -543,7 +543,7 @@ namespace Asm65 {
                 case AddressMode.DP:
                 case AddressMode.PCRel:
                 case AddressMode.PCRelLong:         // BRL
-                case AddressMode.StackInt:          // BRK/COP
+                case AddressMode.StackInt:          // COP
                 case AddressMode.StackPCRelLong:    // PER
                 case AddressMode.WDM:
                     fmt = wdisStr + "{0}";

@@ -16,7 +16,9 @@
          nop
          nop
          nop
-         .byte   $00,$ff
+         brk
+
+         .byte   $ff
 
 L101F:   ora     ($ff,x)
          cop     $ff

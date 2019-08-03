@@ -12,7 +12,9 @@
          nop
          nop
          nop
-         brk   $ff
+         brk
+
+         dfb   $ff
 
 L101F    ora   ($ff,x)
          cop   $ff

@@ -18,7 +18,9 @@
          nop
          nop
          nop
-         brk   $00
+         brk
+
+         dfb   $00
 
 L1035    ora   ($00,x)
          dfb   $02

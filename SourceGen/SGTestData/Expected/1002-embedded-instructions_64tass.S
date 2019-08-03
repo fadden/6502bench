@@ -22,7 +22,7 @@ L101C   sep     #$30
         lda     $00
         beq     L1025
         lda     #$00
-        .byte   $00
+        brk
 
 L1025   sta     $012345
         rts

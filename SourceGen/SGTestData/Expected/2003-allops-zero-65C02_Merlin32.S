@@ -7,7 +7,9 @@
          nop
          nop
          nop
-         brk   $00
+         brk
+
+         dfb   $00
 
 L1014    ora   ($00,x)
          dfb   $02,$00

@@ -276,8 +276,7 @@ namespace SourceGen.AsmGen {
                     return null;
                 }
             }
-            if (op == OpDef.OpBRK_StackInt || op == OpDef.OpCOP_StackInt ||
-                    op == OpDef.OpWDM_WDM) {
+            if (op == OpDef.OpCOP_StackInt || op == OpDef.OpWDM_WDM) {
                 // 64tass doesn't like these to have an operand.  Output as hex.
                 return null;
             }

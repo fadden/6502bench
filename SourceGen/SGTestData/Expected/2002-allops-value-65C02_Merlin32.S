@@ -7,7 +7,9 @@
          nop
          nop
          nop
-         brk   $ff
+         brk
+
+         dfb   $ff
 
 L1014    ora   ($ff,x)
          dfb   $02,$ff

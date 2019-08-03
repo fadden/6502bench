@@ -646,8 +646,12 @@ namespace SourceGen {
 
                 // On first visit, check for BRK inline call.
                 if (firstVisit) {
-                    if (op == OpDef.OpBRK_StackInt) {
-                        CheckForInlineCall(op, offset, out bool unused);
+                    if (op == OpDef.OpBRK_Implied) {
+                        bool noContinue = CheckForInlineCall(op, offset, !doContinue);
+                        if (!noContinue) {
+                            // We're expected to continue execution past the BRK.
+                            doContinue = true;
+                        }
                     }
                 }
 
@@ -675,7 +679,7 @@ namespace SourceGen {
                 if (firstVisit) {
                     // Currently ignoring OpDef.OpJSR_AbsIndexXInd
                     if (op == OpDef.OpJSR_Abs || op == OpDef.OpJSR_AbsLong) {
-                        CheckForInlineCall(op, offset, out bool noContinue);
+                        bool noContinue = CheckForInlineCall(op, offset, false);
                         if (noContinue) {
                             LogD(offset, "Script declared inline call no-continue");
                             mAnattribs[offset].DoesNotContinue = true;
@@ -902,8 +906,7 @@ namespace SourceGen {
         /// <param name="op">Instruction being examined.</param>
         /// <param name="offset">File offset of start of instruction.</param>
         /// <param name="noContinue">Set if any plugin declares the call to be no-continue.</param>
-        private void CheckForInlineCall(OpDef op, int offset, out bool noContinue) {
-            noContinue = false;
+        private bool CheckForInlineCall(OpDef op, int offset, bool noContinue) {
             for (int i = 0; i < mScriptArray.Length; i++) {
                 IPlugin script = mScriptArray[i];
                 if (op == OpDef.OpJSR_Abs && script is IPlugin_InlineJsr) {
@@ -912,11 +915,12 @@ namespace SourceGen {
                 } else if (op == OpDef.OpJSR_AbsLong && script is IPlugin_InlineJsl) {
                     ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
                     noContinue |= noCont;
-                } else if (op == OpDef.OpBRK_StackInt && script is IPlugin_InlineBrk) {
+                } else if (op == OpDef.OpBRK_Implied && script is IPlugin_InlineBrk) {
                     ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
                     noContinue &= noCont;
                 }
             }
+            return noContinue;
         }
 
         private bool SetOperandFormat(int offset, DataSubType subType, string label) {

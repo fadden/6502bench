@@ -15,7 +15,9 @@
         nop
         nop
         nop
-        .byte   $00,$00
+        brk
+
+        .byte   $00
 
 L101F   ora     ($00,x)
         .byte   $02,$00

@@ -409,7 +409,7 @@ namespace Asm65 {
         private static CpuDef Cpu6502 { get; } = new CpuDef("MOS 6502", (1 << 16) - 1, false) {
             Type = CpuType.Cpu6502,
             mOpDefs = new OpDef[] {
-                OpDef.OpBRK_StackInt,           // 0x00
+                OpDef.OpBRK_Implied,            // 0x00
                 OpDef.OpORA_DPIndexXInd,
                 OpDef.GenerateUndoc(0x02, OpDef.OpJAM_Implied),
                 OpDef.OpSLO_DPIndexXInd,
@@ -673,7 +673,7 @@ namespace Asm65 {
         private static CpuDef Cpu65C02 { get; } = new CpuDef("WDC W65C02S", (1 << 16) - 1, false) {
             Type = CpuType.Cpu65C02,
             mOpDefs = new OpDef[] {
-                OpDef.OpBRK_StackInt,           // 0x00
+                OpDef.OpBRK_Implied,            // 0x00
                 OpDef.OpORA_DPIndexXInd,
                 OpDef.GenerateUndoc(0x02, OpDef.OpLDD_Imm),
                 OpDef.GenerateUndoc(0x03, OpDef.OpNOP_65C02),
@@ -937,7 +937,7 @@ namespace Asm65 {
         private static CpuDef Cpu65816 { get; } = new CpuDef("WDC W65C816S", (1 << 24) - 1, true) {
             Type = CpuType.Cpu65816,
             mOpDefs = new OpDef[] {
-                OpDef.OpBRK_StackInt,           // 0x00
+                OpDef.OpBRK_Implied,            // 0x00
                 OpDef.OpORA_DPIndexXInd,
                 OpDef.OpCOP_StackInt,
                 OpDef.OpORA_StackRel,

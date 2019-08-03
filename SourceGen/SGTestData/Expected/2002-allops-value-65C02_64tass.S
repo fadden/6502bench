@@ -8,7 +8,9 @@
         nop
         nop
         nop
-        .byte   $00,$ff
+        brk
+
+        .byte   $ff
 
 L1014   ora     ($ff,x)
         .byte   $02,$ff

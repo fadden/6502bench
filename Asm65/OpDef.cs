@@ -1444,9 +1444,13 @@ namespace Asm65 {
             AddrMode = AddressMode.Unknown
         };
 
-        public static readonly OpDef OpBRK_StackInt = new OpDef(OpBRK) {
+        public static readonly OpDef OpBRK_Implied = new OpDef(OpBRK) {
             Opcode = 0x00,
-            AddrMode = AddressMode.StackInt,
+            // There should arguably be OpBRK_Implied for 6502/65C02 and OpBRK_StackInt for
+            // 65816, but in practice hardly any assemblers prefer (or even allow) it to be
+            // a two-byte instruction.  The BRK does *act* like a two-byte instruction, but
+            // code rarely reflects this usage.
+            AddrMode = AddressMode.Implied,
             CycDef = 7 | (int)(CycleMod.OneIfE0)
         };
         public static readonly OpDef OpORA_DPIndexXInd = new OpDef(OpORA) {

@@ -321,7 +321,7 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
-            if ((op == OpDef.OpWDM_WDM || op == OpDef.OpBRK_StackInt) && mAsmVersion <= V2_17) {
+            if ((op == OpDef.OpWDM_WDM) && mAsmVersion <= V2_17) {
                 // cc65 v2.17 doesn't support WDM, and assembles BRK <arg> to opcode $05.
                 // https://github.com/cc65/cc65/issues/715
                 // https://github.com/cc65/cc65/issues/716

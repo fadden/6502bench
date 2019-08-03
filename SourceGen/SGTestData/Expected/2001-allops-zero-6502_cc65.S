@@ -20,7 +20,9 @@
          nop
          nop
          nop
-         .byte   $00,$00
+         brk
+
+         .byte   $00
 
 L1035:   ora     ($00,x)
          jam

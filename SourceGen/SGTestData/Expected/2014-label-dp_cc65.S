@@ -17,7 +17,9 @@
          nop
          nop
          nop
-         .byte   $00,$80
+         brk
+
+         .byte   $80
 
 L101F:   ora     (L0080,x)
          cop     $80

@@ -12,7 +12,9 @@
          nop
          nop
          nop
-         brk   $00
+         brk
+
+         dfb   $00
 
 L101F    ora   ($00,x)
          cop   $00
