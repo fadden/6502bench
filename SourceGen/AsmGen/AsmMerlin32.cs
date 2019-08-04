@@ -183,6 +183,7 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            config.mForceDirectOpcodeSuffix = string.Empty;
             config.mForceAbsOpcodeSuffix = ":";
             config.mForceLongOpcodeSuffix = "l";
             config.mForceDirectOperandPrefix = string.Empty;

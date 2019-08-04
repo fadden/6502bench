@@ -24,7 +24,7 @@ limitations under the License.
         mc:Ignorable="d"
         Title="Source Generation Test"
         Width="640" Height="480" MinWidth="640" MinHeight="480"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing">
 
     <Window.Resources>

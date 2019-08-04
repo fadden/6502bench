@@ -137,7 +137,7 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            pseudoOps = sDataOpNames;
+            pseudoOps = sDataOpNames.GetCopy();
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);
@@ -177,6 +177,7 @@ namespace SourceGen.AsmGen {
 
             config.mBankSelectBackQuote = true;
 
+            config.mForceDirectOpcodeSuffix = string.Empty;
             config.mForceAbsOpcodeSuffix = string.Empty;
             config.mForceLongOpcodeSuffix = string.Empty;
             config.mForceDirectOperandPrefix = string.Empty;

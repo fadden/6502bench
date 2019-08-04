@@ -59,6 +59,7 @@ namespace Asm65 {
 
             // functional changes to assembly output
             public bool mSuppressHexNotation;       // omit '$' before hex digits
+            public bool mSuppressImpliedAcc;        // emit just "LSR" rather than "LSR A"?
 
             public bool mAllowHighAsciiCharConst;   // can we do high-ASCII character constants?
                                                     // (this might need to be generalized)
@@ -66,6 +67,7 @@ namespace Asm65 {
             public string mForceDirectOperandPrefix;    // these may be null or empty
             public string mForceAbsOpcodeSuffix;
             public string mForceAbsOperandPrefix;
+            public string mForceDirectOpcodeSuffix;
             public string mForceLongOpcodeSuffix;
             public string mForceLongOperandPrefix;
 
@@ -117,7 +119,7 @@ namespace Asm65 {
         // Bits and pieces.
         char mHexFmtChar;
         string mHexPrefix;
-        char mAccChar;
+        string mAccChar;
         char mXregChar;
         char mYregChar;
         char mSregChar;
@@ -250,9 +252,9 @@ namespace Asm65 {
                 mHexPrefix = "$";
             }
             if (mFormatConfig.mUpperOperandA) {
-                mAccChar = 'A';
+                mAccChar = "A";
             } else {
-                mAccChar = 'a';
+                mAccChar = "a";
             }
             if (mFormatConfig.mUpperOperandXY) {
                 mXregChar = 'X';
@@ -487,7 +489,9 @@ namespace Asm65 {
         public string FormatMnemonic(string mnemonic, OpDef.WidthDisambiguation wdis) {
             string opcodeStr = mnemonic;
             if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
-                // nothing to do for opcode
+                if (!string.IsNullOrEmpty(mFormatConfig.mForceDirectOpcodeSuffix)) {
+                    opcodeStr += mFormatConfig.mForceDirectOpcodeSuffix;
+                }
             } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
                 if (!string.IsNullOrEmpty(mFormatConfig.mForceAbsOpcodeSuffix)) {
                     opcodeStr += mFormatConfig.mForceAbsOpcodeSuffix;
@@ -573,7 +577,11 @@ namespace Asm65 {
                     fmt = "[{0}]";
                     break;
                 case AddressMode.Acc:
-                    fmt = "" + mAccChar;
+                    if (mFormatConfig.mSuppressImpliedAcc) {
+                        fmt = string.Empty;
+                    } else {
+                        fmt = mAccChar;
+                    }
                     break;
                 case AddressMode.DPIndIndexY:
                     fmt = "({0})," + mYregChar;

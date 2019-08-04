@@ -80,7 +80,8 @@ limitations under the License.
         </Grid>
 
         <TextBox Grid.Row="1" Name="previewTextBox" IsReadOnly="True" Margin="0,4,0,0"
-                 FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Auto">
+                 FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap">
             sample text1
         </TextBox>
 
@@ -96,7 +97,8 @@ limitations under the License.
             </DockPanel>
 
             <TextBox DockPanel.Dock="Top" Name="cmdOutputTextBox" IsReadOnly="True" Margin="0,4,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Auto">
+                     FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Auto"
+                     TextWrapping="Wrap">
                 sample text2
             </TextBox>
         </DockPanel>

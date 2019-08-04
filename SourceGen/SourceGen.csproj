@@ -62,6 +62,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AsmGen\AsmAcme.cs" />
     <Compile Include="AsmGen\AsmCc65.cs" />
     <Compile Include="AsmGen\AsmMerlin32.cs" />
     <Compile Include="AsmGen\AsmTass64.cs" />

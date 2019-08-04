@@ -175,8 +175,10 @@ namespace SourceGen.AsmGen {
                     (op.AddrMode == OpDef.AddressMode.DP ||
                         op.AddrMode == OpDef.AddressMode.DPIndexX) ||
                         op.AddrMode == OpDef.AddressMode.DPIndexY) {
-                // Could be a forward reference to a direct-page label.
-                if (IsForwardLabelReference(gen, offset)) {
+                // Could be a forward reference to a direct-page label.  For ACME, we don't
+                // care if it's forward or not.
+                if ((gen.Quirks.SinglePassNoLabelCorrection && IsLabelReference(gen, offset)) ||
+                        IsForwardLabelReference(gen, offset)) {
                     wdis = OpDef.WidthDisambiguation.ForceDirect;
                 }
             }
@@ -315,19 +317,36 @@ namespace SourceGen.AsmGen {
         /// <param name="offset">Offset of instruction opcode.</param>
         /// <returns>True if the instruction's operand is a forward reference to a label.</returns>
         private static bool IsForwardLabelReference(IGenerator gen, int offset) {
+            return (GetLabelOffsetFromOperand(gen, offset) > offset);
+        }
+
+        /// <summary>
+        /// Determines whether the instruction at the specified offset has an operand
+        /// that references a symbol.
+        /// </summary>
+        /// <param name="gen">Source generator reference.</param>
+        /// <param name="offset">Offset of instruction opcode.</param>
+        /// <returns>True if the instruction's operand is a forward reference to a label.</returns>
+        private static bool IsLabelReference(IGenerator gen, int offset) {
+            return (GetLabelOffsetFromOperand(gen, offset) >= 0);
+        }
+
+        /// <summary>
+        /// Determines the offset of the label that the operand's symbol references.
+        /// </summary>
+        /// <param name="gen">Source generator reference.</param>
+        /// <param name="offset">Offset of instruction opcode.</param>
+        /// <returns>The offset of the label, or -1 if the operand isn't a symbolic reference
+        ///   to a known label.</returns>
+        private static int GetLabelOffsetFromOperand(IGenerator gen, int offset) {
             DisasmProject proj = gen.Project;
             Debug.Assert(proj.GetAnattrib(offset).IsInstructionStart);
 
             FormatDescriptor dfd = proj.GetAnattrib(offset).DataDescriptor;
             if (dfd == null || !dfd.HasSymbol) {
-                return false;
+                return -1;
             }
-            int labelOffset = proj.FindLabelOffsetByName(dfd.SymbolRef.Label);
-            if (labelOffset <= offset) {
-                // Doesn't exist, or is backward reference.
-                return false;
-            }
-            return true;
+            return proj.FindLabelOffsetByName(dfd.SymbolRef.Label);
         }
 
         /// <summary>

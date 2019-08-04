@@ -185,8 +185,14 @@ namespace SourceGen.AsmGen {
         public bool NoPcRelBankWrap { get; set; }
 
         /// <summary>
-        /// Is the assembler implemented as a single pass?
+        /// Is the assembler implemented as a single pass?  (e.g. cc65)
         /// </summary>
         public bool SinglePassAssembler { get; set; }
+
+        /// <summary>
+        /// Is the assembler's label width determination performed only in the first pass,
+        /// and not corrected when the actual width is determined?
+        /// </summary>
+        public bool SinglePassNoLabelCorrection { get; set; }
     }
 }

@@ -32,6 +32,7 @@ namespace SourceGen.AsmGen {
         public enum Id {
             Unknown = 0,
             Tass64,
+            Acme,
             Cc65,
             Merlin32,
         }
@@ -44,6 +45,7 @@ namespace SourceGen.AsmGen {
         private static AssemblerInfo[] sInfo = new AssemblerInfo[] {
             new AssemblerInfo(Id.Unknown, "???", null, null),
             new AssemblerInfo(Id.Tass64, "64tass", typeof(GenTass64), typeof(AsmTass64)),
+            new AssemblerInfo(Id.Acme, "ACME", typeof(GenAcme), typeof(AsmAcme)),
             new AssemblerInfo(Id.Cc65, "cc65", typeof(GenCc65), typeof(AsmCc65)),
             new AssemblerInfo(Id.Merlin32, "Merlin 32", typeof(GenMerlin32), typeof(AsmMerlin32)),
         };
@@ -165,7 +167,7 @@ namespace SourceGen.AsmGen {
 
 
         public override string ToString() {
-            return "Asm " + ((int)AssemblerId).ToString() + ": " + Name;
+            return "AsmInfo " + ((int)AssemblerId).ToString() + ": " + Name;
         }
     }
 }
