@@ -86,7 +86,7 @@ L1089:   and     ($00),y
          rti
 
 L10AB:   eor     ($00,x)
-         .byte   $42,$00
+         wdm     $00
          eor     $00,S
          .byte   $44,$00,$00
          eor     $00

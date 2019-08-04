@@ -87,7 +87,7 @@ L1089:   and     (L0080),y
          rti
 
 L10AB:   eor     (L0080,x)
-         .byte   $42,$80
+         wdm     $80
          eor     $80,S
          .byte   $44,$83,$84
          eor     z:L0080

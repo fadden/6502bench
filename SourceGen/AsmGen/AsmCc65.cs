@@ -94,8 +94,9 @@ namespace SourceGen.AsmGen {
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
 
-        // We test against this in a few places.
+        // Interesting versions.
         private static CommonUtil.Version V2_17 = new CommonUtil.Version(2, 17);
+        private static CommonUtil.Version V2_18 = new CommonUtil.Version(2, 18);
 
 
         // Pseudo-op string constants.
@@ -145,15 +146,19 @@ namespace SourceGen.AsmGen {
                 // bug fixes.
                 mAsmVersion = asmVersion.Version;
             } else {
-                // No assembler installed.  Use 2.17.
-                mAsmVersion = V2_17;
+                // No assembler installed.  Use 2.18.
+                mAsmVersion = V2_18;
             }
-            if (mAsmVersion <= V2_17) {
-                // cc65 v2.17: https://github.com/cc65/cc65/issues/717
-                Quirks.BlockMoveArgsReversed = true;
-                // cc65 v2.17: https://github.com/cc65/cc65/issues/754
-                Quirks.NoPcRelBankWrap = true;
-            }
+
+            // cc65 v2.17: https://github.com/cc65/cc65/issues/717
+            // cc65 v2.18: https://github.com/cc65/cc65/issues/925
+            Quirks.BlockMoveArgsReversed = true;
+
+            // cc65 v2.17: https://github.com/cc65/cc65/issues/754
+            // still broken in v2.18
+            Quirks.NoPcRelBankWrap = true;
+
+            // Special handling for forward references to zero-page labels is required.
             Quirks.SinglePassAssembler = true;
 
             mWorkDirectory = workDirectory;
@@ -224,10 +229,9 @@ namespace SourceGen.AsmGen {
                     //        string.Format(Properties.Resources.GENERATED_FOR_LATEST, "cc65"));
                     //}
 
-                    // Currently generating code for v2.17.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                        "cc65", V2_17,
+                        "cc65", V2_18,
                         AsmCc65.OPTIONS + " -C " + Path.GetFileName(cfgName)));
                 }
 
@@ -311,7 +315,7 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
-            if ((op == OpDef.OpWDM_WDM) && mAsmVersion <= V2_17) {
+            if ((op == OpDef.OpWDM_WDM) && mAsmVersion < V2_18) {
                 // cc65 v2.17 doesn't support WDM, and assembles BRK <arg> to opcode $05.
                 // https://github.com/cc65/cc65/issues/715
                 // https://github.com/cc65/cc65/issues/716

@@ -631,6 +631,16 @@ namespace SourceGen.WpfGui {
 
         }
 
+        private void AsmExePathTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+            if (IsLoaded) {
+                // We don't really need to be updating AssemblerConfig every time they type
+                // a character, but it's fine.
+                AssemblerInfo asmInfo = (AssemblerInfo)asmConfigComboBox.SelectedItem;
+                AssemblerConfig.SetConfig(mSettings, asmInfo.AssemblerId, GetAsmConfigFromUi());
+                IsDirty = true;
+            }
+        }
+
         /// <summary>
         /// Creates a file dialog to search for a specific executable.
         /// </summary>

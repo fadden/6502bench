@@ -156,7 +156,7 @@ limitations under the License.
                                 <Button DockPanel.Dock="Right" Content="Browse..." Width="75"
                                         Margin="8,0,0,8" Click="AsmExeBrowseButton_Click"/>
                                 <TextBox Name="asmExePathTextBox" DockPanel.Dock="Left" Margin="0,0,0,8"
-                                         Text="C:\something"/>
+                                         Text="C:\something" TextChanged="AsmExePathTextBox_TextChanged"/>
                             </DockPanel>
 
                             <TextBlock Grid.Column="0" Grid.Row="2" Text="Column widths:"

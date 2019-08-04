@@ -86,7 +86,7 @@ L1089:   and     ($ff),y
          rti
 
 L10AB:   eor     ($ff,x)
-         .byte   $42,$ff
+         wdm     $ff
          eor     $ff,S
          .byte   $44,$ff,$fe
          eor     $ff
