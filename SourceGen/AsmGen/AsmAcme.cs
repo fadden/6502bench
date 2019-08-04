@@ -31,7 +31,12 @@ namespace SourceGen.AsmGen {
     /// (https://sourceforge.net/projects/acme-crossass/).
     /// </summary>
     public class GenAcme : IGenerator {
-        private const string ASM_FILE_SUFFIX = "_acme.a"; // must start with underscore
+        // The ACME docs say that ACME sources should use the ".a" extension.  However, this
+        // is already used for static libraries on UNIX systems, which means filename
+        // completion in shells tends to ignore them, and it can cause confusion in
+        // makefile rules.  Since ".S" is pretty universal for assembly language sources,
+        // I'm sticking with that.
+        private const string ASM_FILE_SUFFIX = "_acme.S"; // must start with underscore
         private const int MAX_OPERAND_LEN = 64;
         private const string CLOSE_PSEUDOPC = "} ;!pseudopc";
 
@@ -94,7 +99,7 @@ namespace SourceGen.AsmGen {
         private static CommonUtil.Version V0_96_4 = new CommonUtil.Version(0, 96, 4);
 
         // Set if we're inside a "pseudopc" block, which will need to be closed.
-        private bool mInPseudoPcBlock = false;
+        private bool mInPseudoPcBlock;
 
 
         // Pseudo-op string constants.
@@ -220,7 +225,16 @@ namespace SourceGen.AsmGen {
                         "acme", V0_96_4, AsmAcme.OPTIONS));
                 }
 
-                GenCommon.Generate(this, sw, worker);
+                if (HasNonZeroBankCode()) {
+                    // don't try
+                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                        "ACME can't handle 65816 code that lives outside bank zero");
+                    int orgAddr = Project.AddrMap.Get(0);
+                    OutputOrgDirective(0, orgAddr);
+                    OutputDenseHex(0, Project.FileData.Length, string.Empty, string.Empty);
+                } else {
+                    GenCommon.Generate(this, sw, worker);
+                }
 
                 if (mInPseudoPcBlock) {
                     OutputLine(string.Empty, CLOSE_PSEUDOPC, string.Empty, string.Empty);
@@ -229,6 +243,22 @@ namespace SourceGen.AsmGen {
             mOutStream = null;
 
             return pathNames;
+        }
+
+        /// <summary>
+        /// Determines whether the project has any code assembled outside bank zero.
+        /// </summary>
+        private bool HasNonZeroBankCode() {
+            if (Project.CpuDef.HasAddr16) {
+                // Not possible on this CPU.
+                return false;
+            }
+            foreach (AddressMap.AddressMapEntry ent in Project.AddrMap) {
+                if (ent.Addr > 0xffff) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // IGenerator
