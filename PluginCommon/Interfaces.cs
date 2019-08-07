@@ -126,7 +126,7 @@ namespace PluginCommon {
         Unknown = 0,
         NumericLE,
         NumericBE,
-        String,
+        StringGeneric,
         Dense,
         Fill
     }

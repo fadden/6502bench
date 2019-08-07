@@ -1047,7 +1047,7 @@ namespace SourceGen {
                     return FormatDescriptor.Type.NumericBE;
                 case DataType.Dense:
                     return FormatDescriptor.Type.Dense;
-                case DataType.String:
+                case DataType.StringGeneric:
                 case DataType.Fill:
                 default:
                     // not appropriate for operands, or inline data (?)
@@ -1068,8 +1068,6 @@ namespace SourceGen {
                     return FormatDescriptor.SubType.Decimal;
                 case DataSubType.Binary:
                     return FormatDescriptor.SubType.Binary;
-                case DataSubType.Ascii:
-                    return FormatDescriptor.SubType.Ascii;
                 case DataSubType.Address:
                     return FormatDescriptor.SubType.Address;
                 case DataSubType.Symbol:

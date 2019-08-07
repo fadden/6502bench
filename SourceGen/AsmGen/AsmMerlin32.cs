@@ -118,7 +118,6 @@ namespace SourceGen.AsmGen {
             StrLen16Hi = "strl",
             StrDci = "dci",
             StrDciHi = "dci",
-            //StrDciReverse
         };
 
 
@@ -294,7 +293,12 @@ namespace SourceGen.AsmGen {
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
                     break;
-                case FormatDescriptor.Type.String:
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringNullTerm:
+                case FormatDescriptor.Type.StringL8:
+                case FormatDescriptor.Type.StringL16:
+                case FormatDescriptor.Type.StringDci:
                     multiLine = true;
                     opcodeStr = operandStr = null;
                     OutputString(offset, labelStr, commentStr);
@@ -460,9 +464,6 @@ namespace SourceGen.AsmGen {
             // backward order.  Also, Merlin doesn't allow hex to be embedded in a REV
             // operation, so we can't use REV if the string contains a delimiter.
             //
-            // DciReverse is deprecated, but we can handle it as a Reverse string with a
-            // trailing byte on a following line.
-            //
             // For aesthetic purposes, zero-length CString, L8String, and L16String
             // should be output as DFB/DW zeroes rather than an empty string -- makes
             // it easier to read.
@@ -472,7 +473,7 @@ namespace SourceGen.AsmGen {
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
             Debug.Assert(dfd != null);
-            Debug.Assert(dfd.FormatType == FormatDescriptor.Type.String);
+            Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
             bool highAscii = false;
@@ -483,22 +484,18 @@ namespace SourceGen.AsmGen {
             bool showTrailing = false;
             RevMode revMode = RevMode.Forward;
 
-            switch (dfd.FormatSubType) {
-                case FormatDescriptor.SubType.None:
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
-                case FormatDescriptor.SubType.Dci:
+                case FormatDescriptor.Type.StringDci:
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
-                case FormatDescriptor.SubType.Reverse:
+                case FormatDescriptor.Type.StringReverse:
                     highAscii = (data[offset] & 0x80) != 0;
                     revMode = RevMode.Reverse;
                     break;
-                case FormatDescriptor.SubType.DciReverse:
-                    highAscii = (data[offset + dfd.Length - 1] & 0x80) != 0;
-                    revMode = RevMode.Reverse;
-                    break;
-                case FormatDescriptor.SubType.CString:
+                case FormatDescriptor.Type.StringNullTerm:
                     highAscii = (data[offset] & 0x80) != 0;
                     if (dfd.Length == 1) {
                         showZeroes = 1;     // empty null-terminated string
@@ -506,7 +503,7 @@ namespace SourceGen.AsmGen {
                     trailingBytes = 1;
                     showTrailing = true;
                     break;
-                case FormatDescriptor.SubType.L8String:
+                case FormatDescriptor.Type.StringL8:
                     if (dfd.Length > 1) {
                         highAscii = (data[offset + 1] & 0x80) != 0;
                     } else {
@@ -514,7 +511,7 @@ namespace SourceGen.AsmGen {
                     }
                     leadingBytes = 1;
                     break;
-                case FormatDescriptor.SubType.L16String:
+                case FormatDescriptor.Type.StringL16:
                     if (dfd.Length > 2) {
                         highAscii = (data[offset + 2] & 0x80) != 0;
                     } else {
@@ -555,11 +552,11 @@ namespace SourceGen.AsmGen {
 
             string opcodeStr;
 
-            switch (dfd.FormatSubType) {
-                case FormatDescriptor.SubType.None:
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
                     opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
                     break;
-                case FormatDescriptor.SubType.Dci:
+                case FormatDescriptor.Type.StringDci:
                     if (gath.NumLinesOutput == 1) {
                         opcodeStr = highAscii ? sDataOpNames.StrDciHi : sDataOpNames.StrDci;
                     } else {
@@ -568,7 +565,7 @@ namespace SourceGen.AsmGen {
                         showTrailing = true;
                     }
                     break;
-                case FormatDescriptor.SubType.Reverse:
+                case FormatDescriptor.Type.StringReverse:
                     if (gath.HasDelimiter) {
                         // can't include escaped delimiters in REV
                         opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
@@ -581,18 +578,11 @@ namespace SourceGen.AsmGen {
                         Debug.Assert(revMode == RevMode.Reverse);
                     }
                     break;
-                case FormatDescriptor.SubType.DciReverse:
-                    // Mostly punt -- output as ASCII with special handling for first byte.
-                    opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
-                    revMode = RevMode.Forward;
-                    leadingBytes = 1;
-                    showLeading = true;
-                    break;
-                case FormatDescriptor.SubType.CString:
+                case FormatDescriptor.Type.StringNullTerm:
                     //opcodeStr = sDataOpNames.StrNullTerm[highAscii ? 1 : 0];
                     opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
                     break;
-                case FormatDescriptor.SubType.L8String:
+                case FormatDescriptor.Type.StringL8:
                     if (gath.NumLinesOutput == 1) {
                         opcodeStr = highAscii ? sDataOpNames.StrLen8Hi : sDataOpNames.StrLen8;
                     } else {
@@ -601,7 +591,7 @@ namespace SourceGen.AsmGen {
                         showLeading = true;
                     }
                     break;
-                case FormatDescriptor.SubType.L16String:
+                case FormatDescriptor.Type.StringL16:
                     if (gath.NumLinesOutput == 1) {
                         opcodeStr = highAscii ? sDataOpNames.StrLen16Hi : sDataOpNames.StrLen16;
                     } else {

@@ -52,7 +52,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 1;
+        public const int CONTENT_VERSION = 2;
 
         private static readonly bool ADD_CRLF = true;
 
@@ -669,6 +669,33 @@ namespace SourceGen {
             dfd = null;
             FormatDescriptor.Type format;
             FormatDescriptor.SubType subFormat;
+
+            // File version 1 used a different set of enumerated values for defining strings.
+            // Parse it out here.
+            if ("String".Equals(sfd.Format)) {
+                subFormat = FormatDescriptor.SubType.Ascii;
+                if ("None".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringGeneric;
+                } else if ("Reverse".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringReverse;
+                } else if ("CString".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringNullTerm;
+                } else if ("L8String".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringL8;
+                } else if ("L16String".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringL16;
+                } else if ("Dci".Equals(sfd.SubFormat)) {
+                    format = FormatDescriptor.Type.StringDci;
+                } else {
+                    // DciReverse no longer supported; output as dense hex
+                    format = FormatDescriptor.Type.Dense;
+                    subFormat = FormatDescriptor.SubType.None;
+                }
+                Debug.WriteLine("Found v1 string, fmt=" + format + ", sub=" + subFormat);
+                dfd = FormatDescriptor.Create(sfd.Length, format, subFormat);
+                return true;
+            }
+
             try {
                 format = (FormatDescriptor.Type)Enum.Parse(
                     typeof(FormatDescriptor.Type), sfd.Format);

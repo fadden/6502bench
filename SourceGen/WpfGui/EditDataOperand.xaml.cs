@@ -528,6 +528,9 @@ namespace SourceGen.WpfGui {
                                 radioSimpleDataBinary.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Ascii:
+                            case FormatDescriptor.SubType.C64Petscii:
+                            case FormatDescriptor.SubType.C64Screen:
+                                // TODO(petscii): update UI
                                 radioSimpleDataAscii.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Address:
@@ -560,34 +563,23 @@ namespace SourceGen.WpfGui {
                         // preferred format not enabled; leave Hex/Low checked
                     }
                     break;
-                case FormatDescriptor.Type.String:
-                    switch (dfd.FormatSubType) {
-                        case FormatDescriptor.SubType.None:
-                            preferredFormat = radioStringMixed;
-                            break;
-                        case FormatDescriptor.SubType.Reverse:
-                            preferredFormat = radioStringMixedReverse;
-                            break;
-                        case FormatDescriptor.SubType.CString:
-                            preferredFormat = radioStringNullTerm;
-                            break;
-                        case FormatDescriptor.SubType.L8String:
-                            preferredFormat = radioStringLen8;
-                            break;
-                        case FormatDescriptor.SubType.L16String:
-                            preferredFormat = radioStringLen16;
-                            break;
-                        case FormatDescriptor.SubType.Dci:
-                            preferredFormat = radioStringDci;
-                            break;
-                        case FormatDescriptor.SubType.DciReverse:
-                            preferredFormat = radioDefaultFormat;
-                            break;
-                        default:
-                            Debug.Assert(false);
-                            preferredFormat = radioDefaultFormat;
-                            break;
-                    }
+                case FormatDescriptor.Type.StringGeneric:
+                    preferredFormat = radioStringMixed;
+                    break;
+                case FormatDescriptor.Type.StringReverse:
+                    preferredFormat = radioStringMixedReverse;
+                    break;
+                case FormatDescriptor.Type.StringNullTerm:
+                    preferredFormat = radioStringNullTerm;
+                    break;
+                case FormatDescriptor.Type.StringL8:
+                    preferredFormat = radioStringLen8;
+                    break;
+                case FormatDescriptor.Type.StringL16:
+                    preferredFormat = radioStringLen16;
+                    break;
+                case FormatDescriptor.Type.StringDci:
+                    preferredFormat = radioStringDci;
                     break;
                 case FormatDescriptor.Type.Dense:
                     preferredFormat = radioDenseHex;
@@ -639,6 +631,7 @@ namespace SourceGen.WpfGui {
                 } else if (radioSimpleDataBinary.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Binary;
                 } else if (radioSimpleDataAscii.IsChecked == true) {
+                    // TODO(petscii): configure subType correctly
                     subType = FormatDescriptor.SubType.Ascii;
                 } else if (radioSimpleDataAddress.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Address;
@@ -688,26 +681,25 @@ namespace SourceGen.WpfGui {
                 type = FormatDescriptor.Type.Dense;
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
+                subType = FormatDescriptor.SubType.Ascii;    // TODO(petscii): set encoding
             } else if (radioStringMixed.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
+                type = FormatDescriptor.Type.StringGeneric;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringMixedReverse.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
-                subType = FormatDescriptor.SubType.Reverse;
+                type = FormatDescriptor.Type.StringReverse;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringNullTerm.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
-                subType = FormatDescriptor.SubType.CString;
+                type = FormatDescriptor.Type.StringNullTerm;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringLen8.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
-                subType = FormatDescriptor.SubType.L8String;
+                type = FormatDescriptor.Type.StringL8;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringLen16.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
-                subType = FormatDescriptor.SubType.L16String;
+                type = FormatDescriptor.Type.StringL16;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringDci.IsChecked == true) {
-                type = FormatDescriptor.Type.String;
-                subType = FormatDescriptor.SubType.Dci;
-            //} else if (radioStringDciReverse.Checked) {
-            //    type = FormatDescriptor.Type.String;
-            //    subType = FormatDescriptor.SubType.DciReverse;
+                type = FormatDescriptor.Type.StringDci;
+                subType = FormatDescriptor.SubType.Ascii;
             } else {
                 Debug.Assert(false);
                 // default/none
@@ -720,26 +712,26 @@ namespace SourceGen.WpfGui {
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
 
-                if (type == FormatDescriptor.Type.String) {
-                    // We want to create one FormatDescriptor object per string.  That way
-                    // each string gets its own line.
-                    if ((subType == FormatDescriptor.SubType.None ||
-                            subType == FormatDescriptor.SubType.Reverse)) {
-                        CreateMixedStringEntries(rng.Low, rng.High, subType);
-                    } else if (subType == FormatDescriptor.SubType.CString) {
-                        CreateCStringEntries(rng.Low, rng.High, subType);
-                    } else if (subType == FormatDescriptor.SubType.L8String ||
-                            subType == FormatDescriptor.SubType.L16String) {
-                        CreateLengthStringEntries(rng.Low, rng.High, subType);
-                    } else if (subType == FormatDescriptor.SubType.Dci ||
-                            subType == FormatDescriptor.SubType.DciReverse) {
-                        CreateDciStringEntries(rng.Low, rng.High, subType);
-                    } else {
-                        Debug.Assert(false);
-                        CreateMixedStringEntries(rng.Low, rng.High, subType);   // shrug
-                    }
-                } else {
-                    CreateSimpleEntries(type, subType, chunkLength, symbolRef, rng.Low, rng.High);
+                // TODO(petscii): handle encoding on all four calls
+                switch (type) {
+                    case FormatDescriptor.Type.StringGeneric:
+                    case FormatDescriptor.Type.StringReverse:
+                        CreateMixedStringEntries(rng.Low, rng.High, type, subType);
+                        break;
+                    case FormatDescriptor.Type.StringNullTerm:
+                        CreateCStringEntries(rng.Low, rng.High, type, subType);
+                        break;
+                    case FormatDescriptor.Type.StringL8:
+                    case FormatDescriptor.Type.StringL16:
+                        CreateLengthStringEntries(rng.Low, rng.High, type, subType);
+                        break;
+                    case FormatDescriptor.Type.StringDci:
+                        CreateDciStringEntries(rng.Low, rng.High, type, subType);
+                        break;
+                    default:
+                        CreateSimpleEntries(type, subType, chunkLength, symbolRef,
+                            rng.Low, rng.High);
+                        break;
                 }
             }
         }
@@ -793,7 +785,7 @@ namespace SourceGen.WpfGui {
         /// <param name="low">Offset of first byte in range.</param>
         /// <param name="high">Offset of last byte in range.</param>
         /// <param name="subType">String sub-type.</param>
-        private void CreateMixedStringEntries(int low, int high,
+        private void CreateMixedStringEntries(int low, int high, FormatDescriptor.Type type,
                 FormatDescriptor.SubType subType) {
             int stringStart = -1;
             int highBit = 0;
@@ -846,11 +838,12 @@ namespace SourceGen.WpfGui {
             Debug.Assert(length > 0);
             if (length == 1) {
                 // single byte, output as single ASCII char rather than 1-byte string
+                // TODO(petscii): low/high?
                 CreateByteFD(offset, FormatDescriptor.SubType.Ascii);
             } else {
                 FormatDescriptor dfd;
                 dfd = FormatDescriptor.Create(length,
-                    FormatDescriptor.Type.String, subType);
+                    FormatDescriptor.Type.StringGeneric, subType);
                 Results.Add(offset, dfd);
             }
         }
@@ -873,14 +866,14 @@ namespace SourceGen.WpfGui {
         /// <param name="low">Offset of first byte in range.</param>
         /// <param name="high">Offset of last byte in range.</param>
         /// <param name="subType">String sub-type.</param>
-        private void CreateCStringEntries(int low, int high,
+        private void CreateCStringEntries(int low, int high, FormatDescriptor.Type type,
                 FormatDescriptor.SubType subType) {
             int startOffset = low;
             for (int i = low; i <= high; i++) {
                 if (mFileData[i] == 0x00) {
                     // End of string.  Zero-length strings are allowed.
                     FormatDescriptor dfd = FormatDescriptor.Create(
-                        i - startOffset + 1, FormatDescriptor.Type.String, subType);
+                        i - startOffset + 1, type, subType);
                     Results.Add(startOffset, dfd);
                     startOffset = i + 1;
                 } else {
@@ -899,20 +892,19 @@ namespace SourceGen.WpfGui {
         /// <param name="low">Offset of first byte in range.</param>
         /// <param name="high">Offset of last byte in range.</param>
         /// <param name="subType">String sub-type.</param>
-        private void CreateLengthStringEntries(int low, int high,
+        private void CreateLengthStringEntries(int low, int high, FormatDescriptor.Type type,
                 FormatDescriptor.SubType subType) {
             int i;
             for (i = low; i <= high;) {
                 int length = mFileData[i];
-                if (subType == FormatDescriptor.SubType.L16String) {
+                if (type == FormatDescriptor.Type.StringL16) {
                     length |= mFileData[i + 1] << 8;
                     length += 2;
                 } else {
                     length++;
                 }
                 // Zero-length strings are allowed.
-                FormatDescriptor dfd = FormatDescriptor.Create(length,
-                    FormatDescriptor.Type.String, subType);
+                FormatDescriptor dfd = FormatDescriptor.Create(length, type, subType);
                 Results.Add(i, dfd);
                 i += length;
             }
@@ -927,36 +919,25 @@ namespace SourceGen.WpfGui {
         /// <param name="low">Offset of first byte in range.</param>
         /// <param name="high">Offset of last byte in range.</param>
         /// <param name="subType">String sub-type.</param>
-        private void CreateDciStringEntries(int low, int high,
+        private void CreateDciStringEntries(int low, int high, FormatDescriptor.Type type,
                 FormatDescriptor.SubType subType) {
-            int start, end, adj, endMask;
-            if (subType == FormatDescriptor.SubType.Dci) {
-                start = low;
-                end = high + 1;
-                adj = 1;
-            } else if (subType == FormatDescriptor.SubType.DciReverse) {
-                start = high;
-                end = low - 1;
-                adj = -1;
-            } else {
-                Debug.Assert(false);
-                return;
-            }
+            int end, endMask;
+
+            end = high + 1;
 
             // Zero-length strings aren't a thing for DCI.  The analyzer requires that all
             // strings in a region have the same polarity, so just grab the last byte.
             endMask = mFileData[end - 1] & 0x80;
 
-            int stringStart = start;
-            for (int i = start; i != end; i += adj) {
+            int stringStart = low;
+            for (int i = low; i != end; i++) {
                 byte val = mFileData[i];
                 if ((val & 0x80) == endMask) {
                     // found the end of a string
-                    int length = (i - stringStart) * adj + 1;
-                    FormatDescriptor dfd = FormatDescriptor.Create(length,
-                        FormatDescriptor.Type.String, subType);
+                    int length = (i - stringStart) + 1;
+                    FormatDescriptor dfd = FormatDescriptor.Create(length, type, subType);
                     Results.Add(stringStart < i ? stringStart : i, dfd);
-                    stringStart = i + adj;
+                    stringStart = i + 1;
                 }
             }
 

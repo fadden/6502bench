@@ -87,8 +87,6 @@ namespace SourceGen {
             public string StrNullTermHi { get; set; }
             public string StrDci { get; set; }
             public string StrDciHi { get; set; }
-            public string StrDciReverse { get; set; }
-            public string StrDciReverseHi { get; set; }
 
             public string GetDefineData(int width) {
                 switch (width) {
@@ -180,8 +178,6 @@ namespace SourceGen {
             StrNullTermHi = ".zstrh",
             StrDci = ".dstr",
             StrDciHi = ".dstrh",
-            StrDciReverse = ".rdstr",
-            StrDciReverseHi = ".rdstrh",
         };
 
 
@@ -192,6 +188,37 @@ namespace SourceGen {
         /// <param name="dfd">Data format descriptor.</param>
         /// <returns>Line count.</returns>
         public static int ComputeRequiredLineCount(Formatter formatter, FormatDescriptor dfd) {
+            if (dfd.IsString) {
+                // Subtract two chars, to leave room for start/end delimiter.  We use
+                // non-ASCII delimiters on-screen, so there's nothing to escape there.
+                int maxLen = MAX_OPERAND_LEN - 2;
+
+                // Remove leading length or trailing null byte from string length.
+                int textLen = dfd.Length;
+                switch (dfd.FormatType) {
+                    case FormatDescriptor.Type.StringGeneric:
+                    case FormatDescriptor.Type.StringReverse:
+                    case FormatDescriptor.Type.StringDci:
+                        break;
+                    case FormatDescriptor.Type.StringNullTerm:
+                    case FormatDescriptor.Type.StringL8:
+                        textLen--;
+                        break;
+                    case FormatDescriptor.Type.StringL16:
+                        textLen -= 2;
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+                int strLen = (textLen + maxLen - 1) / maxLen;
+                if (strLen == 0) {
+                    // Empty string, but we still need to output a line.
+                    strLen = 1;
+                }
+                return strLen;
+            }
+
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.Default:
                 case FormatDescriptor.Type.NumericLE:
@@ -203,37 +230,6 @@ namespace SourceGen {
                         int maxLen = MAX_OPERAND_LEN;
                         int textLen = dfd.Length * 2;
                         return (textLen + maxLen - 1) / maxLen;
-                    }
-                case FormatDescriptor.Type.String: {
-                        // Subtract two chars, to leave room for start/end delimiter.  We use
-                        // non-ASCII delimiters on-screen, so there's nothing to escape there.
-                        int maxLen = MAX_OPERAND_LEN - 2;
-
-                        // Remove leading length or trailing null byte from string length.
-                        int textLen = dfd.Length;
-                        switch (dfd.FormatSubType) {
-                            case FormatDescriptor.SubType.None:
-                            case FormatDescriptor.SubType.Dci:
-                            case FormatDescriptor.SubType.Reverse:
-                            case FormatDescriptor.SubType.DciReverse:
-                                break;
-                            case FormatDescriptor.SubType.CString:
-                            case FormatDescriptor.SubType.L8String:
-                                textLen--;
-                                break;
-                            case FormatDescriptor.SubType.L16String:
-                                textLen -= 2;
-                                break;
-                            default:
-                                Debug.Assert(false);
-                                break;
-                        }
-                        int strLen = (textLen + maxLen - 1) / maxLen;
-                        if (strLen == 0) {
-                            // Empty string, but we still need to output a line.
-                            strLen = 1;
-                        }
-                        return strLen;
                     }
                 default:
                     Debug.Assert(false);
@@ -274,89 +270,94 @@ namespace SourceGen {
             // multi-line items.
             PseudoOut po = new PseudoOut();
 
-            switch (dfd.FormatType) {
-                case FormatDescriptor.Type.Default:
-                    if (length != 1) {
-                        // This shouldn't happen.
-                        Debug.Assert(false);
-                        length = 1;
+            if (dfd.IsString) {
+                // It's hard to do strings in single-line pieces because of prefix lengths,
+                // terminating nulls, DCI polarity, and reverse-order strings.  We
+                // really just want to convert the whole thing to a run of chars
+                // and then pull out a chunk.  As an optimization we can handle
+                // generic strings more efficiently, which should help if auto-analysis is
+                // creating massive strings (at least until auto-analysis learns how to do
+                // more complex things).
+                //
+                // TODO: consider storing the full string on the first line, then each
+                //   subsequent line has a reference to it with offset+length
+                if (dfd.FormatType == FormatDescriptor.Type.StringGeneric) {
+                    int maxPerLine = MAX_OPERAND_LEN - 2;
+                    offset += subIndex * maxPerLine;
+                    length -= subIndex * maxPerLine;
+                    if (length > maxPerLine) {
+                        length = maxPerLine;
                     }
-                    po.Opcode = opNames.GetDefineData(length);
-                    int operand = RawData.GetWord(data, offset, length, false);
-                    po.Operand = formatter.FormatHexValue(operand, length * 2);
-                    break;
-                case FormatDescriptor.Type.NumericLE:
-                    po.Opcode = opNames.GetDefineData(length);
-                    operand = RawData.GetWord(data, offset, length, false);
-                    po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                        operand, length, FormatNumericOpFlags.None);
-                    break;
-                case FormatDescriptor.Type.NumericBE:
-                    po.Opcode = opNames.GetDefineBigData(length);
-                    operand = RawData.GetWord(data, offset, length, true);
-                    po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                        operand, length, FormatNumericOpFlags.None);
-                    break;
-                case FormatDescriptor.Type.Fill:
-                    po.Opcode = opNames.Fill;
-                    po.Operand = length + "," + formatter.FormatHexValue(data[offset], 2);
-                    break;
-                case FormatDescriptor.Type.Dense: {
-                        int maxPerLine = MAX_OPERAND_LEN / 2;
-                        offset += subIndex * maxPerLine;
-                        length -= subIndex * maxPerLine;
-                        if (length > maxPerLine) {
-                            length = maxPerLine;
-                        }
-                        po.Opcode = opNames.Dense;
-                        po.Operand = formatter.FormatDenseHex(data, offset, length);
-                        //List<PseudoOut> outList = new List<PseudoOut>();
-                        //GenerateTextLines(text, "", "", po, outList);
-                        //po = outList[subIndex];
-                    }
-                    break;
-                case FormatDescriptor.Type.String:
-                    // It's hard to do strings in single-line pieces because of prefix lengths,
-                    // terminating nulls, DCI polarity, and reverse-order strings.  We
-                    // really just want to convert the whole thing to a run of chars
-                    // and then pull out a chunk.  As an optimization we can handle
-                    // generic strings (subtype=None) more efficiently, which should solve
-                    // the problem of massive strings created by auto-analysis.
-                    if (dfd.FormatSubType == FormatDescriptor.SubType.None) {
-                        int maxPerLine = MAX_OPERAND_LEN - 2;
-                        offset += subIndex * maxPerLine;
-                        length -= subIndex * maxPerLine;
-                        if (length > maxPerLine) {
-                            length = maxPerLine;
-                        }
-                        char[] ltext = BytesToChars(formatter, opNames, dfd.FormatSubType, data,
-                            offset, length, out string lpopcode, out int unused);
-                        po.Opcode = lpopcode;
-                        po.Operand = "\u201c" + new string(ltext) + "\u201d";
-                    } else {
-                        char[] text = BytesToChars(formatter, opNames, dfd.FormatSubType, data,
-                            offset, length, out string popcode, out int showHexZeroes);
+                    char[] ltext = BytesToChars(formatter, opNames, dfd.FormatType, data,
+                        offset, length, out string lpopcode, out int unused);
+                    po.Opcode = lpopcode;
+                    po.Operand = "\u201c" + new string(ltext) + "\u201d";
+                } else {
+                    char[] text = BytesToChars(formatter, opNames, dfd.FormatType, data,
+                        offset, length, out string popcode, out int showHexZeroes);
 
-                        if (showHexZeroes == 1) {
-                            po.Opcode = opNames.DefineData1;
-                            po.Operand = formatter.FormatHexValue(0, 2);
-                        } else if (showHexZeroes == 2) {
-                            po.Opcode = opNames.DefineData2;
-                            po.Operand = formatter.FormatHexValue(0, 4);
-                        } else {
-                            Debug.Assert(showHexZeroes == 0);
-                            po.Opcode = popcode;
-                            List<PseudoOut> outList = new List<PseudoOut>();
-                            GenerateTextLines(text, "\u201c", "\u201d", po, outList);
-                            po = outList[subIndex];
-                        }
+                    if (showHexZeroes == 1) {
+                        po.Opcode = opNames.DefineData1;
+                        po.Operand = formatter.FormatHexValue(0, 2);
+                    } else if (showHexZeroes == 2) {
+                        po.Opcode = opNames.DefineData2;
+                        po.Operand = formatter.FormatHexValue(0, 4);
+                    } else {
+                        Debug.Assert(showHexZeroes == 0);
+                        po.Opcode = popcode;
+                        List<PseudoOut> outList = new List<PseudoOut>();
+                        GenerateTextLines(text, "\u201c", "\u201d", po, outList);
+                        po = outList[subIndex];
                     }
-                    break;
-                default:
-                    Debug.Assert(false);
-                    po.Opcode = ".???";
-                    po.Operand = "$" + data[offset].ToString("x2");
-                    break;
+                }
+            } else {
+                switch (dfd.FormatType) {
+                    case FormatDescriptor.Type.Default:
+                        if (length != 1) {
+                            // This shouldn't happen.
+                            Debug.Assert(false);
+                            length = 1;
+                        }
+                        po.Opcode = opNames.GetDefineData(length);
+                        int operand = RawData.GetWord(data, offset, length, false);
+                        po.Operand = formatter.FormatHexValue(operand, length * 2);
+                        break;
+                    case FormatDescriptor.Type.NumericLE:
+                        po.Opcode = opNames.GetDefineData(length);
+                        operand = RawData.GetWord(data, offset, length, false);
+                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
+                            operand, length, FormatNumericOpFlags.None);
+                        break;
+                    case FormatDescriptor.Type.NumericBE:
+                        po.Opcode = opNames.GetDefineBigData(length);
+                        operand = RawData.GetWord(data, offset, length, true);
+                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
+                            operand, length, FormatNumericOpFlags.None);
+                        break;
+                    case FormatDescriptor.Type.Fill:
+                        po.Opcode = opNames.Fill;
+                        po.Operand = length + "," + formatter.FormatHexValue(data[offset], 2);
+                        break;
+                    case FormatDescriptor.Type.Dense: {
+                            int maxPerLine = MAX_OPERAND_LEN / 2;
+                            offset += subIndex * maxPerLine;
+                            length -= subIndex * maxPerLine;
+                            if (length > maxPerLine) {
+                                length = maxPerLine;
+                            }
+                            po.Opcode = opNames.Dense;
+                            po.Operand = formatter.FormatDenseHex(data, offset, length);
+                            //List<PseudoOut> outList = new List<PseudoOut>();
+                            //GenerateTextLines(text, "", "", po, outList);
+                            //po = outList[subIndex];
+                        }
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        po.Opcode = ".???";
+                        po.Operand = "$" + data[offset].ToString("x2");
+                        break;
+                }
             }
 
             return po;
@@ -368,7 +369,7 @@ namespace SourceGen {
         /// are not shown.
         /// </summary>
         /// <param name="formatter">Formatter object.</param>
-        /// <param name="subType">String sub-type.</param>
+        /// <param name="formatType">String layout.</param>
         /// <param name="data">File data.</param>
         /// <param name="offset">Offset, within data, of start of string.</param>
         /// <param name="length">Number of bytes to convert.</param>
@@ -377,7 +378,7 @@ namespace SourceGen {
         ///     length or null-termination) instead of an empty string.</param>
         /// <returns>Array of characters with string data.</returns>
         private static char[] BytesToChars(Formatter formatter, PseudoOpNames opNames,
-                FormatDescriptor.SubType subType, byte[] data, int offset, int length,
+                FormatDescriptor.Type formatType, byte[] data, int offset, int length,
                 out string popcode, out int showHexZeroes) {
             Debug.Assert(length > 0);
 
@@ -389,32 +390,25 @@ namespace SourceGen {
 
             showHexZeroes = 0;
 
-            switch (subType) {
-                case FormatDescriptor.SubType.None:
+            switch (formatType) {
+                case FormatDescriptor.Type.StringGeneric:
                     // High or low ASCII, full width specified by formatter.
                     highAscii = (data[offset] & 0x80) != 0;
                     popcode = highAscii ? opNames.StrGenericHi : opNames.StrGeneric;
                     break;
-                case FormatDescriptor.SubType.Dci:
+                case FormatDescriptor.Type.StringDci:
                     // High or low ASCII, full width specified by formatter.
                     highAscii = (data[offset] & 0x80) != 0;
                     popcode = highAscii ? opNames.StrDciHi : opNames.StrDci;
                     break;
-                case FormatDescriptor.SubType.Reverse:
+                case FormatDescriptor.Type.StringReverse:
                     // High or low ASCII, full width specified by formatter.  Show characters
                     // in reverse order.
                     highAscii = (data[offset + strLen - 1] & 0x80) != 0;
                     popcode = highAscii ? opNames.StrReverseHi : opNames.StrReverse;
                     reverse = true;
                     break;
-                case FormatDescriptor.SubType.DciReverse:
-                    // High or low ASCII, full width specified by formatter.  Show characters
-                    // in reverse order.
-                    highAscii = (data[offset + strLen - 1] & 0x80) != 0;
-                    popcode = highAscii ? opNames.StrDciReverseHi : opNames.StrDciReverse;
-                    reverse = true;
-                    break;
-                case FormatDescriptor.SubType.CString:
+                case FormatDescriptor.Type.StringNullTerm:
                     // High or low ASCII, with a terminating null.  Don't show the null.  If
                     // it's an empty string, just show the null byte as hex.
                     highAscii = (data[offset] & 0x80) != 0;
@@ -424,7 +418,7 @@ namespace SourceGen {
                         showHexZeroes = 1;
                     }
                     break;
-                case FormatDescriptor.SubType.L8String:
+                case FormatDescriptor.Type.StringL8:
                     // High or low ASCII, with a leading length byte.  Don't show the null.
                     // If it's an empty string, just show the length byte as hex.
                     strOffset++;
@@ -436,7 +430,7 @@ namespace SourceGen {
                     }
                     popcode = highAscii ? opNames.StrLen8Hi : opNames.StrLen8;
                     break;
-                case FormatDescriptor.SubType.L16String:
+                case FormatDescriptor.Type.StringL16:
                     // High or low ASCII, with a leading length word.  Don't show the null.
                     // If it's an empty string, just show the length word as hex.
                     Debug.Assert(strLen > 1);
@@ -455,6 +449,7 @@ namespace SourceGen {
                     break;
             }
 
+            // TODO(petscii): convert character encoding
             char[] text = new char[strLen];
             if (!reverse) {
                 for (int i = 0; i < strLen; i++) {
@@ -547,6 +542,10 @@ namespace SourceGen {
                 case FormatDescriptor.SubType.Binary:
                     return formatter.FormatBinaryValue(operandValue, hexMinLen * 4);
                 case FormatDescriptor.SubType.Ascii:
+                case FormatDescriptor.SubType.C64Petscii:
+                case FormatDescriptor.SubType.C64Screen:
+                    // TODO(petscii): convert encoding; use a helper function *not* in
+                    //   formatter -- pass converted char value in along with operandValue
                     return formatter.FormatAsciiOrHex(operandValue);
                 case FormatDescriptor.SubType.Symbol:
                     if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {

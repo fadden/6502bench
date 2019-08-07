@@ -119,7 +119,6 @@ namespace SourceGen.AsmGen {
             //StrLen8                   // macro with .strlen?
             //StrLen16
             //StrDci
-            //StrDciReverse
         };
 
 
@@ -414,7 +413,12 @@ namespace SourceGen.AsmGen {
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
                     break;
-                case FormatDescriptor.Type.String:
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringNullTerm:
+                case FormatDescriptor.Type.StringL8:
+                case FormatDescriptor.Type.StringL16:
+                case FormatDescriptor.Type.StringDci:
                     multiLine = true;
                     opcodeStr = operandStr = null;
                     OutputString(offset, labelStr, commentStr);
@@ -586,7 +590,7 @@ namespace SourceGen.AsmGen {
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
             Debug.Assert(dfd != null);
-            Debug.Assert(dfd.FormatType == FormatDescriptor.Type.String);
+            Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
             bool highAscii = false;
@@ -595,36 +599,31 @@ namespace SourceGen.AsmGen {
             bool showLeading = false;
             bool showTrailing = false;
 
-            switch (dfd.FormatSubType) {
-                case FormatDescriptor.SubType.None:
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
-                case FormatDescriptor.SubType.Dci:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    trailingBytes = 1;
-                    showTrailing = true;
-                    break;
-                case FormatDescriptor.SubType.Reverse:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    break;
-                case FormatDescriptor.SubType.DciReverse:
-                    highAscii = (data[offset + dfd.Length - 1] & 0x80) != 0;
-                    leadingBytes = 1;
-                    showLeading = true;
-                    break;
-                case FormatDescriptor.SubType.CString:
+                case FormatDescriptor.Type.StringDci:
                     highAscii = (data[offset] & 0x80) != 0;
                     trailingBytes = 1;
                     showTrailing = true;
                     break;
-                case FormatDescriptor.SubType.L8String:
+                case FormatDescriptor.Type.StringReverse:
+                    highAscii = (data[offset] & 0x80) != 0;
+                    break;
+                case FormatDescriptor.Type.StringNullTerm:
+                    highAscii = (data[offset] & 0x80) != 0;
+                    trailingBytes = 1;
+                    showTrailing = true;
+                    break;
+                case FormatDescriptor.Type.StringL8:
                     if (dfd.Length > 1) {
                         highAscii = (data[offset + 1] & 0x80) != 0;
                     }
                     leadingBytes = 1;
                     showLeading = true;
                     break;
-                case FormatDescriptor.SubType.L16String:
+                case FormatDescriptor.Type.StringL16:
                     if (dfd.Length > 2) {
                         highAscii = (data[offset + 2] & 0x80) != 0;
                     }
@@ -652,8 +651,8 @@ namespace SourceGen.AsmGen {
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
 
-            switch (dfd.FormatSubType) {
-                case FormatDescriptor.SubType.None:
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
                     // Special case for simple short high-ASCII strings.  These have no
                     // leading or trailing bytes.  We can improve this a bit by handling
                     // arbitrarily long strings by simply breaking them across lines.
@@ -673,19 +672,18 @@ namespace SourceGen.AsmGen {
                         highAscii = false;
                     }
                     break;
-                case FormatDescriptor.SubType.Dci:
-                case FormatDescriptor.SubType.Reverse:
-                case FormatDescriptor.SubType.DciReverse:
+                case FormatDescriptor.Type.StringDci:
+                case FormatDescriptor.Type.StringReverse:
                     // Full configured above.
                     break;
-                case FormatDescriptor.SubType.CString:
+                case FormatDescriptor.Type.StringNullTerm:
                     if (gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
                         opcodeStr = sDataOpNames.StrNullTerm;
                         showTrailing = false;
                     }
                     break;
-                case FormatDescriptor.SubType.L8String:
-                case FormatDescriptor.SubType.L16String:
+                case FormatDescriptor.Type.StringL8:
+                case FormatDescriptor.Type.StringL16:
                     // Implement macros?
                     break;
                 default:

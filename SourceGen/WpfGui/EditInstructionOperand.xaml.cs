@@ -333,6 +333,7 @@ namespace SourceGen.WpfGui {
                     preview.Append(mFormatter.FormatBinaryValue(mOperandValue, 8));
                     break;
                 case FormatDescriptor.SubType.Ascii:
+                    // TODO(petscii): encoding
                     preview.Append(mFormatter.FormatAsciiOrHex(mOperandValue));
                     break;
                 case FormatDescriptor.SubType.Symbol:
@@ -470,6 +471,7 @@ namespace SourceGen.WpfGui {
                             binaryButton.IsChecked = true;
                             break;
                         case FormatDescriptor.SubType.Ascii:
+                        // TODO(petscii): encoding
                             asciiButton.IsChecked = true;
                             break;
                         case FormatDescriptor.SubType.Symbol:
@@ -499,7 +501,13 @@ namespace SourceGen.WpfGui {
                     }
                     break;
                 case FormatDescriptor.Type.NumericBE:
-                case FormatDescriptor.Type.String:
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringNullTerm:
+                case FormatDescriptor.Type.StringL8:
+                case FormatDescriptor.Type.StringL16:
+                case FormatDescriptor.Type.StringDci:
+                case FormatDescriptor.Type.Dense:
                 case FormatDescriptor.Type.Fill:
                 default:
                     // Unexpected; used to be data?
@@ -543,6 +551,7 @@ namespace SourceGen.WpfGui {
             } else if (binaryButton.IsChecked == true) {
                 subType = FormatDescriptor.SubType.Binary;
             } else if (asciiButton.IsChecked == true) {
+                // TODO(petscii): encoding
                 subType = FormatDescriptor.SubType.Ascii;
             } else if (symbolButton.IsChecked == true) {
                 subType = FormatDescriptor.SubType.Symbol;

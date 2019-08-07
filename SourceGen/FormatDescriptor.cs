@@ -34,27 +34,35 @@ namespace SourceGen {
     /// </summary>
     public class FormatDescriptor {
         /// <summary>
-        /// General data type.
+        /// General data type.  Generally corresponds to the pseudo-opcode.
         /// 
         /// The UI only allows big-endian values in certain situations.  Internally we want
         /// to be orthogonal in case the policy changes.
         /// </summary>
         public enum Type : byte {
             Unknown = 0,
-            REMOVE,         // special type, only used by operand editor
-            Default,        // means "unformatted", same effect as not having a FormatDescriptor
-            NumericLE,      // 1-4 byte number, little-endian
-            NumericBE,      // 1-4 byte number, big-endian
-            String,         // character string
-            Dense,          // raw data, represented as compactly as possible
-            Fill            // fill memory with a value
+            REMOVE,             // special type, only used by operand editor
+            Default,            // means "unformatted", same as not having a FormatDescriptor
+
+            NumericLE,          // 1-4 byte number, little-endian
+            NumericBE,          // 1-4 byte number, big-endian
+
+            StringGeneric,      // character string
+            StringReverse,      // character string, in reverse order
+            StringNullTerm,     // C-style null-terminated string
+            StringL8,           // string with 8-bit length prefix
+            StringL16,          // string with 16-bit length prefix
+            StringDci,          // string terminated by flipped high bit (Dextral Char Inverted)
+
+            Dense,              // raw data, represented as compactly as possible
+            Fill                // fill memory with a value
         }
 
         /// <summary>
-        /// Additional data type detail.
+        /// Additional data type detail.  Generally affects the operand.
         /// 
-        /// Some things are extracted from the data itself, e.g. we don't need to specify if
-        /// a string is high- or low-ASCII, or what value to use for Fill.
+        /// Some things are extracted from the data itself, e.g. we don't need to specify
+        /// what value to use for Fill.
         /// </summary>
         public enum SubType : byte {
             None = 0,
@@ -63,22 +71,18 @@ namespace SourceGen {
             Hex,
             Decimal,
             Binary,
-            Ascii,          // aspirational; falls back on hex if data not suited
-            Address,        // wants to be an address, but no symbol defined
-            Symbol,         // symbolic ref; replace with Expression, someday?
+            Address,            // wants to be an address, but no symbol defined
+            Symbol,             // symbolic ref; replace with Expression, someday?
 
-            // String; default is straight text
-            Reverse,        // plain ASCII in reverse order
-            CString,        // null-terminated
-            L8String,       // 8-bit length prefix
-            L16String,      // 16-bit length prefix
-            Dci,            // Dextral Character Inverted
-            DciReverse,     // DCI with string backwards [deprecated -- no asm supports this]
+            // Strings and NumericLE/BE (single character)
+            Ascii,              // ASCII (with or without the high bit set)
+            C64Petscii,         // C64 PETSCII
+            C64Screen,          // C64 screen code
 
             // Dense; no sub-types
 
             // Fill; default is non-ignore
-            Ignore          // TODO(someday): use this for "don't care" sections
+            Ignore              // TODO(someday): use this for "don't care" sections
         }
 
         private const int MAX_NUMERIC_LEN = 4;
@@ -265,6 +269,25 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// True if the FormatDescriptor is a string type.
+        /// </summary>
+        public bool IsString {
+            get {
+                switch (FormatType) {
+                    case Type.StringGeneric:
+                    case Type.StringReverse:
+                    case Type.StringNullTerm:
+                    case Type.StringL8:
+                    case Type.StringL16:
+                    case Type.StringDci:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// True if the FormatDescriptor has a symbol or is Numeric/Address.
         /// </summary>
         public bool HasSymbolOrAddress {
@@ -320,6 +343,48 @@ namespace SourceGen {
         /// </summary>
         public string ToUiString() {
             // NOTE: this should be made easier to localize
+
+            if (IsString) {
+                string descr;
+                switch (FormatSubType) {
+                    case SubType.Ascii:
+                        descr = "ASCII";
+                        break;
+                    case SubType.C64Petscii:
+                        descr = "C64 PETSCII";
+                        break;
+                    case SubType.C64Screen:
+                        descr = "C64 Screen";
+                        break;
+                    default:
+                        descr = "???";
+                        break;
+                }
+                switch (FormatType) {
+                    case Type.StringGeneric:
+                        descr += " string";
+                        break;
+                    case Type.StringReverse:
+                        descr += " string (reverse)";
+                        break;
+                    case Type.StringNullTerm:
+                        descr += " string (null term)";
+                        break;
+                    case Type.StringL8:
+                        descr += " string (1-byte len)";
+                        break;
+                    case Type.StringL16:
+                        descr += " string (2-byte len)";
+                        break;
+                    case Type.StringDci:
+                        descr += " string (DCI)";
+                        break;
+                    default:
+                        descr += " ???";
+                        break;
+                }
+            }
+
             switch (FormatSubType) {
                 case SubType.None:
                     switch (FormatType) {
@@ -328,13 +393,12 @@ namespace SourceGen {
                             return "Numeric (little-endian)";
                         case Type.NumericBE:
                             return "Numeric (big-endian)";
-                        case Type.String:
-                            return "String (generic)";
                         case Type.Dense:
                             return "Dense";
                         case Type.Fill:
                             return "Fill";
                         default:
+                            // strings handled earlier
                             return "???";
                     }
                 case SubType.Hex:
@@ -343,25 +407,16 @@ namespace SourceGen {
                     return "Numeric, Decimal";
                 case SubType.Binary:
                     return "Numeric, Binary";
-                case SubType.Ascii:
-                    return "ASCII";
                 case SubType.Address:
                     return "Address";
                 case SubType.Symbol:
                     return "Symbol \"" + SymbolRef.Label + "\"";
-
-                case SubType.Reverse:
-                    return "String (reverse)";
-                case SubType.CString:
-                    return "String (null-term)";
-                case SubType.L8String:
-                    return "String (1-byte len)";
-                case SubType.L16String:
-                    return "String (2-byte len)";
-                case SubType.Dci:
-                    return "String (DCI)";
-                case SubType.DciReverse:
-                    return "String (RevDCI)";
+                case SubType.Ascii:
+                    return "ASCII";
+                case SubType.C64Petscii:
+                    return "C64 PETSCII";
+                case SubType.C64Screen:
+                    return "C64 Screen";
 
                 default:
                     return "???";

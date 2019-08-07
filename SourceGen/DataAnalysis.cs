@@ -737,7 +737,7 @@ namespace SourceGen {
                 if (asciiLen >= minStringChars) {
                     LogV(start, "ASCII string, len=" + asciiLen + " bytes");
                     mAnattribs[start].DataDescriptor = FormatDescriptor.Create(asciiLen,
-                        FormatDescriptor.Type.String, FormatDescriptor.SubType.None);
+                        FormatDescriptor.Type.StringGeneric, FormatDescriptor.SubType.Ascii);
                     start += asciiLen;
                     continue;
                 }
