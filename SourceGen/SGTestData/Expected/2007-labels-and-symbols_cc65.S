@@ -115,10 +115,10 @@ start:   clc
          .dword  start >> 16
 
 skipdata: lda    #biggie >> 16 -1
-         .byte   $54,$01,$12
-         .byte   $44,$12,$01
-         .byte   $54,$01,$12
-         .byte   $44,$12,$01
+         mvn     #^biggie,#^biggie-17
+         mvp     #^start,#^start+17
+         mvn     #18,#1
+         mvp     #%00000001,#%00010010
          per     skipdata
          brl     nextchunk
 

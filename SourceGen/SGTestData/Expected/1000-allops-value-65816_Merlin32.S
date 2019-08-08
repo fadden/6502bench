@@ -84,7 +84,7 @@ L1089    and   ($ff),y
 L10AB    eor   ($ff,x)
          wdm   $ff
          eor   $ff,S
-         mvp   $fe,$ff
+         mvp   #$fe,#$ff
          eor   $ff
          lsr   $ff
          eor   [$ff]
@@ -101,7 +101,7 @@ L10C2    eor   $feff
 L10CE    eor   ($ff),y
          eor   ($ff)
          eor   ($ff,S),y
-         mvn   $fe,$ff
+         mvn   #$fe,#$ff
          eor   $ff,x
          lsr   $ff,x
          eor   [$ff],y

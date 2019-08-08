@@ -1151,7 +1151,7 @@ namespace SourceGen {
                     string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         null, attr.DataDescriptor, operand & 0xff, 1,
                         PseudoOp.FormatNumericOpFlags.None);
-                    formattedOperand = opstr1 + "," + opstr2;
+                    formattedOperand = '#' + opstr1 + "," + '#' + opstr2;
                 } else {
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         null, attr.DataDescriptor, operandForSymbol, operandLen, opFlags);
@@ -1159,8 +1159,8 @@ namespace SourceGen {
             } else {
                 // Show operand value in hex.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
-                    formattedOperand = formatter.FormatHexValue(operand >> 8, 2) + "," +
-                        formatter.FormatHexValue(operand & 0xff, 2);
+                    formattedOperand = '#' + formatter.FormatHexValue(operand >> 8, 2) + "," +
+                        '#' + formatter.FormatHexValue(operand & 0xff, 2);
                 } else {
                     if (operandLen == 2) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",

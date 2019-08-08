@@ -88,7 +88,7 @@ L1089   and     (L0080),y
 L10AB   eor     (L0080,x)
         .byte   $42,$80
         eor     $80,s
-        mvp     $84,$83
+        mvp     #$84,#$83
         eor     L0080
         lsr     L0080
         eor     [L0080]
@@ -105,7 +105,7 @@ L10C2   eor     @wL0086
 L10CE   eor     (L0080),y
         eor     (L0080)
         eor     ($80,s),y
-        mvn     $84,$83
+        mvn     #$84,#$83
         eor     L0080,x
         lsr     L0080,x
         eor     [L0080],y

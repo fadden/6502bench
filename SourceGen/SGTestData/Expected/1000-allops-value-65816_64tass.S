@@ -87,7 +87,7 @@ L1089   and     ($ff),y
 L10AB   eor     ($ff,x)
         .byte   $42,$ff
         eor     $ff,s
-        mvp     $fe,$ff
+        mvp     #$fe,#$ff
         eor     $ff
         lsr     $ff
         eor     [$ff]
@@ -104,7 +104,7 @@ L10C2   eor     $feff
 L10CE   eor     ($ff),y
         eor     ($ff)
         eor     ($ff,s),y
-        mvn     $fe,$ff
+        mvn     #$fe,#$ff
         eor     $ff,x
         lsr     $ff,x
         eor     [$ff],y

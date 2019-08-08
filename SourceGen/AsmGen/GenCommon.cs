@@ -234,7 +234,8 @@ namespace SourceGen.AsmGen {
                         opstr1 = opstr2;
                         opstr2 = tmp;
                     }
-                    formattedOperand = opstr1 + "," + opstr2;
+                    string hash = gen.Quirks.BlockMoveArgsNoHash ? "" : "#";
+                    formattedOperand = hash + opstr1 + "," + hash + opstr2;
                 } else {
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         gen.Localizer.LabelMap, attr.DataDescriptor,
@@ -251,8 +252,9 @@ namespace SourceGen.AsmGen {
                         arg1 = operand >> 8;
                         arg2 = operand & 0xff;
                     }
-                    formattedOperand = formatter.FormatHexValue(arg1, 2) + "," +
-                        formatter.FormatHexValue(arg2, 2);
+                    string hash = gen.Quirks.BlockMoveArgsNoHash ? "" : "#";
+                    formattedOperand = hash + formatter.FormatHexValue(arg1, 2) + "," +
+                        hash + formatter.FormatHexValue(arg2, 2);
                 } else {
                     if (operandLen == 2) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",

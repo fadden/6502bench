@@ -88,7 +88,7 @@ L1089:   and     ($ff),y
 L10AB:   eor     ($ff,x)
          wdm     $ff
          eor     $ff,S
-         .byte   $44,$ff,$fe
+         mvp     #$fe,#$ff
          eor     $ff
          lsr     $ff
          eor     [$ff]
@@ -105,7 +105,7 @@ L10C2:   eor     $feff
 L10CE:   eor     ($ff),y
          eor     ($ff)
          eor     ($ff,S),y
-         .byte   $54,$ff,$fe
+         mvn     #$fe,#$ff
          eor     $ff,x
          lsr     $ff,x
          eor     [$ff],y

@@ -149,9 +149,11 @@ namespace SourceGen.AsmGen {
                 mAsmVersion = V2_18;
             }
 
-            // cc65 v2.17: https://github.com/cc65/cc65/issues/717
-            // cc65 v2.18: https://github.com/cc65/cc65/issues/925
-            Quirks.BlockMoveArgsReversed = true;
+            if (mAsmVersion <= V2_17) {
+                // cc65 v2.17: https://github.com/cc65/cc65/issues/717
+                // see also https://github.com/cc65/cc65/issues/926
+                Quirks.BlockMoveArgsReversed = true;
+            }
 
             // cc65 v2.17: https://github.com/cc65/cc65/issues/754
             // still broken in v2.18

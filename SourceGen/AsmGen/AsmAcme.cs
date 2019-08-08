@@ -161,6 +161,7 @@ namespace SourceGen.AsmGen {
             Quirks = new AssemblerQuirks();
             Quirks.SinglePassAssembler = true;
             Quirks.SinglePassNoLabelCorrection = true;
+            Quirks.BlockMoveArgsNoHash = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;

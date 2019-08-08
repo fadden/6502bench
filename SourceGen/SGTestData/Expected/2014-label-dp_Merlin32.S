@@ -85,7 +85,7 @@ L1089    and   (L0080),y
 L10AB    dfb   $41,$80
          wdm   $80
          eor   $80,S
-         mvp   $84,$83
+         mvp   #$84,#$83
          eor   L0080
          lsr   L0080
          dfb   $47,$80
@@ -102,7 +102,7 @@ L10C2    eor:  L0086
 L10CE    eor   (L0080),y
          dfb   $52,$80
          eor   ($80,S),y
-         mvn   $84,$83
+         mvn   #$84,#$83
          eor   L0080,x
          lsr   L0080,x
          eor   [L0080],y

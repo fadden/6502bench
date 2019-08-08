@@ -110,10 +110,10 @@ start    clc
          adrl  ^start
 
 skipdata lda   #^biggie-65536
-         mvn   ^biggie,^biggie-1114112
-         mvp   ^start,^start+1114112
-         mvn   18,1
-         mvp   %00000001,%00010010
+         mvn   #^biggie,#^biggie-1114112
+         mvp   #^start,#^start+1114112
+         mvn   #18,#1
+         mvp   #%00000001,#%00010010
          per   skipdata
          brl   nextchunk
 

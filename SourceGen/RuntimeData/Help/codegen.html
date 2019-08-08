@@ -192,6 +192,8 @@ code, but also needs to know how to handle the corner cases.</p>
     SourceGen for ACME also uses ".S".</li>
   <li>Does not allow the accumulator to be specified explicitly as an
     operand, e.g. you can't write <code>LSR A</code>.</li>
+  <li>Syntax for <code>MVN</code>/<code>MVP</code> doesn't allow '#'
+    before 8-bit operands.</li>
 </ul>
 
 
@@ -230,9 +232,6 @@ code, but also needs to know how to handle the corner cases.</p>
     multiple segments (it is, after all, an assembler for a C compiler).
     A linker configuration script is expected to be provided for anything
     complex.  SourceGen generates a custom config file for each project.</li>
-  <li>The syntax for the 65816 block move instructions
-    (<code>MVN</code>/<code>MVP</code>) changed to a non-standard format
-    in v2.18, requiring a '#' before 8-bit constants.</li>
 </ul>
 
 

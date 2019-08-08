@@ -173,6 +173,11 @@ namespace SourceGen.AsmGen {
         public bool BlockMoveArgsReversed { get; set; }
 
         /// <summary>
+        /// Are 8-bit constant args to MVN/MVP output without a leading '#'?
+        /// </summary>
+        public bool BlockMoveArgsNoHash { get; set; }
+
+        /// <summary>
         /// Does the assembler configure assembler widths based on SEP/REP, but doesn't
         /// track the emulation bit?
         /// </summary>

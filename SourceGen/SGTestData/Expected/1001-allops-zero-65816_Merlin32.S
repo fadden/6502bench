@@ -84,7 +84,7 @@ L1089    and   ($00),y
 L10AB    eor   ($00,x)
          wdm   $00
          eor   $00,S
-         mvp   $00,$00
+         mvp   #$00,#$00
          eor   $00
          lsr   $00
          eor   [$00]
@@ -101,7 +101,7 @@ L10C2    eor:  $0000
 L10CE    eor   ($00),y
          eor   ($00)
          eor   ($00,S),y
-         mvn   $00,$00
+         mvn   #$00,#$00
          eor   $00,x
          lsr   $00,x
          eor   [$00],y
