@@ -533,85 +533,36 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.Length > 0);
 
             bool highAscii = false;
-            int leadingBytes = 0;
+            int hiddenLeadingBytes = 0;
+            int shownLeadingBytes = 0;
             int trailingBytes = 0;
-            bool showLeading = false;
-            bool showTrailing = false;
+            string opcodeStr;
 
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    break;
-                case FormatDescriptor.Type.StringDci:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    trailingBytes = 1;
-                    showTrailing = true;
-                    break;
                 case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringDci:
+                    opcodeStr = sDataOpNames.StrGeneric;
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
+                    opcodeStr = sDataOpNames.StrNullTerm;
                     highAscii = (data[offset] & 0x80) != 0;
                     trailingBytes = 1;
-                    showTrailing = true;
                     break;
                 case FormatDescriptor.Type.StringL8:
+                    opcodeStr = sDataOpNames.StrLen8;
                     if (dfd.Length > 1) {
                         highAscii = (data[offset + 1] & 0x80) != 0;
                     }
-                    leadingBytes = 1;
-                    showLeading = true;
+                    hiddenLeadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
+                    opcodeStr = sDataOpNames.StrGeneric;
                     if (dfd.Length > 2) {
                         highAscii = (data[offset + 2] & 0x80) != 0;
                     }
-                    leadingBytes = 2;
-                    showLeading = true;
-                    break;
-                default:
-                    Debug.Assert(false);
-                    return;
-            }
-
-            char delim = '"';
-            StringGather gath = null;
-
-            // Run the string through so we can see if it'll fit on one line.  As a minor
-            // optimization, we skip this step for "generic" strings, which are probably
-            // the most common thing.
-            if (dfd.FormatSubType != FormatDescriptor.SubType.None || highAscii) {
-                gath = new StringGather(this, labelStr, "???", commentStr, delim,
-                        delim, StringGather.ByteStyle.CommaSep, MAX_OPERAND_LEN, true);
-                FeedGath(gath, data, offset, dfd.Length, leadingBytes, showLeading,
-                    trailingBytes, showTrailing);
-                Debug.Assert(gath.NumLinesOutput > 0);
-            }
-
-            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
-
-            switch (dfd.FormatType) {
-                case FormatDescriptor.Type.StringGeneric:
-                    // TODO(someday): something fancy with encodings to handle high-ASCII text?
-                    break;
-                case FormatDescriptor.Type.StringDci:
-                case FormatDescriptor.Type.StringReverse:
-                    // Fully configured above.
-                    break;
-                case FormatDescriptor.Type.StringNullTerm:
-                    if (gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
-                        opcodeStr = sDataOpNames.StrNullTerm;
-                        showTrailing = false;
-                    }
-                    break;
-                case FormatDescriptor.Type.StringL8:
-                    if (gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
-                        opcodeStr = sDataOpNames.StrLen8;
-                        showLeading = false;
-                    }
-                    break;
-                case FormatDescriptor.Type.StringL16:
-                    // Implement as macro?
+                    shownLeadingBytes = 2;
                     break;
                 default:
                     Debug.Assert(false);
@@ -623,35 +574,58 @@ namespace SourceGen.AsmGen {
                 return;
             }
 
-            // Create a new StringGather, with the final opcode choice.
-            gath = new StringGather(this, labelStr, opcodeStr, commentStr, delim,
-                delim, StringGather.ByteStyle.CommaSep, MAX_OPERAND_LEN, false);
-            FeedGath(gath, data, offset, dfd.Length, leadingBytes, showLeading,
-                trailingBytes, showTrailing);
-        }
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
+                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
+                CharEncoding.ConvertLowAscii);
 
-        /// <summary>
-        /// Feeds the bytes into the StringGather.
-        /// </summary>
-        private void FeedGath(StringGather gath, byte[] data, int offset, int length,
-                int leadingBytes, bool showLeading, int trailingBytes, bool showTrailing) {
-            int startOffset = offset;
-            int strEndOffset = offset + length - trailingBytes;
+            // Feed bytes in, skipping over hidden bytes (leading L8, trailing null).
+            stropf.FeedBytes(data, offset + hiddenLeadingBytes,
+                dfd.Length - hiddenLeadingBytes - trailingBytes, shownLeadingBytes, false);
+            Debug.Assert(stropf.Lines.Count > 0);
 
-            if (showLeading) {
-                while (leadingBytes-- > 0) {
-                    gath.WriteByte(data[offset++]);
-                }
-            } else {
-                offset += leadingBytes;
+            // See if we need to do this over.
+            bool redo = false;
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringL16:
+                case FormatDescriptor.Type.StringDci:
+                    // All good the first time.
+                    break;
+                case FormatDescriptor.Type.StringNullTerm:
+                    if (stropf.Lines.Count != 1 || stropf.HasEscapedText) {
+                        // Must be single-line without quoted chars.
+                        opcodeStr = sDataOpNames.StrGeneric;
+                        redo = true;
+                    }
+                    break;
+                case FormatDescriptor.Type.StringL8:
+                    if (stropf.Lines.Count != 1 || stropf.HasEscapedText) {
+                        // Must be single-line without quoted chars.
+                        opcodeStr = sDataOpNames.StrGeneric;
+                        redo = true;
+                    }
+                    break;
+                default:
+                    Debug.Assert(false);
+                    return;
             }
-            for (; offset < strEndOffset; offset++) {
-                gath.WriteChar((char)(data[offset] & 0x7f));
+
+            if (redo) {
+                //Debug.WriteLine("REDO off=+" + offset.ToString("x6") + ": " + dfd.FormatType);
+
+                // This time, instead of skipping over leading length bytes, we include them
+                // explicitly.
+                stropf.Reset();
+                stropf.FeedBytes(data, offset, dfd.Length, hiddenLeadingBytes, false);
             }
-            while (showTrailing && trailingBytes-- > 0) {
-                gath.WriteByte(data[offset++]);
+
+            opcodeStr = formatter.FormatPseudoOp(opcodeStr);
+
+            foreach (string str in stropf.Lines) {
+                OutputLine(labelStr, opcodeStr, str, commentStr);
+                labelStr = commentStr = string.Empty;       // only show on first
             }
-            gath.Finish();
         }
     }
 

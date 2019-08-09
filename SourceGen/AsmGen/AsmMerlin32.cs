@@ -448,8 +448,6 @@ namespace SourceGen.AsmGen {
         }
 
 
-        private enum RevMode { Forward, Reverse, BlockReverse };
-
         private void OutputString(int offset, string labelStr, string commentStr) {
             // This gets complicated.
             //
@@ -467,6 +465,11 @@ namespace SourceGen.AsmGen {
             // For aesthetic purposes, zero-length CString, L8String, and L16String
             // should be output as DFB/DW zeroes rather than an empty string -- makes
             // it easier to read.
+            //
+            // NOTE: we generally assume that the input is in the correct format, e.g.
+            // the length byte in a StringL8 matches dfd.Length, and the high bits in DCI strings
+            // have the right pattern.  If not, we will generate bad output.  This would need
+            // to be scanned and corrected at a higher level.
 
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
@@ -477,58 +480,51 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.Length > 0);
 
             bool highAscii = false;
-            int showZeroes = 0;
+            bool reverse = false;
             int leadingBytes = 0;
-            int trailingBytes = 0;
-            bool showLeading = false;
-            bool showTrailing = false;
-            RevMode revMode = RevMode.Forward;
+            string opcodeStr;
 
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    break;
-                case FormatDescriptor.Type.StringDci:
+                    opcodeStr = sDataOpNames.StrGeneric;
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringReverse:
+                    opcodeStr = sDataOpNames.StrReverse;
                     highAscii = (data[offset] & 0x80) != 0;
-                    revMode = RevMode.Reverse;
+                    reverse = true;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
+                    opcodeStr = sDataOpNames.StrGeneric;        // no pseudo-op for this
                     highAscii = (data[offset] & 0x80) != 0;
                     if (dfd.Length == 1) {
-                        showZeroes = 1;     // empty null-terminated string
+                        // Empty string.  Just output the length byte(s) or null terminator.
+                        GenerateShortSequence(offset, 1, out string opcode, out string operand);
+                        OutputLine(labelStr, opcode, operand, commentStr);
+                        return;
                     }
-                    trailingBytes = 1;
-                    showTrailing = true;
                     break;
                 case FormatDescriptor.Type.StringL8:
+                    opcodeStr = sDataOpNames.StrLen8;
                     if (dfd.Length > 1) {
                         highAscii = (data[offset + 1] & 0x80) != 0;
-                    } else {
-                        //showZeroes = 1;
                     }
                     leadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
+                    opcodeStr = sDataOpNames.StrLen16;
                     if (dfd.Length > 2) {
                         highAscii = (data[offset + 2] & 0x80) != 0;
-                    } else {
-                        //showZeroes = 2;
                     }
                     leadingBytes = 2;
+                    break;
+                case FormatDescriptor.Type.StringDci:
+                    opcodeStr = sDataOpNames.StrDci;
+                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 default:
                     Debug.Assert(false);
                     return;
-            }
-
-            if (showZeroes != 0) {
-                // Empty string.  Just output the length byte(s) or null terminator.
-                GenerateShortSequence(offset, showZeroes, out string opcode, out string operand);
-                OutputLine(labelStr, opcode, operand, commentStr);
-                return;
             }
 
             // Merlin 32 uses single-quote for low ASCII, double-quote for high ASCII.  When
@@ -536,68 +532,63 @@ namespace SourceGen.AsmGen {
             // we're forcing the characters to low ASCII, but the actual character being
             // escaped might be in high ASCII.  Hence delim vs. delimReplace.
             char delim = highAscii ? '"' : '\'';
-            char delimReplace = highAscii ? ((char)(delim | 0x80)) : delim;
-            StringGather gath = null;
-
-            // Run the string through so we can see if it'll fit on one line.  As a minor
-            // optimization, we skip this step for "generic" strings, which are probably
-            // the most common thing.
-            if (dfd.FormatSubType != FormatDescriptor.SubType.None) {
-                gath = new StringGather(this, labelStr, "???", commentStr, delim,
-                        delimReplace, StringGather.ByteStyle.DenseHex, MAX_OPERAND_LEN, true);
-                FeedGath(gath, data, offset, dfd.Length, revMode, leadingBytes, showLeading,
-                    trailingBytes, showTrailing);
-                Debug.Assert(gath.NumLinesOutput > 0);
+            CharEncoding.Convert charConv;
+            if (highAscii) {
+                charConv = CharEncoding.ConvertHighAscii;
+            } else {
+                charConv = CharEncoding.ConvertLowAscii;
             }
 
-            string opcodeStr;
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, delim,
+                StringOpFormatter.RawOutputStyle.DenseHex, MAX_OPERAND_LEN, charConv);
+            if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                // DCI is awkward because the character encoding flips on the last byte.  Rather
+                // than clutter up StringOpFormatter for this rare item, we just accept both
+                // throughout.
+                stropf.CharConv = CharEncoding.ConvertLowAndHighAscii;
+            }
 
+            // Feed bytes in, skipping over the leading length bytes.
+            stropf.FeedBytes(data, offset + leadingBytes,
+                dfd.Length - leadingBytes, 0, reverse);
+            Debug.Assert(stropf.Lines.Count > 0);
+
+            // See if we need to do this over.
+            bool redo = false;
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
-                    opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
-                    break;
-                case FormatDescriptor.Type.StringDci:
-                    if (gath.NumLinesOutput == 1) {
-                        opcodeStr = highAscii ? sDataOpNames.StrDciHi : sDataOpNames.StrDci;
-                    } else {
-                        opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
-                        trailingBytes = 1;
-                        showTrailing = true;
-                    }
+                case FormatDescriptor.Type.StringNullTerm:
                     break;
                 case FormatDescriptor.Type.StringReverse:
-                    if (gath.HasDelimiter) {
-                        // can't include escaped delimiters in REV
-                        opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
-                        revMode = RevMode.Forward;
-                    } else if (gath.NumLinesOutput > 1) {
-                        opcodeStr = highAscii ? sDataOpNames.StrReverseHi : sDataOpNames.StrReverse;
-                        revMode = RevMode.BlockReverse;
-                    } else {
-                        opcodeStr = highAscii ? sDataOpNames.StrReverseHi : sDataOpNames.StrReverse;
-                        Debug.Assert(revMode == RevMode.Reverse);
+                    if (stropf.HasEscapedText) {
+                        // can't include escaped characters in REV
+                        opcodeStr = sDataOpNames.StrGeneric;
+                        reverse = false;
+                        redo = true;
                     }
                     break;
-                case FormatDescriptor.Type.StringNullTerm:
-                    //opcodeStr = sDataOpNames.StrNullTerm[highAscii ? 1 : 0];
-                    opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
-                    break;
                 case FormatDescriptor.Type.StringL8:
-                    if (gath.NumLinesOutput == 1) {
-                        opcodeStr = highAscii ? sDataOpNames.StrLen8Hi : sDataOpNames.StrLen8;
-                    } else {
-                        opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
+                    if (stropf.Lines.Count != 1) {
+                        // single-line only
+                        opcodeStr = sDataOpNames.StrGeneric;
                         leadingBytes = 1;
-                        showLeading = true;
+                        redo = true;
                     }
                     break;
                 case FormatDescriptor.Type.StringL16:
-                    if (gath.NumLinesOutput == 1) {
-                        opcodeStr = highAscii ? sDataOpNames.StrLen16Hi : sDataOpNames.StrLen16;
-                    } else {
-                        opcodeStr = highAscii ? sDataOpNames.StrGenericHi : sDataOpNames.StrGeneric;
+                    if (stropf.Lines.Count != 1) {
+                        // single-line only
+                        opcodeStr = sDataOpNames.StrGeneric;
                         leadingBytes = 2;
-                        showLeading = true;
+                        redo = true;
+                    }
+                    break;
+                case FormatDescriptor.Type.StringDci:
+                    if (stropf.Lines.Count != 1) {
+                        // single-line only
+                        opcodeStr = sDataOpNames.StrGeneric;
+                        stropf.CharConv = charConv;
+                        redo = true;
                     }
                     break;
                 default:
@@ -605,61 +596,21 @@ namespace SourceGen.AsmGen {
                     return;
             }
 
+            if (redo) {
+                //Debug.WriteLine("REDO off=+" + offset.ToString("x6") + ": " + dfd.FormatType);
+
+                // This time, instead of skipping over leading length bytes, we include them
+                // explicitly.
+                stropf.Reset();
+                stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, reverse);
+            }
+
             opcodeStr = formatter.FormatPseudoOp(opcodeStr);
 
-            // Create a new StringGather, with the final opcode choice.
-            gath = new StringGather(this, labelStr, opcodeStr, commentStr, delim,
-                delimReplace, StringGather.ByteStyle.DenseHex, MAX_OPERAND_LEN, false);
-            FeedGath(gath, data, offset, dfd.Length, revMode, leadingBytes, showLeading,
-                trailingBytes, showTrailing);
-        }
-
-        /// <summary>
-        /// Feeds the bytes into the StringGather.
-        /// </summary>
-        private void FeedGath(StringGather gath, byte[] data, int offset, int length,
-                RevMode revMode, int leadingBytes, bool showLeading,
-                int trailingBytes, bool showTrailing) {
-            int startOffset = offset;
-            int strEndOffset = offset + length - trailingBytes;
-
-            if (showLeading) {
-                while (leadingBytes-- > 0) {
-                    gath.WriteByte(data[offset++]);
-                }
-            } else {
-                offset += leadingBytes;
+            foreach (string str in stropf.Lines) {
+                OutputLine(labelStr, opcodeStr, str, commentStr);
+                labelStr = commentStr = string.Empty;       // only show on first
             }
-            if (revMode == RevMode.BlockReverse) {
-                const int maxPerLine = MAX_OPERAND_LEN - 2;
-                int numBlockLines = (length + maxPerLine - 1) / maxPerLine;
-
-                for (int chunk = 0; chunk < numBlockLines; chunk++) {
-                    int chunkOffset = startOffset + chunk * maxPerLine;
-                    int endOffset = chunkOffset + maxPerLine;
-                    if (endOffset > strEndOffset) {
-                        endOffset = strEndOffset;
-                    }
-                    for (int off = endOffset - 1; off >= chunkOffset; off--) {
-                        gath.WriteChar((char)(data[off] & 0x7f));
-                    }
-                }
-            } else {
-                for (; offset < strEndOffset; offset++) {
-                    if (revMode == RevMode.Forward) {
-                        gath.WriteChar((char)(data[offset] & 0x7f));
-                    } else if (revMode == RevMode.Reverse) {
-                        int posn = startOffset + (strEndOffset - offset) - 1;
-                        gath.WriteChar((char)(data[posn] & 0x7f));
-                    } else {
-                        Debug.Assert(false);
-                    }
-                }
-            }
-            while (showTrailing && trailingBytes-- > 0) {
-                gath.WriteByte(data[offset++]);
-            }
-            gath.Finish();
         }
     }
 

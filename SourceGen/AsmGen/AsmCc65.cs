@@ -598,135 +598,89 @@ namespace SourceGen.AsmGen {
             bool highAscii = false;
             int leadingBytes = 0;
             int trailingBytes = 0;
-            bool showLeading = false;
-            bool showTrailing = false;
 
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    break;
-                case FormatDescriptor.Type.StringDci:
-                    highAscii = (data[offset] & 0x80) != 0;
-                    trailingBytes = 1;
-                    showTrailing = true;
-                    break;
                 case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringDci:
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
                     highAscii = (data[offset] & 0x80) != 0;
                     trailingBytes = 1;
-                    showTrailing = true;
                     break;
                 case FormatDescriptor.Type.StringL8:
                     if (dfd.Length > 1) {
                         highAscii = (data[offset + 1] & 0x80) != 0;
                     }
                     leadingBytes = 1;
-                    showLeading = true;
                     break;
                 case FormatDescriptor.Type.StringL16:
                     if (dfd.Length > 2) {
                         highAscii = (data[offset + 2] & 0x80) != 0;
                     }
                     leadingBytes = 2;
-                    showLeading = true;
                     break;
                 default:
                     Debug.Assert(false);
                     return;
             }
 
-            char delim = '"';
-            StringGather gath = null;
-
-            // Run the string through so we can see if it'll fit on one line.  As a minor
-            // optimization, we skip this step for "generic" strings, which are probably
-            // the most common thing.
-            if (dfd.FormatSubType != FormatDescriptor.SubType.None || highAscii) {
-                gath = new StringGather(this, labelStr, "???", commentStr, delim,
-                        delim, StringGather.ByteStyle.CommaSep, MAX_OPERAND_LEN, true);
-                FeedGath(gath, data, offset, dfd.Length, leadingBytes, showLeading,
-                    trailingBytes, showTrailing);
-                Debug.Assert(gath.NumLinesOutput > 0);
-            }
-
-            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
-
-            switch (dfd.FormatType) {
-                case FormatDescriptor.Type.StringGeneric:
-                    // Special case for simple short high-ASCII strings.  These have no
-                    // leading or trailing bytes.  We can improve this a bit by handling
-                    // arbitrarily long strings by simply breaking them across lines.
-                    Debug.Assert(leadingBytes == 0);
-                    Debug.Assert(trailingBytes == 0);
-                    if (highAscii && gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
-                        if (!mHighAsciiMacroOutput) {
-                            mHighAsciiMacroOutput = true;
-                            // Output a macro for high-ASCII strings.
-                            OutputLine(".macro", "HiAscii", "Arg", string.Empty);
-                            OutputLine(string.Empty, ".repeat", ".strlen(Arg), I", string.Empty);
-                            OutputLine(string.Empty, ".byte", ".strat(Arg, I) | $80", string.Empty);
-                            OutputLine(string.Empty, ".endrep", string.Empty, string.Empty);
-                            OutputLine(".endmacro", string.Empty, string.Empty, string.Empty);
-                        }
-                        opcodeStr = formatter.FormatPseudoOp("HiAscii");
-                        highAscii = false;
-                    }
-                    break;
-                case FormatDescriptor.Type.StringDci:
-                case FormatDescriptor.Type.StringReverse:
-                    // Full configured above.
-                    break;
-                case FormatDescriptor.Type.StringNullTerm:
-                    if (gath.NumLinesOutput == 1 && !gath.HasDelimiter) {
-                        opcodeStr = sDataOpNames.StrNullTerm;
-                        showTrailing = false;
-                    }
-                    break;
-                case FormatDescriptor.Type.StringL8:
-                case FormatDescriptor.Type.StringL16:
-                    // Implement macros?
-                    break;
-                default:
-                    Debug.Assert(false);
-                    return;
-            }
-
-            if (highAscii) {
+            if (highAscii && dfd.FormatType != FormatDescriptor.Type.StringGeneric) {
                 OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
                 return;
             }
 
-            // Create a new StringGather, with the final opcode choice.
-            gath = new StringGather(this, labelStr, opcodeStr, commentStr, delim,
-                delim, StringGather.ByteStyle.CommaSep, MAX_OPERAND_LEN, false);
-            FeedGath(gath, data, offset, dfd.Length, leadingBytes, showLeading,
-                trailingBytes, showTrailing);
-        }
-
-        /// <summary>
-        /// Feeds the bytes into the StringGather.
-        /// </summary>
-        private void FeedGath(StringGather gath, byte[] data, int offset, int length,
-                int leadingBytes, bool showLeading, int trailingBytes, bool showTrailing) {
-            int startOffset = offset;
-            int strEndOffset = offset + length - trailingBytes;
-
-            if (showLeading) {
-                while (leadingBytes-- > 0) {
-                    gath.WriteByte(data[offset++]);
-                }
+            CharEncoding.Convert charConv;
+            if (highAscii) {
+                charConv = CharEncoding.ConvertHighAscii;
             } else {
-                offset += leadingBytes;
+                charConv = CharEncoding.ConvertLowAscii;
             }
-            for (; offset < strEndOffset; offset++) {
-                gath.WriteChar((char)(data[offset] & 0x7f));
+
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
+                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
+                charConv);
+            stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes, false);
+
+            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
+
+            if (highAscii) {
+                // Does this fit the narrow definition of what we can do with a macro?
+                Debug.Assert(dfd.FormatType == FormatDescriptor.Type.StringGeneric);
+                if (stropf.Lines.Count == 1 && !stropf.HasEscapedText) {
+                    if (!mHighAsciiMacroOutput) {
+                        mHighAsciiMacroOutput = true;
+                        // Output a macro for high-ASCII strings.
+                        OutputLine(".macro", "HiAscii", "Arg", string.Empty);
+                        OutputLine(string.Empty, ".repeat", ".strlen(Arg), I", string.Empty);
+                        OutputLine(string.Empty, ".byte", ".strat(Arg, I) | $80", string.Empty);
+                        OutputLine(string.Empty, ".endrep", string.Empty, string.Empty);
+                        OutputLine(".endmacro", string.Empty, string.Empty, string.Empty);
+                    }
+                    opcodeStr = formatter.FormatPseudoOp("HiAscii");
+                } else {
+                    // didn't work out, dump hex
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
+                }
             }
-            while (showTrailing && trailingBytes-- > 0) {
-                gath.WriteByte(data[offset++]);
+
+            if (dfd.FormatType == FormatDescriptor.Type.StringNullTerm) {
+                if (stropf.Lines.Count == 1 && !stropf.HasEscapedText) {
+                    // Keep it.
+                    opcodeStr = sDataOpNames.StrNullTerm;
+                } else {
+                    // Didn't fit, so re-emit it, this time with the terminating null byte.
+                    stropf.Reset();
+                    stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, false);
+                }
             }
-            gath.Finish();
+
+            foreach (string str in stropf.Lines) {
+                OutputLine(labelStr, opcodeStr, str, commentStr);
+                labelStr = commentStr = string.Empty;       // only show on first
+            }
         }
     }
 

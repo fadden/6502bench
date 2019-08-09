@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace SourceGen.AsmGen {
+namespace Asm65 {
     /// <summary>
-    /// Multi-line string gatherer.  Accumulates characters and raw bytes, emitting
-    /// them when we have a full operand's worth.
-    /// 
-    /// If the delimiter character appears, it will be output inline as a raw byte.
-    /// The low-ASCII string ['hello'world'] will become [27,'hello',27,'world',27]
-    /// (or something similar).
+    /// String pseudo-op formatter.  Handles character encoding conversion and quoting of
+    /// delimiters and non-printable characters.
     /// </summary>
-    public class StringGather {
-        // Inputs.
-        public IGenerator Gen { get; private set; }
-        public string Label { get; private set; }
-        public string Opcode { get; private set; }
-        public string Comment { get; private set; }
-        public char Delimiter { get; private set; }
-        public char DelimiterReplacement { get; private set; }
-        public ByteStyle ByteStyleX { get; private set; }
-        public int MaxOperandLen { get; private set; }
-        public bool IsTestRun { get; private set; }
+    public class StringOpFormatter {
+        public CharEncoding.Convert CharConv { get; set; }
 
-        public enum ByteStyle { DenseHex, CommaSep };
+        private char Delimiter { get; set; }
+        private RawOutputStyle RawStyle { get; set; }
+        private int MaxOperandLen { get; set; }
+
+        // Output format for raw (non-printable) characters.  Most assemblers use comma-separated
+        // hex values, some allow dense hex strings.
+        public enum RawOutputStyle { DenseHex, CommaSep };
 
         // Outputs.
-        public bool HasDelimiter { get; private set; }
-        public int NumLinesOutput { get; private set; }
+        public bool HasEscapedText { get; private set; }
+        public List<string> Lines { get; private set; }
 
+        // Reference to array with 16 hex digits.  (May be upper or lower case.)
         private char[] mHexChars;
 
         /// <summary>
@@ -50,12 +45,13 @@ namespace SourceGen.AsmGen {
         /// because they're mixed with bytes, particularly when we have to escape the
         /// delimiter character.  Strings might start or end with escaped delimiters,
         /// so we don't add them until we have to.
+        /// </summary>
         private char[] mBuffer;
 
         /// <summary>
         /// Next available character position.
         /// </summary>
-        private int mIndex = 0;
+        private int mIndex;
 
         /// <summary>
         /// State of the buffer, based on the last thing we added.
@@ -64,48 +60,51 @@ namespace SourceGen.AsmGen {
             Unknown = 0,
             StartOfLine,
             InQuote,
-            OutQuote
+            OutQuote,
+            Finished
         }
-        private State mState = State.StartOfLine;
+        private State mState;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="gen">Reference back to generator, for output function and
-        ///   format options.</param>
-        /// <param name="label">Line label.  Appears on first output line only.</param>
-        /// <param name="opcode">Opcode to use for all lines.</param>
-        /// <param name="comment">End-of-line comment.  Appears on first output line
-        ///   only.</param>
+        /// <param name="formatter">Reference to text formatter.</param>
         /// <param name="delimiter">String delimiter character.</param>
-        /// <param name="isTestRun">If true, no file output is produced.</param>
-        public StringGather(IGenerator gen, string label, string opcode,
-                string comment, char delimiter, char delimReplace, ByteStyle byteStyle,
-                int maxOperandLen, bool isTestRun) {
-            Gen = gen;
-            Label = label;
-            Opcode = opcode;
-            Comment = comment;
+        /// <param name="byteStyle">How to format raw byte data.</param>
+        /// <param name="maxOperandLen">Maximum line length.</param>
+        /// <param name="charConv">Character conversion delegate.</param>
+        public StringOpFormatter(Formatter formatter, char delimiter, RawOutputStyle byteStyle,
+                int maxOperandLen, CharEncoding.Convert charConv) {
             Delimiter = delimiter;
-            DelimiterReplacement = delimReplace;
-            ByteStyleX = byteStyle;
+            RawStyle = byteStyle;
             MaxOperandLen = maxOperandLen;
-            IsTestRun = isTestRun;
+            CharConv = charConv;
 
             mBuffer = new char[MaxOperandLen];
-            mHexChars = Gen.SourceFormatter.HexDigits;
+            mHexChars = formatter.HexDigits;
+            Lines = new List<string>();
+
+            Reset();
+        }
+
+        public void Reset() {
+            mState = State.StartOfLine;
+            mIndex = 0;
+            Lines.Clear();
         }
 
         /// <summary>
-        /// Write a character into the buffer.
+        /// Write a character into the buffer.  If the character matches the delimiter, or
+        /// isn't printable, the raw character value will be written as a byte instead.
         /// </summary>
-        /// <param name="ch">Character to add.</param>
-        public void WriteChar(char ch) {
-            Debug.Assert(ch >= 0 && ch <= 0xff);
-            if (ch == Delimiter) {
+        /// <param name="rawCh">Raw character value.</param>
+        public void WriteChar(byte rawCh) {
+            Debug.Assert(mState != State.Finished);
+
+            char ch = CharConv(rawCh);
+            if (ch == Delimiter || ch == CharEncoding.UNPRINTABLE_CHAR) {
                 // Must write it as a byte.
-                HasDelimiter = true;
-                WriteByte((byte)DelimiterReplacement);
+                WriteByte(rawCh);
                 return;
             }
 
@@ -146,6 +145,10 @@ namespace SourceGen.AsmGen {
         /// </summary>
         /// <param name="val">Value to add.</param>
         public void WriteByte(byte val) {
+            Debug.Assert(mState != State.Finished);
+
+            HasEscapedText = true;
+
             // If we're at the start of a line, just output the byte.
             // If we're inside quotes, emit a delimiter, comma, and the byte.  We must
             //   have space for four (DenseHex) or five (CommaSep) chars.
@@ -155,7 +158,7 @@ namespace SourceGen.AsmGen {
                 case State.StartOfLine:
                     break;
                 case State.InQuote:
-                    int minWidth = (ByteStyleX == ByteStyle.CommaSep) ? 5 : 4;
+                    int minWidth = (RawStyle == RawOutputStyle.CommaSep) ? 5 : 4;
                     if (mIndex + minWidth > MaxOperandLen) {
                         Flush();
                     } else {
@@ -164,11 +167,11 @@ namespace SourceGen.AsmGen {
                     }
                     break;
                 case State.OutQuote:
-                    minWidth = (ByteStyleX == ByteStyle.CommaSep) ? 4 : 2;
+                    minWidth = (RawStyle == RawOutputStyle.CommaSep) ? 4 : 2;
                     if (mIndex + minWidth > MaxOperandLen) {
                         Flush();
                     } else {
-                        if (ByteStyleX == ByteStyle.CommaSep) {
+                        if (RawStyle == RawOutputStyle.CommaSep) {
                             mBuffer[mIndex++] = ',';
                         }
                     }
@@ -178,7 +181,7 @@ namespace SourceGen.AsmGen {
                     break;
             }
 
-            if (ByteStyleX == ByteStyle.CommaSep) {
+            if (RawStyle == RawOutputStyle.CommaSep) {
                 mBuffer[mIndex++] = '$';
             }
             mBuffer[mIndex++] = mHexChars[val >> 4];
@@ -202,26 +205,65 @@ namespace SourceGen.AsmGen {
                     // empty string; put out a pair of delimiters
                     mBuffer[mIndex++] = Delimiter;
                     mBuffer[mIndex++] = Delimiter;
-                    NumLinesOutput++;
                     break;
                 case State.InQuote:
                     // add delimiter and finish
                     mBuffer[mIndex++] = Delimiter;
-                    NumLinesOutput++;
                     break;
                 case State.OutQuote:
                     // just output it
-                    NumLinesOutput++;
                     break;
             }
-            if (!IsTestRun) {
-                Gen.OutputLine(Label, Opcode, new string(mBuffer, 0, mIndex),
-                    Comment);
-            }
-            mIndex = 0;
 
-            // Erase these after first use so we don't put them on every line.
-            Label = Comment = string.Empty;
+            string newStr = new string(mBuffer, 0, mIndex);
+            Debug.Assert(newStr.Length <= MaxOperandLen);
+            Lines.Add(newStr);
+
+            mState = State.Finished;
+
+            mIndex = 0;
+        }
+
+        /// <summary>
+        /// Feeds the bytes into the StringGather.
+        /// </summary>
+        public void FeedBytes(byte[] data, int offset, int length, int leadingBytes,
+                bool reverse) {
+            int startOffset = offset;
+            int strEndOffset = offset + length;
+
+            // Write leading bytes.  This is used for the 8- or 16-bit length (when no
+            // appropriate pseudo-op is available), because we want to output that as hex
+            // even if it maps to a printable character.
+            while (leadingBytes-- > 0) {
+                WriteByte(data[offset++]);
+            }
+            if (reverse) {
+                // Max per line is line length minus the two delimiters.  We don't allow
+                // any hex quoting in reversed text, so this always works.  (If somebody
+                // does try to reverse text with delimiters or unprintable chars, we'll
+                // blow out the line limit, but for a cross-assembler that should be purely
+                // cosmetic.)
+                int maxPerLine = MaxOperandLen - 2;
+                int numBlockLines = (length + maxPerLine - 1) / maxPerLine;
+
+                for (int chunk = 0; chunk < numBlockLines; chunk++) {
+                    int chunkOffset = startOffset + chunk * maxPerLine;
+                    int endOffset = chunkOffset + maxPerLine;
+                    if (endOffset > strEndOffset) {
+                        endOffset = strEndOffset;
+                    }
+                    for (int off = endOffset - 1; off >= chunkOffset; off--) {
+                        WriteChar(data[off]);
+                    }
+                }
+            } else {
+                for (; offset < strEndOffset; offset++) {
+                    WriteChar(data[offset]);
+                }
+            }
+
+            Finish();
         }
     }
 }

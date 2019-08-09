@@ -73,7 +73,6 @@
     <Compile Include="AsmGen\IAssembler.cs" />
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
-    <Compile Include="AsmGen\StringGather.cs" />
     <Compile Include="Tests\GenTest.cs" />
     <Compile Include="Tests\ProgressMessage.cs" />
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
