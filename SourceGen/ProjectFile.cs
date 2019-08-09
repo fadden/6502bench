@@ -686,8 +686,17 @@ namespace SourceGen {
                     format = FormatDescriptor.Type.StringL16;
                 } else if ("Dci".Equals(sfd.SubFormat)) {
                     format = FormatDescriptor.Type.StringDci;
+                } else if ("DciReverse".Equals(sfd.SubFormat)) {
+                    // No longer supported.  Treating it as a generic string works poorly,
+                    // because the first byte will appear to be (say) high ASCII, but the rest
+                    // of the string will be low ASCII and get output as hex data.  If we
+                    // explicitly differentiated high/low ASCII we could make this work right.
+                    // We could also split the descriptor into two parts.  Nobody ever used
+                    // this but the regression tests, though, so we don't really care.
+                    format = FormatDescriptor.Type.Dense;
+                    subFormat = FormatDescriptor.SubType.None;
                 } else {
-                    // DciReverse no longer supported; output as dense hex
+                    // No idea what this is; output as dense hex.
                     format = FormatDescriptor.Type.Dense;
                     subFormat = FormatDescriptor.SubType.None;
                 }
