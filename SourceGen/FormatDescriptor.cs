@@ -66,6 +66,7 @@ namespace SourceGen {
         /// </summary>
         public enum SubType : byte {
             None = 0,
+            ASCII_GENERIC,      // internal place-holder, used when loading older projects
 
             // NumericLE/BE; default is "raw", which can have a context-specific display format
             Hex,
@@ -75,8 +76,9 @@ namespace SourceGen {
             Symbol,             // symbolic ref; replace with Expression, someday?
 
             // Strings and NumericLE/BE (single character)
-            Ascii,              // ASCII (with or without the high bit set)
-            C64Petscii,         // C64 PETSCII
+            LowAscii,           // ASCII (high bit clear)
+            HighAscii,          // ASCII (high bit set)
+            C64Petscii,         // C64 PETSCII (lower case $41-5a, upper case $c1-da)
             C64Screen,          // C64 screen code
 
             // Dense; no sub-types
@@ -85,7 +87,8 @@ namespace SourceGen {
             Ignore              // TODO(someday): use this for "don't care" sections
         }
 
-        private const int MAX_NUMERIC_LEN = 4;
+        // Maximum length of a NumericLE/BE item (32-bit value or 4-byte instruction).
+        public const int MAX_NUMERIC_LEN = 4;
 
         // Create some "stock" descriptors.  For simple cases we return one of these
         // instead of allocating a new object.
@@ -99,8 +102,8 @@ namespace SourceGen {
             Type.NumericLE, SubType.Decimal);
         private static FormatDescriptor ONE_BINARY = new FormatDescriptor(1,
             Type.NumericLE, SubType.Binary);
-        private static FormatDescriptor ONE_ASCII = new FormatDescriptor(1,
-            Type.NumericLE, SubType.Ascii);
+        private static FormatDescriptor ONE_LOW_ASCII = new FormatDescriptor(1,
+            Type.NumericLE, SubType.LowAscii);
 
         /// <summary>
         /// Length, in bytes, of the data to be formatted.
@@ -210,8 +213,8 @@ namespace SourceGen {
                             return ONE_DECIMAL;
                         case SubType.Binary:
                             return ONE_BINARY;
-                        case SubType.Ascii:
-                            return ONE_ASCII;
+                        case SubType.LowAscii:
+                            return ONE_LOW_ASCII;
                     }
                 }
             }
@@ -347,8 +350,11 @@ namespace SourceGen {
             if (IsString) {
                 string descr;
                 switch (FormatSubType) {
-                    case SubType.Ascii:
+                    case SubType.LowAscii:
                         descr = "ASCII";
+                        break;
+                    case SubType.HighAscii:
+                        descr = "ASCII (high)";
                         break;
                     case SubType.C64Petscii:
                         descr = "C64 PETSCII";
@@ -411,12 +417,14 @@ namespace SourceGen {
                     return "Address";
                 case SubType.Symbol:
                     return "Symbol \"" + SymbolRef.Label + "\"";
-                case SubType.Ascii:
-                    return "ASCII";
+                case SubType.LowAscii:
+                    return "Numeric, ASCII";
+                case SubType.HighAscii:
+                    return "Numeric, ASCII (high)";
                 case SubType.C64Petscii:
-                    return "C64 PETSCII";
+                    return "Numeric, C64 PETSCII";
                 case SubType.C64Screen:
-                    return "C64 Screen";
+                    return "Numeric, C64 Screen";
 
                 default:
                     return "???";

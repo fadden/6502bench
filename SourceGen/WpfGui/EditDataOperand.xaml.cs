@@ -527,7 +527,8 @@ namespace SourceGen.WpfGui {
                             case FormatDescriptor.SubType.Binary:
                                 radioSimpleDataBinary.IsChecked = true;
                                 break;
-                            case FormatDescriptor.SubType.Ascii:
+                            case FormatDescriptor.SubType.LowAscii:
+                            case FormatDescriptor.SubType.HighAscii:
                             case FormatDescriptor.SubType.C64Petscii:
                             case FormatDescriptor.SubType.C64Screen:
                                 // TODO(petscii): update UI
@@ -631,8 +632,8 @@ namespace SourceGen.WpfGui {
                 } else if (radioSimpleDataBinary.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Binary;
                 } else if (radioSimpleDataAscii.IsChecked == true) {
-                    // TODO(petscii): configure subType correctly
-                    subType = FormatDescriptor.SubType.Ascii;
+                    // TODO(petscii): add PETSCII buttons
+                    subType = FormatDescriptor.SubType.ASCII_GENERIC;
                 } else if (radioSimpleDataAddress.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Address;
                 } else if (radioSimpleDataSymbolic.IsChecked == true) {
@@ -681,25 +682,27 @@ namespace SourceGen.WpfGui {
                 type = FormatDescriptor.Type.Dense;
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
-                subType = FormatDescriptor.SubType.Ascii;    // TODO(petscii): set encoding
             } else if (radioStringMixed.IsChecked == true) {
+                // TODO(petscii): encoding format will come from a combo box; that determines
+                //   the subType and the arg to the string-creation functions, which use the
+                //   appropriate char encoding methods to break up the strings
                 type = FormatDescriptor.Type.StringGeneric;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else if (radioStringMixedReverse.IsChecked == true) {
                 type = FormatDescriptor.Type.StringReverse;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else if (radioStringNullTerm.IsChecked == true) {
                 type = FormatDescriptor.Type.StringNullTerm;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else if (radioStringLen8.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL8;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else if (radioStringLen16.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL16;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else if (radioStringDci.IsChecked == true) {
                 type = FormatDescriptor.Type.StringDci;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = FormatDescriptor.SubType.LowAscii;
             } else {
                 Debug.Assert(false);
                 // default/none
@@ -762,8 +765,8 @@ namespace SourceGen.WpfGui {
             // length.  Either way, we only need to create the descriptor once.  (This is
             // safe because FormatDescriptor instances are immutable.)
             //
-            // Because certain details, like the fill byte and high-vs-low ASCII, are pulled
-            // out of the data stream at format time, we don't have to dig for them now.
+            // The one exception to this is ASCII values for non-string data, because we have
+            // to dig the low vs. high value out of the data itself.
             FormatDescriptor dfd;
             if (subType == FormatDescriptor.SubType.Symbol) {
                 dfd = FormatDescriptor.Create(chunkLength, symbolRef,
@@ -771,8 +774,19 @@ namespace SourceGen.WpfGui {
             } else {
                 dfd = FormatDescriptor.Create(chunkLength, type, subType);
             }
-
             while (low <= high) {
+                if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                    Debug.Assert(dfd.IsNumeric);
+                    int val = RawData.GetWord(mFileData, low, dfd.Length,
+                        type == FormatDescriptor.Type.NumericBE);
+                    FormatDescriptor.SubType actualSubType = (val > 0x7f) ?
+                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.LowAscii;
+                    if (actualSubType != dfd.FormatSubType) {
+                        // replace the descriptor
+                        dfd = FormatDescriptor.Create(chunkLength, type, actualSubType);
+                    }
+                }
+
                 Results.Add(low, dfd);
                 low += chunkLength;
             }
@@ -833,13 +847,12 @@ namespace SourceGen.WpfGui {
         /// <param name="offset">Offset of first byte.</param>
         /// <param name="length">Length of string.</param>
         /// <param name="subType">String sub-type.</param>
-        private void CreateStringOrByte(int offset, int length,
-                FormatDescriptor.SubType subType) {
+        private void CreateStringOrByte(int offset, int length, FormatDescriptor.SubType subType) {
             Debug.Assert(length > 0);
             if (length == 1) {
-                // single byte, output as single ASCII char rather than 1-byte string
-                // TODO(petscii): low/high?
-                CreateByteFD(offset, FormatDescriptor.SubType.Ascii);
+                // Single byte, output as single char rather than 1-byte string.  We use the
+                // same encoding as the rest of the string.
+                CreateByteFD(offset, subType);
             } else {
                 FormatDescriptor dfd;
                 dfd = FormatDescriptor.Create(length,

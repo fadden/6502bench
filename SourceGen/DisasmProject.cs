@@ -308,11 +308,14 @@ namespace SourceGen {
         /// </summary>
         /// <param name="fileData">65xx data file contents.</param>
         /// <param name="dataFileName">Data file's filename (not pathname).</param>
-        public void SetFileData(byte[] fileData, string dataFileName) {
+        /// <param name="report">Reporting object for validation errors.</param>
+        public void SetFileData(byte[] fileData, string dataFileName, ref FileLoadReport report) {
             Debug.Assert(fileData.Length == FileDataLength);
             Debug.Assert(CRC32.OnWholeBuffer(0, fileData) == FileDataCrc32);
             mFileData = fileData;
             mDataFileName = dataFileName;
+
+            FixAndValidate(ref report);
 
 #if false
             ScanFileData();
@@ -395,6 +398,98 @@ namespace SourceGen {
             }
         }
 #endif
+
+        /// <summary>
+        /// Walks the list of format descriptors, fixing places where the data doesn't match.
+        /// </summary>
+        private void FixAndValidate(ref FileLoadReport report) {
+            Dictionary<int, FormatDescriptor> changes = new Dictionary<int, FormatDescriptor>();
+
+            foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
+                FormatDescriptor dfd = kvp.Value;
+
+                // v1 project files specified string layouts as sub-types, and assumed they
+                // were high or low ASCII.  Numeric values could use the ASCII sub-type, which
+                // included both high and low.
+                //
+                // v2 project files changed this to make string layouts types, with the
+                // character encoding specified in the sub-type.  High and low ASCII became
+                // separate, explicitly specified items.
+                //
+                // When loading a v1 file, the old "Ascii" sub-type is deserialized to
+                // ASCII_GENERIC.  Now that we have access to the file data, we need to refine
+                // the sub-type to high or low.
+                if (dfd.FormatSubType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                    FormatDescriptor newDfd;
+                    if (dfd.IsString) {
+                        // Determine the string encoding by looking at the first character.
+                        // For some strings (StringL8, StringL16) we need to skip forward a
+                        // byte or two.  Empty strings with lengths or null-termination will
+                        // be treated as low ASCII.
+                        int checkOffset = kvp.Key;
+                        if (dfd.FormatType == FormatDescriptor.Type.StringL8 && dfd.Length > 1) {
+                            checkOffset++;
+                        } else if (dfd.FormatType == FormatDescriptor.Type.StringL16 && dfd.Length > 2) {
+                            checkOffset += 2;
+                        }
+                        bool isHigh = (FileData[checkOffset] & 0x80) != 0;
+                        newDfd = FormatDescriptor.Create(dfd.Length, dfd.FormatType,
+                            isHigh ? FormatDescriptor.SubType.HighAscii :
+                                FormatDescriptor.SubType.LowAscii);
+                    } else if (dfd.IsNumeric) {
+                        // This is a character constant in an instruction or data operand, such
+                        // as ".dd1 'f'" or "LDA #'f'".  Could be multi-byte (even instructions
+                        // can be 16-bit).  This is a little awkward, because at this point we
+                        // can't tell the difference between instructions and data.
+                        //
+                        // However, we do know that instructions are always little-endian, that
+                        // opcodes are one byte, that data values > $ff can't be ASCII encoded,
+                        // and that $00 isn't a valid ASCII character.  So we can apply the
+                        // following test:
+                        // - if the length is 1, it's data; grab the first byte
+                        // - if it's NumericBE, it's data; grab the last byte
+                        // - if the second byte is $00, it's data; grab the first byte
+                        // - otherwise, it's an instruction; grab the second byte
+                        int checkOffset;
+                        if (dfd.FormatType == FormatDescriptor.Type.NumericBE) {
+                            Debug.Assert(dfd.Length <= FormatDescriptor.MAX_NUMERIC_LEN);
+                            checkOffset = kvp.Key + dfd.Length - 1;
+                        } else if (dfd.Length < 2 || FileData[kvp.Key + 1] == 0x00) {
+                            checkOffset = kvp.Key;
+                        } else {
+                            Debug.Assert(dfd.FormatType == FormatDescriptor.Type.NumericLE);
+                            checkOffset = kvp.Key + 1;
+                        }
+                        bool isHigh = (FileData[checkOffset] & 0x80) != 0;
+                        newDfd = FormatDescriptor.Create(dfd.Length, dfd.FormatType,
+                            isHigh ? FormatDescriptor.SubType.HighAscii :
+                                FormatDescriptor.SubType.LowAscii);
+                    } else {
+                        Debug.Assert(false);
+                        newDfd = dfd;
+                    }
+                    changes[kvp.Key] = newDfd;
+                    Debug.WriteLine("Fix +" + kvp.Key.ToString("x6") + ": " +
+                        dfd + " -> " + newDfd);
+                }
+            }
+
+            // apply changes to main list
+            foreach (KeyValuePair<int, FormatDescriptor> kvp in changes) {
+                OperandFormats[kvp.Key] = kvp.Value;
+                //report.Add(FileLoadItem.Type.Notice,
+                //    "Fixed format at +" + kvp.Key.ToString("x6"));
+            }
+
+            // TODO: validate strings
+            // - null-terminated strings must not have 0x00 bytes, except for the last byte,
+            //   which must be 0x00
+            // - the length stored in L8/L16 strings much match the format descriptor length
+            // - DCI strings must have the appropriate pattern for the high bit
+            //
+            // Note it is not required that string data match the encoding, since you're allowed
+            // to have random gunk mixed in.  It just can't violate the above rules.
+        }
 
         /// <summary>
         /// Loads platform symbol files and extension scripts.

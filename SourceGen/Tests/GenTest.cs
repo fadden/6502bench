@@ -463,7 +463,8 @@ namespace SourceGen.Tests {
                     return null;
                 }
 
-                project.SetFileData(fileData, Path.GetFileName(dataPathName));
+                FileLoadReport unused = new FileLoadReport("test");
+                project.SetFileData(fileData, Path.GetFileName(dataPathName), ref unused);
                 project.ProjectPathName = projectPathName;
                 project.LoadExternalFiles();
             }

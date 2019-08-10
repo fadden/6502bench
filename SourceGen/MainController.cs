@@ -991,6 +991,8 @@ namespace SourceGen {
                 }
             }
 
+            newProject.SetFileData(fileData, Path.GetFileName(dataPathName), ref report);
+
             // If there were warnings, notify the user and give the a chance to cancel.
             if (report.Count != 0) {
                 ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, report.Format(),
@@ -1004,7 +1006,6 @@ namespace SourceGen {
 
             mProject = newProject;
             mProjectPathName = mProject.ProjectPathName = projPathName;
-            mProject.SetFileData(fileData, Path.GetFileName(dataPathName));
             FinishPrep();
         }
 

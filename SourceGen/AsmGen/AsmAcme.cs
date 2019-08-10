@@ -540,7 +540,11 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            bool highAscii = false;
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                return;
+            }
+
             int leadingBytes = 0;
 
             switch (dfd.FormatType) {
@@ -548,28 +552,16 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.StringReverse:
                 case FormatDescriptor.Type.StringNullTerm:
                 case FormatDescriptor.Type.StringDci:
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringL8:
-                    if (dfd.Length > 1) {
-                        highAscii = (data[offset + 1] & 0x80) != 0;
-                    }
                     leadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
-                    if (dfd.Length > 2) {
-                        highAscii = (data[offset + 2] & 0x80) != 0;
-                    }
                     leadingBytes = 2;
                     break;
                 default:
                     Debug.Assert(false);
                     return;
-            }
-
-            if (highAscii) {
-                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                return;
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',

@@ -541,11 +541,13 @@ namespace SourceGen {
                     return formatter.FormatDecimalValue(operandValue);
                 case FormatDescriptor.SubType.Binary:
                     return formatter.FormatBinaryValue(operandValue, hexMinLen * 4);
-                case FormatDescriptor.SubType.Ascii:
+                case FormatDescriptor.SubType.LowAscii:
+                case FormatDescriptor.SubType.HighAscii:
                 case FormatDescriptor.SubType.C64Petscii:
                 case FormatDescriptor.SubType.C64Screen:
                     // TODO(petscii): convert encoding; use a helper function *not* in
                     //   formatter -- pass converted char value in along with operandValue
+                    // TODO: pass in a "make high ASCII" string, e.g. "| 0x80", that fixes char
                     return formatter.FormatAsciiOrHex(operandValue);
                 case FormatDescriptor.SubType.Symbol:
                     if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
@@ -575,6 +577,7 @@ namespace SourceGen {
                         return formatter.FormatHexValue(operandValue, hexMinLen);
                     }
                 default:
+                    // should not see REMOVE or ASCII_GENERIC here
                     Debug.Assert(false);
                     return "???";
             }

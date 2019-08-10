@@ -595,7 +595,6 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            bool highAscii = false;
             int leadingBytes = 0;
             int trailingBytes = 0;
 
@@ -603,22 +602,14 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:
                 case FormatDescriptor.Type.StringDci:
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
-                    highAscii = (data[offset] & 0x80) != 0;
                     trailingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL8:
-                    if (dfd.Length > 1) {
-                        highAscii = (data[offset + 1] & 0x80) != 0;
-                    }
                     leadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
-                    if (dfd.Length > 2) {
-                        highAscii = (data[offset + 2] & 0x80) != 0;
-                    }
                     leadingBytes = 2;
                     break;
                 default:
@@ -626,6 +617,7 @@ namespace SourceGen.AsmGen {
                     return;
             }
 
+            bool highAscii = (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii);
             if (highAscii && dfd.FormatType != FormatDescriptor.Type.StringGeneric) {
                 OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
                 return;
@@ -639,8 +631,7 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
-                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
-                charConv);
+                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN, charConv);
             stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes, false);
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);

@@ -479,7 +479,6 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            bool highAscii = false;
             bool reverse = false;
             int leadingBytes = 0;
             string opcodeStr;
@@ -487,16 +486,13 @@ namespace SourceGen.AsmGen {
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
                     opcodeStr = sDataOpNames.StrGeneric;
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringReverse:
                     opcodeStr = sDataOpNames.StrReverse;
-                    highAscii = (data[offset] & 0x80) != 0;
                     reverse = true;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
                     opcodeStr = sDataOpNames.StrGeneric;        // no pseudo-op for this
-                    highAscii = (data[offset] & 0x80) != 0;
                     if (dfd.Length == 1) {
                         // Empty string.  Just output the length byte(s) or null terminator.
                         GenerateShortSequence(offset, 1, out string opcode, out string operand);
@@ -506,37 +502,29 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.StringL8:
                     opcodeStr = sDataOpNames.StrLen8;
-                    if (dfd.Length > 1) {
-                        highAscii = (data[offset + 1] & 0x80) != 0;
-                    }
                     leadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
                     opcodeStr = sDataOpNames.StrLen16;
-                    if (dfd.Length > 2) {
-                        highAscii = (data[offset + 2] & 0x80) != 0;
-                    }
                     leadingBytes = 2;
                     break;
                 case FormatDescriptor.Type.StringDci:
                     opcodeStr = sDataOpNames.StrDci;
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 default:
                     Debug.Assert(false);
                     return;
             }
 
-            // Merlin 32 uses single-quote for low ASCII, double-quote for high ASCII.  When
-            // quoting the delimiter we use a hexadecimal value.  We need to bear in mind that
-            // we're forcing the characters to low ASCII, but the actual character being
-            // escaped might be in high ASCII.  Hence delim vs. delimReplace.
-            char delim = highAscii ? '"' : '\'';
+            // Merlin 32 uses single-quote for low ASCII, double-quote for high ASCII.
             CharEncoding.Convert charConv;
-            if (highAscii) {
+            char delim;
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
                 charConv = CharEncoding.ConvertHighAscii;
+                delim = '"';
             } else {
                 charConv = CharEncoding.ConvertLowAscii;
+                delim = '\'';
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, delim,

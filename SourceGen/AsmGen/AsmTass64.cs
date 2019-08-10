@@ -532,49 +532,39 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            bool highAscii = false;
             int hiddenLeadingBytes = 0;
             int shownLeadingBytes = 0;
             int trailingBytes = 0;
             string opcodeStr;
 
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                return;
+            }
+
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:
                     opcodeStr = sDataOpNames.StrGeneric;
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
                     opcodeStr = sDataOpNames.StrNullTerm;
-                    highAscii = (data[offset] & 0x80) != 0;
                     trailingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL8:
                     opcodeStr = sDataOpNames.StrLen8;
-                    if (dfd.Length > 1) {
-                        highAscii = (data[offset + 1] & 0x80) != 0;
-                    }
                     hiddenLeadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
                     opcodeStr = sDataOpNames.StrGeneric;
-                    if (dfd.Length > 2) {
-                        highAscii = (data[offset + 2] & 0x80) != 0;
-                    }
                     shownLeadingBytes = 2;
                     break;
                 case FormatDescriptor.Type.StringDci:
                     opcodeStr = sDataOpNames.StrDci;
-                    highAscii = (data[offset] & 0x80) != 0;
                     break;
                 default:
                     Debug.Assert(false);
                     return;
-            }
-
-            if (highAscii) {
-                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                return;
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',

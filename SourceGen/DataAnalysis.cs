@@ -736,8 +736,10 @@ namespace SourceGen {
                 int asciiLen = RecognizeAscii(mFileData, start, end);
                 if (asciiLen >= minStringChars) {
                     LogV(start, "ASCII string, len=" + asciiLen + " bytes");
+                    bool isHigh = (mFileData[start] & 0x80) != 0;
                     mAnattribs[start].DataDescriptor = FormatDescriptor.Create(asciiLen,
-                        FormatDescriptor.Type.StringGeneric, FormatDescriptor.SubType.Ascii);
+                        FormatDescriptor.Type.StringGeneric, isHigh ?
+                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.LowAscii);
                     start += asciiLen;
                     continue;
                 }
