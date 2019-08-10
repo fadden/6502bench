@@ -65,7 +65,7 @@
         .byte   $80
         .byte   $e8,$e9,$e7,$e8,$a0,$c1,$d3,$c3,$c9,$c9,$a0,$f3,$f4,$f2,$fa,$00
         .byte   $80
-        .text   "'low'quoted",$22,"''text",$00
+        .null   "'low'quoted",$22,"''text"
         .byte   $80
         .byte   $a2,$e8,$e9,$e7,$e8,$a2,$f1,$f5,$ef,$f4,$e5,$e4,$a7,$a2,$a2,$f4
         .byte   $e5,$f8,$f4,$00
@@ -82,7 +82,7 @@
         .byte   $80
         .byte   $0f,$e8,$e9,$e7,$e8,$a0,$c1,$d3,$c3,$c9,$c9,$a0,$f3,$f4,$f2,$b1
         .byte   $80
-        .text   $12,"'low'quoted",$22,"''text"
+        .ptext  "'low'quoted",$22,"''text"
         .byte   $80
         .byte   $13,$a2,$e8,$e9,$e7,$e8,$a2,$f1,$f5,$ef,$f4,$e5,$e4,$a7,$a2,$a2
         .byte   $f4,$e5,$f8,$f4
@@ -119,11 +119,11 @@
         .text   "n mankind, and therefore never send to know for whom the bell "
         .text   "tolls; it tolls for thee."
         .byte   $81
-        .text   "low ASCII dc",$e9
+        .shift  "low ASCII dci"
         .byte   $80
         .byte   $e8,$e9,$e7,$e8,$a0,$c1,$d3,$c3,$c9,$c9,$a0,$e4,$e3,$69
         .byte   $80
-        .text   "'low'quoted",$22,"''tex",$f4
+        .shift  "'low'quoted",$22,"''text"
         .byte   $80
         .byte   $a2,$e8,$e9,$e7,$e8,$a2,$f1,$f5,$ef,$f4,$e5,$e4,$a7,$a2,$a2,$f4
         .byte   $e5,$f8,$74

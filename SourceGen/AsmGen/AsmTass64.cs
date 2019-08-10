@@ -128,7 +128,7 @@ namespace SourceGen.AsmGen {
             StrNullTerm = ".null",
             StrLen8 = ".ptext",
             //StrLen16
-            //StrDci
+            StrDci = ".shift"
         };
         private const string HERE_PSEUDO_OP = ".here";
 
@@ -522,7 +522,7 @@ namespace SourceGen.AsmGen {
             // We could probably do something fancy with the character encoding options to
             // make high-ASCII work nicely.
             //
-            // We might be able to define a macro for DCI and Reverse.
+            // We might be able to define a macro for Reverse.
 
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
@@ -541,7 +541,6 @@ namespace SourceGen.AsmGen {
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:
-                case FormatDescriptor.Type.StringDci:
                     opcodeStr = sDataOpNames.StrGeneric;
                     highAscii = (data[offset] & 0x80) != 0;
                     break;
@@ -564,6 +563,10 @@ namespace SourceGen.AsmGen {
                     }
                     shownLeadingBytes = 2;
                     break;
+                case FormatDescriptor.Type.StringDci:
+                    opcodeStr = sDataOpNames.StrDci;
+                    highAscii = (data[offset] & 0x80) != 0;
+                    break;
                 default:
                     Debug.Assert(false);
                     return;
@@ -577,6 +580,12 @@ namespace SourceGen.AsmGen {
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
                 StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
                 CharEncoding.ConvertLowAscii);
+            if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                // DCI is awkward because the character encoding flips on the last byte.  Rather
+                // than clutter up StringOpFormatter for this rare item, we just accept low/high
+                // throughout.
+                stropf.CharConv = CharEncoding.ConvertLowAndHighAscii;
+            }
 
             // Feed bytes in, skipping over hidden bytes (leading L8, trailing null).
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
@@ -589,20 +598,15 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:
                 case FormatDescriptor.Type.StringL16:
-                case FormatDescriptor.Type.StringDci:
                     // All good the first time.
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
-                    if (stropf.Lines.Count != 1 || stropf.HasEscapedText) {
-                        // Must be single-line without quoted chars.
-                        opcodeStr = sDataOpNames.StrGeneric;
-                        redo = true;
-                    }
-                    break;
                 case FormatDescriptor.Type.StringL8:
-                    if (stropf.Lines.Count != 1 || stropf.HasEscapedText) {
-                        // Must be single-line without quoted chars.
+                case FormatDescriptor.Type.StringDci:
+                    if (stropf.Lines.Count != 1) {
+                        // Must be single-line.
                         opcodeStr = sDataOpNames.StrGeneric;
+                        stropf.CharConv = CharEncoding.ConvertLowAscii; // undo DCI hack
                         redo = true;
                     }
                     break;

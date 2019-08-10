@@ -543,7 +543,7 @@ namespace SourceGen.AsmGen {
                 StringOpFormatter.RawOutputStyle.DenseHex, MAX_OPERAND_LEN, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
-                // than clutter up StringOpFormatter for this rare item, we just accept both
+                // than clutter up StringOpFormatter for this rare item, we just accept low/high
                 // throughout.
                 stropf.CharConv = CharEncoding.ConvertLowAndHighAscii;
             }
