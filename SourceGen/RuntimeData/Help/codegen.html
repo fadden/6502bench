@@ -156,6 +156,15 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>For 65816, selecting the bank byte is done with the back-quote ('`')
     rather than the caret ('^').  (There's a note in the docs to the effect
     that they plan to move to carets.)</li>
+  <li>By default, the assembler assumes that the input is PETSCII, but
+    doesn't convert characters in text strings.  So PETSCII source files
+    generate PETSCII strings, and ASCII source files generate ASCII
+    strings.  However, if you use the built-in "screen" encoding, you will
+    get the wrong behavior if you compile an ASCII source without the
+    "--ascii" command-line flag, because it expects to convert from
+    PETSCII.  To get the behavior expected of a cross-assembler, it's
+    necessary to pass "--ascii" and explicitly define an ASCII encoding
+    for use with ASCII text strings.</li>
 </ul>
 
 
