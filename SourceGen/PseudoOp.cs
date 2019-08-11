@@ -76,17 +76,11 @@ namespace SourceGen {
             public string Fill { get; set; }
             public string Dense { get; set; }
             public string StrGeneric { get; set; }
-            public string StrGenericHi { get; set; }
             public string StrReverse { get; set; }
-            public string StrReverseHi { get; set; }
             public string StrLen8 { get; set; }
-            public string StrLen8Hi { get; set; }
             public string StrLen16 { get; set; }
-            public string StrLen16Hi { get; set; }
             public string StrNullTerm { get; set; }
-            public string StrNullTermHi { get; set; }
             public string StrDci { get; set; }
-            public string StrDciHi { get; set; }
 
             public string GetDefineData(int width) {
                 switch (width) {
@@ -167,18 +161,12 @@ namespace SourceGen {
             Dense = ".bulk",
 
             StrGeneric = ".str",
-            StrGenericHi = ".strh",
             StrReverse = ".rstr",
-            StrReverseHi = ".rstrh",
             StrLen8 = ".l1str",
-            StrLen8Hi = ".l1strh",
             StrLen16 = ".l2str",
-            StrLen16Hi = ".l2strh",
             StrNullTerm = ".zstr",
-            StrNullTermHi = ".zstrh",
             StrDci = ".dstr",
-            StrDciHi = ".dstrh",
-        };
+    };
 
 
         /// <summary>
@@ -385,7 +373,6 @@ namespace SourceGen {
             // See also GenMerlin32.OutputString().
             int strOffset = offset;
             int strLen = length;
-            bool highAscii = false;
             bool reverse = false;
 
             showHexZeroes = 0;
@@ -393,26 +380,22 @@ namespace SourceGen {
             switch (formatType) {
                 case FormatDescriptor.Type.StringGeneric:
                     // High or low ASCII, full width specified by formatter.
-                    highAscii = (data[offset] & 0x80) != 0;
-                    popcode = highAscii ? opNames.StrGenericHi : opNames.StrGeneric;
+                    popcode = opNames.StrGeneric;
                     break;
                 case FormatDescriptor.Type.StringDci:
                     // High or low ASCII, full width specified by formatter.
-                    highAscii = (data[offset] & 0x80) != 0;
-                    popcode = highAscii ? opNames.StrDciHi : opNames.StrDci;
+                    popcode = opNames.StrDci;
                     break;
                 case FormatDescriptor.Type.StringReverse:
                     // High or low ASCII, full width specified by formatter.  Show characters
                     // in reverse order.
-                    highAscii = (data[offset + strLen - 1] & 0x80) != 0;
-                    popcode = highAscii ? opNames.StrReverseHi : opNames.StrReverse;
+                    popcode = opNames.StrReverse;
                     reverse = true;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
                     // High or low ASCII, with a terminating null.  Don't show the null.  If
                     // it's an empty string, just show the null byte as hex.
-                    highAscii = (data[offset] & 0x80) != 0;
-                    popcode = highAscii ? opNames.StrNullTermHi : opNames.StrNullTerm;
+                    popcode = opNames.StrNullTerm;
                     strLen--;
                     if (strLen == 0) {
                         showHexZeroes = 1;
@@ -425,10 +408,8 @@ namespace SourceGen {
                     strLen--;
                     if (strLen == 0) {
                         showHexZeroes = 1;
-                    } else {
-                        highAscii = (data[strOffset] & 0x80) != 0;
                     }
-                    popcode = highAscii ? opNames.StrLen8Hi : opNames.StrLen8;
+                    popcode = opNames.StrLen8;
                     break;
                 case FormatDescriptor.Type.StringL16:
                     // High or low ASCII, with a leading length word.  Don't show the null.
@@ -438,10 +419,8 @@ namespace SourceGen {
                     strLen -= 2;
                     if (strLen == 0) {
                         showHexZeroes = 2;
-                    } else {
-                        highAscii = (data[strOffset] & 0x80) != 0;
                     }
-                    popcode = highAscii ? opNames.StrLen16Hi : opNames.StrLen16;
+                    popcode = opNames.StrLen16;
                     break;
                 default:
                     Debug.Assert(false);

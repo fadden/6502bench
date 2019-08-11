@@ -89,6 +89,11 @@ namespace SourceGen {
         public const string CDLV_FONT_FAMILY = "cdlv-font-family";
         public const string CDLV_FONT_SIZE = "cdlv-font-size";
 
+        public const string CHR_ASCII_DELIM_PAT = "chr-ascii-delim-pat";
+        public const string CHR_HIGH_ASCII_DELIM_PAT = "chr-high-ascii-delim-pat";
+        public const string CHR_C64_PETSCII_DELIM_PAT = "chr-c64-petscii-delim-pat";
+        public const string CHR_C64_SCREEN_CODE_DELIM_PAT = "chr-c64-screen-code-delim-pat";
+
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";
         public const string HEXD_CHAR_CONV = "hexd-char-conv1";

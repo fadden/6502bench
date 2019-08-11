@@ -47,11 +47,12 @@ limitations under the License.
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <GroupBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Header="Column Visibility"
+                    <GroupBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Header="Column Visibility"
                               Margin="0,0,10,0">
                         <StackPanel>
                             <Button Name="showCol0" Content="{}{0} Offset" Width="120" Margin="0,4"
@@ -85,7 +86,7 @@ limitations under the License.
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Grid.Column="1" Grid.Row="1" Header="Upper Case Display"
+                    <GroupBox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Header="Upper Case Display"
                               Margin="5,0,5,0">
                         <StackPanel>
                             <CheckBox Content="Hexadecimal Values" Margin="0,4"
@@ -117,13 +118,110 @@ limitations under the License.
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Grid.Column="2" Grid.Row="1" Header="Miscellaneous"
+                    <GroupBox Grid.Column="2" Grid.Row="1" Header="Text Delimiters"
                               Margin="10,0,0,0">
-                        <CheckBox Content="Add spaces in bytes column" Margin="0,4,0,0"
-                                  IsChecked="{Binding SpacesBetweenBytes}"/>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.Resources>
+                                    <!-- TextBox spacer -->
+                                    <Thickness x:Key="TBS" Left="6" Top="4" Right="0" Bottom="0"/>
+                                    <Thickness x:Key="ASC" Left="0" Top="2" Right="0" Bottom="0"/>
+                                </Grid.Resources>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.8*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="ASCII:" Grid.Column="0" Grid.Row="0"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Margin="{StaticResource ASC}"/>
+                                <TextBox Grid.Column="1" Grid.Row="0"
+                                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}">
+                                    <TextBox.Text>
+                                        <Binding Path="AsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
+                                                 FallbackValue="[#]">
+                                            <Binding.ValidationRules>
+                                                <local:StringDelimiterRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+
+                                <TextBlock Text="High ASCII:" Grid.Column="0" Grid.Row="1"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Margin="{StaticResource ASC}"/>
+                                <TextBox Grid.Column="1" Grid.Row="1"
+                                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}">
+                                    <TextBox.Text>
+                                        <Binding Path="HighAsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
+                                                 FallbackValue="[#]">
+                                            <Binding.ValidationRules>
+                                                <local:StringDelimiterRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+
+                                <TextBlock Text="C64 PETSCII:" Grid.Column="0" Grid.Row="2"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Margin="{StaticResource ASC}"/>
+                                <TextBox Grid.Column="1" Grid.Row="2"
+                                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}">
+                                    <TextBox.Text>
+                                        <Binding Path="PetsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
+                                                 FallbackValue="[#]">
+                                            <Binding.ValidationRules>
+                                                <local:StringDelimiterRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+
+                                <TextBlock Text="C64 Screen:" Grid.Column="0" Grid.Row="3"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Margin="{StaticResource ASC}"/>
+                                <TextBox Grid.Column="1" Grid.Row="3"
+                                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}">
+                                    <TextBox.Text>
+                                        <Binding Path="ScreenCodeDelimPat" UpdateSourceTrigger="PropertyChanged"
+                                                 FallbackValue="[#]">
+                                            <Binding.ValidationRules>
+                                                <local:StringDelimiterRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+
+                            <Button Name="defaultTextDelimitersButton" Content="Default" Margin="4,8,0,0"
+                                    Width="70" HorizontalAlignment="Left"
+                                    Click="DefaultTextDelimitersButton_Click"/>
+                        </StackPanel>
                     </GroupBox>
 
-                    <CheckBox Grid.Column="0" Grid.Row="3" Content="Enable DEBUG menu" Margin="4,16,0,0"
+                    <GroupBox Grid.Column="2" Grid.Row="2" Header="Miscellaneous"
+                              Margin="10,0,0,0">
+                        <StackPanel>
+                            <CheckBox Content="Add spaces in bytes column" Margin="0,4,0,0"
+                                      IsChecked="{Binding SpacesBetweenBytes}"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <CheckBox Grid.Column="0" Grid.Row="4" Content="Enable DEBUG menu" Margin="4,16,0,0"
                               IsChecked="{Binding EnableDebugMenu}"/>
                 </Grid>
             </TabItem>
@@ -298,15 +396,15 @@ limitations under the License.
 
 
             <TabItem Name="pseudoOpTab" Header="Pseudo-Op">
-                <TabItem.Resources>
-                    <!-- TextBox spacer -->
-                    <Thickness x:Key="TBS" Left="6" Top="0" Right="0" Bottom="0"/>
-                </TabItem.Resources>
                 <DockPanel LastChildFill="False">
                     <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
                                Text="Select pseudo-op names for display. This does not affect source code generation. Blank entries get a default value."/>
 
                     <Grid DockPanel.Dock="Top" Height="240" Margin="4,0">
+                        <Grid.Resources>
+                            <!-- TextBox spacer -->
+                            <Thickness x:Key="TBS" Left="6" Top="0" Right="0" Bottom="0"/>
+                        </Grid.Resources>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>
@@ -340,11 +438,9 @@ limitations under the License.
                             <TextBlock Text="Big-endian data," HorizontalAlignment="Right"/>
                             <TextBlock Text="two bytes:" HorizontalAlignment="Right"/>
                         </StackPanel>
-                        <TextBlock Grid.Column="0" Grid.Row="3" Text="Generic string:"
+                        <TextBlock Grid.Column="0" Grid.Row="3" Text="Generic str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="0" Grid.Row="4" Text="1-byte len:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="0" Grid.Row="5" Text="Null term string:"
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="1-byte len str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                         <TextBox Name="equDirectiveTextBox" Grid.Column="1" Grid.Row="0"
@@ -367,21 +463,15 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strNullTermTextBox" Grid.Column="1" Grid.Row="5"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
 
                         <!-- second column -->
                         <TextBlock Grid.Column="3" Grid.Row="0" Text="Origin:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="3" Grid.Row="1" Text="Two bytes:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="3" Text="Generic/hi:"
+                        <TextBlock Grid.Column="3" Grid.Row="3" Text="Reverse str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="4" Text="1-byte len/hi:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="5" Text="Null term/hi:"
+                        <TextBlock Grid.Column="3" Grid.Row="4" Text="2-byte len str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                         <TextBox Name="orgDirectiveTextBox" Grid.Column="4" Grid.Row="0"
@@ -392,15 +482,11 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strGenericHiTextBox" Grid.Column="4" Grid.Row="3"
+                        <TextBox Name="strReverseTextBox" Grid.Column="4" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strLen8HiTextBox" Grid.Column="4" Grid.Row="4"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strNullTermHiTextBox" Grid.Column="4" Grid.Row="5"
+                        <TextBox Name="strLen16TextBox" Grid.Column="4" Grid.Row="4"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
@@ -412,11 +498,7 @@ limitations under the License.
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="6" Grid.Row="2" Text="Fill:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="3" Text="Reverse:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="4" Text="2-byte len:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="5" Text="DCI:"
+                        <TextBlock Grid.Column="6" Grid.Row="3" Text="Null-term str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                         <TextBox Name="regWidthDirectiveTextBox" Grid.Column="7" Grid.Row="0"
@@ -431,15 +513,7 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strReverseTextBox" Grid.Column="7" Grid.Row="3"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strLen16TextBox" Grid.Column="7" Grid.Row="4"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strDciTextBox" Grid.Column="7" Grid.Row="5"
+                        <TextBox Name="strNullTermTextBox" Grid.Column="7" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
@@ -449,11 +523,7 @@ limitations under the License.
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="9" Grid.Row="2" Text="Bulk data:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="9" Grid.Row="3" Text="Reverse/hi:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="9" Grid.Row="4" Text="2-byte len/hi:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="9" Grid.Row="5" Text="DCI/hi:"
+                        <TextBlock Grid.Column="9" Grid.Row="3" Text="DCI str:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                         <TextBox Name="defineData4TextBox" Grid.Column="10" Grid.Row="1"
@@ -464,15 +534,7 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strReverseHiTextBox" Grid.Column="10" Grid.Row="3"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strLen16HiTextBox" Grid.Column="10" Grid.Row="4"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strDciHiTextBox" Grid.Column="10" Grid.Row="5"
+                        <TextBox Name="strDciTextBox" Grid.Column="10" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="8"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>

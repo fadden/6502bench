@@ -108,48 +108,19 @@ namespace SourceGen.AsmGen {
             Fill = "ds",
             Dense = "hex",
             StrGeneric = "asc",
-            StrGenericHi = "asc",
             StrReverse = "rev",
-            StrReverseHi = "rev",
             //StrNullTerm
             StrLen8 = "str",
-            StrLen8Hi = "str",
             StrLen16 = "strl",
-            StrLen16Hi = "strl",
             StrDci = "dci",
-            StrDciHi = "dci",
         };
 
 
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            // This is not intended to match up with the Merlin generator, which uses
-            // the same pseudo-op for low/high ASCII but different string delimiters.  We
-            // don't change the delimiters for the display list, so instead we tweak the
-            // opcode slightly.
-            char hiAscii = '\u2191';
-            pseudoOps = new PseudoOp.PseudoOpNames() {
-                EquDirective = "equ",
-                OrgDirective = "org",
-                DefineData1 = "dfb",
-                DefineData2 = "dw",
-                DefineData3 = "adr",
-                DefineData4 = "adrl",
-                DefineBigData2 = "ddb",
-                Fill = "ds",
-                Dense = "hex",
-                StrGeneric = "asc",
-                StrGenericHi = "asc" + hiAscii,
-                StrReverse = "rev",
-                StrReverseHi = "rev" + hiAscii,
-                StrLen8 = "str",
-                StrLen8Hi = "str" + hiAscii,
-                StrLen16 = "strl",
-                StrLen16Hi = "strl" + hiAscii,
-                StrDci = "dci",
-                StrDciHi = "dci" + hiAscii,
-            };
+            pseudoOps = sDataOpNames.GetCopy();
+            pseudoOps.RegWidthDirective = string.Empty;
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);

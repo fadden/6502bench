@@ -146,17 +146,11 @@ namespace SourceGen.WpfGui {
                 new TextBoxPropertyMap(fillTextBox, "Fill"),
                 new TextBoxPropertyMap(denseTextBox, "Dense"),
                 new TextBoxPropertyMap(strGenericTextBox, "StrGeneric"),
-                new TextBoxPropertyMap(strGenericHiTextBox, "StrGenericHi"),
                 new TextBoxPropertyMap(strReverseTextBox, "StrReverse"),
-                new TextBoxPropertyMap(strReverseHiTextBox, "StrReverseHi"),
                 new TextBoxPropertyMap(strLen8TextBox, "StrLen8"),
-                new TextBoxPropertyMap(strLen8HiTextBox, "StrLen8Hi"),
                 new TextBoxPropertyMap(strLen16TextBox, "StrLen16"),
-                new TextBoxPropertyMap(strLen16HiTextBox, "StrLen16Hi"),
                 new TextBoxPropertyMap(strNullTermTextBox, "StrNullTerm"),
-                new TextBoxPropertyMap(strNullTermHiTextBox, "StrNullTermHi"),
                 new TextBoxPropertyMap(strDciTextBox, "StrDci"),
-                new TextBoxPropertyMap(strDciHiTextBox, "StrDciHi"),
             };
         }
 
@@ -420,6 +414,61 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
                 IsDirty = true;
             }
+        }
+
+        private const string DEFAULT_ASCII_DELIM_PAT = "\u2018#\u2019";
+        private const string DEFAULT_HIGH_ASCII_DELIM_PAT = "\u201c#\u201d";
+        private const string DEFAULT_C64_PETSCII_DELIM_PAT = "pet:#";
+        private const string DEFAULT_C64_SCREEN_CODE_DELIM_PAT = "scr:#";
+        public string AsciiDelimPat {
+            get {
+                return mSettings.GetString(AppSettings.CHR_ASCII_DELIM_PAT, DEFAULT_ASCII_DELIM_PAT);
+            }
+            set {
+                mSettings.SetString(AppSettings.CHR_ASCII_DELIM_PAT, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        public string HighAsciiDelimPat {
+            get {
+                return mSettings.GetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT,
+                    DEFAULT_HIGH_ASCII_DELIM_PAT);
+            }
+            set {
+                mSettings.SetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        public string PetsciiDelimPat {
+            get {
+                return mSettings.GetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT,
+                    DEFAULT_C64_PETSCII_DELIM_PAT);
+            }
+            set {
+                mSettings.SetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        public string ScreenCodeDelimPat {
+            get {
+                return mSettings.GetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT,
+                    DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
+            }
+            set {
+                mSettings.SetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+
+        private void DefaultTextDelimitersButton_Click(object sender, RoutedEventArgs e) {
+            AsciiDelimPat = DEFAULT_ASCII_DELIM_PAT;
+            HighAsciiDelimPat = DEFAULT_HIGH_ASCII_DELIM_PAT;
+            PetsciiDelimPat = DEFAULT_C64_PETSCII_DELIM_PAT;
+            ScreenCodeDelimPat = DEFAULT_C64_SCREEN_CODE_DELIM_PAT;
         }
 
         #endregion Code View
@@ -834,6 +883,11 @@ namespace SourceGen.WpfGui {
 
             // No need to set this to anything specific.
             pseudoOpQuickComboBox.SelectedIndex = 0;
+
+            // Create text field listeners.
+            foreach (TextBoxPropertyMap pmap in mPseudoNameMap) {
+                pmap.TextBox.TextChanged += PseudoOpTextChanged;
+            }
         }
 
         /// <summary>
@@ -885,6 +939,9 @@ namespace SourceGen.WpfGui {
         #endregion PseudoOp
     }
 
+    /// <summary>
+    /// Text entry validation rule for assembler column widths.
+    /// </summary>
     public class AsmColWidthRule : ValidationRule {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
             // Validating TextBox input, so value should always be a string.  Check anyway.
@@ -905,6 +962,23 @@ namespace SourceGen.WpfGui {
 
             //Debug.WriteLine("VVV not valid integer: '" + strValue + "'");
             return new ValidationResult(false, "Invalid integer value: '" + strValue + "'");
+        }
+    }
+
+    /// <summary>
+    /// Text entry validation rule for text string delimiter patterns.
+    /// </summary>
+    public class StringDelimiterRule : ValidationRule {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+            string strValue = Convert.ToString(value);
+            int firstHash = strValue.IndexOf('#');
+            if (firstHash < 0) {
+                return new ValidationResult(false, "Must include exactly one '#'");
+            }
+            if (strValue.LastIndexOf('#') != firstHash) {
+                return new ValidationResult(false, "Found more than one '#'");
+            }
+            return ValidationResult.ValidResult;
         }
     }
 }
