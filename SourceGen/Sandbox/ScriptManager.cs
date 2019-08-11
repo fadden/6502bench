@@ -220,6 +220,20 @@ namespace SourceGen.Sandbox {
         }
         private void DebugGetScriptInfo(IPlugin plugin, StringBuilder sb) {
             sb.Append(plugin.Identifier);
+            sb.Append(":");
+
+            // The plugin is actually a MarshalByRefObject, so we can't use reflection
+            // to gather the list of interfaces.
+            // TODO(maybe): add a call that does the query on the remote site
+            if (plugin is PluginCommon.IPlugin_InlineJsr) {
+                sb.Append(" InlineJsr");
+            }
+            if (plugin is PluginCommon.IPlugin_InlineJsl) {
+                sb.Append(" InlineJsl");
+            }
+            if (plugin is PluginCommon.IPlugin_InlineBrk) {
+                sb.Append(" InlineBrk");
+            }
             sb.Append("\r\n");
         }
     }

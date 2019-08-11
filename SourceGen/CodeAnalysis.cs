@@ -107,6 +107,10 @@ namespace SourceGen {
         /// </summary>
         private IPlugin[] mScriptArray;
 
+        [Flags]
+        private enum PluginCap { NONE = 0, JSR = 1 << 0, JSL = 1 << 1, BRK = 1 << 2 };
+        private PluginCap[] mPluginCaps;
+
         /// <summary>
         /// CPU to use when analyzing data.
         /// </summary>
@@ -293,11 +297,26 @@ namespace SourceGen {
             if (mScriptManager == null) {
                 // Currently happens for regression tests with no external files.
                 mScriptArray = new IPlugin[0];
+                mPluginCaps = new PluginCap[0];
                 return;
             }
 
             // Include all scripts.
             mScriptArray = mScriptManager.GetAllInstances().ToArray();
+            mPluginCaps = new PluginCap[mScriptArray.Length];
+            for (int i = 0; i < mScriptArray.Length; i++) {
+                PluginCap cap = PluginCap.NONE;
+                if (mScriptArray[i] is IPlugin_InlineJsr) {
+                    cap |= PluginCap.JSR;
+                }
+                if (mScriptArray[i] is IPlugin_InlineJsl) {
+                    cap |= PluginCap.JSL;
+                }
+                if (mScriptArray[i] is IPlugin_InlineBrk) {
+                    cap |= PluginCap.BRK;
+                }
+                mPluginCaps[i] = cap;
+            }
 
             // Prep them.
             mScriptManager.PrepareScripts(mScriptSupport);
@@ -909,13 +928,17 @@ namespace SourceGen {
         private bool CheckForInlineCall(OpDef op, int offset, bool noContinue) {
             for (int i = 0; i < mScriptArray.Length; i++) {
                 IPlugin script = mScriptArray[i];
-                if (op == OpDef.OpJSR_Abs && script is IPlugin_InlineJsr) {
+                // The IPlugin object is a MarshalByRefObject, which doesn't define the
+                // interface directly.  A simple test showed it was fairly quick when the
+                // interface was implemented but a bit slow when it wasn't.  For performance
+                // we query the capability flags instead.
+                if (op == OpDef.OpJSR_Abs && (mPluginCaps[i] & PluginCap.JSR) != 0) {
                     ((IPlugin_InlineJsr)script).CheckJsr(offset, out bool noCont);
                     noContinue |= noCont;
-                } else if (op == OpDef.OpJSR_AbsLong && script is IPlugin_InlineJsl) {
+                } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
                     ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
                     noContinue |= noCont;
-                } else if (op == OpDef.OpBRK_Implied && script is IPlugin_InlineBrk) {
+                } else if (op == OpDef.OpBRK_Implied && (mPluginCaps[i] & PluginCap.BRK) != 0) {
                     ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
                     noContinue &= noCont;
                 }
