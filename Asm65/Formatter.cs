@@ -72,10 +72,12 @@ namespace Asm65 {
             public string mFullLineCommentDelimiterBase; // usually ';' or '*', WITHOUT extra space
             public string mBoxLineCommentDelimiter;     // usually blank or ';'
 
-            public string mAsciiDelimPattern;           // delimiter pattern for ASCII constants
-            public string mHighAsciiDelimPattern;       // delimiter pattern for high ASCII
-            public string mC64PetsciiDelimPattern;      // delimiter pattern for C64 PETSCII
-            public string mC64ScreenCodeDelimPattern;   // delimiter pattern for C64 screen code
+            // delimiter patterns for single character constants
+            // (currently also used for on-screen strings; asm gen strings are handled differently)
+            public string mAsciiDelimPattern;
+            public string mHighAsciiDelimPattern;
+            public string mC64PetsciiDelimPattern;
+            public string mC64ScreenCodeDelimPattern;
 
             // miscellaneous
             public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
@@ -85,6 +87,7 @@ namespace Asm65 {
             public enum CharConvMode { Unknown = 0, PlainAscii, HighLowAscii };
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
+            // This determines what operators are available and what their precedence is.
             // Hopefully we don't need a separate mode for every assembler in existence.
             public enum ExpressionMode { Unknown = 0, Common, Cc65, Merlin };
             public ExpressionMode mExpressionMode;      // symbol rendering mode

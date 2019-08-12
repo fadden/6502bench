@@ -53,7 +53,7 @@ limitations under the License.
                     </Grid.RowDefinitions>
 
                     <GroupBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Header="Column Visibility"
-                              Margin="0,0,10,0">
+                              Margin="0,0,10,0" Padding="2,0">
                         <StackPanel>
                             <Button Name="showCol0" Content="{}{0} Offset" Width="120" Margin="0,4"
                                     Click="ColumnVisibilityButton_Click"/>
@@ -77,9 +77,9 @@ limitations under the License.
                     </GroupBox>
 
                     <GroupBox Grid.Column="1" Grid.Row="0" Header="Code List Font"
-                              Margin="5,0,5,0">
+                              Margin="5,0,5,0" Padding="2,4">
                         <StackPanel>
-                            <TextBlock Margin="0,4,0,0">Current font:</TextBlock>
+                            <TextBlock>Current font:</TextBlock>
                             <TextBlock Name="codeListFontDesc" Margin="0,4,0,0">10-pt Hoser Sans</TextBlock>
                             <Button Content="Select Font..." Width="120" Margin="0,8,0,0"
                                     HorizontalAlignment="Left" Click="SelectFontButton_Click"/>
@@ -87,7 +87,7 @@ limitations under the License.
                     </GroupBox>
 
                     <GroupBox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Header="Upper Case Display"
-                              Margin="5,0,5,0">
+                              Margin="5,0,5,0" Padding="2,4">
                         <StackPanel>
                             <CheckBox Content="Hexadecimal Values" Margin="0,4"
                                       IsChecked="{Binding UpperHexValues}"/>
@@ -109,9 +109,9 @@ limitations under the License.
                     </GroupBox>
 
                     <GroupBox Grid.Column="2" Grid.Row="0" Header="Clipboard"
-                              Margin="10,0,0,0">
+                              Margin="10,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <TextBlock Margin="0,4,0,0">Format for lines copied to clipboard:</TextBlock>
+                            <TextBlock>Format for lines copied to clipboard:</TextBlock>
                             <ComboBox Name="clipboardFormatComboBox" IsReadOnly="True" Margin="0,8,0,0"
                                       ItemsSource="{Binding ClipboardFormatItems}" DisplayMemberPath="Name"
                                       SelectionChanged="ClipboardFormatComboBox_SelectionChanged"/>
@@ -119,7 +119,7 @@ limitations under the License.
                     </GroupBox>
 
                     <GroupBox Grid.Column="2" Grid.Row="1" Header="Text Delimiters"
-                              Margin="10,0,0,0">
+                              Margin="10,0,0,0" Padding="2,0">
                         <StackPanel>
                             <Grid>
                                 <Grid.Resources>
@@ -128,7 +128,7 @@ limitations under the License.
                                     <Thickness x:Key="ASC" Left="0" Top="2" Right="0" Bottom="0"/>
                                 </Grid.Resources>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="0.8*"/>
+                                    <ColumnDefinition Width="0.95*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -189,7 +189,7 @@ limitations under the License.
                                     </TextBox.Text>
                                 </TextBox>
 
-                                <TextBlock Text="C64 Screen:" Grid.Column="0" Grid.Row="3"
+                                <TextBlock Text="C64 Screen Code:" Grid.Column="0" Grid.Row="3"
                                            HorizontalAlignment="Right" VerticalAlignment="Center"
                                            Margin="{StaticResource ASC}"/>
                                 <TextBox Grid.Column="1" Grid.Row="3"
@@ -225,9 +225,9 @@ limitations under the License.
                     </GroupBox>
 
                     <GroupBox Grid.Column="2" Grid.Row="2" Header="Miscellaneous"
-                              Margin="10,0,0,0">
+                              Margin="10,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Add spaces in bytes column" Margin="0,4,0,0"
+                            <CheckBox Content="Add spaces in bytes column"
                                       IsChecked="{Binding SpacesBetweenBytes}"/>
                         </StackPanel>
                     </GroupBox>
@@ -240,8 +240,8 @@ limitations under the License.
 
             <TabItem Name="asmConfigTab" Header="Asm Config">
                 <StackPanel>
-                    <GroupBox Header="Assembler Configuration">
-                        <Grid Margin="0,4,0,0">
+                    <GroupBox Header="Assembler Configuration" Padding="2,4">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -334,7 +334,7 @@ limitations under the License.
                     <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
                                Text="Configure display format options. This does not affect source code generation."/>
                     <GroupBox Header="Operand Width Disambiguator" Width="300" DockPanel.Dock="Top"
-                              HorizontalAlignment="Left" Margin="0,8,0,0">
+                              HorizontalAlignment="Left" Margin="0,8,0,0" Padding="2,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -391,8 +391,8 @@ limitations under the License.
                     </StackPanel>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              Width="400" HorizontalAlignment="Right">
-                        <DockPanel LastChildFill="False" Margin="8">
+                              Width="400" HorizontalAlignment="Right" Padding="2,4">
+                        <DockPanel LastChildFill="False" Margin="4">
                             <Button DockPanel.Dock="Left" Content="Default" Width="75"
                                     Click="QuickFmtDefaultButton_Click"/>
                             <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"
@@ -552,8 +552,8 @@ limitations under the License.
                     </Grid>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              Width="400" HorizontalAlignment="Right">
-                        <DockPanel LastChildFill="False" Margin="8">
+                              Width="400" HorizontalAlignment="Right" Padding="2,4">
+                        <DockPanel LastChildFill="False" Margin="4">
                             <Button DockPanel.Dock="Left" Content="Default" Width="75"
                                     Click="PseudoOpDefaultButton_Click"/>
                             <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"
