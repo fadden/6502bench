@@ -61,9 +61,6 @@ namespace Asm65 {
             public bool mSuppressHexNotation;       // omit '$' before hex digits
             public bool mSuppressImpliedAcc;        // emit just "LSR" rather than "LSR A"?
 
-            public bool mAllowHighAsciiCharConst;   // can we do high-ASCII character constants?
-                                                    // (this might need to be generalized)
-
             public string mForceDirectOperandPrefix;    // these may be null or empty
             public string mForceAbsOpcodeSuffix;
             public string mForceAbsOperandPrefix;
@@ -75,11 +72,16 @@ namespace Asm65 {
             public string mFullLineCommentDelimiterBase; // usually ';' or '*', WITHOUT extra space
             public string mBoxLineCommentDelimiter;     // usually blank or ';'
 
+            public string mAsciiDelimPattern;           // delimiter pattern for ASCII constants
+            public string mHighAsciiDelimPattern;       // delimiter pattern for high ASCII
+            public string mC64PetsciiDelimPattern;      // delimiter pattern for C64 PETSCII
+            public string mC64ScreenCodeDelimPattern;   // delimiter pattern for C64 screen code
+
             // miscellaneous
+            public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
+
+            // hex dumps
             public bool mHexDumpAsciiOnly;              // disallow non-ASCII chars in hex dumps?
-
-            public bool mSpacesBetweenBytes;    // "20edfd" vs. "20 ed fd"
-
             public enum CharConvMode { Unknown = 0, PlainAscii, HighLowAscii };
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
@@ -131,6 +133,13 @@ namespace Asm65 {
         private string mAddrFormatNoBank;
         private string mAddrFormatWithBank;
 
+        // Character data delimiter format strings, processed from the delimiter patterns.
+        private string mAsciiDelimFmt;
+        private string mHighAsciiDelimFmt;
+        private string mC64PetsciiDelimFmt;
+        private string mC64ScreenCodeDelimFmt;
+
+
         // Generated opcode strings.  The index is the bitwise OR of the opcode value and
         // the disambiguation value.  In most cases this just helps us avoid calling
         // ToUpper incessantly.
@@ -154,7 +163,6 @@ namespace Asm65 {
 
         // Buffer to use when generating hex dump lines.
         private char[] mHexDumpBuffer;
-
 
         /// <summary>
         /// A 16-character array with 0-9a-f, for hex conversions.  The letters will be
@@ -199,8 +207,12 @@ namespace Asm65 {
         }
 
 
+        /// <summary>
+        /// Constructor.  Initializes various fields based on the configuration.  We want to
+        /// do as much work as possible here.
+        /// </summary>
         public Formatter(FormatConfig config) {
-            mFormatConfig = config;
+            mFormatConfig = config;     // copy struct
             if (mFormatConfig.mEndOfLineCommentDelimiter == null) {
                 mFormatConfig.mEndOfLineCommentDelimiter = string.Empty;
             }
@@ -217,30 +229,14 @@ namespace Asm65 {
                 mFullLineCommentDelimiterPlus = mFormatConfig.mFullLineCommentDelimiterBase;
             }
 
-            Reset();
-
             // Prep the static parts of the hex dump buffer.
             mHexDumpBuffer = new char[73];
             for (int i = 0; i < mHexDumpBuffer.Length; i++) {
                 mHexDumpBuffer[i] = ' ';
             }
             mHexDumpBuffer[6] = ':';
-        }
 
-        /// <summary>
-        /// Resets the pieces we use to build format strings.
-        /// </summary>
-        private void Reset() {
-            // Clear old data.  (No longer needed.)
-            //mAddrFormatNoBank = mAddrFormatWithBank = null;
-            //mOffset24Format = null;
-            //mOpcodeStrings.Clear();
-            //mPseudoOpStrings.Clear();
-            //mOperandFormats.Clear();
-            //for (int i = 0; i < MAX_BYTE_DUMP; i++) {
-            //    mByteDumpFormats[i] = null;
-            //}
-
+            // Resolve boolean flags to character or string values.
             if (mFormatConfig.mUpperHexDigits) {
                 mHexFmtChar = 'X';
             } else {
@@ -251,7 +247,9 @@ namespace Asm65 {
             } else {
                 mHexPrefix = "$";
             }
-            if (mFormatConfig.mUpperOperandA) {
+            if (mFormatConfig.mSuppressImpliedAcc) {
+                mAccChar = "";
+            } else if (mFormatConfig.mUpperOperandA) {
                 mAccChar = "A";
             } else {
                 mAccChar = "a";
@@ -268,6 +266,27 @@ namespace Asm65 {
             } else {
                 mSregChar = 's';
             }
+
+            // process the delimiter patterns
+            mAsciiDelimFmt = PatternToFormat(mFormatConfig.mAsciiDelimPattern);
+            mHighAsciiDelimFmt = PatternToFormat(mFormatConfig.mHighAsciiDelimPattern);
+            mC64PetsciiDelimFmt = PatternToFormat(mFormatConfig.mC64PetsciiDelimPattern);
+            mC64ScreenCodeDelimFmt = PatternToFormat(mFormatConfig.mC64ScreenCodeDelimPattern);
+        }
+
+        private string PatternToFormat(string pat) {
+            if (string.IsNullOrEmpty(pat)) {
+                return string.Empty;
+            }
+            // Must be exactly one '#'.
+            int firstHash = pat.IndexOf('#');
+            int lastHash = pat.LastIndexOf('#');
+            if (firstHash < 0 || firstHash != lastHash) {
+                Debug.WriteLine("Invalid delimiter pattern '" + pat + "'");
+                return string.Empty;
+            }
+
+            return pat.Replace("#", "{0}");
         }
 
         /// <summary>
@@ -352,69 +371,43 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Formats a value as an ASCII character, surrounded by quotes.  Must be a valid
-        /// low- or high-ASCII value.
+        /// Formats a single-character operand.  Output will be a delimited printable character
+        /// when possible, a hex value when the converted character is unprintable.
         /// </summary>
-        /// <param name="value">Value to format.</param>
+        /// <param name="value">Value to format.  Could be a 16-bit immediate value.</param>
+        /// <param name="enc">Character encoding to use for value.</param>
         /// <returns>Formatted string.</returns>
-        private string FormatAsciiChar(int value) {
-            Debug.Assert(CommonUtil.TextUtil.IsHiLoAscii(value));
-            char ch = (char)(value & 0x7f);
-            bool hiAscii = ((value & 0x80) != 0);
-
-            StringBuilder sb;
-            int method = -1;
-            switch (method) {
-                case 0:
-                default:
-                    // Convention is from Merlin: single quote for low-ASCII, double-quote
-                    // for high-ASCII.  Add a backslash if we're quoting the delimiter.
-                    sb = new StringBuilder(4);
-                    char quoteChar = ((value & 0x80) == 0) ? '\'' : '"';
-                    sb.Append(quoteChar);
-                    if (quoteChar == ch) {
-                        sb.Append('\\');
-                    }
-                    sb.Append(ch);
-                    sb.Append(quoteChar);
-                    break;
-                case 1:
-                    // Convention is similar to Merlin, but with curly-quotes so it doesn't
-                    // look weird when quoting ' or ".
-                    sb = new StringBuilder(3);
-                    sb.Append(hiAscii ? '\u201c' : '\u2018');
-                    sb.Append(ch);
-                    sb.Append(hiAscii ? '\u201d' : '\u2019');
-                    break;
-                case 2:
-                    // Always use apostrophe, but follow it with an up-arrow to indicate
-                    // that it's high-ASCII.
-                    sb = new StringBuilder(4);
-                    sb.Append("'");
-                    sb.Append(ch);
-                    sb.Append("'");
-                    if (hiAscii) {
-                        sb.Append('\u21e1');    // UPWARDS DASHED ARROW
-                        //sb.Append('\u2912');    // UPWARDS ARROW TO BAR
-                    }
-                    break;
+        public string FormatCharacterValue(int value, CharEncoding.Encoding enc) {
+            if (value < 0 || value > 0xff) {
+                return FormatHexValue(value, 2);
             }
-            return sb.ToString();
-        }
 
-        /// <summary>
-        /// Formats a value as an ASCII character, if possible, or as a hex value.
-        /// </summary>
-        /// <param name="value">Value to format.</param>
-        /// <returns>Formatted string.</returns>
-        public string FormatAsciiOrHex(int value) {
-            bool hiAscii = ((value & 0x80) != 0);
-            if (hiAscii && !mFormatConfig.mAllowHighAsciiCharConst) {
+            string fmt;
+            CharEncoding.Convert conv;
+            switch (enc) {
+                case CharEncoding.Encoding.Ascii:
+                    fmt = mAsciiDelimFmt;
+                    conv = CharEncoding.ConvertAscii;
+                    break;
+                case CharEncoding.Encoding.HighAscii:
+                    fmt = mHighAsciiDelimFmt;
+                    conv = CharEncoding.ConvertHighAscii;
+                    break;
+                case CharEncoding.Encoding.C64Petscii:
+                case CharEncoding.Encoding.C64ScreenCode:
+                default:
+                    return FormatHexValue(value, 2);
+            }
+            if (string.IsNullOrEmpty(fmt)) {
                 return FormatHexValue(value, 2);
-            } else if (CommonUtil.TextUtil.IsHiLoAscii(value)) {
-                return FormatAsciiChar(value);
+            }
+
+            char ch = conv((byte)value);
+            if (ch == CharEncoding.UNPRINTABLE_CHAR) {
+                return FormatHexValue(value, 2);
             } else {
-                return FormatHexValue(value, 2);
+                // possible optimization: replace fmt with a prefix/suffix pair, and just concat
+                return string.Format(fmt, ch);
             }
         }
 
@@ -577,11 +570,7 @@ namespace Asm65 {
                     fmt = "[{0}]";
                     break;
                 case AddressMode.Acc:
-                    if (mFormatConfig.mSuppressImpliedAcc) {
-                        fmt = string.Empty;
-                    } else {
-                        fmt = mAccChar;
-                    }
+                    fmt = mAccChar;
                     break;
                 case AddressMode.DPIndIndexY:
                     fmt = "({0})," + mYregChar;

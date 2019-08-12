@@ -34,6 +34,10 @@ limitations under the License.
     <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>
     <system:String x:Key="str_DefaultHeaderCommentFmt">6502bench SourceGen v{0}</system:String>
     <system:String x:Key="str_DefaultValue">Default</system:String>
+    <system:String x:Key="str_DefaultAsciiDelimPat">&#x2018;#&#x2019;</system:String>
+    <system:String x:Key="str_DefaultHighAsciiDelimPat">&#x201c;#&#x201d;</system:String>
+    <system:String x:Key="str_DefaultC64PetsciiDelimPat">pet:&#x201c;#&#x201d;</system:String>
+    <system:String x:Key="str_DefaultC64ScreenCodeDelimPat">scr:&#x201c;#&#x201d;</system:String>
     <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
     <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>

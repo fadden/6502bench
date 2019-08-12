@@ -20,17 +20,20 @@ using System.Diagnostics;
 namespace SourceGen {
     /// <summary>
     /// Format descriptor for data items and instruction operands.  Instances are immutable.
-    /// 
+    ///
     /// A list of these is saved as part of the project definition.  Code and data that
     /// doesn't have one of these will be formatted with default behavior.  For data that
     /// means a single hexadecimal byte.
-    /// 
+    ///
     /// These are referenced from the project and the Anattribs array.  Entries in the
     /// latter may come from the project (as specified by the user), or be auto-generated
     /// by the data analysis pass.
-    /// 
+    ///
     /// There may be a large number of these, so try to keep the size down.  These are usually
     /// stored in lists, not arrays, so declaring as a struct wouldn't help with that.
+    ///
+    /// The stringified form of the enum values are currently serialized into the project
+    /// file.  DO NOT rename members of the enumeration without creating an upgrade path.
     /// </summary>
     public class FormatDescriptor {
         /// <summary>
@@ -76,7 +79,7 @@ namespace SourceGen {
             Symbol,             // symbolic ref; replace with Expression, someday?
 
             // Strings and NumericLE/BE (single character)
-            LowAscii,           // ASCII (high bit clear)
+            Ascii,              // ASCII (high bit clear)
             HighAscii,          // ASCII (high bit set)
             C64Petscii,         // C64 PETSCII (lower case $41-5a, upper case $c1-da)
             C64Screen,          // C64 screen code
@@ -103,7 +106,7 @@ namespace SourceGen {
         private static FormatDescriptor ONE_BINARY = new FormatDescriptor(1,
             Type.NumericLE, SubType.Binary);
         private static FormatDescriptor ONE_LOW_ASCII = new FormatDescriptor(1,
-            Type.NumericLE, SubType.LowAscii);
+            Type.NumericLE, SubType.Ascii);
 
         /// <summary>
         /// Length, in bytes, of the data to be formatted.
@@ -213,7 +216,7 @@ namespace SourceGen {
                             return ONE_DECIMAL;
                         case SubType.Binary:
                             return ONE_BINARY;
-                        case SubType.LowAscii:
+                        case SubType.Ascii:
                             return ONE_LOW_ASCII;
                     }
                 }
@@ -350,7 +353,7 @@ namespace SourceGen {
             if (IsString) {
                 string descr;
                 switch (FormatSubType) {
-                    case SubType.LowAscii:
+                    case SubType.Ascii:
                         descr = "ASCII";
                         break;
                     case SubType.HighAscii:
@@ -417,7 +420,7 @@ namespace SourceGen {
                     return "Address";
                 case SubType.Symbol:
                     return "Symbol \"" + SymbolRef.Label + "\"";
-                case SubType.LowAscii:
+                case SubType.Ascii:
                     return "Numeric, ASCII";
                 case SubType.HighAscii:
                     return "Numeric, ASCII (high)";

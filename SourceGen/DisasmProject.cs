@@ -435,7 +435,7 @@ namespace SourceGen {
                         bool isHigh = (FileData[checkOffset] & 0x80) != 0;
                         newDfd = FormatDescriptor.Create(dfd.Length, dfd.FormatType,
                             isHigh ? FormatDescriptor.SubType.HighAscii :
-                                FormatDescriptor.SubType.LowAscii);
+                                FormatDescriptor.SubType.Ascii);
                     } else if (dfd.IsNumeric) {
                         // This is a character constant in an instruction or data operand, such
                         // as ".dd1 'f'" or "LDA #'f'".  Could be multi-byte (even instructions
@@ -463,7 +463,7 @@ namespace SourceGen {
                         bool isHigh = (FileData[checkOffset] & 0x80) != 0;
                         newDfd = FormatDescriptor.Create(dfd.Length, dfd.FormatType,
                             isHigh ? FormatDescriptor.SubType.HighAscii :
-                                FormatDescriptor.SubType.LowAscii);
+                                FormatDescriptor.SubType.Ascii);
                     } else {
                         Debug.Assert(false);
                         newDfd = dfd;

@@ -739,7 +739,7 @@ namespace SourceGen {
                     bool isHigh = (mFileData[start] & 0x80) != 0;
                     mAnattribs[start].DataDescriptor = FormatDescriptor.Create(asciiLen,
                         FormatDescriptor.Type.StringGeneric, isHigh ?
-                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.LowAscii);
+                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.Ascii);
                     start += asciiLen;
                     continue;
                 }

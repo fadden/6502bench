@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Asm65 {
@@ -41,18 +40,25 @@ namespace Asm65 {
         /// </remarks>
         public delegate char Convert(byte val);
 
+        public enum Encoding {
+            Unknown = 0,
+            Ascii,
+            HighAscii,
+            C64Petscii,
+            C64ScreenCode,
+        }
 
         //
         // Standard ASCII.
         //
-        public static bool IsPrintableLowAscii(byte val) {
+        public static bool IsPrintableAscii(byte val) {
             return (val >= 0x20 && val < 0x7f);
         }
-        public static bool IsExtendedLowAscii(byte val) {
-            return IsPrintableLowAscii(val) || val == 0x07 || val == 0x0a || val == 0x0d;
+        public static bool IsExtendedAscii(byte val) {
+            return IsPrintableAscii(val) || val == 0x07 || val == 0x0a || val == 0x0d;
         }
-        public static char ConvertLowAscii(byte val) {
-            if (IsPrintableLowAscii(val)) {
+        public static char ConvertAscii(byte val) {
+            if (IsPrintableAscii(val)) {
                 return (char)val;
             } else {
                 return UNPRINTABLE_CHAR;
@@ -80,7 +86,7 @@ namespace Asm65 {
         // High *or* low ASCII.
         //
         public static char ConvertLowAndHighAscii(byte val) {
-            if (IsPrintableLowAscii(val) || IsPrintableHighAscii(val)) {
+            if (IsPrintableAscii(val) || IsPrintableHighAscii(val)) {
                 return (char)(val & 0x7f);
             } else {
                 return UNPRINTABLE_CHAR;

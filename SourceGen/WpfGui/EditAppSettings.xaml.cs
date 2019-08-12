@@ -416,13 +416,10 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private const string DEFAULT_ASCII_DELIM_PAT = "\u2018#\u2019";
-        private const string DEFAULT_HIGH_ASCII_DELIM_PAT = "\u201c#\u201d";
-        private const string DEFAULT_C64_PETSCII_DELIM_PAT = "pet:#";
-        private const string DEFAULT_C64_SCREEN_CODE_DELIM_PAT = "scr:#";
         public string AsciiDelimPat {
             get {
-                return mSettings.GetString(AppSettings.CHR_ASCII_DELIM_PAT, DEFAULT_ASCII_DELIM_PAT);
+                return mSettings.GetString(AppSettings.CHR_ASCII_DELIM_PAT,
+                    Res.Strings.DEFAULT_ASCII_DELIM_PAT);
             }
             set {
                 mSettings.SetString(AppSettings.CHR_ASCII_DELIM_PAT, value);
@@ -433,7 +430,7 @@ namespace SourceGen.WpfGui {
         public string HighAsciiDelimPat {
             get {
                 return mSettings.GetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT,
-                    DEFAULT_HIGH_ASCII_DELIM_PAT);
+                    Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT);
             }
             set {
                 mSettings.SetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT, value);
@@ -444,7 +441,7 @@ namespace SourceGen.WpfGui {
         public string PetsciiDelimPat {
             get {
                 return mSettings.GetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT,
-                    DEFAULT_C64_PETSCII_DELIM_PAT);
+                    Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT);
             }
             set {
                 mSettings.SetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT, value);
@@ -455,7 +452,7 @@ namespace SourceGen.WpfGui {
         public string ScreenCodeDelimPat {
             get {
                 return mSettings.GetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT,
-                    DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
+                    Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
             }
             set {
                 mSettings.SetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT, value);
@@ -465,10 +462,10 @@ namespace SourceGen.WpfGui {
         }
 
         private void DefaultTextDelimitersButton_Click(object sender, RoutedEventArgs e) {
-            AsciiDelimPat = DEFAULT_ASCII_DELIM_PAT;
-            HighAsciiDelimPat = DEFAULT_HIGH_ASCII_DELIM_PAT;
-            PetsciiDelimPat = DEFAULT_C64_PETSCII_DELIM_PAT;
-            ScreenCodeDelimPat = DEFAULT_C64_SCREEN_CODE_DELIM_PAT;
+            AsciiDelimPat = Res.Strings.DEFAULT_ASCII_DELIM_PAT;
+            HighAsciiDelimPat = Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT;
+            PetsciiDelimPat = Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT;
+            ScreenCodeDelimPat = Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT;
         }
 
         #endregion Code View
@@ -939,6 +936,8 @@ namespace SourceGen.WpfGui {
         #endregion PseudoOp
     }
 
+    #region Validation rules
+
     /// <summary>
     /// Text entry validation rule for assembler column widths.
     /// </summary>
@@ -981,4 +980,6 @@ namespace SourceGen.WpfGui {
             return ValidationResult.ValidResult;
         }
     }
+
+    #endregion Validation rules
 }

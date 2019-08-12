@@ -492,6 +492,21 @@ namespace SourceGen {
             HasHashPrefix,      // operand has a leading '#', avoiding ambiguity in some cases
         }
 
+        public static CharEncoding.Encoding SubTypeToEnc(FormatDescriptor.SubType subType) {
+            switch (subType) {
+                case FormatDescriptor.SubType.Ascii:
+                    return CharEncoding.Encoding.Ascii;
+                case FormatDescriptor.SubType.HighAscii:
+                    return CharEncoding.Encoding.HighAscii;
+                case FormatDescriptor.SubType.C64Petscii:
+                    return CharEncoding.Encoding.C64Petscii;
+                case FormatDescriptor.SubType.C64Screen:
+                    return CharEncoding.Encoding.C64ScreenCode;
+                default:
+                    return CharEncoding.Encoding.Unknown;
+            }
+        }
+
         /// <summary>
         /// Format a numeric operand value according to the specified sub-format.
         /// </summary>
@@ -520,14 +535,12 @@ namespace SourceGen {
                     return formatter.FormatDecimalValue(operandValue);
                 case FormatDescriptor.SubType.Binary:
                     return formatter.FormatBinaryValue(operandValue, hexMinLen * 4);
-                case FormatDescriptor.SubType.LowAscii:
+                case FormatDescriptor.SubType.Ascii:
                 case FormatDescriptor.SubType.HighAscii:
                 case FormatDescriptor.SubType.C64Petscii:
                 case FormatDescriptor.SubType.C64Screen:
-                    // TODO(petscii): convert encoding; use a helper function *not* in
-                    //   formatter -- pass converted char value in along with operandValue
-                    // TODO: pass in a "make high ASCII" string, e.g. "| 0x80", that fixes char
-                    return formatter.FormatAsciiOrHex(operandValue);
+                    CharEncoding.Encoding enc = SubTypeToEnc(dfd.FormatSubType);
+                    return formatter.FormatCharacterValue(operandValue, enc);
                 case FormatDescriptor.SubType.Symbol:
                     if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
                         StringBuilder sb = new StringBuilder();

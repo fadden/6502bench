@@ -332,10 +332,12 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.SubType.Binary:
                     preview.Append(mFormatter.FormatBinaryValue(mOperandValue, 8));
                     break;
-                case FormatDescriptor.SubType.LowAscii:
+                case FormatDescriptor.SubType.Ascii:
                 case FormatDescriptor.SubType.HighAscii:
-                    // TODO(petscii): encoding
-                    preview.Append(mFormatter.FormatAsciiOrHex(mOperandValue));
+                case FormatDescriptor.SubType.C64Petscii:
+                case FormatDescriptor.SubType.C64Screen:
+                    CharEncoding.Encoding enc = PseudoOp.SubTypeToEnc(dfd.FormatSubType);
+                    preview.Append(mFormatter.FormatCharacterValue(mOperandValue, enc));
                     break;
                 case FormatDescriptor.SubType.Symbol:
                     if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
@@ -471,7 +473,7 @@ namespace SourceGen.WpfGui {
                         case FormatDescriptor.SubType.Binary:
                             binaryButton.IsChecked = true;
                             break;
-                        case FormatDescriptor.SubType.LowAscii:
+                        case FormatDescriptor.SubType.Ascii:
                         case FormatDescriptor.SubType.HighAscii:
                             // TODO(petscii): encoding
                             asciiButton.IsChecked = true;
@@ -557,7 +559,7 @@ namespace SourceGen.WpfGui {
                 if (mOperandValue > 0x7f) {
                     subType = FormatDescriptor.SubType.HighAscii;
                 } else {
-                    subType = FormatDescriptor.SubType.LowAscii;
+                    subType = FormatDescriptor.SubType.Ascii;
                 }
             } else if (symbolButton.IsChecked == true) {
                 subType = FormatDescriptor.SubType.Symbol;

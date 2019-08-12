@@ -41,14 +41,14 @@ skipdata: lda    #'h'
          lda     #$7f
          lda     #$80
          lda     #$9f
-         lda     #$a0
-         lda     #$fe
+         lda     #' ' | $80
+         lda     #'~' | $80
          lda     #$ff
          rep     #'0'
          .a16
          .i16
          lda     #'h'
-         lda     #$c8
+         lda     #'H' | $80
          lda     #$6868
          rts
 

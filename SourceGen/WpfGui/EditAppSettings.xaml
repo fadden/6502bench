@@ -143,7 +143,7 @@ limitations under the License.
                                            Margin="{StaticResource ASC}"/>
                                 <TextBox Grid.Column="1" Grid.Row="0"
                                          HorizontalAlignment="Left" VerticalAlignment="Center"
-                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         Margin="{StaticResource TBS}" Width="90" MaxLength="12"
                                          FontFamily="{StaticResource GeneralMonoFont}">
                                     <TextBox.Text>
                                         <Binding Path="AsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
@@ -160,7 +160,7 @@ limitations under the License.
                                            Margin="{StaticResource ASC}"/>
                                 <TextBox Grid.Column="1" Grid.Row="1"
                                          HorizontalAlignment="Left" VerticalAlignment="Center"
-                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         Margin="{StaticResource TBS}" Width="90" MaxLength="12"
                                          FontFamily="{StaticResource GeneralMonoFont}">
                                     <TextBox.Text>
                                         <Binding Path="HighAsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
@@ -177,11 +177,11 @@ limitations under the License.
                                            Margin="{StaticResource ASC}"/>
                                 <TextBox Grid.Column="1" Grid.Row="2"
                                          HorizontalAlignment="Left" VerticalAlignment="Center"
-                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         Margin="{StaticResource TBS}" Width="90" MaxLength="12"
                                          FontFamily="{StaticResource GeneralMonoFont}">
                                     <TextBox.Text>
                                         <Binding Path="PetsciiDelimPat" UpdateSourceTrigger="PropertyChanged"
-                                                 FallbackValue="[#]">
+                                                 FallbackValue="petscii:[#]M">
                                             <Binding.ValidationRules>
                                                 <local:StringDelimiterRule ValidatesOnTargetUpdated="True"/>
                                             </Binding.ValidationRules>
@@ -194,7 +194,7 @@ limitations under the License.
                                            Margin="{StaticResource ASC}"/>
                                 <TextBox Grid.Column="1" Grid.Row="3"
                                          HorizontalAlignment="Left" VerticalAlignment="Center"
-                                         Margin="{StaticResource TBS}" Width="80" MaxLength="8"
+                                         Margin="{StaticResource TBS}" Width="90" MaxLength="12"
                                          FontFamily="{StaticResource GeneralMonoFont}">
                                     <TextBox.Text>
                                         <Binding Path="ScreenCodeDelimPat" UpdateSourceTrigger="PropertyChanged"
@@ -207,9 +207,20 @@ limitations under the License.
                                 </TextBox>
                             </Grid>
 
-                            <Button Name="defaultTextDelimitersButton" Content="Default" Margin="4,8,0,0"
-                                    Width="70" HorizontalAlignment="Left"
-                                    Click="DefaultTextDelimitersButton_Click"/>
+                            <DockPanel LastChildFill="False">
+                                <Button Name="defaultTextDelimitersButton" DockPanel.Dock="Left"
+                                        Content="Default" Width="70" Margin="0,8,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="DefaultTextDelimitersButton_Click"/>
+
+                                <TextBox DockPanel.Dock="Right" IsReadOnly="True"
+                                         Text="&#x2018;&#x2019;&#x2022;&#x201c;&#x201d;&#x2191;&#xab;&#xbb;&#x2770;&#x2771;"
+                                         FontFamily="{StaticResource GeneralMonoFont}"
+                                         FontSize="16"
+                                         VerticalAlignment="Bottom"/>
+                                <TextBlock DockPanel.Dock="Right" Margin="0,0,4,3" VerticalAlignment="Bottom"
+                                           Text="Sample:"/>
+                            </DockPanel>
                         </StackPanel>
                     </GroupBox>
 

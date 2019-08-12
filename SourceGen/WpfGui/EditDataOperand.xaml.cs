@@ -527,7 +527,7 @@ namespace SourceGen.WpfGui {
                             case FormatDescriptor.SubType.Binary:
                                 radioSimpleDataBinary.IsChecked = true;
                                 break;
-                            case FormatDescriptor.SubType.LowAscii:
+                            case FormatDescriptor.SubType.Ascii:
                             case FormatDescriptor.SubType.HighAscii:
                             case FormatDescriptor.SubType.C64Petscii:
                             case FormatDescriptor.SubType.C64Screen:
@@ -687,22 +687,22 @@ namespace SourceGen.WpfGui {
                 //   the subType and the arg to the string-creation functions, which use the
                 //   appropriate char encoding methods to break up the strings
                 type = FormatDescriptor.Type.StringGeneric;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringMixedReverse.IsChecked == true) {
                 type = FormatDescriptor.Type.StringReverse;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringNullTerm.IsChecked == true) {
                 type = FormatDescriptor.Type.StringNullTerm;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringLen8.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL8;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringLen16.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL16;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else if (radioStringDci.IsChecked == true) {
                 type = FormatDescriptor.Type.StringDci;
-                subType = FormatDescriptor.SubType.LowAscii;
+                subType = FormatDescriptor.SubType.Ascii;
             } else {
                 Debug.Assert(false);
                 // default/none
@@ -780,7 +780,7 @@ namespace SourceGen.WpfGui {
                     int val = RawData.GetWord(mFileData, low, dfd.Length,
                         type == FormatDescriptor.Type.NumericBE);
                     FormatDescriptor.SubType actualSubType = (val > 0x7f) ?
-                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.LowAscii;
+                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.Ascii;
                     if (actualSubType != dfd.FormatSubType) {
                         // replace the descriptor
                         dfd = FormatDescriptor.Create(chunkLength, type, actualSubType);

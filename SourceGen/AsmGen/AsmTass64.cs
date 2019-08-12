@@ -185,8 +185,9 @@ namespace SourceGen.AsmGen {
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
-            config.mAllowHighAsciiCharConst = false;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
+            config.mAsciiDelimPattern = "'#'";
+            config.mHighAsciiDelimPattern = "'#' | $80";
         }
 
         // IGenerator
@@ -569,7 +570,7 @@ namespace SourceGen.AsmGen {
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
                 StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
-                CharEncoding.ConvertLowAscii);
+                CharEncoding.ConvertAscii);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high
@@ -596,7 +597,7 @@ namespace SourceGen.AsmGen {
                     if (stropf.Lines.Count != 1) {
                         // Must be single-line.
                         opcodeStr = sDataOpNames.StrGeneric;
-                        stropf.CharConv = CharEncoding.ConvertLowAscii; // undo DCI hack
+                        stropf.CharConv = CharEncoding.ConvertAscii; // undo DCI hack
                         redo = true;
                     }
                     break;

@@ -189,8 +189,9 @@ namespace SourceGen.AsmGen {
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
-            config.mAllowHighAsciiCharConst = false;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
+            config.mAsciiDelimPattern = "'#'";
+            config.mHighAsciiDelimPattern = "'#' | $80";
         }
 
         // IGenerator
@@ -566,7 +567,7 @@ namespace SourceGen.AsmGen {
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
                 StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
-                CharEncoding.ConvertLowAscii);
+                CharEncoding.ConvertAscii);
             stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, false);
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);

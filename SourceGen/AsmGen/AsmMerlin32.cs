@@ -162,8 +162,10 @@ namespace SourceGen.AsmGen {
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = string.Empty;
-            config.mAllowHighAsciiCharConst = true;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
+
+            config.mAsciiDelimPattern = "'#'";
+            config.mHighAsciiDelimPattern = "\"#\"";
         }
 
         // IGenerator; executes on background thread
@@ -494,7 +496,7 @@ namespace SourceGen.AsmGen {
                 charConv = CharEncoding.ConvertHighAscii;
                 delim = '"';
             } else {
-                charConv = CharEncoding.ConvertLowAscii;
+                charConv = CharEncoding.ConvertAscii;
                 delim = '\'';
             }
 

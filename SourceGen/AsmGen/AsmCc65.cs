@@ -186,8 +186,9 @@ namespace SourceGen.AsmGen {
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
-            config.mAllowHighAsciiCharConst = false;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Cc65;
+            config.mAsciiDelimPattern = "'#'";
+            config.mHighAsciiDelimPattern = "'#' | $80";
         }
 
         // IGenerator
@@ -627,7 +628,7 @@ namespace SourceGen.AsmGen {
             if (highAscii) {
                 charConv = CharEncoding.ConvertHighAscii;
             } else {
-                charConv = CharEncoding.ConvertLowAscii;
+                charConv = CharEncoding.ConvertAscii;
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',

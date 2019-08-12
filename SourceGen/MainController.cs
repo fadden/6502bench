@@ -427,7 +427,18 @@ namespace SourceGen {
             mFormatterConfig.mEndOfLineCommentDelimiter = ";";
             mFormatterConfig.mFullLineCommentDelimiterBase = ";";
             mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
-            mFormatterConfig.mAllowHighAsciiCharConst = true;
+            mFormatterConfig.mAsciiDelimPattern =
+                AppSettings.Global.GetString(AppSettings.CHR_ASCII_DELIM_PAT,
+                    Res.Strings.DEFAULT_ASCII_DELIM_PAT);
+            mFormatterConfig.mHighAsciiDelimPattern =
+                AppSettings.Global.GetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT,
+                    Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT);
+            mFormatterConfig.mC64PetsciiDelimPattern =
+                AppSettings.Global.GetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT,
+                    Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT);
+            mFormatterConfig.mC64ScreenCodeDelimPattern =
+                AppSettings.Global.GetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT,
+                    Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
             mOutputFormatter = new Formatter(mFormatterConfig);
             mOutputFormatterCpuDef = null;
 

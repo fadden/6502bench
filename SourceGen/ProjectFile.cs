@@ -495,7 +495,7 @@ namespace SourceGen {
                 if (!CreateSymbol(kvp.Value, report, out Symbol sym)) {
                     continue;
                 }
-                if (!CreateFormatDescriptor(kvp.Value.DataDescriptor, report,
+                if (!CreateFormatDescriptor(kvp.Value.DataDescriptor, spf._ContentVersion, report,
                         out FormatDescriptor dfd)) {
                     continue;
                 }
@@ -618,7 +618,8 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (!CreateFormatDescriptor(kvp.Value, report, out FormatDescriptor dfd)) {
+                if (!CreateFormatDescriptor(kvp.Value, spf._ContentVersion, report,
+                        out FormatDescriptor dfd)) {
                     continue;
                 }
                 if (intKey < 0 || intKey + dfd.Length > spf.FileDataLength) {
@@ -664,10 +665,11 @@ namespace SourceGen {
         /// Creates a FormatDescriptor from a SerFormatDescriptor.
         /// </summary>
         /// <param name="sfd">Deserialized data.</param>
+        /// <param name="version">Serialization version (CONTENT_VERSION).</param>
         /// <param name="report">Error report object.</param>
         /// <param name="dfd">Created FormatDescriptor.</param>
         /// <returns>True on success.</returns>
-        private static bool CreateFormatDescriptor(SerFormatDescriptor sfd,
+        private static bool CreateFormatDescriptor(SerFormatDescriptor sfd, int version,
                 FileLoadReport report, out FormatDescriptor dfd) {
             dfd = null;
             FormatDescriptor.Type format;
@@ -676,6 +678,7 @@ namespace SourceGen {
             if ("String".Equals(sfd.Format)) {
                 // File version 1 used a different set of enumerated values for defining strings.
                 // Parse it out here.
+                Debug.Assert(version <= 1);
                 subFormat = FormatDescriptor.SubType.ASCII_GENERIC;
                 if ("None".Equals(sfd.SubFormat)) {
                     format = FormatDescriptor.Type.StringGeneric;
@@ -707,10 +710,11 @@ namespace SourceGen {
             try {
                 format = (FormatDescriptor.Type)Enum.Parse(
                     typeof(FormatDescriptor.Type), sfd.Format);
-                if ("Ascii".Equals(sfd.SubFormat)) {
+                if (version <= 1 && "Ascii".Equals(sfd.SubFormat)) {
                     // File version 1 used "Ascii" for all character data in numeric operands.
                     // It applied to both low and high ASCII.
                     subFormat = FormatDescriptor.SubType.ASCII_GENERIC;
+                    Debug.WriteLine("Found v1 char, fmt=" + sfd.Format + ", sub=" + sfd.SubFormat);
                 } else {
                     subFormat = (FormatDescriptor.SubType)Enum.Parse(
                         typeof(FormatDescriptor.SubType), sfd.SubFormat);
