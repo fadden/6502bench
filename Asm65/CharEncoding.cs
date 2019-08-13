@@ -94,7 +94,16 @@ namespace Asm65 {
         }
 
         //
-        // C64 PETSCII
+        // ATASCII (Atari 400/800)
+        //
+        // Substantially similar to ASCII, but with printable symbols in the control character
+        // range ($00-1f).  Characters $60 and $7b-7f don't correspond to ASCII symbols.
+        //
+        // Characters with the high bit set are shown with colors reversed.
+        //
+
+        //
+        // PETSCII (C64 variant)
         //
         // Assemblers like ACME use the C64 character set 2, a/k/a shifted mode, lower case
         // mode, or text mode.
@@ -125,6 +134,11 @@ namespace Asm65 {
         //  $93 - clear
         //  $12 92 - reverse on/off
         //  $07 0a 0d - bell, LF, CR (note CR is favored for EOL)
+        //
+        // Other Commodore systems use variants on PETSCII, but the ASCII correspondence remains
+        // the same -- only the non-ASCII symbols change.  (On the original PET, $60-7f was a
+        // duplicate of $20-3f rather than a duplicate of the upper-case letters, which might be
+        // why $c0-df is preferred for upper case.)
         //
         // For full details, see the chart at https://www.aivosto.com/articles/petscii.pdf
         //

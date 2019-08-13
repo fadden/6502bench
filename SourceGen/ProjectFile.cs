@@ -179,7 +179,8 @@ namespace SourceGen {
     /// </summary>
     internal class SerializableProjectFile1 {
         // This appears at the top of the file, not as part of the JSON data.  The version
-        // number refers to the file format version, not the application version.
+        // number refers to the file format version, not the application version.  Only
+        // change this if a change is made that renders the file unreadable by previous versions.
         public const string MAGIC = "### 6502bench SourceGen dis65 v1.0 ###";
 
         public SerializableProjectFile1() { }
@@ -215,12 +216,14 @@ namespace SourceGen {
         }
         public class SerAnalysisParameters {
             public bool AnalyzeUncategorizedData { get; set; }
+            public string DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
 
             public SerAnalysisParameters() { }
             public SerAnalysisParameters(ProjectProperties.AnalysisParameters src) {
                 AnalyzeUncategorizedData = src.AnalyzeUncategorizedData;
+                DefaultTextScanMode = src.DefaultTextScanMode.ToString();
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
             }
@@ -475,6 +478,13 @@ namespace SourceGen {
             proj.ProjectProps.AnalysisParams = new ProjectProperties.AnalysisParameters();
             proj.ProjectProps.AnalysisParams.AnalyzeUncategorizedData =
                 spf.ProjectProps.AnalysisParams.AnalyzeUncategorizedData;
+            if (Enum.TryParse<ProjectProperties.AnalysisParameters.TextScanMode>(
+                    spf.ProjectProps.AnalysisParams.DefaultTextScanMode,
+                    out ProjectProperties.AnalysisParameters.TextScanMode mode)) {
+                proj.ProjectProps.AnalysisParams.DefaultTextScanMode = mode;
+            } else {
+                // unknown value, leave as default
+            }
             proj.ProjectProps.AnalysisParams.MinCharsForString =
                 spf.ProjectProps.AnalysisParams.MinCharsForString;
             proj.ProjectProps.AnalysisParams.SeekNearbyTargets =

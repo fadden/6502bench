@@ -29,6 +29,7 @@ using Microsoft.Win32;
 using Asm65;
 using CommonUtil;
 using CommonWPF;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -88,6 +89,43 @@ namespace SourceGen.WpfGui {
             mWorkProps = new ProjectProperties(props);
             mProjectDir = projectDir;
             mFormatter = formatter;
+
+            // Construct arrays used as item sources for combo boxes.
+            CpuItems = new CpuItem[] {
+                new CpuItem((string)FindResource("str_6502"), CpuDef.CpuType.Cpu6502),
+                new CpuItem((string)FindResource("str_65C02"), CpuDef.CpuType.Cpu65C02),
+                new CpuItem((string)FindResource("str_65816"), CpuDef.CpuType.Cpu65816),
+            };
+            DefaultTextScanModeItems = new DefaultTextScanMode[] {
+                new DefaultTextScanMode((string)FindResource("str_LowAscii"),
+                    TextScanMode.LowAscii),
+                new DefaultTextScanMode((string)FindResource("str_LowHighAscii"),
+                    TextScanMode.LowHighAscii),
+                new DefaultTextScanMode((string)FindResource("str_C64Petscii"),
+                    TextScanMode.C64Petscii),
+                new DefaultTextScanMode((string)FindResource("str_C64ScreenCode"),
+                    TextScanMode.C64ScreenCode),
+            };
+            MinCharsItems = new MinCharsItem[] {
+                new MinCharsItem((string)FindResource("str_DisableStringScan"),
+                    DataAnalysis.MIN_CHARS_FOR_STRING_DISABLED),
+                new MinCharsItem("3", 3),
+                new MinCharsItem("4", 4),
+                new MinCharsItem("5", 5),
+                new MinCharsItem("6", 6),
+                new MinCharsItem("7", 7),
+                new MinCharsItem("8", 8),
+                new MinCharsItem("9", 9),
+                new MinCharsItem("10", 10),
+            };
+            AutoLabelItems = new AutoLabelItem[] {
+                new AutoLabelItem((string)FindResource("str_AutoLabelSimple"),
+                    AutoLabel.Style.Simple),
+                new AutoLabelItem((string)FindResource("str_AutoLabelAnnotated"),
+                    AutoLabel.Style.Annotated),
+                new AutoLabelItem((string)FindResource("str_AutoLabelFullyAnnotated"),
+                    AutoLabel.Style.FullyAnnotated),
+            };
         }
 
         // INotifyPropertyChanged implementation
@@ -173,12 +211,19 @@ namespace SourceGen.WpfGui {
                 Type = type;
             }
         }
-        private static CpuItem[] sCpuItems = {
-            new CpuItem("MOS 6502", CpuDef.CpuType.Cpu6502),
-            new CpuItem("WDC W65C02S", CpuDef.CpuType.Cpu65C02),
-            new CpuItem("WDC W65C816S", CpuDef.CpuType.Cpu65816),
-        };
-        public CpuItem[] CpuItems { get { return sCpuItems; } }
+        public CpuItem[] CpuItems { get; private set; }
+
+        // Default text encoding combo box items
+        public class DefaultTextScanMode {
+            public string Name { get; private set; }
+            public TextScanMode Mode { get; private set; }
+
+            public DefaultTextScanMode(string name, TextScanMode mode) {
+                Name = name;
+                Mode = mode;
+            }
+        }
+        public DefaultTextScanMode[] DefaultTextScanModeItems { get; private set; }
 
         // Min chars for string combo box items
         public class MinCharsItem {
@@ -190,18 +235,7 @@ namespace SourceGen.WpfGui {
                 Value = value;
             }
         }
-        private static MinCharsItem[] sMinCharsItems = {
-            new MinCharsItem("None (disabled)", DataAnalysis.MIN_CHARS_FOR_STRING_DISABLED),
-            new MinCharsItem("3", 3),
-            new MinCharsItem("4", 4),
-            new MinCharsItem("5", 5),
-            new MinCharsItem("6", 6),
-            new MinCharsItem("7", 7),
-            new MinCharsItem("8", 8),
-            new MinCharsItem("9", 9),
-            new MinCharsItem("10", 10),
-        };
-        public MinCharsItem[] MinCharsItems { get { return sMinCharsItems; } }
+        public MinCharsItem[] MinCharsItems { get; private set; }
 
         // Auto-label style combo box items
         public class AutoLabelItem {
@@ -213,12 +247,7 @@ namespace SourceGen.WpfGui {
                 Style = style;
             }
         }
-        private static AutoLabelItem[] sAutoLabelItems = {
-            new AutoLabelItem("Simple (\"L1234\")", AutoLabel.Style.Simple),
-            new AutoLabelItem("Annotated (\"W_1234\")", AutoLabel.Style.Annotated),
-            new AutoLabelItem("Fully Annotated (\"DWR_1234\")", AutoLabel.Style.FullyAnnotated),
-        };
-        public AutoLabelItem[] AutoLabelItems {  get { return sAutoLabelItems; } }
+        public AutoLabelItem[] AutoLabelItems { get; private set; }
 
         // properties for checkboxes
 
@@ -255,7 +284,18 @@ namespace SourceGen.WpfGui {
                 }
             }
             if (cpuComboBox.SelectedItem == null) {
-                cpuComboBox.SelectedIndex = 0;
+                cpuComboBox.SelectedIndex = 0;                  // 6502
+            }
+
+            for (int i = 0; i < DefaultTextScanModeItems.Length; i++) {
+                if (DefaultTextScanModeItems[i].Mode ==
+                        mWorkProps.AnalysisParams.DefaultTextScanMode) {
+                    defaultTextEncComboBox.SelectedItem = DefaultTextScanModeItems[i];
+                    break;
+                }
+            }
+            if (defaultTextEncComboBox.SelectedItem == null) {
+                defaultTextEncComboBox.SelectedIndex = 1;       // low+high ASCII
             }
 
             for (int i = 0; i < MinCharsItems.Length; i++) {
@@ -265,7 +305,7 @@ namespace SourceGen.WpfGui {
                 }
             }
             if (minStringCharsComboBox.SelectedItem == null) {
-                minStringCharsComboBox.SelectedIndex = 2;
+                minStringCharsComboBox.SelectedIndex = 2;       // 4
             }
 
             for (int i = 0; i < AutoLabelItems.Length; i++) {
@@ -275,10 +315,11 @@ namespace SourceGen.WpfGui {
                 }
             }
             if (autoLabelStyleComboBox.SelectedItem == null) {
-                autoLabelStyleComboBox.SelectedIndex = 0;
+                autoLabelStyleComboBox.SelectedIndex = 0;       // simple
             }
 
             UpdateEntryFlags();
+            IsDirty = false;
         }
 
         private void UpdateEntryFlags() {
@@ -302,6 +343,13 @@ namespace SourceGen.WpfGui {
         private void CpuComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             CpuItem item = (CpuItem)cpuComboBox.SelectedItem;
             mWorkProps.CpuType = item.Type;
+            IsDirty = true;
+        }
+
+        private void DefaultTextEncComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            DefaultTextScanMode item =
+                (DefaultTextScanMode)defaultTextEncComboBox.SelectedItem;
+            mWorkProps.AnalysisParams.DefaultTextScanMode = item.Mode;
             IsDirty = true;
         }
 
@@ -337,7 +385,6 @@ namespace SourceGen.WpfGui {
         }
 
         #endregion General
-
 
         #region Project Symbols
 
@@ -618,7 +665,6 @@ namespace SourceGen.WpfGui {
         }
 
         #endregion Platform symbol files
-
 
         #region Extension scripts
 

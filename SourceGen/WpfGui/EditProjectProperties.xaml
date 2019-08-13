@@ -19,6 +19,7 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Project Properties"
@@ -31,6 +32,22 @@ limitations under the License.
         <Style TargetType="{x:Type GridViewColumnHeader}">
             <Setter Property="HorizontalContentAlignment" Value="Left" />
         </Style>
+
+        <!-- strings for combo boxes -->
+        <system:String x:Key="str_6502">MOS 6502</system:String>
+        <system:String x:Key="str_65C02">WDC W65C02S</system:String>
+        <system:String x:Key="str_65816">WDC W65C816S</system:String>
+
+        <system:String x:Key="str_LowAscii">Plain ASCII</system:String>
+        <system:String x:Key="str_LowHighAscii">Plain or High ASCII</system:String>
+        <system:String x:Key="str_C64Petscii">C64 PETSCII</system:String>
+        <system:String x:Key="str_C64ScreenCode">C64 Screen Code</system:String>
+
+        <system:String x:Key="str_DisableStringScan">None (disabled)</system:String>
+
+        <system:String x:Key="str_AutoLabelSimple">Simple ("L1234")</system:String>
+        <system:String x:Key="str_AutoLabelAnnotated">Annotated ("W_1234")</system:String>
+        <system:String x:Key="str_AutoLabelFullyAnnotated">Fully Annotated ("DWR_1234")</system:String>
     </Window.Resources>
 
     <DockPanel Margin="8">
@@ -86,10 +103,21 @@ limitations under the License.
                                       IsChecked="{Binding AnalyzeUncategorizedData}"/>
                             <CheckBox Name="seekAltTargetCheckBox" Margin="0,4,0,0" Content="Seek nearby targets"
                                       IsChecked="{Binding SeekNearbyTargets}"/>
-                            <TextBlock Margin="0,8,0,0" Text="Minimum characters for string:"/>
-                            <ComboBox Name="minStringCharsComboBox" Margin="0,2,0,0"
-                                      ItemsSource="{Binding MinCharsItems}" DisplayMemberPath="Name"
-                                      SelectionChanged="MinStringCharsComboBox_SelectionChanged"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Margin="0,3,0,0" Text="Default text encoding:"/>
+                                <ComboBox Name="defaultTextEncComboBox" Margin="8,2,0,0"
+                                          Width="142"
+                                          ItemsSource="{Binding DefaultTextScanModeItems}" DisplayMemberPath="Name"
+                                          SelectionChanged="DefaultTextEncComboBox_SelectionChanged"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Margin="0,3,0,0" Text="Min chars for string detection:"/>
+                                <ComboBox Name="minStringCharsComboBox" Margin="8,2,0,0" Width="100"
+                                          ItemsSource="{Binding MinCharsItems}" DisplayMemberPath="Name"
+                                          SelectionChanged="MinStringCharsComboBox_SelectionChanged"/>
+                            </StackPanel>
                         </StackPanel>
                     </GroupBox>
 
@@ -98,6 +126,7 @@ limitations under the License.
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Text="Auto-label style:" Margin="0,2,8,0"/>
                             <ComboBox DockPanel.Dock="Left" Name="autoLabelStyleComboBox"
+                                      Width="300" HorizontalAlignment="Left"
                                       ItemsSource="{Binding AutoLabelItems}" DisplayMemberPath="Name"
                                       SelectionChanged="AutoLabelStyleComboBox_SelectionChanged"/>
                         </DockPanel>

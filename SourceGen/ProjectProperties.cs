@@ -36,17 +36,28 @@ namespace SourceGen {
         /// Some parameters we feed to the analyzers.
         /// </summary>
         public class AnalysisParameters {
+            public enum TextScanMode {
+                Unknown = 0,
+                LowAscii,
+                LowHighAscii,
+                C64Petscii,
+                C64ScreenCode,
+            }
+
             public bool AnalyzeUncategorizedData { get; set; }
+            public TextScanMode DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
 
             public AnalysisParameters() {
                 AnalyzeUncategorizedData = true;
+                DefaultTextScanMode = TextScanMode.LowHighAscii;
                 MinCharsForString = DataAnalysis.DEFAULT_MIN_STRING_LENGTH;
                 SeekNearbyTargets = true;
             }
             public AnalysisParameters(AnalysisParameters src) {
                 AnalyzeUncategorizedData = src.AnalyzeUncategorizedData;
+                DefaultTextScanMode = src.DefaultTextScanMode;
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
             }
