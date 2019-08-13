@@ -18,6 +18,7 @@ using System.Diagnostics;
 
 using Asm65;
 using CommonUtil;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen {
     /// <summary>
@@ -30,11 +31,11 @@ namespace SourceGen {
         // Minimum number of consecutive identical bytes for something to be called a "run".
         private const int MIN_RUN_LENGTH = 5;
 
-        // Minimum length for treating data as a run if the byte is a valid ASCII value.
-        // (Alternatively, the maximum length of an ASCII string composed of single characters.)
+        // Minimum length for treating data as a run if the byte is a printable character.
+        // (Alternatively, the maximum length of a character string composed of a single value.)
         // Anything shorter than this is handled with a string directive, anything this long or
         // longer becomes FILL.  This should be larger than the MinCharsForString parameter.
-        private const int MIN_RUN_LENGTH_ASCII = 62;
+        private const int MAX_STRING_RUN_LENGTH = 62;
 
         // Absolute minimum string length for auto-detection.  This is used when generating the
         // data tables.
@@ -605,7 +606,7 @@ namespace SourceGen {
 
             int minStringChars = mAnalysisParams.MinCharsForString;
 
-#if false   // this is actually slower (and uses more memory)
+#if DATA_PRESCAN   // this is actually slower (and uses more memory)
             while (start <= end) {
                 // This is used to let us skip forward.  It starts past the end of the block,
                 // and moves backward as we identify potential points of interest.
@@ -709,53 +710,105 @@ namespace SourceGen {
                 }
             }
 #else
+            // Select "is printable" test.  We use the extended version to include some
+            // control characters.
+            CharEncoding.InclusionTest testPrintable;
+            FormatDescriptor.SubType baseSubType;
+            switch (mAnalysisParams.DefaultTextScanMode) {
+                case TextScanMode.LowAscii:
+                    testPrintable = CharEncoding.IsExtendedAscii;
+                    baseSubType = FormatDescriptor.SubType.Ascii;
+                    break;
+                case TextScanMode.LowHighAscii:
+                    testPrintable = CharEncoding.IsExtendedLowOrHighAscii;
+                    baseSubType = FormatDescriptor.SubType.ASCII_GENERIC;
+                    break;
+                case TextScanMode.C64Petscii:
+                    testPrintable = CharEncoding.IsExtendedPetscii;
+                    baseSubType = FormatDescriptor.SubType.C64Petscii;
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    testPrintable = CharEncoding.IsExtendedScreenCode;
+                    baseSubType = FormatDescriptor.SubType.C64Screen;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    testPrintable = CharEncoding.IsExtendedLowOrHighAscii;
+                    baseSubType = FormatDescriptor.SubType.ASCII_GENERIC;
+                    break;
+            }
+
             while (start <= end) {
                 // Check for block of repeated values.
                 int runLen = RecognizeRun(mFileData, start, end);
-                bool isAscii = TextUtil.IsPrintableAscii((char)(mFileData[start] & 0x7f));
-                if (runLen >= MIN_RUN_LENGTH) {
-                    // Output as run or ASCII string.  Prefer ASCII if the string is short
-                    // enough to fit on one line (e.g. 64 chars including delimiters) and
-                    // meets the minimum string length threshold.
-                    if (isAscii && runLen <= MIN_RUN_LENGTH_ASCII && runLen >= minStringChars) {
-                        // String -- if we create the descriptor here, we save a little time,
-                        // but strings like "*****hello" turn into two separate strings.  So
-                        // just fall through and let the ASCII recognizer handle it.
-                    } else {
-                        // run
-                        LogV(start, "Run of 0x" + mFileData[start].ToString("x2") + ": " +
-                            runLen + " bytes");
-                        mAnattribs[start].DataDescriptor = FormatDescriptor.Create(
-                            runLen, FormatDescriptor.Type.Fill,
-                            FormatDescriptor.SubType.None);
-                        start += runLen;
-                        continue;
+                int printLen = 0;
+                FormatDescriptor.SubType subType = baseSubType;
+
+                if (testPrintable(mFileData[start])) {
+                    // The run byte is printable, and the run is shorter than a line.  It's
+                    // possible the run is followed by additional printable characters, e.g.
+                    // "*****hello".  Text is easier for humans to understand, so we prefer
+                    // that unless the run is longer than one line.
+                    if (runLen <= MAX_STRING_RUN_LENGTH) {
+                        // See if the run is followed by additional printable characters.
+                        printLen = runLen;
+
+                        // For LowHighAscii we allow a string to be either low or high, but it
+                        // must be entirely one thing.  Refine our test.
+                        CharEncoding.InclusionTest refinedTest = testPrintable;
+                        if (mAnalysisParams.DefaultTextScanMode == TextScanMode.LowHighAscii) {
+                            if (CharEncoding.IsExtendedAscii(mFileData[start])) {
+                                refinedTest = CharEncoding.IsExtendedAscii;
+                                subType = FormatDescriptor.SubType.Ascii;
+                            } else {
+                                refinedTest = CharEncoding.IsExtendedHighAscii;
+                                subType = FormatDescriptor.SubType.HighAscii;
+                            }
+                        }
+                        for (int i = start + runLen; i <= end; i++) {
+                            if (!refinedTest(mFileData[i])) {
+                                break;
+                            }
+                            printLen++;
+                        }
                     }
                 }
 
-                int asciiLen = RecognizeAscii(mFileData, start, end);
-                if (asciiLen >= minStringChars) {
-                    LogV(start, "ASCII string, len=" + asciiLen + " bytes");
-                    bool isHigh = (mFileData[start] & 0x80) != 0;
-                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(asciiLen,
-                        FormatDescriptor.Type.StringGeneric, isHigh ?
-                        FormatDescriptor.SubType.HighAscii : FormatDescriptor.SubType.Ascii);
-                    start += asciiLen;
-                    continue;
-                }
-
-                // Nothing found, output as single byte.  This is the easiest form for users
-                // to edit.  If we found a run, but it was too short, we can go ahead and
-                // mark all bytes in the run because we know the later matches will also be
-                // too short.
-                Debug.Assert(runLen > 0);
-                while (runLen-- != 0) {
-                    mAnattribs[start++].DataDescriptor = oneByteDefault;
-                    FormatDescriptor.DebugPrefabBump();
+                if (printLen >= minStringChars) {
+                    // This either a short run followed by printable characters, or just a
+                    // (possibly very large) bunch of printable characters.
+                    Debug.Assert(subType != FormatDescriptor.SubType.ASCII_GENERIC);
+                    LogD(start, "Character string (" + subType + "), len=" + printLen + " bytes");
+                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(printLen,
+                        FormatDescriptor.Type.StringGeneric, subType);
+                    start += printLen;
+                } else if (runLen >= MIN_RUN_LENGTH) {
+                    // Didn't qualify as a string, but it's long enough to be a run.
+                    //
+                    // TODO(someday): allow .fill pseudo-ops to have character encoding
+                    //   sub-types, so we can ".fill 64,'*'".  Easy to do here, but
+                    //   proper treatment requires tweaking data operand editor to allow
+                    //   char encoding to be specified.
+                    LogV(start, "Run of 0x" + mFileData[start].ToString("x2") + ": " +
+                        runLen + " bytes");
+                    mAnattribs[start].DataDescriptor = FormatDescriptor.Create(
+                        runLen, FormatDescriptor.Type.Fill,
+                        FormatDescriptor.SubType.None);
+                    start += runLen;
+                } else {
+                    // Nothing useful found, output 1+ values as single bytes.  This is the
+                    // easiest form for users to edit.  If we found a run, but it was too short,
+                    // we can go ahead and mark all bytes in the run because we know the later
+                    // matches will also be too short.
+                    Debug.Assert(runLen > 0);
+                    while (runLen-- != 0) {
+                        mAnattribs[start++].DataDescriptor = oneByteDefault;
+                        FormatDescriptor.DebugPrefabBump();
+                    }
                 }
             }
 #endif
-            }
+        }
 
 #region Static analyzer methods
 
@@ -774,29 +827,6 @@ namespace SourceGen {
                     break;
                 }
             }
-            return index - start;
-        }
-
-        /// <summary>
-        /// Checks for a run of ASCII values.  Both high and low ASCII are recognized,
-        /// but the entire run must be one or the other.
-        /// </summary>
-        /// <param name="fileData">Raw data.</param>
-        /// <param name="start">Offset of first byte in range.</param>
-        /// <param name="end">Offset of last byte in range.</param>
-        /// <returns>Length of run.</returns>
-        public static int RecognizeAscii(byte[] fileData, int start, int end) {
-            // This won't find a mix of Apple II high/inverse/flashing text.
-            byte firstHi = (byte)(fileData[start] & 0x80);
-
-            int index;
-            for (index = start; index <= end; index++) {
-                char ch = (char)fileData[index];
-                if (!TextUtil.IsPrintableAscii((char)(ch & 0x7f)) || (ch & 0x80) != firstHi) {
-                    break;
-                }
-            }
-
             return index - start;
         }
 
@@ -1080,7 +1110,7 @@ namespace SourceGen {
 
 
 
-#if false
+#if DATA_PRESCAN
         /// <summary>
         /// Iterator that generates a list of offsets which are not known to hold code or data.
         /// 

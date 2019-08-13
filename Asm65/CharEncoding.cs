@@ -35,11 +35,15 @@ namespace Asm65 {
         /// </summary>
         /// <remarks>
         /// Yes, I'm assuming it all fits in a UTF-16 char.  PETSCII has some glyphs that
-        /// aren't part of the BMP, but we're targeting a variety of cross-assemblers, so
-        /// anything non-ASCII is getting hexified anyway.
+        /// aren't part of the BMP, but we're targeting a variety of cross-assemblers with
+        /// potentially different notions of Unicode mappings, so anything non-ASCII is
+        /// getting hexified anyway.
         /// </remarks>
         public delegate char Convert(byte val);
 
+        /// <summary>
+        /// Character encoding.
+        /// </summary>
         public enum Encoding {
             Unknown = 0,
             Ascii,
@@ -49,7 +53,17 @@ namespace Asm65 {
         }
 
         //
-        // Standard ASCII.
+        // Plain ASCII.
+        //
+        // We recognize BELL, LF, and CR as control characters that may be present in
+        // text strings.  This allows use to generate:
+        //
+        //  .str "hello",$0d
+        //
+        // instead of:
+        //
+        //  .str "hello"
+        //  .dd1  $0d
         //
         public static bool IsPrintableAscii(byte val) {
             return (val >= 0x20 && val < 0x7f);
@@ -66,7 +80,7 @@ namespace Asm65 {
         }
 
         //
-        // Standard ASCII, but with the high bit set.
+        // High ASCII: plain ASCII with the high bit set.
         //
         public static bool IsPrintableHighAscii(byte val) {
             return (val >= 0xa0 && val < 0xff);
@@ -83,8 +97,14 @@ namespace Asm65 {
         }
 
         //
-        // High *or* low ASCII.
+        // High and/or low ASCII.
         //
+        public static bool IsPrintableLowOrHighAscii(byte val) {
+            return IsPrintableAscii((byte)(val & 0x7f));
+        }
+        public static bool IsExtendedLowOrHighAscii(byte val) {
+            return IsExtendedAscii((byte)(val & 0x7f));
+        }
         public static char ConvertLowAndHighAscii(byte val) {
             if (IsPrintableAscii(val) || IsPrintableHighAscii(val)) {
                 return (char)(val & 0x7f);
@@ -101,6 +121,7 @@ namespace Asm65 {
         //
         // Characters with the high bit set are shown with colors reversed.
         //
+
 
         //
         // PETSCII (C64 variant)
@@ -142,6 +163,35 @@ namespace Asm65 {
         //
         // For full details, see the chart at https://www.aivosto.com/articles/petscii.pdf
         //
+        private static bool[] sPrintablePetscii = CreatePrintablePetsciiMap();
+        private static bool[] sExtendedPetscii = CreateExtendedPetsciiMap();
+        private static bool[] CreatePrintablePetsciiMap() {
+            bool[] map = new bool[256];
+            for (int i = 0x20; i <= 0x5b; i++) {
+                map[i] = true;
+            }
+            map[0x5d] = true;
+            for (int i = 0xc1; i <= 0xda; i++) {
+                map[i] = true;
+            }
+            return map;
+        }
+        private static bool[] CreateExtendedPetsciiMap() {
+            bool[] map = CreatePrintablePetsciiMap();
+            // control codes that we might expect to find in strings
+            map[0x05] = map[0x1c] = map[0x1e] = map[0x1f] = map[0x81] = map[0x90] = map[0x95] =
+                map[0x96] = map[0x97] = map[0x98] = map[0x99] = map[0x9a] = map[0x9b] =
+                map[0x9c] = map[0x9e] = map[0x9f] = true;
+            map[0x93] = map[0x12] = map[0x92] = true;
+            map[0x07] = map[0x0a] = map[0x0d] = true;
+            return map;
+        }
+        public static bool IsPrintablePetscii(byte val) {
+            return sPrintablePetscii[val];
+        }
+        public static bool IsExtendedPetscii(byte val) {
+            return sExtendedPetscii[val];
+        }
 
         //
         // C64 Screen Codes
@@ -159,5 +209,26 @@ namespace Asm65 {
         //
         // For full details, see the chart at https://www.aivosto.com/articles/petscii.pdf
         //
+        private static bool[] sPrintableScreenCode = CreatePrintableScreenCodeMap();
+        private static bool[] CreatePrintableScreenCodeMap() {
+            bool[] map = new bool[256];
+            for (int i = 0x00; i <= 0x1b; i++) {
+                map[i] = true;
+            }
+            map[0x1d] = true;
+            for (int i = 0x20; i <= 0x3f; i++) {
+                map[i] = true;
+            }
+            for (int i = 0x41; i <= 0x5a; i++) {
+                map[i] = true;
+            }
+            return map;
+        }
+        public static bool IsPrintableScreenCode(byte val) {
+            return sPrintableScreenCode[val];
+        }
+        public static bool IsExtendedScreenCode(byte val) {
+            return sPrintableScreenCode[val];
+        }
     }
 }

@@ -143,7 +143,7 @@ namespace SourceGen {
         // Project and platform symbols that are being referenced from code.
         public List<DefSymbol> ActiveDefSymbolList { get; private set; }
 
-#if false
+#if DATA_PRESCAN
         // Data scan results.
         public TypedRangeSet RepeatedBytes { get; private set; }
         public RangeSet StdAsciiBytes { get; private set; }
@@ -233,7 +233,7 @@ namespace SourceGen {
             mFileData = fileData;
             mDataFileName = dataFileName;
             FileDataCrc32 = CommonUtil.CRC32.OnWholeBuffer(0, mFileData);
-#if false
+#if DATA_PRESCAN
             ScanFileData();
 #endif
 
@@ -317,12 +317,12 @@ namespace SourceGen {
 
             FixAndValidate(ref report);
 
-#if false
+#if DATA_PRESCAN
             ScanFileData();
 #endif
         }
 
-#if false
+#if DATA_PRESCAN
         private delegate bool ByteTest(byte val);   // for ScanFileData()
 
         /// <summary>
