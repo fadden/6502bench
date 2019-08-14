@@ -631,9 +631,11 @@ namespace SourceGen.AsmGen {
                 charConv = CharEncoding.ConvertAscii;
             }
 
-            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
-                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN, charConv);
-            stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes, false);
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
+                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep,
+                MAX_OPERAND_LEN, charConv);
+            stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes,
+                StringOpFormatter.ReverseMode.Forward);
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
 
@@ -665,7 +667,8 @@ namespace SourceGen.AsmGen {
                 } else {
                     // Didn't fit, so re-emit it, this time with the terminating null byte.
                     stropf.Reset();
-                    stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, false);
+                    stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
+                        StringOpFormatter.ReverseMode.Forward);
                 }
             }
 

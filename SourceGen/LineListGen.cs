@@ -620,7 +620,7 @@ namespace SourceGen {
             mLineList.InsertRange(0, headerLines);
 
             GenerateLineList(mProject, mFormatter, mPseudoOpNames,
-                0, mProject.FileData.Length - 1, mLineList);
+                mProject.FileData, 0, mProject.FileData.Length - 1, mLineList);
 
             mDisplayList.ResetList(mLineList.Count);
 
@@ -704,7 +704,8 @@ namespace SourceGen {
             // Create temporary list to hold new lines.  Set the initial capacity to
             // the previous size, on the assumption that it won't change much.
             List<Line> newLines = new List<Line>(endIndex - startIndex + 1);
-            GenerateLineList(mProject, mFormatter, mPseudoOpNames, startOffset, endOffset, newLines);
+            GenerateLineList(mProject, mFormatter, mPseudoOpNames, mProject.FileData,
+                startOffset, endOffset, newLines);
 
             // Out with the old, in with the new.
             mLineList.RemoveRange(startIndex, endIndex - startIndex + 1);
@@ -862,7 +863,8 @@ namespace SourceGen {
         /// <param name="endOffset">Offset of last byte.</param>
         /// <param name="lines">List to add output lines to.</param>
         private static void GenerateLineList(DisasmProject proj, Formatter formatter,
-                PseudoOp.PseudoOpNames opNames, int startOffset, int endOffset, List<Line> lines) {
+                PseudoOp.PseudoOpNames opNames, byte[] data, int startOffset, int endOffset,
+                List<Line> lines) {
             //Debug.WriteLine("GenerateRange [+" + startOffset.ToString("x6") + ",+" +
             //    endOffset.ToString("x6") + "]");
 
@@ -996,8 +998,12 @@ namespace SourceGen {
                     offset += len;
                 } else {
                     Debug.Assert(attr.DataDescriptor != null);
+                    // TODO: replace this with something that caches expensive items like
+                    //   string operands; maybe have an out List<string> that is null for the
+                    //   easy stuff
                     int numLines =
-                        PseudoOp.ComputeRequiredLineCount(formatter, attr.DataDescriptor);
+                        PseudoOp.ComputeRequiredLineCount(formatter, opNames, attr.DataDescriptor,
+                            data, offset);
                     for (int i = 0; i < numLines; i++) {
                         Line line = new Line(offset, attr.Length, Line.Type.Data, i);
                         lines.Add(line);

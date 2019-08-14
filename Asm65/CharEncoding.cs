@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 using System;
-using System.Text;
+using System.Diagnostics;
 
 namespace Asm65 {
     /// <summary>
@@ -186,11 +186,23 @@ namespace Asm65 {
             map[0x07] = map[0x0a] = map[0x0d] = true;
             return map;
         }
-        public static bool IsPrintablePetscii(byte val) {
+        public static bool IsPrintableC64Petscii(byte val) {
             return sPrintablePetscii[val];
         }
-        public static bool IsExtendedPetscii(byte val) {
+        public static bool IsExtendedC64Petscii(byte val) {
             return sExtendedPetscii[val];
+        }
+        public static char ConvertC64Petscii(byte val) {
+            if ((val >= 0x20 && val <= 0x40) || val == 0x5b || val == 0x5d) {
+                return (char)val;               // number/symbols, '[', ']'
+            } else if (val >= 0x41 && val <= 0x5a) {
+                return (char)(val + 0x20);      // lower case
+            } else if (val >= 0xc1 && val <= 0xda) {
+                return (char)(val - 0x80);      // upper case
+            } else {
+                Debug.Assert(!IsPrintableC64Petscii(val));
+                return UNPRINTABLE_CHAR;
+            }
         }
 
         //
@@ -200,7 +212,7 @@ namespace Asm65 {
         //
         //  $00-1f: lower case letters (PETSCII $40-5f)
         //  $20-3f: same as ASCII (PETSCII $20-3f)
-        //  $40-5f: upper case letters (PETSCII $60-7f)
+        //  $40-5f: upper case letters (PETSCII $60-7f / $c0-df)
         //  $60-7f: non-ASCII symbols (PETSCII $a0-bf)
         //
         // With the high bit set, character colors are reversed.  The printable ASCII set
@@ -224,11 +236,25 @@ namespace Asm65 {
             }
             return map;
         }
-        public static bool IsPrintableScreenCode(byte val) {
+        public static bool IsPrintableC64ScreenCode(byte val) {
             return sPrintableScreenCode[val];
         }
-        public static bool IsExtendedScreenCode(byte val) {
+        public static bool IsExtendedC64ScreenCode(byte val) {
             return sPrintableScreenCode[val];
+        }
+        public static char ConvertC64ScreenCode(byte val) {
+            if (val == 0x00 || val == 0x1b || val == 0x1d) {
+                return (char)(val + 0x40);      // '@', '[', ']'
+            } else if (val >= 0x01 && val <= 0x1a) {
+                return (char)(val + 0x60);      // lower case
+            } else if (val >= 0x20 && val <= 0x3f) {
+                return (char)(val);             // numbers/symbols
+            } else if (val >= 0x41 && val <= 0x5a) {
+                return (char)(val);             // upper case
+            } else {
+                Debug.Assert(!IsPrintableC64ScreenCode(val));
+                return UNPRINTABLE_CHAR;
+            }
         }
     }
 }

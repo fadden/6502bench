@@ -452,7 +452,7 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            bool reverse = false;
+            StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
             int leadingBytes = 0;
             string opcodeStr;
 
@@ -462,7 +462,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.StringReverse:
                     opcodeStr = sDataOpNames.StrReverse;
-                    reverse = true;
+                    revMode = StringOpFormatter.ReverseMode.LineReverse;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
                     opcodeStr = sDataOpNames.StrGeneric;        // no pseudo-op for this
@@ -500,7 +500,8 @@ namespace SourceGen.AsmGen {
                 delim = '\'';
             }
 
-            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, delim,
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
+                new Formatter.DelimiterSet(delim),
                 StringOpFormatter.RawOutputStyle.DenseHex, MAX_OPERAND_LEN, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
@@ -511,7 +512,7 @@ namespace SourceGen.AsmGen {
 
             // Feed bytes in, skipping over the leading length bytes.
             stropf.FeedBytes(data, offset + leadingBytes,
-                dfd.Length - leadingBytes, 0, reverse);
+                dfd.Length - leadingBytes, 0, revMode);
             Debug.Assert(stropf.Lines.Count > 0);
 
             // See if we need to do this over.
@@ -524,7 +525,7 @@ namespace SourceGen.AsmGen {
                     if (stropf.HasEscapedText) {
                         // can't include escaped characters in REV
                         opcodeStr = sDataOpNames.StrGeneric;
-                        reverse = false;
+                        revMode = StringOpFormatter.ReverseMode.Forward;
                         redo = true;
                     }
                     break;
@@ -563,7 +564,7 @@ namespace SourceGen.AsmGen {
                 // This time, instead of skipping over leading length bytes, we include them
                 // explicitly.
                 stropf.Reset();
-                stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, reverse);
+                stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, revMode);
             }
 
             opcodeStr = formatter.FormatPseudoOp(opcodeStr);

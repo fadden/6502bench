@@ -724,11 +724,11 @@ namespace SourceGen {
                     baseSubType = FormatDescriptor.SubType.ASCII_GENERIC;
                     break;
                 case TextScanMode.C64Petscii:
-                    testPrintable = CharEncoding.IsExtendedPetscii;
+                    testPrintable = CharEncoding.IsExtendedC64Petscii;
                     baseSubType = FormatDescriptor.SubType.C64Petscii;
                     break;
                 case TextScanMode.C64ScreenCode:
-                    testPrintable = CharEncoding.IsExtendedScreenCode;
+                    testPrintable = CharEncoding.IsExtendedC64ScreenCode;
                     baseSubType = FormatDescriptor.SubType.C64Screen;
                     break;
                 default:

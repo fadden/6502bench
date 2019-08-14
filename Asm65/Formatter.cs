@@ -104,6 +104,34 @@ namespace Asm65 {
             }
         }
 
+        /// <summary>
+        /// Container for string delimiter pieces.  Instances are immutable.
+        /// </summary>
+        /// <remarks>
+        /// The prefix is included at the start of the first line, but not included on
+        /// subsequent lines.  This is primarily intended for the on-screen display, not
+        /// assembly source generation.  The suffix is not used at all here; this class is
+        /// shared with the code that generates single-character operands.
+        /// </remarks>
+        public class DelimiterSet {
+            public string Prefix { get; private set; }
+            public char OpenDelim { get; private set; }
+            public char CloseDelim { get; private set; }
+            public string Suffix { get; private set; }
+
+            public DelimiterSet(char delim) {
+                OpenDelim = CloseDelim = delim;
+                Prefix = Suffix = string.Empty;
+            }
+            public DelimiterSet(string prefix, char openDelim, char closeDelim, string suffix) {
+                Prefix = prefix;
+                OpenDelim = openDelim;
+                CloseDelim = closeDelim;
+                Suffix = suffix;
+            }
+        }
+        public static DelimiterSet DOUBLE_QUOTE_DELIM = new DelimiterSet('"');
+
         private static readonly char[] sHexCharsLower = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
         };

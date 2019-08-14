@@ -23,11 +23,15 @@ namespace Asm65 {
     /// delimiters and non-printable characters.
     /// </summary>
     public class StringOpFormatter {
-        public CharEncoding.Convert CharConv { get; set; }
+        /// <summary>
+        /// Text direction.  If text is stored in reverse order, we want to un-reverse it to
+        /// make it readable.  This gets tricky for a multi-line item.  For the assembler we
+        /// want to break it into lines and then reverse each chunk, but on screen we want to
+        /// reverse the entire thing as a single block.
+        /// </summary>
+        public enum ReverseMode { Forward, LineReverse, FullReverse };
 
-        private char Delimiter { get; set; }
-        private RawOutputStyle RawStyle { get; set; }
-        private int MaxOperandLen { get; set; }
+        public CharEncoding.Convert CharConv { get; set; }
 
         // Output format for raw (non-printable) characters.  Most assemblers use comma-separated
         // hex values, some allow dense hex strings.
@@ -36,6 +40,10 @@ namespace Asm65 {
         // Outputs.
         public bool HasEscapedText { get; private set; }
         public List<string> Lines { get; private set; }
+
+        private Formatter.DelimiterSet mDelimiterSet;
+        private RawOutputStyle mRawStyle;
+        private int mMaxOperandLen;
 
         // Reference to array with 16 hex digits.  (May be upper or lower case.)
         private char[] mHexChars;
@@ -69,20 +77,23 @@ namespace Asm65 {
         /// Constructor.
         /// </summary>
         /// <param name="formatter">Reference to text formatter.</param>
-        /// <param name="delimiter">String delimiter character.</param>
+        /// <param name="delimiterSet">String delimiter values.</param>
         /// <param name="byteStyle">How to format raw byte data.</param>
         /// <param name="maxOperandLen">Maximum line length.</param>
         /// <param name="charConv">Character conversion delegate.</param>
-        public StringOpFormatter(Formatter formatter, char delimiter, RawOutputStyle byteStyle,
-                int maxOperandLen, CharEncoding.Convert charConv) {
-            Delimiter = delimiter;
-            RawStyle = byteStyle;
-            MaxOperandLen = maxOperandLen;
+        public StringOpFormatter(Formatter formatter, Formatter.DelimiterSet delimiterSet,
+                RawOutputStyle byteStyle, int maxOperandLen, CharEncoding.Convert charConv) {
+            mRawStyle = byteStyle;
+            mMaxOperandLen = maxOperandLen;
             CharConv = charConv;
 
-            mBuffer = new char[MaxOperandLen];
+            mDelimiterSet = delimiterSet;
+            mBuffer = new char[mMaxOperandLen];
             mHexChars = formatter.HexDigits;
             Lines = new List<string>();
+
+            // suffix not used, so we don't expect it to be set to something
+            Debug.Assert(string.IsNullOrEmpty(mDelimiterSet.Suffix));
 
             Reset();
         }
@@ -91,6 +102,11 @@ namespace Asm65 {
             mState = State.StartOfLine;
             mIndex = 0;
             Lines.Clear();
+
+            // Copy the prefix string into the buffer for the first line.
+            for (int i = 0; i < mDelimiterSet.Prefix.Length; i++) {
+                mBuffer[mIndex++] = mDelimiterSet.Prefix[i];
+            }
         }
 
         /// <summary>
@@ -102,7 +118,8 @@ namespace Asm65 {
             Debug.Assert(mState != State.Finished);
 
             char ch = CharConv(rawCh);
-            if (ch == Delimiter || ch == CharEncoding.UNPRINTABLE_CHAR) {
+            if (ch == mDelimiterSet.OpenDelim || ch == mDelimiterSet.CloseDelim ||
+                    ch == CharEncoding.UNPRINTABLE_CHAR) {
                 // Must write it as a byte.
                 WriteByte(rawCh);
                 return;
@@ -115,21 +132,21 @@ namespace Asm65 {
             //   We must have 4 chars remaining (comma, open quote, new char, close quote).
             switch (mState) {
                 case State.StartOfLine:
-                    mBuffer[mIndex++] = Delimiter;
+                    mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
                     break;
                 case State.InQuote:
-                    if (mIndex + 2 > MaxOperandLen) {
+                    if (mIndex + 2 > mMaxOperandLen) {
                         Flush();
-                        mBuffer[mIndex++] = Delimiter;
+                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
                     }
                     break;
                 case State.OutQuote:
-                    if (mIndex + 4 > MaxOperandLen) {
+                    if (mIndex + 4 > mMaxOperandLen) {
                         Flush();
-                        mBuffer[mIndex++] = Delimiter;
+                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
                     } else {
                         mBuffer[mIndex++] = ',';
-                        mBuffer[mIndex++] = Delimiter;
+                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
                     }
                     break;
                 default:
@@ -158,20 +175,20 @@ namespace Asm65 {
                 case State.StartOfLine:
                     break;
                 case State.InQuote:
-                    int minWidth = (RawStyle == RawOutputStyle.CommaSep) ? 5 : 4;
-                    if (mIndex + minWidth > MaxOperandLen) {
+                    int minWidth = (mRawStyle == RawOutputStyle.CommaSep) ? 5 : 4;
+                    if (mIndex + minWidth > mMaxOperandLen) {
                         Flush();
                     } else {
-                        mBuffer[mIndex++] = Delimiter;
+                        mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
                         mBuffer[mIndex++] = ',';
                     }
                     break;
                 case State.OutQuote:
-                    minWidth = (RawStyle == RawOutputStyle.CommaSep) ? 4 : 2;
-                    if (mIndex + minWidth > MaxOperandLen) {
+                    minWidth = (mRawStyle == RawOutputStyle.CommaSep) ? 4 : 2;
+                    if (mIndex + minWidth > mMaxOperandLen) {
                         Flush();
                     } else {
-                        if (RawStyle == RawOutputStyle.CommaSep) {
+                        if (mRawStyle == RawOutputStyle.CommaSep) {
                             mBuffer[mIndex++] = ',';
                         }
                     }
@@ -181,7 +198,7 @@ namespace Asm65 {
                     break;
             }
 
-            if (RawStyle == RawOutputStyle.CommaSep) {
+            if (mRawStyle == RawOutputStyle.CommaSep) {
                 mBuffer[mIndex++] = '$';
             }
             mBuffer[mIndex++] = mHexChars[val >> 4];
@@ -203,12 +220,12 @@ namespace Asm65 {
             switch (mState) {
                 case State.StartOfLine:
                     // empty string; put out a pair of delimiters
-                    mBuffer[mIndex++] = Delimiter;
-                    mBuffer[mIndex++] = Delimiter;
+                    mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
+                    mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
                     break;
                 case State.InQuote:
                     // add delimiter and finish
-                    mBuffer[mIndex++] = Delimiter;
+                    mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
                     break;
                 case State.OutQuote:
                     // just output it
@@ -216,7 +233,7 @@ namespace Asm65 {
             }
 
             string newStr = new string(mBuffer, 0, mIndex);
-            Debug.Assert(newStr.Length <= MaxOperandLen);
+            Debug.Assert(newStr.Length <= mMaxOperandLen);
             Lines.Add(newStr);
 
             mState = State.Finished;
@@ -228,7 +245,7 @@ namespace Asm65 {
         /// Feeds the bytes into the StringGather.
         /// </summary>
         public void FeedBytes(byte[] data, int offset, int length, int leadingBytes,
-                bool reverse) {
+                ReverseMode revMode) {
             int startOffset = offset;
             int strEndOffset = offset + length;
 
@@ -238,13 +255,13 @@ namespace Asm65 {
             while (leadingBytes-- > 0) {
                 WriteByte(data[offset++]);
             }
-            if (reverse) {
+            if (revMode == ReverseMode.LineReverse) {
                 // Max per line is line length minus the two delimiters.  We don't allow
                 // any hex quoting in reversed text, so this always works.  (If somebody
                 // does try to reverse text with delimiters or unprintable chars, we'll
                 // blow out the line limit, but for a cross-assembler that should be purely
                 // cosmetic.)
-                int maxPerLine = MaxOperandLen - 2;
+                int maxPerLine = mMaxOperandLen - 2;
                 int numBlockLines = (length + maxPerLine - 1) / maxPerLine;
 
                 for (int chunk = 0; chunk < numBlockLines; chunk++) {
@@ -257,7 +274,13 @@ namespace Asm65 {
                         WriteChar(data[off]);
                     }
                 }
+            } else if (revMode == ReverseMode.FullReverse) {
+                for (; offset < strEndOffset; offset++) {
+                    int posn = startOffset + (strEndOffset - offset) - 1;
+                    WriteChar(data[posn]);
+                }
             } else {
+                Debug.Assert(revMode == ReverseMode.Forward);
                 for (; offset < strEndOffset; offset++) {
                     WriteChar(data[offset]);
                 }

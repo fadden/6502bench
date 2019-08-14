@@ -142,10 +142,13 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Some reasonable defaults for on-screen display.  The object is mutable, so make
-        /// a copy of it.
+        /// Returns a new PseudoOpNames instance with some reasonable defaults for on-screen
+        /// display.
         /// </summary>
-        public static readonly PseudoOpNames sDefaultPseudoOpNames = new PseudoOpNames() {
+        public static PseudoOpNames DefaultPseudoOpNames {
+            get { return sDefaultPseudoOpNames.GetCopy(); }
+        }
+        private static readonly PseudoOpNames sDefaultPseudoOpNames = new PseudoOpNames() {
             EquDirective = ".eq",
             OrgDirective = ".org",
             RegWidthDirective = ".rwid",
@@ -166,7 +169,7 @@ namespace SourceGen {
             StrLen16 = ".l2str",
             StrNullTerm = ".zstr",
             StrDci = ".dstr",
-    };
+        };
 
 
         /// <summary>
@@ -175,36 +178,12 @@ namespace SourceGen {
         /// <param name="formatter">Format definition.</param>
         /// <param name="dfd">Data format descriptor.</param>
         /// <returns>Line count.</returns>
-        public static int ComputeRequiredLineCount(Formatter formatter, FormatDescriptor dfd) {
+        public static int ComputeRequiredLineCount(Formatter formatter, PseudoOpNames opNames,
+                FormatDescriptor dfd, byte[] data, int offset) {
             if (dfd.IsString) {
-                // Subtract two chars, to leave room for start/end delimiter.  We use
-                // non-ASCII delimiters on-screen, so there's nothing to escape there.
-                int maxLen = MAX_OPERAND_LEN - 2;
-
-                // Remove leading length or trailing null byte from string length.
-                int textLen = dfd.Length;
-                switch (dfd.FormatType) {
-                    case FormatDescriptor.Type.StringGeneric:
-                    case FormatDescriptor.Type.StringReverse:
-                    case FormatDescriptor.Type.StringDci:
-                        break;
-                    case FormatDescriptor.Type.StringNullTerm:
-                    case FormatDescriptor.Type.StringL8:
-                        textLen--;
-                        break;
-                    case FormatDescriptor.Type.StringL16:
-                        textLen -= 2;
-                        break;
-                    default:
-                        Debug.Assert(false);
-                        break;
-                }
-                int strLen = (textLen + maxLen - 1) / maxLen;
-                if (strLen == 0) {
-                    // Empty string, but we still need to output a line.
-                    strLen = 1;
-                }
-                return strLen;
+                List<string> lines = FormatStringOp(formatter, opNames, dfd, data,
+                    offset, out string popcode);
+                return lines.Count;
             }
 
             switch (dfd.FormatType) {
@@ -259,45 +238,10 @@ namespace SourceGen {
             PseudoOut po = new PseudoOut();
 
             if (dfd.IsString) {
-                // It's hard to do strings in single-line pieces because of prefix lengths,
-                // terminating nulls, DCI polarity, and reverse-order strings.  We
-                // really just want to convert the whole thing to a run of chars
-                // and then pull out a chunk.  As an optimization we can handle
-                // generic strings more efficiently, which should help if auto-analysis is
-                // creating massive strings (at least until auto-analysis learns how to do
-                // more complex things).
-                //
-                // TODO: consider storing the full string on the first line, then each
-                //   subsequent line has a reference to it with offset+length
-                if (dfd.FormatType == FormatDescriptor.Type.StringGeneric) {
-                    int maxPerLine = MAX_OPERAND_LEN - 2;
-                    offset += subIndex * maxPerLine;
-                    length -= subIndex * maxPerLine;
-                    if (length > maxPerLine) {
-                        length = maxPerLine;
-                    }
-                    char[] ltext = BytesToChars(formatter, opNames, dfd.FormatType, data,
-                        offset, length, out string lpopcode, out int unused);
-                    po.Opcode = lpopcode;
-                    po.Operand = "\u201c" + new string(ltext) + "\u201d";
-                } else {
-                    char[] text = BytesToChars(formatter, opNames, dfd.FormatType, data,
-                        offset, length, out string popcode, out int showHexZeroes);
-
-                    if (showHexZeroes == 1) {
-                        po.Opcode = opNames.DefineData1;
-                        po.Operand = formatter.FormatHexValue(0, 2);
-                    } else if (showHexZeroes == 2) {
-                        po.Opcode = opNames.DefineData2;
-                        po.Operand = formatter.FormatHexValue(0, 4);
-                    } else {
-                        Debug.Assert(showHexZeroes == 0);
-                        po.Opcode = popcode;
-                        List<PseudoOut> outList = new List<PseudoOut>();
-                        GenerateTextLines(text, "\u201c", "\u201d", po, outList);
-                        po = outList[subIndex];
-                    }
-                }
+                List<string> lines = FormatStringOp(formatter, opNames, dfd, data,
+                    offset, out string popcode);
+                po.Opcode = popcode;
+                po.Operand = lines[subIndex];
             } else {
                 switch (dfd.FormatType) {
                     case FormatDescriptor.Type.Default:
@@ -352,75 +296,84 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Converts a collection of bytes that represent a string into an array of characters,
-        /// stripping the high bit.  Framing data, such as leading lengths and trailing nulls,
-        /// are not shown.
+        /// Converts a collection of bytes that represent a string into an array of formatted
+        /// string operands.
         /// </summary>
         /// <param name="formatter">Formatter object.</param>
-        /// <param name="formatType">String layout.</param>
+        /// <param name="opNames">Pseudo-opcode name table.</param>
+        /// <param name="dfd">Format descriptor.</param>
         /// <param name="data">File data.</param>
         /// <param name="offset">Offset, within data, of start of string.</param>
-        /// <param name="length">Number of bytes to convert.</param>
         /// <param name="popcode">Pseudo-opcode string.</param>
-        /// <param name="showHexZeroes">If nonzero, show 1+ zeroes (representing a leading
-        ///     length or null-termination) instead of an empty string.</param>
-        /// <returns>Array of characters with string data.</returns>
-        private static char[] BytesToChars(Formatter formatter, PseudoOpNames opNames,
-                FormatDescriptor.Type formatType, byte[] data, int offset, int length,
-                out string popcode, out int showHexZeroes) {
-            Debug.Assert(length > 0);
+        /// <returns>Array of strings.</returns>
+        private static List<string> FormatStringOp(Formatter formatter, PseudoOpNames opNames,
+                FormatDescriptor dfd, byte[] data, int offset, out string popcode) {
 
-            // See also GenMerlin32.OutputString().
-            int strOffset = offset;
-            int strLen = length;
-            bool reverse = false;
+            int hiddenLeadingBytes = 0;
+            int trailingBytes = 0;
+            StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
 
-            showHexZeroes = 0;
-
-            switch (formatType) {
-                case FormatDescriptor.Type.StringGeneric:
-                    // High or low ASCII, full width specified by formatter.
-                    popcode = opNames.StrGeneric;
+            CharEncoding.Convert charConv;
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                    charConv = CharEncoding.ConvertAscii;
                     break;
-                case FormatDescriptor.Type.StringDci:
-                    // High or low ASCII, full width specified by formatter.
-                    popcode = opNames.StrDci;
+                case FormatDescriptor.SubType.HighAscii:
+                    charConv = CharEncoding.ConvertHighAscii;
+                    break;
+                case FormatDescriptor.SubType.C64Petscii:
+                    charConv = CharEncoding.ConvertC64Petscii;
+                    break;
+                case FormatDescriptor.SubType.C64Screen:
+                    charConv = CharEncoding.ConvertC64ScreenCode;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    charConv = CharEncoding.ConvertAscii;
+                    break;
+            }
+
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.StringGeneric:
+                    // Generic character data.
+                    popcode = opNames.StrGeneric;
                     break;
                 case FormatDescriptor.Type.StringReverse:
                     // High or low ASCII, full width specified by formatter.  Show characters
                     // in reverse order.
                     popcode = opNames.StrReverse;
-                    reverse = true;
+                    revMode = StringOpFormatter.ReverseMode.FullReverse;
                     break;
                 case FormatDescriptor.Type.StringNullTerm:
-                    // High or low ASCII, with a terminating null.  Don't show the null.  If
-                    // it's an empty string, just show the null byte as hex.
+                    // Character data with a terminating null.  Don't show the null byte.
                     popcode = opNames.StrNullTerm;
-                    strLen--;
-                    if (strLen == 0) {
-                        showHexZeroes = 1;
-                    }
+                    trailingBytes = 1;
+                    //if (strLen == 0) {
+                    //    showHexZeroes = 1;
+                    //}
                     break;
                 case FormatDescriptor.Type.StringL8:
-                    // High or low ASCII, with a leading length byte.  Don't show the null.
-                    // If it's an empty string, just show the length byte as hex.
-                    strOffset++;
-                    strLen--;
-                    if (strLen == 0) {
-                        showHexZeroes = 1;
-                    }
+                    // Character data with a leading length byte.  Don't show the length.
+                    hiddenLeadingBytes = 1;
+                    //if (strLen == 0) {
+                    //    showHexZeroes = 1;
+                    //}
                     popcode = opNames.StrLen8;
                     break;
                 case FormatDescriptor.Type.StringL16:
-                    // High or low ASCII, with a leading length word.  Don't show the null.
-                    // If it's an empty string, just show the length word as hex.
-                    Debug.Assert(strLen > 1);
-                    strOffset += 2;
-                    strLen -= 2;
-                    if (strLen == 0) {
-                        showHexZeroes = 2;
-                    }
+                    // Character data with a leading length word.  Don't show the length.
+                    Debug.Assert(dfd.Length > 1);
+                    hiddenLeadingBytes = 2;
+                    //if (strLen == 0) {
+                    //    showHexZeroes = 2;
+                    //}
                     popcode = opNames.StrLen16;
+                    break;
+                case FormatDescriptor.Type.StringDci:
+                    // High or low ASCII, with high bit on last byte flipped.  Only useful
+                    // for ASCII strings.
+                    popcode = opNames.StrDci;
+                    charConv = CharEncoding.ConvertLowAndHighAscii;
                     break;
                 default:
                     Debug.Assert(false);
@@ -428,59 +381,14 @@ namespace SourceGen {
                     break;
             }
 
-            // TODO(petscii): convert character encoding
-            char[] text = new char[strLen];
-            if (!reverse) {
-                for (int i = 0; i < strLen; i++) {
-                    text[i] = (char)(data[i + strOffset] & 0x7f);
-                }
-            } else {
-                for (int i = 0; i < strLen; i++) {
-                    text[i] = (char)(data[strOffset + (strLen - i - 1)] & 0x7f);
-                }
-            }
+            Formatter.DelimiterSet delims = new Formatter.DelimiterSet(
+                "pfx:", '\u201c', '\u201d', string.Empty);
+            StringOpFormatter stropf = new StringOpFormatter(formatter, delims,
+                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN, charConv);
+            stropf.FeedBytes(data, offset + hiddenLeadingBytes,
+                dfd.Length - hiddenLeadingBytes - trailingBytes, 0, revMode);
 
-            return text;
-        }
-
-        /// <summary>
-        /// Generate multiple operand lines from a text line, adding optional delimiters.
-        /// </summary>
-        /// <param name="text">Buffer of characters to output.  Must be ASCII.</param>
-        /// <param name="startDelim">Delimiter character(s), or the empty string.</param>
-        /// <param name="endDelim">Delimiter character(s), or the empty string.</param>
-        /// <param name="template">PseudoOut with offset, length, and opcode set.  Each
-        ///   returned PseudoOut will have these value plus the generated operand.</param>
-        /// <param name="outList">List that receives the generated items.</param>
-        private static void GenerateTextLines(char[] text, string startDelim, string endDelim,
-                PseudoOut template, List<PseudoOut> outList) {
-            // Could get fancy and break long strings at word boundaries.
-            int textOffset = 0;
-
-            if (text.Length == 0) {
-                // empty string
-                PseudoOut po = new PseudoOut(template);
-                po.Operand = startDelim + endDelim;
-                outList.Add(po);
-                return;
-            }
-
-            int textPerLine = MAX_OPERAND_LEN - (startDelim.Length + endDelim.Length);
-            StringBuilder sb = new StringBuilder(MAX_OPERAND_LEN);
-            while (textOffset < text.Length) {
-                int len = (text.Length - textOffset < textPerLine) ?
-                           text.Length - textOffset : textPerLine;
-                sb.Clear();
-                sb.Append(startDelim);
-                sb.Append(new string(text, textOffset, len));
-                sb.Append(endDelim);
-
-                PseudoOut po = new PseudoOut(template);
-                po.Operand = sb.ToString();
-                outList.Add(po);
-
-                textOffset += len;
-            }
+            return stropf.Lines;
         }
 
         /// <summary>

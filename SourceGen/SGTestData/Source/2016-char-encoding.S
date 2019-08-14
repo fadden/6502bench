@@ -74,10 +74,10 @@
 
 ; Get a bit fancy
         !byte   $82
-        !text   "Low ASCII CRLF",$07,$0d,$0a
+        !text   $07,"Low ASCII CRLF",$0d,$0a
         !byte   $82
         !xor $80 {
-            !text   "High ASCII CRLF",$07,$0d,$0a
+            !text   $07,"High ASCII CRLF",$0d,$0a
         }
         !byte   $82
         !pet    $93,"PETSCII with ",$96,"control",$05," codes",$0d
@@ -104,20 +104,28 @@
         !scr    "`abcdefghijklmnopqrstuvwxyz{|}~"
 
 ; The 2005 test exercises low/high ASCII strings, so no need to do that here.
-; Do a quick test with PETSCII.
+; Do a quick test with C64 characters.  Note Screen Code can't be null-terminated,
+; and PETSCII can't be DCI.
         !byte   $84
         !pet    "IICSTEP esrever"               ;format as StringReverse
+        !byte   $84
         !pet    "null term PETSCII",0           ;format as StringNullTerm
+        !byte   $84
         !pet    "This null-terminated string is too long to fit on a single line, and will be split.",0
+        !byte   $84
         !pet    19,"PETSCII with length"        ;format as StringL8
+        !byte   $84
         !pet    20,0,"PETSCII with length2"     ;format as StringL16
 
         !byte   $84
         !scr    "edoC neercS esrever"           ;format as StringReverse
-        !scr    "null term Screen Code",0       ;format as StringNullTerm
-        !scr    "This null-terminated string is too long to fit on a single line, and will be split.",0
+        !byte   $84
         !scr    23,"Screen Code with length"    ;format as StringL8
+        !byte   $84
         !scr    24,0,"Screen Code with length2" ;format as StringL16
+        !byte   $84
+        !scr    "Screen Code DC",$c9            ;format as DCI
+        !byte   $84
 
         !byte   $85
 

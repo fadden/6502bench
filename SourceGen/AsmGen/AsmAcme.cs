@@ -565,10 +565,12 @@ namespace SourceGen.AsmGen {
                     return;
             }
 
-            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
+                Formatter.DOUBLE_QUOTE_DELIM,
                 StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
                 CharEncoding.ConvertAscii);
-            stropf.FeedBytes(data, offset, dfd.Length, leadingBytes, false);
+            stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
+                StringOpFormatter.ReverseMode.Forward);
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
             foreach (string str in stropf.Lines) {

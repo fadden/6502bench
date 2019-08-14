@@ -444,7 +444,7 @@ namespace SourceGen {
 
             // Set pseudo-op names.  Entries aren't allowed to be blank, so we start with the
             // default values and merge in whatever the user has configured.
-            mPseudoOpNames = PseudoOp.sDefaultPseudoOpNames.GetCopy();
+            mPseudoOpNames = PseudoOp.DefaultPseudoOpNames;
             string pseudoCereal = settings.GetString(AppSettings.FMT_PSEUDO_OP_NAMES, null);
             if (!string.IsNullOrEmpty(pseudoCereal)) {
                 PseudoOp.PseudoOpNames deser = PseudoOp.PseudoOpNames.Deserialize(pseudoCereal);

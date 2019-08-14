@@ -568,9 +568,9 @@ namespace SourceGen.AsmGen {
                     return;
             }
 
-            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter, '"',
-                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
-                CharEncoding.ConvertAscii);
+            StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
+                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep,
+                MAX_OPERAND_LEN, CharEncoding.ConvertAscii);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high
@@ -580,7 +580,8 @@ namespace SourceGen.AsmGen {
 
             // Feed bytes in, skipping over hidden bytes (leading L8, trailing null).
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
-                dfd.Length - hiddenLeadingBytes - trailingBytes, shownLeadingBytes, false);
+                dfd.Length - hiddenLeadingBytes - trailingBytes, shownLeadingBytes,
+                StringOpFormatter.ReverseMode.Forward);
             Debug.Assert(stropf.Lines.Count > 0);
 
             // See if we need to do this over.
@@ -612,7 +613,8 @@ namespace SourceGen.AsmGen {
                 // This time, instead of skipping over leading length bytes, we include them
                 // explicitly.
                 stropf.Reset();
-                stropf.FeedBytes(data, offset, dfd.Length, hiddenLeadingBytes, false);
+                stropf.FeedBytes(data, offset, dfd.Length, hiddenLeadingBytes,
+                    StringOpFormatter.ReverseMode.Forward);
             }
 
             opcodeStr = formatter.FormatPseudoOp(opcodeStr);
