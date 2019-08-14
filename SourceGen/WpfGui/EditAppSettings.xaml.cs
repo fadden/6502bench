@@ -24,6 +24,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 
+using Asm65;
 using CommonUtil;
 
 using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
@@ -69,11 +70,12 @@ namespace SourceGen.WpfGui {
         /// Tab page enumeration.
         /// </summary>
         public enum Tab {
-            Unknown = -1,
-            CodeView = 0,
-            AsmConfig = 1,
-            DisplayFormat = 2,
-            PseudoOp = 3
+            Unknown = 0,
+            CodeView,
+            TextDelimiters,
+            AsmConfig,
+            DisplayFormat,
+            PseudoOp
         }
 
         /// <summary>
@@ -156,6 +158,7 @@ namespace SourceGen.WpfGui {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             Loaded_CodeView();
+            Loaded_TextDelimiters();
             Loaded_AsmConfig();
             Loaded_DisplayFormat();
             Loaded_PseudoOp();
@@ -163,6 +166,9 @@ namespace SourceGen.WpfGui {
             switch (mInitialTab) {
                 case Tab.CodeView:
                     tabControl.SelectedItem = codeViewTab;
+                    break;
+                case Tab.TextDelimiters:
+                    tabControl.SelectedItem = textDelimitersTab;
                     break;
                 case Tab.AsmConfig:
                     tabControl.SelectedItem = asmConfigTab;
@@ -198,6 +204,13 @@ namespace SourceGen.WpfGui {
             PseudoOp.PseudoOpNames opNames = ExportPseudoOpNames();
             string pseudoCereal = opNames.Serialize();
             mSettings.SetString(AppSettings.FMT_PSEUDO_OP_NAMES, pseudoCereal);
+
+            Formatter.DelimiterSet charSet = ExportDelimiters(mCharDtb);
+            string charCereal = charSet.Serialize();
+            mSettings.SetString(AppSettings.FMT_CHAR_DELIM, charCereal);
+            Formatter.DelimiterSet stringSet = ExportDelimiters(mStringDtb);
+            string stringCereal = stringSet.Serialize();
+            mSettings.SetString(AppSettings.FMT_STRING_DELIM, stringCereal);
 
             mMainCtrl.SetAppSettings(mSettings);
             AsmGen.AssemblerVersionCache.QueryVersions();
@@ -416,59 +429,125 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        public string AsciiDelimPat {
-            get {
-                return mSettings.GetString(AppSettings.CHR_ASCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_ASCII_DELIM_PAT);
-            }
-            set {
-                mSettings.SetString(AppSettings.CHR_ASCII_DELIM_PAT, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
-        public string HighAsciiDelimPat {
-            get {
-                return mSettings.GetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT);
-            }
-            set {
-                mSettings.SetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
-        public string PetsciiDelimPat {
-            get {
-                return mSettings.GetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT);
-            }
-            set {
-                mSettings.SetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
-        public string ScreenCodeDelimPat {
-            get {
-                return mSettings.GetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT,
-                    Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
-            }
-            set {
-                mSettings.SetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
-
-        private void DefaultTextDelimitersButton_Click(object sender, RoutedEventArgs e) {
-            AsciiDelimPat = Res.Strings.DEFAULT_ASCII_DELIM_PAT;
-            HighAsciiDelimPat = Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT;
-            PetsciiDelimPat = Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT;
-            ScreenCodeDelimPat = Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT;
-        }
-
         #endregion Code View
+
+        #region Text Delimiters
+
+        private class DelimiterTextBoxes {
+            public CharEncoding.Encoding mEncoding;
+            public TextBox mPrefix;
+            public TextBox mOpen;
+            public TextBox mClose;
+            public TextBox mSuffix;
+
+            public DelimiterTextBoxes(CharEncoding.Encoding enc, TextBox prefix, TextBox open,
+                    TextBox close, TextBox suffix) {
+                mEncoding = enc;
+                mPrefix = prefix;
+                mOpen = open;
+                mClose = close;
+                mSuffix = suffix;
+            }
+        }
+        private DelimiterTextBoxes[] mCharDtb;
+        private DelimiterTextBoxes[] mStringDtb;
+
+        private void Loaded_TextDelimiters() {
+            // Map text boxes to delimiter definitions.
+            mCharDtb = new DelimiterTextBoxes[] {
+                new DelimiterTextBoxes(CharEncoding.Encoding.Ascii,
+                    chrdAsciiPrefix, chrdAsciiOpen, chrdAsciiClose, chrdAsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.HighAscii,
+                    chrdHighAsciiPrefix, chrdHighAsciiOpen, chrdHighAsciiClose, chrdHighAsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.C64Petscii,
+                    chrdPetsciiPrefix, chrdPetsciiOpen, chrdPetsciiClose, chrdPetsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.C64ScreenCode,
+                    chrdScreenCodePrefix, chrdScreenCodeOpen, chrdScreenCodeClose, chrdScreenCodeSuffix),
+            };
+            mStringDtb = new DelimiterTextBoxes[] {
+                new DelimiterTextBoxes(CharEncoding.Encoding.Ascii,
+                    strdAsciiPrefix, strdAsciiOpen, strdAsciiClose, strdAsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.HighAscii,
+                    strdHighAsciiPrefix, strdHighAsciiOpen, strdHighAsciiClose, strdHighAsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.C64Petscii,
+                    strdPetsciiPrefix, strdPetsciiOpen, strdPetsciiClose, strdPetsciiSuffix),
+                new DelimiterTextBoxes(CharEncoding.Encoding.C64ScreenCode,
+                    strdScreenCodePrefix, strdScreenCodeOpen, strdScreenCodeClose, strdScreenCodeSuffix),
+            };
+
+            string charDelimCereal = mSettings.GetString(AppSettings.FMT_CHAR_DELIM, null);
+            Formatter.DelimiterSet chrSet;
+            if (!string.IsNullOrEmpty(charDelimCereal)) {
+                chrSet = Formatter.DelimiterSet.Deserialize(charDelimCereal);
+            } else {
+                chrSet = new Formatter.DelimiterSet();
+            }
+            ImportDelimiters(chrSet, mCharDtb);
+
+            string stringDelimCereal = mSettings.GetString(AppSettings.FMT_STRING_DELIM, null);
+            Formatter.DelimiterSet strSet;
+            if (!string.IsNullOrEmpty(stringDelimCereal)) {
+                strSet = Formatter.DelimiterSet.Deserialize(stringDelimCereal);
+            } else {
+                strSet = new Formatter.DelimiterSet();
+            }
+            ImportDelimiters(strSet, mStringDtb);
+
+            // Create text field listeners.  Do this last, so the imports don't set dirty flag.
+            foreach (DelimiterTextBoxes boxes in mCharDtb) {
+                boxes.mPrefix.TextChanged += DelimiterTextChanged;
+                boxes.mOpen.TextChanged += DelimiterTextChanged;
+                boxes.mClose.TextChanged += DelimiterTextChanged;
+                boxes.mSuffix.TextChanged += DelimiterTextChanged;
+            }
+            foreach (DelimiterTextBoxes boxes in mStringDtb) {
+                boxes.mPrefix.TextChanged += DelimiterTextChanged;
+                boxes.mOpen.TextChanged += DelimiterTextChanged;
+                boxes.mClose.TextChanged += DelimiterTextChanged;
+                boxes.mSuffix.TextChanged += DelimiterTextChanged;
+            }
+        }
+
+        // Import delimiters from a DelimiterSet to the text fields.
+        private void ImportDelimiters(Formatter.DelimiterSet delSet, DelimiterTextBoxes[] boxarr) {
+            foreach (DelimiterTextBoxes boxes in boxarr) {
+                Formatter.DelimiterDef def = delSet.Get(boxes.mEncoding);
+                boxes.mPrefix.Text = def.Prefix;
+                boxes.mOpen.Text = "" + def.OpenDelim;
+                boxes.mClose.Text = "" + def.CloseDelim;
+                boxes.mSuffix.Text = def.Suffix;
+            }
+        }
+
+        // Export delimiters from the text fields to a DelimiterSet.
+        private Formatter.DelimiterSet ExportDelimiters(DelimiterTextBoxes[] boxarr) {
+            Formatter.DelimiterSet delSet = new Formatter.DelimiterSet();
+            foreach (DelimiterTextBoxes boxes in boxarr) {
+                char open = boxes.mOpen.Text.Length > 0 ? boxes.mOpen.Text[0] : '!';
+                char close = boxes.mClose.Text.Length > 0 ? boxes.mClose.Text[0] : '!';
+                Formatter.DelimiterDef def = new Formatter.DelimiterDef(
+                    boxes.mPrefix.Text, open, close, boxes.mSuffix.Text);
+                delSet.Set(boxes.mEncoding, def);
+            }
+            return delSet;
+        }
+
+        // Invoked when text is changed in any delimiter text box.
+        private void DelimiterTextChanged(object sender, EventArgs e) {
+            IsDirty = true;
+        }
+
+        private void ChrDelDefaultsButton_Click(object sender, RoutedEventArgs e) {
+            Formatter.DelimiterSet chrDel = Formatter.DelimiterSet.GetDefaultCharDelimiters();
+            ImportDelimiters(chrDel, mCharDtb);
+        }
+
+        private void StrDelDefaultsButton_Click(object sender, RoutedEventArgs e) {
+            Formatter.DelimiterSet strDel = Formatter.DelimiterSet.GetDefaultStringDelimiters();
+            ImportDelimiters(strDel, mStringDtb);
+        }
+
+        #endregion Text Delimiters
 
         #region Asm Config
 
@@ -964,6 +1043,7 @@ namespace SourceGen.WpfGui {
         }
     }
 
+#if false
     /// <summary>
     /// Text entry validation rule for text string delimiter patterns.
     /// </summary>
@@ -980,6 +1060,7 @@ namespace SourceGen.WpfGui {
             return ValidationResult.ValidResult;
         }
     }
+#endif
 
     #endregion Validation rules
 }

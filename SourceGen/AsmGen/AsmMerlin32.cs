@@ -164,8 +164,10 @@ namespace SourceGen.AsmGen {
             config.mBoxLineCommentDelimiter = string.Empty;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
 
-            config.mAsciiDelimPattern = "'#'";
-            config.mHighAsciiDelimPattern = "\"#\"";
+            Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
+            charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
+            charSet.Set(CharEncoding.Encoding.HighAscii, Formatter.DOUBLE_QUOTE_DELIM);
+            config.mCharDelimiters = charSet;
         }
 
         // IGenerator; executes on background thread
@@ -501,7 +503,7 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                new Formatter.DelimiterSet(delim),
+                new Formatter.DelimiterDef(delim),
                 StringOpFormatter.RawOutputStyle.DenseHex, MAX_OPERAND_LEN, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather

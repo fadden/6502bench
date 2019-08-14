@@ -310,6 +310,16 @@ namespace SourceGen {
                 mMainWin.CodeListFontFamily.ToString());
             settings.SetInt(AppSettings.CDLV_FONT_SIZE, (int)mMainWin.CodeListFontSize);
 
+            // Character and string delimiters.
+            Formatter.DelimiterSet chrDel = Formatter.DelimiterSet.GetDefaultCharDelimiters();
+            string chrSer = chrDel.Serialize();
+            settings.SetString(AppSettings.FMT_CHAR_DELIM, chrSer);
+
+            Formatter.DelimiterSet strDel = Formatter.DelimiterSet.GetDefaultStringDelimiters();
+            string strSer = strDel.Serialize();
+            settings.SetString(AppSettings.FMT_STRING_DELIM, strSer);
+
+
             // Load the settings file, and merge it into the globals.
             string runtimeDataDir = RuntimeDataAccess.GetDirectory();
             if (runtimeDataDir == null) {
@@ -427,18 +437,19 @@ namespace SourceGen {
             mFormatterConfig.mEndOfLineCommentDelimiter = ";";
             mFormatterConfig.mFullLineCommentDelimiterBase = ";";
             mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
-            mFormatterConfig.mAsciiDelimPattern =
-                AppSettings.Global.GetString(AppSettings.CHR_ASCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_ASCII_DELIM_PAT);
-            mFormatterConfig.mHighAsciiDelimPattern =
-                AppSettings.Global.GetString(AppSettings.CHR_HIGH_ASCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_HIGH_ASCII_DELIM_PAT);
-            mFormatterConfig.mC64PetsciiDelimPattern =
-                AppSettings.Global.GetString(AppSettings.CHR_C64_PETSCII_DELIM_PAT,
-                    Res.Strings.DEFAULT_C64_PETSCII_DELIM_PAT);
-            mFormatterConfig.mC64ScreenCodeDelimPattern =
-                AppSettings.Global.GetString(AppSettings.CHR_C64_SCREEN_CODE_DELIM_PAT,
-                    Res.Strings.DEFAULT_C64_SCREEN_CODE_DELIM_PAT);
+
+            string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
+            if (chrDelCereal != null) {
+                mFormatterConfig.mCharDelimiters =
+                    Formatter.DelimiterSet.Deserialize(chrDelCereal);
+            }
+            string strDelCereal = settings.GetString(AppSettings.FMT_STRING_DELIM, null);
+            if (strDelCereal != null) {
+                mFormatterConfig.mStringDelimiters =
+                    Formatter.DelimiterSet.Deserialize(strDelCereal);
+            }
+
+
             mOutputFormatter = new Formatter(mFormatterConfig);
             mOutputFormatterCpuDef = null;
 
@@ -1402,7 +1413,7 @@ namespace SourceGen {
         }
 
         public void HandleCodeListDoubleClick(int row, int col) {
-            Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
+            //Debug.WriteLine("DCLICK: row=" + row + " col=" + col);
             mMainWin.CodeListView_DebugValidateSelectionCount();
 
             // Clicking on some types of lines, such as ORG directives, results in

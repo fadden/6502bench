@@ -190,8 +190,12 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
-            config.mAsciiDelimPattern = "'#'";
-            config.mHighAsciiDelimPattern = "'#' | $80";
+
+            Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
+            charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
+            charSet.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+            config.mCharDelimiters = charSet;
         }
 
         // IGenerator

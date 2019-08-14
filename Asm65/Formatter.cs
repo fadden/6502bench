@@ -73,11 +73,8 @@ namespace Asm65 {
             public string mBoxLineCommentDelimiter;     // usually blank or ';'
 
             // delimiter patterns for single character constants
-            // (currently also used for on-screen strings; asm gen strings are handled differently)
-            public string mAsciiDelimPattern;
-            public string mHighAsciiDelimPattern;
-            public string mC64PetsciiDelimPattern;
-            public string mC64ScreenCodeDelimPattern;
+            public DelimiterSet mCharDelimiters;
+            public DelimiterSet mStringDelimiters;
 
             // miscellaneous
             public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
@@ -104,33 +101,163 @@ namespace Asm65 {
             }
         }
 
+        #region Text Delimiters
+
         /// <summary>
-        /// Container for string delimiter pieces.  Instances are immutable.
+        /// Container for character and string delimiter pieces.  Instances are immutable.
         /// </summary>
         /// <remarks>
-        /// The prefix is included at the start of the first line, but not included on
-        /// subsequent lines.  This is primarily intended for the on-screen display, not
-        /// assembly source generation.  The suffix is not used at all here; this class is
-        /// shared with the code that generates single-character operands.
+        /// For single-character operands, a simple concatenation of the four fields, with the
+        /// character in the middle, is performed.
+        ///
+        /// For strings, the prefix is included at the start of the first line, but not included
+        /// on subsequent lines.  This is primarily intended for the on-screen display, not
+        /// assembly source generation.  The suffix is not used at all.
         /// </remarks>
-        public class DelimiterSet {
+        public class DelimiterDef {
             public string Prefix { get; private set; }
             public char OpenDelim { get; private set; }
             public char CloseDelim { get; private set; }
             public string Suffix { get; private set; }
 
-            public DelimiterSet(char delim) {
+            public DelimiterDef(char delim) {
                 OpenDelim = CloseDelim = delim;
                 Prefix = Suffix = string.Empty;
             }
-            public DelimiterSet(string prefix, char openDelim, char closeDelim, string suffix) {
+            public DelimiterDef(string prefix, char openDelim, char closeDelim, string suffix) {
+                Debug.Assert(prefix != null);
+                Debug.Assert(suffix != null);
                 Prefix = prefix;
                 OpenDelim = openDelim;
                 CloseDelim = closeDelim;
                 Suffix = suffix;
             }
+            public override string ToString() {
+                return Prefix + OpenDelim + '#' + CloseDelim + Suffix;
+            }
         }
-        public static DelimiterSet DOUBLE_QUOTE_DELIM = new DelimiterSet('"');
+        public static DelimiterDef SINGLE_QUOTE_DELIM = new DelimiterDef('\'');
+        public static DelimiterDef DOUBLE_QUOTE_DELIM = new DelimiterDef('"');
+
+        public class DelimiterSet {
+            private Dictionary<CharEncoding.Encoding, DelimiterDef> mDelimiters =
+                new Dictionary<CharEncoding.Encoding, DelimiterDef>();
+
+            /// <summary>
+            /// Returns the specified DelimiterDef, or a default if not found.
+            /// </summary>
+            public DelimiterDef Get(CharEncoding.Encoding enc) {
+                if (!mDelimiters.TryGetValue(enc, out DelimiterDef def)) {
+                    return DOUBLE_QUOTE_DELIM;
+                }
+                return def;
+            }
+            public void Set(CharEncoding.Encoding enc, DelimiterDef def) {
+                mDelimiters[enc] = def;
+            }
+            public override string ToString() {
+                StringBuilder sb = new StringBuilder();
+                foreach (KeyValuePair<CharEncoding.Encoding, DelimiterDef> kvp in mDelimiters) {
+                    sb.Append("[" + kvp.Key + ": " + kvp.Value + "]");
+                }
+                return sb.ToString();
+            }
+
+            public static DelimiterSet GetDefaultCharDelimiters() {
+                DelimiterSet chrDel = new DelimiterSet();
+                chrDel.Set(CharEncoding.Encoding.Ascii,
+                    new DelimiterDef(string.Empty, '\u2018', '\u2019', string.Empty));
+                chrDel.Set(CharEncoding.Encoding.HighAscii,
+                    new DelimiterDef(string.Empty, '\u2018', '\u2019', " | $80"));
+                chrDel.Set(CharEncoding.Encoding.C64Petscii,
+                    new DelimiterDef("pet:", '\u2018', '\u2019', string.Empty));
+                chrDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                    new DelimiterDef("scr:", '\u2018', '\u2019', string.Empty));
+                return chrDel;
+            }
+
+            public static DelimiterSet GetDefaultStringDelimiters() {
+                DelimiterSet strDel = new DelimiterSet();
+                strDel.Set(CharEncoding.Encoding.Ascii,
+                    new DelimiterDef(string.Empty, '\u201c', '\u201d', string.Empty));
+                strDel.Set(CharEncoding.Encoding.HighAscii,
+                    new DelimiterDef("\u2191", '\u201c', '\u201d', string.Empty));
+                strDel.Set(CharEncoding.Encoding.C64Petscii,
+                    new DelimiterDef("pet:", '\u201c', '\u201d', string.Empty));
+                strDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                    new DelimiterDef("scr:", '\u201c', '\u201d', string.Empty));
+                return strDel;
+            }
+
+            /// <summary>
+            /// Serializes a DelimiterSet.
+            /// </summary>
+            /// <remarks>
+            /// Can't use Javascript from a .NET Standard library.  XmlSerializer doesn't
+            /// handle Lists or Dictionaries.  Do it the old-fashioned way.
+            /// </remarks>
+            public string Serialize() {
+                Debug.Assert(mDelimiters.Count < 10);
+                StringBuilder sb = new StringBuilder();
+                sb.Append('*');     // if the format changes, start with something else
+                foreach (KeyValuePair<CharEncoding.Encoding, DelimiterDef> kvp in mDelimiters) {
+                    string name = kvp.Key.ToString();
+                    AddLenString(sb, name);
+                    AddLenString(sb, kvp.Value.Prefix);
+                    sb.Append(kvp.Value.OpenDelim);
+                    sb.Append(kvp.Value.CloseDelim);
+                    AddLenString(sb, kvp.Value.Suffix);
+                }
+                sb.Append('!');
+                return sb.ToString();
+            }
+            private void AddLenString(StringBuilder sb, string str) {
+                sb.Append(str.Length.ToString());
+                sb.Append(',');
+                sb.Append(str);
+            }
+            public static DelimiterSet Deserialize(string cereal) {
+                try {
+                    DelimiterSet delimSet = new DelimiterSet();
+
+                    int offset = 0;
+                    if (cereal[offset++] != '*') {
+                        throw new Exception("missing leading asterisk");
+                    }
+                    while (cereal[offset] != '!') {
+                        string str = GetLenString(cereal, ref offset);
+                        if (!Enum.TryParse(str, out CharEncoding.Encoding enc)) {
+                            Debug.WriteLine("Ignoring unknown encoding " + str);
+                            enc = CharEncoding.Encoding.Unknown;
+                        }
+                        string prefix = GetLenString(cereal, ref offset);
+                        char open = cereal[offset++];
+                        char close = cereal[offset++];
+                        string suffix = GetLenString(cereal, ref offset);
+                        if (enc != CharEncoding.Encoding.Unknown) {
+                            delimSet.Set(enc, new DelimiterDef(prefix, open, close, suffix));
+                        }
+                    }
+                    return delimSet;
+                } catch (Exception ex) {
+                    Debug.WriteLine("DelimiterSet deserialization failed: " + ex.Message);
+                    return new DelimiterSet();
+                }
+            }
+            private static string GetLenString(string str, ref int offset) {
+                int commaIndex = str.IndexOf(',', offset);
+                if (commaIndex < 0) {
+                    throw new Exception("no comma in length string");
+                }
+                string lenStr = str.Substring(offset, commaIndex - offset);
+                int len = int.Parse(lenStr);
+                string resultStr = str.Substring(commaIndex + 1, len);
+                offset = commaIndex + 1 + len;
+                return resultStr;
+            }
+        }
+
+        #endregion Text Delimiters
 
         private static readonly char[] sHexCharsLower = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
@@ -165,10 +292,10 @@ namespace Asm65 {
         private string mAddrFormatWithBank;
 
         // Character data delimiter format strings, processed from the delimiter patterns.
-        private string mAsciiDelimFmt;
-        private string mHighAsciiDelimFmt;
-        private string mC64PetsciiDelimFmt;
-        private string mC64ScreenCodeDelimFmt;
+        private string mCharDelimAsciiFmt;
+        private string mCharDelimHighAsciiFmt;
+        private string mCharDelimC64PetsciiFmt;
+        private string mCharDelimC64ScreenCodeFmt;
 
 
         // Generated opcode strings.  The index is the bitwise OR of the opcode value and
@@ -299,25 +426,29 @@ namespace Asm65 {
             }
 
             // process the delimiter patterns
-            mAsciiDelimFmt = PatternToFormat(mFormatConfig.mAsciiDelimPattern);
-            mHighAsciiDelimFmt = PatternToFormat(mFormatConfig.mHighAsciiDelimPattern);
-            mC64PetsciiDelimFmt = PatternToFormat(mFormatConfig.mC64PetsciiDelimPattern);
-            mC64ScreenCodeDelimFmt = PatternToFormat(mFormatConfig.mC64ScreenCodeDelimPattern);
+            DelimiterSet chrDelim = mFormatConfig.mCharDelimiters;
+            if (chrDelim == null) {
+                Debug.WriteLine("NOTE: char delimiters not set");
+                chrDelim = DelimiterSet.GetDefaultCharDelimiters();
+            }
+            mCharDelimAsciiFmt =
+                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.Ascii));
+            mCharDelimHighAsciiFmt =
+                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.HighAscii));
+            mCharDelimC64PetsciiFmt =
+                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.C64Petscii));
+            mCharDelimC64ScreenCodeFmt =
+                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.C64ScreenCode));
         }
 
-        private string PatternToFormat(string pat) {
-            if (string.IsNullOrEmpty(pat)) {
-                return string.Empty;
-            }
-            // Must be exactly one '#'.
-            int firstHash = pat.IndexOf('#');
-            int lastHash = pat.LastIndexOf('#');
-            if (firstHash < 0 || firstHash != lastHash) {
-                Debug.WriteLine("Invalid delimiter pattern '" + pat + "'");
-                return string.Empty;
-            }
-
-            return pat.Replace("#", "{0}");
+        private string DelimiterDefToFormat(DelimiterDef def) {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(def.Prefix);
+            sb.Append(def.OpenDelim);
+            sb.Append("{0}");
+            sb.Append(def.CloseDelim);
+            sb.Append(def.Suffix);
+            return sb.ToString();
         }
 
         /// <summary>
@@ -417,15 +548,21 @@ namespace Asm65 {
             CharEncoding.Convert conv;
             switch (enc) {
                 case CharEncoding.Encoding.Ascii:
-                    fmt = mAsciiDelimFmt;
+                    fmt = mCharDelimAsciiFmt;
                     conv = CharEncoding.ConvertAscii;
                     break;
                 case CharEncoding.Encoding.HighAscii:
-                    fmt = mHighAsciiDelimFmt;
+                    fmt = mCharDelimHighAsciiFmt;
                     conv = CharEncoding.ConvertHighAscii;
                     break;
                 case CharEncoding.Encoding.C64Petscii:
+                    fmt = mCharDelimC64PetsciiFmt;
+                    conv = CharEncoding.ConvertC64Petscii;
+                    break;
                 case CharEncoding.Encoding.C64ScreenCode:
+                    fmt = mCharDelimC64ScreenCodeFmt;
+                    conv = CharEncoding.ConvertC64ScreenCode;
+                    break;
                 default:
                     return FormatHexValue(value, 2);
             }

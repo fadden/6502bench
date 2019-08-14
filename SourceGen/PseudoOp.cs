@@ -312,24 +312,31 @@ namespace SourceGen {
             int hiddenLeadingBytes = 0;
             int trailingBytes = 0;
             StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
+            Formatter.DelimiterSet delSet = formatter.Config.mStringDelimiters;
+            Formatter.DelimiterDef delDef;
 
             CharEncoding.Convert charConv;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
                     charConv = CharEncoding.ConvertAscii;
+                    delDef = delSet.Get(CharEncoding.Encoding.Ascii);
                     break;
                 case FormatDescriptor.SubType.HighAscii:
                     charConv = CharEncoding.ConvertHighAscii;
+                    delDef = delSet.Get(CharEncoding.Encoding.HighAscii);
                     break;
                 case FormatDescriptor.SubType.C64Petscii:
                     charConv = CharEncoding.ConvertC64Petscii;
+                    delDef = delSet.Get(CharEncoding.Encoding.C64Petscii);
                     break;
                 case FormatDescriptor.SubType.C64Screen:
                     charConv = CharEncoding.ConvertC64ScreenCode;
+                    delDef = delSet.Get(CharEncoding.Encoding.C64ScreenCode);
                     break;
                 default:
                     Debug.Assert(false);
                     charConv = CharEncoding.ConvertAscii;
+                    delDef = delSet.Get(CharEncoding.Encoding.Ascii);
                     break;
             }
 
@@ -381,9 +388,7 @@ namespace SourceGen {
                     break;
             }
 
-            Formatter.DelimiterSet delims = new Formatter.DelimiterSet(
-                "pfx:", '\u201c', '\u201d', string.Empty);
-            StringOpFormatter stropf = new StringOpFormatter(formatter, delims,
+            StringOpFormatter stropf = new StringOpFormatter(formatter, delDef,
                 StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN, charConv);
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
                 dfd.Length - hiddenLeadingBytes - trailingBytes, 0, revMode);

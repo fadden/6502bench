@@ -41,7 +41,7 @@ namespace Asm65 {
         public bool HasEscapedText { get; private set; }
         public List<string> Lines { get; private set; }
 
-        private Formatter.DelimiterSet mDelimiterSet;
+        private Formatter.DelimiterDef mDelimiterDef;
         private RawOutputStyle mRawStyle;
         private int mMaxOperandLen;
 
@@ -77,23 +77,23 @@ namespace Asm65 {
         /// Constructor.
         /// </summary>
         /// <param name="formatter">Reference to text formatter.</param>
-        /// <param name="delimiterSet">String delimiter values.</param>
+        /// <param name="delimiterDef">String delimiter values.</param>
         /// <param name="byteStyle">How to format raw byte data.</param>
         /// <param name="maxOperandLen">Maximum line length.</param>
         /// <param name="charConv">Character conversion delegate.</param>
-        public StringOpFormatter(Formatter formatter, Formatter.DelimiterSet delimiterSet,
+        public StringOpFormatter(Formatter formatter, Formatter.DelimiterDef delimiterDef,
                 RawOutputStyle byteStyle, int maxOperandLen, CharEncoding.Convert charConv) {
             mRawStyle = byteStyle;
             mMaxOperandLen = maxOperandLen;
             CharConv = charConv;
 
-            mDelimiterSet = delimiterSet;
+            mDelimiterDef = delimiterDef;
             mBuffer = new char[mMaxOperandLen];
             mHexChars = formatter.HexDigits;
             Lines = new List<string>();
 
             // suffix not used, so we don't expect it to be set to something
-            Debug.Assert(string.IsNullOrEmpty(mDelimiterSet.Suffix));
+            Debug.Assert(string.IsNullOrEmpty(mDelimiterDef.Suffix));
 
             Reset();
         }
@@ -104,8 +104,8 @@ namespace Asm65 {
             Lines.Clear();
 
             // Copy the prefix string into the buffer for the first line.
-            for (int i = 0; i < mDelimiterSet.Prefix.Length; i++) {
-                mBuffer[mIndex++] = mDelimiterSet.Prefix[i];
+            for (int i = 0; i < mDelimiterDef.Prefix.Length; i++) {
+                mBuffer[mIndex++] = mDelimiterDef.Prefix[i];
             }
         }
 
@@ -118,7 +118,7 @@ namespace Asm65 {
             Debug.Assert(mState != State.Finished);
 
             char ch = CharConv(rawCh);
-            if (ch == mDelimiterSet.OpenDelim || ch == mDelimiterSet.CloseDelim ||
+            if (ch == mDelimiterDef.OpenDelim || ch == mDelimiterDef.CloseDelim ||
                     ch == CharEncoding.UNPRINTABLE_CHAR) {
                 // Must write it as a byte.
                 WriteByte(rawCh);
@@ -132,21 +132,21 @@ namespace Asm65 {
             //   We must have 4 chars remaining (comma, open quote, new char, close quote).
             switch (mState) {
                 case State.StartOfLine:
-                    mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
+                    mBuffer[mIndex++] = mDelimiterDef.OpenDelim;
                     break;
                 case State.InQuote:
                     if (mIndex + 2 > mMaxOperandLen) {
                         Flush();
-                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
+                        mBuffer[mIndex++] = mDelimiterDef.OpenDelim;
                     }
                     break;
                 case State.OutQuote:
                     if (mIndex + 4 > mMaxOperandLen) {
                         Flush();
-                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
+                        mBuffer[mIndex++] = mDelimiterDef.OpenDelim;
                     } else {
                         mBuffer[mIndex++] = ',';
-                        mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
+                        mBuffer[mIndex++] = mDelimiterDef.OpenDelim;
                     }
                     break;
                 default:
@@ -179,7 +179,7 @@ namespace Asm65 {
                     if (mIndex + minWidth > mMaxOperandLen) {
                         Flush();
                     } else {
-                        mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
+                        mBuffer[mIndex++] = mDelimiterDef.CloseDelim;
                         mBuffer[mIndex++] = ',';
                     }
                     break;
@@ -220,12 +220,12 @@ namespace Asm65 {
             switch (mState) {
                 case State.StartOfLine:
                     // empty string; put out a pair of delimiters
-                    mBuffer[mIndex++] = mDelimiterSet.OpenDelim;
-                    mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
+                    mBuffer[mIndex++] = mDelimiterDef.OpenDelim;
+                    mBuffer[mIndex++] = mDelimiterDef.CloseDelim;
                     break;
                 case State.InQuote:
                     // add delimiter and finish
-                    mBuffer[mIndex++] = mDelimiterSet.CloseDelim;
+                    mBuffer[mIndex++] = mDelimiterDef.CloseDelim;
                     break;
                 case State.OutQuote:
                     // just output it

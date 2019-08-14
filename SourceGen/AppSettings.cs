@@ -63,6 +63,8 @@ namespace SourceGen {
         public const string FMT_EXPRESSION_MODE = "fmt-expression-mode";
 
         public const string FMT_PSEUDO_OP_NAMES = "fmt-pseudo-op-names";
+        public const string FMT_CHAR_DELIM = "fmt-char-delim";
+        public const string FMT_STRING_DELIM = "fmt-string-delim";
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
@@ -88,11 +90,6 @@ namespace SourceGen {
         public const string CDLV_COL_WIDTHS = "cdlv-col-widths1";
         public const string CDLV_FONT_FAMILY = "cdlv-font-family";
         public const string CDLV_FONT_SIZE = "cdlv-font-size";
-
-        public const string CHR_ASCII_DELIM_PAT = "chr-ascii-delim-pat";
-        public const string CHR_HIGH_ASCII_DELIM_PAT = "chr-high-ascii-delim-pat";
-        public const string CHR_C64_PETSCII_DELIM_PAT = "chr-c64-petscii-delim-pat";
-        public const string CHR_C64_SCREEN_CODE_DELIM_PAT = "chr-c64-screen-code-delim-pat";
 
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";
