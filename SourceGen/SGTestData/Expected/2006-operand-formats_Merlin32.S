@@ -33,11 +33,15 @@ skipdata lda   #'h'
          ldal  'h'
          lda   #$1f
          lda   #' '
+         lda   #'"'
+         lda   #$27
          lda   #'~'
          lda   #$7f
          lda   #$80
          lda   #$9f
          lda   #" "
+         lda   #$a2
+         lda   #"'"
          lda   #"~"
          lda   #$ff
          rep   #'0'

@@ -36,11 +36,15 @@ skipdata lda    #'h'
         lda+3   'h'
         lda     #$1f
         lda     #' '
+        lda     #'"'
+        lda     #$27
         lda     #'~'
         lda     #$7f
         lda     #$80
         lda     #$9f
         lda     #' ' | $80
+        lda     #'"' | $80
+        lda     #$a7
         lda     #'~' | $80
         lda     #$ff
         rep     #'0'
@@ -62,4 +66,4 @@ more_ascii !byte 'h'
         !byte   >more_ascii
         !word   more_ascii
         !24     more_ascii
-        !byte   $10,$68
+        !byte   $10,$70

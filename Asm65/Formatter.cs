@@ -119,10 +119,9 @@ namespace Asm65 {
             public char OpenDelim { get; private set; }
             public char CloseDelim { get; private set; }
             public string Suffix { get; private set; }
+            public string FormatStr { get; private set; }
 
-            public DelimiterDef(char delim) {
-                OpenDelim = CloseDelim = delim;
-                Prefix = Suffix = string.Empty;
+            public DelimiterDef(char delim) : this(string.Empty, delim, delim, string.Empty) {
             }
             public DelimiterDef(string prefix, char openDelim, char closeDelim, string suffix) {
                 Debug.Assert(prefix != null);
@@ -131,6 +130,15 @@ namespace Asm65 {
                 OpenDelim = openDelim;
                 CloseDelim = closeDelim;
                 Suffix = suffix;
+
+                // Generate format string.
+                StringBuilder sb = new StringBuilder();
+                sb.Append(Prefix);
+                sb.Append(OpenDelim);
+                sb.Append("{0}");
+                sb.Append(CloseDelim);
+                sb.Append(Suffix);
+                FormatStr = sb.ToString();
             }
             public override string ToString() {
                 return Prefix + OpenDelim + '#' + CloseDelim + Suffix;
@@ -291,13 +299,6 @@ namespace Asm65 {
         private string mAddrFormatNoBank;
         private string mAddrFormatWithBank;
 
-        // Character data delimiter format strings, processed from the delimiter patterns.
-        private string mCharDelimAsciiFmt;
-        private string mCharDelimHighAsciiFmt;
-        private string mCharDelimC64PetsciiFmt;
-        private string mCharDelimC64ScreenCodeFmt;
-
-
         // Generated opcode strings.  The index is the bitwise OR of the opcode value and
         // the disambiguation value.  In most cases this just helps us avoid calling
         // ToUpper incessantly.
@@ -431,24 +432,6 @@ namespace Asm65 {
                 Debug.WriteLine("NOTE: char delimiters not set");
                 chrDelim = DelimiterSet.GetDefaultCharDelimiters();
             }
-            mCharDelimAsciiFmt =
-                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.Ascii));
-            mCharDelimHighAsciiFmt =
-                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.HighAscii));
-            mCharDelimC64PetsciiFmt =
-                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.C64Petscii));
-            mCharDelimC64ScreenCodeFmt =
-                DelimiterDefToFormat(chrDelim.Get(CharEncoding.Encoding.C64ScreenCode));
-        }
-
-        private string DelimiterDefToFormat(DelimiterDef def) {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(def.Prefix);
-            sb.Append(def.OpenDelim);
-            sb.Append("{0}");
-            sb.Append(def.CloseDelim);
-            sb.Append(def.Suffix);
-            return sb.ToString();
         }
 
         /// <summary>
@@ -544,37 +527,36 @@ namespace Asm65 {
                 return FormatHexValue(value, 2);
             }
 
-            string fmt;
+            DelimiterDef delimDef = mFormatConfig.mCharDelimiters.Get(enc);
+            string fmt = delimDef.FormatStr;
+            Debug.Assert(fmt != null);
+
             CharEncoding.Convert conv;
             switch (enc) {
                 case CharEncoding.Encoding.Ascii:
-                    fmt = mCharDelimAsciiFmt;
                     conv = CharEncoding.ConvertAscii;
                     break;
                 case CharEncoding.Encoding.HighAscii:
-                    fmt = mCharDelimHighAsciiFmt;
                     conv = CharEncoding.ConvertHighAscii;
                     break;
                 case CharEncoding.Encoding.C64Petscii:
-                    fmt = mCharDelimC64PetsciiFmt;
                     conv = CharEncoding.ConvertC64Petscii;
                     break;
                 case CharEncoding.Encoding.C64ScreenCode:
-                    fmt = mCharDelimC64ScreenCodeFmt;
                     conv = CharEncoding.ConvertC64ScreenCode;
                     break;
                 default:
                     return FormatHexValue(value, 2);
             }
-            if (string.IsNullOrEmpty(fmt)) {
-                return FormatHexValue(value, 2);
-            }
 
             char ch = conv((byte)value);
-            if (ch == CharEncoding.UNPRINTABLE_CHAR) {
+            if (ch == CharEncoding.UNPRINTABLE_CHAR || ch == delimDef.OpenDelim ||
+                    ch == delimDef.CloseDelim) {
+                // We might be able to do better with delimiter clashes, e.g. '\'', but
+                // that's assembler-specific.
                 return FormatHexValue(value, 2);
             } else {
-                // possible optimization: replace fmt with a prefix/suffix pair, and just concat
+                // Possible optimization: replace fmt with a prefix/suffix pair, and just concat
                 return string.Format(fmt, ch);
             }
         }

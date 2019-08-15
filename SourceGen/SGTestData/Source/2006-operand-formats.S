@@ -43,11 +43,15 @@
 
         lda     #$1f
         lda     #$20
+        lda     #$22
+        lda     #$27
         lda     #$7e
         lda     #$7f
         lda     #$80
         lda     #$9f
         lda     #$a0
+        lda     #$a2
+        lda     #$a7
         lda     #$fe
         lda     #$ff
 
