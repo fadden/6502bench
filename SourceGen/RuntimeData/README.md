@@ -35,6 +35,8 @@ The currently-supported parameters are:
    opcodes.  They are disabled by default.
  * first-word-is-load-addr={true|false} - If true, the first two bytes of
    the file contain the load address.
+ * default-text-encoding=&lt;mode&gt; - Specify default character encoding.
+   Use "c64-petscii" for PETSCII.  The default is low/high ASCII.
 
 All of these things can be changed after the project has begun, but it's
 nice to have them configured in advance.

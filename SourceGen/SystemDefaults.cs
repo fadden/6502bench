@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 using Asm65;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen {
     /// <summary>
@@ -28,10 +29,13 @@ namespace SourceGen {
         private const string ENTRY_FLAGS = "entry-flags";
         private const string UNDOCUMENTED_OPCODES = "undocumented-opcodes";
         private const string FIRST_WORD_IS_LOAD_ADDR = "first-word-is-load-addr";
+        private const string DEFAULT_TEXT_ENCODING = "default-text-encoding";
 
         private const string ENTRY_FLAG_EMULATION = "emulation";
         private const string ENTRY_FLAG_NATIVE_LONG = "native-long";
         private const string ENTRY_FLAG_NATIVE_SHORT = "native-short";
+
+        private const string TEXT_ENCODING_C64_PETSCII = "c64-petscii";
 
 
         /// <summary>
@@ -105,14 +109,31 @@ namespace SourceGen {
         /// Gets the default setting for using the first two bytes of the file as the
         /// load address.
         /// 
-        /// This is primarily for C64.  Apple II DOS 3.3 binary files also put the load
-        /// address first, followed by the length, but that's typically stripped out when
+        /// This is primarily for C64 PRG files.  Apple II DOS 3.3 binary files also put the
+        /// load address first, followed by the length, but that's typically stripped out when
         /// the file is extracted.
         /// </summary>
-        /// <param name="sysDef"></param>
-        /// <returns></returns>
+        /// <param name="sysDef">SystemDef instance.</param>
+        /// <returns>True if the first word holds the load address.</returns>
         public static bool GetFirstWordIsLoadAddr(SystemDef sysDef) {
             return GetBoolParam(sysDef, FIRST_WORD_IS_LOAD_ADDR, false);
+        }
+
+        /// <summary>
+        /// Gets the default setting for the text scan encoding mode.
+        /// </summary>
+        /// <param name="sysDef">SystemDef instance.</param>
+        /// <returns>Preferred text scan mode.</returns>
+        public static TextScanMode GetTextScanMode(SystemDef sysDef) {
+            Dictionary<string, string> parms = sysDef.Parameters;
+            TextScanMode mode = TextScanMode.LowHighAscii;
+
+            if (parms.TryGetValue(DEFAULT_TEXT_ENCODING, out string valueStr)) {
+                if (valueStr == TEXT_ENCODING_C64_PETSCII) {
+                    mode = TextScanMode.C64Petscii;
+                }
+            }
+            return mode;
         }
 
         /// <summary>

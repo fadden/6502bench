@@ -260,6 +260,9 @@ namespace SourceGen {
             ProjectProps.IncludeUndocumentedInstr = includeUndoc;
             UpdateCpuDef();
 
+            ProjectProps.AnalysisParams.DefaultTextScanMode =
+                SystemDefaults.GetTextScanMode(sysDef);
+
             ProjectProps.EntryFlags = SystemDefaults.GetEntryFlags(sysDef);
 
             // Configure the load address.

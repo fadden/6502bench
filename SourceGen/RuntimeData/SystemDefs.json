@@ -176,7 +176,8 @@
       "ExtensionScripts" : [
       ],
       "Parameters" : {
-        "first-word-is-load-addr":"true"
+        "first-word-is-load-addr":"true",
+        "default-text-encoding":"c64-petscii"
       }
     },
     {
@@ -191,6 +192,7 @@
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "default-text-encoding":"c64-petscii"
       }
     },
     {
@@ -206,6 +208,7 @@
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "default-text-encoding":"c64-petscii"
       }
     },
     {
@@ -219,6 +222,7 @@
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "default-text-encoding":"c64-petscii"
       }
     },
     {
