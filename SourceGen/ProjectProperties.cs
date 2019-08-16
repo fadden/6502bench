@@ -36,6 +36,8 @@ namespace SourceGen {
         /// Some parameters we feed to the analyzers.
         /// </summary>
         public class AnalysisParameters {
+            // This is very similar to Formatter.FormatConfig.CharConvMode, but it serves
+            // a different purpose and might diverge in the future.
             public enum TextScanMode {
                 Unknown = 0,
                 LowAscii,

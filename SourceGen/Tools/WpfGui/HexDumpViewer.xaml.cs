@@ -21,6 +21,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using Asm65;
+using CharConvMode = Asm65.Formatter.FormatConfig.CharConvMode;
 
 namespace SourceGen.Tools.WpfGui {
     /// <summary>
@@ -68,16 +69,6 @@ namespace SourceGen.Tools.WpfGui {
         }
 
         /// <summary>
-        /// Character conversion modes.  These determine how we interpret bytes for the
-        /// ASCII portion of the dump.
-        /// </summary>
-        public enum CharConvMode {
-            Unknown = 0,
-            PlainAscii,
-            HighLowAscii
-        }
-
-        /// <summary>
         /// Character conversion combo box item.
         /// </summary>
         public class CharConvItem {
@@ -103,10 +94,14 @@ namespace SourceGen.Tools.WpfGui {
             mFormatter = formatter;
 
             CharConvItems = new CharConvItem[] {
-                new CharConvItem((string)FindResource("str_PlainAscii"),
-                    CharConvMode.PlainAscii),
-                new CharConvItem((string)FindResource("str_HighLowAscii"),
-                    CharConvMode.HighLowAscii),
+                new CharConvItem((string)FindResource("str_AsciiOnly"),
+                    CharConvMode.Ascii),
+                new CharConvItem((string)FindResource("str_LowHighAscii"),
+                    CharConvMode.LowHighAscii),
+                new CharConvItem((string)FindResource("str_C64Petscii"),
+                    CharConvMode.C64Petscii),
+                new CharConvItem((string)FindResource("str_C64ScreenCode"),
+                    CharConvMode.C64ScreenCode),
             };
         }
 
@@ -116,7 +111,7 @@ namespace SourceGen.Tools.WpfGui {
 
             // Restore conv mode setting.
             CharConvMode mode = (CharConvMode)AppSettings.Global.GetEnum(
-                AppSettings.HEXD_CHAR_CONV, typeof(CharConvMode), (int)CharConvMode.PlainAscii);
+                AppSettings.HEXD_CHAR_CONV, typeof(CharConvMode), (int)CharConvMode.Ascii);
             int index = 0;
             for (int i = 0; i < CharConvItems.Length; i++) {
                 if (CharConvItems[i].Mode == mode) {
@@ -126,11 +121,6 @@ namespace SourceGen.Tools.WpfGui {
             }
             charConvComboBox.SelectedIndex = index;
         }
-
-        //private void Window_Closing(object sender, EventArgs e) {
-        //    Debug.WriteLine("Window width: " + ActualWidth);
-        //    Debug.WriteLine("Column width: " + hexDumpData.Columns[0].ActualWidth);
-        //}
 
         /// <summary>
         /// Sets the filename associated with the data.  This is for display purposes only.
@@ -152,18 +142,7 @@ namespace SourceGen.Tools.WpfGui {
                 // initializing
                 return;
             }
-
-            switch (item.Mode) {
-                case CharConvMode.PlainAscii:
-                    config.mHexDumpCharConvMode = Formatter.FormatConfig.CharConvMode.PlainAscii;
-                    break;
-                case CharConvMode.HighLowAscii:
-                    config.mHexDumpCharConvMode = Formatter.FormatConfig.CharConvMode.HighLowAscii;
-                    break;
-                default:
-                    Debug.Assert(false);
-                    break;
-            }
+            config.mHexDumpCharConvMode = item.Mode;
 
             config.mHexDumpAsciiOnly = AsciiOnlyDump;
 

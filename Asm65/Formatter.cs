@@ -81,7 +81,14 @@ namespace Asm65 {
 
             // hex dumps
             public bool mHexDumpAsciiOnly;              // disallow non-ASCII chars in hex dumps?
-            public enum CharConvMode { Unknown = 0, PlainAscii, HighLowAscii };
+            public enum CharConvMode {
+                // TODO(maybe): just pass in a CharEncoding.Convert delegate
+                Unknown = 0,
+                Ascii,
+                LowHighAscii,
+                C64Petscii,
+                C64ScreenCode
+            };
             public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
 
             // This determines what operators are available and what their precedence is.
@@ -321,6 +328,8 @@ namespace Asm65 {
         // Buffer to use when generating hex dump lines.
         private char[] mHexDumpBuffer;
 
+        private CharEncoding.Convert mHexDumpCharConv;
+
         /// <summary>
         /// A 16-character array with 0-9a-f, for hex conversions.  The letters will be
         /// upper or lower case, per the format config.
@@ -429,6 +438,25 @@ namespace Asm65 {
             if (chrDelim == null) {
                 Debug.WriteLine("NOTE: char delimiters not set");
                 chrDelim = DelimiterSet.GetDefaultCharDelimiters();
+            }
+
+            switch (mFormatConfig.mHexDumpCharConvMode) {
+                case FormatConfig.CharConvMode.Ascii:
+                    mHexDumpCharConv = CharEncoding.ConvertAscii;
+                    break;
+                case FormatConfig.CharConvMode.LowHighAscii:
+                    mHexDumpCharConv = CharEncoding.ConvertLowAndHighAscii;
+                    break;
+                case FormatConfig.CharConvMode.C64Petscii:
+                    mHexDumpCharConv = CharEncoding.ConvertC64Petscii;
+                    break;
+                case FormatConfig.CharConvMode.C64ScreenCode:
+                    mHexDumpCharConv = CharEncoding.ConvertC64ScreenCode;
+                    break;
+                default:
+                    // most some things don't configure the hex dump; this is fine
+                    mHexDumpCharConv = CharEncoding.ConvertLowAndHighAscii;
+                    break;
             }
         }
 
@@ -958,13 +986,8 @@ namespace Asm65 {
         /// <param name="val">Value to convert.</param>
         /// <returns>Printable character.</returns>
         private char CharConv(byte val) {
-            char ch;
-            if (mFormatConfig.mHexDumpCharConvMode == FormatConfig.CharConvMode.HighLowAscii) {
-                ch = (char)(val & 0x7f);
-            } else {
-                ch = (char)val;
-            }
-            if (CommonUtil.TextUtil.IsPrintableAscii(ch)) {
+            char ch = mHexDumpCharConv(val);
+            if (ch != CharEncoding.UNPRINTABLE_CHAR) {
                 return ch;
             } else if (mFormatConfig.mHexDumpAsciiOnly) {
                 return '.';
