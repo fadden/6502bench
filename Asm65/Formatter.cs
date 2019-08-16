@@ -144,8 +144,8 @@ namespace Asm65 {
                 return Prefix + OpenDelim + '#' + CloseDelim + Suffix;
             }
         }
-        public static DelimiterDef SINGLE_QUOTE_DELIM = new DelimiterDef('\'');
-        public static DelimiterDef DOUBLE_QUOTE_DELIM = new DelimiterDef('"');
+        public static readonly DelimiterDef SINGLE_QUOTE_DELIM = new DelimiterDef('\'');
+        public static readonly DelimiterDef DOUBLE_QUOTE_DELIM = new DelimiterDef('"');
 
         public class DelimiterSet {
             private Dictionary<CharEncoding.Encoding, DelimiterDef> mDelimiters =

@@ -22,6 +22,7 @@ using System.Text;
 
 using Asm65;
 using CommonUtil;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen.AsmGen {
     #region IGenerator
@@ -186,10 +187,26 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
+
+            // Configure delimiters for single-character operands.  The conversion mode we
+            // use is determined by the default text mode in the project properties.
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
-            charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
-            charSet.Set(CharEncoding.Encoding.HighAscii,
-                new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
+            switch (textMode) {
+                case TextScanMode.C64Petscii:
+                    charSet.Set(CharEncoding.Encoding.C64Petscii, Formatter.SINGLE_QUOTE_DELIM);
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    charSet.Set(CharEncoding.Encoding.C64ScreenCode, Formatter.SINGLE_QUOTE_DELIM);
+                    break;
+                case TextScanMode.LowAscii:
+                case TextScanMode.LowHighAscii:
+                default:
+                    charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
+                    charSet.Set(CharEncoding.Encoding.HighAscii,
+                        new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+                    break;
+            }
             config.mCharDelimiters = charSet;
         }
 
@@ -254,6 +271,32 @@ namespace SourceGen.AsmGen {
 
             OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(".cpu"),
                 '\"' + cpuStr + '\"', string.Empty);
+
+            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
+            switch (textMode) {
+                case TextScanMode.C64Petscii:
+                    OutputLine(string.Empty, ".enc", "sg_petscii", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\" @\", $20", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"AZ\", $c1", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"az\", $41", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"[[\", $5b", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"]]\", $5d", string.Empty);
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    OutputLine(string.Empty, ".enc", "sg_screen", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\" ?\", $20", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"@@\", $00", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"AZ\", $41", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"az\", $01", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"[[\", $1b", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "\"]]\", $1d", string.Empty);
+                    break;
+                case TextScanMode.LowAscii:
+                case TextScanMode.LowHighAscii:
+                default:
+                    // ASCII in, ASCII out
+                    break;
+            }
         }
 
         // IGenerator
@@ -518,15 +561,17 @@ namespace SourceGen.AsmGen {
         }
 
         private void OutputString(int offset, string labelStr, string commentStr) {
-            // Normal ASCII strings are handled with a simple .text directive.
+            // Generic strings whose encoding matches the configured text encoding are output
+            // with a simple .text directive.
             //
             // CString and L8String have directives (.null, .ptext), but we can only use
             // them if the string fits on one line and doesn't include delimiters.
             //
-            // We could probably do something fancy with the character encoding options to
-            // make high-ASCII work nicely.
-            //
             // We might be able to define a macro for Reverse.
+            //
+            // We don't currently switch character encodings in the middle of a file.  We could
+            // do so to flip between PETSCII, screen codes, low ASCII, and high ASCII, but it
+            // adds a lot of noise and it's unclear that this is generally useful.
 
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
@@ -534,19 +579,40 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            CharEncoding.Convert charConv;
-            CharEncoding.Convert dciConv;
+            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
+            CharEncoding.Convert charConv = null;
+            CharEncoding.Convert dciConv = null;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
-                    charConv = CharEncoding.ConvertAscii;
-                    dciConv = CharEncoding.ConvertLowAndHighAscii;
+                    if (textMode == TextScanMode.LowAscii ||
+                            textMode == TextScanMode.LowHighAscii) {
+                        charConv = CharEncoding.ConvertAscii;
+                        dciConv = CharEncoding.ConvertLowAndHighAscii;
+                    }
+                    break;
+                case FormatDescriptor.SubType.C64Petscii:
+                    if (textMode == TextScanMode.C64Petscii) {
+                        charConv = CharEncoding.ConvertC64Petscii;
+                        // DCI not supported for PETSCII; make sure it doesn't get tried
+                        if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                            charConv = null;
+                        }
+                    }
+                    break;
+                case FormatDescriptor.SubType.C64Screen:
+                    if (textMode == TextScanMode.C64ScreenCode) {
+                        charConv = CharEncoding.ConvertC64ScreenCode;
+                        dciConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
+                    }
                     break;
                 case FormatDescriptor.SubType.HighAscii:
-                case FormatDescriptor.SubType.C64Petscii:
-                case FormatDescriptor.SubType.C64Screen:
+                    // not supported
                 default:
-                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                    return;
+                    break;
+            }
+            if (charConv == null) {
+                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                return;
             }
 
             Formatter formatter = SourceFormatter;
@@ -648,6 +714,10 @@ namespace SourceGen.AsmGen {
     /// Cross-assembler execution interface.
     /// </summary>
     public class AsmTass64 : IAssembler {
+        // Standard options.  Note we're not using --ascii, which causes all character data
+        // to be converted to PETSCII by default.  By keeping things "raw" we can define our
+        // character encoding explicitly.  Anybody who wants to move the code to native
+        // assembly can generate for PETSCII and then just delete the sg_petscii .cdefs.
         public const string OPTIONS = "--case-sensitive --nostart --long-address -Wall";
 
         // Paths from generator.
