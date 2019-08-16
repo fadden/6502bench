@@ -308,6 +308,33 @@ namespace SourceGen.AsmGen {
             }
         }
 
+        /// <summary>
+        /// Outputs formatted data in an unformatted way, because the code generator couldn't
+        /// figure out how to do something better.
+        /// </summary>
+        private void OutputNoJoy(int offset, int length, string labelStr, string commentStr) {
+            byte[] data = Project.FileData;
+            Debug.Assert(length > 0);
+            Debug.Assert(offset >= 0 && offset < data.Length);
+
+            bool singleValue = true;
+            byte val = data[offset];
+            for (int i = 1; i < length; i++) {
+                if (data[offset + i] != val) {
+                    singleValue = false;
+                    break;
+                }
+            }
+
+            if (singleValue && length > 1) {
+                string opcodeStr = SourceFormatter.FormatPseudoOp(sDataOpNames.Fill);
+                string operandStr = length + "," + SourceFormatter.FormatHexValue(val, 2);
+                OutputLine(labelStr, opcodeStr, operandStr, commentStr);
+            } else {
+                OutputDenseHex(offset, length, labelStr, commentStr);
+            }
+        }
+
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
             if (op.IsUndocumented) {
@@ -446,14 +473,27 @@ namespace SourceGen.AsmGen {
             // have the right pattern.  If not, we will generate bad output.  This would need
             // to be scanned and corrected at a higher level.
 
-            Formatter formatter = SourceFormatter;
-            byte[] data = Project.FileData;
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
             Debug.Assert(dfd != null);
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
+            // We can sort of do parts of C64 stuff, but it's probably more readable to just
+            // output a commented blob than something where only the capital letters are readable.
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                case FormatDescriptor.SubType.HighAscii:
+                    break;
+                case FormatDescriptor.SubType.C64Petscii:
+                case FormatDescriptor.SubType.C64Screen:
+                default:
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
+            }
+
+            Formatter formatter = SourceFormatter;
+            byte[] data = Project.FileData;
             StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
             int leadingBytes = 0;
             string opcodeStr;

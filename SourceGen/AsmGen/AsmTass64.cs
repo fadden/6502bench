@@ -428,7 +428,7 @@ namespace SourceGen.AsmGen {
                 }
             }
 
-            if (singleValue) {
+            if (singleValue && length > 1) {
                 string opcodeStr = SourceFormatter.FormatPseudoOp(sDataOpNames.Fill);
                 string operandStr = length + "," + SourceFormatter.FormatHexValue(val, 2);
                 OutputLine(labelStr, opcodeStr, operandStr, commentStr);
@@ -528,23 +528,33 @@ namespace SourceGen.AsmGen {
             //
             // We might be able to define a macro for Reverse.
 
-            Formatter formatter = SourceFormatter;
-            byte[] data = Project.FileData;
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
             Debug.Assert(dfd != null);
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
+            CharEncoding.Convert charConv;
+            CharEncoding.Convert dciConv;
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                    charConv = CharEncoding.ConvertAscii;
+                    dciConv = CharEncoding.ConvertLowAndHighAscii;
+                    break;
+                case FormatDescriptor.SubType.HighAscii:
+                case FormatDescriptor.SubType.C64Petscii:
+                case FormatDescriptor.SubType.C64Screen:
+                default:
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
+            }
+
+            Formatter formatter = SourceFormatter;
+            byte[] data = Project.FileData;
             int hiddenLeadingBytes = 0;
             int shownLeadingBytes = 0;
             int trailingBytes = 0;
             string opcodeStr;
-
-            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
-                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                return;
-            }
 
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
@@ -573,12 +583,12 @@ namespace SourceGen.AsmGen {
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep,
-                MAX_OPERAND_LEN, CharEncoding.ConvertAscii);
+                MAX_OPERAND_LEN, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high
                 // throughout.
-                stropf.CharConv = CharEncoding.ConvertLowAndHighAscii;
+                stropf.CharConv = dciConv;
             }
 
             // Feed bytes in, skipping over hidden bytes (leading L8, trailing null).
@@ -601,7 +611,7 @@ namespace SourceGen.AsmGen {
                     if (stropf.Lines.Count != 1) {
                         // Must be single-line.
                         opcodeStr = sDataOpNames.StrGeneric;
-                        stropf.CharConv = CharEncoding.ConvertAscii; // undo DCI hack
+                        stropf.CharConv = charConv; // undo DCI hack
                         redo = true;
                     }
                     break;

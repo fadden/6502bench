@@ -451,7 +451,7 @@ namespace SourceGen.AsmGen {
                 }
             }
 
-            if (singleValue) {
+            if (singleValue && length > 1) {
                 string opcodeStr = SourceFormatter.FormatPseudoOp(sDataOpNames.Fill);
                 string operandStr = length + "," + SourceFormatter.FormatHexValue(val, 2);
                 OutputLine(labelStr, opcodeStr, operandStr, commentStr);
@@ -532,11 +532,6 @@ namespace SourceGen.AsmGen {
         }
 
         private void OutputString(int offset, string labelStr, string commentStr) {
-            // Normal ASCII strings are handled with a simple !text directive.
-            //
-            // We could probably do something fancy with !xor to
-            // make high-ASCII work nicely.
-
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
             Anattrib attr = Project.GetAnattrib(offset);
@@ -545,9 +540,30 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
-                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                return;
+            string opcodeStr;
+            CharEncoding.Convert charConv;
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                    opcodeStr = sDataOpNames.StrGeneric;
+                    charConv = CharEncoding.ConvertAscii;
+                    break;
+                case FormatDescriptor.SubType.HighAscii:
+                    // Can't !xor the output, because while it works for string data it
+                    // also flips the high bits on unprintable bytes output as raw hex.
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
+                case FormatDescriptor.SubType.C64Petscii:
+                    opcodeStr = "!pet";
+                    charConv = CharEncoding.ConvertC64Petscii;
+                    break;
+                case FormatDescriptor.SubType.C64Screen:
+                    opcodeStr = "!scr";
+                    charConv = CharEncoding.ConvertC64ScreenCode;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
             }
 
             int leadingBytes = 0;
@@ -557,11 +573,14 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.StringReverse:
                 case FormatDescriptor.Type.StringNullTerm:
                 case FormatDescriptor.Type.StringDci:
+                    // Last byte will be output as hex.
                     break;
                 case FormatDescriptor.Type.StringL8:
+                    // Length byte will be output as hex.
                     leadingBytes = 1;
                     break;
                 case FormatDescriptor.Type.StringL16:
+                    // Length byte will be output as hex.
                     leadingBytes = 2;
                     break;
                 default:
@@ -570,17 +589,21 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM,
-                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN,
-                CharEncoding.ConvertAscii);
+                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep,
+                MAX_OPERAND_LEN, charConv);
             stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 
-            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
+            //if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+            //    OutputLine(string.Empty, "!xor", "$80 {", string.Empty);
+            //}
             foreach (string str in stropf.Lines) {
                 OutputLine(labelStr, opcodeStr, str, commentStr);
                 labelStr = commentStr = string.Empty;       // only show on first
             }
+            //if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+            //    OutputLine(string.Empty, "}", string.Empty, string.Empty);
+            //}
         }
     }
 

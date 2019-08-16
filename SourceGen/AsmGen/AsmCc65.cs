@@ -485,7 +485,7 @@ namespace SourceGen.AsmGen {
                 }
             }
 
-            if (singleValue) {
+            if (singleValue && length > 1) {
                 string opcodeStr = SourceFormatter.FormatPseudoOp(sDataOpNames.Fill);
                 string operandStr = length + "," + SourceFormatter.FormatHexValue(val, 2);
                 OutputLine(labelStr, opcodeStr, operandStr, commentStr);
@@ -592,14 +592,35 @@ namespace SourceGen.AsmGen {
             // Some ideas here:
             // https://groups.google.com/forum/#!topic/comp.sys.apple2.programmer/5Wkw8mUPcU0
 
-            Formatter formatter = SourceFormatter;
-            byte[] data = Project.FileData;
             Anattrib attr = Project.GetAnattrib(offset);
             FormatDescriptor dfd = attr.DataDescriptor;
             Debug.Assert(dfd != null);
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
+            CharEncoding.Convert charConv;
+            bool isHighAscii = false;
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                    charConv = CharEncoding.ConvertAscii;
+                    break;
+                case FormatDescriptor.SubType.HighAscii:
+                    if (dfd.FormatType != FormatDescriptor.Type.StringGeneric) {
+                        OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                        return;
+                    }
+                    charConv = CharEncoding.ConvertHighAscii;
+                    isHighAscii = true;
+                    break;
+                case FormatDescriptor.SubType.C64Petscii:
+                case FormatDescriptor.SubType.C64Screen:
+                default:
+                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                    return;
+            }
+
+            Formatter formatter = SourceFormatter;
+            byte[] data = Project.FileData;
             int leadingBytes = 0;
             int trailingBytes = 0;
 
@@ -622,19 +643,6 @@ namespace SourceGen.AsmGen {
                     return;
             }
 
-            bool highAscii = (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii);
-            if (highAscii && dfd.FormatType != FormatDescriptor.Type.StringGeneric) {
-                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                return;
-            }
-
-            CharEncoding.Convert charConv;
-            if (highAscii) {
-                charConv = CharEncoding.ConvertHighAscii;
-            } else {
-                charConv = CharEncoding.ConvertAscii;
-            }
-
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep,
                 MAX_OPERAND_LEN, charConv);
@@ -643,7 +651,7 @@ namespace SourceGen.AsmGen {
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.StrGeneric);
 
-            if (highAscii) {
+            if (isHighAscii) {
                 // Does this fit the narrow definition of what we can do with a macro?
                 Debug.Assert(dfd.FormatType == FormatDescriptor.Type.StringGeneric);
                 if (stropf.Lines.Count == 1 && !stropf.HasEscapedText) {
