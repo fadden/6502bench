@@ -152,12 +152,10 @@ namespace Asm65 {
                 new Dictionary<CharEncoding.Encoding, DelimiterDef>();
 
             /// <summary>
-            /// Returns the specified DelimiterDef, or a default if not found.
+            /// Returns the specified DelimiterDef, or null if not found.
             /// </summary>
             public DelimiterDef Get(CharEncoding.Encoding enc) {
-                if (!mDelimiters.TryGetValue(enc, out DelimiterDef def)) {
-                    return DOUBLE_QUOTE_DELIM;
-                }
+                mDelimiters.TryGetValue(enc, out DelimiterDef def);
                 return def;
             }
             public void Set(CharEncoding.Encoding enc, DelimiterDef def) {
@@ -528,6 +526,10 @@ namespace Asm65 {
             }
 
             DelimiterDef delimDef = mFormatConfig.mCharDelimiters.Get(enc);
+            if (delimDef == null) {
+                return FormatHexValue(value, 2);
+            }
+
             string fmt = delimDef.FormatStr;
             Debug.Assert(fmt != null);
 

@@ -97,13 +97,13 @@ namespace SourceGen.WpfGui {
                 new CpuItem((string)FindResource("str_65816"), CpuDef.CpuType.Cpu65816),
             };
             DefaultTextScanModeItems = new DefaultTextScanMode[] {
-                new DefaultTextScanMode((string)FindResource("str_LowAscii"),
+                new DefaultTextScanMode(Res.Strings.SCAN_LOW_ASCII,
                     TextScanMode.LowAscii),
-                new DefaultTextScanMode((string)FindResource("str_LowHighAscii"),
+                new DefaultTextScanMode(Res.Strings.SCAN_LOW_HIGH_ASCII,
                     TextScanMode.LowHighAscii),
-                new DefaultTextScanMode((string)FindResource("str_C64Petscii"),
+                new DefaultTextScanMode(Res.Strings.SCAN_C64_PETSCII,
                     TextScanMode.C64Petscii),
-                new DefaultTextScanMode((string)FindResource("str_C64ScreenCode"),
+                new DefaultTextScanMode(Res.Strings.SCAN_C64_SCREEN_CODE,
                     TextScanMode.C64ScreenCode),
             };
             MinCharsItems = new MinCharsItem[] {

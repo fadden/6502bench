@@ -318,11 +318,19 @@ namespace SourceGen {
             CharEncoding.Convert charConv;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
-                    charConv = CharEncoding.ConvertAscii;
+                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                        charConv = CharEncoding.ConvertLowAndHighAscii;
+                    } else {
+                        charConv = CharEncoding.ConvertAscii;
+                    }
                     delDef = delSet.Get(CharEncoding.Encoding.Ascii);
                     break;
                 case FormatDescriptor.SubType.HighAscii:
-                    charConv = CharEncoding.ConvertHighAscii;
+                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                        charConv = CharEncoding.ConvertLowAndHighAscii;
+                    } else {
+                        charConv = CharEncoding.ConvertHighAscii;
+                    }
                     delDef = delSet.Get(CharEncoding.Encoding.HighAscii);
                     break;
                 case FormatDescriptor.SubType.C64Petscii:
@@ -330,7 +338,11 @@ namespace SourceGen {
                     delDef = delSet.Get(CharEncoding.Encoding.C64Petscii);
                     break;
                 case FormatDescriptor.SubType.C64Screen:
-                    charConv = CharEncoding.ConvertC64ScreenCode;
+                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                        charConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
+                    } else {
+                        charConv = CharEncoding.ConvertC64ScreenCode;
+                    }
                     delDef = delSet.Get(CharEncoding.Encoding.C64ScreenCode);
                     break;
                 default:
@@ -340,13 +352,17 @@ namespace SourceGen {
                     break;
             }
 
+            if (delDef == null) {
+                delDef = Formatter.DOUBLE_QUOTE_DELIM;
+            }
+
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
                     // Generic character data.
                     popcode = opNames.StrGeneric;
                     break;
                 case FormatDescriptor.Type.StringReverse:
-                    // High or low ASCII, full width specified by formatter.  Show characters
+                    // Character data, full width specified by formatter.  Show characters
                     // in reverse order.
                     popcode = opNames.StrReverse;
                     revMode = StringOpFormatter.ReverseMode.FullReverse;
@@ -377,10 +393,8 @@ namespace SourceGen {
                     popcode = opNames.StrLen16;
                     break;
                 case FormatDescriptor.Type.StringDci:
-                    // High or low ASCII, with high bit on last byte flipped.  Only useful
-                    // for ASCII strings.
+                    // High bit on last byte is flipped.
                     popcode = opNames.StrDci;
-                    charConv = CharEncoding.ConvertLowAndHighAscii;
                     break;
                 default:
                     Debug.Assert(false);

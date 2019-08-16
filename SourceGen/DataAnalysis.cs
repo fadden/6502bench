@@ -810,7 +810,7 @@ namespace SourceGen {
 #endif
         }
 
-#region Static analyzer methods
+        #region Static analyzer methods
 
         /// <summary>
         /// Checks for a repeated run of the same byte.
@@ -837,27 +837,45 @@ namespace SourceGen {
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range</param>
-        /// <param name="lowAscii">Set to the number of low-ASCII bytes found.</param>
-        /// <param name="highAscii">Set to the number of high-ASCII bytes found.</param>
-        /// <param name="nonAscii">Set to the number of non-ASCII bytes found.</param>
-        public static void CountAsciiBytes(byte[] fileData, int start, int end,
-                out int lowAscii, out int highAscii, out int nonAscii) {
-            lowAscii = highAscii = nonAscii = 0;
+        /// <param name="charTest">Character test delegate.  Must match on both high and
+        ///   low characters.</param>
+        /// <param name="lowVal">Set to the number of low-range characters found.</param>
+        /// <param name="highVal">Set to the number of high-range characters found.</param>
+        /// <param name="nonChar">Set to the number of non-character bytes found.</param>
+        public static void CountHighLowBytes(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest,
+                out int lowVal, out int highVal, out int nonChar) {
+            lowVal = highVal = nonChar = 0;
 
             for (int i = start; i <= end; i++) {
                 byte val = fileData[i];
-                if (val < 0x20) {
-                    nonAscii++;
-                } else if (val < 0x7f) {
-                    lowAscii++;
-                } else if (val < 0xa0) {
-                    nonAscii++;
-                } else if (val < 0xff) {
-                    highAscii++;
+                if (!charTest(val)) {
+                    nonChar++;
+                } else if ((val & 0x80) == 0) {
+                    lowVal++;
                 } else {
-                    nonAscii++;
+                    highVal++;
                 }
             }
+        }
+
+        /// <summary>
+        /// Counts the number of bytes that match the character test.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="start">Offset of first byte in range.</param>
+        /// <param name="end">Offset of last byte in range.</param>
+        /// <param name="charTest">Character test delegate.</param>
+        /// <returns>Number of matching characters.</returns>
+        public static int CountCharacterBytes(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest) {
+            int count = 0;
+            for (int i = start; i <= end; i++) {
+                if (charTest(fileData[i])) {
+                    count++;
+                }
+            }
+            return count;
         }
 
         /// <summary>
@@ -865,15 +883,17 @@ namespace SourceGen {
         /// 
         /// Zero-length strings are allowed but not included in the count.
         /// 
-        /// Each string must be either high-ASCII or low-ASCII, not a mix.
-        /// 
         /// If any bad data is found, the scan aborts and returns -1.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
+        /// <param name="charTest">Character test delegate.</param>
+        /// <param name="limitHiBit">If set, the high bit in all character must be the
+        ///   same.  Used to enforce a single encoding when "low or high ASCII" is used.</param>
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
-        public static int RecognizeNullTerminatedStrings(byte[] fileData, int start, int end) {
+        public static int RecognizeNullTerminatedStrings(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest, bool limitHiBit) {
             // Quick test.
             if (fileData[end] != 0x00) {
                 return -1;
@@ -892,16 +912,17 @@ namespace SourceGen {
                     stringLen = 0;
                     expectedHiBit = -1;
                 } else {
-                    if (expectedHiBit == -1) {
-                        // First byte in string, set hi/lo expectation.
-                        expectedHiBit = val & 0x80;
-                    } else if ((val & 0x80) != expectedHiBit) {
-                        // Mixed ASCII or non-ASCII, fail.
-                        return -1;
+                    if (limitHiBit) {
+                        if (expectedHiBit == -1) {
+                            // First byte in string, set hi/lo expectation.
+                            expectedHiBit = val & 0x80;
+                        } else if ((val & 0x80) != expectedHiBit) {
+                            // Mixed ASCII or non-ASCII, fail.
+                            return -1;
+                        }
                     }
-                    val &= 0x7f;
-                    if (val < 0x20 || val == 0x7f) {
-                        // Non-ASCII, fail.
+                    if (!charTest(val)) {
+                        // Not a matching character, fail.
                         return -1;
                     }
                     stringLen++;
@@ -913,16 +934,18 @@ namespace SourceGen {
 
         /// <summary>
         /// Counts strings prefixed with an 8-bit length.
-        /// 
-        /// Each string must be either high-ASCII or low-ASCII, not a mix.
         ///
         /// Zero-length strings are allowed but not counted.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
+        /// <param name="charTest">Character test delegate.</param>
+        /// <param name="limitHiBit">If set, the high bit in all character must be the
+        ///   same.  Used to enforce a single encoding when "low or high ASCII" is used.</param>
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
-        public static int RecognizeLen8Strings(byte[] fileData, int start, int end) {
+        public static int RecognizeLen8Strings(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest, bool limitHiBit) {
             int posn = start;
             int remaining = end - start + 1;
             int stringCount = 0;
@@ -944,13 +967,12 @@ namespace SourceGen {
 
                 while (strLen-- != 0) {
                     byte val = fileData[posn++];
-                    if ((val & 0x80) != expectedHiBit) {
+                    if (limitHiBit && (val & 0x80) != expectedHiBit) {
                         // Mixed ASCII, fail.
                         return -1;
                     }
-                    val &= 0x7f;
-                    if (val < 0x20 || val == 0x7f) {
-                        // Non-ASCII, fail.
+                    if (!charTest(val)) {
+                        // Not a matching character, fail.
                         return -1;
                     }
                 }
@@ -961,16 +983,18 @@ namespace SourceGen {
 
         /// <summary>
         /// Counts strings prefixed with a 16-bit length.
-        /// 
-        /// Each string must be either high-ASCII or low-ASCII, not a mix.
         ///
         /// Zero-length strings are allowed but not counted.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
+        /// <param name="charTest">Character test delegate.</param>
+        /// <param name="limitHiBit">If set, the high bit in all character must be the
+        ///   same.  Used to enforce a single encoding when "low or high ASCII" is used.</param>
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
-        public static int RecognizeLen16Strings(byte[] fileData, int start, int end) {
+        public static int RecognizeLen16Strings(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest, bool limitHiBit) {
             int posn = start;
             int remaining = end - start + 1;
             int stringCount = 0;
@@ -998,13 +1022,12 @@ namespace SourceGen {
 
                 while (strLen-- != 0) {
                     byte val = fileData[posn++];
-                    if ((val & 0x80) != expectedHiBit) {
+                    if (limitHiBit && (val & 0x80) != expectedHiBit) {
                         // Mixed ASCII, fail.
                         return -1;
                     }
-                    val &= 0x7f;
-                    if (val < 0x20 || val == 0x7f) {
-                        // Non-ASCII, fail.
+                    if (!charTest(val)) {
+                        // Not a matching character, fail.
                         return -1;
                     }
                 }
@@ -1020,11 +1043,16 @@ namespace SourceGen {
         /// Each string must be at least two bytes.  To reduce false-positives, we require
         /// that all strings have the same hi/lo pattern.
         /// </summary>
+        /// <remarks>
+        /// Not useful for C64Petscii, which mixes high/low characters.
+        /// </remarks>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
+        /// <param name="charTest">Character test delegate.</param>
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
-        public static int RecognizeDciStrings(byte[] fileData, int start, int end) {
+        public static int RecognizeDciStrings(byte[] fileData, int start, int end,
+                CharEncoding.InclusionTest charTest) {
             int expectedHiBit = fileData[start] & 0x80;
             int stringCount = 0;
             int stringLen = 0;
@@ -1048,9 +1076,8 @@ namespace SourceGen {
                     stringLen++;
                 }
 
-                val &= 0x7f;
-                if (val < 0x20 || val == 0x7f) {
-                    // Non-ASCII, fail.
+                if (!charTest((byte)(val & 0x7f))) {
+                    // Not a matching character, fail.
                     return -1;
                 }
             }
@@ -1104,7 +1131,7 @@ namespace SourceGen {
             return stringCount;
         }
 
-#endregion // Static analyzers
+        #endregion // Static analyzers
     }
 }
 

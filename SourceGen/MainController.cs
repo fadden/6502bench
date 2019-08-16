@@ -2359,7 +2359,7 @@ namespace SourceGen {
         ///   is selected.</param>
         public SelectionState UpdateSelectionState() {
             int selCount = mMainWin.CodeListView_GetSelectionCount();
-            Debug.WriteLine("UpdateSelectionState: selCount=" + selCount);
+            //Debug.WriteLine("UpdateSelectionState: selCount=" + selCount);
 
             SelectionState state = new SelectionState();
 

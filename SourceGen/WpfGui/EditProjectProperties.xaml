@@ -38,11 +38,6 @@ limitations under the License.
         <system:String x:Key="str_65C02">WDC W65C02S</system:String>
         <system:String x:Key="str_65816">WDC W65C816S</system:String>
 
-        <system:String x:Key="str_LowAscii">Plain ASCII</system:String>
-        <system:String x:Key="str_LowHighAscii">Plain or High ASCII</system:String>
-        <system:String x:Key="str_C64Petscii">C64 PETSCII</system:String>
-        <system:String x:Key="str_C64ScreenCode">C64 Screen Code</system:String>
-
         <system:String x:Key="str_DisableStringScan">None (disabled)</system:String>
 
         <system:String x:Key="str_AutoLabelSimple">Simple ("L1234")</system:String>

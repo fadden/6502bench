@@ -36,7 +36,11 @@ limitations under the License.
                      Checked="MainGroup_CheckedChanged"/>
         <RadioButton Name="binaryButton" GroupName="Format" Content="Binary" Margin="0,2,0,0"
                      Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="asciiButton" GroupName="Format" Content="ASCII character" Margin="0,2,0,0"
+        <RadioButton Name="asciiButton" GroupName="Format" Content="ASCII (low or high) character" Margin="0,2,0,0"
+                     Checked="MainGroup_CheckedChanged"/>
+        <RadioButton Name="petsciiButton" GroupName="Format" Content="C64 PETSCII character" Margin="0,2,0,0"
+                     Checked="MainGroup_CheckedChanged"/>
+        <RadioButton Name="screenCodeButton" GroupName="Format" Content="C64 Screen character" Margin="0,2,0,0"
                      Checked="MainGroup_CheckedChanged"/>
         <Grid>
             <Grid.ColumnDefinitions>

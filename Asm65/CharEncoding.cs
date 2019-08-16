@@ -106,11 +106,12 @@ namespace Asm65 {
             return IsExtendedAscii((byte)(val & 0x7f));
         }
         public static char ConvertLowAndHighAscii(byte val) {
-            if (IsPrintableAscii(val) || IsPrintableHighAscii(val)) {
-                return (char)(val & 0x7f);
-            } else {
-                return UNPRINTABLE_CHAR;
-            }
+            //if (IsPrintableAscii(val) || IsPrintableHighAscii(val)) {
+            //    return (char)(val & 0x7f);
+            //} else {
+            //    return UNPRINTABLE_CHAR;
+            //}
+            return ConvertAscii((byte)(val & 0x7f));
         }
 
         //
@@ -255,6 +256,9 @@ namespace Asm65 {
                 Debug.Assert(!IsPrintableC64ScreenCode(val));
                 return UNPRINTABLE_CHAR;
             }
+        }
+        public static char ConvertLowAndHighC64ScreenCode(byte val) {
+            return ConvertC64ScreenCode((byte)(val & 0x7f));
         }
     }
 }

@@ -512,6 +512,9 @@ namespace SourceGen.WpfGui {
         private void ImportDelimiters(Formatter.DelimiterSet delSet, DelimiterTextBoxes[] boxarr) {
             foreach (DelimiterTextBoxes boxes in boxarr) {
                 Formatter.DelimiterDef def = delSet.Get(boxes.mEncoding);
+                if (def == null) {
+                    def = Formatter.DOUBLE_QUOTE_DELIM;
+                }
                 boxes.mPrefix.Text = def.Prefix;
                 boxes.mOpen.Text = "" + def.OpenDelim;
                 boxes.mClose.Text = "" + def.CloseDelim;

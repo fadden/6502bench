@@ -205,6 +205,14 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_SaveBeforeAsm");
         public static string SAVE_BEFORE_ASM_CAPTION =
             (string)Application.Current.FindResource("str_SaveBeforeAsmCaption");
+        public static string SCAN_LOW_ASCII =
+            (string)Application.Current.FindResource("str_ScanLowAscii");
+        public static string SCAN_LOW_HIGH_ASCII =
+            (string)Application.Current.FindResource("str_ScanLowHighAscii");
+        public static string SCAN_C64_PETSCII =
+            (string)Application.Current.FindResource("str_ScanC64Petscii");
+        public static string SCAN_C64_SCREEN_CODE =
+            (string)Application.Current.FindResource("str_ScanC64ScreenCode");
         public static string SETUP_SYSTEM_SUMMARY_FMT =
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
         public static string SHOW_COL =

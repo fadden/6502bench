@@ -21,7 +21,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
+using Asm65;
 using CommonUtil;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -77,17 +79,26 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private Asm65.Formatter mFormatter;
 
-        ///// <summary>
-        ///// Set this during initial control configuration, so we know to ignore the CheckedChanged
-        ///// events.
-        ///// </summary>
-        //private bool mIsInitialSetup;
-
         /// <summary>
         /// Set to true if, during the initial setup, the format defined by FirstFormatDescriptor
         /// was unavailable.
         /// </summary>
         private bool mPreferredFormatUnavailable;
+
+        /// <summary>
+        /// Text encoding combo box item.  We use the same TextScanMode enum that the
+        /// uncategorized data analyzer uses.
+        /// </summary>
+        public class StringEncodingItem {
+            public string Name { get; private set; }
+            public TextScanMode Mode { get; private set; }
+
+            public StringEncodingItem(string name, TextScanMode mode) {
+                Name = name;
+                Mode = mode;
+            }
+        }
+        public StringEncodingItem[] StringEncodingItems { get; private set; }
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -107,6 +118,17 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mSelection = trs;
             mFirstFormatDescriptor = firstDesc;
+
+            StringEncodingItems = new StringEncodingItem[] {
+                new StringEncodingItem(Res.Strings.SCAN_LOW_ASCII,
+                    TextScanMode.LowAscii),
+                new StringEncodingItem(Res.Strings.SCAN_LOW_HIGH_ASCII,
+                    TextScanMode.LowHighAscii),
+                new StringEncodingItem(Res.Strings.SCAN_C64_PETSCII,
+                    TextScanMode.C64Petscii),
+                new StringEncodingItem(Res.Strings.SCAN_C64_SCREEN_CODE,
+                    TextScanMode.C64ScreenCode),
+            };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -115,6 +137,9 @@ namespace SourceGen.WpfGui {
             // Determine which of the various options is suitable for the selected offsets.
             // Disable any radio buttons that won't work.
             AnalyzeRanges();
+
+            // This gets invoked a bit later, from the "selection changed" callback.
+            //AnalyzeStringRanges(TextScanMode.LowHighAscii);
 
             // Configure the dialog from the FormatDescriptor, if one is available.
             Debug.WriteLine("First FD: " + mFirstFormatDescriptor);
@@ -169,6 +194,36 @@ namespace SourceGen.WpfGui {
             UpdateControls();
         }
 
+        /// <summary>
+        /// Sets the string encoding combo box to an item that matches the specified mode.  If
+        /// the mode can't be found, an arbitrary entry will be chosen.
+        /// </summary>
+        private void SetStringEncoding(TextScanMode mode) {
+            StringEncodingItem choice = null;
+            foreach (StringEncodingItem item in StringEncodingItems) {
+                if (item.Mode == mode) {
+                    choice = item;
+                    break;
+                }
+            }
+            if (choice == null) {
+                choice = StringEncodingItems[1];
+            }
+            stringEncodingComboBox.SelectedItem = choice;
+        }
+
+        private void StringEncodingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (!IsLoaded) {
+                return;
+            }
+            StringEncodingItem item = (StringEncodingItem)stringEncodingComboBox.SelectedItem;
+            AnalyzeStringRanges(item.Mode);
+            UpdateControls();
+
+            AppSettings.Global.SetEnum(AppSettings.OPED_DEFAULT_STRING_ENCODING,
+                typeof(TextScanMode), (int)item.Mode);
+        }
+
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             CreateDescriptorListFromControls();
             FormatDescriptor.DebugDumpSortedList(Results);
@@ -207,7 +262,14 @@ namespace SourceGen.WpfGui {
             bool focusOnSymbol = !simpleDisplayAsGroupBox.IsEnabled && wantStyle;
             simpleDisplayAsGroupBox.IsEnabled = wantStyle;
             if (wantStyle) {
-                radioSimpleDataAscii.IsEnabled = IsRawAsciiCompatible(simpleWidth, isBigEndian);
+                // Because this covers multiple items in a data area, we allow the
+                // "extended" set, which includes some control characters.
+                radioSimpleDataAscii.IsEnabled = IsCompatibleWithCharSet(simpleWidth,
+                    isBigEndian, CharEncoding.IsExtendedLowOrHighAscii);
+                radioSimpleDataPetscii.IsEnabled = IsCompatibleWithCharSet(simpleWidth,
+                    isBigEndian, CharEncoding.IsExtendedC64Petscii);
+                radioSimpleDataScreenCode.IsEnabled = IsCompatibleWithCharSet(simpleWidth,
+                    isBigEndian, CharEncoding.IsExtendedC64ScreenCode);
             }
 
             // Enable the symbolic reference entry box if the "display as" group is enabled.
@@ -263,13 +325,6 @@ namespace SourceGen.WpfGui {
 
             IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
 
-            int mixedAsciiOkCount = 0;
-            int mixedAsciiNotCount = 0;
-            int nullTermStringCount = 0;
-            int len8StringCount = 0;
-            int len16StringCount = 0;
-            int dciStringCount = 0;
-
             // For each range, check to see if the data within qualifies for the various
             // options.  If any of them fail to meet the criteria, the option is disabled
             // for all ranges.
@@ -277,7 +332,7 @@ namespace SourceGen.WpfGui {
                 TypedRangeSet.TypedRange rng = iter.Current;
                 Debug.WriteLine("Testing [" + rng.Low + ", " + rng.High + "]");
 
-                // Start with the easy ones.  Single-byte and dense are always enabled.
+                // Note single-byte and dense are always enabled.
 
                 int count = rng.High - rng.Low + 1;
                 Debug.Assert(count > 0);
@@ -305,46 +360,110 @@ namespace SourceGen.WpfGui {
                 } else {
                     radioFill.IsEnabled = false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Analyzes the selection to see which string formatting options are suitable.
+        /// Disables radio buttons and updates labels.
+        /// 
+        /// Call this when the character encoding selection changes.
+        /// </summary>
+        private void AnalyzeStringRanges(TextScanMode scanMode) {
+            Debug.WriteLine("Analyzing string ranges");
+            Debug.Assert(IsLoaded);
+
+            int mixedCharOkCount = 0;
+            int mixedCharNotCount = 0;
+            int nullTermStringCount = 0;
+            int len8StringCount = 0;
+            int len16StringCount = 0;
+            int dciStringCount = 0;
+
+            CharEncoding.InclusionTest charTest;
+            switch (scanMode) {
+                case TextScanMode.LowAscii:
+                    charTest = CharEncoding.IsExtendedAscii;
+                    break;
+                case TextScanMode.LowHighAscii:
+                    charTest = CharEncoding.IsExtendedLowOrHighAscii;
+                    break;
+                case TextScanMode.C64Petscii:
+                    charTest = CharEncoding.IsExtendedC64Petscii;
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    charTest = CharEncoding.IsExtendedC64ScreenCode;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    charTest = CharEncoding.IsExtendedAscii;
+                    break;
+            }
+
+            radioStringMixed.IsEnabled = true;
+            radioStringMixedReverse.IsEnabled = true;
+            radioStringNullTerm.IsEnabled = (scanMode != TextScanMode.C64ScreenCode);
+            radioStringLen8.IsEnabled = true;
+            radioStringLen16.IsEnabled = true;
+            radioStringDci.IsEnabled = (scanMode != TextScanMode.C64Petscii);
+
+            IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
+            while (iter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = iter.Current;
+                Debug.WriteLine("Testing [" + rng.Low + ", " + rng.High + "]");
 
                 // See if there's enough string data to make it worthwhile.  We use an
-                // arbitrary threshold of 2+ ASCII characters, and require twice as many
-                // ASCII as non-ASCII.  We arbitrarily require the strings to be either
-                // high or low ASCII, and treat the other as non-ASCII.  (We could relax
-                // this -- we generate separate items for each string and non-ASCII chunk --
-                // but I'm trying to hide the option when the buffer doesn't really seem
-                // to be holding strings.  Could replace with some sort of minimum string
-                // length requirement?)
+                // arbitrary threshold of 2+ printable characters, and require twice as many
+                // printable as non-printable.
                 if (radioStringMixed.IsEnabled) {
-                    int asciiCount;
-                    DataAnalysis.CountAsciiBytes(mFileData, rng.Low, rng.High,
-                        out int lowAscii, out int highAscii, out int nonAscii);
-                    if (highAscii > lowAscii) {
-                        asciiCount = highAscii;
-                        nonAscii += lowAscii;
-                    } else {
-                        asciiCount = lowAscii;
-                        nonAscii += highAscii;
-                    }
+                    if (scanMode == TextScanMode.LowHighAscii) {
+                        // We use a special test that counts low, high, and non-ASCII.
+                        // Whichever form of ASCII has the highest count is the winner, and
+                        // the loser is counted as non-ASCII.
+                        int asciiCount;
+                        DataAnalysis.CountHighLowBytes(mFileData, rng.Low, rng.High, charTest,
+                            out int lowAscii, out int highAscii, out int nonAscii);
+                        if (highAscii > lowAscii) {
+                            asciiCount = highAscii;
+                            nonAscii += lowAscii;
+                        } else {
+                            asciiCount = lowAscii;
+                            nonAscii += highAscii;
+                        }
 
-                    if (asciiCount >= 2 && asciiCount >= nonAscii * 2) {
-                        // Looks good
-                        mixedAsciiOkCount += asciiCount;
-                        mixedAsciiNotCount += nonAscii;
+                        if (asciiCount >= 2 && asciiCount >= nonAscii * 2) {
+                            // Looks good
+                            mixedCharOkCount += asciiCount;
+                            mixedCharNotCount += nonAscii;
+                        } else {
+                            // Fail
+                            radioStringMixed.IsEnabled = false;
+                            radioStringMixedReverse.IsEnabled = false;
+                            mixedCharOkCount = mixedCharNotCount = -1;
+                        }
                     } else {
-                        // Fail
-                        radioStringMixed.IsEnabled = false;
-                        radioStringMixedReverse.IsEnabled = false;
-                        mixedAsciiOkCount = mixedAsciiNotCount = -1;
+                        int matchCount = DataAnalysis.CountCharacterBytes(mFileData,
+                            rng.Low, rng.High, charTest);
+                        int missCount = (rng.High - rng.Low + 1) - matchCount;
+                        if (matchCount >= 2 && matchCount >= missCount * 2) {
+                            mixedCharOkCount += matchCount;
+                            mixedCharNotCount += missCount;
+                        } else {
+                            // Fail
+                            radioStringMixed.IsEnabled = false;
+                            radioStringMixedReverse.IsEnabled = false;
+                            mixedCharOkCount = mixedCharNotCount = -1;
+                        }
                     }
                 }
 
                 // Check for null-terminated strings.  Zero-length strings are allowed, but
                 // not counted -- we want to have some actual character data.  Individual
-                // strings need to be entirely high-ASCII or low-ASCII, but not all strings
+                // ASCII strings need to be entirely high-ASCII or low-ASCII, but not all strings
                 // in a region have to be the same.
                 if (radioStringNullTerm.IsEnabled) {
                     int strCount = DataAnalysis.RecognizeNullTerminatedStrings(mFileData,
-                        rng.Low, rng.High);
+                        rng.Low, rng.High, charTest, scanMode == TextScanMode.LowHighAscii);
                     if (strCount > 0) {
                         nullTermStringCount += strCount;
                     } else {
@@ -355,7 +474,8 @@ namespace SourceGen.WpfGui {
 
                 // Check for strings prefixed with an 8-bit length.
                 if (radioStringLen8.IsEnabled) {
-                    int strCount = DataAnalysis.RecognizeLen8Strings(mFileData, rng.Low, rng.High);
+                    int strCount = DataAnalysis.RecognizeLen8Strings(mFileData, rng.Low, rng.High,
+                        charTest, scanMode == TextScanMode.LowHighAscii);
                     if (strCount > 0) {
                         len8StringCount += strCount;
                     } else {
@@ -366,7 +486,8 @@ namespace SourceGen.WpfGui {
 
                 // Check for strings prefixed with a 16-bit length.
                 if (radioStringLen16.IsEnabled) {
-                    int strCount = DataAnalysis.RecognizeLen16Strings(mFileData, rng.Low, rng.High);
+                    int strCount = DataAnalysis.RecognizeLen16Strings(mFileData, rng.Low, rng.High,
+                        charTest, scanMode == TextScanMode.LowHighAscii);
                     if (strCount > 0) {
                         len16StringCount += strCount;
                     } else {
@@ -375,10 +496,11 @@ namespace SourceGen.WpfGui {
                     }
                 }
 
-                // Check for DCI strings.  All strings within a single range must have the
+                // Check for DCI strings.  All strings within the entire range must have the
                 // same "polarity", e.g. low ASCII terminated by high ASCII.
                 if (radioStringDci.IsEnabled) {
-                    int strCount = DataAnalysis.RecognizeDciStrings(mFileData, rng.Low, rng.High);
+                    int strCount = DataAnalysis.RecognizeDciStrings(mFileData, rng.Low, rng.High,
+                        charTest);
                     if (strCount > 0) {
                         dciStringCount += strCount;
                     } else {
@@ -390,15 +512,16 @@ namespace SourceGen.WpfGui {
 
             // Update the dialog with string and character counts, summed across all regions.
 
+            string fmt;
             const string UNSUP_STR = "xx";
             fmt = (string)FindResource("str_StringMixed");
             string revfmt = (string)FindResource("str_StringMixedReverse");
-            if (mixedAsciiOkCount > 0) {
+            if (mixedCharOkCount > 0) {
                 Debug.Assert(radioStringMixed.IsEnabled);
                 radioStringMixed.Content = string.Format(fmt,
-                    mixedAsciiOkCount, mixedAsciiNotCount);
+                    mixedCharOkCount, mixedCharNotCount);
                 radioStringMixedReverse.Content = string.Format(revfmt,
-                    mixedAsciiOkCount, mixedAsciiNotCount);
+                    mixedCharOkCount, mixedCharNotCount);
             } else {
                 Debug.Assert(!radioStringMixed.IsEnabled);
                 radioStringMixed.Content = string.Format(fmt, UNSUP_STR, UNSUP_STR);
@@ -440,32 +563,40 @@ namespace SourceGen.WpfGui {
                 Debug.Assert(!radioStringDci.IsEnabled);
                 radioStringDci.Content = string.Format(fmt, UNSUP_STR);
             }
+
+            // If this invalidated the selected item, reset to Default.
+            if ((radioStringMixed.IsChecked == true && !radioStringMixed.IsEnabled) ||
+                (radioStringMixedReverse.IsChecked == true && !radioStringMixedReverse.IsEnabled) ||
+                (radioStringNullTerm.IsChecked == true && !radioStringNullTerm.IsEnabled) ||
+                (radioStringLen8.IsChecked == true && !radioStringLen8.IsEnabled) ||
+                (radioStringLen8.IsChecked == true && !radioStringLen8.IsEnabled) ||
+                (radioStringDci.IsChecked == true && !radioStringDci.IsEnabled)) {
+
+                Debug.WriteLine("Previous selection invalidated");
+                radioDefaultFormat.IsChecked = true;
+            }
         }
 
         /// <summary>
-        /// Determines whether the data in the buffer can be represented as ASCII values.
+        /// Determines whether the data in the buffer can be represented as character values.
         /// Using ".DD1 'A'" for 0x41 is obvious, but we also allow ".DD2 'A'" for
         /// 0x41 0x00.  16-bit character constants are more likely as intermediate
         /// operands, but could be found in data areas.
-        /// 
-        /// High and low ASCII are allowed, and may be freely mixed.
-        /// 
-        /// Testing explicitly is probably excessive, and possibly counter-productive if
-        /// the user is trying to flag an area that is a mix of ASCII and non-ASCII and
-        /// just wants hex for the rest, but we'll give it a try.
         /// </summary>
         /// <param name="wordWidth">Number of bytes per character.</param>
         /// <param name="isBigEndian">Word endian-ness.</param>
-        /// <returns>True if data in all regions can be represented as high or low ASCII.</returns>
-        private bool IsRawAsciiCompatible(int wordWidth, bool isBigEndian) {
+        /// <param name="charTest">Character test delegate.</param>
+        /// <returns>True if data in all regions can be represented as a character.</returns>
+        private bool IsCompatibleWithCharSet(int wordWidth, bool isBigEndian,
+                CharEncoding.InclusionTest charTest) {
             IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
                 Debug.Assert(((rng.High - rng.Low + 1) / wordWidth) * wordWidth ==
                     rng.High - rng.Low + 1);
                 for (int i = rng.Low; i <= rng.High; i += wordWidth) {
-                    int val = RawData.GetWord(mFileData, rng.Low, wordWidth, isBigEndian);
-                    if (val < 0x20 || (val >= 0x7f && val < 0xa0) || val >= 0xff) {
+                    int val = RawData.GetWord(mFileData, i, wordWidth, isBigEndian);
+                    if (val != (byte)val || !charTest((byte)val)) {
                         // bad value, fail
                         return false;
                     }
@@ -485,9 +616,20 @@ namespace SourceGen.WpfGui {
             radioSimpleDataHex.IsChecked = true;
             radioSymbolPartLow.IsChecked = true;
 
+            // Get the previous mode selected in the combo box.  If the format descriptor
+            // doesn't specify a string, we'll use this.
+            TextScanMode textMode = (TextScanMode)AppSettings.Global.GetEnum(
+                AppSettings.OPED_DEFAULT_STRING_ENCODING, typeof(TextScanMode),
+                (int)TextScanMode.LowHighAscii);
+
             if (dfd == null) {
                 radioDefaultFormat.IsChecked = true;
+                SetStringEncoding(textMode);
                 return;
+            }
+
+            if (dfd.IsString) {
+                textMode = TextScanModeFromDescriptor(dfd);
             }
 
             RadioButton preferredFormat;
@@ -529,10 +671,13 @@ namespace SourceGen.WpfGui {
                                 break;
                             case FormatDescriptor.SubType.Ascii:
                             case FormatDescriptor.SubType.HighAscii:
-                            case FormatDescriptor.SubType.C64Petscii:
-                            case FormatDescriptor.SubType.C64Screen:
-                                // TODO(petscii): update UI
                                 radioSimpleDataAscii.IsChecked = true;
+                                break;
+                            case FormatDescriptor.SubType.C64Petscii:
+                                radioSimpleDataPetscii.IsChecked = true;
+                                break;
+                            case FormatDescriptor.SubType.C64Screen:
+                                radioSimpleDataScreenCode.IsChecked = true;
                                 break;
                             case FormatDescriptor.SubType.Address:
                                 radioSimpleDataAddress.IsChecked = true;
@@ -601,6 +746,24 @@ namespace SourceGen.WpfGui {
                 mPreferredFormatUnavailable = true;
                 radioDefaultFormat.IsChecked = true;
             }
+
+            SetStringEncoding(textMode);
+        }
+
+        private TextScanMode TextScanModeFromDescriptor(FormatDescriptor dfd) {
+            Debug.Assert(dfd.IsString);
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                case FormatDescriptor.SubType.HighAscii:
+                    return TextScanMode.LowHighAscii;
+                case FormatDescriptor.SubType.C64Petscii:
+                    return TextScanMode.C64Petscii;
+                case FormatDescriptor.SubType.C64Screen:
+                    return TextScanMode.C64ScreenCode;
+                default:
+                    Debug.Assert(false);
+                    return TextScanMode.LowHighAscii;
+            }
         }
 
         #endregion Setup
@@ -623,6 +786,33 @@ namespace SourceGen.WpfGui {
             WeakSymbolRef symbolRef = null;
             int chunkLength = -1;
 
+            FormatDescriptor.SubType charSubType;
+            CharEncoding.InclusionTest charTest;
+            StringEncodingItem item = (StringEncodingItem)stringEncodingComboBox.SelectedItem;
+            switch (item.Mode) {
+                case TextScanMode.LowAscii:
+                    charSubType = FormatDescriptor.SubType.Ascii;
+                    charTest = CharEncoding.IsExtendedAscii;
+                    break;
+                case TextScanMode.LowHighAscii:
+                    charSubType = FormatDescriptor.SubType.ASCII_GENERIC;
+                    charTest = CharEncoding.IsExtendedLowOrHighAscii;
+                    break;
+                case TextScanMode.C64Petscii:
+                    charSubType = FormatDescriptor.SubType.C64Petscii;
+                    charTest = CharEncoding.IsExtendedC64Petscii;
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    charSubType = FormatDescriptor.SubType.C64Screen;
+                    charTest = CharEncoding.IsExtendedC64ScreenCode;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    charSubType = FormatDescriptor.SubType.ASCII_GENERIC;
+                    charTest = CharEncoding.IsExtendedLowOrHighAscii;
+                    break;
+            }
+
             // Decode the "display as" panel, if it's relevant.
             if (radioSimpleDataHex.IsEnabled) {
                 if (radioSimpleDataHex.IsChecked == true) {
@@ -632,8 +822,11 @@ namespace SourceGen.WpfGui {
                 } else if (radioSimpleDataBinary.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Binary;
                 } else if (radioSimpleDataAscii.IsChecked == true) {
-                    // TODO(petscii): add PETSCII buttons
                     subType = FormatDescriptor.SubType.ASCII_GENERIC;
+                } else if (radioSimpleDataPetscii.IsChecked == true) {
+                    subType = FormatDescriptor.SubType.C64Petscii;
+                } else if (radioSimpleDataScreenCode.IsChecked == true) {
+                    subType = FormatDescriptor.SubType.C64Screen;
                 } else if (radioSimpleDataAddress.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Address;
                 } else if (radioSimpleDataSymbolic.IsChecked == true) {
@@ -683,26 +876,23 @@ namespace SourceGen.WpfGui {
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
             } else if (radioStringMixed.IsChecked == true) {
-                // TODO(petscii): encoding format will come from a combo box; that determines
-                //   the subType and the arg to the string-creation functions, which use the
-                //   appropriate char encoding methods to break up the strings
                 type = FormatDescriptor.Type.StringGeneric;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else if (radioStringMixedReverse.IsChecked == true) {
                 type = FormatDescriptor.Type.StringReverse;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else if (radioStringNullTerm.IsChecked == true) {
                 type = FormatDescriptor.Type.StringNullTerm;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else if (radioStringLen8.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL8;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else if (radioStringLen16.IsChecked == true) {
                 type = FormatDescriptor.Type.StringL16;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else if (radioStringDci.IsChecked == true) {
                 type = FormatDescriptor.Type.StringDci;
-                subType = FormatDescriptor.SubType.Ascii;
+                subType = charSubType;
             } else {
                 Debug.Assert(false);
                 // default/none
@@ -715,11 +905,12 @@ namespace SourceGen.WpfGui {
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
 
-                // TODO(petscii): handle encoding on all four calls
                 switch (type) {
                     case FormatDescriptor.Type.StringGeneric:
+                        CreateMixedStringEntries(rng.Low, rng.High, type, subType, charTest);
+                        break;
                     case FormatDescriptor.Type.StringReverse:
-                        CreateMixedStringEntries(rng.Low, rng.High, type, subType);
+                        CreateMixedStringEntries(rng.Low, rng.High, type, subType, charTest);
                         break;
                     case FormatDescriptor.Type.StringNullTerm:
                         CreateCStringEntries(rng.Low, rng.High, type, subType);
@@ -794,69 +985,118 @@ namespace SourceGen.WpfGui {
 
         /// <summary>
         /// Creates one or more FormatDescriptor entries for the specified range, adding them
-        /// to the Results list.
+        /// to the Results list.  Runs of character data are output as generic strings, while any
+        /// non-character data is output as individual bytes.
         /// </summary>
+        /// <remarks>
+        /// This is the only string create function that accepts a mix of valid and invalid
+        /// characters.
+        /// </remarks>
         /// <param name="low">Offset of first byte in range.</param>
         /// <param name="high">Offset of last byte in range.</param>
+        /// <param name="type">String type (Generic or Reverse).</param>
         /// <param name="subType">String sub-type.</param>
+        /// <param name="charTest">Character test delegate.</param>
         private void CreateMixedStringEntries(int low, int high, FormatDescriptor.Type type,
-                FormatDescriptor.SubType subType) {
+                FormatDescriptor.SubType subType, CharEncoding.InclusionTest charTest) {
             int stringStart = -1;
-            int highBit = 0;
             int cur;
-            for (cur = low; cur <= high; cur++) {
-                byte val = mFileData[cur];
-                if (CommonUtil.TextUtil.IsHiLoAscii(val)) {
-                    // is ASCII
-                    if (stringStart >= 0) {
-                        // was in a string
-                        if (highBit != (val & 0x80)) {
-                            // end of string due to high bit flip, output
-                            CreateStringOrByte(stringStart, cur - stringStart, subType);
-                            // start a new string
-                            stringStart = cur;
+
+            if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                int highBit = 0;
+                for (cur = low; cur <= high; cur++) {
+                    byte val = mFileData[cur];
+                    if (charTest(val)) {
+                        // is ASCII
+                        if (stringStart >= 0) {
+                            // was in a string
+                            if (highBit != (val & 0x80)) {
+                                // end of string due to high bit flip, output
+                                CreateGenericStringOrByte(stringStart, cur - stringStart,
+                                    type, subType);
+                                // start a new string
+                                stringStart = cur;
+                            } else {
+                                // still in string, keep going
+                            }
                         } else {
-                            // still in string, keep going
+                            // wasn't in a string, start one
+                            stringStart = cur;
+                        }
+                        highBit = val & 0x80;
+                    } else {
+                        // not ASCII
+                        if (stringStart >= 0) {
+                            // was in a string, output it
+                            CreateGenericStringOrByte(stringStart, cur - stringStart,
+                                type, subType);
+                            stringStart = -1;
+                        }
+                        // output as single byte
+                        CreateByteFD(cur, FormatDescriptor.SubType.Hex);
+                    }
+                }
+            } else {
+                for (cur = low; cur <= high; cur++) {
+                    byte val = mFileData[cur];
+                    if (charTest(val)) {
+                        // is character
+                        if (stringStart < 0) {
+                            // mark this as the start of the string
+                            stringStart = cur;
                         }
                     } else {
-                        // wasn't in a string, start one
-                        stringStart = cur;
+                        // not character
+                        if (stringStart >= 0) {
+                            // was in a string, output it
+                            CreateGenericStringOrByte(stringStart, cur - stringStart,
+                                type, subType);
+                            stringStart = -1;
+                        }
+                        // output as single byte
+                        CreateByteFD(cur, FormatDescriptor.SubType.Hex);
                     }
-                    highBit = val & 0x80;
-                } else {
-                    // not ASCII
-                    if (stringStart >= 0) {
-                        // was in a string, output it
-                        CreateStringOrByte(stringStart, cur - stringStart, subType);
-                        stringStart = -1;
-                    }
-                    // output as single byte
-                    CreateByteFD(cur, FormatDescriptor.SubType.Hex);
                 }
+
             }
             if (stringStart >= 0) {
                 // close out the string
-                CreateStringOrByte(stringStart, cur - stringStart, subType);
+                CreateGenericStringOrByte(stringStart, cur - stringStart, type, subType);
             }
         }
 
+        private FormatDescriptor.SubType ResolveAsciiGeneric(int offset,
+                FormatDescriptor.SubType subType) {
+            if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                if ((mFileData[offset] & 0x80) != 0) {
+                    subType = FormatDescriptor.SubType.HighAscii;
+                } else {
+                    subType = FormatDescriptor.SubType.Ascii;
+                }
+            }
+            return subType;
+        }
+
         /// <summary>
-        /// Creates a format descriptor for ASCII data.  If the data is only one byte long,
-        /// a single-byte ASCII char item is emitted instead.
+        /// Creates a format descriptor for character data.  If the data is only one byte long,
+        /// a single-byte character item is emitted instead.
         /// </summary>
         /// <param name="offset">Offset of first byte.</param>
         /// <param name="length">Length of string.</param>
-        /// <param name="subType">String sub-type.</param>
-        private void CreateStringOrByte(int offset, int length, FormatDescriptor.SubType subType) {
+        /// <param name="type">String type (Generic or Reverse).</param>
+        /// <param name="subType">String sub-type.  If set to ASCII_GENERIC, this will
+        ///   refine the sub-type.</param>
+        private void CreateGenericStringOrByte(int offset, int length,
+                FormatDescriptor.Type type, FormatDescriptor.SubType subType) {
             Debug.Assert(length > 0);
+            subType = ResolveAsciiGeneric(offset, subType);
             if (length == 1) {
                 // Single byte, output as single char rather than 1-byte string.  We use the
                 // same encoding as the rest of the string.
                 CreateByteFD(offset, subType);
             } else {
                 FormatDescriptor dfd;
-                dfd = FormatDescriptor.Create(length,
-                    FormatDescriptor.Type.StringGeneric, subType);
+                dfd = FormatDescriptor.Create(length, type, subType);
                 Results.Add(offset, dfd);
             }
         }
@@ -886,7 +1126,7 @@ namespace SourceGen.WpfGui {
                 if (mFileData[i] == 0x00) {
                     // End of string.  Zero-length strings are allowed.
                     FormatDescriptor dfd = FormatDescriptor.Create(
-                        i - startOffset + 1, type, subType);
+                        i - startOffset + 1, type, ResolveAsciiGeneric(startOffset, subType));
                     Results.Add(startOffset, dfd);
                     startOffset = i + 1;
                 } else {
@@ -917,7 +1157,8 @@ namespace SourceGen.WpfGui {
                     length++;
                 }
                 // Zero-length strings are allowed.
-                FormatDescriptor dfd = FormatDescriptor.Create(length, type, subType);
+                FormatDescriptor dfd = FormatDescriptor.Create(length, type,
+                    ResolveAsciiGeneric(i, subType));
                 Results.Add(i, dfd);
                 i += length;
             }
@@ -948,8 +1189,9 @@ namespace SourceGen.WpfGui {
                 if ((val & 0x80) == endMask) {
                     // found the end of a string
                     int length = (i - stringStart) + 1;
-                    FormatDescriptor dfd = FormatDescriptor.Create(length, type, subType);
-                    Results.Add(stringStart < i ? stringStart : i, dfd);
+                    FormatDescriptor dfd = FormatDescriptor.Create(length, type,
+                        ResolveAsciiGeneric(stringStart, subType));
+                    Results.Add(stringStart, dfd);
                     stringStart = i + 1;
                 }
             }

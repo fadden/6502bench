@@ -1,7 +1,7 @@
 ; Copyright 2019 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
-; Assembler: ACME (good PETSCII/screen code support)
+; Assembler: ACME (for the PETSCII/screen code support)
 
         !cpu    65816
 *       =       $1000
@@ -27,6 +27,8 @@
         lda     #$7f            ;EDIT: force to high ASCII
         lda     #$7f            ;EDIT: force to PETSCII
         lda     #$7f            ;EDIT: force to screen code
+
+        lda     #$0d            ;verify the instruction operand editor only allows C64SC
 
 ; Single letter in a 16-bit immediate
         rep     #$30
@@ -63,7 +65,7 @@
 ; Start with the basics
         !byte   $80
         !text   "low ASCII str"
-        !byte   $80
+;        !byte   $80        ; let them run together to test scan / dialog behavior
         !xor $80 {
             !text   "high ASCII str"
         }

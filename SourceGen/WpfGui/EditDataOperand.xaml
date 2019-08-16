@@ -33,8 +33,8 @@ limitations under the License.
         <system:String x:Key="str_SingleGroup">Select data format ({0} bytes selected):</system:String>
         <system:String x:Key="str_MultiGroup">Select data format ({0} bytes selected in {1} groups):</system:String>
 
-        <system:String x:Key="str_StringMixed">Mixed ASCII ({0} bytes) and non-ASCII ({1} bytes)</system:String>
-        <system:String x:Key="str_StringMixedReverse">Reversed ASCII ({0} bytes) and non-ASCII ({1} bytes)</system:String>
+        <system:String x:Key="str_StringMixed">Mixed character ({0} bytes) and non-character ({1} bytes)</system:String>
+        <system:String x:Key="str_StringMixedReverse">Reversed character ({0} bytes) and non-character ({1} bytes)</system:String>
         <system:String x:Key="str_StringNullTerm">Null-terminated strings ({0})</system:String>
         <system:String x:Key="str_StringLen8">Strings prefixed with 8-bit length ({0})</system:String>
         <system:String x:Key="str_StringLen16">Strings prefixed with 16-bit length ({0})</system:String>
@@ -64,29 +64,44 @@ limitations under the License.
                 <RadioButton Name="radio32BitLittle" GroupName="Main" Content="32-bit words, little-endian" Margin="0,4,0,0"
                              Checked="MainGroup_CheckedChanged"/>
             </StackPanel>
-            <GroupBox Name="simpleDisplayAsGroupBox" Grid.Column="1" Header="Display As..." Margin="16,0,0,0">
+            <GroupBox Name="simpleDisplayAsGroupBox" Grid.Column="1" Header="Display As..." Margin="16,0,0,0"
+                      Padding="2,4">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="0">
                         <RadioButton Name="radioSimpleDataHex" GroupName="Display" Content="Hex"
-                                     Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
+                                     Checked="SimpleDisplay_CheckedChanged"/>
                         <RadioButton Name="radioSimpleDataDecimal" GroupName="Display" Content="Decimal"
-                                     Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
+                                     Margin="0,4,18,0" Checked="SimpleDisplay_CheckedChanged"/>
                         <RadioButton Name="radioSimpleDataBinary" GroupName="Display" Content="Binary"
                                      Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataAscii" GroupName="Display" Content="ASCII"
+                        <RadioButton Name="radioSimpleDataAddress" GroupName="Display" Content="_Address"
                                      Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <RadioButton Name="radioSimpleDataAddress" GroupName="Display" Content="_Address"
-                                     Margin="12,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
+                    <StackPanel Grid.Column="1" Grid.Row="0">
+                        <RadioButton Name="radioSimpleDataAscii" GroupName="Display"
+                                     Content="ASCII (low or high) character"
+                                     Checked="SimpleDisplay_CheckedChanged"/>
+                        <RadioButton Name="radioSimpleDataPetscii" GroupName="Display"
+                                     Content="C64 PETSCII character"
+                                     Checked="SimpleDisplay_CheckedChanged"/>
+                        <RadioButton Name="radioSimpleDataScreenCode" GroupName="Display"
+                                     Content="C64 Screen character"
+                                     Checked="SimpleDisplay_CheckedChanged"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
                         <RadioButton Name="radioSimpleDataSymbolic" GroupName="Display" Content="_Symbolic reference"
-                                     Margin="12,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
-                        <TextBox Name="symbolEntryTextBox" Margin="32,4,0,0" TextChanged="SymbolEntryTextBox_TextChanged"/>
-                        <StackPanel Orientation="Horizontal" Margin="32,4,0,0"
+                                     Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
+                        <TextBox Name="symbolEntryTextBox" Margin="20,4,0,0" TextChanged="SymbolEntryTextBox_TextChanged"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="20,4,0,0"
                                     IsEnabled="{Binding ElementName=radioSimpleDataSymbolic, Path=IsChecked}">
                             <RadioButton Name="radioSymbolPartLow" GroupName="Part" Content="Low"/>
                             <RadioButton Name="radioSymbolPartHigh" GroupName="Part" Content="High" Margin="8,0,0,0"/>
@@ -106,6 +121,12 @@ limitations under the License.
 
         <TextBlock Text="String" Margin="0,12,0,0"/>
         <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2"/>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Character encoding:" Margin="0,7,0,0"/>
+            <ComboBox Name="stringEncodingComboBox" Width="150" Margin="8,4,0,4"
+                      ItemsSource="{Binding StringEncodingItems}" DisplayMemberPath="Name"
+                      SelectionChanged="StringEncodingComboBox_SelectionChanged"/>
+        </StackPanel>
         <RadioButton Name="radioStringMixed" GroupName="Main" Margin="0,4,0,0"
                      Content="{StaticResource str_StringMixed}"
                      Checked="MainGroup_CheckedChanged"/>

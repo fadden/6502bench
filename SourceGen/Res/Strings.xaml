@@ -112,6 +112,10 @@ limitations under the License.
     <system:String x:Key="str_RuntimeDirNotFoundCaption">RuntimeData Not Found</system:String>
     <system:String x:Key="str_SaveBeforeAsm">Please save your project before assembling. The generated source code will be placed in the same directory as the project file.</system:String>
     <system:String x:Key="str_SaveBeforeAsmCaption">Save Project First</system:String>
+    <system:String x:Key="str_ScanLowAscii">Plain ASCII</system:String>
+    <system:String x:Key="str_ScanLowHighAscii">Low or High ASCII</system:String>
+    <system:String x:Key="str_ScanC64Petscii">C64 PETSCII</system:String>
+    <system:String x:Key="str_ScanC64ScreenCode">C64 Screen Code</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
     <system:String x:Key="str_ShowCol">Show</system:String>
     <system:String x:Key="str_StatusReady">Ready</system:String>

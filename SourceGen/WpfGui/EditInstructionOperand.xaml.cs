@@ -171,8 +171,19 @@ namespace SourceGen.WpfGui {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mIsInitialSetup = true;
 
-            // Can this be represented as high or low ASCII?
-            asciiButton.IsEnabled = CommonUtil.TextUtil.IsHiLoAscii(mOperandValue);
+            // Can this be represented as a character?  We only allow the printable set
+            // here, not the extended set (which includes control characters).
+            if (mOperandValue == (byte) mOperandValue) {
+                asciiButton.IsEnabled =
+                    CharEncoding.IsPrintableLowOrHighAscii((byte)mOperandValue);
+                petsciiButton.IsEnabled =
+                    CharEncoding.IsPrintableC64Petscii((byte)mOperandValue);
+                screenCodeButton.IsEnabled =
+                    CharEncoding.IsPrintableC64ScreenCode((byte)mOperandValue);
+            } else {
+                asciiButton.IsEnabled = petsciiButton.IsEnabled = screenCodeButton.IsEnabled =
+                    false;
+            }
 
             // Configure the dialog from the FormatDescriptor, if one is available.
             SetControlsFromDescriptor(FormatDescriptor);
@@ -475,8 +486,13 @@ namespace SourceGen.WpfGui {
                             break;
                         case FormatDescriptor.SubType.Ascii:
                         case FormatDescriptor.SubType.HighAscii:
-                            // TODO(petscii): encoding
                             asciiButton.IsChecked = true;
+                            break;
+                        case FormatDescriptor.SubType.C64Petscii:
+                            petsciiButton.IsChecked = true;
+                            break;
+                        case FormatDescriptor.SubType.C64Screen:
+                            screenCodeButton.IsChecked = true;
                             break;
                         case FormatDescriptor.SubType.Symbol:
                             Debug.Assert(dfd.HasSymbol);
@@ -555,12 +571,15 @@ namespace SourceGen.WpfGui {
             } else if (binaryButton.IsChecked == true) {
                 subType = FormatDescriptor.SubType.Binary;
             } else if (asciiButton.IsChecked == true) {
-                // TODO(petscii): encoding
                 if (mOperandValue > 0x7f) {
                     subType = FormatDescriptor.SubType.HighAscii;
                 } else {
                     subType = FormatDescriptor.SubType.Ascii;
                 }
+            } else if (petsciiButton.IsChecked == true) {
+                subType = FormatDescriptor.SubType.C64Petscii;
+            } else if (screenCodeButton.IsChecked == true) {
+                subType = FormatDescriptor.SubType.C64Screen;
             } else if (symbolButton.IsChecked == true) {
                 subType = FormatDescriptor.SubType.Symbol;
             } else {

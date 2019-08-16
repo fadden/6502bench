@@ -393,6 +393,7 @@ namespace SourceGen {
                         descr += " ???";
                         break;
                 }
+                return descr;
             }
 
             switch (FormatSubType) {

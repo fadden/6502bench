@@ -68,6 +68,9 @@ namespace SourceGen {
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
+        // Main project view settings.
+        public const string PRVW_RECENT_PROJECT_LIST = "prvw-recent-project-list";
+
         // Symbol-list window options.
         public const string SYMWIN_SHOW_USER = "symwin-show-user";
         public const string SYMWIN_SHOW_AUTO = "symwin-show-auto";
@@ -91,6 +94,9 @@ namespace SourceGen {
         public const string CDLV_FONT_FAMILY = "cdlv-font-family";
         public const string CDLV_FONT_SIZE = "cdlv-font-size";
 
+        // Operand edit settings.
+        public const string OPED_DEFAULT_STRING_ENCODING = "oped-default-string-encoding";
+
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";
         public const string HEXD_CHAR_CONV = "hexd-char-conv1";
@@ -104,9 +110,6 @@ namespace SourceGen {
         public const string SRCGEN_DISABLE_LABEL_LOCALIZATION = "srcgen-disable-label-localization";
         public const string SRCGEN_LONG_LABEL_NEW_LINE = "srcgen-long-label-new-line";
         public const string SRCGEN_SHOW_CYCLE_COUNTS = "srcgen-show-cycle-counts";
-
-        // Main project view settings.
-        public const string PRVW_RECENT_PROJECT_LIST = "prvw-recent-project-list";
 
         // Assembler settings prefix
         public const string ASM_CONFIG_PREFIX = "asm-config-";
