@@ -106,8 +106,8 @@
         !scr    "`abcdefghijklmnopqrstuvwxyz{|}~"
 
 ; The 2005 test exercises low/high ASCII strings, so no need to do that here.
-; Do a quick test with C64 characters.  Note Screen Code can't be null-terminated,
-; and PETSCII can't be DCI.
+; Do a quick test with C64 characters.  Note Screen Code can't be null-terminated
+; by definition, and PETSCII can't effectively be DCI.
         !byte   $84
         !pet    "IICSTEP esrever"               ;format as StringReverse
         !byte   $84
@@ -118,6 +118,8 @@
         !pet    19,"PETSCII with length"        ;format as StringL8
         !byte   $84
         !pet    20,0,"PETSCII with length2"     ;format as StringL16
+        !byte   $84
+        !pet    "bad dcI"                       ;EDIT: format as StringDCI
 
         !byte   $84
         !scr    "edoC neercS esrever"           ;format as StringReverse
@@ -126,7 +128,7 @@
         !byte   $84
         !scr    24,0,"Screen Code with length2" ;format as StringL16
         !byte   $84
-        !scr    "Screen Code DC",$c9            ;format as DCI
+        !scr    "Screen Code DC",$c9            ;format as StringDCI
         !byte   $84
 
         !byte   $85
