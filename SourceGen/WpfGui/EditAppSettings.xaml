@@ -629,23 +629,23 @@ limitations under the License.
 
                         <TextBox Name="equDirectiveTextBox" Grid.Column="1" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="defineData1TextBox" Grid.Column="1" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="defineBigData2TextBox" Grid.Column="1" Grid.Row="2"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strGenericTextBox" Grid.Column="1" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strLen8TextBox" Grid.Column="1" Grid.Row="4"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
 
                         <!-- second column -->
@@ -660,19 +660,19 @@ limitations under the License.
 
                         <TextBox Name="orgDirectiveTextBox" Grid.Column="4" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="defineData2TextBox" Grid.Column="4" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strReverseTextBox" Grid.Column="4" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strLen16TextBox" Grid.Column="4" Grid.Row="4"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
 
                         <!-- third column -->
@@ -687,19 +687,19 @@ limitations under the License.
 
                         <TextBox Name="regWidthDirectiveTextBox" Grid.Column="7" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="defineData3TextBox" Grid.Column="7" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="fillTextBox" Grid.Column="7" Grid.Row="2"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strNullTermTextBox" Grid.Column="7" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
 
                         <!-- fourth column -->
@@ -712,15 +712,15 @@ limitations under the License.
 
                         <TextBox Name="defineData4TextBox" Grid.Column="10" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="denseTextBox" Grid.Column="10" Grid.Row="2"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBox Name="strDciTextBox" Grid.Column="10" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="8"
+                                 Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                     </Grid>
 

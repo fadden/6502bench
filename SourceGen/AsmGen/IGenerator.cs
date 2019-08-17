@@ -28,8 +28,9 @@ namespace SourceGen.AsmGen {
         /// Returns some strings and format options for use in for the display list, configurable
         /// through the app settings "quick set" feature.  These are not used when generating
         /// source code.
-        /// 
-        /// This may be called on an unconfigured IGenerator.
+        ///
+        /// This may be called on an unconfigured IGenerator, so this should not expect to
+        /// have access to project properties.
         /// </summary>
         /// <param name="pseudoOps">Table of pseudo-op names.</param>
         /// <param name="formatConfig">Format configuration.</param>

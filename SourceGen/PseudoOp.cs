@@ -59,28 +59,89 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Pseudo-op name collection.  Name strings may be null.
+        /// Pseudo-op name collection.  Instances are immutable.
         /// </summary>
         public class PseudoOpNames {
-            public string EquDirective { get; set; }
-            public string OrgDirective { get; set; }
-            public string RegWidthDirective { get; set; }
+            public string EquDirective { get; private set; }
+            public string OrgDirective { get; private set; }
+            public string RegWidthDirective { get; private set; }
 
-            public string DefineData1 { get; set; }
-            public string DefineData2 { get; set; }
-            public string DefineData3 { get; set; }
-            public string DefineData4 { get; set; }
-            public string DefineBigData2 { get; set; }
-            public string DefineBigData3 { get; set; }
-            public string DefineBigData4 { get; set; }
-            public string Fill { get; set; }
-            public string Dense { get; set; }
-            public string StrGeneric { get; set; }
-            public string StrReverse { get; set; }
-            public string StrLen8 { get; set; }
-            public string StrLen16 { get; set; }
-            public string StrNullTerm { get; set; }
-            public string StrDci { get; set; }
+            public string DefineData1 { get; private set; }
+            public string DefineData2 { get; private set; }
+            public string DefineData3 { get; private set; }
+            public string DefineData4 { get; private set; }
+            public string DefineBigData2 { get; private set; }
+            public string DefineBigData3 { get; private set; }
+            public string DefineBigData4 { get; private set; }
+            public string Fill { get; private set; }
+            public string Dense { get; private set; }
+            public string StrGeneric { get; private set; }
+            public string StrReverse { get; private set; }
+            public string StrLen8 { get; private set; }
+            public string StrLen16 { get; private set; }
+            public string StrNullTerm { get; private set; }
+            public string StrDci { get; private set; }
+
+            /// <summary>
+            /// Constructs an empty PseudoOp.
+            /// </summary>
+            public PseudoOpNames() : this(new Dictionary<string, string>()) {
+            }
+
+            /// <summary>
+            /// Constructor.  Pass in a dictionary with name/value pairs.  Unknown names
+            /// will be ignored, missing names will be assigned the empty string.
+            /// </summary>
+            /// <param name="dict">Dictionary of values.</param>
+            public PseudoOpNames(Dictionary<string, string> dict) {
+                foreach (PropertyInfo prop in GetType().GetProperties()) {
+                    dict.TryGetValue(prop.Name, out string value);
+                    if (value == null) {
+                        value = string.Empty;
+                    }
+                    prop.SetValue(this, value);
+                }
+            }
+
+            public static bool operator ==(PseudoOpNames a, PseudoOpNames b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;    // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;   // one is null
+                }
+                return a.EquDirective == b.EquDirective &&
+                    a.OrgDirective == b.OrgDirective &&
+                    a.RegWidthDirective == b.RegWidthDirective &&
+                    a.DefineData1 == b.DefineData1 &&
+                    a.DefineData2 == b.DefineData2 &&
+                    a.DefineData3 == b.DefineData3 &&
+                    a.DefineData4 == b.DefineData4 &&
+                    a.DefineBigData2 == b.DefineBigData2 &&
+                    a.DefineBigData3 == b.DefineBigData3 &&
+                    a.DefineBigData4 == b.DefineBigData4 &&
+                    a.Fill == b.Fill &&
+                    a.Dense == b.Dense &&
+                    a.StrGeneric == b.StrGeneric &&
+                    a.StrReverse == b.StrReverse &&
+                    a.StrLen8 == b.StrLen8 &&
+                    a.StrLen16 == b.StrLen16 &&
+                    a.StrNullTerm == b.StrNullTerm &&
+                    a.StrDci == b.StrDci;
+            }
+            public static bool operator !=(PseudoOpNames a, PseudoOpNames b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is PseudoOpNames && this == (PseudoOpNames)obj;
+            }
+            public override int GetHashCode() {
+                // should be enough
+                return (EquDirective == null ? 0 : EquDirective.GetHashCode()) ^
+                    (OrgDirective == null ? 0 : OrgDirective.GetHashCode()) ^
+                    (DefineData1 == null ? 0 : DefineData1.GetHashCode()) ^
+                    (Fill == null ? 0 : Fill.GetHashCode());
+            }
 
             public string GetDefineData(int width) {
                 switch (width) {
@@ -99,11 +160,6 @@ namespace SourceGen {
                     case 4: return DefineBigData4;
                     default: Debug.Assert(false); return ".!!?";
                 }
-            }
-
-            public PseudoOpNames GetCopy() {
-                // Do it the lazy way.
-                return Deserialize(Serialize());
             }
 
             /// <summary>
@@ -127,13 +183,24 @@ namespace SourceGen {
                 // which means a lot of double-quote escaping.  We could do something here
                 // that stored more nicely but it doesn't seem worth the effort.
                 JavaScriptSerializer ser = new JavaScriptSerializer();
-                return ser.Serialize(this);
+
+                Dictionary<string, string> dict = new Dictionary<string, string>();
+                foreach (PropertyInfo prop in GetType().GetProperties()) {
+                    string value = (string)prop.GetValue(this);
+                    if (!string.IsNullOrEmpty(value)) {
+                        dict[prop.Name] = value;
+                    }
+                }
+
+                return ser.Serialize(dict);
             }
 
             public static PseudoOpNames Deserialize(string cereal) {
                 JavaScriptSerializer ser = new JavaScriptSerializer();
                 try {
-                    return ser.Deserialize<PseudoOpNames>(cereal);
+                    Dictionary<string, string> dict =
+                        ser.Deserialize<Dictionary<string, string>>(cereal);
+                    return new PseudoOpNames(dict);
                 } catch (Exception ex) {
                     Debug.WriteLine("PseudoOpNames deserialization failed: " + ex.Message);
                     return new PseudoOpNames();
@@ -142,34 +209,34 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Returns a new PseudoOpNames instance with some reasonable defaults for on-screen
-        /// display.
+        /// Returns a PseudoOpNames instance with some reasonable defaults for on-screen display.
         /// </summary>
         public static PseudoOpNames DefaultPseudoOpNames {
-            get { return sDefaultPseudoOpNames.GetCopy(); }
+            get { return sDefaultPseudoOpNames; }
         }
-        private static readonly PseudoOpNames sDefaultPseudoOpNames = new PseudoOpNames() {
-            EquDirective = ".eq",
-            OrgDirective = ".org",
-            RegWidthDirective = ".rwid",
+        private static readonly PseudoOpNames sDefaultPseudoOpNames =
+            new PseudoOpNames(new Dictionary<string, string> {
+                { "EquDirective", ".eq" },
+                { "OrgDirective", ".org" },
+                { "RegWidthDirective", ".rwid" },
 
-            DefineData1 = ".dd1",
-            DefineData2 = ".dd2",
-            DefineData3 = ".dd3",
-            DefineData4 = ".dd4",
-            DefineBigData2 = ".dbd2",
-            DefineBigData3 = ".dbd3",
-            DefineBigData4 = ".dbd4",
-            Fill = ".fill",
-            Dense = ".bulk",
+                { "DefineData1", ".dd1" },
+                { "DefineData2", ".dd2" },
+                { "DefineData3", ".dd3" },
+                { "DefineData4", ".dd4" },
+                { "DefineBigData2", ".dbd2" },
+                { "DefineBigData3", ".dbd3" },
+                { "DefineBigData4", ".dbd4" },
+                { "Fill", ".fill" },
+                { "Dense", ".bulk" },
 
-            StrGeneric = ".str",
-            StrReverse = ".rstr",
-            StrLen8 = ".l1str",
-            StrLen16 = ".l2str",
-            StrNullTerm = ".zstr",
-            StrDci = ".dstr",
-        };
+                { "StrGeneric", ".str" },
+                { "StrReverse", ".rstr" },
+                { "StrLen8", ".l1str" },
+                { "StrLen16", ".l2str" },
+                { "StrNullTerm", ".zstr" },
+                { "StrDci", ".dstr" }
+        });
 
 
         /// <summary>

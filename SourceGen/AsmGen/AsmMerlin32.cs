@@ -90,37 +90,35 @@ namespace SourceGen.AsmGen {
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
 
 
-        // Semi-convenient way to hold all the interesting string constants in one place.
-        // Note the actual usage of the pseudo-op may not match what the main app does,
-        // e.g. RegWidthDirective behaves differently from "mx".  I'm just trying to avoid
-        // having string constants scattered all over.
-        private static PseudoOp.PseudoOpNames sDataOpNames = new PseudoOp.PseudoOpNames() {
-            EquDirective = "equ",
-            OrgDirective = "org",
-            RegWidthDirective = "mx",
-            DefineData1 = "dfb",
-            DefineData2 = "dw",
-            DefineData3 = "adr",
-            DefineData4 = "adrl",
-            DefineBigData2 = "ddb",
-            //DefineBigData3
-            //DefineBigData4
-            Fill = "ds",
-            Dense = "hex",
-            StrGeneric = "asc",
-            StrReverse = "rev",
-            //StrNullTerm
-            StrLen8 = "str",
-            StrLen16 = "strl",
-            StrDci = "dci",
-        };
+        // Pseudo-op string constants.
+        private static PseudoOp.PseudoOpNames sDataOpNames =
+            new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
+                { "EquDirective", "equ" },
+                { "OrgDirective", "org" },
+                //RegWidthDirective
+                { "DefineData1", "dfb" },
+                { "DefineData2", "dw" },
+                { "DefineData3", "adr" },
+                { "DefineData4", "adrl" },
+                { "DefineBigData2", "ddb" },
+                //DefineBigData3
+                //DefineBigData4
+                { "Fill", "ds" },
+                { "Dense", "hex" },
+                { "StrGeneric", "asc" },
+                { "StrReverse", "rev" },
+                //StrNullTerm
+                { "StrLen8", "str" },
+                { "StrLen16", "strl" },
+                { "StrDci", "dci" },
+        });
+        private const string REG_WIDTH_DIRECTIVE = "mx";
 
 
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            pseudoOps = sDataOpNames.GetCopy();
-            pseudoOps.RegWidthDirective = string.Empty;
+            pseudoOps = sDataOpNames;
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);
@@ -249,7 +247,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
-                    if (opcodeStr == null) {
+                    if ((string.IsNullOrEmpty(opcodeStr))) {
                         // Nothing defined, output as comma-separated single-byte values.
                         GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     } else {
@@ -413,8 +411,7 @@ namespace SourceGen.AsmGen {
                 // Assembler defaults to short regs, so we can skip this.
                 return;
             }
-            OutputLine(string.Empty,
-                SourceFormatter.FormatPseudoOp(sDataOpNames.RegWidthDirective),
+            OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(REG_WIDTH_DIRECTIVE),
                 "%" + newM + newX, string.Empty);
         }
 

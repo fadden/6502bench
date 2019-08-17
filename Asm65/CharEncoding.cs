@@ -193,17 +193,29 @@ namespace Asm65 {
         public static bool IsExtendedC64Petscii(byte val) {
             return sExtendedPetscii[val];
         }
-        public static char ConvertC64Petscii(byte val) {
-            if ((val >= 0x20 && val <= 0x40) || val == 0x5b || val == 0x5d) {
-                return (char)val;               // number/symbols, '[', ']'
-            } else if (val >= 0x41 && val <= 0x5a) {
-                return (char)(val + 0x20);      // lower case
-            } else if (val >= 0xc1 && val <= 0xda) {
-                return (char)(val - 0x80);      // upper case
-            } else {
-                Debug.Assert(!IsPrintableC64Petscii(val));
-                return UNPRINTABLE_CHAR;
+        private static char[] sPetsciiToUnicode = CreatePetsciiToUnicodeMap();
+        private static char[] CreatePetsciiToUnicodeMap() {
+            // There are performance arguments for doing this with and without a table.  For
+            // x64 with fast memory and large caches, table seems reasonable.
+            char[] map = new char[256];
+            for (int val = 0; val < 256; val++) {
+                char ch;
+                if ((val >= 0x20 && val <= 0x40) || val == 0x5b || val == 0x5d) {
+                    ch = (char)val;               // number/symbols, '[', ']'
+                } else if (val >= 0x41 && val <= 0x5a) {
+                    ch = (char)(val + 0x20);      // lower case
+                } else if (val >= 0xc1 && val <= 0xda) {
+                    ch = (char)(val - 0x80);      // upper case
+                } else {
+                    Debug.Assert(!IsPrintableC64Petscii((byte)val));
+                    ch = UNPRINTABLE_CHAR;
+                }
+                map[val] = ch;
             }
+            return map;
+        }
+        public static char ConvertC64Petscii(byte val) {
+            return sPetsciiToUnicode[val];
         }
 
         //
@@ -243,19 +255,29 @@ namespace Asm65 {
         public static bool IsExtendedC64ScreenCode(byte val) {
             return sPrintableScreenCode[val];
         }
-        public static char ConvertC64ScreenCode(byte val) {
-            if (val == 0x00 || val == 0x1b || val == 0x1d) {
-                return (char)(val + 0x40);      // '@', '[', ']'
-            } else if (val >= 0x01 && val <= 0x1a) {
-                return (char)(val + 0x60);      // lower case
-            } else if (val >= 0x20 && val <= 0x3f) {
-                return (char)(val);             // numbers/symbols
-            } else if (val >= 0x41 && val <= 0x5a) {
-                return (char)(val);             // upper case
-            } else {
-                Debug.Assert(!IsPrintableC64ScreenCode(val));
-                return UNPRINTABLE_CHAR;
+        private static char[] sScreenCodeToUnicode = CreateScreenCodeToUnicodeMap();
+        private static char[] CreateScreenCodeToUnicodeMap() {
+            char[] map = new char[256];
+            for (int val = 0; val < 256; val++) {
+                char ch;
+                if (val == 0x00 || val == 0x1b || val == 0x1d) {
+                    ch = (char)(val + 0x40);      // '@', '[', ']'
+                } else if (val >= 0x01 && val <= 0x1a) {
+                    ch = (char)(val + 0x60);      // lower case
+                } else if (val >= 0x20 && val <= 0x3f) {
+                    ch = (char)(val);             // numbers/symbols
+                } else if (val >= 0x41 && val <= 0x5a) {
+                    ch = (char)(val);             // upper case
+                } else {
+                    Debug.Assert(!IsPrintableC64ScreenCode((byte)val));
+                    ch = UNPRINTABLE_CHAR;
+                }
+                map[val] = ch;
             }
+            return map;
+        }
+        public static char ConvertC64ScreenCode(byte val) {
+            return sScreenCodeToUnicode[val];
         }
         public static char ConvertLowAndHighC64ScreenCode(byte val) {
             return ConvertC64ScreenCode((byte)(val & 0x7f));

@@ -386,7 +386,7 @@ namespace SourceGen {
         /// Replaces the contents of the global settings object with the new settings,
         /// then applies them to the project.
         /// </summary>
-        /// <param name="settings"></param>
+        /// <param name="settings">New settings.</param>
         public void SetAppSettings(AppSettings settings) {
             AppSettings.Global.ReplaceSettings(settings);
             ApplyAppSettings();
@@ -450,6 +450,8 @@ namespace SourceGen {
             }
 
 
+            // Update the formatter, and null out mOutputFormatterCpuDef to force a refresh
+            // of related items.
             mOutputFormatter = new Formatter(mFormatterConfig);
             mOutputFormatterCpuDef = null;
 
@@ -1410,6 +1412,8 @@ namespace SourceGen {
             EditAppSettings dlg = new EditAppSettings(owner, mMainWin, this,
                 initialTab, initialAsmId);
             dlg.ShowDialog();
+
+            // The settings code calls SetAppSettings() directly whenever "Apply" is hit.
         }
 
         public void HandleCodeListDoubleClick(int row, int col) {

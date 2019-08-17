@@ -50,6 +50,7 @@ namespace SourceGen {
     ///  https://www.codeproject.com/Articles/34405/WPF-Data-Virtualization?msg=5635751
     ///  https://web.archive.org/web/20121216034305/http://www.zagstudio.com/blog/498
     ///  https://web.archive.org/web/20121107200359/http://www.zagstudio.com/blog/378
+    ///  https://github.com/lvaleriu/Virtualization
     /// </remarks>
     public class DisplayList : IList<DisplayList.FormattedParts>, IList,
             INotifyCollectionChanged, INotifyPropertyChanged {

@@ -32,9 +32,10 @@ namespace SourceGen {
     /// There may be a large number of these, so try to keep the size down.  These are usually
     /// stored in lists, not arrays, so declaring as a struct wouldn't help with that.
     ///
-    /// The stringified names of the enum values are currently serialized into the project
-    /// file.  DO NOT rename members of the enumeration without creating an upgrade path.  If
-    /// new values are added, the project file version number should be incremented.
+    /// IMPORTANT: The stringified names of the enum values are currently serialized into
+    /// the project file.  DO NOT rename members of the enumerations without creating an
+    /// upgrade path.  If new values are added, the project file version number should
+    /// be incremented.
     /// </summary>
     public class FormatDescriptor {
         /// <summary>

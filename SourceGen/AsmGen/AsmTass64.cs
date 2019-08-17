@@ -111,33 +111,34 @@ namespace SourceGen.AsmGen {
 
 
         // Pseudo-op string constants.
-        private static PseudoOp.PseudoOpNames sDataOpNames = new PseudoOp.PseudoOpNames() {
-            EquDirective = "=",
-            OrgDirective = ".logical",
-            //RegWidthDirective         // .as, .al, .xs, .xl
-            DefineData1 = ".byte",
-            DefineData2 = ".word",
-            DefineData3 = ".long",
-            DefineData4 = ".dword",
-            //DefineBigData2
-            //DefineBigData3
-            //DefineBigData4
-            Fill = ".fill",
-            //Dense                     // no equivalent, use .byte with comma-separated args
-            StrGeneric = ".text",
-            //StrReverse
-            StrNullTerm = ".null",
-            StrLen8 = ".ptext",
-            //StrLen16
-            StrDci = ".shift"
-        };
+        private static PseudoOp.PseudoOpNames sDataOpNames =
+            new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
+                { "EquDirective", "=" },
+                { "OrgDirective", ".logical" },
+                //RegWidthDirective         // .as, .al, .xs, .xl
+                { "DefineData1", ".byte" },
+                { "DefineData2", ".word" },
+                { "DefineData3", ".long" },
+                { "DefineData4", ".dword" },
+                //DefineBigData2
+                //DefineBigData3
+                //DefineBigData4
+                { "Fill", ".fill" },
+                //Dense                     // no equivalent, use .byte with comma-separated args
+                { "StrGeneric", ".text" },
+                //StrReverse
+                { "StrNullTerm", ".null" },
+                { "StrLen8", ".ptext" },
+                //StrLen16
+                { "StrDci", ".shift" }
+        });
         private const string HERE_PSEUDO_OP = ".here";
 
 
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            pseudoOps = sDataOpNames.GetCopy();
+            pseudoOps = sDataOpNames;
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);
@@ -165,7 +166,7 @@ namespace SourceGen.AsmGen {
         }
 
         /// <summary>
-        /// Configures the assembler-specific format items.
+        /// Configures the assembler-specific format items.  May be called without a Project.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
             // Must be lower case when --case-sensitive is used.
@@ -187,27 +188,6 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
-
-            // Configure delimiters for single-character operands.  The conversion mode we
-            // use is determined by the default text mode in the project properties.
-            Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
-            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
-            switch (textMode) {
-                case TextScanMode.C64Petscii:
-                    charSet.Set(CharEncoding.Encoding.C64Petscii, Formatter.SINGLE_QUOTE_DELIM);
-                    break;
-                case TextScanMode.C64ScreenCode:
-                    charSet.Set(CharEncoding.Encoding.C64ScreenCode, Formatter.SINGLE_QUOTE_DELIM);
-                    break;
-                case TextScanMode.LowAscii:
-                case TextScanMode.LowHighAscii:
-                default:
-                    charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
-                    charSet.Set(CharEncoding.Encoding.HighAscii,
-                        new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
-                    break;
-            }
-            config.mCharDelimiters = charSet;
         }
 
         // IGenerator
@@ -221,6 +201,29 @@ namespace SourceGen.AsmGen {
             Formatter.FormatConfig config = new Formatter.FormatConfig();
             GenCommon.ConfigureFormatterFromSettings(Settings, ref config);
             SetFormatConfigValues(ref config);
+
+            // Configure delimiters for single-character operands.  The conversion mode we
+            // use is determined by the default text mode in the project properties.
+            Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
+            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
+            switch (textMode) {
+                case TextScanMode.C64Petscii:
+                    charSet.Set(CharEncoding.Encoding.C64Petscii,
+                        Formatter.SINGLE_QUOTE_DELIM);
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    charSet.Set(CharEncoding.Encoding.C64ScreenCode,
+                        Formatter.SINGLE_QUOTE_DELIM);
+                    break;
+                case TextScanMode.LowAscii:
+                case TextScanMode.LowHighAscii:
+                default:
+                    charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
+                    charSet.Set(CharEncoding.Encoding.HighAscii,
+                        new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+                    break;
+            }
+            config.mCharDelimiters = charSet;
             SourceFormatter = new Formatter(config);
 
             string msg = string.Format(Res.Strings.PROGRESS_GENERATING_FMT, pathName);
@@ -387,7 +390,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
-                    if (opcodeStr == null) {
+                    if ((string.IsNullOrEmpty(opcodeStr))) {
                         // Nothing defined, output as comma-separated single-byte values.
                         GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     } else {

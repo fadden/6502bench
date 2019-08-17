@@ -100,32 +100,33 @@ namespace SourceGen.AsmGen {
 
 
         // Pseudo-op string constants.
-        private static PseudoOp.PseudoOpNames sDataOpNames = new PseudoOp.PseudoOpNames() {
-            EquDirective = "=",
-            OrgDirective = ".org",
-            //RegWidthDirective         // .a8, .a16, .i8, .i16
-            DefineData1 = ".byte",
-            DefineData2 = ".word",
-            DefineData3 = ".faraddr",
-            DefineData4 = ".dword",
-            DefineBigData2 = ".dbyt",
-            //DefineBigData3
-            //DefineBigData4
-            Fill = ".res",
-            //Dense                     // no equivalent, use .byte with comma-separated args
-            StrGeneric = ".byte",
-            //StrReverse
-            StrNullTerm = ".asciiz",
-            //StrLen8                   // macro with .strlen?
-            //StrLen16
-            //StrDci
-        };
+        private static PseudoOp.PseudoOpNames sDataOpNames =
+            new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
+                { "EquDirective", "=" },
+                { "OrgDirective", ".org" },
+                //RegWidthDirective         // .a8, .a16, .i8, .i16
+                { "DefineData1", ".byte" },
+                { "DefineData2", ".word" },
+                { "DefineData3", ".faraddr" },
+                { "DefineData4", ".dword" },
+                { "DefineBigData2", ".dbyt" },
+                //DefineBigData3
+                //DefineBigData4
+                { "Fill", ".res" },
+                //Dense                     // no equivalent, use .byte with comma-separated args
+                { "StrGeneric", ".byte" },
+                //StrReverse
+                { "StrNullTerm", ".asciiz" },
+                //StrLen8                   // macro with .strlen?
+                //StrLen16
+                //StrDci
+        });
 
 
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            pseudoOps = sDataOpNames.GetCopy();
+            pseudoOps = sDataOpNames;
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);
@@ -401,7 +402,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
-                    if (opcodeStr == null) {
+                    if ((string.IsNullOrEmpty(opcodeStr))) {
                         // Nothing defined, output as comma-separated single-byte values.
                         GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     } else {

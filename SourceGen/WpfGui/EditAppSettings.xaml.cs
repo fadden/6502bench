@@ -30,6 +30,7 @@ using CommonUtil;
 using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
 using AssemblerConfig = SourceGen.AsmGen.AssemblerConfig;
 using ExpressionMode = Asm65.Formatter.FormatConfig.ExpressionMode;
+using System.Windows.Input;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -212,8 +213,16 @@ namespace SourceGen.WpfGui {
             string stringCereal = stringSet.Serialize();
             mSettings.SetString(AppSettings.FMT_STRING_DELIM, stringCereal);
 
-            mMainCtrl.SetAppSettings(mSettings);
-            AsmGen.AssemblerVersionCache.QueryVersions();
+            try {
+                // QueryVersions() can sometimes be slow under Win10 (mid 2019), possibly
+                // because of the built-in malware detection, so pop up a wait cursor.
+                Mouse.OverrideCursor = Cursors.Wait;
+                mMainCtrl.SetAppSettings(mSettings);
+                AsmGen.AssemblerVersionCache.QueryVersions();
+            } finally {
+                Mouse.OverrideCursor = null;
+            }
+
             IsDirty = false;
         }
 
@@ -913,9 +922,9 @@ namespace SourceGen.WpfGui {
             AssemblerInfo asmInfo = (AssemblerInfo)displayFmtQuickComboBox.SelectedItem;
             AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
 
-            PseudoOp.PseudoOpNames opNames;
+            PseudoOp.PseudoOpNames unused;
             Asm65.Formatter.FormatConfig formatConfig;
-            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
+            gen.GetDefaultDisplayFormat(out unused, out formatConfig);
 
             SetWidthDisamSettings(formatConfig.mForceAbsOpcodeSuffix,
                 formatConfig.mForceLongOpcodeSuffix,
@@ -983,13 +992,14 @@ namespace SourceGen.WpfGui {
         /// Exports values from text fields to a PseudoOpNames object.
         /// </summary>
         private PseudoOp.PseudoOpNames ExportPseudoOpNames() {
-            PseudoOp.PseudoOpNames opNames = new PseudoOp.PseudoOpNames();
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+
             for (int i = 0; i < mPseudoNameMap.Length; i++) {
-                // NOTE: PseudoOpNames must be a class (not a struct) or this will fail.
-                // SetValue() would be invoked on a boxed copy that is discarded afterward.
-                mPseudoNameMap[i].PropInfo.SetValue(opNames, mPseudoNameMap[i].TextBox.Text);
+                // Use TrimEnd() to remove invisible trailing spaces, and reduce a string
+                // that's nothing but blanks to empty.
+                dict[mPseudoNameMap[i].PropInfo.Name] = mPseudoNameMap[i].TextBox.Text.TrimEnd();
             }
-            return opNames;
+            return new PseudoOp.PseudoOpNames(dict);
         }
 
         // Invoked when text is changed in any pseudo-op text box.

@@ -103,32 +103,33 @@ namespace SourceGen.AsmGen {
 
 
         // Pseudo-op string constants.
-        private static PseudoOp.PseudoOpNames sDataOpNames = new PseudoOp.PseudoOpNames() {
-            EquDirective = "=",
-            OrgDirective = "!pseudopc",
-            //RegWidthDirective         // !al, !as, !rl, !rs
-            DefineData1 = "!byte",
-            DefineData2 = "!word",
-            DefineData3 = "!24",
-            DefineData4 = "!32",
-            //DefineBigData2
-            //DefineBigData3
-            //DefineBigData4
-            Fill = "!fill",
-            Dense = "!hex",
-            StrGeneric = "!text",       // can use !xor for high ASCII
-            //StrReverse
-            //StrNullTerm
-            //StrLen8
-            //StrLen16
-            //StrDci
-        };
+        private static PseudoOp.PseudoOpNames sDataOpNames =
+            new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
+                { "EquDirective", "=" },
+                { "OrgDirective", "!pseudopc" },
+                //RegWidthDirective         // !al, !as, !rl, !rs
+                { "DefineData1", "!byte" },
+                { "DefineData2", "!word" },
+                { "DefineData3", "!24" },
+                { "DefineData4", "!32" },
+                //DefineBigData2
+                //DefineBigData3
+                //DefineBigData4
+                { "Fill", "!fill" },
+                { "Dense", "!hex" },
+                { "StrGeneric", "!text" },       // can use !xor for high ASCII
+                //StrReverse
+                //StrNullTerm
+                //StrLen8
+                //StrLen16
+                //StrDci
+        });
 
 
         // IGenerator
         public void GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames pseudoOps,
                 out Formatter.FormatConfig formatConfig) {
-            pseudoOps = sDataOpNames.GetCopy();
+            pseudoOps = sDataOpNames;
 
             formatConfig = new Formatter.FormatConfig();
             SetFormatConfigValues(ref formatConfig);
@@ -374,7 +375,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
-                    if (opcodeStr == null) {
+                    if (string.IsNullOrEmpty(opcodeStr)) {
                         // Nothing defined, output as comma-separated single-byte values.
                         GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     } else {

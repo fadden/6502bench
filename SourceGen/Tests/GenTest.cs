@@ -309,7 +309,14 @@ namespace SourceGen.Tests {
                 ReportProgress(" verify...");
                 timer.StartTask("Compare Binary to Expected");
                 FileInfo fi = new FileInfo(asmResults.OutputPathName);
-                if (fi.Length != project.FileData.Length) {
+                if (!fi.Exists) {
+                    // This can happen if the assembler fails to generate output but doesn't
+                    // report an error code (e.g. Merlin 32 in certain situations).
+                    ReportErrMsg("asm output missing");
+                    ReportFailure();
+                    didFail = true;
+                    continue;
+                } else if (fi.Length != project.FileData.Length) {
                     ReportErrMsg("asm output mismatch: length is " + fi.Length + ", expected " +
                         project.FileData.Length);
                     ReportFailure();

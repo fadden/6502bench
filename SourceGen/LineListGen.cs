@@ -443,11 +443,16 @@ namespace SourceGen {
 
         /// <summary>
         /// Changes the pseudo-op name object.  Clears the line list, instigating a
-        /// full re-render.
+        /// full re-render.  If the new set is unchanged from the old set, nothing is done.
         /// </summary>
         /// <param name="opNames">Pseudo-op names.</param>
         public void SetPseudoOpNames(PseudoOp.PseudoOpNames opNames) {
+            if (mPseudoOpNames == opNames) {
+                return;
+            }
+
             mPseudoOpNames = opNames;
+            Debug.Assert(mPseudoOpNames == opNames);
             mLineList.Clear();
             mDisplayList.Clear();
         }
