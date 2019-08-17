@@ -63,6 +63,12 @@ namespace SourceGen {
         /// </summary>
         private PseudoOp.PseudoOpNames mPseudoOpNames;
 
+        /// <summary>
+        /// Cache of previously-formatted data.  The data is stored with references to
+        /// dependencies, so it should not be necessary to explicitly clear this.
+        /// </summary>
+        private FormattedOperandCache mFormattedLineCache;
+
 
         /// <summary>
         /// One of these per line of output in the display.  It should be possible to draw
@@ -421,6 +427,7 @@ namespace SourceGen {
             mPseudoOpNames = opNames;
 
             mLineList = new List<Line>();
+            mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
 
@@ -481,12 +488,10 @@ namespace SourceGen {
                 FormattedParts parts;
                 switch (line.LineType) {
                     case Line.Type.Code:
-                        parts = GenerateInstructionLine(mProject, mFormatter,
-                            line.FileOffset, line.OffsetSpan, mShowCycleCounts);
+                        parts = GenerateInstructionLine(line.FileOffset, line.OffsetSpan);
                         break;
                     case Line.Type.Data:
-                        parts = GenerateDataLine(mProject, mFormatter, mPseudoOpNames,
-                            line.FileOffset, line.SubLineIndex);
+                        parts = GenerateDataLine(line.FileOffset, line.SubLineIndex);
                         break;
                     case Line.Type.Blank:
                         // Nothing to do.
@@ -624,8 +629,7 @@ namespace SourceGen {
             List<Line> headerLines = GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames);
             mLineList.InsertRange(0, headerLines);
 
-            GenerateLineList(mProject, mFormatter, mPseudoOpNames,
-                mProject.FileData, 0, mProject.FileData.Length - 1, mLineList);
+            GenerateLineList(0, mProject.FileData.Length - 1, mLineList);
 
             mDisplayList.ResetList(mLineList.Count);
 
@@ -709,8 +713,7 @@ namespace SourceGen {
             // Create temporary list to hold new lines.  Set the initial capacity to
             // the previous size, on the assumption that it won't change much.
             List<Line> newLines = new List<Line>(endIndex - startIndex + 1);
-            GenerateLineList(mProject, mFormatter, mPseudoOpNames, mProject.FileData,
-                startOffset, endOffset, newLines);
+            GenerateLineList(startOffset, endOffset, newLines);
 
             // Out with the old, in with the new.
             mLineList.RemoveRange(startIndex, endIndex - startIndex + 1);
@@ -862,14 +865,10 @@ namespace SourceGen {
         /// options, like maximum per-line operand length, might affect how many lines
         /// are generated.
         /// </summary>
-        /// <param name="proj">Project reference.</param>
-        /// <param name="formatter">Output formatter.</param>
         /// <param name="startOffset">Offset of first byte.</param>
         /// <param name="endOffset">Offset of last byte.</param>
         /// <param name="lines">List to add output lines to.</param>
-        private static void GenerateLineList(DisasmProject proj, Formatter formatter,
-                PseudoOp.PseudoOpNames opNames, byte[] data, int startOffset, int endOffset,
-                List<Line> lines) {
+        private void GenerateLineList(int startOffset, int endOffset, List<Line> lines) {
             //Debug.WriteLine("GenerateRange [+" + startOffset.ToString("x6") + ",+" +
             //    endOffset.ToString("x6") + "]");
 
@@ -878,9 +877,9 @@ namespace SourceGen {
 
             // Find the previous status flags for M/X tracking.
             StatusFlags prevFlags = StatusFlags.AllIndeterminate;
-            if (proj.CpuDef.HasEmuFlag) {
+            if (mProject.CpuDef.HasEmuFlag) {
                 for (int scanoff = startOffset - 1; scanoff >= 0; scanoff--) {
-                    Anattrib attr = proj.GetAnattrib(scanoff);
+                    Anattrib attr = mProject.GetAnattrib(scanoff);
                     if (attr.IsInstructionStart) {
                         prevFlags = attr.StatusFlags;
                         // Apply the same tweak here that we do to curFlags below.
@@ -900,17 +899,16 @@ namespace SourceGen {
             // partial-list generation.
             bool addBlank = false;
             if (startOffset > 0) {
-                int baseOff = DataAnalysis.GetBaseOperandOffset(proj, startOffset - 1);
-                if (proj.GetAnattrib(baseOff).DoesNotContinue) {
+                int baseOff = DataAnalysis.GetBaseOperandOffset(mProject, startOffset - 1);
+                if (mProject.GetAnattrib(baseOff).DoesNotContinue) {
                     addBlank = true;
                 }
             }
-
             int offset = startOffset;
             while (offset <= endOffset) {
-                Anattrib attr = proj.GetAnattrib(offset);
+                Anattrib attr = mProject.GetAnattrib(offset);
                 if (attr.IsInstructionStart && offset > 0 &&
-                        proj.GetAnattrib(offset - 1).IsData) {
+                        mProject.GetAnattrib(offset - 1).IsData) {
                     // Transition from data to code.  (Don't add blank line for inline data.)
                     lines.Add(GenerateBlankLine(offset));
                 } else if (addBlank) {
@@ -921,20 +919,22 @@ namespace SourceGen {
 
                 // Insert long comments and notes.  These may span multiple display lines,
                 // and require word-wrap, so it's easiest just to render them fully here.
-                if (proj.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
-                    List<string> formatted = noteData.FormatText(formatter, "NOTE: ");
+                // TODO: integrate into FormattedOperandCache so we don't have to
+                //   regenerate them unless they change.  Use the MLC as the dependency.
+                if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
+                    List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
                     StringListToLines(formatted, offset, Line.Type.Note,
                         noteData.BackgroundColor, lines);
                 }
-                if (proj.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
-                    List<string> formatted = longComment.FormatText(formatter, string.Empty);
+                if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
+                    List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
                     StringListToLines(formatted, offset, Line.Type.LongComment,
                         longComment.BackgroundColor, lines);
                 }
 
                 if (attr.IsInstructionStart) {
                     // Generate reg width directive, if necessary.
-                    if (proj.CpuDef.HasEmuFlag) {
+                    if (mProject.CpuDef.HasEmuFlag) {
                         // Changing from "ambiguous but assumed short" to "definitively short"
                         // merits a directive, notably at the start of the file.  The tricky
                         // part is that E=1 means definitively M=1 X=1.  And maybe
@@ -964,8 +964,8 @@ namespace SourceGen {
                             // possible values.  Having the operand capitalization match the
                             // pseudo-op's feels reasonable.
                             rwLine.Parts = FormattedParts.CreateDirective(
-                                formatter.FormatPseudoOp(opNames.RegWidthDirective),
-                                formatter.FormatPseudoOp(operandStr));
+                                mFormatter.FormatPseudoOp(mPseudoOpNames.RegWidthDirective),
+                                mFormatter.FormatPseudoOp(operandStr));
                             lines.Add(rwLine);
                         }
                         prevFlags = curFlags;
@@ -974,7 +974,7 @@ namespace SourceGen {
                     // Look for embedded instructions.
                     int len;
                     for (len = 1; len < attr.Length; len++) {
-                        if (proj.GetAnattrib(offset + len).IsInstructionStart) {
+                        if (mProject.GetAnattrib(offset + len).IsInstructionStart) {
                             break;
                         }
                     }
@@ -1003,15 +1003,32 @@ namespace SourceGen {
                     offset += len;
                 } else {
                     Debug.Assert(attr.DataDescriptor != null);
-                    // TODO: replace this with something that caches expensive items like
-                    //   string operands; maybe have an out List<string> that is null for the
-                    //   easy stuff
-                    int numLines =
-                        PseudoOp.ComputeRequiredLineCount(formatter, opNames, attr.DataDescriptor,
-                            data, offset);
-                    for (int i = 0; i < numLines; i++) {
-                        Line line = new Line(offset, attr.Length, Line.Type.Data, i);
-                        lines.Add(line);
+                    if (attr.DataDescriptor.IsString) {
+                        // See if we've already got this one.
+                        List<string> strLines = mFormattedLineCache.GetStringEntry(offset,
+                            mFormatter, attr.DataDescriptor, mPseudoOpNames, out string popcode);
+                        if (strLines == null) {
+                            //Debug.WriteLine("FMT string at +" + offset.ToString("x6"));
+                            strLines = PseudoOp.FormatStringOp(mFormatter, mPseudoOpNames,
+                                attr.DataDescriptor, mProject.FileData, offset,
+                                out popcode);
+                            mFormattedLineCache.SetStringEntry(offset, strLines, popcode,
+                                mFormatter, attr.DataDescriptor, mPseudoOpNames);
+                        }
+                        FormattedParts[] partsArray = GenerateStringLines(offset,
+                            popcode, strLines);
+                        for (int i = 0; i < strLines.Count; i++) {
+                            Line line = new Line(offset, attr.Length, Line.Type.Data, i);
+                            line.Parts = partsArray[i];
+                            lines.Add(line);
+                        }
+                    } else {
+                        int numLines = PseudoOp.ComputeRequiredLineCount(mFormatter,
+                            mPseudoOpNames,attr.DataDescriptor, mProject.FileData, offset);
+                        for (int i = 0; i < numLines; i++) {
+                            Line line = new Line(offset, attr.Length, Line.Type.Data, i);
+                            lines.Add(line);
+                        }
                     }
                     offset += attr.Length;
                 }
@@ -1025,7 +1042,7 @@ namespace SourceGen {
             //
             // It should not be possible for an address map change to appear in the middle
             // of an instruction or data item.
-            foreach (AddressMap.AddressMapEntry ent in proj.AddrMap) {
+            foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
                 if (ent.Offset < startOffset || ent.Offset > endOffset) {
                     continue;
                 }
@@ -1041,9 +1058,9 @@ namespace SourceGen {
                 }
                 Line topLine = lines[index];
                 Line newLine = new Line(topLine.FileOffset, 0, Line.Type.OrgDirective);
-                string addrStr = formatter.FormatHexValue(ent.Addr, 4);
+                string addrStr = mFormatter.FormatHexValue(ent.Addr, 4);
                 newLine.Parts = FormattedParts.CreateDirective(
-                    formatter.FormatPseudoOp(opNames.OrgDirective), addrStr);
+                    mFormatter.FormatPseudoOp(mPseudoOpNames.OrgDirective), addrStr);
                 lines.Insert(index, newLine);
 
                 // Prepend a blank line if the previous line wasn't already blank, and this
@@ -1067,11 +1084,11 @@ namespace SourceGen {
         /// <summary>
         /// Takes a list of strings and adds them to the Line list as long comments.
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="offset"></param>
-        /// <param name="lineType"></param>
-        /// <param name="color"></param>
-        /// <param name="lines"></param>
+        /// <param name="list">String list.</param>
+        /// <param name="offset">File offset of item start.</param>
+        /// <param name="lineType">What type of line this is.</param>
+        /// <param name="color">Background color (for Notes).</param>
+        /// <param name="lines">Line list to add data to.</param>
         private static void StringListToLines(List<string> list, int offset, Line.Type lineType,
                 Color color, List<Line> lines) {
             foreach (string str in list) {
@@ -1083,17 +1100,16 @@ namespace SourceGen {
             }
         }
 
-        private static FormattedParts GenerateInstructionLine(DisasmProject proj,
-                Formatter formatter, int offset, int instrBytes, bool showCycleCounts) {
-            Anattrib attr = proj.GetAnattrib(offset);
-            byte[] data = proj.FileData;
+        private FormattedParts GenerateInstructionLine(int offset, int instrBytes) {
+            Anattrib attr = mProject.GetAnattrib(offset);
+            byte[] data = mProject.FileData;
 
-            string offsetStr = formatter.FormatOffset24(offset);
+            string offsetStr = mFormatter.FormatOffset24(offset);
 
             int addr = attr.Address;
-            string addrStr = formatter.FormatAddress(addr, !proj.CpuDef.HasAddr16);
-            string bytesStr = formatter.FormatBytes(data, offset, instrBytes);
-            string flagsStr = attr.StatusFlags.ToString(proj.CpuDef.HasEmuFlag);
+            string addrStr = mFormatter.FormatAddress(addr, !mProject.CpuDef.HasAddr16);
+            string bytesStr = mFormatter.FormatBytes(data, offset, instrBytes);
+            string flagsStr = attr.StatusFlags.ToString(mProject.CpuDef.HasEmuFlag);
             string attrStr = attr.ToAttrString();
 
             string labelStr = string.Empty;
@@ -1101,7 +1117,7 @@ namespace SourceGen {
                 labelStr = attr.Symbol.Label;
             }
 
-            OpDef op = proj.CpuDef.GetOpDef(data[offset]);
+            OpDef op = mProject.CpuDef.GetOpDef(data[offset]);
             int operand = op.GetOperand(data, offset, attr.StatusFlags);
             int instrLen = op.GetLength(attr.StatusFlags);
             OpDef.WidthDisambiguation wdis = OpDef.WidthDisambiguation.None;
@@ -1109,7 +1125,7 @@ namespace SourceGen {
                 wdis = OpDef.GetWidthDisambiguation(instrLen, operand);
             }
 
-            string opcodeStr = formatter.FormatOpcode(op, wdis);
+            string opcodeStr = mFormatter.FormatOpcode(op, wdis);
             if (attr.Length != instrBytes) {
                 // An instruction is embedded inside this one.  Note that BRK is a two-byte
                 // instruction, so don't freak out if you see it marked as embedded when a
@@ -1156,22 +1172,22 @@ namespace SourceGen {
                 // Format operand as directed.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     // Special handling for the double-operand block move.
-                    string opstr1 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
+                    string opstr1 = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                         null, attr.DataDescriptor, operand >> 8, 1,
                         PseudoOp.FormatNumericOpFlags.None);
-                    string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
+                    string opstr2 = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                         null, attr.DataDescriptor, operand & 0xff, 1,
                         PseudoOp.FormatNumericOpFlags.None);
                     formattedOperand = '#' + opstr1 + "," + '#' + opstr2;
                 } else {
-                    formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
+                    formattedOperand = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                         null, attr.DataDescriptor, operandForSymbol, operandLen, opFlags);
                 }
             } else {
                 // Show operand value in hex.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
-                    formattedOperand = '#' + formatter.FormatHexValue(operand >> 8, 2) + "," +
-                        '#' + formatter.FormatHexValue(operand & 0xff, 2);
+                    formattedOperand = '#' + mFormatter.FormatHexValue(operand >> 8, 2) + "," +
+                        '#' + mFormatter.FormatHexValue(operand & 0xff, 2);
                 } else {
                     if (operandLen == 2) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",
@@ -1179,66 +1195,107 @@ namespace SourceGen {
                         // but we don't want to show it here.
                         operandForSymbol &= 0xffff;
                     }
-                    formattedOperand = formatter.FormatHexValue(operandForSymbol, operandLen * 2);
+                    formattedOperand = mFormatter.FormatHexValue(operandForSymbol, operandLen * 2);
                 }
             }
-            string operandStr = formatter.FormatOperand(op, formattedOperand, wdis);
+            string operandStr = mFormatter.FormatOperand(op, formattedOperand, wdis);
 
-            string eolComment = proj.Comments[offset];
-            if (showCycleCounts) {
+            string eolComment = mProject.Comments[offset];
+            if (mShowCycleCounts) {
                 bool branchCross = (attr.Address & 0xff00) != (operandForSymbol & 0xff00);
-                int cycles = proj.CpuDef.GetCycles(op.Opcode, attr.StatusFlags, attr.BranchTaken,
-                    branchCross);
+                int cycles = mProject.CpuDef.GetCycles(op.Opcode, attr.StatusFlags,
+                    attr.BranchTaken, branchCross);
                 if (cycles > 0) {
                     eolComment = cycles.ToString() + "  " + eolComment;
                 } else {
                     eolComment = (-cycles).ToString() + "+ " + eolComment;
                 }
             }
-            string commentStr = formatter.FormatEolComment(eolComment);
+            string commentStr = mFormatter.FormatEolComment(eolComment);
 
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
                 flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
             return parts;
         }
 
-        private static FormattedParts GenerateDataLine(DisasmProject proj, Formatter formatter,
-                PseudoOp.PseudoOpNames opNames, int offset, int subLineIndex) {
-            Anattrib attr = proj.GetAnattrib(offset);
-            byte[] data = proj.FileData;
+        private FormattedParts GenerateDataLine(int offset, int subLineIndex) {
+            Anattrib attr = mProject.GetAnattrib(offset);
+            byte[] data = mProject.FileData;
 
             string offsetStr, addrStr, bytesStr, flagsStr, attrStr, labelStr, opcodeStr,
                 operandStr, commentStr;
             offsetStr = addrStr = bytesStr = flagsStr = attrStr = labelStr = opcodeStr =
                 operandStr = commentStr = string.Empty;
 
-            PseudoOp.PseudoOut pout = PseudoOp.FormatDataOp(formatter, opNames, proj.SymbolTable,
-                null, attr.DataDescriptor, proj.FileData, offset, subLineIndex);
+            PseudoOp.PseudoOut pout = PseudoOp.FormatDataOp(mFormatter, mPseudoOpNames,
+                mProject.SymbolTable, null, attr.DataDescriptor, mProject.FileData, offset,
+                subLineIndex);
             if (subLineIndex == 0) {
-                offsetStr = formatter.FormatOffset24(offset);
+                offsetStr = mFormatter.FormatOffset24(offset);
 
-                addrStr = formatter.FormatAddress(attr.Address, !proj.CpuDef.HasAddr16);
+                addrStr = mFormatter.FormatAddress(attr.Address, !mProject.CpuDef.HasAddr16);
                 if (attr.Symbol != null) {
                     labelStr = attr.Symbol.Label;
                 }
 
-                bytesStr = formatter.FormatBytes(data, offset, attr.Length);
+                bytesStr = mFormatter.FormatBytes(data, offset, attr.Length);
                 attrStr = attr.ToAttrString();
 
-                opcodeStr = formatter.FormatPseudoOp(pout.Opcode);
+                opcodeStr = mFormatter.FormatPseudoOp(pout.Opcode);
+                commentStr = mFormatter.FormatEolComment(mProject.Comments[offset]);
             } else {
                 opcodeStr = " +";
             }
 
             operandStr = pout.Operand;
 
-            if (subLineIndex == 0) {
-                commentStr = formatter.FormatEolComment(proj.Comments[offset]);
-            }
-
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
                 flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
             return parts;
+        }
+
+        private FormattedParts[] GenerateStringLines(int offset, string popcode,
+                List<string> operands) {
+            FormattedParts[] partsArray = new FormattedParts[operands.Count];
+
+            Anattrib attr = mProject.GetAnattrib(offset);
+            byte[] data = mProject.FileData;
+
+            string offsetStr, addrStr, bytesStr, attrStr, labelStr, opcodeStr,
+                operandStr, commentStr;
+
+            for (int subLineIndex = 0; subLineIndex < operands.Count; subLineIndex++) {
+                if (subLineIndex == 0) {
+                    offsetStr = mFormatter.FormatOffset24(offset);
+
+                    addrStr = mFormatter.FormatAddress(attr.Address, !mProject.CpuDef.HasAddr16);
+                    if (attr.Symbol != null) {
+                        labelStr = attr.Symbol.Label;
+                    } else {
+                        labelStr = string.Empty;
+                    }
+
+                    bytesStr = mFormatter.FormatBytes(data, offset, attr.Length);
+                    attrStr = attr.ToAttrString();
+
+                    opcodeStr = mFormatter.FormatPseudoOp(popcode);
+                    commentStr = mFormatter.FormatEolComment(mProject.Comments[offset]);
+                } else {
+                    offsetStr = addrStr = bytesStr = attrStr = labelStr = commentStr =
+                        string.Empty;
+
+                    opcodeStr = " +";
+                }
+
+                operandStr = operands[subLineIndex];
+
+                FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
+                    /*flags*/string.Empty, attrStr, labelStr, opcodeStr, operandStr, commentStr);
+
+                partsArray[subLineIndex] = parts;
+            }
+
+            return partsArray;
         }
     }
 }

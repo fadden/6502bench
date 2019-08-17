@@ -36,7 +36,7 @@ namespace SourceGen {
         private const int MAX_OPERAND_LEN = 64;
 
         /// <summary>
-        /// One piece of the operand.
+        /// One piece of the pseudo-instruction.
         /// </summary>
         public struct PseudoOut {
             /// <summary>
@@ -57,6 +57,8 @@ namespace SourceGen {
                 Operand = src.Operand;
             }
         }
+
+        #region PseudoOpNames
 
         /// <summary>
         /// Pseudo-op name collection.  Instances are immutable.
@@ -238,6 +240,7 @@ namespace SourceGen {
                 { "StrDci", ".dstr" }
         });
 
+        #endregion PseudoOpNames
 
         /// <summary>
         /// Computes the number of lines of output required to hold the formatted output.
@@ -248,6 +251,7 @@ namespace SourceGen {
         public static int ComputeRequiredLineCount(Formatter formatter, PseudoOpNames opNames,
                 FormatDescriptor dfd, byte[] data, int offset) {
             if (dfd.IsString) {
+                Debug.Assert(false);        // shouldn't be calling here anymore
                 List<string> lines = FormatStringOp(formatter, opNames, dfd, data,
                     offset, out string popcode);
                 return lines.Count;
@@ -275,7 +279,7 @@ namespace SourceGen {
         /// Generates a pseudo-op statement for the specified data operation.
         /// 
         /// For most operations, only one output line will be generated.  For larger items,
-        /// like long comments, the value may be split into multiple lines.  The sub-index
+        /// like dense hex, the value may be split into multiple lines.  The sub-index
         /// indicates which line should be formatted.
         /// </summary>
         /// <param name="formatter">Format definition.</param>
@@ -305,6 +309,7 @@ namespace SourceGen {
             PseudoOut po = new PseudoOut();
 
             if (dfd.IsString) {
+                Debug.Assert(false);        // shouldn't be calling here anymore
                 List<string> lines = FormatStringOp(formatter, opNames, dfd, data,
                     offset, out string popcode);
                 po.Opcode = popcode;
@@ -372,8 +377,8 @@ namespace SourceGen {
         /// <param name="data">File data.</param>
         /// <param name="offset">Offset, within data, of start of string.</param>
         /// <param name="popcode">Pseudo-opcode string.</param>
-        /// <returns>Array of strings.</returns>
-        private static List<string> FormatStringOp(Formatter formatter, PseudoOpNames opNames,
+        /// <returns>Array of operand strings.</returns>
+        public static List<string> FormatStringOp(Formatter formatter, PseudoOpNames opNames,
                 FormatDescriptor dfd, byte[] data, int offset, out string popcode) {
 
             int hiddenLeadingBytes = 0;

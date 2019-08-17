@@ -732,43 +732,60 @@ namespace SourceGen.WpfGui {
             //   50K: 10 seconds, 20K: 1.6 sec, 10K: 0.6 sec, 5K: 0.2 sec
             const int MAX_SEL_COUNT = 5000;
 
-            // The caller will clear the DisplayListSelection before calling here, so we
-            // need to clear the ListView selection to match, even if we're about to call
-            // SelectAll.  If we don't, the SelectAll() call won't generate the necessary
-            // events, and our DisplayListSelection will get out of sync.
-            codeListView.SelectedItems.Clear();
+            TaskTimer timer = new TaskTimer();
+            timer.StartTask("TOTAL");
 
-            if (sel.IsAllSelected()) {
-                Debug.WriteLine("SetSelection: re-selecting all items");
-                codeListView.SelectAll();
-                return;
+            try {
+                timer.StartTask("Clear");
+                // The caller will clear the DisplayListSelection before calling here, so we
+                // need to clear the ListView selection to match, even if we're about to call
+                // SelectAll.  If we don't, the SelectAll() call won't generate the necessary
+                // events, and our DisplayListSelection will get out of sync.
+                codeListView.SelectedItems.Clear();
+                timer.EndTask("Clear");
+
+                if (sel.IsAllSelected()) {
+                    Debug.WriteLine("SetSelection: re-selecting all items");
+                    timer.StartTask("SelectAll");
+                    codeListView.SelectAll();
+                    timer.EndTask("SelectAll");
+                    return;
+                }
+
+                if (sel.Count > MAX_SEL_COUNT) {
+                    // Too much for WPF ListView -- only restore the first item.
+                    Debug.WriteLine("SetSelection: not restoring (" + sel.Count + " items)");
+                    codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
+                    return;
+                }
+
+                Debug.WriteLine("SetSelection: selecting " + sel.Count + " of " +
+                    CodeDisplayList.Count);
+
+                // Note: if you refresh the display list with F5, the selection will be lost.  This
+                // appears to be a consequence of hitting a key -- changing from the built-in
+                // "Refresh" command to a locally defined "Re-analyze" command bound to F6 didn't
+                // change the behavior.  Selecting "re-analyze" from the DEBUG menu doesn't lose
+                // the selection.
+
+                timer.StartTask("tmpArray " + sel.Count);
+                DisplayList.FormattedParts[] tmpArray = new DisplayList.FormattedParts[sel.Count];
+                int ai = 0;
+                foreach (int listIndex in sel) {
+                    tmpArray[ai++] = CodeDisplayList[listIndex];
+                }
+                timer.EndTask("tmpArray " + sel.Count);
+
+                // Use a reflection call to provide the full set.  This is much faster than
+                // adding the items one at a time to SelectedItems.  (For one thing, it only
+                // invokes the SelectionChanged method once.)
+                timer.StartTask("Invoke");
+                listViewSetSelectedItems.Invoke(codeListView, new object[] { tmpArray });
+                timer.EndTask("Invoke");
+            } finally {
+                timer.EndTask("TOTAL");
+                //timer.DumpTimes("CodeListView_SetSelection");
             }
-
-            if (sel.Count > MAX_SEL_COUNT) {
-                // Too much for WPF ListView -- only restore the first item.
-                Debug.WriteLine("SetSelection: not restoring (" + sel.Count + " items)");
-                codeListView.SelectedItems.Add(CodeDisplayList[sel.GetFirstSelectedIndex()]);
-                return;
-            }
-
-            Debug.WriteLine("SetSelection: selecting " + sel.Count + " of " +
-                CodeDisplayList.Count);
-
-            //DateTime startWhen = DateTime.Now;
-
-            DisplayList.FormattedParts[] tmpArray = new DisplayList.FormattedParts[sel.Count];
-            int ai = 0;
-            foreach (int listIndex in sel) {
-                tmpArray[ai++] = CodeDisplayList[listIndex];
-            }
-
-            // Use a reflection call to provide the full set.  This is much faster than
-            // adding the items one at a time to SelectedItems.  (For one thing, it only
-            // invokes the SelectionChanged method once.)
-            listViewSetSelectedItems.Invoke(codeListView, new object[] { tmpArray });
-
-            //Debug.WriteLine("SetSelection on " + sel.Count + " items took " +
-            //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
         }
 
         public void CodeListView_DebugValidateSelectionCount() {

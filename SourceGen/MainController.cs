@@ -2462,30 +2462,37 @@ namespace SourceGen {
                 // A single line can span multiple offsets, each of which could have a
                 // different hint.  Note the code/data hints are only applied to the first
                 // byte of each selected line, so we're not quite in sync with that.
-                for (int offset = line.FileOffset; offset < line.FileOffset + line.OffsetSpan;
-                        offset++) {
-                    switch (mProject.TypeHints[offset]) {
-                        case CodeAnalysis.TypeHint.Code:
-                            codeHints++;
-                            break;
-                        case CodeAnalysis.TypeHint.Data:
-                            dataHints++;
-                            break;
-                        case CodeAnalysis.TypeHint.InlineData:
-                            inlineDataHints++;
-                            break;
-                        case CodeAnalysis.TypeHint.NoHint:
-                            noHints++;
-                            break;
-                        default:
-                            Debug.Assert(false);
-                            break;
+                //
+                // For multi-line items, the OffsetSpan of the first item covers the entire
+                // item (it's the same for all Line instances), so we only want to do this for
+                // the first entry.
+                if (line.SubLineIndex == 0) {
+                    for (int offset = line.FileOffset; offset < line.FileOffset + line.OffsetSpan;
+                            offset++) {
+                        switch (mProject.TypeHints[offset]) {
+                            case CodeAnalysis.TypeHint.Code:
+                                codeHints++;
+                                break;
+                            case CodeAnalysis.TypeHint.Data:
+                                dataHints++;
+                                break;
+                            case CodeAnalysis.TypeHint.InlineData:
+                                inlineDataHints++;
+                                break;
+                            case CodeAnalysis.TypeHint.NoHint:
+                                noHints++;
+                                break;
+                            default:
+                                Debug.Assert(false);
+                                break;
+                        }
                     }
                 }
             }
 
-            //Debug.WriteLine("GatherEntityCounts (len=" + CodeListGen.Count + ") took " +
-            //    (DateTime.Now - startWhen).TotalMilliseconds + " ms");
+            //Debug.WriteLine("GatherEntityCounts (start=" + startIndex + " end=" + endIndex +
+            //    " len=" + mMainWin.CodeDisplayList.Count +
+            //    ") took " + (DateTime.Now - startWhen).TotalMilliseconds + " ms");
 
             return new EntityCounts() {
                 mCodeLines = codeLines,
