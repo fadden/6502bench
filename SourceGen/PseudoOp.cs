@@ -165,19 +165,31 @@ namespace SourceGen {
             }
 
             /// <summary>
-            /// Merges the non-null, non-empty strings in "other" into this instance.
+            /// Merges the non-null, non-empty strings.
             /// </summary>
-            public void Merge(PseudoOpNames other) {
-                // Lots of fields, we don't do this often... use reflection.
-                Type type = GetType();
-                PropertyInfo[] props = type.GetProperties();
-                foreach (PropertyInfo pi in props) {
-                    string str = (string)pi.GetValue(other);
-                    if (string.IsNullOrEmpty(str)) {
+            public static PseudoOpNames Merge(PseudoOpNames basePon, PseudoOpNames newPon) {
+                Dictionary<string, string> baseDict = PropsToDict(basePon);
+                Dictionary<string, string> newDict = PropsToDict(newPon);
+
+                foreach (KeyValuePair<string, string> kvp in newDict) {
+                    if (string.IsNullOrEmpty(kvp.Value)) {
                         continue;
                     }
-                    pi.SetValue(this, str);
+                    baseDict[kvp.Key] = kvp.Value;
                 }
+
+                return new PseudoOpNames(baseDict);
+            }
+
+            private static Dictionary<string, string> PropsToDict(PseudoOpNames pon) {
+                Dictionary<string, string> dict = new Dictionary<string, string>();
+                foreach (PropertyInfo prop in pon.GetType().GetProperties()) {
+                    string value = (string)prop.GetValue(pon);
+                    if (!string.IsNullOrEmpty(value)) {
+                        dict[prop.Name] = value;
+                    }
+                }
+                return dict;
             }
 
             public string Serialize() {
@@ -185,15 +197,7 @@ namespace SourceGen {
                 // which means a lot of double-quote escaping.  We could do something here
                 // that stored more nicely but it doesn't seem worth the effort.
                 JavaScriptSerializer ser = new JavaScriptSerializer();
-
-                Dictionary<string, string> dict = new Dictionary<string, string>();
-                foreach (PropertyInfo prop in GetType().GetProperties()) {
-                    string value = (string)prop.GetValue(this);
-                    if (!string.IsNullOrEmpty(value)) {
-                        dict[prop.Name] = value;
-                    }
-                }
-
+                Dictionary<string, string> dict = PropsToDict(this);
                 return ser.Serialize(dict);
             }
 

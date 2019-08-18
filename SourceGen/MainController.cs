@@ -462,7 +462,7 @@ namespace SourceGen {
             if (!string.IsNullOrEmpty(pseudoCereal)) {
                 PseudoOp.PseudoOpNames deser = PseudoOp.PseudoOpNames.Deserialize(pseudoCereal);
                 if (deser != null) {
-                    mPseudoOpNames.Merge(deser);
+                    mPseudoOpNames = PseudoOp.PseudoOpNames.Merge(mPseudoOpNames, deser);
                 }
             }
 
