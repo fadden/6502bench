@@ -5,7 +5,9 @@
 
         !text   "low ASCII str"
         !byte   $80
-        !hex    e8e9e7e8a0c1d3c3c9c9a0f3f4f2
+        !xor    $80 {
+        !text   "high ASCII str"
+        }
         !byte   $80
         !text   "'low'quoted",$22,"''text"
         !byte   $80
@@ -42,13 +44,20 @@
         !text   "0123456789012345678901234567890123456789012345678901678901",$22
         !text   $22,$22
         !byte   $81
-        !fill   62,$aa
+        !xor    $80 {
+        !text   "**************************************************************"
+        }
         !byte   $80
-        !fill   96,$aa
+        !xor    $80 {
+        !text   "**************************************************************"
+        !text   "**********************************"
+        }
         !byte   $81
         !text   "ver IICSA wol"
         !byte   $80
-        !hex    f6e5f2a0c9c9c3d3c1a0e8e7e9e8
+        !xor    $80 {
+        !text   "ver IICSA hgih"
+        }
         !byte   $80
         !text   ".eeht rof sllot ti ;sllot lleb eht mohw rof wonk ot dnes reven"
         !text   " erofereht dna ,dniknam ni devlovni ma I esuaceb ,em sehsinimi"

@@ -45,7 +45,9 @@
         !byte   $00,$45
         !byte   $80
         !text   "low ASCII str"
-        !hex    e8e9e7e8a0c1d3c3c9c9a0f3f4f2
+        !xor    $80 {
+        !text   "high ASCII str"
+        }
         !byte   $80
         !pet    "PETSCII str"
         !byte   $80

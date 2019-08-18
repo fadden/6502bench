@@ -549,10 +549,9 @@ namespace SourceGen.AsmGen {
                     charConv = CharEncoding.ConvertAscii;
                     break;
                 case FormatDescriptor.SubType.HighAscii:
-                    // Can't !xor the output, because while it works for string data it
-                    // also flips the high bits on unprintable bytes output as raw hex.
-                    OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
-                    return;
+                    opcodeStr = sDataOpNames.StrGeneric;
+                    charConv = CharEncoding.ConvertHighAscii;
+                    break;
                 case FormatDescriptor.SubType.C64Petscii:
                     opcodeStr = "!pet";
                     charConv = CharEncoding.ConvertC64Petscii;
@@ -595,16 +594,23 @@ namespace SourceGen.AsmGen {
             stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 
-            //if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
-            //    OutputLine(string.Empty, "!xor", "$80 {", string.Empty);
-            //}
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii && stropf.HasEscapedText) {
+                // Can't !xor the output, because while it works for string data it
+                // also flips the high bits on the unprintable bytes we output as raw hex.
+                OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                return;
+            }
+
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+                OutputLine(string.Empty, "!xor", "$80 {", string.Empty);
+            }
             foreach (string str in stropf.Lines) {
                 OutputLine(labelStr, opcodeStr, str, commentStr);
                 labelStr = commentStr = string.Empty;       // only show on first
             }
-            //if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
-            //    OutputLine(string.Empty, "}", string.Empty, string.Empty);
-            //}
+            if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+                OutputLine(string.Empty, "}", string.Empty, string.Empty);
+            }
         }
     }
 
