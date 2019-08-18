@@ -100,8 +100,8 @@ feature is still evolving, and the interfaces may change significantly
 in the near future.</b></p>
 
 <p>The current interfaces can be used to identify inline data that follows
-JSR/JSL instructions, and to format operands.  The latter can be useful for
-replacing immediate load operands with symbolic constants.</p>
+JSR, JSL, or BRK instructions, and to format operands.  The latter can be
+useful for replacing immediate load operands with symbolic constants.</p>
 
 <p>Scripts may be loaded from the RuntimeData directory, or from the directory
 where the project file lives.  Attempts to load them from other locations
@@ -160,8 +160,8 @@ to data files.)</p>
 be used as a malware vector, so there's no value in forcing scripts to
 execute in an isolated server process, or to jump through the other hoops
 required to really lock things down.  I do believe there's value in
-defining the API in such a way that we *could* implement full security if
-circumstances change, so I'm using app domains as a way to keep everybody
+defining the API in such a way that we <b>could</b> implement full security if
+circumstances change, so I'm using app domains as a way to keep the API
 honest.</p>
 
 

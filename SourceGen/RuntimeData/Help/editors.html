@@ -53,8 +53,10 @@ be imported by other projects (see
 
 <h2><a name="operand">Edit Instruction Operand</a></h2>
 <p>Operands can be displayed in a variety of numeric formats, or as a
-symbol.  The ASCII character format is only available for operands
-whose value falls into the range of low- or high-ASCII characters.</p>
+symbol.  The character formats are only available for operands
+whose value falls into the proper range.  The ASCII format handles
+both plain and high ASCII; the correct encoding is chosen based on
+the character data.</p>
 <p>Symbols may be used in their entirety, or shifted and masked.
 The low / high / bank selector determines which byte is used as the
 low byte.  For 16-bit operands, this acts as a shift rather than a byte
@@ -87,14 +89,14 @@ be used twice, adjusted if necessary.  (This may be addressed in a
 future release.)</p>
 
 
-<h2><a name="data">Edit Data Format</a></h2>
+<h2><a name="data">Edit Data Operand</a></h2>
 <p>This dialog offers a variety of choices, and can be used to apply a
-format to a range of offsets.  You must select all of the bytes you want
+format to multiple lines.  You must select all of the bytes you want
 to format.  For example, to format two bytes as a 16-bit word, you must
 select both bytes in the editor.  (If you click on the first item, then
 Shift+double-click on the operand field of the last item, you can do
 this very quickly.)  The selection does not need to be contiguous: you
-can use Control+click to select scattered items.)</p>
+can use Control+click to select scattered items.</p>
 <p>If the range is discontiguous, or crosses a visual boundary
 such as a change in address, a user-specified label, or a long comment
 or note, the selection will be split into smaller regions.  A message at the
@@ -125,11 +127,18 @@ same value.</p>
 
 <p>The "String" items are enabled or disabled depending on whether the
 data you have selected is in the appropriate format.  For example,
-"Null-terminated strings" is only enabled if the data is exclusively
-ASCII characters followed by $00.  Zero-length strings are allowed,
-but only if some non-zero-length strings are present.</p>
-<p>Standard ASCII and "high ASCII" are both supported, but strings must
-be composed exclusively of one or the other.</p>
+"Null-terminated strings" is only enabled if the data regions are
+composed entirely of characters followed by $00.  Zero-length strings
+are allowed, but only if some non-zero-length strings are present.</p>
+<p>The character encoding can be selected, offering a choice between
+plain ASCII, low + high ASCII, C64 PETSCII, and C64 screen codes.  When
+you change the encoding, your available options may change.  The
+low + high ASCII setting will accept both, configuring the appropriate
+encoding based on the data values, but when identifying multiple strings
+it requires that each individual string be entirely one or the other.</p>
+<p>Due to fundamental limitations of the character sets, C64 PETSCII
+does not support DCI, and C64 screen code strings cannot be null
+terminated.</p>
 
 <p>To avoid burying a label in the middle of a data item, contiguous areas
 are split at labels.  This can sometimes have unexpected effects.  For
@@ -165,9 +174,6 @@ CODE     LDA     LABEL+2
 
 
 <h2><a name="comment">Edit Comment</a></h2>
-<p>NOTE: the shortcut for Edit Comment is Ctrl+; (semicolon).  For some
-reason Windows likes to show this as "Ctrl+Oem1".</p>
-
 <p>Enter an end-of-line (EOL) comment, or leave the text field blank to
 delete it.  EOL comments may be placed on instruction and data lines, but
 not on assembler directives.</p>
@@ -179,9 +185,9 @@ If this isn't a concern, you can enter any characters you like.</p>
 want to limit the overall length if you're hoping to create 80-column
 output.  Some retro assemblers may have hard line length limitations,
 which could result in the comment being truncated in generated sources.</p>
-<p>A semicolon (';') is placed at the start of the line.  If an assembler
+<p>A semicolon (';') is placed at the start of the comment.  If an assembler
 has different conventions, a different delimiter character may be used.  You
-don't need to include a semicolon in the comment field.</p>
+don't need to include a delimiter explicitly in the comment field.</p>
 
 <p>Comments on platform symbols are read from the platform symbol file, and
 cannot be edited from within SourceGen.  Comments on project symbols are
@@ -238,7 +244,7 @@ to the note in the code list and in the "Notes" window.</p>
 <a href="intro.html#about-symbols">All About Symbols</a>), and must
 not have the same name as another project symbol.  It can overlap
 with platform symbols and user labels.</p>
-<p>The value may be entered in decimal, hexadecimal, or binary.  The
+<p>The value may be entered in decimal, hexadecimal, or binary.  The numeric
 base you choose will be remembered, so that the value will be displayed
 the same way when used in a .EQ directive.</p>
 <p>If you enter a comment, it will be placed at the end of the line of

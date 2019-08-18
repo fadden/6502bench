@@ -310,7 +310,7 @@ land in the middle of an instruction are always adjusted backward to
 the instruction start.  This is necessary because labels are only visible
 if they're associated with the first (opcode) byte of an instruction.</p>
 
-<p>The uncategorized data analyzer tries to find ASCII strings and
+<p>The uncategorized data analyzer tries to find character strings and
 opportunities to use the ".FILL" operation.  It breaks the file into
 pieces, where contiguous regions hold nothing but data, are not split
 across a ".ORG" directive, are not interrupted by data, and do not

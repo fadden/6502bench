@@ -23,14 +23,14 @@ project properties.</p>
 
 <p>Application settings are stored in a file called "SourceGen-settings"
 in the SourceGen installation directory.  If the file is missing or
-corrupted, some default settings will be used.  These settings are local
+corrupted, default settings will be used.  These settings are local
 to your system, and include everything from window sizes to whether or not
 you prefer hexadecimal values to be shown in upper case.  None of them
 affect the way the project analyzes code and data, though they may affect
 the way generated assembly sources look.</p>
 
-<p>The settings editor is divided into four tabs.  Changes aren't pushed
-out to the main application until you hit Apply or OK.</p>
+<p>The settings editor is divided into four tabs.  Changes don't take
+effect until you hit Apply or OK.</p>
 
 
 <h3><a name="appset-codeview">Code View</a></h3>
@@ -40,18 +40,18 @@ out to the main application until you hit Apply or OK.</p>
 <p>Click the Column Visibility buttons to hide columns.  Click them
 again to restore the column to a width appropriate for the current font.
 A "hidden" column just has a width of zero, so with careful mouse
-positioning you can show and hide columns from the code list.  The buttons
-may be more convenient though.</p>
+positioning you can show and hide columns by dragging the column headers.
+The buttons may be more convenient though.</p>
 
-<p>You can select a different font for the code list.  Make it as large
-or small as you want.  Mono-space fonts like Courier or Consolas are
+<p>You can select a different font for the code list, and make it as large
+or as small as you want.  Mono-space fonts like Courier or Consolas are
 recommended (and will be the only ones shown).</p>
 
 <p>You can choose to display different parts of the display in upper or
 lower case, using the "all lower" and "all upper" buttons as a quick way
-to set all values.  These values are also used for generated assembly
-code.  Note that labels are case-sensitive and can't be forced one way
-or the other.</p>
+to set all values.  These settings are also used for generated assembly
+code, unless the assembler has specific case-sensitivity requirements.  There
+is no setting for labels, which are always case-sensitive.</p>
 
 <p>The Clipboard drop-down list lets you choose the format for text
 <a href="mainwin.html#clipboard">copied to the clipboard</a>.  The
@@ -65,6 +65,32 @@ to spaced (<code>20 ed fd</code>).  This also affects the way the
 "Disassembly" copy &amp; paste format looks.</p>
 
 
+<h3><a name="appset-textdelim">Text Delimiters</a></h3>
+
+<p>Character and string operands are shown surrounded by quotes, e.g.
+<code>LDA #'*'</code> or <code>.STR "Hello, world!"</code>.  It's
+handy to be able to tell at a glance how characters are encoded, so
+SourceGen allows you to set the delimiters independently for every
+supported character encoding.</p>
+<p>String operands may contain a mixture of text and hexadecimal values.
+For example, in ASCII data, the control characters for linefeed and
+carriage return ($0a and $0d) are considered part of the string, but
+don't have a printable symbol.  (Unicode defines some glpyhs, but they
+don't look very good at smaller font sizes.)</p>
+<p>If one of the delimiter characters appears in the string itself,
+the character will be output as hex to avoid confusion.  For this
+reason, it's generally wise to use delimiter characters that aren't
+part of the ASCII character set.  The "Sample Characters" box holds some
+characters that you can copy and paste (with Ctrl+C / Ctrl+V) into the
+delimiter fields.</p>
+<p>For character operands, the prefix and suffix are added to the start
+and end of the operand.  For string operands, the prefix is added to the
+start of the first line, and suffixes aren't allowed.
+<p>These options change the way the code list looks on screen.  They
+do not affect generated code, which must use the delimiter characters
+specified by the assembler.</p>
+
+
 <h3><a name="appset-asmconfig">Asm Config</a></h3>
 
 <p>These settings configure cross-assemblers and modify assembly source
@@ -74,17 +100,17 @@ will initially contain assembler-specific default values.  All of
 the values in the Assembler Configuration box may be configured
 differently for each assembler.</p>
 <p>The "executable" box holds the full path to the cross-assembler
-executable.
-For cc65 this is <code>bin/cl65.exe</code>,
-for Merlin32 you need <code>Merlin32.exe</code>,
-for 64tass it's <code>64tass.exe</code>.
-(On non-Windows platforms, you won't need the ".exe".)  For cc65 you need
-a full installation, with the configuration files and libraries, not just
-the cl65 binary alone.</p>
+executable.</p>
+<ul>
+  <li>64tass: <code>64tass.exe</code>
+  <li>ACME: <code>acme.exe</code>
+  <li>cc65: <code>bin/cl65.exe</code> -- full installation required,
+    with all configuration files and libraries
+  <li>Merlin 32: <code>Merlin32.exe</code>
+</ul>
 <p>The "column widths" section allows you to specify the width of the
 label, opcode, operand, and comment fields.  If the width is less than 1,
-or isn't a valid number, 1 will be used.  (Note: the comment width isn't
-used at this time.)</p>
+or isn't a valid number, 1 will be used.</p>
 
 <p>When "show cycle counts" is checked, every instruction line will have
 an end-of-line comment that indicates the number of cycles required for
@@ -132,7 +158,8 @@ you are most comfortable with.</p>
 
 <p>The "quick set" buttons configure the fields on this tab to match
 the conventions of the specified assembler.  Select your preferred assembler
-with the combox box, then click "set" to set the fields.</p>
+with the combox box, then click "set" to set the fields.  (64tass and
+ACME use the "common" expression style.)</p>
 
 
 <h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
@@ -195,12 +222,18 @@ entry point hint) will use this value.  This is chiefly of value for
 65816 code, where the initial value of the M/X/E flags is significant.</p>
 
 <p>If "analyze uncategorized data" is checked, SourceGen will attempt to
-identify strings and regions filled with a single byte value.  If it's
+identify character strings and regions that are filled with a repeated
+value.  If it's
 not checked, anything that isn't detected as code or explicitly formatted
 will simply be shown as a byte value.</p>
 <p>If "seek nearby targets" is checked, the analyzer will try to use
 nearby labels for data loads and stores.</p>
-<p>The "minimum characters for string" setting determines how many
+<p>The "default text encoding" setting has two effects.  First, it
+specifies which character encoding to use when searching for strings in
+uncategorized data.  Second, if an assembler has a notion of preferred
+character encoding (e.g. you can default string operands to PETSCII),
+this setting will determine which encoding is preferred.</p>
+<p>The "min chars for string detection" setting determines how many
 ASCII characters need to appear consecutively for the data analyzer to
 declare it a string.  Shorter values are prone to false-positive
 identifications, longer values miss out on short strings.  You can also
@@ -253,10 +286,8 @@ you will receive a warning.</p>
 
 <h3><a name="projprop-extscripts">Extension Scripts</a></h3>
 <p>From here, you can add and remove extension script files.
-See the <a href="intro.html#scripts">extension scripts</a> section for
-an overview of how extension scripts work.
-There's a more detailed document in the RuntimeData directory
-("ExtensionScripts.md").</p>
+See the <a href="advanced.html#scripts">extension scripts</a> section for
+details on how extension scripts work.</p>
 
 
 <p>Extension script files must live in the RuntimeData directory that comes

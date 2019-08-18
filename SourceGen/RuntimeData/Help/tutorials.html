@@ -264,15 +264,15 @@ label to "STR1".  Move up a bit and select address $2030, then scroll to
 the bottom and shift-click address $2070.  Select Actions &gt; Edit Operand.
 At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
-two separate regions.  Select "mixed ASCII and non-ASCII", then click
-"OK".</p>
+two separate regions.  Select "Low or High ASCII" encoding, select the
+"mixed character and non-character" string type, then click "OK".</p>
 <p>We now have two ".STR" lines, one for "string zero  ", and one with the
 STR1 label and the rest of the string data.  This is okay, but it's not
 really what we want.  The code at $200B appears to be loading a 16-bit
 address from data at $2025, so we want to use that if we can.</p>
 <p>Select Edit &gt; Undo three times.  You should be back to the state where
-there's a single ".STR" line at the bottom, split across two lines with
-a '+'.</p>
+there's a single ".STR" line at the bottom of the file, split across two
+lines with a '+'.</p>
 <p>Select the line at $2026.  This is currently formatted as a string,
 but that appears to be incorrect, so let's format it as individual bytes
 instead.  There's an easy way to do that: use Actions &gt; Toggle Single-Byte

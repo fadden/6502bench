@@ -11,31 +11,34 @@
 <body>
 <div id="content">
 <h1>6502bench SourceGen</h1>
-<p>SourceGen is an interactive disassembler for 6502, 65C02, 65802,
+<p>SourceGen is an interactive disassembler for 6502, 65C02,
 and 65816 code.  The official web site is
 <a href="https://6502bench.com/">https://6502bench.com/</a>.</p>
 
 <p>If you want to dive right in, try the
-<a href="tutorials.html">Tutorials</a>.</p>
+<a href="tutorials.html">tutorials</a>.</p>
 
 <h2>Contents</h2>
 <ul>
   <li><a href="intro.html">Overview</a>
   <ul>
     <li><a href="intro.html#fundamental-concepts">Fundamental Concepts</a></li>
-    <li><a href="intro.html#begin">About 6502 Code</a></li>
+    <li><a href="intro.html#begin">About 6502 Code</a>
+      <ul>
+        <li><a href="intro.html#charenc">Character Encoding</a></li>
+      </ul></li>
     <li><a href="intro.html#sgintro">How SourceGen Works</a>
-    <ul>
-      <li><a href="intro.html#scripts">Extension Scripts</a></li>
-      <li><a href="intro.html#hints">Analyzer Hints</a></li>
-    </ul></li>
+      <ul>
+        <li><a href="intro.html#scripts">Extension Scripts</a></li>
+        <li><a href="intro.html#hints">Analyzer Hints</a></li>
+      </ul></li>
     <li><a href="intro.html#sgconcepts">SourceGen Concepts</a></li>
     <li><a href="intro.html#about-symbols">All About Symbols</a>
-    <ul>
-      <li><a href="intro.html#weak-refs">Weak References</a></li>
-      <li><a href="intro.html#symbol-parts">Parts and Adjustments</a></li>
-      <li><a href="intro.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
-    </ul></li>
+      <ul>
+        <li><a href="intro.html#weak-refs">Weak References</a></li>
+        <li><a href="intro.html#symbol-parts">Parts and Adjustments</a></li>
+        <li><a href="intro.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
+      </ul></li>
     <li><a href="intro.html#width-disambiguation">Width Disambiguation</a></li>
     <li><a href="intro.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
   </ul></li>
@@ -89,6 +92,7 @@ and 65816 code.  The official web site is
     <li><a href="codegen.html#quirks">Assembler-Specific Bugs &amp; Quirks</a>
     <ul>
       <li><a href="codegen.html#64tass">64tass</a></li>
+      <li><a href="codegen.html#acme">ACME</a></li>
       <li><a href="codegen.html#cc65">cc65</a></li>
       <li><a href="codegen.html#merlin32">Merlin 32</a></li>
     </ul></li>
@@ -99,6 +103,7 @@ and 65816 code.  The official web site is
     <li><a href="settings.html#app-settings">Application Settings</a>
     <ul>
       <li><a href="settings.html#appset-codeview">Code View</a></li>
+      <li><a href="settings.html#appset-textdelim">Text Delimiters</a></li>
       <li><a href="settings.html#appset-asmconfig">Asm Config</a></li>
       <li><a href="settings.html#appset-displayformat">Display Format</a></li>
       <li><a href="settings.html#appset-pseudoop">Pseudo-Op</a></li>

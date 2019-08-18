@@ -147,7 +147,7 @@ to select an item, ctrl-left-click to toggle individual items on and
 off, and shift-left-click to select a range.  You can select all lines
 with Edit &gt; Select All.  Resize columns by
 left-clicking on the divider in the header and dragging it.</p>
-<p>Multi-line items, such as long comments or ASCII strings, are
+<p>Multi-line items, such as long comments or character strings, are
 selected as a whole when any part is selected.</p>
 
 <p>Right-clicking opens a menu.  The contents are the same as those in
@@ -309,7 +309,7 @@ the Remove Hints menu item will remove hints from every byte.</p>
 
 <p>If you're having a hard time selecting just the right bytes because
 the instructions are caught up in a multi-byte data item, such as an
-auto-detected ASCII string, you can disable uncategorized data analysis
+auto-detected character string, you can disable uncategorized data analysis
 (the thing that creates the .STR and .FILL ops for you).  You can do this
 from the
 <a href="settings.html#project-properties">project properties</a> editor,
@@ -442,7 +442,7 @@ what splits a region), or is the last byte in the file.</p>
 
 <p>This menu item is in the Edit menu, and acts as a shortcut to opening
 the Project Properties editor, and clicking on the "Analyze Uncategorized
-Data" checkbox.  When enabled, SourceGen will look for ASCII strings and
+Data" checkbox.  When enabled, SourceGen will look for character strings and
 regions of identical bytes, and generate .STR and .FILL directives.  When
 disabled, uncategorized data is presented as one byte per line, which can
 be handy if you're trying to get at a byte in the middle of a string.</p>

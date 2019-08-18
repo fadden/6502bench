@@ -21,7 +21,7 @@ assembly-language source.</p>
 <p>SourceGen has two purposes.  The first is to be a really nice
 disassembler for the 6502 and related CPUs.  Code tracing with status
 flag tracking makes it easier to separate the code from the data,
-automatic formatting of ASCII strings and filled-data areas helps
+automatic formatting of character strings and filled-data areas helps
 get the data regions sorted out, and modern IDE-style features like
 cross-reference generation and color-highlighted bookmarks help
 navigate the code while trying to figure out what it does.  A
@@ -86,7 +86,7 @@ Variables and constants may be single-byte or multi-byte, the latter
 typically in little-endian byte order.</p>
 
 <p>Much of the data in a typical program is read-only, often in the
-form of graphics or ASCII string data.  Graphics can be difficult
+form of graphics or character string data.  Graphics can be difficult
 to recognize automatically, but strings can be identified with a
 reasonable degree of confidence.  Address tables, which are a collection
 of addresses to other things, are also fairly common.</p>
@@ -144,6 +144,34 @@ instructions.  If you don't know what state the flags are in, you can't
 know whether <code>LDA #value</code> is two bytes or three, and the
 disassembly of the instruction stream will come out wrong.</p>
 
+<h3><a name="charenc">Character Encoding</a></h3>
+
+<p>The American Standard Code for Information Interchange (ASCII) was
+developed in the 1960s, and became widely used as the means for representing
+text data on a computer.  It's compatible with Unicode, in that the
+binary representation of an ASCII string is exactly the same when
+expressed as a Unicode string with UTF-8 encoding.</p>
+<p>Not all 6502-based computers used ASCII, notably those from Commodore
+International (e.g. PET, VIC-20, 64, 128), which used variants
+collectively known as "PETSCII".  PETSCII had most of the same symbols,
+but rearranged them, and added a number of graphical symbols.  This was
+further complicated by the use of two different character sets, one of
+which dropped lower-case letters in favor of additional symbols, and
+the use of a separate encoding for characters stored in the text frame
+buffer ("screen codes").</p>
+<p>Apple II computers were based on ASCII, but tended to store bytes
+with the high bit set rather than clear.  This is known as "high ASCII".</p>
+
+<p>SourceGen allows you to specify that a string is encoded with ASCII,
+High ASCII, C64 PETSCII, or C64 Screen Codes.  Because the goal is to
+generate assembly sources for cross-assemblers, the C64 character
+support is limited to the set that overlaps with ASCII.</p>
+<p>For the most part only printable characters are accepted in strings,
+but certain control characters are also allowed.  The characters for
+bell ($07), linefeed ($0a), and carriage return ($0d) are recognized as
+string data, and in C64 PETSCII a number of text color and formatting
+control codes are also allowed.</p>
+
 
 <h2><a name="sgintro">How SourceGen Works</a></h2>
 
@@ -184,8 +212,8 @@ executed by SourceGen.  They can be added to a project from SourceGen's
 runtime data directory, or can live in the directory next to the project
 file.</p>
 <p>In the current implementation, scripts are only called to examine
-JSR/JSL instructions.  They can format nearby bytes as inline data, or
-apply symbols to operands.</p>
+JSR, JSL, and BRK instructions.  They can format nearby bytes as inline
+data, or apply symbols to operands.</p>
 
 <p>To reduce the chances of a script causing problems, all scripts are
 executed in a sandbox with severely restricted access.  Notably, nothing
@@ -196,6 +224,8 @@ contains all of the compiled script DLLs, as well as two pre-built
 application DLLs that plugins are allowed access to.  The contents
 are persistent, to avoid recompiling the scripts every time SourceGen
 is launched, but may be manually deleted without harm.</p>
+<p>More details can be found in the
+<a href="advanced.html#extension-scripts">advanced topics</a> section.</p>
 
 
 <h3><a name="hints">Analyzer Hints</a></h3>
@@ -690,12 +720,12 @@ represent hundreds of bytes and span multiple lines.</p>
   <li>.BULK - data packed in as compact a form as the assembler allows.
     Useful for chunks of graphics data.</li>
   <li>.FILL - a series of identical bytes.  The operand
-    is the byte count, followed by the byte value.</li>
+    has two parts, the byte count followed by the byte value.</li>
 </ul>
 
 <p>In addition, several pseudo-ops are defined for string constants:</p>
 <ul>
-  <li>.STR - basic ASCII string.</li>
+  <li>.STR - basic character string.</li>
   <li>.RSTR - string in reverse order.</li>
   <li>.ZSTR - null-terminated string.</li>
   <li>.DSTR - Dextral Character Inverted string.  The high bit of the
@@ -704,12 +734,17 @@ represent hundreds of bytes and span multiple lines.</p>
   <li>.L2STR - string prefixed with a length word.</li>
 </ul>
 
-<p>If the characters have their high bits set -- commonly referred to
-as "high ASCII" -- an upward arrow will be added to the pseudo-op.  How
-these strings are generated into assembly source varies.</p>
-<p>You can configure these to look more like what your favorite assembler
-uses in the
-<a href="settings.html#app-settings">application settings</a>.</p>
+<p>You can configure the pseudo-operands to look more like what your
+favorite assembler uses in the
+<a href="settings.html#appset-pseudoop">Pseudo-Op</a> tab in the
+application settings.</p>
+
+<p>String constants start and end with delimiter characters, typically
+single or double quotes.  You can configure the delimiters differently
+for each character encoding, so that it's obvious whether the text is
+in ASCII or PETSCII.  See the
+<a href="settings.html#appset-textdelim">Text Delimiters</a> tab in
+the application settings.</p>
 
 
 </div>
