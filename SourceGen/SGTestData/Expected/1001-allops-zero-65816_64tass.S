@@ -20,7 +20,7 @@
         .byte   $00
 
 L101F   ora     ($00,x)
-        .byte   $02,$00
+        cop     #$00
         ora     $00,s
         tsb     $00
         ora     $00

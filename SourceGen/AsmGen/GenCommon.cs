@@ -267,6 +267,11 @@ namespace SourceGen.AsmGen {
             }
             string operandStr = formatter.FormatOperand(op, formattedOperand, wdis);
 
+            if (gen.Quirks.StackIntOperandIsImmediate && op.AddrMode == OpDef.AddressMode.StackInt) {
+                // COP $02 is standard, but some require COP #$02
+                operandStr = '#' + operandStr;
+            }
+
             string eolComment = proj.Comments[offset];
             if (doAddCycles) {
                 bool branchCross = (attr.Address & 0xff00) != (operandForSymbol & 0xff00);

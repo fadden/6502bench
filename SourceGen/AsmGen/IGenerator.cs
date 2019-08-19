@@ -179,6 +179,11 @@ namespace SourceGen.AsmGen {
         public bool BlockMoveArgsNoHash { get; set; }
 
         /// <summary>
+        /// Do 8-bit constant args to StackInt ops (BRK/COP) require a leading '#'?
+        /// </summary>
+        public bool StackIntOperandIsImmediate { get; set; }
+
+        /// <summary>
         /// Does the assembler configure assembler widths based on SEP/REP, but doesn't
         /// track the emulation bit?
         /// </summary>

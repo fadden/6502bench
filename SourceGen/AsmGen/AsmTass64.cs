@@ -153,6 +153,7 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
+            Quirks.StackIntOperandIsImmediate = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
@@ -326,8 +327,8 @@ namespace SourceGen.AsmGen {
                     return null;
                 }
             }
-            if (op == OpDef.OpCOP_StackInt || op == OpDef.OpWDM_WDM) {
-                // 64tass doesn't like these to have an operand.  Output as hex.
+            if (op == OpDef.OpWDM_WDM) {
+                // 64tass v1.54 doesn't like this to have an operand.  Output as hex.
                 return null;
             }
             return string.Empty;        // indicate original is fine

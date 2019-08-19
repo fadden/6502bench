@@ -20,7 +20,7 @@
         .byte   $ff
 
 L101F   ora     ($ff,x)
-        .byte   $02,$ff
+        cop     #$ff
         ora     $ff,s
         tsb     $ff
         ora     $ff
