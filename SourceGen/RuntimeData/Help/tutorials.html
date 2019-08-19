@@ -101,8 +101,8 @@ the operand itself opens a format editor; more on that later.)</p>
 References window.  Note the selection jumps to L1002.  You can immediately
 jump to any reference.</p>
 <p>At the top of the Symbols window on the right side of the screen is a
-row of buttons.  Make sure "Auto" is selected.  You should see three
-labels in the window (L1002, L1014, L1017).  Double-click on L1014.  The
+row of buttons.  Make sure "Auto" and "Addr" are selected.  You should see
+three labels in the window (L1002, L1014, L1017).  Double-click on L1014.  The
 selection jumps to the appropriate line.</p>
 
 <p>Select Edit &gt; Find.  Type "hello", and hit Enter.  The selection will
@@ -245,18 +245,18 @@ does it.  The difference can be noted in the Info window.)</p>
 <h3>Editing Data Operands</h3>
 
 <p>There's some string and numeric data down at the bottom of the file.  The
-final string appears to be multiple strings stuck together.  Notice that
-the opcode for the very last line is '+', which means it's a continuation
-of the previous line.  Long data items can span multiple lines, split
-every 64 characters (including delimiters), but they are still single
-items: selecting any part selects the whole.</p>
-<p>Select the last line, then Actions &gt; Edit Operand.  You'll notice
-that this dialog is much different from the one you got when editing the
-operand of an instruction.  At the top it will say "65 bytes selected".  You
-can format this
-as a single 65-byte string, as 65 individual items, or various things
-in between.  For now, select "Single bytes", and then on the right,
-select "ASCII".  Click "OK".</p>
+final string appears to be multiple strings stuck together.  (You may need
+to increase the width of the Operand column to see the whole thing.)  Notice
+that the opcode for the very last line is '+', which means it's a
+continuation of the previous line.  Long data items can span multiple
+lines, split every 64 characters (including delimiters), but they are
+still single items: selecting any part selects the whole.</p>
+<p>Select the last line in the file, then Actions &gt; Edit Operand.  You'll
+notice that this dialog is much different from the one you got when editing
+the operand of an instruction.  At the top it will say "65 bytes
+selected".  You can format this as a single 65-byte string, as 65 individual
+items, or various things in between.  For now, select "Single bytes", and
+then on the right, select "ASCII (low or high) character".  Click "OK".</p>
 <p>Each character is now on its own line.  The selection still spans the
 same set of addresses.</p>
 <p>Select address $203D on its own, then Actions &gt; Edit Label.  Set the
@@ -345,13 +345,14 @@ tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
 directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
 click Open.  Click OK to close the project properties window.</p>
 <p>The STA instructions now reference <code>AMPERV</code>, which is noted
-as a call vector.  We can see the code setting up a jump to $1d70.  As it
-happens, the start address of the code is $1d60 -- the last four digits of
-the filename -- so let's make that change.  Double-click the initial .ORG
-statement, and change it from $2000 to $1d60.  We can now see that $1d70
-starts right after this initial chunk of code.</p>
+as a call vector.  We can see the code setting up a jump (opcode $4c) to
+$1d70.  As it happens, the start address of the code is $1d60 -- the last
+four digits of the filename -- so let's make that change.  Double-click
+the initial .ORG statement, and change it from $2000 to $1d60.  We can now
+see that $1d70 starts right after this initial chunk of code.</p>
 
-<p>Select the line with address $1d70, then Actions &gt; Hint As Code Entry Point.
+<p>Select the line with address $1d70, then Actions &gt; Hint As Code
+Entry Point.
 More code appears, but not much -- if you scroll down you'll see that most
 of the file is still data.  The code at $1d70 searches through a table at
 $1d88 for a match with the contents of the accumulator.  If it finds a match,
@@ -360,7 +361,7 @@ and the JMPs away.  This code is pushing a return address onto the stack.
 When the code at CHRGET returns, it'll return to that address.  Because of
 a quirk of the 6502 architecture, the address pushed must be the target
 address minus one.</p>
-<p>The first byte in the first table at $1d97 (which has the auto-label
+<p>The first byte in the first address table at $1d97 (which has the auto-label
 L1D97) is $b4.  The first byte in the second table is $1d.  So the first
 address we want is $1db4 + 1 = $1db5.</p>
 <p>Select the line at $1db5, and use Actions &gt; Hint As Code Entry Point.
@@ -421,7 +422,7 @@ that looks for strings and .FILL regions, so now each uncategorized byte is
 on its own line.</p>
 <p>You could select the first two lines and use Actions &gt; Edit Operand
 to format them as a 16-bit little-endian hex value, but there's a shortcut:
-select the first line only, then Edit &gt; Format As Word (Ctrl+W).  It
+select only the first line of code, then Edit &gt; Format As Word (Ctrl+W).  It
 automatically grabbed the following byte and combined them.  Since we believe
 $2000 is the load address for everything that follows, click on the line
 with address $1002, select Actions &gt; Set Address, and enter "2000".  With
@@ -501,7 +502,7 @@ Asm Config tab.  Click the "Show cycle counts" checkbox, then click OK.</p>
 counts are adjusted for everything SourceGen can figure out.  For example,
 the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
 cycles but might take more.  That's because conditional branches take an
-extra cycles if the branch is taken.  The BNE on line $2061" shows 3 cycles,
+extra cycle if the branch is taken.  The BNE on line $2061" shows 3 cycles,
 because we know that the branch is always taken.  (If you want to see why,
 look at the value of the 'Z' flag in the "flags" column.  Lower-case 'z'
 means the zero-flag is clear.)</p>

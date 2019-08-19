@@ -133,7 +133,7 @@ code, but also needs to know how to handle the corner cases.</p>
 <ul>
   <li>Undocumented opcode <code>SHA (ZP),Y</code> ($93) is not supported;
     the assembler appears to be expecting <code>SHA ABS,X</code> instead.</li>
-  <li>COP and WDM are not allowed to have operands.</li>
+  <li>WDM is not supported.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -152,11 +152,13 @@ code, but also needs to know how to handle the corner cases.</p>
     as case-sensitive.  The <code>--case-sensitive</code> must be passed to
     the assembler.</li>
   <li>If you set the <code>--case-sensitive</code> flag, <b>all</b> opcodes
-    and operands must be lower-case.  Most of the SourceGen options used to
-    show things in upper case must be disabled.</li>
+    and operands must be lower-case.  Most of the SourceGen options that
+    cause things to appear in upper case must be disabled.</li>
   <li>For 65816, selecting the bank byte is done with the back-quote ('`')
     rather than the caret ('^').  (There's a note in the docs to the effect
     that they plan to move to carets.)</li>
+  <li>The arguments to COP and BRK require immediate-mode syntax
+    (<code>COP #$03</code> rather than <code>COP $03</code>).
   <li>By default, the assembler assumes that the input is PETSCII, but
     doesn't convert characters in text strings.  So PETSCII source files
     generate PETSCII strings, and ASCII source files generate ASCII
@@ -170,13 +172,11 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <p>Notes:</p>
 <ul>
-  <li>The "default text encoding" project property determines the text
-    encoding for the entire file.  For non-ASCII projects, a small
-    encoding table is output at the top of the file.  This works for
-    C64 PETSCII and C64 screen codes, but not for high ASCII.  This is
-    done without passing "--ascii" on the command line.  If the
-    source file is converted to PETSCII, the encoding table should be
-    removed.</li>
+  <li>The "default text encoding" project property is used by SourceGen
+    to set the text encoding for the entire source file.  For non-ASCII
+    projects, a small encoding table is generated at the top of the output.
+    This works for C64 PETSCII and C64 screen codes, but not for high
+    ASCII.  This is done without passing "--ascii" on the command line.</li>
 </ul>
 
 

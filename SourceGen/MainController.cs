@@ -292,6 +292,7 @@ namespace SourceGen {
             settings.SetBool(AppSettings.FMT_UPPER_OPERAND_A, true);
             settings.SetBool(AppSettings.FMT_UPPER_OPERAND_S, true);
             settings.SetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
+            settings.SetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, true);
             settings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, "l");
             settings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, "a:");
             settings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, "f:");
