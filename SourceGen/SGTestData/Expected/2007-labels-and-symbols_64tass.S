@@ -1,6 +1,8 @@
 ;Project was edited to add a label in the middle of a dense hex region, and add
 ;a duplicate label.
         .cpu    "65816"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 zip     =       $cd
 absl    =       $1029
 plataddr =      $3000      ;address only in platform file

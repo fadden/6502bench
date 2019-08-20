@@ -1,5 +1,7 @@
 ;Project file was edited to get zero-length strings and reverse DCI.
         .cpu    "6502"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 *       =       $1000
         rts
 

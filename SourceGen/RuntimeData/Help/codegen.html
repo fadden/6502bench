@@ -159,15 +159,14 @@ code, but also needs to know how to handle the corner cases.</p>
     that they plan to move to carets.)</li>
   <li>The arguments to COP and BRK require immediate-mode syntax
     (<code>COP #$03</code> rather than <code>COP $03</code>).
-  <li>By default, the assembler assumes that the input is PETSCII, but
-    doesn't convert characters in text strings.  So PETSCII source files
-    generate PETSCII strings, and ASCII source files generate ASCII
-    strings.  However, if you use the built-in "screen" encoding, you will
-    get the wrong behavior if you compile an ASCII source without the
-    "--ascii" command-line flag, because it expects to convert from
-    PETSCII.  To get the behavior expected of a cross-assembler, the
-    recommended approach seems to be to pass "--ascii" and explicitly
-    define an ASCII encoding for use with ASCII text strings.</li>
+  <li>For historical reasons, the default behavior of the assembler is to
+    assume that the source file is PETSCII, and the desired encoding for
+    strings is also PETSCII.  No character conversion is done, so anybody
+    assembling ASCII files will get ASCII strings (which works out pretty
+    well if you're assembling code for a non-Commodore target).  However,
+    the documentation says you're required to pass the "--ascii" flag when
+    the input is ASCII/UTF-8, so to build files that want ASCII operands
+    an explicit character encoding definition must be provided.</li>
 </ul>
 
 <p>Notes:</p>

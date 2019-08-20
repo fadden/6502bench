@@ -1,4 +1,6 @@
         .cpu    "65816"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 REALLYLONGLABELNAME = $8888 ;that's a long name
 
 *       =       $1000

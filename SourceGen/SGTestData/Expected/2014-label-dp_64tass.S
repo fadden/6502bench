@@ -1,5 +1,7 @@
 ;6502bench SourceGen v1.1.0-dev1
         .cpu    "65816"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 *       =       $1000
         .as
         .xs

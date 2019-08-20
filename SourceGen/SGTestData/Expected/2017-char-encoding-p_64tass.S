@@ -1,11 +1,5 @@
 ;Project edited to mark some non-ASCII operands as ASCII.
         .cpu    "65816"
-        .enc    sg_petscii
-        .cdef   " @", $20
-        .cdef   "AZ", $c1
-        .cdef   "az", $41
-        .cdef   "[[", $5b
-        .cdef   "]]", $5d
 *       =       $1000
         .as
         .xs

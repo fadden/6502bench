@@ -279,26 +279,30 @@ namespace SourceGen.AsmGen {
             TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
             switch (textMode) {
                 case TextScanMode.C64Petscii:
-                    OutputLine(string.Empty, ".enc", "sg_petscii", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\" @\", $20", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"AZ\", $c1", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"az\", $41", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"[[\", $5b", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"]]\", $5d", string.Empty);
+                    // With "--ascii", this is the default.
+                    //OutputLine(string.Empty, ".enc", "sg_petscii", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\" @\", $20", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"AZ\", $c1", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"az\", $41", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"[[\", $5b", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"]]\", $5d", string.Empty);
                     break;
                 case TextScanMode.C64ScreenCode:
-                    OutputLine(string.Empty, ".enc", "sg_screen", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\" ?\", $20", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"@@\", $00", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"AZ\", $41", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"az\", $01", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"[[\", $1b", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "\"]]\", $1d", string.Empty);
+                    // With "--ascii", we can use the built-in screen encoding.
+                    OutputLine(string.Empty, ".enc", "screen", string.Empty);
+                    //OutputLine(string.Empty, ".enc", "sg_screen", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\" ?\", $20", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"@@\", $00", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"AZ\", $41", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"az\", $01", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"[[\", $1b", string.Empty);
+                    //OutputLine(string.Empty, ".cdef", "\"]]\", $1d", string.Empty);
                     break;
                 case TextScanMode.LowAscii:
                 case TextScanMode.LowHighAscii:
                 default:
-                    // ASCII in, ASCII out
+                    OutputLine(string.Empty, ".enc", "sg_ascii", string.Empty);
+                    OutputLine(string.Empty, ".cdef", "$20,$7e,$20", string.Empty);
                     break;
             }
         }
@@ -718,11 +722,12 @@ namespace SourceGen.AsmGen {
     /// Cross-assembler execution interface.
     /// </summary>
     public class AsmTass64 : IAssembler {
-        // Standard options.  Note we're not using --ascii, which causes all character data
-        // to be converted to PETSCII by default.  By keeping things "raw" we can define our
-        // character encoding explicitly.  Anybody who wants to move the code to native
-        // assembly can generate for PETSCII and then just delete the sg_petscii .cdefs.
-        public const string OPTIONS = "--case-sensitive --nostart --long-address -Wall";
+        // Standard options.  For historical reasons the assembler expects PETSCII input by
+        // default, and requires "--ascii" for ASCII/UTF-8 input.  This flag switches the
+        // default "none" encoding from "raw" to something that converts characters to
+        // PETSCII, so if you want to output strings in another format (such as ASCII) an
+        // explicit encoding must be specified.
+        public const string OPTIONS = "--ascii --case-sensitive --nostart --long-address -Wall";
 
         // Paths from generator.
         private List<string> mPathNames;

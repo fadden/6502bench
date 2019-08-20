@@ -1,12 +1,6 @@
 ;Project edited to mark some non-ASCII operands as ASCII.
         .cpu    "65816"
-        .enc    sg_screen
-        .cdef   " ?", $20
-        .cdef   "@@", $00
-        .cdef   "AZ", $41
-        .cdef   "az", $01
-        .cdef   "[[", $1b
-        .cdef   "]]", $1d
+        .enc    screen
 *       =       $1000
         .as
         .xs

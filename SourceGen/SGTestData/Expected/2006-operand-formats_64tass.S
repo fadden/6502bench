@@ -1,5 +1,7 @@
 ;Project file was edited for some ASCII operands.
         .cpu    "65816"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 *       =       $1000
         .as
         .xs
