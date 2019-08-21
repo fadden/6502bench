@@ -499,6 +499,12 @@ namespace SourceGen {
             HasHashPrefix,      // operand has a leading '#', avoiding ambiguity in some cases
         }
 
+        /// <summary>
+        /// Converts a FormatDescriptor SubType to a CharEncoding.Encoding value.
+        /// </summary>
+        /// <param name="subType">FormatDescriptor sub-type.</param>
+        /// <returns>The corresponding CharEncoding.Encoding value, or Encoding.Unknown
+        ///   if the sub-type isn't a character encoding.</returns>
         public static CharEncoding.Encoding SubTypeToEnc(FormatDescriptor.SubType subType) {
             switch (subType) {
                 case FormatDescriptor.SubType.Ascii:

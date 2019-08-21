@@ -309,22 +309,6 @@ namespace SourceGen.AsmGen {
             }
         }
 
-        private CharEncoding.Encoding FormatDescriptorToCharEncoding(FormatDescriptor dfd) {
-            switch (dfd.FormatSubType) {
-                case FormatDescriptor.SubType.Ascii:
-                    return CharEncoding.Encoding.Ascii;
-                case FormatDescriptor.SubType.HighAscii:
-                    return CharEncoding.Encoding.HighAscii;
-                case FormatDescriptor.SubType.C64Petscii:
-                    return CharEncoding.Encoding.C64Petscii;
-                case FormatDescriptor.SubType.C64Screen:
-                    return CharEncoding.Encoding.C64ScreenCode;
-                case FormatDescriptor.SubType.ASCII_GENERIC:
-                default:
-                    return CharEncoding.Encoding.Unknown;
-            }
-        }
-
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
             if (op.IsUndocumented) {
@@ -358,7 +342,7 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void UpdateCharacterEncoding(FormatDescriptor dfd) {
-            CharEncoding.Encoding newEnc = FormatDescriptorToCharEncoding(dfd);
+            CharEncoding.Encoding newEnc = PseudoOp.SubTypeToEnc(dfd.FormatSubType);
             if (newEnc == CharEncoding.Encoding.Unknown) {
                 // probably not a character operand
                 return;
