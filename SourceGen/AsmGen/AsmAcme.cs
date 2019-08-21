@@ -573,7 +573,7 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.StringReverse:
                 case FormatDescriptor.Type.StringNullTerm:
                 case FormatDescriptor.Type.StringDci:
-                    // Last byte will be output as hex.
+                    // Last byte may be output as hex.
                     break;
                 case FormatDescriptor.Type.StringL8:
                     // Length byte will be output as hex.

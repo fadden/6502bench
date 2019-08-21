@@ -410,7 +410,11 @@ namespace SourceGen {
                     delDef = delSet.Get(CharEncoding.Encoding.HighAscii);
                     break;
                 case FormatDescriptor.SubType.C64Petscii:
-                    charConv = CharEncoding.ConvertC64Petscii;
+                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
+                        charConv = CharEncoding.ConvertLowAndHighC64Petscii;
+                    } else {
+                        charConv = CharEncoding.ConvertC64Petscii;
+                    }
                     delDef = delSet.Get(CharEncoding.Encoding.C64Petscii);
                     break;
                 case FormatDescriptor.SubType.C64Screen:

@@ -405,7 +405,7 @@ namespace SourceGen.WpfGui {
             radioStringNullTerm.IsEnabled = (scanMode != TextScanMode.C64ScreenCode);
             radioStringLen8.IsEnabled = true;
             radioStringLen16.IsEnabled = true;
-            radioStringDci.IsEnabled = (scanMode != TextScanMode.C64Petscii);
+            radioStringDci.IsEnabled = true;
 
             IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
             while (iter.MoveNext()) {

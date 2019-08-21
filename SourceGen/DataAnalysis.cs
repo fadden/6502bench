@@ -1044,7 +1044,8 @@ namespace SourceGen {
         /// that all strings have the same hi/lo pattern.
         /// </summary>
         /// <remarks>
-        /// Not useful for C64Petscii, which mixes high/low characters.
+        /// For C64Petscii, this will identify strings that are entirely in lower case except
+        /// for the last letteR, or vice-versa.
         /// </remarks>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>

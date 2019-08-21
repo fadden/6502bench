@@ -601,10 +601,7 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.SubType.C64Petscii:
                     if (textMode == TextScanMode.C64Petscii) {
                         charConv = CharEncoding.ConvertC64Petscii;
-                        // DCI not supported for PETSCII; make sure it doesn't get tried
-                        if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                            charConv = null;
-                        }
+                        dciConv = CharEncoding.ConvertLowAndHighC64Petscii;
                     }
                     break;
                 case FormatDescriptor.SubType.C64Screen:

@@ -217,6 +217,15 @@ namespace Asm65 {
         public static char ConvertC64Petscii(byte val) {
             return sPetsciiToUnicode[val];
         }
+        public static char ConvertLowAndHighC64Petscii(byte val) {
+            // This is an odd one.  Some programs use DCI with PETSCII, which means the
+            // string is allow lower case except for the last letteR.
+            //
+            // There's no such thing as "high PETSCII", in the same sense that ASCII or
+            // C64 screen codes have it, but I'm giving the method a similar name for
+            // the sake of consistency.
+            return ConvertC64Petscii((byte)(val & 0x7f));
+        }
 
         //
         // C64 Screen Codes

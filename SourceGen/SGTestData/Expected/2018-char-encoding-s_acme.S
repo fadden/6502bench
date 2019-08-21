@@ -103,7 +103,7 @@
         !byte   $84
         !pet    $14,$00,"PETSCII with length2"
         !byte   $84
-        !pet    "bad dcI"
+        !pet    "pet dcI"
         !byte   $84
         !scr    "edoC neercS esrever"
         !byte   $84
