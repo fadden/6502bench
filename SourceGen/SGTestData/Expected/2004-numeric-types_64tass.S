@@ -1,7 +1,5 @@
 ;Project file was edited to get all big-endian data types.
         .cpu    "6502"
-        .enc    sg_ascii
-        .cdef   $20,$7e,$20
 *       =       $1000
         rts
 

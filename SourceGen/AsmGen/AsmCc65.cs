@@ -346,6 +346,9 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
+        public void UpdateCharacterEncoding(FormatDescriptor dfd) { }
+
+        // IGenerator
         public void GenerateShortSequence(int offset, int length, out string opcode,
                 out string operand) {
             Debug.Assert(length >= 1 && length <= 4);

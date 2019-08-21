@@ -129,7 +129,12 @@ same value.</p>
 data you have selected is in the appropriate format.  For example,
 "Null-terminated strings" is only enabled if the data regions are
 composed entirely of characters followed by $00.  Zero-length strings
-are allowed, but only if some non-zero-length strings are present.</p>
+are allowed, but only if some non-zero-length strings are present.
+DCI (Dextral Character Inverted) strings have the high bit on the last
+byte flipped; for PETSCII this will usually look like a series of
+lower-case letters followed by a capital letter, but may look odd if the
+last character is punctuation (e.g. '!' becomes $A1, which is a
+rectangle character that SourceGen will only display as hex).</p>
 <p>The character encoding can be selected, offering a choice between
 plain ASCII, low + high ASCII, C64 PETSCII, and C64 screen codes.  When
 you change the encoding, your available options may change.  The
@@ -137,7 +142,7 @@ low + high ASCII setting will accept both, configuring the appropriate
 encoding based on the data values, but when identifying multiple strings
 it requires that each individual string be entirely one or the other.</p>
 <p>Due to fundamental limitations of the character set, C64 screen code
-strings cannot be null terminated.</p>
+strings cannot be null terminated ($00 is '@').</p>
 
 <p>To avoid burying a label in the middle of a data item, contiguous areas
 are split at labels.  This can sometimes have unexpected effects.  For

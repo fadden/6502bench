@@ -22,7 +22,6 @@ using System.Text;
 
 using Asm65;
 using CommonUtil;
-using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen.AsmGen {
     #region IGenerator
@@ -44,6 +43,8 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class GenTass64 : IGenerator {
         private const string ASM_FILE_SUFFIX = "_64tass.S"; // must start with underscore
+        private const string ASCII_ENC_NAME = "sg_ascii";
+        private const string HIGH_ASCII_ENC_NAME = "sg_hiascii";
         private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
@@ -100,6 +101,11 @@ namespace SourceGen.AsmGen {
         /// If we output a ".logical", we will need a ".here" eventually.
         /// </summary>
         private bool mNeedHereOp;
+
+        /// <summary>
+        /// What encoding are we currently set up for.
+        /// </summary>
+        private CharEncoding.Encoding mCurrentEncoding;
 
         /// <summary>
         /// Holds detected version of configured assembler.
@@ -203,28 +209,16 @@ namespace SourceGen.AsmGen {
             GenCommon.ConfigureFormatterFromSettings(Settings, ref config);
             SetFormatConfigValues(ref config);
 
-            // Configure delimiters for single-character operands.  The conversion mode we
-            // use is determined by the default text mode in the project properties.
-            Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
-            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
-            switch (textMode) {
-                case TextScanMode.C64Petscii:
-                    charSet.Set(CharEncoding.Encoding.C64Petscii,
-                        Formatter.SINGLE_QUOTE_DELIM);
-                    break;
-                case TextScanMode.C64ScreenCode:
-                    charSet.Set(CharEncoding.Encoding.C64ScreenCode,
-                        Formatter.SINGLE_QUOTE_DELIM);
-                    break;
-                case TextScanMode.LowAscii:
-                case TextScanMode.LowHighAscii:
-                default:
-                    charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
-                    charSet.Set(CharEncoding.Encoding.HighAscii,
-                        new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
-                    break;
-            }
-            config.mCharDelimiters = charSet;
+            // Configure delimiters for single-character operands.
+            Formatter.DelimiterSet charDelimSet = new Formatter.DelimiterSet();
+            charDelimSet.Set(CharEncoding.Encoding.C64Petscii, Formatter.SINGLE_QUOTE_DELIM);
+            charDelimSet.Set(CharEncoding.Encoding.C64ScreenCode, Formatter.SINGLE_QUOTE_DELIM);
+            charDelimSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
+            charDelimSet.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+
+            config.mCharDelimiters = charDelimSet;
+
             SourceFormatter = new Formatter(config);
 
             string msg = string.Format(Res.Strings.PROGRESS_GENERATING_FMT, pathName);
@@ -276,34 +270,58 @@ namespace SourceGen.AsmGen {
             OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(".cpu"),
                 '\"' + cpuStr + '\"', string.Empty);
 
-            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
-            switch (textMode) {
-                case TextScanMode.C64Petscii:
-                    // With "--ascii", this is the default.
-                    //OutputLine(string.Empty, ".enc", "sg_petscii", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\" @\", $20", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"AZ\", $c1", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"az\", $41", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"[[\", $5b", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"]]\", $5d", string.Empty);
-                    break;
-                case TextScanMode.C64ScreenCode:
-                    // With "--ascii", we can use the built-in screen encoding.
-                    OutputLine(string.Empty, ".enc", "screen", string.Empty);
-                    //OutputLine(string.Empty, ".enc", "sg_screen", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\" ?\", $20", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"@@\", $00", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"AZ\", $41", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"az\", $01", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"[[\", $1b", string.Empty);
-                    //OutputLine(string.Empty, ".cdef", "\"]]\", $1d", string.Empty);
-                    break;
-                case TextScanMode.LowAscii:
-                case TextScanMode.LowHighAscii:
+            // C64 PETSCII and C64 screen codes are built in.  Define ASCII if we also
+            // need that.
+            mCurrentEncoding = CharEncoding.Encoding.C64Petscii;
+
+            CheckAsciiFormats(out bool hasAscii, out bool hasHighAscii);
+            if (hasHighAscii) {
+                OutputLine(string.Empty, ".enc", HIGH_ASCII_ENC_NAME, string.Empty);
+                OutputLine(string.Empty, ".cdef", "$20,$7e,$a0", string.Empty);
+                mCurrentEncoding = CharEncoding.Encoding.HighAscii;
+            }
+            if (hasAscii) {
+                OutputLine(string.Empty, ".enc", ASCII_ENC_NAME, string.Empty);
+                OutputLine(string.Empty, ".cdef", "$20,$7e,$20", string.Empty);
+                mCurrentEncoding = CharEncoding.Encoding.Ascii;
+            }
+        }
+
+        private void CheckAsciiFormats(out bool hasAscii, out bool hasHighAscii) {
+            int offset = 0;
+            hasAscii = hasHighAscii = false;
+            while (offset < Project.FileData.Length) {
+                Anattrib attr = Project.GetAnattrib(offset);
+                FormatDescriptor dfd = attr.DataDescriptor;
+                if (dfd != null) {
+                    if (dfd.FormatSubType == FormatDescriptor.SubType.Ascii) {
+                        Debug.Assert(dfd.IsNumeric || dfd.IsString);
+                        hasAscii = true;
+                    } else if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
+                        hasHighAscii = true;
+                    }
+                }
+                if (hasAscii && hasHighAscii) {
+                    return;
+                }
+
+                offset += attr.Length;
+            }
+        }
+
+        private CharEncoding.Encoding FormatDescriptorToCharEncoding(FormatDescriptor dfd) {
+            switch (dfd.FormatSubType) {
+                case FormatDescriptor.SubType.Ascii:
+                    return CharEncoding.Encoding.Ascii;
+                case FormatDescriptor.SubType.HighAscii:
+                    return CharEncoding.Encoding.HighAscii;
+                case FormatDescriptor.SubType.C64Petscii:
+                    return CharEncoding.Encoding.C64Petscii;
+                case FormatDescriptor.SubType.C64Screen:
+                    return CharEncoding.Encoding.C64ScreenCode;
+                case FormatDescriptor.SubType.ASCII_GENERIC:
                 default:
-                    OutputLine(string.Empty, ".enc", "sg_ascii", string.Empty);
-                    OutputLine(string.Empty, ".cdef", "$20,$7e,$20", string.Empty);
-                    break;
+                    return CharEncoding.Encoding.Unknown;
             }
         }
 
@@ -336,6 +354,43 @@ namespace SourceGen.AsmGen {
                 return null;
             }
             return string.Empty;        // indicate original is fine
+        }
+
+        // IGenerator
+        public void UpdateCharacterEncoding(FormatDescriptor dfd) {
+            CharEncoding.Encoding newEnc = FormatDescriptorToCharEncoding(dfd);
+            if (newEnc == CharEncoding.Encoding.Unknown) {
+                // probably not a character operand
+                return;
+            }
+            if (newEnc != mCurrentEncoding) {
+                switch (newEnc) {
+                    case CharEncoding.Encoding.Ascii:
+                        OutputLine(string.Empty, ".enc", ASCII_ENC_NAME, string.Empty);
+                        break;
+                    case CharEncoding.Encoding.HighAscii:
+                        // If this is a numeric operand (not string), and we're currently in
+                        // ASCII mode, the "| $80" in the delimiter will handle this without
+                        // the need for a .enc.  Much less clutter for sources that have plain
+                        // ASCII strings but test high ASCII constants.
+                        if (mCurrentEncoding == CharEncoding.Encoding.Ascii && !dfd.IsString) {
+                            newEnc = mCurrentEncoding;
+                        } else {
+                            OutputLine(string.Empty, ".enc", HIGH_ASCII_ENC_NAME, string.Empty);
+                        }
+                        break;
+                    case CharEncoding.Encoding.C64Petscii:
+                        OutputLine(string.Empty, ".enc", "none", string.Empty);
+                        break;
+                    case CharEncoding.Encoding.C64ScreenCode:
+                        OutputLine(string.Empty, ".enc", "screen", string.Empty);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
+                mCurrentEncoding = newEnc;
+            }
         }
 
         // IGenerator
@@ -389,6 +444,7 @@ namespace SourceGen.AsmGen {
                 case FormatDescriptor.Type.NumericLE:
                     opcodeStr = sDataOpNames.GetDefineData(length);
                     operand = RawData.GetWord(data, offset, length, false);
+                    UpdateCharacterEncoding(dfd);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                         mLocalizer.LabelMap, dfd, operand, length,
                         PseudoOp.FormatNumericOpFlags.None);
@@ -399,6 +455,7 @@ namespace SourceGen.AsmGen {
                         // Nothing defined, output as comma-separated single-byte values.
                         GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     } else {
+                        UpdateCharacterEncoding(dfd);
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                             mLocalizer.LabelMap, dfd, operand, length,
@@ -587,31 +644,25 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.IsString);
             Debug.Assert(dfd.Length > 0);
 
-            TextScanMode textMode = Project.ProjectProps.AnalysisParams.DefaultTextScanMode;
             CharEncoding.Convert charConv = null;
             CharEncoding.Convert dciConv = null;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
-                    if (textMode == TextScanMode.LowAscii ||
-                            textMode == TextScanMode.LowHighAscii) {
-                        charConv = CharEncoding.ConvertAscii;
-                        dciConv = CharEncoding.ConvertLowAndHighAscii;
-                    }
-                    break;
-                case FormatDescriptor.SubType.C64Petscii:
-                    if (textMode == TextScanMode.C64Petscii) {
-                        charConv = CharEncoding.ConvertC64Petscii;
-                        dciConv = CharEncoding.ConvertLowAndHighC64Petscii;
-                    }
-                    break;
-                case FormatDescriptor.SubType.C64Screen:
-                    if (textMode == TextScanMode.C64ScreenCode) {
-                        charConv = CharEncoding.ConvertC64ScreenCode;
-                        dciConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
-                    }
+                    charConv = CharEncoding.ConvertAscii;
+                    dciConv = CharEncoding.ConvertLowAndHighAscii;
                     break;
                 case FormatDescriptor.SubType.HighAscii:
-                    // not supported
+                    charConv = CharEncoding.ConvertHighAscii;
+                    dciConv = CharEncoding.ConvertLowAndHighAscii;
+                    break;
+                case FormatDescriptor.SubType.C64Petscii:
+                    charConv = CharEncoding.ConvertC64Petscii;
+                    dciConv = CharEncoding.ConvertLowAndHighC64Petscii;
+                    break;
+                case FormatDescriptor.SubType.C64Screen:
+                    charConv = CharEncoding.ConvertC64ScreenCode;
+                    dciConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
+                    break;
                 default:
                     break;
             }
@@ -619,6 +670,9 @@ namespace SourceGen.AsmGen {
                 OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
                 return;
             }
+
+            // Issue a .enc, if needed.
+            UpdateCharacterEncoding(dfd);
 
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
@@ -646,6 +700,12 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.StringDci:
                     opcodeStr = sDataOpNames.StrDci;
+                    if ((Project.FileData[offset] & 0x80) != 0) {
+                        // ".shift" directive only works for strings where the low bit starts
+                        // clear and ends high.
+                        OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
+                        return;
+                    }
                     break;
                 default:
                     Debug.Assert(false);

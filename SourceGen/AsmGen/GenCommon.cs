@@ -237,6 +237,9 @@ namespace SourceGen.AsmGen {
                     string hash = gen.Quirks.BlockMoveArgsNoHash ? "" : "#";
                     formattedOperand = hash + opstr1 + "," + hash + opstr2;
                 } else {
+                    if (attr.DataDescriptor.IsStringOrCharacter) {
+                        gen.UpdateCharacterEncoding(attr.DataDescriptor);
+                    }
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         gen.Localizer.LabelMap, attr.DataDescriptor,
                         operandForSymbol, operandLen, opFlags);

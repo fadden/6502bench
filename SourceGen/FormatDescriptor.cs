@@ -296,6 +296,24 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// True if the FormatDescriptor is a string or character.
+        /// </summary>
+        public bool IsStringOrCharacter {
+            get {
+                switch (FormatSubType) {
+                    case SubType.ASCII_GENERIC:
+                    case SubType.Ascii:
+                    case SubType.HighAscii:
+                    case SubType.C64Petscii:
+                    case SubType.C64Screen:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// True if the FormatDescriptor has a symbol or is Numeric/Address.
         /// </summary>
         public bool HasSymbolOrAddress {

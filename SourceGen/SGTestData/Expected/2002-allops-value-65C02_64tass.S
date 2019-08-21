@@ -1,6 +1,4 @@
         .cpu    "65c02"
-        .enc    sg_ascii
-        .cdef   $20,$7e,$20
 *       =       $1000
         jsr     L1014
         jsr     L108A

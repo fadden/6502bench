@@ -96,6 +96,16 @@ namespace SourceGen.AsmGen {
         string ModifyOpcode(int offset, OpDef op);
 
         /// <summary>
+        /// Allows the generator to issue character encoding update instructions for source
+        /// files with more than one encoding.
+        /// </summary>
+        /// <remarks>
+        /// This may be called for non-character numeric descriptors.
+        /// </remarks>
+        /// <param name="dfd">Format descriptor for character or string.</param>
+        void UpdateCharacterEncoding(FormatDescriptor dfd);
+
+        /// <summary>
         /// Generates an opcode/operand pair for a short sequence of bytes (1-4 bytes).
         /// Does not produce any source output.
         /// </summary>

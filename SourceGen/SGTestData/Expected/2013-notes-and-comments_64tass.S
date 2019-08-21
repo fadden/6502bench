@@ -14,8 +14,6 @@
 ;*                                     *
 ;***************************************
         .cpu    "6502"
-        .enc    sg_ascii
-        .cdef   $20,$7e,$20
 plataddr =      $3000      ;address only in platform file
 
 ;Short, unboxed comment here!!
