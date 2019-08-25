@@ -127,7 +127,6 @@ namespace SourceGen.WpfGui {
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
 
             IsValid = labelValid && labelUnique && valueValid;
-            Debug.WriteLine("VALID IS " + IsValid);
         }
 
         private bool ParseValue(out int value, out int numBase) {

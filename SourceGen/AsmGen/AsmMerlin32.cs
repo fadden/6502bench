@@ -388,7 +388,7 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputAsmConfig() {
-            // nothing to do
+            // nothing to do (though we could emit "xc off" for 6502)
         }
 
         // IGenerator

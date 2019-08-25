@@ -150,6 +150,8 @@ namespace SourceGen {
                         // Either way there's nothing further for us to do.  (Technically we
                         // would want to treat it like the no-descriptor case if the type was
                         // numeric/Address, but we don't allow that for instructions.)
+                        //
+                        // Project and platform symbols are applied later.
                         Debug.Assert(attr.DataDescriptor.FormatSubType !=
                             FormatDescriptor.SubType.Address);
                         continue;

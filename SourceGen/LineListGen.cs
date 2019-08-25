@@ -713,6 +713,7 @@ namespace SourceGen {
             // Create temporary list to hold new lines.  Set the initial capacity to
             // the previous size, on the assumption that it won't change much.
             List<Line> newLines = new List<Line>(endIndex - startIndex + 1);
+
             GenerateLineList(startOffset, endOffset, newLines);
 
             // Out with the old, in with the new.
@@ -904,6 +905,7 @@ namespace SourceGen {
                     addBlank = true;
                 }
             }
+
             int offset = startOffset;
             while (offset <= endOffset) {
                 Anattrib attr = mProject.GetAnattrib(offset);
@@ -1034,10 +1036,10 @@ namespace SourceGen {
                 }
             }
 
-            // See if there were any address shifts in this section.  If so, insert an ORG
-            // statement as the first entry for the offset.  We're expecting to have very
-            // few AddressMap entries (usually just one), so it's more efficient to process
-            // them here and walk through the sub-list than it is to ping the address map
+            // See if there were any address shifts in this section.  If so, go back and
+            // insert an ORG statement as the first entry for the offset.  We're expecting to
+            // have very few AddressMap entries (usually just one), so it's more efficient to
+            // process them here and walk through the sub-list than it is to ping the address map
             // at every line.
             //
             // It should not be possible for an address map change to appear in the middle
@@ -1067,8 +1069,17 @@ namespace SourceGen {
                 // isn't the ORG at the start of the file.  (This may temporarily do
                 // double-spacing if we do a partial update, because we won't be able to
                 // "see" the previous line.  Harmless.)
-                if (ent.Offset != 0 && index > 0 && lines[index-1].LineType != Line.Type.Blank) {
-                    Line blankLine = new Line(topLine.FileOffset, 0, Line.Type.Blank);
+                //
+                // Interesting case:
+                //   .dd2 $1000
+                //   <blank>
+                //   .org $1234
+                //   .dd2 $aabb    ;comment
+                // We need to include "index == 0" or we'll lose the blank when the comment
+                // is edited.
+                if (ent.Offset != 0 &&
+                        (index == 0 || (index > 0 && lines[index-1].LineType != Line.Type.Blank))){
+                    Line blankLine = GenerateBlankLine(topLine.FileOffset);
                     lines.Insert(index, blankLine);
                 }
             }
