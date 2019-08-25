@@ -1685,6 +1685,18 @@ namespace SourceGen {
             }
         }
 
+        public bool CanEditLocalVariableTable() {
+            return true;        // TODO
+        }
+
+        public void EditLocalVariableTable() {
+            // TODO
+            EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+        }
+
         public bool CanEditLongComment() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;

@@ -89,6 +89,7 @@
     <Compile Include="Tools\WpfGui\ShowText.xaml.cs">
       <DependentUpon>ShowText.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LocalVariableTable.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
@@ -109,6 +110,9 @@
     </Compile>
     <Compile Include="WpfGui\EditLabel.xaml.cs">
       <DependentUpon>EditLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditLocalVariableTable.xaml.cs">
+      <DependentUpon>EditLocalVariableTable.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\EditLongComment.xaml.cs">
       <DependentUpon>EditLongComment.xaml</DependentUpon>
@@ -259,6 +263,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditLocalVariableTable.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1069,6 +1069,8 @@ namespace SourceGen {
                 // isn't the ORG at the start of the file.  (This may temporarily do
                 // double-spacing if we do a partial update, because we won't be able to
                 // "see" the previous line.  Harmless.)
+                // TODO: consider always adding blanks, and doing a fix-up pass afterward.
+                //       (but keep in mind that blank lines should always come above things)
                 //
                 // Interesting case:
                 //   .dd2 $1000

@@ -951,6 +951,10 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLabel();
         }
 
+        private void CanEditLocalVariableTable(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLocalVariableTable();
+        }
+
         private void CanEditLongComment(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLongComment();
         }
@@ -1079,6 +1083,10 @@ namespace SourceGen.WpfGui {
 
         private void EditLabelCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditLabel();
+        }
+
+        private void EditLocalVariableTableCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditLocalVariableTable();
         }
 
         private void EditLongCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

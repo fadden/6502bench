@@ -23,6 +23,8 @@ namespace SourceGen {
     /// Instances are immutable.
     /// </summary>
     public class DefSymbol : Symbol {
+        public const int NO_WIDTH = -1;
+
         /// <summary>
         /// Data format descriptor.
         /// </summary>
@@ -40,8 +42,9 @@ namespace SourceGen {
         public string Tag { get; private set; }
 
         /// <summary>
-        /// Number of bytes referenced by the symbol.  Useful for identifying two-byte and
-        /// three-byte pointers.  Used for Variables.
+        /// Number of bytes referenced by the symbol.  Useful for identifying multi-byte items,
+        /// such as two-byte and three-byte pointers.  Used for Variables.  Value will be
+        /// NO_WIDTH if unset.
         /// </summary>
         public int Width { get; private set; }
 
@@ -62,6 +65,7 @@ namespace SourceGen {
             Debug.Assert(source == Source.Platform || source == Source.Project);
             Debug.Assert(type == Type.ExternalAddr || type == Type.Constant);
             Xrefs = new XrefSet();
+            Width = NO_WIDTH;
         }
 
         /// <summary>
