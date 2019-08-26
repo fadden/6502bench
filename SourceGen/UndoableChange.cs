@@ -53,7 +53,7 @@ are considered "uncategorized", so the uncategorized-data analysis must be repea
 - When altering the way that data is formatted, it's useful to exercise the same code paths,
 up to the point where the analyzer is called.  We still want to go through all the steps that
 update the display list and cause controls to be redrawn, but we don't want to actually change
-anything in the DisasmProject.  "Misc" means we do nothing but pretend there was a full update.
+anything in the DisasmProject.
 
 *** When can we get away with only updating part of the display list (re-analysis=none)?
 - Changing a user label.  All lines that reference the label need to be updated in the
@@ -101,7 +101,10 @@ namespace SourceGen {
             SetNote,
 
             // Updates project properties.
-            SetProjectProperties
+            SetProjectProperties,
+
+            // Adds, updates, or removes a local variable table.
+            SetLocalVariableTable,
         }
 
         /// <summary>
@@ -449,6 +452,28 @@ namespace SourceGen {
             // reanalysis.  We could scan the objects to see what actually changed, but that
             // doesn't seem worthwhile.
             uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
+            return uc;
+        }
+
+        /// <summary>
+        /// Creates an UndoableChange for a local variable table update.
+        /// </summary>
+        /// <param name="offset">Affected offset.</param>
+        /// <param name="oldLvTable">Old table.</param>
+        /// <param name="newLvTable">New table.</param>
+        /// <returns>Change record.</returns>
+        public static UndoableChange CreateLocalVariableTableChange(int offset,
+                LocalVariableTable oldLvTable, LocalVariableTable newLvTable) {
+            if (oldLvTable == newLvTable) {
+                Debug.WriteLine("No-op local variable table change");
+            }
+
+            UndoableChange uc = new UndoableChange();
+            uc.Type = ChangeType.SetLocalVariableTable;
+            uc.Offset = offset;
+            uc.OldValue = oldLvTable;
+            uc.NewValue = newLvTable;
+            uc.ReanalysisRequired = ReanalysisScope.DataOnly;   // update dfds in Anattribs
             return uc;
         }
 

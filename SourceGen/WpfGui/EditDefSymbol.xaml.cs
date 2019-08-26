@@ -87,6 +87,11 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private SymbolTable mSymbolTable;
 
+        /// <summary>
+        /// Set to true if we should create a Variable rather than a project symbol.
+        /// </summary>
+        private bool mIsVariable;
+
         // Saved off at dialog load time.
         private Brush mDefaultLabelColor;
 
@@ -101,33 +106,28 @@ namespace SourceGen.WpfGui {
         /// Constructor, for editing a project symbol.
         /// </summary>
         public EditDefSymbol(Window owner, Formatter formatter,
-                SortedList<string, DefSymbol> defList, DefSymbol defSym) {
+                SortedList<string, DefSymbol> defList, DefSymbol defSym,
+                SymbolTable symbolTable, bool isVariable) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mNumFormatter = formatter;
             mDefSymbolList = defList;
-
             mOldSym = defSym;
+            mSymbolTable = symbolTable;
+            mIsVariable = isVariable;
 
             Label = Value = VarWidth = Comment = string.Empty;
-            widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
-                Visibility.Collapsed;
-            projectLabelUniqueLabel.Visibility = Visibility.Visible;
-        }
-
-        /// <summary>
-        /// Constructor, for editing a local variable.
-        /// </summary>
-        public EditDefSymbol(Window owner, Formatter formatter,
-                SortedList<string, DefSymbol> defList, DefSymbol defSym,
-                SymbolTable symbolTable) : this(owner, formatter, defList, defSym) {
-            mSymbolTable = symbolTable;
-
-            widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
-                Visibility.Visible;
-            projectLabelUniqueLabel.Visibility = Visibility.Collapsed;
+            if (isVariable) {
+                widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
+                    Visibility.Visible;
+                projectLabelUniqueLabel.Visibility = Visibility.Collapsed;
+            } else {
+                widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
+                    Visibility.Collapsed;
+                labelUniqueLabel.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -137,7 +137,7 @@ namespace SourceGen.WpfGui {
                 Label = mOldSym.Label;
                 Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
                     mOldSym.DataDescriptor.NumBase);
-                VarWidth = mOldSym.Width.ToString();
+                VarWidth = mOldSym.DataDescriptor.Length.ToString();
                 Comment = mOldSym.Comment;
 
                 if (mOldSym.SymbolType == Symbol.Type.Constant) {
@@ -222,7 +222,8 @@ namespace SourceGen.WpfGui {
                 width = int.Parse(VarWidth);
             }
 
-            NewSym = new DefSymbol(Label, value, Symbol.Source.Project,
+            NewSym = new DefSymbol(Label, value,
+                mIsVariable ? Symbol.Source.Project : Symbol.Source.Variable,
                 isConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
                 subType, Comment, string.Empty, width);
 

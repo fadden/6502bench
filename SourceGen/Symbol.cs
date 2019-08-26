@@ -22,16 +22,18 @@ namespace SourceGen {
     /// </summary>
     public class Symbol {
         /// <summary>
-        /// Was the symbol defined by the user, or generated automatically?
+        /// How was the symbol defined?
         /// </summary>
         public enum Source {
             // These are in order of highest to lowest precedence.  This matters when
-            // looking up a symbol by value, since multiple symbols can have the same value.
+            // looking up a symbol by value from the symbol table, because multiple symbols
+            // can have the same value.
             Unknown = 0,
             User,               // user-defined label
             Project,            // from project configuration file
             Platform,           // from platform definition file
-            Auto                // auto-generated label
+            Auto,               // auto-generated label
+            Variable            // local variable
         }
 
         /// <summary>
@@ -108,7 +110,8 @@ namespace SourceGen {
                 case Source.Auto:               sts = "A";  break;
                 case Source.User:               sts = "U";  break;
                 case Source.Platform:           sts = "P";  break;
-                case Source.Project:            sts = "R";  break;
+                case Source.Project:            sts = "R"; break;
+                case Source.Variable:           sts = "V"; break;
                 default:                        sts = "?";  break;
             }
             switch (SymbolType) {

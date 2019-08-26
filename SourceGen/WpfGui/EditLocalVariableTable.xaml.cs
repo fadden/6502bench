@@ -58,10 +58,23 @@ namespace SourceGen.WpfGui {
         public ObservableCollection<FormattedSymbol> Variables { get; private set; } =
             new ObservableCollection<FormattedSymbol>();
 
+        /// <summary>
+        /// Clear-previous flag.
+        /// </summary>
         public bool ClearPrevious {
             get { return mWorkTable.ClearPrevious; }
             set { mWorkTable.ClearPrevious = value; OnPropertyChanged(); }
         }
+
+        /// <summary>
+        /// True if this is not a new table.  (Using "not" because that's the sense we
+        /// need in XAML.)
+        /// </summary>
+        public bool IsNotNewTable {
+            get { return mIsNotNewTable; }
+            set { mIsNotNewTable = value; OnPropertyChanged(); }
+        }
+        private bool mIsNotNewTable;
 
         /// <summary>
         /// Working set.  Used internally to hold state.
@@ -85,6 +98,9 @@ namespace SourceGen.WpfGui {
         }
 
 
+        /// <summary>
+        /// Constructor.  lvt will be null when creating a new entry.
+        /// </summary>
         public EditLocalVariableTable(Window owner, SymbolTable symbolTable, Formatter formatter,
                 LocalVariableTable lvt) {
             InitializeComponent();
@@ -96,6 +112,7 @@ namespace SourceGen.WpfGui {
 
             if (lvt != null) {
                 mWorkTable = new LocalVariableTable(lvt);
+                mIsNotNewTable = true;
             } else {
                 mWorkTable = new LocalVariableTable();
             }
@@ -126,8 +143,7 @@ namespace SourceGen.WpfGui {
                     defSym.Label,
                     mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
                     typeStr,
-                    defSym.Width == DefSymbol.NO_WIDTH ?
-                        string.Empty : defSym.Width.ToString(),
+                    defSym.DataDescriptor.Length.ToString(),
                     defSym.Comment);
 
                 Variables.Add(fsym);
@@ -148,7 +164,13 @@ namespace SourceGen.WpfGui {
         }
 
         private void DeleteTableButton_Click(object sender, RoutedEventArgs e) {
-            // TODO - get confirmation, then set result=true with LvTable=null
+            MessageBoxResult result = MessageBox.Show((string)FindResource("str_ConfirmDelete"),
+                (string)FindResource("str_ConfirmDeleteCaption"),
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes) {
+                NewTable = null;
+                DialogResult = true;
+            }
         }
 
         private void SymbolsListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -167,7 +189,7 @@ namespace SourceGen.WpfGui {
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.Variables, null,
-                mSymbolTable);
+                mSymbolTable, true);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 Debug.WriteLine("ADD: " + dlg.NewSym);
@@ -191,7 +213,7 @@ namespace SourceGen.WpfGui {
 
         private void DoEditSymbol(DefSymbol defSym) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.Variables, defSym,
-                mSymbolTable);
+                mSymbolTable, true);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.

@@ -316,6 +316,21 @@ namespace SourceGen {
                 Comment = defSym.Comment;
             }
         }
+        public class SerLocalVariableTable {
+            public List<SerDefSymbol> Variables { get; set; }
+            public bool ClearPrevious { get; set; }
+
+            public SerLocalVariableTable() { }
+            public SerLocalVariableTable(LocalVariableTable varTab) {
+                Variables = new List<SerDefSymbol>(varTab.Variables.Count);
+                foreach (KeyValuePair<string, DefSymbol> kvp in varTab.Variables) {
+                    // Note kvp.Key is redundant -- same as kvp.Value.Label
+                    Variables.Add(new SerDefSymbol(kvp.Value));
+                }
+
+                ClearPrevious = varTab.ClearPrevious;
+            }
+        }
 
         // Fields are serialized to/from JSON.  Do not change the field names.
         public int _ContentVersion { get; set; }
@@ -330,6 +345,7 @@ namespace SourceGen {
         public Dictionary<string, SerMultiLineComment> Notes { get; set; }
         public Dictionary<string, SerSymbol> UserLabels { get; set; }
         public Dictionary<string, SerFormatDescriptor> OperandFormats { get; set; }
+        public Dictionary<string, SerLocalVariableTable> LvTables { get; set; }
 
         /// <summary>
         /// Serializes a DisasmProject into an augmented JSON string.
@@ -411,6 +427,12 @@ namespace SourceGen {
             spf.OperandFormats = new Dictionary<string, SerFormatDescriptor>();
             foreach (KeyValuePair<int,FormatDescriptor> kvp in proj.OperandFormats) {
                 spf.OperandFormats.Add(kvp.Key.ToString(), new SerFormatDescriptor(kvp.Value));
+            }
+
+            // Convert local variable tables to serializable form.
+            spf.LvTables = new Dictionary<string, SerLocalVariableTable>();
+            foreach (KeyValuePair<int, LocalVariableTable> kvp in proj.LvTables) {
+                spf.LvTables.Add(kvp.Key.ToString(), new SerLocalVariableTable(kvp.Value));
             }
 
             spf.ProjectProps = new SerProjectProperties(proj.ProjectProps);
@@ -502,16 +524,11 @@ namespace SourceGen {
 
             // Deserialize ProjectProperties: project symbols.
             foreach (KeyValuePair<string, SerDefSymbol> kvp in spf.ProjectProps.ProjectSyms) {
-                if (!CreateSymbol(kvp.Value, report, out Symbol sym)) {
+                if (!CreateDefSymbol(kvp.Value, spf._ContentVersion, report,
+                        out DefSymbol defSym)) {
                     continue;
                 }
-                if (!CreateFormatDescriptor(kvp.Value.DataDescriptor, spf._ContentVersion, report,
-                        out FormatDescriptor dfd)) {
-                    continue;
-                }
-
-                proj.ProjectProps.ProjectSyms[sym.Label] =
-                    new DefSymbol(sym, dfd, kvp.Value.Comment);
+                proj.ProjectProps.ProjectSyms[defSym.Label] = defSym;
             }
 
             // Deserialize address map.
@@ -621,10 +638,9 @@ namespace SourceGen {
             }
 
             // Deserialize operand format descriptors.
-            foreach (KeyValuePair<string,SerFormatDescriptor> kvp in spf.OperandFormats) {
+            foreach (KeyValuePair<string, SerFormatDescriptor> kvp in spf.OperandFormats) {
                 if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
-                        Res.Strings.PROJECT_FIELD_OPERAND_FORMAT, report,
-                        out int intKey)) {
+                        Res.Strings.PROJECT_FIELD_OPERAND_FORMAT, report, out int intKey)) {
                     continue;
                 }
 
@@ -632,6 +648,7 @@ namespace SourceGen {
                         out FormatDescriptor dfd)) {
                     continue;
                 }
+                // Extra validation: make sure dfd doesn't run off end.
                 if (intKey < 0 || intKey + dfd.Length > spf.FileDataLength) {
                     report.Add(FileLoadItem.Type.Warning,
                         string.Format(Res.Strings.ERR_BAD_FD_FMT, intKey));
@@ -644,6 +661,25 @@ namespace SourceGen {
                 proj.OperandFormats[intKey] = dfd;
             }
 
+            // Deserialize local variable tables.  These were added in v1.3.
+            if (spf.LvTables != null) {
+                foreach (KeyValuePair<string, SerLocalVariableTable> kvp in spf.LvTables) {
+                    if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
+                            Res.Strings.PROJECT_FIELD_LV_TABLE, report, out int intKey)) {
+                        continue;
+                    }
+
+                    if (!CreateLocalVariableTable(kvp.Value, spf._ContentVersion, report,
+                            out LocalVariableTable lvt)) {
+                        report.Add(FileLoadItem.Type.Warning,
+                            string.Format(Res.Strings.ERR_BAD_LV_TABLE_FMT, intKey));
+                        continue;
+                    }
+
+                    proj.LvTables[intKey] = lvt;
+                }
+            }
+
             return true;
         }
 
@@ -652,7 +688,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="ssym">Deserialized data.</param>
         /// <param name="report">Error report object.</param>
-        /// <param name="outSym"></param>
+        /// <param name="outSym">Created symbol.</param>
         /// <returns>True on success.</returns>
         private static bool CreateSymbol(SerSymbol ssym, FileLoadReport report,
                 out Symbol outSym) {
@@ -668,6 +704,30 @@ namespace SourceGen {
                 return false;
             }
             outSym = new Symbol(ssym.Label, ssym.Value, source, type/*, ssym.IsExport*/);
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a DefSymbol from a SerDefSymbol.
+        /// </summary>
+        /// <param name="serDefSym">Deserialized data.</param>
+        /// <param name="contentVersion">Serialization version.</param>
+        /// <param name="report">Error report object.</param>
+        /// <param name="outDefSym">Created symbol.</param>
+        /// <returns></returns>
+        private static bool CreateDefSymbol(SerDefSymbol serDefSym, int contentVersion,
+                FileLoadReport report, out DefSymbol outDefSym) {
+            outDefSym = null;
+
+            if (!CreateSymbol(serDefSym, report, out Symbol sym)) {
+                return false;
+            }
+            if (!CreateFormatDescriptor(serDefSym.DataDescriptor, contentVersion, report,
+                    out FormatDescriptor dfd)) {
+                return false;
+            }
+
+            outDefSym = new DefSymbol(sym, dfd, serDefSym.Comment);
             return true;
         }
 
@@ -756,6 +816,27 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Creates a LocalVariableTable from a SerLocalVariableTable.
+        /// </summary>
+        /// <param name="serTable">Deserialized data.</param>
+        /// <param name="contentVersion">Serialization version.</param>
+        /// <param name="report">Error report object.</param>
+        /// <param name="outLvt">Created LocalVariableTable</param>
+        /// <returns>True on success.</returns>
+        private static bool CreateLocalVariableTable(SerLocalVariableTable serTable,
+                int contentVersion, FileLoadReport report, out LocalVariableTable outLvt) {
+            outLvt = new LocalVariableTable();
+            outLvt.ClearPrevious = serTable.ClearPrevious;
+            foreach (SerDefSymbol serDef in serTable.Variables) {
+                if (!CreateDefSymbol(serDef, contentVersion, report, out DefSymbol defSym)) {
+                    return false;
+                }
+                outLvt.Variables.Add(defSym.Label, defSym);
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Parses an integer key that was stored as a string, and checks to see if the
         /// value falls within an acceptable range.
         /// </summary>
@@ -764,7 +845,7 @@ namespace SourceGen {
         /// <param name="fieldName">Name of field, for error messages.</param>
         /// <param name="report">Error report object.</param>
         /// <param name="intKey">Returned integer key.</param>
-        /// <returns>True on success, false on failure.</returns>
+        /// <returns>True on success.</returns>
         private static bool ParseValidateKey(string keyStr, int fileLen, string fieldName,
                 FileLoadReport report, out int intKey) {
             if (!int.TryParse(keyStr, out intKey)) {

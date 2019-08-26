@@ -43,41 +43,67 @@ namespace SourceGen {
         // at any time.  Smaller items are kept in arrays, with one entry per byte
         // of file data.
 
-        // Length of input data.  (This is redundant with FileData.Length while in memory,
-        // but we want this value to be serialized into the project file.)
+        /// <summary>
+        /// Length of input data.  (This is redundant with FileData.Length while in memory,
+        /// but we want this value to be serialized into the project file.)
+        /// </summary>
         public int FileDataLength { get; private set; }
 
-        // CRC-32 on input data.
+        /// <summary>
+        /// CRC-32 on input data.
+        /// </summary>
         public uint FileDataCrc32 { get; private set; }
 
-        // Map file offsets to addresses.
-        public AddressMap AddrMap { get { return mAddrMap; } }
-        private AddressMap mAddrMap;
+        /// <summary>
+        /// Map file offsets to addresses.
+        /// </summary>
+        public AddressMap AddrMap { get; private set; }
 
-        // Type hints.  Default value is "no hint".
+        /// <summary>
+        /// Type hints.  Default value is "no hint".
+        /// </summary>
         public CodeAnalysis.TypeHint[] TypeHints { get; private set; }
 
-        // Status flag overrides.  Default value is "all unspecified".
+        /// <summary>
+        /// Status flag overrides.  Default value is "all unspecified".
+        /// </summary>
         public StatusFlags[] StatusFlagOverrides { get; private set; }
 
-        // End-of-line comments.  Empty string means "no comment".
+        /// <summary>
+        /// End-of-line comments.  Empty string means "no comment".
+        /// </summary>
         public string[] Comments { get; private set; }
 
-        // Full line, possibly multi-line comments.
+        /// <summary>
+        /// Full line, possibly multi-line comments.
+        /// </summary>
         public Dictionary<int, MultiLineComment> LongComments { get; private set; }
 
-        // Notes, which are like comments but not included in the assembled output.
+        /// <summary>
+        /// Notes, which are like comments but not included in the assembled output.
+        /// </summary>
         public SortedList<int, MultiLineComment> Notes { get; private set; }
 
-        // Labels, defined by the user; uses file offset as key.  Ideally the label names
-        // are unique, but there are ways around that.
+        /// <summary>
+        /// Labels, defined by the user; uses file offset as key.  Ideally the label names
+        /// are unique, but there are ways around that.
+        /// </summary>
         public Dictionary<int, Symbol> UserLabels { get; private set; }
 
-        // Format descriptors for operands and data items; uses file offset as key.
+        /// <summary>
+        /// Local variable tables.
+        /// </summary>
+        public SortedList<int, LocalVariableTable> LvTables { get; private set; }
+
+        /// <summary>
+        /// Format descriptors for operands and data items; uses file offset as key.
+        /// </summary>
         public SortedList<int, FormatDescriptor> OperandFormats { get; private set; }
 
-        // Project properties.  Includes CPU type, platform symbol file names, project
-        // symbols, etc.
+        /// <summary>
+        /// Project properties.  Includes CPU type, platform symbol file names, project
+        /// symbols, etc.
+        /// </summary>
         public ProjectProperties ProjectProps { get; private set; }
 
         #endregion // data to save & restore
@@ -177,8 +203,8 @@ namespace SourceGen {
             FileDataLength = fileDataLen;
             ProjectPathName = string.Empty;
 
-            mAddrMap = new AddressMap(fileDataLen);
-            mAddrMap.Set(0, 0x1000);    // default load address to $1000; override later
+            AddrMap = new AddressMap(fileDataLen);
+            AddrMap.Set(0, 0x1000);    // default load address to $1000; override later
 
             // Default value is "no hint".
             TypeHints = new CodeAnalysis.TypeHint[fileDataLen];
@@ -198,6 +224,7 @@ namespace SourceGen {
 
             UserLabels = new Dictionary<int, Symbol>();
             OperandFormats = new SortedList<int, FormatDescriptor>();
+            LvTables = new SortedList<int, LocalVariableTable>();
             ProjectProps = new ProjectProperties();
 
             SymbolTable = new SymbolTable();
@@ -273,15 +300,15 @@ namespace SourceGen {
                 // address as the start of the file.  The overlapping-address code should do
                 // the right thing with it.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                mAddrMap.Set(0, loadAddr);
-                mAddrMap.Set(2, loadAddr);
+                AddrMap.Set(0, loadAddr);
+                AddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
                 TypeHints[0] = CodeAnalysis.TypeHint.NoHint;
                 TypeHints[2] = CodeAnalysis.TypeHint.Code;
             } else {
                 int loadAddr = SystemDefaults.GetLoadAddress(sysDef);
-                mAddrMap.Set(0, loadAddr);
+                AddrMap.Set(0, loadAddr);
             }
 
             foreach (string str in sysDef.SymbolFiles) {
@@ -590,7 +617,7 @@ namespace SourceGen {
 
                 reanalysisTimer.StartTask("CodeAnalysis.Analyze");
 
-                CodeAnalysis ca = new CodeAnalysis(mFileData, CpuDef, mAnattribs, mAddrMap,
+                CodeAnalysis ca = new CodeAnalysis(mFileData, CpuDef, mAnattribs, AddrMap,
                     TypeHints, StatusFlagOverrides, ProjectProps.EntryFlags, mScriptManager,
                     debugLog);
 
@@ -713,7 +740,7 @@ namespace SourceGen {
                 }
 
                 int expectedAddr = kvp.Value.Value;
-                Debug.Assert(expectedAddr == mAddrMap.OffsetToAddress(offset));
+                Debug.Assert(expectedAddr == AddrMap.OffsetToAddress(offset));
 
                 // Add direct reference to the UserLabels Symbol object.
                 mAnattribs[offset].Symbol = kvp.Value;
@@ -821,7 +848,7 @@ namespace SourceGen {
             foreach (KeyValuePair<int, Symbol> kvp in UserLabels) {
                 int offset = kvp.Key;
                 Symbol sym = kvp.Value;
-                int expectedAddr = mAddrMap.OffsetToAddress(offset);
+                int expectedAddr = AddrMap.OffsetToAddress(offset);
                 if (sym.Value != expectedAddr) {
                     Symbol newSym = new Symbol(sym.Label, expectedAddr, sym.SymbolSource,
                         sym.SymbolType);
@@ -960,6 +987,8 @@ namespace SourceGen {
             // Clear previous cross-reference data from project/platform symbols.  These
             // symbols don't have file offsets, so we can't store them in the main mXrefs
             // list.
+            // TODO(someday): DefSymbol is otherwise immutable.  We should put these elsewhere,
+            //   maybe a Dictionary<DefSymbol, XrefSet>?  Just mind the garbage collection.
             foreach (Symbol sym in SymbolTable) {
                 if (sym is DefSymbol) {
                     (sym as DefSymbol).Xrefs.Clear();
@@ -1466,7 +1495,8 @@ namespace SourceGen {
         /// </summary>
         /// <param name="cs">Set of changes to apply.</param>
         /// <param name="backward">If set, undo the changes instead.</param>
-        /// <param name="affectedOffsets">List of offsets affected by change.</param>
+        /// <param name="affectedOffsets">List of offsets affected by change.  Only meaningful
+        ///   when the result is not "None".</param>
         /// <returns>An indication of the level of reanalysis required.  If this returns None,
         ///   the list of offsets to update will be in affectedOffsets.</returns>
         public UndoableChange.ReanalysisScope ApplyChanges(ChangeSet cs, bool backward,
@@ -1723,6 +1753,26 @@ namespace SourceGen {
                             if (needExternalFileReload) {
                                 LoadExternalFiles();
                             }
+                        }
+                        // ignore affectedOffsets
+                        Debug.Assert(uc.ReanalysisRequired ==
+                            UndoableChange.ReanalysisScope.CodeAndData);
+                        break;
+                    case UndoableChange.ChangeType.SetLocalVariableTable: {
+                            LvTables.TryGetValue(offset, out LocalVariableTable current);
+                            if (current != (LocalVariableTable)oldValue) {
+                                Debug.WriteLine("GLITCH: old lvt value mismatch: current=" +
+                                    current + " old=" + (LocalVariableTable)oldValue);
+                                Debug.Assert(false);
+                            }
+                            if (newValue == null) {
+                                LvTables.Remove(offset);
+                            } else {
+                                LvTables[offset] = (LocalVariableTable)newValue;
+                            }
+                            // ignore affectedOffsets
+                            Debug.Assert(uc.ReanalysisRequired ==
+                                UndoableChange.ReanalysisScope.DataOnly);
                         }
                         break;
                     default:

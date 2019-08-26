@@ -101,6 +101,9 @@ namespace SourceGen {
                 OrgDirective            = 1 << 5,
                 EquDirective            = 1 << 6,
                 RegWidthDirective       = 1 << 7,
+
+                // Additional metadata.
+                LocalVariableTable      = 1 << 8,
             }
 
             /// <summary>

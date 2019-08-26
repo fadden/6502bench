@@ -1686,18 +1686,33 @@ namespace SourceGen {
         }
 
         public bool CanEditLocalVariableTable() {
-            return true;        // TODO
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Single line of code, or a local variable table.
+            return SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.LocalVariableTable;
         }
 
-        private LocalVariableTable lvt = new LocalVariableTable();
         public void EditLocalVariableTable() {
-            // TODO
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            mProject.LvTables.TryGetValue(offset, out LocalVariableTable oldLvt);
+
             EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin, mProject.SymbolTable,
-                mOutputFormatter, lvt);
+                mOutputFormatter, oldLvt);
             if (dlg.ShowDialog() != true) {
                 return;
             }
-            lvt = dlg.NewTable;
+            if (oldLvt == dlg.NewTable) {
+                Debug.WriteLine("LvTable unchanged");
+                return;
+            }
+            UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(offset,
+                oldLvt, dlg.NewTable);
+            ChangeSet cs = new ChangeSet(uc);
+            ApplyUndoableChanges(cs);
         }
 
         public bool CanEditLongComment() {
@@ -1721,18 +1736,18 @@ namespace SourceGen {
             if (mProject.LongComments.TryGetValue(offset, out MultiLineComment oldComment)) {
                 dlg.LongComment = oldComment;
             }
-            dlg.ShowDialog();
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
 
-            if (dlg.DialogResult == true) {
-                MultiLineComment newComment = dlg.LongComment;
-                if (oldComment != newComment) {
-                    Debug.WriteLine("Changing long comment at +" + offset.ToString("x6"));
+            MultiLineComment newComment = dlg.LongComment;
+            if (oldComment != newComment) {
+                Debug.WriteLine("Changing long comment at +" + offset.ToString("x6"));
 
-                    UndoableChange uc = UndoableChange.CreateLongCommentChange(offset,
-                        oldComment, newComment);
-                    ChangeSet cs = new ChangeSet(uc);
-                    ApplyUndoableChanges(cs);
-                }
+                UndoableChange uc = UndoableChange.CreateLongCommentChange(offset,
+                    oldComment, newComment);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
             }
         }
 
@@ -1940,7 +1955,7 @@ namespace SourceGen {
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mOutputFormatter,
-                mProject.ProjectProps.ProjectSyms, origDefSym);
+                mProject.ProjectProps.ProjectSyms, origDefSym, null, false);
             if (dlg.ShowDialog() == true) {
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
                 newProps.ProjectSyms.Remove(origDefSym.Label);

@@ -65,6 +65,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadFileLength");
         public static string ERR_BAD_IDENT =
             (string)Application.Current.FindResource("str_ErrBadIdent");
+        public static string ERR_BAD_LV_TABLE_FMT =
+            (string)Application.Current.FindResource("str_ErrBadLvTableFmt");
         public static string ERR_BAD_RANGE =
             (string)Application.Current.FindResource("str_ErrBadRange");
         public static string ERR_BAD_SYMBOL_ST =
@@ -183,6 +185,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ProjectFieldComment");
         public static string PROJECT_FIELD_LONG_COMMENT =
             (string)Application.Current.FindResource("str_ProjectFieldLongComment");
+        public static string PROJECT_FIELD_LV_TABLE =
+            (string)Application.Current.FindResource("str_ProjectFieldLvTable");
         public static string PROJECT_FIELD_NOTE =
             (string)Application.Current.FindResource("str_ProjectFieldNote");
         public static string PROJECT_FIELD_OPERAND_FORMAT =

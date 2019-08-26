@@ -19,12 +19,19 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Local Variable Table"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <system:String x:Key="str_ConfirmDelete">Are you sure you want to delete the entire table?</system:String>
+        <system:String x:Key="str_ConfirmDeleteCaption">Confirm Deletion</system:String>
+    </Window.Resources>
+
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -76,7 +83,8 @@ limitations under the License.
                   Content="Clear values from previous tables"/>
 
         <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
-            <Button DockPanel.Dock="Left" Content="Delete Table" Width="120" Click="DeleteTableButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="Delete Table" Width="120" IsEnabled="{Binding IsNotNewTable}"
+                    Click="DeleteTableButton_Click"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" Click="OkButton_Click"/>
