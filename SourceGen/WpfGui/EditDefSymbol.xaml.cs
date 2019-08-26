@@ -30,22 +30,42 @@ namespace SourceGen.WpfGui {
     /// </summary>
     public partial class EditDefSymbol : Window, INotifyPropertyChanged {
         /// <summary>
-        /// Set to previous value before calling; may be null if creating a new symbol.
-        /// Will be set to new value on OK result.
+        /// Result; will be set non-null on OK.
         /// </summary>
-        public DefSymbol DefSym { get; set; }
+        public DefSymbol NewSym { get; private set; }
 
         /// <summary>
         /// Set to true when all fields are valid.  Controls whether the OK button is enabled.
         /// </summary>
         public bool IsValid {
             get { return mIsValid; }
-            set {
-                mIsValid = value;
-                OnPropertyChanged();
-            }
+            set { mIsValid = value; OnPropertyChanged(); }
         }
         private bool mIsValid;
+
+        public string Label {
+            get { return mLabel; }
+            set { mLabel = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private string mLabel;
+
+        public string Value {
+            get { return mValue; }
+            set { mValue = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private string mValue;
+
+        public string VarWidth {
+            get { return mWidth; }
+            set { mWidth = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private string mWidth;
+
+        public string Comment {
+            get { return mComment; }
+            set { mComment = value; OnPropertyChanged(); }
+        }
+        private string mComment;
 
         /// <summary>
         /// Format object to use when formatting addresses and constants.
@@ -53,9 +73,19 @@ namespace SourceGen.WpfGui {
         private Formatter mNumFormatter;
 
         /// <summary>
+        /// Old symbol value.  May be null.
+        /// </summary>
+        private DefSymbol mOldSym;
+
+        /// <summary>
         /// List of existing symbols, for uniqueness check.  The list will not be modified.
         /// </summary>
         private SortedList<string, DefSymbol> mDefSymbolList;
+
+        /// <summary>
+        /// Full symbol table, for extended uniqueness check.
+        /// </summary>
+        private SymbolTable mSymbolTable;
 
         // Saved off at dialog load time.
         private Brush mDefaultLabelColor;
@@ -67,26 +97,50 @@ namespace SourceGen.WpfGui {
         }
 
 
+        /// <summary>
+        /// Constructor, for editing a project symbol.
+        /// </summary>
         public EditDefSymbol(Window owner, Formatter formatter,
-                SortedList<string, DefSymbol> defList) {
+                SortedList<string, DefSymbol> defList, DefSymbol defSym) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mNumFormatter = formatter;
             mDefSymbolList = defList;
+
+            mOldSym = defSym;
+
+            Label = Value = VarWidth = Comment = string.Empty;
+            widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
+                Visibility.Collapsed;
+            projectLabelUniqueLabel.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Constructor, for editing a local variable.
+        /// </summary>
+        public EditDefSymbol(Window owner, Formatter formatter,
+                SortedList<string, DefSymbol> defList, DefSymbol defSym,
+                SymbolTable symbolTable) : this(owner, formatter, defList, defSym) {
+            mSymbolTable = symbolTable;
+
+            widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
+                Visibility.Visible;
+            projectLabelUniqueLabel.Visibility = Visibility.Collapsed;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mDefaultLabelColor = labelNotesLabel.Foreground;
 
-            if (DefSym != null) {
-                labelTextBox.Text = DefSym.Label;
-                valueTextBox.Text = mNumFormatter.FormatValueInBase(DefSym.Value,
-                    DefSym.DataDescriptor.NumBase);
-                commentTextBox.Text = DefSym.Comment;
+            if (mOldSym != null) {
+                Label = mOldSym.Label;
+                Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
+                    mOldSym.DataDescriptor.NumBase);
+                VarWidth = mOldSym.Width.ToString();
+                Comment = mOldSym.Comment;
 
-                if (DefSym.SymbolType == Symbol.Type.Constant) {
+                if (mOldSym.SymbolType == Symbol.Type.Constant) {
                     constantRadioButton.IsChecked = true;
                 } else {
                     addressRadioButton.IsChecked = true;
@@ -100,37 +154,55 @@ namespace SourceGen.WpfGui {
         }
 
         private void UpdateControls() {
-            bool labelValid, labelUnique, valueValid;
+            if (!IsLoaded) {
+                return;
+            }
 
-            // Label must be valid and not already exist in project symbol list.  (It's okay
-            // if it exists elsewhere.)
-            labelValid = Asm65.Label.ValidateLabel(labelTextBox.Text);
+            // Label must be valid and not already exist in project symbol list.  (For project
+            // symbols, it's okay if an identical label exists elsewhere.)
+            bool labelValid = Asm65.Label.ValidateLabel(Label);
+            bool labelUnique;
 
-            if (mDefSymbolList.TryGetValue(labelTextBox.Text, out DefSymbol existing)) {
+            if (mDefSymbolList.TryGetValue(Label, out DefSymbol existing)) {
                 // It's okay if it's the same object.
-                labelUnique = (existing == DefSym);
+                labelUnique = (existing == mOldSym);
             } else {
                 labelUnique = true;
+            }
+
+            // For local variables, do a secondary uniqueness check.
+            if (labelUnique && mSymbolTable != null) {
+                labelUnique = !mSymbolTable.TryGetValue(Label, out Symbol sym);
             }
 
             // Value must be blank, meaning "erase any earlier definition", or valid value.
             // (Hmm... don't currently have a way to specify "no symbol" in DefSymbol.)
             //if (!string.IsNullOrEmpty(valueTextBox.Text)) {
-            valueValid = ParseValue(out int unused1, out int unused2);
+            bool valueValid = ParseValue(out int unused1, out int unused2);
             //} else {
             //    valueValid = true;
             //}
 
+            bool widthValid = true;
+            if (widthEntry1.Visibility == Visibility.Visible) {
+                if (!int.TryParse(VarWidth, out int width) ||
+                        width < DefSymbol.MIN_WIDTH || width > DefSymbol.MAX_WIDTH) {
+                    widthValid = false;
+                }
+            }
+
             // TODO(maybe): do this the XAML way, with properties and Styles
             labelNotesLabel.Foreground = labelValid ? mDefaultLabelColor : Brushes.Red;
-            labelUniqueLabel.Foreground = labelUnique ? mDefaultLabelColor : Brushes.Red;
+            labelUniqueLabel.Foreground = projectLabelUniqueLabel.Foreground =
+                labelUnique ? mDefaultLabelColor : Brushes.Red;
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
+            widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;
 
-            IsValid = labelValid && labelUnique && valueValid;
+            IsValid = labelValid && labelUnique && valueValid && widthValid;
         }
 
         private bool ParseValue(out int value, out int numBase) {
-            string str = valueTextBox.Text;
+            string str = Value;
             if (str.IndexOf('/') >= 0) {
                 // treat as address
                 numBase = 16;
@@ -145,19 +217,16 @@ namespace SourceGen.WpfGui {
 
             ParseValue(out int value, out int numBase);
             FormatDescriptor.SubType subType = FormatDescriptor.GetSubTypeForBase(numBase);
-            DefSym = new DefSymbol(labelTextBox.Text, value, Symbol.Source.Project,
+            int width = DefSymbol.NO_WIDTH;
+            if (!string.IsNullOrEmpty(VarWidth)) {
+                width = int.Parse(VarWidth);
+            }
+
+            NewSym = new DefSymbol(Label, value, Symbol.Source.Project,
                 isConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                subType, commentTextBox.Text, string.Empty);
+                subType, Comment, string.Empty, width);
 
             DialogResult = true;
-        }
-
-        private void LabelTextBox_TextChanged(object sender, TextChangedEventArgs e) {
-            UpdateControls();
-        }
-
-        private void ValueTextBox_TextChanged(object sender, TextChangedEventArgs e) {
-            UpdateControls();
         }
     }
 }

@@ -15,18 +15,23 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SourceGen {
     /// <summary>
     /// Table of redefinable variables.  A project may have several of these, at different
     /// offsets.  The contents of later tables overwrite the contents of earlier tables.
+    ///
+    /// The class is mutable, but may only be modified by the LvTable editor (which makes
+    /// changes to a work object that moves through the undo/redo buffer) or the
+    /// deserializer.
     /// </summary>
     public class LocalVariableTable {
         /// <summary>
         /// List of variables.  The symbol's label must be unique within a table, so we sort
         /// on that.
         /// </summary>
-        private SortedList<string, DefSymbol> mVariables;
+        public SortedList<string, DefSymbol> Variables;
 
         /// <summary>
         /// If set, all values from previous VariableTables should be discarded when this
@@ -40,25 +45,65 @@ namespace SourceGen {
         /// </remarks>
         public bool ClearPrevious { get; set; }
 
-        /// <summary>
-        /// Indexer.
-        /// </summary>
-        /// <param name="key">Symbol's label.</param>
-        /// <returns>Matching symbol.  Throws an exception if not found.</returns>
-        public DefSymbol this[string key] {
-            get {
-                return mVariables[key];
-            }
-            set {
-                mVariables[key] = value;
-            }
-        }
 
         /// <summary>
         /// Constructs an empty table.
         /// </summary>
         public LocalVariableTable() {
-            mVariables = new SortedList<string, DefSymbol>();
+            Variables = new SortedList<string, DefSymbol>();
+        }
+
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        /// <param name="src">Object to clone.</param>
+        public LocalVariableTable(LocalVariableTable src) : this() {
+            ClearPrevious = src.ClearPrevious;
+
+            foreach (KeyValuePair<string, DefSymbol> kvp in src.Variables) {
+                Variables[kvp.Key] = kvp.Value;
+            }
+
+            Debug.Assert(this == src);
+        }
+
+        public static bool operator ==(LocalVariableTable a, LocalVariableTable b) {
+            if (ReferenceEquals(a, b)) {
+                return true;    // same object, or both null
+            }
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                return false;   // one is null
+            }
+            // All fields must be equal.
+            if (a.ClearPrevious != b.ClearPrevious) {
+                return false;
+            }
+            if (a.Variables.Count != b.Variables.Count) {
+                return false;
+            }
+            // Compare all list entries.
+            for (int i = 0; i < a.Variables.Count; i++) {
+                if (a.Variables.Values[i] != b.Variables.Values[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static bool operator !=(LocalVariableTable a, LocalVariableTable b) {
+            return !(a == b);
+        }
+        public override bool Equals(object obj) {
+            return obj is LocalVariableTable && this == (LocalVariableTable)obj;
+        }
+        public override int GetHashCode() {
+            int hashCode = 0;
+            foreach (KeyValuePair<string, DefSymbol> kvp in Variables) {
+                hashCode ^= kvp.Value.GetHashCode();
+            }
+            if (ClearPrevious) {
+                hashCode++;
+            }
+            return hashCode;
         }
     }
 }

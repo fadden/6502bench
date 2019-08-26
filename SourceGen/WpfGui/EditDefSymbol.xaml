@@ -36,40 +36,47 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Column="0" Grid.Row="0" Text="Label:"/>
         <StackPanel Grid.Column="1" Grid.Row="0">
-            <TextBox Name="labelTextBox" Margin="0,1,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}"
-                     TextChanged="LabelTextBox_TextChanged"/>
+            <TextBox Name="labelTextBox" Margin="0,1,0,0" Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}"
+                     FontFamily="{StaticResource GeneralMonoFont}"/>
             <TextBlock Name="labelNotesLabel" Text="• 2+ alphanumerics, starting with letter" Margin="0,4,0,0"/>
-            <TextBlock Name="labelUniqueLabel" Text="• Unique among project symbols" Margin="0,4,0,16"/>
+            <TextBlock Name="projectLabelUniqueLabel" Text="• Unique among project symbols" Margin="0,4,0,16"/>
+            <TextBlock Name="labelUniqueLabel" Text="• Unique" Margin="0,4,0,16"/>
         </StackPanel>
 
         <TextBlock Grid.Column="0" Grid.Row="1" Text="Value:"/>
         <StackPanel Grid.Column="1" Grid.Row="1">
-            <TextBox Name="valueTextBox" Margin="0,1,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}"
-                     TextChanged="ValueTextBox_TextChanged"/>
+            <TextBox Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                     FontFamily="{StaticResource GeneralMonoFont}"/>
             <TextBlock Name="valueNotesLabel" Text="• Decimal, hex ($), or binary (%)" Margin="0,4,0,16"/>
         </StackPanel>
 
-        <TextBlock Grid.Column="0" Grid.Row="2" Text="Comment:" Margin="0,0,8,0"/>
-        <StackPanel Grid.Column="1" Grid.Row="2">
-            <TextBox Name="commentTextBox" Margin="0,1,0,0"
+        <TextBlock Name="widthEntry1" Grid.Column="0" Grid.Row="2" Text="Width:"/>
+        <StackPanel Name="widthEntry2" Grid.Column="1" Grid.Row="2">
+            <TextBox Margin="0,1,0,0" Text="{Binding VarWidth, UpdateSourceTrigger=PropertyChanged}"
+                     FontFamily="{StaticResource GeneralMonoFont}"/>
+            <TextBlock Name="widthNotesLabel" Text="• Decimal, 1-4" Margin="0,4,0,16"/>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Comment:" Margin="0,0,8,0"/>
+        <StackPanel Grid.Column="1" Grid.Row="3">
+            <TextBox Margin="0,1,0,0" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
             <TextBlock Text="• Optional" Margin="0,4,0,16"/>
         </StackPanel>
 
-        <GroupBox Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Header="Symbol Type" Padding="4">
+        <GroupBox Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Header="Symbol Type" Padding="4">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Name="addressRadioButton" Content="Address"/>
                 <RadioButton Name="constantRadioButton" Content="Constant" Margin="24,0,0,0"/>
             </StackPanel>
         </GroupBox>
 
-        <StackPanel Grid.Column="1" Grid.Row="4" Margin="0,16,0,0"
+        <StackPanel Grid.Column="1" Grid.Row="5" Margin="0,16,0,0"
                     Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="70" IsDefault="True" IsEnabled="{Binding IsValid}"
                     Click="OkButton_Click"/>

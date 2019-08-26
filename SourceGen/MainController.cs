@@ -1689,12 +1689,15 @@ namespace SourceGen {
             return true;        // TODO
         }
 
+        private LocalVariableTable lvt = new LocalVariableTable();
         public void EditLocalVariableTable() {
             // TODO
-            EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin);
+            EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin, mProject.SymbolTable,
+                mOutputFormatter, lvt);
             if (dlg.ShowDialog() != true) {
                 return;
             }
+            lvt = dlg.NewTable;
         }
 
         public bool CanEditLongComment() {
@@ -1937,12 +1940,11 @@ namespace SourceGen {
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mOutputFormatter,
-                mProject.ProjectProps.ProjectSyms);
-            dlg.DefSym = origDefSym;
+                mProject.ProjectProps.ProjectSyms, origDefSym);
             if (dlg.ShowDialog() == true) {
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
                 newProps.ProjectSyms.Remove(origDefSym.Label);
-                newProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+                newProps.ProjectSyms[dlg.NewSym.Label] = dlg.NewSym;
 
                 UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
                     mProject.ProjectProps, newProps);

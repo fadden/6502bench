@@ -20,7 +20,8 @@ namespace SourceGen {
     /// <summary>
     /// A collection of project properties.
     /// 
-    /// The class is mutable, but may only be modified by DisasmProject.ApplyChanges or
+    /// The class is mutable, but may only be modified by the property editor (which updates
+    /// a work object that gets put into the project by DisasmProject.ApplyChanges) or
     /// the deserializer.
     /// 
     /// All fields are explicitly handled by the ProjectFile serializer.

@@ -24,6 +24,8 @@ namespace SourceGen {
     /// </summary>
     public class DefSymbol : Symbol {
         public const int NO_WIDTH = -1;
+        public const int MIN_WIDTH = 1;
+        public const int MAX_WIDTH = 4;
 
         /// <summary>
         /// Data format descriptor.
@@ -91,6 +93,25 @@ namespace SourceGen {
 
             Comment = comment;
             Tag = tag;
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="label">Symbol's label.</param>
+        /// <param name="value">Symbol's value.</param>
+        /// <param name="source">Symbol source (general point of origin).</param>
+        /// <param name="type">Symbol type.</param>
+        /// <param name="formatSubType">Format descriptor sub-type, so we know how the
+        ///   user wants the value to be displayed.</param>
+        /// <param name="comment">End-of-line comment.</param>
+        /// <param name="tag">Symbol tag, used for grouping platform symbols.</param>
+        /// <param name="width">Variable width.</param>
+        public DefSymbol(string label, int value, Source source, Type type,
+                FormatDescriptor.SubType formatSubType, string comment, string tag, int width)
+                : this(label, value, source, type, formatSubType, comment, tag) {
+            Debug.Assert(width == NO_WIDTH || (width >= MIN_WIDTH && width <= MAX_WIDTH));
+            Width = width;
         }
 
         /// <summary>

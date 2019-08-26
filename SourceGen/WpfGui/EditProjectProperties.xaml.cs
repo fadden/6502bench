@@ -157,10 +157,10 @@ namespace SourceGen.WpfGui {
             NewProps = new ProjectProperties(mWorkProps);
             DialogResult = true;
 
-            GridView view = (GridView)projectSymbolsListView.View;
-            foreach (GridViewColumn header in view.Columns) {
-                Debug.WriteLine("WIDTH " + header.ActualWidth);
-            }
+            //GridView view = (GridView)projectSymbolsListView.View;
+            //foreach (GridViewColumn header in view.Columns) {
+            //    Debug.WriteLine("WIDTH " + header.ActualWidth);
+            //}
         }
 
         private void UpdateControls() {
@@ -431,11 +431,11 @@ namespace SourceGen.WpfGui {
         }
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
-            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms);
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms, null);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
-                Debug.WriteLine("ADD: " + dlg.DefSym);
-                mWorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+                Debug.WriteLine("ADD: " + dlg.NewSym);
+                mWorkProps.ProjectSyms[dlg.NewSym.Label] = dlg.NewSym;
                 IsDirty = true;
 
                 // Reload the contents.  This loses the selection, but that shouldn't be an
@@ -466,13 +466,13 @@ namespace SourceGen.WpfGui {
         }
 
         private void DoEditSymbol(DefSymbol defSym) {
-            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms);
-            dlg.DefSym = defSym;
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms,
+                defSym);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.
                 mWorkProps.ProjectSyms.Remove(defSym.Label);
-                mWorkProps.ProjectSyms[dlg.DefSym.Label] = dlg.DefSym;
+                mWorkProps.ProjectSyms[dlg.NewSym.Label] = dlg.NewSym;
                 IsDirty = true;
                 LoadProjectSymbols();
                 UpdateControls();
