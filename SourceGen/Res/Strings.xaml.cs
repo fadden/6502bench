@@ -149,6 +149,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_InvalidFormatWordSelNon1");
         public static string INVALID_FORMAT_WORD_SEL_UNEVEN_FMT =
             (string)Application.Current.FindResource("str_InvalidFormatWordSelUnevenFmt");
+        public static string LOCAL_VARIABLE_TABLE_CLEAR =
+            (string)Application.Current.FindResource("str_LocalVariableTableClear");
+        public static string LOCAL_VARIABLE_TABLE_EMPTY =
+            (string)Application.Current.FindResource("str_LocalVariableTableEmpty");
         public static string NO_FILES_AVAILABLE =
             (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string OPEN_DATA_DOESNT_EXIST =

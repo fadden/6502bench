@@ -25,6 +25,10 @@ namespace SourceGen {
     /// The class is mutable, but may only be modified by the LvTable editor (which makes
     /// changes to a work object that moves through the undo/redo buffer) or the
     /// deserializer.
+    ///
+    /// (Referring to these as "local" variables is a bit of a misnomer, since they have
+    /// global scope from the point where they're defined.  The name reflects their intended
+    /// usage, rather than how the assembler will treat them.)
     /// </summary>
     public class LocalVariableTable {
         /// <summary>
@@ -38,10 +42,15 @@ namespace SourceGen {
         /// table is encountered.
         /// </summary>
         /// <remarks>
-        /// Might be useful to allow addresses (DP ops) and constants (StackRel ops) to be
+        /// This does not correspond to any output in generated assembly code.  We simply stop
+        /// trying to associate the symbols with instructions.  The code will either use a
+        /// less tightly-scoped value (e.g. project symbol) or output as hex.  There is no need
+        /// to tell the assembler to forget the symbol.
+        ///
+        /// It might be useful to allow addresses (DP ops) and constants (StackRel ops) to be
         /// cleared independently, but I suspect the typical compiled-language scenario will
         /// involve StackRel for args and a sliding DP for locals, so generally it makes
-        /// sense to just clear both.
+        /// sense to just clear everything.
         /// </remarks>
         public bool ClearPrevious { get; set; }
 

@@ -224,6 +224,10 @@ namespace SourceGen {
 
             private List<Tag> mSelectionTags = new List<Tag>();
 
+            /// <summary>
+            /// Holds data that helps us position the scroll view at the correct position
+            /// after changes have been applied.
+            /// </summary>
             private class Top {
                 // File offset of line.
                 public int FileOffset { get; private set; }
@@ -495,6 +499,9 @@ namespace SourceGen {
                         break;
                     case Line.Type.Data:
                         parts = GenerateDataLine(line.FileOffset, line.SubLineIndex);
+                        break;
+                    case Line.Type.LocalVariableTable:
+                        parts = GenerateLvTableLine(line.FileOffset, line.SubLineIndex);
                         break;
                     case Line.Type.Blank:
                         // Nothing to do.
@@ -937,6 +944,23 @@ namespace SourceGen {
                         longComment.BackgroundColor, lines);
                 }
 
+                // Local variable tables come next.  Defer rendering.
+                if (mProject.LvTables.TryGetValue(offset, out LocalVariableTable lvt)) {
+                    int count = lvt.Variables.Count;
+                    // If "clear previous" is set, we output an additional line.
+                    if (lvt.ClearPrevious) {
+                        count++;
+                    }
+                    if (count == 0) {
+                        // Need to show something so the user will know an empty table is here.
+                        count = 1;
+                    }
+                    for (int i = 0; i < count; i++) {
+                        Line line = new Line(offset, 0, Line.Type.LocalVariableTable, i);
+                        lines.Add(line);
+                    }
+                }
+
                 if (attr.IsInstructionStart) {
                     // Generate reg width directive, if necessary.
                     if (mProject.CpuDef.HasEmuFlag) {
@@ -1268,6 +1292,48 @@ namespace SourceGen {
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
                 flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
             return parts;
+        }
+
+        private FormattedParts GenerateLvTableLine(int offset, int subLineIndex) {
+            if (!mProject.LvTables.TryGetValue(offset, out LocalVariableTable lvt)) {
+                Debug.Assert(false);
+                return FormattedParts.CreateLongComment("BAD OFFSET +" + offset.ToString("x6") +
+                    " sub=" + subLineIndex);
+            }
+
+            if (lvt.ClearPrevious) {
+                if (subLineIndex == 0) {
+                    return FormattedParts.CreateLongComment(
+                        Res.Strings.LOCAL_VARIABLE_TABLE_CLEAR);
+                } else {
+                    // adjust for previously output "clear" line
+                    subLineIndex--;
+                }
+            }
+
+            if (lvt.Variables.Count == 0) {
+                // If ClearPrevious is set, we returned the "clear" line for index zero.
+                // So this is an empty table without a clear.  We want to show something so
+                // the user knows there's dead weight here.
+                Debug.Assert(subLineIndex == 0 && !lvt.ClearPrevious);
+                return FormattedParts.CreateLongComment(
+                    Res.Strings.LOCAL_VARIABLE_TABLE_EMPTY);
+            }
+
+            if (subLineIndex >= lvt.Variables.Values.Count) {
+                return FormattedParts.CreateLongComment("BAD INDEX +" + offset.ToString("x6") +
+                    " sub=" + subLineIndex);
+            } else {
+                DefSymbol defSym = lvt.Variables.Values[subLineIndex];
+                // Use an operand length of 1 so things are shown as concisely as possible.
+                string addrStr = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
+                    null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
+                string comment = mFormatter.FormatEolComment(defSym.Comment);
+                return FormattedParts.CreateEquDirective(defSym.Label,
+                    mFormatter.FormatPseudoOp(mPseudoOpNames.EquDirective),
+                    addrStr, comment);
+            }
         }
 
         private FormattedParts[] GenerateStringLines(int offset, string popcode,

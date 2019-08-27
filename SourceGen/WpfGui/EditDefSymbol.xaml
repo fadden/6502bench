@@ -52,6 +52,7 @@ limitations under the License.
         <StackPanel Grid.Column="1" Grid.Row="1">
             <TextBox Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
+            <TextBlock Name="valueRangeLabel" Text="• Value between 0-255" Margin="0,4,0,0"/>
             <TextBlock Name="valueNotesLabel" Text="• Decimal, hex ($), or binary (%)" Margin="0,4,0,16"/>
         </StackPanel>
 
@@ -59,7 +60,7 @@ limitations under the License.
         <StackPanel Name="widthEntry2" Grid.Column="1" Grid.Row="2">
             <TextBox Margin="0,1,0,0" Text="{Binding VarWidth, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
-            <TextBlock Name="widthNotesLabel" Text="• Decimal, 1-4" Margin="0,4,0,16"/>
+            <TextBlock Name="widthNotesLabel" Text="• Decimal value, 1-4" Margin="0,4,0,16"/>
         </StackPanel>
 
         <TextBlock Grid.Column="0" Grid.Row="3" Text="Comment:" Margin="0,0,8,0"/>

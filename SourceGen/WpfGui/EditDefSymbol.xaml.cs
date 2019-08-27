@@ -127,6 +127,7 @@ namespace SourceGen.WpfGui {
                 widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
                     Visibility.Collapsed;
                 labelUniqueLabel.Visibility = Visibility.Collapsed;
+                valueRangeLabel.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -178,10 +179,14 @@ namespace SourceGen.WpfGui {
             // Value must be blank, meaning "erase any earlier definition", or valid value.
             // (Hmm... don't currently have a way to specify "no symbol" in DefSymbol.)
             //if (!string.IsNullOrEmpty(valueTextBox.Text)) {
-            bool valueValid = ParseValue(out int unused1, out int unused2);
+            bool valueValid = ParseValue(out int value, out int unused2);
             //} else {
             //    valueValid = true;
             //}
+            bool valueRangeValid = true;
+            if (mIsVariable && valueValid && (value < 0 || value > 255)) {
+                valueRangeValid = false;
+            }
 
             bool widthValid = true;
             if (widthEntry1.Visibility == Visibility.Visible) {
@@ -191,14 +196,14 @@ namespace SourceGen.WpfGui {
                 }
             }
 
-            // TODO(maybe): do this the XAML way, with properties and Styles
             labelNotesLabel.Foreground = labelValid ? mDefaultLabelColor : Brushes.Red;
             labelUniqueLabel.Foreground = projectLabelUniqueLabel.Foreground =
                 labelUnique ? mDefaultLabelColor : Brushes.Red;
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
+            valueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
             widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;
 
-            IsValid = labelValid && labelUnique && valueValid && widthValid;
+            IsValid = labelValid && labelUnique && valueValid && valueRangeValid && widthValid;
         }
 
         private bool ParseValue(out int value, out int numBase) {

@@ -1455,6 +1455,11 @@ namespace SourceGen {
                         EditNote();
                     }
                     break;
+                case LineListGen.Line.Type.LocalVariableTable:
+                    if (CanEditLocalVariableTable()) {
+                        EditLocalVariableTable();
+                    }
+                    break;
 
                 case LineListGen.Line.Type.Code:
                 case LineListGen.Line.Type.Data:
@@ -3177,6 +3182,14 @@ namespace SourceGen {
                             sourceStr = "???";
                         }
                         extraStr = "Source: " + sourceStr;
+                    }
+                    break;
+                case LineListGen.Line.Type.LocalVariableTable:
+                    lineTypeStr = "variable table";
+                    if (mProject.LvTables.TryGetValue(line.FileOffset,
+                            out LocalVariableTable lvt)) {
+                        extraStr = string.Format("{0} entries, clear-previous={1}",
+                            lvt.Variables.Count, lvt.ClearPrevious);
                     }
                     break;
                 default:
