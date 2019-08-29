@@ -1345,9 +1345,12 @@ namespace SourceGen {
             }
             int tableIndex = line.SubLineIndex;
             if (lvt.ClearPrevious) {
-                if (--tableIndex < 0) {
-                    return null;
-                }
+                tableIndex--;
+            }
+            if (tableIndex < 0 || tableIndex >= lvt.Count) {
+                // Will be -1 on first line when ClearPrevious was set.  Will be zero on
+                // first line of empty table.
+                return null;
             }
 
             return lvt[tableIndex];

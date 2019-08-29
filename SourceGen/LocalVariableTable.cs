@@ -112,15 +112,22 @@ namespace SourceGen {
 
         private void SortIfNeeded() {
             if (mNeedSort) {
-                // Currently sorting primarily by value, secondarily by label.  This ordering
-                // determines how it appears in the code list.  If we want to make it
+                // Currently sorting primarily by value, secondarily by symbol type.  This
+                // ordering determines how it appears in the code list.  If we want to make it
                 // configurable we just need to replace the sort function.
                 mVarByValue.Sort((a, b) => {
+                    // Numeric ascending.
                     int diff = a.Value - b.Value;
                     if (diff != 0) {
                         return diff;
                     }
-                    return a.Label.CompareTo(b.Label);
+                    // DP addr first, StackRel const second
+                    if (a.SymbolType == Symbol.Type.ExternalAddr) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                    //return a.Label.CompareTo(b.Label);
                 });
                 mNeedSort = false;
             }
