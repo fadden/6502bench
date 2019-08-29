@@ -67,6 +67,18 @@ namespace SourceGen.WpfGui {
         }
         private string mComment;
 
+        public bool IsAddress {
+            get { return mIsAddress; }
+            set { mIsAddress = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mIsAddress;
+
+        public bool IsConstant {
+            get { return mIsConstant; }
+            set { mIsConstant = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mIsConstant;
+
         /// <summary>
         /// Format object to use when formatting addresses and constants.
         /// </summary>
@@ -127,7 +139,7 @@ namespace SourceGen.WpfGui {
                 widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
                     Visibility.Collapsed;
                 labelUniqueLabel.Visibility = Visibility.Collapsed;
-                valueRangeLabel.Visibility = Visibility.Collapsed;
+                valueRangeLabel.Visibility = valueUniqueLabel.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -142,12 +154,12 @@ namespace SourceGen.WpfGui {
                 Comment = mOldSym.Comment;
 
                 if (mOldSym.SymbolType == Symbol.Type.Constant) {
-                    constantRadioButton.IsChecked = true;
+                    IsConstant = true;
                 } else {
-                    addressRadioButton.IsChecked = true;
+                    IsAddress = true;
                 }
             } else {
-                addressRadioButton.IsChecked = true;
+                IsAddress = true;
             }
 
             labelTextBox.Focus();
@@ -164,6 +176,7 @@ namespace SourceGen.WpfGui {
             bool labelValid = Asm65.Label.ValidateLabel(Label);
             bool labelUnique;
 
+            // NOTE: should be using Asm65.Label.LABEL_COMPARER?
             if (mDefSymbolList.TryGetValue(Label, out DefSymbol existing)) {
                 // It's okay if it's the same object.
                 labelUnique = (existing == mOldSym);
@@ -171,7 +184,7 @@ namespace SourceGen.WpfGui {
                 labelUnique = true;
             }
 
-            // For local variables, do a secondary uniqueness check.
+            // For local variables, do a secondary uniqueness check across the full symbol table.
             if (labelUnique && mSymbolTable != null) {
                 labelUnique = !mSymbolTable.TryGetValue(Label, out Symbol sym);
             }
@@ -179,20 +192,35 @@ namespace SourceGen.WpfGui {
             // Value must be blank, meaning "erase any earlier definition", or valid value.
             // (Hmm... don't currently have a way to specify "no symbol" in DefSymbol.)
             //if (!string.IsNullOrEmpty(valueTextBox.Text)) {
-            bool valueValid = ParseValue(out int value, out int unused2);
+            bool valueValid = ParseValue(out int thisValue, out int unused2);
             //} else {
             //    valueValid = true;
             //}
             bool valueRangeValid = true;
-            if (mIsVariable && valueValid && (value < 0 || value > 255)) {
+            if (mIsVariable && valueValid && (thisValue < 0 || thisValue > 255)) {
                 valueRangeValid = false;
             }
 
             bool widthValid = true;
+            int thisWidth = 0;
             if (widthEntry1.Visibility == Visibility.Visible) {
-                if (!int.TryParse(VarWidth, out int width) ||
-                        width < DefSymbol.MIN_WIDTH || width > DefSymbol.MAX_WIDTH) {
+                if (!int.TryParse(VarWidth, out thisWidth) ||
+                        thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH) {
                     widthValid = false;
+                }
+            }
+
+            Symbol.Type symbolType = IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr;
+
+            // For a variable, the value must also be unique within the table.  Values have
+            // width, so we need to check for overlap.
+            bool valueUniqueValid = true;
+            if (mIsVariable && valueValid && widthValid) {
+                foreach (KeyValuePair<string, DefSymbol> kvp in mDefSymbolList) {
+                    if (DefSymbol.CheckOverlap(kvp.Value, thisValue, thisWidth, symbolType)) {
+                        valueUniqueValid = false;
+                        break;
+                    }
                 }
             }
 
@@ -201,9 +229,11 @@ namespace SourceGen.WpfGui {
                 labelUnique ? mDefaultLabelColor : Brushes.Red;
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
             valueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
+            valueUniqueLabel.Foreground = valueUniqueValid ? mDefaultLabelColor : Brushes.Red;
             widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;
 
-            IsValid = labelValid && labelUnique && valueValid && valueRangeValid && widthValid;
+            IsValid = labelValid && labelUnique && valueValid && valueRangeValid &&
+                valueUniqueValid && widthValid;
         }
 
         private bool ParseValue(out int value, out int numBase) {
@@ -218,8 +248,6 @@ namespace SourceGen.WpfGui {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            bool isConstant = (constantRadioButton.IsChecked == true);
-
             ParseValue(out int value, out int numBase);
             FormatDescriptor.SubType subType = FormatDescriptor.GetSubTypeForBase(numBase);
             int width = DefSymbol.NO_WIDTH;
@@ -228,8 +256,8 @@ namespace SourceGen.WpfGui {
             }
 
             NewSym = new DefSymbol(Label, value,
-                mIsVariable ? Symbol.Source.Project : Symbol.Source.Variable,
-                isConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
+                mIsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
+                IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
                 subType, Comment, string.Empty, width);
 
             DialogResult = true;

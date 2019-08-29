@@ -196,6 +196,28 @@ namespace Asm65 {
         public CycleMod CycleMods { get { return (CycleMod)(CycDef & ~0xff); } }
 
         /// <summary>
+        /// True if the instruction's address mode is a direct page access.
+        /// </summary>
+        public bool IsDirectPageInstruction {
+            get {
+                switch (AddrMode) {
+                    case AddressMode.DP:
+                    case AddressMode.DPInd:
+                    case AddressMode.DPIndexX:
+                    case AddressMode.DPIndexXInd:
+                    case AddressMode.DPIndexY:
+                    case AddressMode.DPIndIndexY:
+                    case AddressMode.DPIndIndexYLong:
+                    case AddressMode.DPIndLong:
+                    case AddressMode.StackDPInd:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// True if the operand's width is uniquely determined by the opcode mnemonic, even
         /// if the operation supports operands with varying widths.
         /// 

@@ -946,7 +946,7 @@ namespace SourceGen {
 
                 // Local variable tables come next.  Defer rendering.
                 if (mProject.LvTables.TryGetValue(offset, out LocalVariableTable lvt)) {
-                    int count = lvt.Variables.Count;
+                    int count = lvt.Count;
                     // If "clear previous" is set, we output an additional line.
                     if (lvt.ClearPrevious) {
                         count++;
@@ -1311,7 +1311,7 @@ namespace SourceGen {
                 }
             }
 
-            if (lvt.Variables.Count == 0) {
+            if (lvt.Count == 0) {
                 // If ClearPrevious is set, we returned the "clear" line for index zero.
                 // So this is an empty table without a clear.  We want to show something so
                 // the user knows there's dead weight here.
@@ -1320,11 +1320,11 @@ namespace SourceGen {
                     Res.Strings.LOCAL_VARIABLE_TABLE_EMPTY);
             }
 
-            if (subLineIndex >= lvt.Variables.Values.Count) {
+            if (subLineIndex >= lvt.Count) {
                 return FormattedParts.CreateLongComment("BAD INDEX +" + offset.ToString("x6") +
                     " sub=" + subLineIndex);
             } else {
-                DefSymbol defSym = lvt.Variables.Values[subLineIndex];
+                DefSymbol defSym = lvt[subLineIndex];
                 // Use an operand length of 1 so things are shown as concisely as possible.
                 string addrStr = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                     null, defSym.DataDescriptor, defSym.Value, 1,

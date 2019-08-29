@@ -134,6 +134,29 @@ namespace SourceGen {
             Tag = string.Empty;
         }
 
+        /// <summary>
+        /// Determines whether a symbol overlaps with a region.  Useful for variables.
+        /// </summary>
+        /// <param name="a">Symbol to check.</param>
+        /// <param name="value">Address.</param>
+        /// <param name="width">Symbol width.</param>
+        /// <param name="type">Symbol type to check against.</param>
+        /// <returns>True if the symbols overlap.</returns>
+        public static bool CheckOverlap(DefSymbol a, int value, int width, Type type) {
+            if (a.DataDescriptor.Length <= 0 || width <= 0) {
+                return false;
+            }
+            if (a.Value < 0 || value < 0) {
+                return false;
+            }
+            if (a.SymbolType != type) {
+                return false;
+            }
+            int maxStart = Math.Max(a.Value, value);
+            int minEnd = Math.Min(a.Value + a.DataDescriptor.Length - 1, value + width - 1);
+            return (maxStart <= minEnd);
+        }
+
 
         public static bool operator ==(DefSymbol a, DefSymbol b) {
             if (ReferenceEquals(a, b)) {
@@ -142,19 +165,28 @@ namespace SourceGen {
             if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
                 return false;   // one is null
             }
-            // All fields must be equal, except Xrefs.
-            if (a.DataDescriptor != b.DataDescriptor ||
-                    a.Comment != b.Comment ||
-                    a.Tag != b.Tag) {
-                return false;
-            }
-            return true;
+            return a.Equals(b);
         }
         public static bool operator !=(DefSymbol a, DefSymbol b) {
             return !(a == b);
         }
         public override bool Equals(object obj) {
-            return obj is DefSymbol && this == (DefSymbol)obj;
+            if (!(obj is DefSymbol)) {
+                return false;
+            }
+            // Do base-class equality comparison and the ReferenceEquals check.
+            if (!base.Equals(obj)) {
+                return false;
+            }
+
+            // All fields must be equal, except Xrefs.
+            DefSymbol other = (DefSymbol)obj;
+            if (DataDescriptor != other.DataDescriptor ||
+                    Comment != other.Comment ||
+                    Tag != other.Tag) {
+                return false;
+            }
+            return true;
         }
         public override int GetHashCode() {
             return base.GetHashCode() ^

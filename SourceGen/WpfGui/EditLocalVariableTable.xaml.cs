@@ -130,8 +130,8 @@ namespace SourceGen.WpfGui {
         private void LoadVariables() {
             Variables.Clear();
 
-            foreach (KeyValuePair<string, DefSymbol> kvp in mWorkTable.Variables) {
-                DefSymbol defSym = kvp.Value;
+            for (int i = 0; i < mWorkTable.Count; i++) {
+                DefSymbol defSym = mWorkTable[i];
                 string typeStr;
                 if (defSym.SymbolType == Symbol.Type.Constant) {
                     typeStr = Res.Strings.ABBREV_CONSTANT;
@@ -183,17 +183,17 @@ namespace SourceGen.WpfGui {
                 return;
             }
             FormattedSymbol item = (FormattedSymbol)lvi.Content;
-            DefSymbol defSym = mWorkTable.Variables[item.Label];
+            DefSymbol defSym = mWorkTable.GetByLabel(item.Label);
             DoEditSymbol(defSym);
         }
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
-            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.Variables, null,
-                mSymbolTable, true);
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.GetSortedByLabel(),
+                null, mSymbolTable, true);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 Debug.WriteLine("ADD: " + dlg.NewSym);
-                mWorkTable.Variables[dlg.NewSym.Label] = dlg.NewSym;
+                mWorkTable.AddOrReplace(dlg.NewSym);
 
                 // Reload the contents.  This loses the selection, but that shouldn't be an
                 // issue when adding new symbols.  To do this incrementally we'd need to add
@@ -207,18 +207,18 @@ namespace SourceGen.WpfGui {
             // Single-select list view, button dimmed when no selection.
             Debug.Assert(symbolsListView.SelectedItems.Count == 1);
             FormattedSymbol item = (FormattedSymbol)symbolsListView.SelectedItems[0];
-            DefSymbol defSym = mWorkTable.Variables[item.Label];
+            DefSymbol defSym = mWorkTable.GetByLabel(item.Label);
             DoEditSymbol(defSym);
         }
 
         private void DoEditSymbol(DefSymbol defSym) {
-            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.Variables, defSym,
-                mSymbolTable, true);
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.GetSortedByLabel(),
+                defSym, mSymbolTable, true);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.
-                mWorkTable.Variables.Remove(defSym.Label);
-                mWorkTable.Variables[dlg.NewSym.Label] = dlg.NewSym;
+                mWorkTable.RemoveByLabel(defSym.Label);
+                mWorkTable.AddOrReplace(dlg.NewSym);
                 LoadVariables();
                 UpdateControls();
             }
@@ -230,8 +230,7 @@ namespace SourceGen.WpfGui {
 
             int selectionIndex = symbolsListView.SelectedIndex;
             FormattedSymbol item = (FormattedSymbol)symbolsListView.SelectedItems[0];
-            DefSymbol defSym = mWorkTable.Variables[item.Label];
-            mWorkTable.Variables.Remove(defSym.Label);
+            mWorkTable.RemoveByLabel(item.Label);
             LoadVariables();
             UpdateControls();
 

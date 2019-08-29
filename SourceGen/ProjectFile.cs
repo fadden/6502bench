@@ -322,10 +322,10 @@ namespace SourceGen {
 
             public SerLocalVariableTable() { }
             public SerLocalVariableTable(LocalVariableTable varTab) {
-                Variables = new List<SerDefSymbol>(varTab.Variables.Count);
-                foreach (KeyValuePair<string, DefSymbol> kvp in varTab.Variables) {
-                    // Note kvp.Key is redundant -- same as kvp.Value.Label
-                    Variables.Add(new SerDefSymbol(kvp.Value));
+                Variables = new List<SerDefSymbol>(varTab.Count);
+                for (int i = 0; i < varTab.Count; i++) {
+                    DefSymbol defSym = varTab[i];
+                    Variables.Add(new SerDefSymbol(defSym));
                 }
 
                 ClearPrevious = varTab.ClearPrevious;
@@ -831,7 +831,13 @@ namespace SourceGen {
                 if (!CreateDefSymbol(serDef, contentVersion, report, out DefSymbol defSym)) {
                     return false;
                 }
-                outLvt.Variables.Add(defSym.Label, defSym);
+                if (defSym.SymbolSource != Symbol.Source.Variable) {
+                    // not expected to happen
+                    Debug.WriteLine("Found local variable with bad source: " +
+                        defSym.SymbolSource);
+                    continue;
+                }
+                outLvt.AddOrReplace(defSym);
             }
             return true;
         }

@@ -1818,7 +1818,8 @@ namespace SourceGen {
             if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.Code) {
                 EditInstructionOperand(selOffset);
             } else {
-                Debug.Assert(CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
+                // We allow the selection to include meta-data like .org and Notes.
+                //Debug.Assert(CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
                 EditDataOperand(selOffset);
             }
         }
@@ -3189,7 +3190,7 @@ namespace SourceGen {
                     if (mProject.LvTables.TryGetValue(line.FileOffset,
                             out LocalVariableTable lvt)) {
                         extraStr = string.Format("{0} entries, clear-previous={1}",
-                            lvt.Variables.Count, lvt.ClearPrevious);
+                            lvt.Count, lvt.ClearPrevious);
                     }
                     break;
                 default:
