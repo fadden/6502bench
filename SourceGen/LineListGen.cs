@@ -1331,7 +1331,7 @@ namespace SourceGen {
                     PseudoOp.FormatNumericOpFlags.None);
                 string comment = mFormatter.FormatEolComment(defSym.Comment);
                 return FormattedParts.CreateEquDirective(defSym.Label,
-                    mFormatter.FormatPseudoOp(mPseudoOpNames.EquDirective),
+                    mFormatter.FormatPseudoOp(mPseudoOpNames.VarDirective),
                     addrStr, comment);
             }
         }

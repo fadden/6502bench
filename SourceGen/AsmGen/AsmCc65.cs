@@ -103,6 +103,7 @@ namespace SourceGen.AsmGen {
         private static PseudoOp.PseudoOpNames sDataOpNames =
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "=" },
+                //VarDirective
                 { "OrgDirective", ".org" },
                 //RegWidthDirective         // .a8, .a16, .i8, .i16
                 { "DefineData1", ".byte" },
@@ -502,6 +503,11 @@ namespace SourceGen.AsmGen {
         public void OutputEquDirective(string name, string valueStr, string comment) {
             OutputLine(name, SourceFormatter.FormatPseudoOp(sDataOpNames.EquDirective),
                 valueStr, SourceFormatter.FormatEolComment(comment));
+        }
+
+        // IGenerator
+        public void OutputVarDirective(string name, string valueStr, string comment) {
+            OutputEquDirective(name, valueStr, comment);
         }
 
         // IGenerator

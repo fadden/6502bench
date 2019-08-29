@@ -592,13 +592,10 @@ limitations under the License.
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>
-                            <ColumnDefinition Width="0"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>
-                            <ColumnDefinition Width="0"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>
-                            <ColumnDefinition Width="0"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.8*"/>
                         </Grid.ColumnDefinitions>
@@ -611,114 +608,118 @@ limitations under the License.
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- first column -->
+                        <!-- first row -->
                         <TextBlock Grid.Column="0" Grid.Row="0" Text="Equate:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <StackPanel Grid.Column="0" Grid.Row="1" VerticalAlignment="Center">
-                            <TextBlock Text="Little-endian" HorizontalAlignment="Right"/>
-                            <TextBlock Text="data, one byte:" HorizontalAlignment="Right"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="0" Grid.Row="2" VerticalAlignment="Center">
-                            <TextBlock Text="Big-endian data," HorizontalAlignment="Right"/>
-                            <TextBlock Text="two bytes:" HorizontalAlignment="Right"/>
-                        </StackPanel>
-                        <TextBlock Grid.Column="0" Grid.Row="3" Text="Generic str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="0" Grid.Row="4" Text="1-byte len str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-
                         <TextBox Name="equDirectiveTextBox" Grid.Column="1" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="defineData1TextBox" Grid.Column="1" Grid.Row="1"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="defineBigData2TextBox" Grid.Column="1" Grid.Row="2"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strGenericTextBox" Grid.Column="1" Grid.Row="3"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strLen8TextBox" Grid.Column="1" Grid.Row="4"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-
-                        <!-- second column -->
-                        <TextBlock Grid.Column="3" Grid.Row="0" Text="Origin:"
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Variable:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="1" Text="Two bytes:"
+                        <TextBox Name="varDirectiveTextBox" Grid.Column="3" Grid.Row="0"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="4" Grid.Row="0" Text="Origin:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="3" Text="Reverse str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Grid.Row="4" Text="2-byte len str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-
-                        <TextBox Name="orgDirectiveTextBox" Grid.Column="4" Grid.Row="0"
+                        <TextBox Name="orgDirectiveTextBox" Grid.Column="5" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="defineData2TextBox" Grid.Column="4" Grid.Row="1"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strReverseTextBox" Grid.Column="4" Grid.Row="3"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strLen16TextBox" Grid.Column="4" Grid.Row="4"
-                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
-                                 Text=".placeho" MaxLength="12"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-
-                        <!-- third column -->
                         <TextBlock Grid.Column="6" Grid.Row="0" Text="Reg width:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="1" Text="Three bytes:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="2" Text="Fill:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Grid.Row="3" Text="Null-term str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
-
                         <TextBox Name="regWidthDirectiveTextBox" Grid.Column="7" Grid.Row="0"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="defineData3TextBox" Grid.Column="7" Grid.Row="1"
+
+                        <!-- second row -->
+                        <StackPanel Grid.Column="0" Grid.Row="1" VerticalAlignment="Center">
+                            <TextBlock Text="Little-endian" HorizontalAlignment="Right"/>
+                            <TextBlock Text="data, one byte:" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <TextBox Name="defineData1TextBox" Grid.Column="1" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="fillTextBox" Grid.Column="7" Grid.Row="2"
+                        <TextBlock Grid.Column="2" Grid.Row="1" Text="Two bytes:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="defineData2TextBox" Grid.Column="3" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strNullTermTextBox" Grid.Column="7" Grid.Row="3"
+                        <TextBlock Grid.Column="4" Grid.Row="1" Text="Three bytes:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="defineData3TextBox" Grid.Column="5" Grid.Row="1"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="6" Grid.Row="1" Text="Four bytes:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="defineData4TextBox" Grid.Column="7" Grid.Row="1"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                        <!-- fourth column -->
-                        <TextBlock Grid.Column="9" Grid.Row="1" Text="Four bytes:"
+                        <!-- third row -->
+                        <StackPanel Grid.Column="0" Grid.Row="2" VerticalAlignment="Center">
+                            <TextBlock Text="Big-endian data," HorizontalAlignment="Right"/>
+                            <TextBlock Text="two bytes:" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <TextBox Name="defineBigData2TextBox" Grid.Column="1" Grid.Row="2"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="4" Grid.Row="2" Text="Fill:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="9" Grid.Row="2" Text="Bulk data:"
+                        <TextBox Name="fillTextBox" Grid.Column="5" Grid.Row="2"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="6" Grid.Row="2" Text="Bulk data:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="9" Grid.Row="3" Text="DCI str:"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="denseTextBox" Grid.Column="7" Grid.Row="2"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                        <TextBox Name="defineData4TextBox" Grid.Column="10" Grid.Row="1"
+                        <!-- fourth row -->
+                        <TextBlock Grid.Column="0" Grid.Row="3" Text="Generic str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strGenericTextBox" Grid.Column="1" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="denseTextBox" Grid.Column="10" Grid.Row="2"
+                        <TextBlock Grid.Column="2" Grid.Row="3" Text="Reverse str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strReverseTextBox" Grid.Column="3" Grid.Row="3"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <TextBox Name="strDciTextBox" Grid.Column="10" Grid.Row="3"
+                        <TextBlock Grid.Column="4" Grid.Row="3" Text="Null-term str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strNullTermTextBox" Grid.Column="5" Grid.Row="3"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="6" Grid.Row="3" Text="DCI str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strDciTextBox" Grid.Column="7" Grid.Row="3"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+
+                        <!-- fifth row -->
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="1-byte len str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strLen8TextBox" Grid.Column="1" Grid.Row="4"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="2-byte len str:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="strLen16TextBox" Grid.Column="3" Grid.Row="4"
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>

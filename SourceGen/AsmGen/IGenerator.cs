@@ -137,6 +137,14 @@ namespace SourceGen.AsmGen {
         void OutputEquDirective(string name, string valueStr, string comment);
 
         /// <summary>
+        /// Outputs a variable definition directive.  The numeric value is already formatted.
+        /// </summary>
+        /// <param name="name">Symbol label.</param>
+        /// <param name="valueStr">Formatted value.</param>
+        /// <param name="comment">End-of-line comment.</param>
+        void OutputVarDirective(string name, string valueStr, string comment);
+
+        /// <summary>
         /// Outputs a code origin directive.
         /// </summary>
         /// <param name="offset">Offset of code targeted to new address.</param>

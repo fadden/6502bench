@@ -65,6 +65,7 @@ namespace SourceGen {
         /// </summary>
         public class PseudoOpNames {
             public string EquDirective { get; private set; }
+            public string VarDirective { get; private set; }
             public string OrgDirective { get; private set; }
             public string RegWidthDirective { get; private set; }
 
@@ -85,10 +86,9 @@ namespace SourceGen {
             public string StrDci { get; private set; }
 
             /// <summary>
-            /// Constructs an empty PseudoOp.
+            /// Constructs an empty PseudoOp, for deserialization.
             /// </summary>
-            public PseudoOpNames() : this(new Dictionary<string, string>()) {
-            }
+            public PseudoOpNames() : this(new Dictionary<string, string>()) { }
 
             /// <summary>
             /// Constructor.  Pass in a dictionary with name/value pairs.  Unknown names
@@ -113,6 +113,7 @@ namespace SourceGen {
                     return false;   // one is null
                 }
                 return a.EquDirective == b.EquDirective &&
+                    a.VarDirective == b.VarDirective &&
                     a.OrgDirective == b.OrgDirective &&
                     a.RegWidthDirective == b.RegWidthDirective &&
                     a.DefineData1 == b.DefineData1 &&
@@ -217,12 +218,10 @@ namespace SourceGen {
         /// <summary>
         /// Returns a PseudoOpNames instance with some reasonable defaults for on-screen display.
         /// </summary>
-        public static PseudoOpNames DefaultPseudoOpNames {
-            get { return sDefaultPseudoOpNames; }
-        }
-        private static readonly PseudoOpNames sDefaultPseudoOpNames =
+        public static PseudoOpNames DefaultPseudoOpNames { get; } =
             new PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", ".eq" },
+                { "VarDirective", ".var" },
                 { "OrgDirective", ".org" },
                 { "RegWidthDirective", ".rwid" },
 

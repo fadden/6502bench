@@ -139,6 +139,7 @@ namespace SourceGen.WpfGui {
             // Map text boxes to PseudoOpName fields.
             mPseudoNameMap = new TextBoxPropertyMap[] {
                 new TextBoxPropertyMap(equDirectiveTextBox, "EquDirective"),
+                new TextBoxPropertyMap(varDirectiveTextBox, "VarDirective"),
                 new TextBoxPropertyMap(orgDirectiveTextBox, "OrgDirective"),
                 new TextBoxPropertyMap(regWidthDirectiveTextBox, "RegWidthDirective"),
                 new TextBoxPropertyMap(defineData1TextBox, "DefineData1"),
