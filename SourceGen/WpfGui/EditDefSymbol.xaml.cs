@@ -196,10 +196,6 @@ namespace SourceGen.WpfGui {
             //} else {
             //    valueValid = true;
             //}
-            bool valueRangeValid = true;
-            if (mIsVariable && valueValid && (thisValue < 0 || thisValue > 255)) {
-                valueRangeValid = false;
-            }
 
             bool widthValid = true;
             int thisWidth = 0;
@@ -207,6 +203,14 @@ namespace SourceGen.WpfGui {
                 if (!int.TryParse(VarWidth, out thisWidth) ||
                         thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH) {
                     widthValid = false;
+                }
+            }
+
+            bool valueRangeValid = true;
+            if (mIsVariable && valueValid && widthValid) {
+                // $ff with width 1 is okay, $ff with width 2 is not
+                if (thisValue < 0 || thisValue + thisWidth > 256) {
+                    valueRangeValid = false;
                 }
             }
 

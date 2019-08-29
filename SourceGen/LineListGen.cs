@@ -1336,6 +1336,23 @@ namespace SourceGen {
             }
         }
 
+        public DefSymbol GetLocalVariableFromLine(int lineIndex) {
+            Line line = this[lineIndex];
+            int offset = line.FileOffset;
+            if (!mProject.LvTables.TryGetValue(offset, out LocalVariableTable lvt)) {
+                Debug.Assert(false);
+                return null;
+            }
+            int tableIndex = line.SubLineIndex;
+            if (lvt.ClearPrevious) {
+                if (--tableIndex < 0) {
+                    return null;
+                }
+            }
+
+            return lvt[tableIndex];
+        }
+
         private FormattedParts[] GenerateStringLines(int offset, string popcode,
                 List<string> operands) {
             FormattedParts[] partsArray = new FormattedParts[operands.Count];

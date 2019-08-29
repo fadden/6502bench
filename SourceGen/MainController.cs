@@ -2966,20 +2966,28 @@ namespace SourceGen {
             LineListGen.Line.Type type = CodeLineList[lineIndex].LineType;
             if (type != LineListGen.Line.Type.Code &&
                     type != LineListGen.Line.Type.Data &&
-                    type != LineListGen.Line.Type.EquDirective) {
+                    type != LineListGen.Line.Type.EquDirective &&
+                    type != LineListGen.Line.Type.LocalVariableTable) {
                 // Code, data, and platform symbol EQUs have xrefs.
                 return;
             }
 
-            // Find the appropriate xref set.
-            int offset = CodeLineList[lineIndex].FileOffset;
             XrefSet xrefs;
-            if (offset < 0) {
-                int index = LineListGen.DefSymIndexFromOffset(offset);
-                DefSymbol defSym = mProject.ActiveDefSymbolList[index];
-                xrefs = defSym.Xrefs;
+
+            // Find the appropriate xref set.
+            if (type == LineListGen.Line.Type.LocalVariableTable) {
+                DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(lineIndex);
+                xrefs = (defSym == null) ? null : defSym.Xrefs;
             } else {
-                xrefs = mProject.GetXrefSet(offset);
+                int offset = CodeLineList[lineIndex].FileOffset;
+                if (offset < 0) {
+                    // EQU in header
+                    int index = LineListGen.DefSymIndexFromOffset(offset);
+                    DefSymbol defSym = mProject.ActiveDefSymbolList[index];
+                    xrefs = defSym.Xrefs;
+                } else {
+                    xrefs = mProject.GetXrefSet(offset);
+                }
             }
             if (xrefs == null || xrefs.Count == 0) {
                 return;
