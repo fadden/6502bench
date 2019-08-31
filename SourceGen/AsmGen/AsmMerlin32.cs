@@ -94,7 +94,7 @@ namespace SourceGen.AsmGen {
         private static PseudoOp.PseudoOpNames sDataOpNames =
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "equ" },
-                { "VarDirective", "~=" },       // not really
+                { "VarDirective", "equ" },
                 { "OrgDirective", "org" },
                 //RegWidthDirective
                 { "DefineData1", "dfb" },
@@ -158,6 +158,7 @@ namespace SourceGen.AsmGen {
             config.mForceDirectOperandPrefix = string.Empty;
             config.mForceAbsOperandPrefix = string.Empty;
             config.mForceLongOperandPrefix = string.Empty;
+            config.mLocalVariableLablePrefix = "]";
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = string.Empty;
@@ -400,7 +401,8 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputVarDirective(string name, string valueStr, string comment) {
-            OutputLine("]" + name, SourceFormatter.FormatPseudoOp(sDataOpNames.EquDirective),
+            OutputLine(SourceFormatter.FormatVariableLabel(name),
+                SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
                 valueStr, SourceFormatter.FormatEolComment(comment));
         }
 

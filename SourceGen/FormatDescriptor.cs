@@ -440,7 +440,11 @@ namespace SourceGen {
                 case SubType.Address:
                     return "Address";
                 case SubType.Symbol:
-                    return "Symbol \"" + SymbolRef.Label + "\"";
+                    if (SymbolRef.IsVariable) {
+                        return "Local var \"" + SymbolRef.Label + "\"";
+                    } else {
+                        return "Symbol \"" + SymbolRef.Label + "\"";
+                    }
                 case SubType.Ascii:
                     return "Numeric, ASCII";
                 case SubType.HighAscii:

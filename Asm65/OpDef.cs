@@ -218,6 +218,16 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// True if the instruction's operand is a stack-relative offset.
+        /// </summary>
+        public bool IsStackRelInstruction {
+            get {
+                return AddrMode == AddressMode.StackRel ||
+                       AddrMode == AddressMode.StackRelIndIndexY;
+            }
+        }
+
+        /// <summary>
         /// True if the operand's width is uniquely determined by the opcode mnemonic, even
         /// if the operation supports operands with varying widths.
         /// 

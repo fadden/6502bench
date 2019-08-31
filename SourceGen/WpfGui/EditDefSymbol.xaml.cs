@@ -171,7 +171,7 @@ namespace SourceGen.WpfGui {
                 return;
             }
 
-            // Label must be valid and not already exist in project symbol list.  (For project
+            // Label must be valid and not already exist in the table we're editing.  (For project
             // symbols, it's okay if an identical label exists elsewhere.)
             bool labelValid = Asm65.Label.ValidateLabel(Label);
             bool labelUnique;
@@ -187,6 +187,11 @@ namespace SourceGen.WpfGui {
             // For local variables, do a secondary uniqueness check across the full symbol table.
             if (labelUnique && mSymbolTable != null) {
                 labelUnique = !mSymbolTable.TryGetValue(Label, out Symbol sym);
+
+                // It's okay if this and the other are both variables.
+                if (!labelUnique && mIsVariable && sym.IsVariable) {
+                    labelUnique = true;
+                }
             }
 
             // Value must be blank, meaning "erase any earlier definition", or valid value.

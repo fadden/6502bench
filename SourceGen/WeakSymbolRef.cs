@@ -49,6 +49,16 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// If this is a local varaiable reference, what type is it.
+        /// </summary>
+        public enum LocalVariableType {
+            Unknown = 0,
+            NotVar,
+            DpAddr,
+            StackRelConst
+        }
+
+        /// <summary>
         /// Label of symbol of interest.
         /// </summary>
         public string Label { get; private set; }
@@ -59,13 +69,31 @@ namespace SourceGen {
         public Part ValuePart { get; private set; }
 
         /// <summary>
-        /// Full constructor.
+        /// Is this a local variable reference, and if so, what type.
         /// </summary>
-        public WeakSymbolRef(string label, Part part) {
+        public LocalVariableType VarType { get; private set; }
+
+        /// <summary>
+        /// True for local variable references.
+        /// </summary>
+        public bool IsVariable { get { return VarType != LocalVariableType.NotVar; } }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public WeakSymbolRef(string label, Part part) :
+            this(label, part, LocalVariableType.NotVar) { }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public WeakSymbolRef(string label, Part part, LocalVariableType varType) {
             Debug.Assert(label != null);
             Label = label;
             ValuePart = part;
+            VarType = varType;
         }
+
 
         public static bool operator ==(WeakSymbolRef a, WeakSymbolRef b) {
             if (ReferenceEquals(a, b)) {
@@ -75,7 +103,8 @@ namespace SourceGen {
                 return false;   // one is null
             }
             return Asm65.Label.LABEL_COMPARER.Equals(a.Label, b.Label) &&
-                a.ValuePart == b.ValuePart;
+                a.ValuePart == b.ValuePart &&
+                a.VarType == b.VarType;
         }
         public static bool operator !=(WeakSymbolRef a, WeakSymbolRef b) {
             return !(a == b);
@@ -84,7 +113,7 @@ namespace SourceGen {
             return obj is WeakSymbolRef && this == (WeakSymbolRef)obj;
         }
         public override int GetHashCode() {
-            return Asm65.Label.ToNormal(Label).GetHashCode() ^ (int)ValuePart;
+            return Asm65.Label.ToNormal(Label).GetHashCode() ^ (int)ValuePart ^ (int)VarType;
         }
 
         public override string ToString() {

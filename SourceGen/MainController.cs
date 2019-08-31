@@ -435,6 +435,7 @@ namespace SourceGen {
             mFormatterConfig = new Formatter.FormatConfig();
             AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
                 ref mFormatterConfig);
+            //mFormatterConfig.mLocalVariableLablePrefix = "\u00a4";  // CURRENCY SIGN
             mFormatterConfig.mEndOfLineCommentDelimiter = ";";
             mFormatterConfig.mFullLineCommentDelimiterBase = ";";
             mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;

@@ -1505,7 +1505,8 @@ namespace SourceGen.WpfGui {
                 (SymFilterPlatformSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
                 (SymFilterAutoLabels != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
                 (SymFilterAddresses != true && sli.Sym.SymbolType != Symbol.Type.Constant) ||
-                (SymFilterConstants != true && sli.Sym.SymbolType == Symbol.Type.Constant))
+                (SymFilterConstants != true && sli.Sym.SymbolType == Symbol.Type.Constant) ||
+                sli.Sym.IsVariable)
             {
                 e.Accepted = false;
             } else {

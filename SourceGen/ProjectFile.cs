@@ -831,7 +831,7 @@ namespace SourceGen {
                 if (!CreateDefSymbol(serDef, contentVersion, report, out DefSymbol defSym)) {
                     return false;
                 }
-                if (defSym.SymbolSource != Symbol.Source.Variable) {
+                if (!defSym.IsVariable) {
                     // not expected to happen
                     Debug.WriteLine("Found local variable with bad source: " +
                         defSym.SymbolSource);

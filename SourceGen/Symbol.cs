@@ -50,13 +50,23 @@ namespace SourceGen {
             Constant            // constant value
         }
 
-        /// Returns true if the symbol's type is an internal label (auto or user).  Returns
-        /// false for external addresses and constants.
+        /// <summary>
+        /// True if the symbol's type is an internal label (auto or user).  Will be false
+        /// for external addresses and constants.
         /// </summary>
         public bool IsInternalLabel {
             get {
                 // Could also check Type instead.  Either works for now.
                 return SymbolSource == Source.User || SymbolSource == Source.Auto;
+            }
+        }
+
+        /// <summary>
+        ///  True if the symbol is a local variable.
+        /// </summary>
+        public bool IsVariable {
+            get {
+                return SymbolSource == Source.Variable;
             }
         }
 

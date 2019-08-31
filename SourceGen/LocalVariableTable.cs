@@ -159,7 +159,8 @@ namespace SourceGen {
         /// not clash.
         /// </summary>
         /// <param name="value">Value to compare.</param>
-        /// <param name="width">Width to check.</param>
+        /// <param name="width">Width to check, useful when checking for collisions.  When
+        ///   doing a simple variable lookup, this should be set to 1.</param>
         /// <returns>One matching symbol, or null if none matched.</returns>
         public DefSymbol GetByValueRange(int value, int width, Symbol.Type type) {
             foreach (KeyValuePair<string, DefSymbol> kvp in mVarByLabel) {
@@ -181,7 +182,7 @@ namespace SourceGen {
                 Debug.Assert(false, "Unexpected symbol type " + newSym.SymbolType);
                 return;
             }
-            if (newSym.SymbolSource != Symbol.Source.Variable) {
+            if (!newSym.IsVariable) {
                 Debug.Assert(false, "Unexpected symbol source " + newSym.SymbolSource);
                 return;
             }

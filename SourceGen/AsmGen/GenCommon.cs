@@ -39,6 +39,10 @@ namespace SourceGen.AsmGen {
 
             bool doAddCycles = gen.Settings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
+            // TODO: switch uniqueness based on quirk
+            LocalVariableLookup lvLookup = new LocalVariableLookup(proj.LvTables,
+                proj.SymbolTable, proj);
+
             GenerateHeader(gen, sw);
 
             // Used for M/X flag tracking.
@@ -69,6 +73,11 @@ namespace SourceGen.AsmGen {
                     gen.OutputOrgDirective(offset, orgAddr);
                 }
 
+                List<DefSymbol> lvars = lvLookup.GetVariablesDefinedAtOffset(offset);
+                if (lvars != null) {
+                    GenerateLocalVariables(gen, sw, lvars);
+                }
+
                 if (attr.IsInstructionStart) {
                     // Generate M/X reg width directive, if necessary.
                     // NOTE: we can suppress the initial directive if we know what the
@@ -96,7 +105,7 @@ namespace SourceGen.AsmGen {
                     }
 
                     // Output instruction.
-                    GenerateInstruction(gen, sw, offset, len, doAddCycles);
+                    GenerateInstruction(gen, sw, lvLookup, offset, len, doAddCycles);
 
                     if (attr.DoesNotContinue) {
                         gen.OutputLine(string.Empty);
@@ -139,7 +148,7 @@ namespace SourceGen.AsmGen {
 
             // Format symbols.
             foreach (DefSymbol defSym in proj.ActiveDefSymbolList) {
-                // Use an operand length of 1 so things are shown as concisely as possible.
+                // Use an operand length of 1 so values are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                     gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
@@ -152,8 +161,22 @@ namespace SourceGen.AsmGen {
             }
         }
 
-        private static void GenerateInstruction(IGenerator gen, StreamWriter sw, int offset,
-                int instrBytes, bool doAddCycles) {
+        private static void GenerateLocalVariables(IGenerator gen, StreamWriter sw,
+                List<DefSymbol> vars) {
+            foreach (DefSymbol defSym in vars) {
+                DisasmProject proj = gen.Project;
+                Formatter formatter = gen.SourceFormatter;
+
+                // Use an operand length of 1 so values are shown as concisely as possible.
+                string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
+                    null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
+                gen.OutputVarDirective(defSym.Label, valueStr, defSym.Comment);
+            }
+        }
+
+        private static void GenerateInstruction(IGenerator gen, StreamWriter sw,
+                LocalVariableLookup lvLookup, int offset, int instrBytes, bool doAddCycles) {
             DisasmProject proj = gen.Project;
             Formatter formatter = gen.SourceFormatter;
             byte[] data = proj.FileData;
@@ -241,8 +264,8 @@ namespace SourceGen.AsmGen {
                         gen.UpdateCharacterEncoding(attr.DataDescriptor);
                     }
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        gen.Localizer.LabelMap, attr.DataDescriptor,
-                        operandForSymbol, operandLen, opFlags);
+                        lvLookup, gen.Localizer.LabelMap, attr.DataDescriptor,
+                        offset, operandForSymbol, operandLen, opFlags);
                 }
             } else {
                 // Show operand value in hex.

@@ -911,76 +911,45 @@ namespace SourceGen {
         /// for the benefit of uniqueness checks.
         /// </summary>
         private void GenerateVariableRefs() {
-            LocalVariableTable curTab = new LocalVariableTable();
-
-            int nextLvtIndex, nextLvtOffset;
-            if (LvTables.Count > 0) {
-                nextLvtIndex = 0;
-                nextLvtOffset = LvTables.Keys[0];
-            } else {
-                nextLvtIndex = -1;
-                nextLvtOffset = FileData.Length;
-            }
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, SymbolTable, this);
 
             for (int offset = 0; offset < FileData.Length; ) {
-                // Have we reached the start of the next LV table?
-                while (offset >= nextLvtOffset) {
-                    // We want to skip over any "hidden" tables.  It's possible, if a bunch of
-                    // tables got collapsed inside a data area, that we need to skip more than one.
-                    if (offset == nextLvtOffset && mAnattribs[offset].IsStart) {
-                        //Debug.WriteLine("FOUND +" + offset.ToString("x6"));
-                        LocalVariableTable lvt = LvTables.Values[nextLvtIndex];
-                        if (lvt.ClearPrevious) {
-                            curTab.Clear();
+                // All entries also get added to the main SymbolTable.  This is a little
+                // wonky because the symbol might already exist with a different value.
+                // So long as the previous thing was also a variable, it doesn't matter.
+                List<DefSymbol> vars = lvLookup.GetVariablesDefinedAtOffset(offset);
+                if (vars != null) {
+                    foreach (DefSymbol defSym in vars) {
+                        if (!SymbolTable.TryGetValue(defSym.Label, out Symbol sym)) {
+                            SymbolTable[defSym.Label] = defSym;
+                        } else if (!sym.IsVariable) {
+                            // Shouldn't happen, and will cause trouble if we're not
+                            // uniquifying names.
+                            Debug.Assert(false,
+                                "Found non-variable with var name in symbol table: " + sym);
                         }
-
-                        // Merge the new entries into the work table.  This automatically
-                        // discards entries that clash.
-                        for (int i = 0; i < lvt.Count; i++) {
-                            curTab.AddOrReplace(lvt[i]);
-                        }
-                        //curTab.DebugDump();
-
-                        // All entries also get added to the main SymbolTable.  This is a little
-                        // wonky because the symbol might already exist with a different value.
-                        // So long as the previous thing was also a variable, it doesn't matter.
-                        AddVariablesToSymbolTable(lvt);
-                    } else {
-                        // Either this wasn't an instruction/data start, or we passed this
-                        // one, which only happens for non-start items.  Whatever the case,
-                        // we're going to ignore it.
-                        Debug.WriteLine("Ignoring LvTable +" + offset.ToString("x6"));
-                    }
-                    // Advance to next table.
-                    nextLvtIndex++;
-                    if (nextLvtIndex < LvTables.Keys.Count) {
-                        nextLvtOffset = LvTables.Keys[nextLvtIndex];
-                    } else {
-                        nextLvtOffset = FileData.Length;
                     }
                 }
 
                 Anattrib attr = mAnattribs[offset];
                 if (attr.IsInstructionStart && attr.DataDescriptor == null) {
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
+                    DefSymbol defSym = null;
                     if (op.IsDirectPageInstruction) {
                         Debug.Assert(attr.OperandAddress == FileData[offset + 1]);
-                        DefSymbol defSym = curTab.GetByValueRange(attr.OperandAddress, 1,
+                        defSym = lvLookup.GetSymbol(offset, FileData[offset + 1],
                             Symbol.Type.ExternalAddr);
-                        if (defSym != null) {
-                            mAnattribs[offset].DataDescriptor =
-                                FormatDescriptor.Create(attr.Length,
-                                    new WeakSymbolRef(defSym.Label, WeakSymbolRef.Part.Low), false);
-                        }
-                    } else if (op.AddrMode == OpDef.AddressMode.StackRel ||
-                            op.AddrMode == OpDef.AddressMode.StackRelIndIndexY) {
-                        DefSymbol defSym = curTab.GetByValueRange(FileData[offset + 1], 1,
+                    } else if (op.IsStackRelInstruction) {
+                        defSym = lvLookup.GetSymbol(offset, FileData[offset + 1],
                             Symbol.Type.Constant);
-                        if (defSym != null) {
-                            mAnattribs[offset].DataDescriptor =
-                                FormatDescriptor.Create(attr.Length,
-                                    new WeakSymbolRef(defSym.Label, WeakSymbolRef.Part.Low), false);
-                        }
+                    }
+                    if (defSym != null) {
+                        WeakSymbolRef vref = new WeakSymbolRef(defSym.Label,
+                            WeakSymbolRef.Part.Low, op.IsStackRelInstruction ?
+                                WeakSymbolRef.LocalVariableType.StackRelConst :
+                                WeakSymbolRef.LocalVariableType.DpAddr);
+                        mAnattribs[offset].DataDescriptor =
+                            FormatDescriptor.Create(attr.Length, vref, false);
                     }
                 }
 
@@ -989,15 +958,6 @@ namespace SourceGen {
                 } else {
                     // Advance by one, not attr.Length, so we don't miss embedded instructions.
                     offset++;
-                }
-            }
-        }
-
-        private void AddVariablesToSymbolTable(LocalVariableTable lvt) {
-            for (int i = 0; i < lvt.Count; i++) {
-                DefSymbol defSym = lvt[i];
-                if (!SymbolTable.TryGetValue(defSym.Label, out Symbol sym)) {
-                    SymbolTable[defSym.Label] = defSym;
                 }
             }
         }
@@ -1048,7 +1008,7 @@ namespace SourceGen {
                     if (sym == null && (attr.OperandAddress & 0xffff) > 1 && checkNearby) {
                         sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 2);
                     }
-                    if (sym != null) {
+                    if (sym != null && !sym.IsVariable) {
                         mAnattribs[offset].DataDescriptor =
                             FormatDescriptor.Create(mAnattribs[offset].Length,
                                 new WeakSymbolRef(sym.Label, WeakSymbolRef.Part.Low), false);
@@ -1126,6 +1086,8 @@ namespace SourceGen {
                 }
             }
 
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, null, this);
+
             // Walk through the Anattrib array, adding xref entries to things referenced
             // by the entity at the current offset.
             for (int offset = 0; offset < mAnattribs.Length; ) {
@@ -1174,11 +1136,21 @@ namespace SourceGen {
                             if (adj == 0) {
                                 hasZeroOffsetSym = true;
                             }
+                        } else if (dfd.SymbolRef.IsVariable) {
+                            DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
+                            if (defSym != null) {
+                                int adj = 0;
+                                if (operandOffset >= 0) {
+                                    adj = defSym.Value - operandOffset;
+                                }
+                                defSym.Xrefs.Add(
+                                    new XrefSet.Xref(offset, true, xrefType, accType, adj));
+                            }
                         } else if (SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
-                            // Is this a reference to a project/platform symbol?
+                            // Is this a reference to a project/platform symbol?  We also handle
+                            // local variables here.
                             if (sym.SymbolSource == Symbol.Source.Project ||
-                                    sym.SymbolSource == Symbol.Source.Platform ||
-                                    sym.SymbolSource == Symbol.Source.Variable) {
+                                    sym.SymbolSource == Symbol.Source.Platform) {
                                 DefSymbol defSym = sym as DefSymbol;
                                 int adj = 0;
                                 if (operandOffset >= 0) {
@@ -1286,7 +1258,7 @@ namespace SourceGen {
             ActiveDefSymbolList.Clear();
 
             foreach (Symbol sym in SymbolTable) {
-                if (!(sym is DefSymbol)) {
+                if (!(sym is DefSymbol) || sym.IsVariable) {
                     continue;
                 }
                 DefSymbol defSym = sym as DefSymbol;

@@ -332,14 +332,14 @@ namespace SourceGen {
                     case FormatDescriptor.Type.NumericLE:
                         po.Opcode = opNames.GetDefineData(length);
                         operand = RawData.GetWord(data, offset, length, false);
-                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                            operand, length, FormatNumericOpFlags.None);
+                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap,
+                            dfd, operand, length, FormatNumericOpFlags.None);
                         break;
                     case FormatDescriptor.Type.NumericBE:
                         po.Opcode = opNames.GetDefineBigData(length);
                         operand = RawData.GetWord(data, offset, length, true);
-                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap, dfd,
-                            operand, length, FormatNumericOpFlags.None);
+                        po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap,
+                            dfd, operand, length, FormatNumericOpFlags.None);
                         break;
                     case FormatDescriptor.Type.Fill:
                         po.Opcode = opNames.Fill;
@@ -533,8 +533,33 @@ namespace SourceGen {
         ///   does not include the opcode byte.  For a relative branch, this will be 2.</param>
         /// <param name="flags">Special handling.</param>
         public static string FormatNumericOperand(Formatter formatter, SymbolTable symbolTable,
-                Dictionary<string, string> labelMap, FormatDescriptor dfd,
-                int operandValue, int operandLen, FormatNumericOpFlags flags) {
+                Dictionary<string, string> labelMap, FormatDescriptor dfd, int operandValue,
+                int operandLen, FormatNumericOpFlags flags) {
+            return FormatNumericOperand(formatter, symbolTable, null, labelMap, dfd, -1,
+                operandValue, operandLen, flags);
+        }
+
+        /// <summary>
+        /// Format a numeric operand value according to the specified sub-format.
+        /// </summary>
+        /// <param name="formatter">Text formatter.</param>
+        /// <param name="symbolTable">Full table of project symbols.</param>
+        /// <param name="lvLookup">Local variable lookup object.  May be null if not
+        ///   formatting an instruction.</param>
+        /// <param name="labelMap">Symbol label remap, for local label conversion.  May be
+        ///   null.</param>
+        /// <param name="dfd">Operand format descriptor.</param>
+        /// <param name="offset">Offset of start of instruction or data pseudo-op, for
+        ///   variable name lookup.  Okay to pass -1 when not formatting an instruction.</param>
+        /// <param name="operandValue">Operand's value.  For most things this comes directly
+        ///   out of the code, for relative branches it's a 24-bit absolute address.</param>
+        /// <param name="operandLen">Length of operand, in bytes.  For an instruction, this
+        ///   does not include the opcode byte.  For a relative branch, this will be 2.</param>
+        /// <param name="flags">Special handling.</param>
+        public static string FormatNumericOperand(Formatter formatter, SymbolTable symbolTable,
+                LocalVariableLookup lvLookup, Dictionary<string, string> labelMap,
+                FormatDescriptor dfd, int offset, int operandValue, int operandLen,
+                FormatNumericOpFlags flags) {
             Debug.Assert(operandLen > 0);
             int hexMinLen = operandLen * 2;
 
@@ -554,7 +579,28 @@ namespace SourceGen {
                     CharEncoding.Encoding enc = SubTypeToEnc(dfd.FormatSubType);
                     return formatter.FormatCharacterValue(operandValue, enc);
                 case FormatDescriptor.SubType.Symbol:
-                    if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+                    if (lvLookup != null && dfd.SymbolRef.IsVariable) {
+                        Debug.Assert(operandLen == 1);      // only doing 8-bit stuff
+                        //Symbol.Type symType;
+                        //if (dfd.SymbolRef.VarType == WeakSymbolRef.LocalVariableType.DpAddr) {
+                        //    symType = Symbol.Type.ExternalAddr;
+                        //} else {
+                        //    symType = Symbol.Type.Constant;
+                        //}
+                        //DefSymbol defSym = lvLookup.GetSymbol(offset, operandValue, symType);
+                        DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
+                        if (defSym != null) {
+                            StringBuilder sb = new StringBuilder();
+                            FormatNumericSymbolCommon(formatter, defSym, null,
+                                dfd, operandValue, operandLen, flags, sb);
+                            return sb.ToString();
+                        } else {
+                            Debug.WriteLine("Local variable format failed");
+                            Debug.Assert(false);
+                            return formatter.FormatHexValue(operandValue, hexMinLen);
+                        }
+                    } else if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym) &&
+                            !sym.IsVariable) {
                         StringBuilder sb = new StringBuilder();
 
                         switch (formatter.ExpressionMode) {
@@ -603,6 +649,9 @@ namespace SourceGen {
             string symLabel = sym.Label;
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
+            }
+            if (sym.IsVariable) {
+                symLabel = formatter.FormatVariableLabel(symLabel);
             }
 
             if (operandLen == 1) {

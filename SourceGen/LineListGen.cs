@@ -69,6 +69,11 @@ namespace SourceGen {
         /// </summary>
         private FormattedOperandCache mFormattedLineCache;
 
+        /// <summary>
+        /// Local variable table data extractor.
+        /// </summary>
+        private LocalVariableLookup mLvLookup;
+
 
         /// <summary>
         /// One of these per line of output in the display.  It should be possible to draw
@@ -437,6 +442,8 @@ namespace SourceGen {
             mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
+            // TODO: remove SymbolTable -- don't need unique
+            mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject.SymbolTable, mProject);
 
             mDisplayList.ListGen = this;
         }
@@ -886,6 +893,9 @@ namespace SourceGen {
             Debug.Assert(startOffset >= 0);
             Debug.Assert(endOffset >= startOffset);
 
+            // Assume variables may have changed.
+            mLvLookup.Reset();
+
             // Find the previous status flags for M/X tracking.
             StatusFlags prevFlags = StatusFlags.AllIndeterminate;
             if (mProject.CpuDef.HasEmuFlag) {
@@ -1220,8 +1230,9 @@ namespace SourceGen {
                         PseudoOp.FormatNumericOpFlags.None);
                     formattedOperand = '#' + opstr1 + "," + '#' + opstr2;
                 } else {
-                    formattedOperand = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
-                        null, attr.DataDescriptor, operandForSymbol, operandLen, opFlags);
+                    formattedOperand = PseudoOp.FormatNumericOperand(mFormatter,
+                        mProject.SymbolTable, mLvLookup, null, attr.DataDescriptor, offset,
+                        operandForSymbol, operandLen, opFlags);
                 }
             } else {
                 // Show operand value in hex.
@@ -1330,7 +1341,8 @@ namespace SourceGen {
                     null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
                 string comment = mFormatter.FormatEolComment(defSym.Comment);
-                return FormattedParts.CreateEquDirective(defSym.Label,
+                return FormattedParts.CreateEquDirective(
+                    mFormatter.FormatVariableLabel(defSym.Label),
                     mFormatter.FormatPseudoOp(mPseudoOpNames.VarDirective),
                     addrStr, comment);
             }

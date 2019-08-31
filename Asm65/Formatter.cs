@@ -68,6 +68,8 @@ namespace Asm65 {
             public string mForceLongOpcodeSuffix;
             public string mForceLongOperandPrefix;
 
+            public string mLocalVariableLablePrefix;    // Merlin 32 puts ']' before var names
+
             public string mEndOfLineCommentDelimiter;   // usually ';'
             public string mFullLineCommentDelimiterBase; // usually ';' or '*', WITHOUT extra space
             public string mBoxLineCommentDelimiter;     // usually blank or ';'
@@ -607,6 +609,17 @@ namespace Asm65 {
                 return string.Format(mAddrFormatWithBank, address >> 16, address & 0xffff);
             } else {
                 return string.Format(mAddrFormatNoBank, address & 0xffff);
+            }
+        }
+
+        /// <summary>
+        /// Formats a local variable label, prepending a prefix if needed.
+        /// </summary>
+        public string FormatVariableLabel(string label) {
+            if (!string.IsNullOrEmpty(mFormatConfig.mLocalVariableLablePrefix)) {
+                return mFormatConfig.mLocalVariableLablePrefix + label;
+            } else {
+                return label;
             }
         }
 
