@@ -556,11 +556,19 @@ limitations under the License.
                     </GroupBox>
 
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
-                        <TextBlock Text="Expression style:"/>
+                        <TextBlock Text="Expression style:" Margin="0,3,0,0"/>
                         <ComboBox Name="expressionStyleComboBox" Width="120" Margin="8,0,0,0"
                                   ItemsSource="{Binding ExpressionStyleItems}" DisplayMemberPath="Name"
                                   IsReadOnly="True"
                                   SelectionChanged="ExpressionStyleComboBox_SelectionChanged"/>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
+                        <TextBlock Text="Local variable prefix:"/>
+                        <TextBox Width="66" MaxLength="8" Margin="8,1,0,0"
+                                 Text="{Binding LocalVarPrefix, UpdateSourceTrigger=PropertyChanged,
+                                    FallbackValue=.placeho}"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
                     </StackPanel>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"

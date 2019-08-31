@@ -65,6 +65,7 @@ namespace SourceGen {
         public const string FMT_PSEUDO_OP_NAMES = "fmt-pseudo-op-names";
         public const string FMT_CHAR_DELIM = "fmt-char-delim";
         public const string FMT_STRING_DELIM = "fmt-string-delim";
+        public const string FMT_LOCAL_VARIABLE_PREFIX = "fmt-local-variable-prefix";
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
@@ -297,7 +298,8 @@ namespace SourceGen {
         /// Sets a string setting.
         /// </summary>
         /// <param name="name">Setting name.</param>
-        /// <param name="value">Setting value.</param>
+        /// <param name="value">Setting value.  If the value is null, the setting will be
+        ///   removed.</param>
         public void SetString(string name, string value) {
             if (value == null) {
                 mSettings.Remove(name);

@@ -435,10 +435,12 @@ namespace SourceGen {
             mFormatterConfig = new Formatter.FormatConfig();
             AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
                 ref mFormatterConfig);
-            //mFormatterConfig.mLocalVariableLablePrefix = "\u00a4";  // CURRENCY SIGN
             mFormatterConfig.mEndOfLineCommentDelimiter = ";";
             mFormatterConfig.mFullLineCommentDelimiterBase = ";";
             mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
+
+            mFormatterConfig.mLocalVariableLablePrefix =
+                settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
             if (chrDelCereal != null) {

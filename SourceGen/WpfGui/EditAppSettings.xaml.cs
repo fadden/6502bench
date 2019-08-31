@@ -832,6 +832,19 @@ namespace SourceGen.WpfGui {
             get { return sExpStyleItems; }
         }
 
+        public string LocalVarPrefix {
+            get { return mLocalVarPrefix; }
+            set {
+                if (mLocalVarPrefix != value) {
+                    mLocalVarPrefix = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, value);
+                    IsDirty = true;
+                }
+            }
+        }
+        private string mLocalVarPrefix;
+
         private void Loaded_DisplayFormat() {
             PopulateWidthDisamSettings();
 
@@ -844,6 +857,9 @@ namespace SourceGen.WpfGui {
 
             // No need to set this to anything specific.
             displayFmtQuickComboBox.SelectedIndex = 0;
+
+            LocalVarPrefix = mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX,
+                string.Empty);
         }
 
         /// <summary>
@@ -932,12 +948,14 @@ namespace SourceGen.WpfGui {
                 formatConfig.mForceAbsOperandPrefix,
                 formatConfig.mForceLongOperandPrefix);
             SelectExpressionStyle(formatConfig.mExpressionMode);
+            LocalVarPrefix = formatConfig.mLocalVariableLablePrefix;
             // dirty flag set by change watchers if one or more fields have changed
         }
 
         private void QuickFmtDefaultButton_Click(object sender, RoutedEventArgs e) {
             SetWidthDisamSettings(null, "l", "a:", "f:");
             SelectExpressionStyle(ExpressionMode.Common);
+            LocalVarPrefix = string.Empty;
             // dirty flag set by change watchers if one or more fields have changed
         }
 

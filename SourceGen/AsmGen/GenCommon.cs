@@ -420,6 +420,8 @@ namespace SourceGen.AsmGen {
 
             // Not doing the delimiter patterns here, because what's in the config file is
             // intended for on-screen display, and hence likely to be unsuited for an assembler.
+
+            // Ditto for the local variable prefix.
         }
     }
 }
