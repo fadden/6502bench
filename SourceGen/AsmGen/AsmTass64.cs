@@ -160,6 +160,7 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
+            Quirks.HasRedefinableSymbols = true;
             Quirks.StackIntOperandIsImmediate = true;
 
             mWorkDirectory = workDirectory;

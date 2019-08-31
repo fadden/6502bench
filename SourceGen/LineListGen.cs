@@ -442,8 +442,7 @@ namespace SourceGen {
             mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
-            // TODO: remove SymbolTable -- don't need unique
-            mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject.SymbolTable, mProject);
+            mLvLookup = new LocalVariableLookup(mProject.LvTables, null, mProject);
 
             mDisplayList.ListGen = this;
         }

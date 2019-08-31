@@ -117,7 +117,7 @@ namespace SourceGen {
         }
 
         public override string ToString() {
-            return "WeakSym: " + Label + ":" + ValuePart;
+            return "WeakSym: " + (IsVariable ? "var " : "") + Label + ":" + ValuePart;
         }
     }
 }

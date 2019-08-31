@@ -599,8 +599,8 @@ namespace SourceGen {
                             Debug.Assert(false);
                             return formatter.FormatHexValue(operandValue, hexMinLen);
                         }
-                    } else if (symbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym) &&
-                            !sym.IsVariable) {
+                    } else if (symbolTable.TryGetNonVariableValue(dfd.SymbolRef.Label,
+                            out Symbol sym)) {
                         StringBuilder sb = new StringBuilder();
 
                         switch (formatter.ExpressionMode) {

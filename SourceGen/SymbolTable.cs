@@ -204,6 +204,21 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Gets the value associated with the key, unless it's a variable.
+        /// </summary>
+        /// <param name="key">Label to look up.</param>
+        /// <param name="sym">Symbol, or null if not found, or found but it's a variable.</param>
+        /// <returns>True if the key is present, false otherwise.</returns>
+        public bool TryGetNonVariableValue(string key, out Symbol sym) {
+            bool found = mSymbols.TryGetValue(key, out sym);
+            if (found && sym.IsVariable) {
+                sym = null;
+                found = false;
+            }
+            return found;
+        }
+
+        /// <summary>
         /// Removes the specified symbol.
         /// </summary>
         public void Remove(Symbol sym) {

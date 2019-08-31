@@ -39,9 +39,8 @@ namespace SourceGen.AsmGen {
 
             bool doAddCycles = gen.Settings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
-            // TODO: switch uniqueness based on quirk
             LocalVariableLookup lvLookup = new LocalVariableLookup(proj.LvTables,
-                proj.SymbolTable, proj);
+                gen.Quirks.HasRedefinableSymbols ? null : proj.SymbolTable, proj);
 
             GenerateHeader(gen, sw);
 

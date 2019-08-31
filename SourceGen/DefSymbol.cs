@@ -135,6 +135,17 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Constructs a DefSymbol from an existing DefSymbol, with a different label.  Use
+        /// this to change the label while keeping everything else the same.
+        /// </summary>
+        /// <param name="defSym">Source DefSymbol.</param>
+        /// <param name="label">Label to use.</param>
+        public DefSymbol(DefSymbol defSym, string label)
+            : this(label, defSym.Value, defSym.SymbolSource, defSym.SymbolType,
+                  defSym.DataDescriptor.FormatSubType, defSym.Comment, defSym.Tag,
+                  defSym.DataDescriptor.Length) { }
+
+        /// <summary>
         /// Determines whether a symbol overlaps with a region.  Useful for variables.
         /// </summary>
         /// <param name="a">Symbol to check.</param>

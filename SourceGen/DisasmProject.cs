@@ -908,25 +908,39 @@ namespace SourceGen {
         /// variables to take precedence.
         ///
         /// This also adds all symbols in non-hidden variable tables to the main SymbolTable,
-        /// for the benefit of uniqueness checks.
+        /// for the benefit of future uniqueness checks.
         /// </summary>
         private void GenerateVariableRefs() {
-            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, SymbolTable, this);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, null, this);
 
             for (int offset = 0; offset < FileData.Length; ) {
-                // All entries also get added to the main SymbolTable.  This is a little
-                // wonky because the symbol might already exist with a different value.
-                // So long as the previous thing was also a variable, it doesn't matter.
+                // Was a table defined at this offset?
                 List<DefSymbol> vars = lvLookup.GetVariablesDefinedAtOffset(offset);
                 if (vars != null) {
+                    // All entries also get added to the main SymbolTable.  This is a little
+                    // wonky because the symbol might already exist with a different value.
+                    // So long as the previous thing was also a variable, it doesn't matter.
                     foreach (DefSymbol defSym in vars) {
                         if (!SymbolTable.TryGetValue(defSym.Label, out Symbol sym)) {
+                            // Symbol not yet in symbol table.  Add it.
+                            //
+                            // NOTE: if you try to run the main app with uniqification enabled,
+                            // this will cause the various uniquified forms of local variables
+                            // to end up in the main symbol table.  This can clashes with user
+                            // labels that would not occur otherwise.
                             SymbolTable[defSym.Label] = defSym;
                         } else if (!sym.IsVariable) {
-                            // Shouldn't happen, and will cause trouble if we're not
-                            // uniquifying names.
-                            Debug.Assert(false,
-                                "Found non-variable with var name in symbol table: " + sym);
+                            // Somehow we have a variable and a non-variable with the same
+                            // name.  Platform/project symbols haven't been processed yet, so
+                            // this must be a clash with a user label.  This will likely cause
+                            // assembly source gen to fail later on.  It's possible to do this
+                            // by "hiding" a table and then adding a user label, so we can't just
+                            // fix it at project load time.  The full fix is to permanently
+                            // rename the dup in the LvTable and reset the LvLookup here, but I
+                            // hate trashing user data.
+                            Debug.WriteLine("Found non-variable with var name in symbol table: "
+                                + sym);
+                            Debug.Assert(false);
                         }
                     }
                 }

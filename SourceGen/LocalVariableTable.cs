@@ -133,15 +133,25 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Clears the tables.
+        /// </summary>
         public void Clear() {
             mVarByLabel.Clear();
             mVarByValue.Clear();
         }
 
+        /// <summary>
+        /// Returns the symbol that matches the label, or null if not found.
+        /// </summary>
         public DefSymbol GetByLabel(string label) {
-            return mVarByLabel[label];
+            mVarByLabel.TryGetValue(label, out DefSymbol defSym);
+            return defSym;
         }
 
+        /// <summary>
+        /// Removes the symbol with the matching label.
+        /// </summary>
         public void RemoveByLabel(string label) {
             if (mVarByLabel.TryGetValue(label, out DefSymbol defSym)) {
                 mVarByLabel.Remove(defSym.Label);
@@ -260,9 +270,9 @@ namespace SourceGen {
             return hashCode;
         }
 
-        public void DebugDump() {
-            Debug.WriteLine("LocalVariableTable count=" + Count + " clear-previous=" +
-                ClearPrevious);
+        public void DebugDump(int offset) {
+            Debug.WriteLine("LocalVariableTable +" + offset.ToString("x6") + " count=" +
+                Count + " clear-previous=" + ClearPrevious);
             for (int i = 0; i < Count; i++) {
                 Debug.WriteLine("  " + i + ": " + this[i]);
             }

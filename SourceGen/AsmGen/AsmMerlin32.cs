@@ -134,8 +134,9 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
-            Quirks.TracksSepRepNotEmu = true;
+            Quirks.HasRedefinableSymbols = true;
             Quirks.NoPcRelBankWrap = true;
+            Quirks.TracksSepRepNotEmu = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;

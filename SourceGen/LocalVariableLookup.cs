@@ -35,6 +35,42 @@ namespace SourceGen {
         private SymbolTable mSymbolTable;
 
         /// <summary>
+        /// Label uniquification helper.
+        /// </summary>
+        private class UniqueLabel {
+            public string BaseLabel { get; private set; }
+            public string Label { get; private set; }
+            private int Counter { get; set; }
+
+            public UniqueLabel(string baseLabel) {
+                Label = BaseLabel = baseLabel;
+                Counter = 0;
+            }
+
+            /// <summary>
+            /// Updates the Label to be unique.  Call this when a symbol is defined or
+            /// re-defined.
+            /// </summary>
+            /// <param name="symbolTable">Symbol table, for uniqueness check.</param>
+            public void MakeUnique(SymbolTable symbolTable) {
+                // The main symbol table might have user-supplied labels like "ptr_2", so we
+                // need to keep testing against that.  However, it should not be possible for
+                // us to clash with other uniquified variables.  So we don't need to check
+                // for clashes in the UniqueLabel list.
+                //
+                // It *is* possible to clash with other variable base names, so we can't
+                // exclude variables from our SymbolTable lookup.
+                string testLabel;
+                do {
+                    Counter++;
+                    testLabel = BaseLabel + "_" + Counter;
+                } while (symbolTable.TryGetValue(testLabel, out Symbol unused1));
+                Label = testLabel;
+            }
+        }
+        private Dictionary<string, UniqueLabel> mUniqueLabels;
+
+        /// <summary>
         /// Reference to project, so we can query the Anattrib array to identify "hidden" tables.
         /// </summary>
         private DisasmProject mProject;
@@ -73,6 +109,9 @@ namespace SourceGen {
             mProject = project;
 
             mCurrentTable = new LocalVariableTable();
+            if (mSymbolTable != null) {
+                mUniqueLabels = new Dictionary<string, UniqueLabel>();
+            }
             Reset();
         }
 
@@ -80,6 +119,7 @@ namespace SourceGen {
             mRecentOffset = -1;
             mRecentSymbols = null;
             mCurrentTable.Clear();
+            mUniqueLabels?.Clear();
             if (mLvTables.Count == 0) {
                 mNextLvtIndex = -1;
                 mNextLvtOffset = mProject.FileDataLength;
@@ -99,12 +139,13 @@ namespace SourceGen {
         /// <returns>Symbol, or null if no match found.</returns>
         public DefSymbol GetSymbol(int offset, int operandValue, Symbol.Type type) {
             AdvanceToOffset(offset);
-
             return mCurrentTable.GetByValueRange(operandValue, 1, type);
         }
 
         /// <summary>
-        /// Gets the symbol associated with a symbol reference.
+        /// Gets the symbol associated with a symbol reference.  If uniquification is enabled,
+        /// the unique-label map for the specified offset will be used to transform the
+        /// symbol reference.
         /// </summary>
         /// <param name="offset">Offset of start of instruction.</param>
         /// <param name="symRef">Reference to symbol.</param>
@@ -112,7 +153,19 @@ namespace SourceGen {
         public DefSymbol GetSymbol(int offset, WeakSymbolRef symRef) {
             AdvanceToOffset(offset);
 
-            return mCurrentTable.GetByLabel(symRef.Label);
+            // The symRef uses the non-uniqified symbol, so we need to get the unique value at
+            // the current offset.
+            string label = symRef.Label;
+            if (mUniqueLabels != null && mUniqueLabels.TryGetValue(label, out UniqueLabel ulab)) {
+                label = ulab.Label;
+            }
+            DefSymbol defSym = mCurrentTable.GetByLabel(label);
+
+            // In theory this is okay, but in practice the only things asking for symbols are
+            // entirely convinced that the symbol exists here.  So this is probably a bug.
+            Debug.Assert(defSym != null);
+
+            return defSym;
         }
 
         /// <summary>
@@ -138,7 +191,6 @@ namespace SourceGen {
             if (mRecentOffset == offset) {
                 return mRecentSymbols;
             }
-
             return null;
         }
 
@@ -150,16 +202,16 @@ namespace SourceGen {
         /// do an incremental update.  If the offset moves backward, we have to reset and walk
         /// forward again.
         /// </remarks>
-        /// <param name="offset">Target offset.</param>
-        private void AdvanceToOffset(int offset) {
+        /// <param name="targetOffset">Target offset.</param>
+        private void AdvanceToOffset(int targetOffset) {
             if (mNextLvtIndex < 0) {
                 return;
             }
-            if (offset < mRecentOffset) {
+            if (targetOffset < mRecentOffset) {
                 // We went backwards.
                 Reset();
             }
-            while (mNextLvtOffset <= offset) {
+            while (mNextLvtOffset <= targetOffset) {
                 if (!mProject.GetAnattrib(mNextLvtOffset).IsStart) {
                     // Hidden table, ignore it.
                     Debug.WriteLine("Ignoring LvTable at +" + mNextLvtOffset.ToString("x6"));
@@ -175,15 +227,25 @@ namespace SourceGen {
                     mRecentOffset = mNextLvtOffset;
 
                     // Merge the new entries into the work table.  This automatically
-                    // discards entries that clash.
+                    // discards entries that clash by name or value.
                     for (int i = 0; i < lvt.Count; i++) {
-                        // TODO: uniquify
-                        mCurrentTable.AddOrReplace(lvt[i]);
+                        DefSymbol defSym = lvt[i];
+                        if (mSymbolTable != null) {
+                            if (mUniqueLabels.TryGetValue(defSym.Label, out UniqueLabel ulab)) {
+                                // We've seen this label before; generate a unique version.
+                                ulab.MakeUnique(mSymbolTable);
+                                defSym = new DefSymbol(defSym, ulab.Label);
+                            } else {
+                                // Haven't seen this before.  Add it to the unique-labels table.
+                                mUniqueLabels.Add(defSym.Label, new UniqueLabel(defSym.Label));
+                            }
+                        }
+                        mCurrentTable.AddOrReplace(defSym);
 
-                        mRecentSymbols.Add(lvt[i]);
+                        mRecentSymbols.Add(defSym);
                     }
 
-                    mCurrentTable.DebugDump();
+                    mCurrentTable.DebugDump(mNextLvtOffset);
                 }
 
                 // Update state to look for next table.
