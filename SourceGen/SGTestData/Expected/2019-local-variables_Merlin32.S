@@ -1,5 +1,4 @@
-;Would need to be edited to test duplicate labels.  Those currently cause
-;assembly to fail (see the X_* vars).
+;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
 PROJ_ZERO equ  $00        ;project addr
 PROJ_ONE equ   $01        ;project addr
 CONST_ZERO equ $f0        ;project const
@@ -23,14 +22,14 @@ CONST_ZERO equ $f0        ;project const
          sta   $f1,S
          eor   0
          ora   240,S
-]X_PROJ_ZERO equ $10      ;clash with project symbol
-]X_DPCODE equ  $80        ;clash with user label
+]PROJ_ZERO_DUP1 equ $10   ;clash with project symbol
+]DPCODE_DUP1 equ $80      ;clash with user label
          lda   ]VAR_ZERO
          lda   ]VAR_ZERO+1
          lda   ]VAR_TWO
          lda   ]VAR_THREE
          lda   $04
-         lda   ]X_PROJ_ZERO
+         lda   ]PROJ_ZERO_DUP1
          lda   $11
          lda   DPCODE
          ldx   PROJ_ZERO

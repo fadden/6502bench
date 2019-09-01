@@ -911,7 +911,7 @@ namespace SourceGen {
         /// for the benefit of future uniqueness checks.
         /// </summary>
         private void GenerateVariableRefs() {
-            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, null, this);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this, false);
 
             for (int offset = 0; offset < FileData.Length; ) {
                 // Was a table defined at this offset?
@@ -926,8 +926,8 @@ namespace SourceGen {
                             //
                             // NOTE: if you try to run the main app with uniqification enabled,
                             // this will cause the various uniquified forms of local variables
-                            // to end up in the main symbol table.  This can clashes with user
-                            // labels that would not occur otherwise.
+                            // to end up in the main symbol table.  This can cause clashes with
+                            // user labels that would not occur otherwise.
                             SymbolTable[defSym.Label] = defSym;
                         } else if (!sym.IsVariable) {
                             // Somehow we have a variable and a non-variable with the same
@@ -935,11 +935,13 @@ namespace SourceGen {
                             // this must be a clash with a user label.  This could cause
                             // assembly source gen to fail later on.  It's possible to do this
                             // by "hiding" a table and then adding a user label, so we can't just
-                            // fix it at project load time.  The full fix is to permanently
-                            // rename the dup in the LvTable and reset the LvLookup here, but I
-                            // hate trashing user data.
+                            // fix it at project load time.
+                            //
+                            // This is now handled by the LvLookup code, which renames the
+                            // duplicate label, so we shouldn't get here.
                             Debug.WriteLine("Found non-variable with var name in symbol table: "
                                 + sym);
+                            Debug.Assert(false);
                         }
                     }
                 }
@@ -1099,7 +1101,7 @@ namespace SourceGen {
                 }
             }
 
-            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, null, this);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this, false);
 
             // Walk through the Anattrib array, adding xref entries to things referenced
             // by the entity at the current offset.

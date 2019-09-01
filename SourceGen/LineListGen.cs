@@ -442,7 +442,7 @@ namespace SourceGen {
             mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
-            mLvLookup = new LocalVariableLookup(mProject.LvTables, null, mProject);
+            mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject, false);
 
             mDisplayList.ListGen = this;
         }
@@ -1334,6 +1334,11 @@ namespace SourceGen {
                 return FormattedParts.CreateLongComment("BAD INDEX +" + offset.ToString("x6") +
                     " sub=" + subLineIndex);
             } else {
+                // We use the entry directly from the LvTable, without LvLookup processing.
+                // This is good, because the entries in the display list match what the editor
+                // shows, but not quite right, because labels that are duplicates of
+                // non-variables (which ideally wouldn't happen) won't show their de-duplicated
+                // form.  I think this is fine.
                 DefSymbol defSym = lvt[subLineIndex];
                 // Use an operand length of 1 so things are shown as concisely as possible.
                 string addrStr = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,

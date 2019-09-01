@@ -34,7 +34,7 @@
 },
 "LongComments":{
 "-2147483647":{
-"Text":"Would need to be edited to test duplicate labels.  Those currently cause assembly to fail (see the X_* vars).","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"Text":"Edited to have duplicate labels (PROJ_ZERO, DPCODE).","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
 "81":{
 "Text":"Test name redefinition.  This is mostly of interest for assemblers without redefinable variables, but also of interest to the cross-reference window.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
@@ -74,11 +74,11 @@
 "Variables":[{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"clash with project symbol","Label":"X_PROJ_ZERO","Value":16,"Source":"Variable","Type":"ExternalAddr"},
+"Comment":"clash with project symbol","Label":"PROJ_ZERO","Value":16,"Source":"Variable","Type":"ExternalAddr"},
 {
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"clash with user label","Label":"X_DPCODE","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false},
+"Comment":"clash with user label","Label":"DPCODE","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false},
 "34":{
 "Variables":[],"ClearPrevious":false},
 "44":{

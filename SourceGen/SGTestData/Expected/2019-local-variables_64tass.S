@@ -1,5 +1,4 @@
-;Would need to be edited to test duplicate labels.  Those currently cause
-;assembly to fail (see the X_* vars).
+;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
         .cpu    "65816"
 PROJ_ZERO =     $00        ;project addr
 PROJ_ONE =      $01        ;project addr
@@ -26,14 +25,14 @@ CONST_ZERO_VAR .var $f0
         sta     $f1,s
         eor     0
         ora     240,s
-X_PROJ_ZERO .var $10       ;clash with project symbol
-X_DPCODE .var   $80        ;clash with user label
+PROJ_ZERO_DUP1 .var $10    ;clash with project symbol
+DPCODE_DUP1 .var $80       ;clash with user label
         lda     VAR_ZERO
         lda     VAR_ZERO+1
         lda     VAR_TWO
         lda     VAR_THREE
         lda     $04
-        lda     X_PROJ_ZERO
+        lda     PROJ_ZERO_DUP1
         lda     $11
         lda     DPCODE
         ldx     PROJ_ZERO

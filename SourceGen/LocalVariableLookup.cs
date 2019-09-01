@@ -29,13 +29,25 @@ namespace SourceGen {
         private SortedList<int, LocalVariableTable> mLvTables;
 
         /// <summary>
-        /// Table of symbols, used to ensure that all symbols are globally unique.  Only used
-        /// when generating code for an assembler that doesn't support redefinable variables.
+        /// Table of symbols, used to ensure that symbols are globally unique.
         /// </summary>
         private SymbolTable mSymbolTable;
 
         /// <summary>
+        /// Reference to project, so we can query the Anattrib array to identify "hidden" tables.
+        /// </summary>
+        private DisasmProject mProject;
+
+        /// <summary>
+        /// Set to true if we want all variables to be globally unique (because the assembler
+        /// can't redefine them).
+        /// </summary>
+        private bool mDoUniquify;
+
+        /// <summary>
         /// Label uniquification helper.
+        ///
+        /// The BaseLabel does not change, but Label is updated by MakeUnique.
         /// </summary>
         private class UniqueLabel {
             public string BaseLabel { get; private set; }
@@ -64,16 +76,22 @@ namespace SourceGen {
                 do {
                     Counter++;
                     testLabel = BaseLabel + "_" + Counter;
-                } while (symbolTable.TryGetValue(testLabel, out Symbol unused1));
+                } while (symbolTable.TryGetValue(testLabel, out Symbol sym));
                 Label = testLabel;
             }
         }
         private Dictionary<string, UniqueLabel> mUniqueLabels;
 
         /// <summary>
-        /// Reference to project, so we can query the Anattrib array to identify "hidden" tables.
+        /// Duplicate label re-map.  This is applied before uniquification.
         /// </summary>
-        private DisasmProject mProject;
+        /// <remarks>
+        /// It's hard to do this as part of uniquification because the remapped base name ends
+        /// up in the symbol table, and the uniqifier isn't able to tell that the entry in the
+        /// symbol table is itself.  The logic is simpler if we just rename the label before
+        /// the uniquifier ever sees it.
+        /// </remarks>
+        private Dictionary<string, string> mDupRemap;
 
         /// <summary>
         /// Most recently processed offset.
@@ -90,6 +108,7 @@ namespace SourceGen {
         /// </summary>
         private LocalVariableTable mCurrentTable;
 
+        // Next point of interest.
         private int mNextLvtIndex;
         private int mNextLvtOffset;
 
@@ -99,17 +118,19 @@ namespace SourceGen {
         /// </summary>
         /// <param name="lvTables">List of tables from the DisasmProject.</param>
         /// <param name="symbolTable">Full SymbolTable from the DisasmProject.  Used to
-        ///   generate globally unique symbol names.  Pass null if uniqueness is not a
-        ///   requirement.</param>
+        ///   generate globally unique symbol names.</param>
         /// <param name="project">Project reference.</param>
+        /// <param name="uniquify">Set to true if variable names cannot be redefined.</param>
         public LocalVariableLookup(SortedList<int, LocalVariableTable> lvTables,
-                SymbolTable symbolTable, DisasmProject project) {
+                DisasmProject project, bool uniquify) {
             mLvTables = lvTables;
-            mSymbolTable = symbolTable;
+            mSymbolTable = project.SymbolTable;
             mProject = project;
+            mDoUniquify = uniquify;
 
             mCurrentTable = new LocalVariableTable();
-            if (mSymbolTable != null) {
+            mDupRemap = new Dictionary<string, string>();
+            if (uniquify) {
                 mUniqueLabels = new Dictionary<string, UniqueLabel>();
             }
             Reset();
@@ -120,6 +141,7 @@ namespace SourceGen {
             mRecentSymbols = null;
             mCurrentTable.Clear();
             mUniqueLabels?.Clear();
+            mDupRemap.Clear();
             if (mLvTables.Count == 0) {
                 mNextLvtIndex = -1;
                 mNextLvtOffset = mProject.FileDataLength;
@@ -153,10 +175,17 @@ namespace SourceGen {
         public DefSymbol GetSymbol(int offset, WeakSymbolRef symRef) {
             AdvanceToOffset(offset);
 
-            // The symRef uses the non-uniqified symbol, so we need to get the unique value at
-            // the current offset.
+            // The symRef uses the non-uniquified symbol, so we need to get the unique value at
+            // the current offset.  We may need to do this even when variables can be
+            // redefined, because we might have a variable that's a duplicate of a user label
+            // or project symbol.
             string label = symRef.Label;
+            if (mDupRemap.TryGetValue(symRef.Label, out string remap)) {
+                label = remap;
+            }
+            //Debug.WriteLine("GetSymbol " + symRef.Label + " -> " + label);
             if (mUniqueLabels != null && mUniqueLabels.TryGetValue(label, out UniqueLabel ulab)) {
+                //Debug.WriteLine("  Unique var " + symRef.Label + " -> " + ulab.Label);
                 label = ulab.Label;
             }
             DefSymbol defSym = mCurrentTable.GetByLabel(label);
@@ -230,9 +259,23 @@ namespace SourceGen {
                     // discards entries that clash by name or value.
                     for (int i = 0; i < lvt.Count; i++) {
                         DefSymbol defSym = lvt[i];
-                        if (mSymbolTable != null) {
+
+                        // Look for non-variable symbols with the same label.  Ordinarily the
+                        // editor prevents this from happening, but there are ways to trick
+                        // the system (e.g. add a symbol while the LvTable is hidden).  We
+                        // deal with it here.
+                        if (mSymbolTable.TryGetNonVariableValue(defSym.Label, out Symbol unused)) {
+                            Debug.WriteLine("Detected duplicate non-var label " + defSym.Label +
+                                " at +" + mNextLvtOffset.ToString("x6"));
+                            string newLabel = DeDupLabel(defSym.Label);
+                            mDupRemap[defSym.Label] = newLabel;
+                            defSym = new DefSymbol(defSym, newLabel);
+                        }
+
+                        if (mDoUniquify) {
                             if (mUniqueLabels.TryGetValue(defSym.Label, out UniqueLabel ulab)) {
-                                // We've seen this label before; generate a unique version.
+                                // We've seen this label before; generate a unique version by
+                                // increasing the appended number.
                                 ulab.MakeUnique(mSymbolTable);
                                 defSym = new DefSymbol(defSym, ulab.Label);
                             } else {
@@ -256,6 +299,19 @@ namespace SourceGen {
                     mNextLvtOffset = mProject.FileDataLength;   // never reached
                 }
             }
+        }
+
+        /// <summary>
+        /// Generates a unique label for the duplicate remap table.
+        /// </summary>
+        private string DeDupLabel(string baseLabel) {
+            string testLabel;
+            int counter = 0;
+            do {
+                counter++;
+                testLabel = baseLabel + "_DUP" + counter;   // make it ugly and obvious
+            } while (mSymbolTable.TryGetNonVariableValue(testLabel, out Symbol unused));
+            return testLabel;
         }
     }
 }

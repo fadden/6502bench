@@ -581,13 +581,6 @@ namespace SourceGen {
                 case FormatDescriptor.SubType.Symbol:
                     if (lvLookup != null && dfd.SymbolRef.IsVariable) {
                         Debug.Assert(operandLen == 1);      // only doing 8-bit stuff
-                        //Symbol.Type symType;
-                        //if (dfd.SymbolRef.VarType == WeakSymbolRef.LocalVariableType.DpAddr) {
-                        //    symType = Symbol.Type.ExternalAddr;
-                        //} else {
-                        //    symType = Symbol.Type.Constant;
-                        //}
-                        //DefSymbol defSym = lvLookup.GetSymbol(offset, operandValue, symType);
                         DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
                         if (defSym != null) {
                             StringBuilder sb = new StringBuilder();

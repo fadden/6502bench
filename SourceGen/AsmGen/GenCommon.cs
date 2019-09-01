@@ -39,8 +39,8 @@ namespace SourceGen.AsmGen {
 
             bool doAddCycles = gen.Settings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
-            LocalVariableLookup lvLookup = new LocalVariableLookup(proj.LvTables,
-                gen.Quirks.HasRedefinableSymbols ? null : proj.SymbolTable, proj);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(proj.LvTables, proj,
+                !gen.Quirks.HasRedefinableSymbols);
 
             GenerateHeader(gen, sw);
 
