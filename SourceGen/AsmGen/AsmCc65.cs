@@ -164,6 +164,8 @@ namespace SourceGen.AsmGen {
             // Special handling for forward references to zero-page labels is required.
             Quirks.SinglePassAssembler = true;
 
+            Quirks.NoRedefinableSymbols = true;
+
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
             Settings = settings;
@@ -506,8 +508,16 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputVarDirective(string name, string valueStr, string comment) {
-            OutputEquDirective(name, valueStr, comment);
+        public void OutputLocalVariableTable(int offset, List<DefSymbol> newDefs,
+                LocalVariableTable allDefs) {
+            foreach (DefSymbol defSym in newDefs) {
+                // Use an operand length of 1 so values are shown as concisely as possible.
+                string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
+                    Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
+                OutputEquDirective(SourceFormatter.FormatVariableLabel(defSym.Label),
+                    valueStr, defSym.Comment);
+            }
         }
 
         // IGenerator

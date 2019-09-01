@@ -160,7 +160,6 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
-            Quirks.HasRedefinableSymbols = true;
             Quirks.StackIntOperandIsImmediate = true;
 
             mWorkDirectory = workDirectory;
@@ -538,9 +537,16 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputVarDirective(string name, string valueStr, string comment) {
-            OutputLine(name, SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
-                valueStr, SourceFormatter.FormatEolComment(comment));
+        public void OutputLocalVariableTable(int offset, List<DefSymbol> newDefs,
+                LocalVariableTable allDefs) {
+            foreach (DefSymbol defSym in newDefs) {
+                string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
+                    Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
+                OutputLine(SourceFormatter.FormatVariableLabel(defSym.Label),
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
+                    valueStr, SourceFormatter.FormatEolComment(defSym.Comment));
+            }
         }
 
         // IGenerator

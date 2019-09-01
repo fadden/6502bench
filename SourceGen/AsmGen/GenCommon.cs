@@ -40,7 +40,7 @@ namespace SourceGen.AsmGen {
             bool doAddCycles = gen.Settings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
             LocalVariableLookup lvLookup = new LocalVariableLookup(proj.LvTables, proj,
-                !gen.Quirks.HasRedefinableSymbols);
+                gen.Quirks.NoRedefinableSymbols);
 
             GenerateHeader(gen, sw);
 
@@ -74,7 +74,9 @@ namespace SourceGen.AsmGen {
 
                 List<DefSymbol> lvars = lvLookup.GetVariablesDefinedAtOffset(offset);
                 if (lvars != null) {
-                    GenerateLocalVariables(gen, sw, lvars);
+                    // table defined here
+                    gen.OutputLocalVariableTable(offset, lvars,
+                        lvLookup.GetMergedTableAtOffset(offset));
                 }
 
                 if (attr.IsInstructionStart) {
@@ -157,20 +159,6 @@ namespace SourceGen.AsmGen {
             // If there was at least one symbol, output a blank line.
             if (proj.ActiveDefSymbolList.Count != 0) {
                 gen.OutputLine(string.Empty);
-            }
-        }
-
-        private static void GenerateLocalVariables(IGenerator gen, StreamWriter sw,
-                List<DefSymbol> vars) {
-            foreach (DefSymbol defSym in vars) {
-                DisasmProject proj = gen.Project;
-                Formatter formatter = gen.SourceFormatter;
-
-                // Use an operand length of 1 so values are shown as concisely as possible.
-                string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                    null, defSym.DataDescriptor, defSym.Value, 1,
-                    PseudoOp.FormatNumericOpFlags.None);
-                gen.OutputVarDirective(defSym.Label, valueStr, defSym.Comment);
             }
         }
 

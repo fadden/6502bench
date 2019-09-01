@@ -137,12 +137,14 @@ namespace SourceGen.AsmGen {
         void OutputEquDirective(string name, string valueStr, string comment);
 
         /// <summary>
-        /// Outputs a variable definition directive.  The numeric value is already formatted.
+        /// Outputs a series of local variable definitions.
         /// </summary>
-        /// <param name="name">Symbol label.</param>
-        /// <param name="valueStr">Formatted value.</param>
-        /// <param name="comment">End-of-line comment.</param>
-        void OutputVarDirective(string name, string valueStr, string comment);
+        /// <param name="offset">Offset at which table is defined.</param>
+        /// <param name="newDefs">New definitions, i.e. just the variables that were defined
+        ///   at this offset.</param>
+        /// <param name="allDefs">All variable definitions that are active at this point.</param>
+        void OutputLocalVariableTable(int offset, List<DefSymbol> newDefs,
+            LocalVariableTable allDefs);
 
         /// <summary>
         /// Outputs a code origin directive.
@@ -200,7 +202,7 @@ namespace SourceGen.AsmGen {
         /// Does the assembler support a type of label whose value can be redefined to
         /// act as a local variable?
         /// </summary>
-        public bool HasRedefinableSymbols { get; set; }
+        public bool NoRedefinableSymbols { get; set; }
 
         /// <summary>
         /// Is the assembler unable to generate relative branches that wrap around banks?

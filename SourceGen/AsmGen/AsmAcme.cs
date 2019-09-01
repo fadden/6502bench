@@ -188,6 +188,7 @@ namespace SourceGen.AsmGen {
             config.mForceDirectOperandPrefix = string.Empty;
             config.mForceAbsOperandPrefix = string.Empty;
             config.mForceLongOperandPrefix = string.Empty;
+            config.mLocalVariableLablePrefix = ".";
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
@@ -472,8 +473,18 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputVarDirective(string name, string valueStr, string comment) {
-            OutputEquDirective(name, valueStr, comment);
+        public void OutputLocalVariableTable(int offset, List<DefSymbol> newDefs,
+                LocalVariableTable allDefs) {
+            OutputLine(string.Empty, "!zone", "Z" + offset.ToString("x6"), string.Empty);
+            for (int i = 0; i < allDefs.Count; i++) {
+                DefSymbol defSym = allDefs[i];
+
+                string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
+                    Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
+                    PseudoOp.FormatNumericOpFlags.None);
+                OutputEquDirective(SourceFormatter.FormatVariableLabel(defSym.Label),
+                    valueStr, defSym.Comment);
+            }
         }
 
         // IGenerator

@@ -49,6 +49,20 @@ namespace SourceGen {
         ///
         /// The BaseLabel does not change, but Label is updated by MakeUnique.
         /// </summary>
+        /// <remarks>
+        /// LvLookup is run multiple times, and can be restarted in the middle of a run.  It's
+        /// essential that UniqueLabel behaves deterministically.  For this to happen, the
+        /// contents of SymbolTable can't change in a way that affects the outcome unless it
+        /// also causes us to redo the uniquification.  This mostly means that we have to be
+        /// very careful about creating duplicate symbols, so that we don't get halfway through
+        /// the analysis pass and invalidate our previous work. It's best to leave
+        /// uniquification disabled until we're generating assembly source code.
+        ///
+        /// The issues also make it hard to do the uniquification once, rather than every time we
+        /// walk the code.  Not all symbol changes cause a re-analysis (e.g. renaming a user
+        /// label does not), and we don't want to fill the symbol table with the uniquified
+        /// names because it could block user labels that would otherwise be valid.
+        /// </remarks>
         private class UniqueLabel {
             public string BaseLabel { get; private set; }
             public string Label { get; private set; }
@@ -87,7 +101,7 @@ namespace SourceGen {
         /// </summary>
         /// <remarks>
         /// It's hard to do this as part of uniquification because the remapped base name ends
-        /// up in the symbol table, and the uniqifier isn't able to tell that the entry in the
+        /// up in the symbol table, and the uniquifier isn't able to tell that the entry in the
         /// symbol table is itself.  The logic is simpler if we just rename the label before
         /// the uniquifier ever sees it.
         /// </remarks>
