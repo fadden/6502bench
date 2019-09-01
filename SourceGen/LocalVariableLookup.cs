@@ -104,6 +104,8 @@ namespace SourceGen {
         /// up in the symbol table, and the uniquifier isn't able to tell that the entry in the
         /// symbol table is itself.  The logic is simpler if we just rename the label before
         /// the uniquifier ever sees it.
+        ///
+        /// I feel like there has to be a simpler way to do this.  This'll do for now.
         /// </remarks>
         private Dictionary<string, string> mDupRemap;
 

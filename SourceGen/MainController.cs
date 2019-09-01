@@ -1324,6 +1324,7 @@ namespace SourceGen {
                     case LineListGen.Line.Type.EquDirective:
                     case LineListGen.Line.Type.RegWidthDirective:
                     case LineListGen.Line.Type.OrgDirective:
+                    case LineListGen.Line.Type.LocalVariableTable:
                         if (format == ClipLineFormat.Disassembly) {
                             if (!string.IsNullOrEmpty(parts.Addr)) {
                                 sb.Append(parts.Addr);
@@ -1706,21 +1707,37 @@ namespace SourceGen {
         public void EditLocalVariableTable() {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
+            // Get existing table, if any.
             mProject.LvTables.TryGetValue(offset, out LocalVariableTable oldLvt);
 
-            EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin, mProject.SymbolTable,
-                mOutputFormatter, oldLvt);
+            EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin, mProject,
+                mOutputFormatter, oldLvt, offset);
             if (dlg.ShowDialog() != true) {
                 return;
             }
-            if (oldLvt == dlg.NewTable) {
+            if (offset != dlg.NewOffset) {
+                // Table moved.  We create two changes, one to delete the current table, one
+                // to create a new table.
+                Debug.Assert(!mProject.LvTables.TryGetValue(dlg.NewOffset,
+                    out LocalVariableTable unused));
+
+                UndoableChange rem = UndoableChange.CreateLocalVariableTableChange(offset,
+                    oldLvt, null);
+                UndoableChange add = UndoableChange.CreateLocalVariableTableChange(dlg.NewOffset,
+                    null, dlg.NewTable);
+                ChangeSet cs = new ChangeSet(2);
+                cs.Add(rem);
+                cs.Add(add);
+                ApplyUndoableChanges(cs);
+            } else if (oldLvt != dlg.NewTable) {
+                // New table, edited in place, or deleted.
+                UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(offset,
+                    oldLvt, dlg.NewTable);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
+            } else {
                 Debug.WriteLine("LvTable unchanged");
-                return;
             }
-            UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(offset,
-                oldLvt, dlg.NewTable);
-            ChangeSet cs = new ChangeSet(uc);
-            ApplyUndoableChanges(cs);
         }
 
         public bool CanEditLongComment() {

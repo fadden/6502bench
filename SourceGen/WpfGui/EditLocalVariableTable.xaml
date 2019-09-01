@@ -83,8 +83,10 @@ limitations under the License.
                   Content="Clear values from previous tables"/>
 
         <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
-            <Button DockPanel.Dock="Left" Content="Delete Table" Width="120" IsEnabled="{Binding IsNotNewTable}"
-                    Click="DeleteTableButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="Delete Table" Width="120"
+                    IsEnabled="{Binding IsNotNewTable}" Click="DeleteTableButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="Move Table" Width="120" Margin="8,0,0,0"
+                    IsEnabled="{Binding IsNotNewTable}" Click="MoveTableButton_Click"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" Click="OkButton_Click"/>

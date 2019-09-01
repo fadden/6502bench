@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -22,7 +21,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 using Asm65;
 using CommonWPF;
@@ -31,12 +29,17 @@ namespace SourceGen.WpfGui {
     /// <summary>
     /// Edit a LocalVariableTable.
     /// </summary>
-    public partial class EditLocalVariableTable : Window {
+    public partial class EditLocalVariableTable : Window, INotifyPropertyChanged {
         /// <summary>
-        /// Result.  Will be null if the table was deleted, or if cancel was hit while
+        /// Output.  Will be null if the table was deleted, or if cancel was hit while
         /// creating a new table.
         /// </summary>
         public LocalVariableTable NewTable { get; private set; }
+
+        /// <summary>
+        /// Output.  If the table was moved, the new offset will be different from the old.
+        /// </summary>
+        public int NewOffset { get; private set; }
 
         // Item for the symbol list view ItemsSource.
         public class FormattedSymbol {
@@ -82,14 +85,24 @@ namespace SourceGen.WpfGui {
         private LocalVariableTable mWorkTable;
 
         /// <summary>
-        /// Symbol table for uniqueness check.
+        /// Project reference.
         /// </summary>
-        private SymbolTable mSymbolTable;
+        private DisasmProject mProject;
 
         /// <summary>
         /// Format object to use when formatting addresses and constants.
         /// </summary>
         private Formatter mFormatter;
+
+        /// <summary>
+        /// Symbol table for uniqueness check.
+        /// </summary>
+        private SymbolTable mSymbolTable;
+
+        /// <summary>
+        /// Table offset, for move ops.
+        /// </summary>
+        private int mOffset;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -101,14 +114,16 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// Constructor.  lvt will be null when creating a new entry.
         /// </summary>
-        public EditLocalVariableTable(Window owner, SymbolTable symbolTable, Formatter formatter,
-                LocalVariableTable lvt) {
+        public EditLocalVariableTable(Window owner, DisasmProject project, Formatter formatter,
+                LocalVariableTable lvt, int offset) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
-            mSymbolTable = symbolTable;
+            mProject = project;
             mFormatter = formatter;
+            mSymbolTable = project.SymbolTable;
+            mOffset = NewOffset = offset;
 
             if (lvt != null) {
                 mWorkTable = new LocalVariableTable(lvt);
@@ -170,6 +185,13 @@ namespace SourceGen.WpfGui {
             if (result == MessageBoxResult.Yes) {
                 NewTable = null;
                 DialogResult = true;
+            }
+        }
+
+        private void MoveTableButton_Click(object sender, RoutedEventArgs e) {
+            EditLvTableLocation dlg = new EditLvTableLocation(this, mProject, mOffset, NewOffset);
+            if (dlg.ShowDialog() == true) {
+                NewOffset = dlg.NewOffset;
             }
         }
 
