@@ -932,7 +932,7 @@ namespace SourceGen {
                         } else if (!sym.IsVariable) {
                             // Somehow we have a variable and a non-variable with the same
                             // name.  Platform/project symbols haven't been processed yet, so
-                            // this must be a clash with a user label.  This will likely cause
+                            // this must be a clash with a user label.  This could cause
                             // assembly source gen to fail later on.  It's possible to do this
                             // by "hiding" a table and then adding a user label, so we can't just
                             // fix it at project load time.  The full fix is to permanently
@@ -940,7 +940,6 @@ namespace SourceGen {
                             // hate trashing user data.
                             Debug.WriteLine("Found non-variable with var name in symbol table: "
                                 + sym);
-                            Debug.Assert(false);
                         }
                     }
                 }

@@ -245,7 +245,7 @@ namespace SourceGen {
                         mRecentSymbols.Add(defSym);
                     }
 
-                    mCurrentTable.DebugDump(mNextLvtOffset);
+                    //mCurrentTable.DebugDump(mNextLvtOffset);
                 }
 
                 // Update state to look for next table.

@@ -226,7 +226,8 @@ namespace SourceGen.WpfGui {
             bool valueUniqueValid = true;
             if (mIsVariable && valueValid && widthValid) {
                 foreach (KeyValuePair<string, DefSymbol> kvp in mDefSymbolList) {
-                    if (DefSymbol.CheckOverlap(kvp.Value, thisValue, thisWidth, symbolType)) {
+                    if (kvp.Value != mOldSym &&
+                            DefSymbol.CheckOverlap(kvp.Value, thisValue, thisWidth, symbolType)) {
                         valueUniqueValid = false;
                         break;
                     }
