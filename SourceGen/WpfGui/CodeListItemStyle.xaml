@@ -200,4 +200,22 @@ See also https://github.com/fadden/DisasmUiTest
             </TextBlock.Text>
         </TextBlock>
     </DataTemplate>
+    <DataTemplate x:Key="flagsHighlightTemplate">
+        <TextBlock>
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=HasModifiedFlags}" Value="True">
+                            <Setter Property="TextBlock.Foreground" Value="DeepSkyBlue"/>
+                            <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+            <TextBlock.Text>
+                <Binding Path="Flags"/>
+            </TextBlock.Text>
+        </TextBlock>
+    </DataTemplate>
 </ResourceDictionary>

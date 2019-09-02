@@ -1265,6 +1265,9 @@ namespace SourceGen {
 
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
                 flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
+            if (mProject.StatusFlagOverrides[offset] != StatusFlags.DefaultValue) {
+                parts = FormattedParts.SetFlagsModified(parts);
+            }
             return parts;
         }
 

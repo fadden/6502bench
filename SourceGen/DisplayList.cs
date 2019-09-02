@@ -357,6 +357,9 @@ namespace SourceGen {
             // Set to true if we want to highlight the address and label fields.
             public bool HasAddrLabelHighlight { get; private set; }
 
+            // Set to true if the Flags field has been modified.
+            public bool HasModifiedFlags { get; private set; }
+
             public int ListIndex { get; set; } = -1;
 
             private static Color NoColor = CommonWPF.Helper.ZeroColor;
@@ -375,6 +378,7 @@ namespace SourceGen {
 
                 newParts.IsLongComment = orig.IsLongComment;
                 newParts.HasAddrLabelHighlight = orig.HasAddrLabelHighlight;
+                newParts.HasModifiedFlags = orig.HasModifiedFlags;
 
                 newParts.ListIndex = orig.ListIndex;
                 return newParts;
@@ -447,6 +451,12 @@ namespace SourceGen {
             public static FormattedParts RemoveSelectionHighlight(FormattedParts orig) {
                 FormattedParts newParts = Clone(orig);
                 newParts.HasAddrLabelHighlight = false;
+                return newParts;
+            }
+
+            public static FormattedParts SetFlagsModified(FormattedParts orig) {
+                FormattedParts newParts = Clone(orig);
+                newParts.HasModifiedFlags = true;
                 return newParts;
             }
 

@@ -553,7 +553,7 @@ limitations under the License.
                         <GridViewColumn Header="Bytes" Width="93"
                                         DisplayMemberBinding="{Binding Bytes}"/>
                         <GridViewColumn Header="Flags" Width="80"
-                                        DisplayMemberBinding="{Binding Flags}"/>
+                                        CellTemplate="{StaticResource flagsHighlightTemplate}"/>
                         <GridViewColumn Header="Attr" Width="54"
                                         DisplayMemberBinding="{Binding Attr}"/>
                         <GridViewColumn Header="Label" Width="73"
