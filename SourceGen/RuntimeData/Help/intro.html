@@ -415,6 +415,19 @@ a double leading underscore (e.g. <code>__label</code>) for its own
 purposes.  In such cases, the label will be modified to comply with the
 target assembler syntax.</p>
 
+<p>Operands may use parts of symbols.  For example, if you have a label
+<code>MYSTRING</code>, you can write:</p>
+<pre>
+MYSTRING .STR    "hello"
+         LDA     #&lt;MYSTRING
+         STA     $00
+         LDA     #&gt;MYSTRING
+         STA     $01
+</pre>
+<p>See <a href="#symbol-parts">Parts and Adjustments</a> for more details.</p>
+
+<h4>Symbol Types</h4>
+
 <p><b>Platform symbols</b> are defined in platform symbol files.  These
 are named with a ".sym65" extension, and have a fairly straightforward
 name/value syntax.  Several files for popular platforms come with SourceGen
@@ -442,6 +455,10 @@ you to redefine symbols within a project.  (You can "hide" a platform
 symbol by creating a project symbol with the same name and an unused
 value, such as $ffffffff.)</p>
 
+<p><b>Local variables</b> are redefinable symbols that are organized
+into tables.  They're used to specify labels for zero-page and 65816
+stack-relative instructions.</p>
+
 <p><b>User labels</b> are labels added to instructions or data by the user.
 The editor won't allow you to add a label that conflicts, but if you
 manage to do so, the user label takes precedence over project and platform
@@ -457,19 +474,73 @@ that label.  Auto labels are only added where they are needed.  Because
 auto labels may be redefined or disappear, the editor will try to prevent
 you from referring to them when editing operands.</p>
 
-<p>Operands may use parts of symbols.  For example, if you have a label
-<code>MYSTRING</code>, you can write:</p>
+
+<h3><a name="local-vars">Local Variables</a></h3>
+
+<p>Local variables are applied to instructions that have zero
+page operands (<code>op ZP</code>, <code>op (ZP),Y</code>, etc.), or
+65816 stack relative operands
+(<code>op OFF,S</code> or <code>op (OFF,S),Y</code>).  While they must be
+unique relative to other kinds of labels, they don't have to be unique
+with respect to earlier variable definitions.  So you can define
+<code>TMP .EQ $10</code>, and a few lines later define
+<code>TMP .EQ $20</code>.  This is handy because zero-page addresses are
+often used in different ways by different parts of the program.  For
+example:</p>
 <pre>
-MYSTRING .STR    "hello"
-         LDA     #&lt;MYSTRING
+         LDA     ($00),Y
+         INC     $02
+         ... later ...
+         DEC     $00
+         STA     ($01),Y
+</pre>
+<p>If we had given <code>$00</code> the label <code>PTR</code> and
+<code>$02</code> the label <code>COUNT</code> globally,
+the second pair of instructions would look all wrong.  With local
+variable tables you can set <code>PTR=$00 COUNT=$02</code> for the first chunk,
+and <code>COUNT=$00 PTR=$01</code> for the second chunk.</p>
+
+<p>Local variables have a value and a width.  If we create a pair of
+variable definitions like this:</p>
+<pre>
+PTR      .eq     $00        ;2 bytes
+COUNT    .eq     $02        ;1 byte
+</pre>
+<p>Then this:</p>
+<pre>
          STA     $00
-         lda     #&gt;MYSTRING
-         STA     $01
+         STX     $01
+         LDY     $02
+</pre>
+<p>Would become:</p>
+<pre>
+         STA     PTR
+         STX     PTR+1
+         LDY     COUNT
 </pre>
 
-<p>The format editor allows you to choose which part of the symbol's
-value to use.  If the value doesn't match exactly, an adjustment will
-be applied.</p>
+<p>The scope of a variable definition starts at the point where it is
+defined, and stops when its definition is erased.  There are three
+ways for a table to erase an earlier definition:</p>
+<ol>
+  <li>Create a new definition with the same name.</li>
+  <li>Create a new definition that has an overlapping value.  For
+    example, if you have a two-byte variable <code>PTR = $00</code>,
+    and define a one-byte variable <code>COUNT = $01</code>, the
+    definition for <code>PTR</code> will be cleared because its second
+    byte overlaps.</li>
+  <li>Tables have a "clear previous" flag that erases all previous
+    definitions.  This doesn't usually cause anything to be generated in the
+    assembly sources; instead, it just causes SourceGen to stop using
+    that label.</li>
+</ol>
+<p>As you might expect, you're not allowed to have duplicate labels or
+overlapping values in an individual table.</p>
+<p>Not all assemblers support redefinable variables.  In those cases,
+the symbol names will be modified to be unique (e.g. the second definition
+of <code>PTR</code> becomes <code>PTR_1</code>), and variables will have
+global scope.</p>
+
 
 <h3><a name="weak-refs">Weak References</a></h3>
 
@@ -700,10 +771,12 @@ absolute long load, and because it can make 65816 code easier to read.</p>
 
 <h2><a name="pseudo-ops">Data and Directive Pseudo-Opcodes</a></h2>
 
-<p>There are only three assembler directives that appear in the code list:</p>
+<p>There are only four assembler directives that appear in the code list:</p>
 <ul>
   <li>.EQ - defines a symbol's value.  These are generated automatically
     when an operand that matches a platform or project symbol is found.</li>
+  <li>.VAR - defines a local variable.  These are generated for
+    local variable tables.</li>
   <li>.ORG - changes the target address.</li>
   <li>.RWID - specifies the width of the accumulator and index registers
     (65816 only).  Note this doesn't change the actual width, just tells
