@@ -51,18 +51,22 @@ namespace SourceGen {
             public TextScanMode DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
+            public bool SmartPlpHandling { get; set; }
 
             public AnalysisParameters() {
+                // Set default values.
                 AnalyzeUncategorizedData = true;
                 DefaultTextScanMode = TextScanMode.LowHighAscii;
                 MinCharsForString = DataAnalysis.DEFAULT_MIN_STRING_LENGTH;
                 SeekNearbyTargets = true;
+                SmartPlpHandling = true;
             }
             public AnalysisParameters(AnalysisParameters src) {
                 AnalyzeUncategorizedData = src.AnalyzeUncategorizedData;
                 DefaultTextScanMode = src.DefaultTextScanMode;
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
+                SmartPlpHandling = src.SmartPlpHandling;
             }
         }
 

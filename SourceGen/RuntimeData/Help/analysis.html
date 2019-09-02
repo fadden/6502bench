@@ -244,15 +244,18 @@ status flag override to get correct disassembly.</p>
 <p>The instruction that is most likely to cause problems is <code>PLP</code>,
 which pulls the processor status flags off of the stack.  SourceGen
 doesn't try to track stack contents, so it can't know what values may
-be pulled.  In many cases the PLP appears not long after a PHP, so
-SourceGen will scan backward through the file to find the nearest PHP,
-and use the status flags from that.  If no PHP can be found, then all
+be pulled.  In many cases the <code>PLP</code> appears not long after a
+<code>PHP</code>, so SourceGen will scan backward through the file to
+find the nearest <code>PHP</code>, and use the status flags from that.  If
+no <code>PHP</code> can be found, then all
 flags are set to "indeterminate".  (The boot loader in the Apple II 5.25"
 floppy disk controller is an example where SourceGen gets it wrong. The
 code does <code>CLC</code>/<code>PHP</code>, followed a bit later by the
 <code>PLP</code>, but it's actually using the stack to pass the carry
 flag around.  Flagging the carry bit as indeterminate with a status flag
-override on the instruction following the PLP fixes things.)</p>
+override on the instruction following the PLP fixes things.)  The
+"smart" behavior can be disabled in the project properties if it's coming
+out wrong more often than right.</p>
 
 <p>Some other things that the code analyzer can't recognize automatically:</p>
 <ul>

@@ -147,6 +147,11 @@ namespace SourceGen {
         private StatusFlags mEntryFlags;
 
         /// <summary>
+        /// User-configurable analysis parameters.
+        /// </summary>
+        private ProjectProperties.AnalysisParameters mAnalysisParameters;
+
+        /// <summary>
         /// Debug trace log.
         /// </summary>
         private DebugLog mDebugLog = new DebugLog(DebugLog.Priority.Silent);
@@ -168,7 +173,8 @@ namespace SourceGen {
         /// <param name="debugLog">Object that receives debug log messages.</param>
         public CodeAnalysis(byte[] data, CpuDef cpuDef, Anattrib[] anattribs,
                 AddressMap addrMap, TypeHint[] hints, StatusFlags[] statusFlagOverrides,
-                StatusFlags entryFlags, ScriptManager scriptMan, DebugLog debugLog) {
+                StatusFlags entryFlags, ProjectProperties.AnalysisParameters parms,
+                ScriptManager scriptMan, DebugLog debugLog) {
             mFileData = data;
             mCpuDef = cpuDef;
             mAnattribs = anattribs;
@@ -177,6 +183,7 @@ namespace SourceGen {
             mStatusFlagOverrides = statusFlagOverrides;
             mEntryFlags = entryFlags;
             mScriptManager = scriptMan;
+            mAnalysisParameters = parms;
             mDebugLog = debugLog;
 
             mScriptSupport = new ScriptSupport(this);
@@ -789,16 +796,18 @@ namespace SourceGen {
                 backOffsetLimit = 0;
             }
             StatusFlags flags = StatusFlags.AllIndeterminate;
-            for (int offset = plpOffset - 1; offset >= backOffsetLimit; offset--) {
-                Anattrib attr = mAnattribs[offset];
-                if (!attr.IsInstructionStart || !attr.IsVisited) {
-                    continue;
-                }
-                OpDef op = mCpuDef.GetOpDef(mFileData[offset]);
-                if (op == OpDef.OpPHP_StackPush) {
-                    LogI(plpOffset, "Found visited PHP at +" + offset.ToString("x6"));
-                    flags = mAnattribs[offset].StatusFlags;
-                    break;
+            if (mAnalysisParameters.SmartPlpHandling) {
+                for (int offset = plpOffset - 1; offset >= backOffsetLimit; offset--) {
+                    Anattrib attr = mAnattribs[offset];
+                    if (!attr.IsInstructionStart || !attr.IsVisited) {
+                        continue;
+                    }
+                    OpDef op = mCpuDef.GetOpDef(mFileData[offset]);
+                    if (op == OpDef.OpPHP_StackPush) {
+                        LogI(plpOffset, "Found visited PHP at +" + offset.ToString("x6"));
+                        flags = mAnattribs[offset].StatusFlags;
+                        break;
+                    }
                 }
             }
 

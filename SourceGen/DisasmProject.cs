@@ -618,8 +618,8 @@ namespace SourceGen {
                 reanalysisTimer.StartTask("CodeAnalysis.Analyze");
 
                 CodeAnalysis ca = new CodeAnalysis(mFileData, CpuDef, mAnattribs, AddrMap,
-                    TypeHints, StatusFlagOverrides, ProjectProps.EntryFlags, mScriptManager,
-                    debugLog);
+                    TypeHints, StatusFlagOverrides, ProjectProps.EntryFlags,
+                    ProjectProps.AnalysisParams, mScriptManager, debugLog);
 
                 ca.Analyze();
                 reanalysisTimer.EndTask("CodeAnalysis.Analyze");

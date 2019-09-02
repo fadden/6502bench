@@ -219,6 +219,7 @@ namespace SourceGen {
             public string DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
+            public bool SmartPlpHandling { get; set; }
 
             public SerAnalysisParameters() { }
             public SerAnalysisParameters(ProjectProperties.AnalysisParameters src) {
@@ -226,6 +227,7 @@ namespace SourceGen {
                 DefaultTextScanMode = src.DefaultTextScanMode.ToString();
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
+                SmartPlpHandling = src.SmartPlpHandling;
             }
         }
         public class SerAddressMap {
@@ -511,6 +513,13 @@ namespace SourceGen {
                 spf.ProjectProps.AnalysisParams.MinCharsForString;
             proj.ProjectProps.AnalysisParams.SeekNearbyTargets =
                 spf.ProjectProps.AnalysisParams.SeekNearbyTargets;
+            if (spf._ContentVersion < 2) {
+                // This was made optional in v1.3.  Default it to true for older projects.
+                proj.ProjectProps.AnalysisParams.SmartPlpHandling = true;
+            } else {
+                proj.ProjectProps.AnalysisParams.SmartPlpHandling =
+                    spf.ProjectProps.AnalysisParams.SmartPlpHandling;
+            }
 
             // Deserialize ProjectProperties: external file identifiers.
             Debug.Assert(proj.ProjectProps.PlatformSymbolFileIdentifiers.Count == 0);

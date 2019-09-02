@@ -227,11 +227,17 @@ entry point hint) will use this value.  This is chiefly of value for
 
 <p>If "analyze uncategorized data" is checked, SourceGen will attempt to
 identify character strings and regions that are filled with a repeated
-value.  If it's
-not checked, anything that isn't detected as code or explicitly formatted
-will simply be shown as a byte value.</p>
+value.  If it's not checked, anything that isn't detected as code or
+explicitly formatted as data will be shown as individual byte values.</p>
 <p>If "seek nearby targets" is checked, the analyzer will try to use
-nearby labels for data loads and stores.</p>
+nearby labels for data loads and stores, adjusting them to fit
+(e.g. <code>LDA LABEL+1</code>).  If not enabled, labels are only used
+when they match exactly.</p>
+<p>If "smart PLP handling" is checked, the analyzer will try to use
+the processor status flags from a nearby <code>PHP</code> when a
+<code>PLP</code> is encountered.  If not enabled, all flags are set to
+"indeterminate" following a <code>PLP</code>.</p>
+
 <p>The "default text encoding" setting has two effects.  First, it
 specifies which character encoding to use when searching for strings in
 uncategorized data.  Second, if an assembler has a notion of preferred

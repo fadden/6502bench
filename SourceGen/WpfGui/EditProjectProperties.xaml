@@ -94,10 +94,12 @@ limitations under the License.
                     <GroupBox Header="Analysis Parameters" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
                               Margin="4,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Name="analyzeUncategorizedCheckBox" Content="Analyze uncategorized data"
+                            <CheckBox Content="Analyze uncategorized data"
                                       IsChecked="{Binding AnalyzeUncategorizedData}"/>
-                            <CheckBox Name="seekAltTargetCheckBox" Margin="0,4,0,0" Content="Seek nearby targets"
+                            <CheckBox Margin="0,4,0,0" Content="Seek nearby targets"
                                       IsChecked="{Binding SeekNearbyTargets}"/>
+                            <CheckBox Margin="0,4,0,0" Content="Smart PLP handling"
+                                      IsChecked="{Binding SmartPlpHandling}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                 <TextBlock Margin="0,3,0,0" Text="Default text encoding:"/>
