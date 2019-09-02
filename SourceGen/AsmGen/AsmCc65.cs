@@ -103,7 +103,7 @@ namespace SourceGen.AsmGen {
         private static PseudoOp.PseudoOpNames sDataOpNames =
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "=" },
-                //VarDirective
+                { "VarDirective", ".set" },
                 { "OrgDirective", ".org" },
                 //RegWidthDirective         // .a8, .a16, .i8, .i16
                 { "DefineData1", ".byte" },
@@ -163,8 +163,6 @@ namespace SourceGen.AsmGen {
 
             // Special handling for forward references to zero-page labels is required.
             Quirks.SinglePassAssembler = true;
-
-            Quirks.NoRedefinableSymbols = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
@@ -515,8 +513,9 @@ namespace SourceGen.AsmGen {
                 string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
                     Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
-                OutputEquDirective(SourceFormatter.FormatVariableLabel(defSym.Label),
-                    valueStr, defSym.Comment);
+                OutputLine(SourceFormatter.FormatVariableLabel(defSym.Label),
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
+                    valueStr, SourceFormatter.FormatEolComment(defSym.Comment));
             }
         }
 
@@ -569,6 +568,8 @@ namespace SourceGen.AsmGen {
             // that cc65 users will expect.
             if (!string.IsNullOrEmpty(label) && label[0] != '.' &&
                     !string.Equals(opcode, sDataOpNames.EquDirective,
+                        StringComparison.InvariantCultureIgnoreCase) &&
+                    !string.Equals(opcode, sDataOpNames.VarDirective,
                         StringComparison.InvariantCultureIgnoreCase)) {
                 label += ':';
 

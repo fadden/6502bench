@@ -14,10 +14,10 @@ CONST_ZERO =     $f0        ;project const
          ldx     $04
          lda     CONST_ZERO,S
          sta     $f1,S
-VAR_ZERO =       $00
-VAR_TWO  =       $02
-VAR_THREE =      $03
-CONST_ZERO_VAR = $f0
+VAR_ZERO .set    $00
+VAR_TWO  .set    $02
+VAR_THREE .set   $03
+CONST_ZERO_VAR .set $f0
          ldy     VAR_ZERO
          lda     (VAR_ZERO+1),y
          sta     VAR_THREE
@@ -26,8 +26,8 @@ CONST_ZERO_VAR = $f0
          sta     $f1,S
          eor     0
          ora     240,S
-PROJ_ZERO_DUP1 = $10        ;clash with project symbol
-DPCODE_DUP1 =    $80        ;clash with user label
+PROJ_ZERO_DUP1 .set $10     ;clash with project symbol
+DPCODE_DUP1 .set $80        ;clash with user label
          lda     VAR_ZERO
          lda     VAR_ZERO+1
          lda     VAR_TWO
@@ -44,16 +44,16 @@ DPCODE_DUP1 =    $80        ;clash with user label
          ldy     PROJ_ONE
          ldy     $02
          .byte   $2c
-NH0      =       $00        ;not hidden
-NH1      =       $01        ;not hidden
+NH0      .set    $00        ;not hidden
+NH1      .set    $01        ;not hidden
 L103C:   lda     #$fe
          beq     L103C
          ldy     NH0
          ldy     NH1
          ldy     $02
          nop
-PTR0     =       $10
-CONST0   =       $10
+PTR0     .set    $10
+CONST0   .set    $10
          lda     PTR0
          ldx     PTR0+1
          ldy     $12
@@ -61,41 +61,41 @@ CONST0   =       $10
          sta     (CONST0+3,S),y
 ;Test name redefinition.  This is mostly of interest for assemblers without
 ;redefinable variables, but also of interest to the cross-reference window.
-PTR      =       $20        ;#1
+PTR      .set    $20        ;#1
          ldx     PTR
-PTR_3    =       $22        ;#2
-         ldx     PTR_3
-PTR_4    =       $24        ;#3
-         ldx     PTR_4
+PTR      .set    $22        ;#2
+         ldx     PTR
+PTR      .set    $24        ;#3
+         ldx     PTR
 PTR_1:   nop
-PTR_A    =       $20
+PTR_A    .set    $20
          ldy     PTR_A
-PTR_B    =       $1f
+PTR_B    .set    $1f
          ldy     PTR_B+1
-PTR_C    =       $1d
+PTR_C    .set    $1d
          ldy     PTR_C+3
-PTR_D    =       $21
+PTR_D    .set    $21
          ldy     PTR_C+3
-VAL0     =       $30
-VAL1     =       $31
-VAL2     =       $32
-VAL3     =       $33
-VAL4     =       $34
-VAL5     =       $35
+VAL0     .set    $30
+VAL1     .set    $31
+VAL2     .set    $32
+VAL3     .set    $33
+VAL4     .set    $34
+VAL5     .set    $35
          and     VAL0
          and     VAL1
          and     VAL2
          and     VAL3
          and     VAL4
          and     VAL5
-VAL14    =       $31
+VAL14    .set    $31
          and     VAL0
          and     VAL14
          and     VAL14+1
          and     VAL14+2
          and     VAL14+3
          and     VAL5
-DPNOP    =       $80        ;same as org
+DPNOP    .set    $80        ;same as org
          lda     z:DPCODE
          jsr     DPCODE
          rts
