@@ -109,6 +109,9 @@
     <Compile Include="WpfGui\EditInstructionOperand.xaml.cs">
       <DependentUpon>EditInstructionOperand.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\EditInstructionOperand2.xaml.cs">
+      <DependentUpon>EditInstructionOperand2.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\EditLabel.xaml.cs">
       <DependentUpon>EditLabel.xaml</DependentUpon>
     </Compile>
@@ -263,6 +266,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditInstructionOperand.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditInstructionOperand2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

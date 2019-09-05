@@ -1308,6 +1308,7 @@ namespace SourceGen {
             int offset = 0;
             while (offset < mFileData.Length) {
                 Anattrib attr = mAnattribs[offset];
+                bool thisIsCode = attr.IsInstructionStart;
                 Debug.Assert(attr.IsStart);
                 Debug.Assert(attr.Length != 0);
                 offset += attr.Length;
@@ -1321,6 +1322,12 @@ namespace SourceGen {
                     extraInstrBytes++;
                     offset++;
                 }
+
+                // Make sure the extra code bytes were part of an instruction.  Otherwise it
+                // means we moved from the end of a data area to the middle of an instruction,
+                // which is very bad.
+                Debug.Assert(extraInstrBytes == 0 || thisIsCode);
+
                 //if (extraInstrBytes > 0) { Debug.WriteLine("EIB=" + extraInstrBytes); }
                 // Max instruction len is 4, so the stray part must be shorter.
                 Debug.Assert(extraInstrBytes < 4);

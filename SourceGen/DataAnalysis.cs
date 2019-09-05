@@ -303,11 +303,15 @@ namespace SourceGen {
                     // (Note the uncategorized data pass hasn't run yet, so only instructions
                     // and offsets identified by users or scripts have been categorized.)
                     int scanOffset = targetOffset;
-                    while (--scanOffset > 0) {
+                    while (--scanOffset >= 0) {
                         FormatDescriptor dfd = mAnattribs[scanOffset].DataDescriptor;
-                        if (dfd != null && scanOffset + dfd.Length > targetOffset) {
-                            // Descriptor encompasses target offset.  Adjust target.
-                            targetOffset = scanOffset;
+                        if (dfd != null) {
+                            if (scanOffset + dfd.Length > targetOffset) {
+                                // Found a descriptor that encompasses target offset.  Adjust
+                                // target to point at the start of the region.
+                                targetOffset = scanOffset;
+                            }
+                            // Descriptors aren't allowed to overlap, so either way we're done.
                             break;
                         }
                     }
