@@ -470,9 +470,12 @@ exported symbols can be pulled directly into other projects.</p>
 instructions or data offsets that are the target of operands.  They're
 formed by appending the hexadecimal address to the letter "L", with
 additional characters added if some other symbol has already defined
-that label.  Auto labels are only added where they are needed.  Because
-auto labels may be redefined or disappear, the editor will try to prevent
-you from referring to them when editing operands.</p>
+that label.  Options can be set that change the "L" to a character or
+characters based on how the label is referenced, e.g. "B" for branch targets.
+Auto labels are only added where they are needed, and are removed when
+no longer necessary.  Because auto labels may be renamed or vanish, the
+editor will try to prevent you from referring to them when editing
+operands.</p>
 
 
 <h3><a name="local-vars">Local Variables</a></h3>
@@ -536,6 +539,9 @@ ways for a table to erase an earlier definition:</p>
 </ol>
 <p>As you might expect, you're not allowed to have duplicate labels or
 overlapping values in an individual table.</p>
+<p>If a platform/project symbol has the same value as a local variable,
+the local variable is used.  If the local variable definition is cleared,
+use of the platform/project symbol will resume.</p>
 <p>Not all assemblers support redefinable variables.  In those cases,
 the symbol names will be modified to be unique (e.g. the second definition
 of <code>PTR</code> becomes <code>PTR_1</code>), and variables will have

@@ -53,7 +53,8 @@ method in <code>DisasmProject.cs</code>):</p>
     and data operand formats.</li>
   <li>Run the data analyzer.  This looks for patterns in uncategorized
     data, and connects instruction and data operands to target offsets.
-    The "nearby label" stuff is handled here.  All of the results are
+    The "nearby label" stuff is handled here.  Auto-labels are generated
+    for references to internal addresses.  All of the results are
     stored in the Anattribs array.  (The data analysis pass is described in
     more detail below.)</li>
   <li>Remove hidden labels from the symbol table.  These are user-specified
@@ -62,11 +63,16 @@ method in <code>DisasmProject.cs</code>):</p>
     want to pull them out of the symbol table.  (Remember, symbolic
     operands use "weak references", so a missing symbol just means the
     operand is shown as a hex value.)</li>
+  <li>Resolve references to local variables.  This sets the operand symbol
+    in Anattrib so we won't try to apply platform/project symbols to
+    zero-page addresses.  If we somehow ended up with a variable that has
+    the same as a user label, we rename the variable.</li>
   <li>Resolve references to platform and project external symbols.
     This sets the operand symbol in Anattrib, and adds the symbol to
     the list that is displayed in .EQ directives.</li>
-  <li>Generate cross-reference lists.  This is done for file data and
-    for any platform/project symbols that are referenced.</li>
+  <li>Generate cross-reference lists.  This is done for internal references,
+    for local variables, and for any platform/project symbols that are
+    referenced.</li>
   <li>If annotated auto-labels are enabled, the simple labels are
     replaced with the annotated versions here.  (This can't be done earlier
     because the annotations are generated from the cross-reference data.)</li>
@@ -75,7 +81,8 @@ method in <code>DisasmProject.cs</code>):</p>
 
 <p>Once analysis is complete, a line-by-line display list is generated
 by walking through the annotated file data.  Most of the actual strings
-aren't rendered until they're needed.</p>
+aren't rendered until they're needed.  For complicated multi-line items
+like string operands, the formatted text is cached.</p>
 
 
 <h3><a name="auto-format">Automatic Formatting</a></h3>
@@ -84,8 +91,9 @@ aren't rendered until they're needed.</p>
 inline data byte.  Some offsets are also marked as the start of an instruction
 or data area.  The start offsets may have a format descriptor associated
 with them.</p>
-<p>Format descriptors have a format (like "numeric" or "string") a
-sub-format (like "hexadecimal" or "null-terminated"), and a length.  For
+<p>Format descriptors have a format (like "numeric" or
+"null-terminated string") a sub-format (like "hexadecimal" or
+"high ASCII"), and a length.  For
 an instruction operand the length is redundant, but for a data operand it
 determines the width of the numeric value or length of the string.  For
 this reason, instructions do not need a format descriptor, but all
@@ -140,8 +148,9 @@ code runs through the same set of steps.  The advantage of this approach
 is that the act of doing a thing, undoing a thing, and redoing a thing
 are all handled the same way.</p>
 <p>None of the editors modify the project data structures directly.  All
-changes are added to a change set, which is processed by a single function.
-The change sets are kept in the undo/redo buffer indefinitely.  After
+changes are added to a change set, which is processed by a single
+"apply changes" function.  The change sets are kept in the undo/redo
+buffer indefinitely.  After
 the changes are made, the Anattrib array and other data structures are
 regenerated.</p>
 
@@ -277,13 +286,13 @@ correctly will require improvements to the user interface.</p>
 
 <h3><a name="extension-scripts">Extension Scripts</a></h3>
 
-<p>Extension scripts can mark data that follows a JSR or JSL as inline
+<p>Extension scripts can mark data that follows a JSR, JSL, or BRK as inline
 data, or change the format of nearby data or instructions.  The first
-time a JSR/JSL instruction is encountered, all loaded extension scripts
-are offered a chance to act.</p>
+time a JSR/JSL/BRK instruction is encountered, all loaded extension scripts
+that implement the appropriate interface are offered a chance to act.</p>
 
 <p>The first script that applies a format wins.  Attempts to re-format
-instructions or data that has already been formatted will fail.  This rule
+instructions or data that have already been formatted will fail.  This rule
 ensures that anything explicitly formatted by the user will not be
 overridden by a script.</p>
 
@@ -298,9 +307,9 @@ before code analysis starts.)</p>
 
 <h2><a name="data-analysis">Data Analysis</a></h2>
 <p>The data analyzer performs two tasks.  It matches operands with
-offsets, and it analyzes uncategorized data.  Either or both of
-these can be disabled from the
-<a href="settings.html#project-props">project properties</a></p>
+offsets, and it analyzes uncategorized data.  This behavior can be
+modified in the
+<a href="settings.html#project-properties">project properties</a>.</p>
 
 <p>The data target analyzer examines every instruction and data operand
 to see if it's referring to an offset within the data file.  If the
@@ -319,8 +328,8 @@ pieces, where contiguous regions hold nothing but data, are not split
 across a ".ORG" directive, are not interrupted by data, and do not
 contain anything that the user has chosen to format.  Each region is
 scanned for matching patterns.  If a match is found, a format entry
-is added to the Anattrib array.  Otherwise, data is added as independent
-byte values.</p>
+is added to the Anattrib array.  Otherwise, data is added as single-byte
+values.</p>
 
 
 </div>
