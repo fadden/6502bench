@@ -582,6 +582,58 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Checks some stuff.  Problems are handled with assertions, so this is only
+        /// useful in debug builds.
+        /// </summary>
+        public void Validate() {
+            // Confirm that we can walk through the file, stepping directly from the start
+            // of one thing to the start of the next.
+            int offset = 0;
+            while (offset < mFileData.Length) {
+                Anattrib attr = mAnattribs[offset];
+                bool thisIsCode = attr.IsInstructionStart;
+                Debug.Assert(attr.IsStart);
+                Debug.Assert(attr.Length != 0);
+                offset += attr.Length;
+
+                // Sometimes embedded instructions continue past the "outer" instruction,
+                // usually because we're misinterpreting the code.  We need to deal with
+                // that here.
+                int extraInstrBytes = 0;
+                while (offset < mFileData.Length && mAnattribs[offset].IsInstruction &&
+                        !mAnattribs[offset].IsInstructionStart) {
+                    extraInstrBytes++;
+                    offset++;
+                }
+
+                // Make sure the extra code bytes were part of an instruction.  Otherwise it
+                // means we moved from the end of a data area to the middle of an instruction,
+                // which is very bad.
+                Debug.Assert(extraInstrBytes == 0 || thisIsCode);
+
+                //if (extraInstrBytes > 0) { Debug.WriteLine("EIB=" + extraInstrBytes); }
+                // Max instruction len is 4, so the stray part must be shorter.
+                Debug.Assert(extraInstrBytes < 4);
+            }
+            Debug.Assert(offset == mFileData.Length);
+
+            // Confirm that all bytes are tagged as code, data, or inline data.  The Asserts
+            // in Anattrib should confirm that nothing is tagged as more than one thing.
+            for (offset = 0; offset < mAnattribs.Length; offset++) {
+                Anattrib attr = mAnattribs[offset];
+                Debug.Assert(attr.IsInstruction || attr.IsInlineData || attr.IsData);
+            }
+
+            // Confirm that there are no Default format entries in OperandFormats.
+            foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
+                Debug.Assert(kvp.Value.FormatType != FormatDescriptor.Type.Default);
+                Debug.Assert(kvp.Value.FormatType != FormatDescriptor.Type.REMOVE);
+            }
+        }
+
+        #region Analysis
+
+        /// <summary>
         /// Analyzes the file data.  This is the main entry point for code/data analysis.
         /// </summary>
         /// <param name="reanalysisRequired">How much work to do.</param>
@@ -1298,55 +1350,10 @@ namespace SourceGen {
             });
         }
 
-        /// <summary>
-        /// Checks some stuff.  Problems are handled with assertions, so this is only
-        /// useful in debug builds.
-        /// </summary>
-        public void Validate() {
-            // Confirm that we can walk through the file, stepping directly from the start
-            // of one thing to the start of the next.
-            int offset = 0;
-            while (offset < mFileData.Length) {
-                Anattrib attr = mAnattribs[offset];
-                bool thisIsCode = attr.IsInstructionStart;
-                Debug.Assert(attr.IsStart);
-                Debug.Assert(attr.Length != 0);
-                offset += attr.Length;
+        #endregion Analysis
 
-                // Sometimes embedded instructions continue past the "outer" instruction,
-                // usually because we're misinterpreting the code.  We need to deal with
-                // that here.
-                int extraInstrBytes = 0;
-                while (offset < mFileData.Length && mAnattribs[offset].IsInstruction &&
-                        !mAnattribs[offset].IsInstructionStart) {
-                    extraInstrBytes++;
-                    offset++;
-                }
 
-                // Make sure the extra code bytes were part of an instruction.  Otherwise it
-                // means we moved from the end of a data area to the middle of an instruction,
-                // which is very bad.
-                Debug.Assert(extraInstrBytes == 0 || thisIsCode);
-
-                //if (extraInstrBytes > 0) { Debug.WriteLine("EIB=" + extraInstrBytes); }
-                // Max instruction len is 4, so the stray part must be shorter.
-                Debug.Assert(extraInstrBytes < 4);
-            }
-            Debug.Assert(offset == mFileData.Length);
-
-            // Confirm that all bytes are tagged as code, data, or inline data.  The Asserts
-            // in Anattrib should confirm that nothing is tagged as more than one thing.
-            for (offset = 0; offset < mAnattribs.Length; offset++) {
-                Anattrib attr = mAnattribs[offset];
-                Debug.Assert(attr.IsInstruction || attr.IsInlineData || attr.IsData);
-            }
-
-            // Confirm that there are no Default format entries in OperandFormats.
-            foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
-                Debug.Assert(kvp.Value.FormatType != FormatDescriptor.Type.Default);
-                Debug.Assert(kvp.Value.FormatType != FormatDescriptor.Type.REMOVE);
-            }
-        }
+        #region Change Management
 
         /// <summary>
         /// Generates a ChangeSet that merges the FormatDescriptors in the new list into
@@ -1977,6 +1984,8 @@ namespace SourceGen {
                 hints[tuple.Value] = (CodeAnalysis.TypeHint)tuple.Type;
             }
         }
+
+        #endregion Change Management
 
         /// <summary>
         /// Finds a label by name.  SymbolTable must be populated.

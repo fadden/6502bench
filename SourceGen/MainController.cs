@@ -3267,6 +3267,12 @@ namespace SourceGen {
                 // If the descriptor has a weak reference to an unknown symbol, should we
                 // call that out here?
                 sb.AppendFormat(Res.Strings.INFO_FD_SUM_FMT, dfd.ToUiString());
+
+                // If the format descriptor for an instruction has the wrong length, it will
+                // be ignored.  Call that out.
+                if (attr.IsInstructionStart && attr.Length != dfd.Length) {
+                    sb.AppendFormat(" [incorrect format length]");
+                }
             }
             sb.Append("\r\n");
 

@@ -218,8 +218,8 @@ namespace SourceGen {
         public int Address { get; set; }
 
         /// <summary>
-        /// Instructions: length of the instruction (for InstrStart).  If a FormatDescriptor
-        ///   is assigned, the length must match.
+        /// Instructions: length of the instruction (for InstrStart).  If a FormatDescriptor is
+        ///   assigned, the length must match, or the dfd will be ignored.
         /// Inline data: FormatDescriptor length, or zero if no descriptor is defined.
         /// Data: FormatDescriptor length, or zero if no descriptor is defined.
         /// 
