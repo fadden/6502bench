@@ -718,6 +718,7 @@ namespace SourceGen {
 #else
             // Select "is printable" test.  We use the extended version to include some
             // control characters.
+            // TODO(maybe): require some *actually* printable characters in each string
             CharEncoding.InclusionTest testPrintable;
             FormatDescriptor.SubType baseSubType;
             switch (mAnalysisParams.DefaultTextScanMode) {

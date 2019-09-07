@@ -1845,6 +1845,7 @@ namespace SourceGen {
         }
 
         private void EditInstructionOperand(int offset) {
+#if false
             EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, offset,
                 mProject, mOutputFormatter);
 
@@ -1912,7 +1913,21 @@ namespace SourceGen {
                 case WpfGui.EditInstructionOperand.SymbolShortcutAction.None:
                     break;
             }
+#else
+            EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, mProject,
+                offset, mOutputFormatter);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
 
+            ChangeSet cs = new ChangeSet(1);
+            mProject.OperandFormats.TryGetValue(offset, out FormatDescriptor dfd);
+            if (dlg.FormatDescriptorResult != dfd) {
+                UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
+                    dfd, dlg.FormatDescriptorResult);
+                cs.Add(uc);
+            }
+#endif
             if (cs.Count != 0) {
                 ApplyUndoableChanges(cs);
             }

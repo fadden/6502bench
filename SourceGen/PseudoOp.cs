@@ -836,7 +836,9 @@ namespace SourceGen {
                 }
                 operandValue = (int)(operandValue & mask);
 
-                if (sb.Length != symLabel.Length) {
+                // If we've added stuff, and we're going to add an adjustment later, stick
+                // an extra space in between for readability.
+                if (sb.Length != symLabel.Length && operandValue != symbolValue) {
                     sb.Append(' ');
                 }
             } else {

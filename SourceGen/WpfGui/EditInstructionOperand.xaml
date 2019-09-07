@@ -19,6 +19,7 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Instruction Operand"
@@ -26,72 +27,144 @@ limitations under the License.
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         ContentRendered="Window_ContentRendered">
-    <StackPanel Margin="8">
-        <TextBlock Text="Select operand format:"/>
-        <RadioButton Name="defaultButton" GroupName="Format" Content="Default" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="hexButton" GroupName="Format" Content="Hexadecimal" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="decimalButton" GroupName="Format" Content="Decimal" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="binaryButton" GroupName="Format" Content="Binary" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="asciiButton" GroupName="Format" Content="ASCII (low or high) character" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="petsciiButton" GroupName="Format" Content="C64 PETSCII character" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="screenCodeButton" GroupName="Format" Content="C64 Screen character" Margin="0,2,0,0"
-                     Checked="MainGroup_CheckedChanged"/>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <RadioButton Name="symbolButton" Grid.Column="0" Grid.Row="0" Margin="0,2,0,0"
-                         GroupName="Format" Content="Symbol"
-                         Checked="MainGroup_CheckedChanged"/>
-            <TextBox Name="symbolTextBox" Grid.Column="1" Grid.Row="0" Margin="8,1,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}" TextChanged="SymbolTextBox_TextChanged"/>
-            <StackPanel Name="symbolPartPanel" Grid.Column="1" Grid.Row="1" Orientation="Horizontal" Margin="8,4,0,0">
-                <RadioButton Name="lowButton" GroupName="Part" Content="Low"
-                             Checked="MainGroup_CheckedChanged"/>
-                <RadioButton Name="highButton" GroupName="Part" Content="High" Margin="8,0,0,0"
-                             Checked="MainGroup_CheckedChanged"/>
-                <RadioButton Name="bankButton" GroupName="Part" Content="Bank" Margin="8,0,0,0"
-                             Checked="MainGroup_CheckedChanged"/>
-            </StackPanel>
-        </Grid>
 
-        <DockPanel Margin="0,8,0,0">
-            <TextBlock DockPanel.Dock="Left" Text="Preview:"/>
-            <TextBox Name="previewTextBox" DockPanel.Dock="Right" IsReadOnly="True" Margin="8,1,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}"/>
-        </DockPanel>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <GroupBox Name="symbolShortcutsGroupBox" Header="Symbol Shortcuts" Margin="0,12,0,0">
+        <system:String x:Key="str_SymbolNotUsed">N/A</system:String>
+        <system:String x:Key="str_SymbolNotValid">[invalid symbol name]</system:String>
+        <system:String x:Key="str_SymbolUnknown">?</system:String>
+    </Window.Resources>
+
+    <Grid Margin="8" Width="500">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                   Text="Select operand format:"/>
+
+        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <RadioButton GroupName="Main" Margin="0,2,0,0"
+                         Content="Default (auto-format as hex, local var, or reference to label/platform/project symbol)"
+                         IsChecked="{Binding FormatDefault}"/>
+        </StackPanel>
+
+        <GroupBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Padding="2,4" Header="Explicit Format">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <RadioButton GroupName="Main" Content="Hexadecimal"
+                                 IsChecked="{Binding FormatHex}"/>
+                    <RadioButton GroupName="Main" Content="Decimal" Margin="0,2,0,0"
+                                 IsChecked="{Binding FormatDecimal}"/>
+                    <RadioButton GroupName="Main" Content="Binary" Margin="0,2,0,0"
+                                 IsChecked="{Binding FormatBinary}"/>
+                    <RadioButton GroupName="Main" Content="ASCII (low or high) character" Margin="0,2,0,0"
+                                 IsEnabled="{Binding IsFormatAsciiAllowed}" IsChecked="{Binding FormatAscii}"/>
+                    <RadioButton GroupName="Main" Content="C64 PETSCII character" Margin="0,2,0,0"
+                                 IsEnabled="{Binding IsFormatPetsciiAllowed}" IsChecked="{Binding FormatPetscii}"/>
+                    <RadioButton GroupName="Main" Content="C64 Screen character" Margin="0,2,0,0"
+                                 IsEnabled="{Binding IsFormatScreenCodeAllowed}" IsChecked="{Binding FormatScreenCode}"/>
+                </StackPanel>
+
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <RadioButton Name="formatSymbolButton" Grid.Column="0" Grid.Row="0" GroupName="Main"
+                                 Content="Symbol" IsChecked="{Binding FormatSymbol}"/>
+                    <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" Margin="18,1,0,0">
+                        <TextBox Name="symbolTextBox" Grid.Column="0" Grid.Row="1" Width="150"
+                                 FontFamily="{StaticResource GeneralMonoFont}"
+                                 Text="{Binding SymbolLabel, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="(auto)" Foreground="Red" Margin="4,0,0,0"
+                                   Visibility="{Binding IsSymbolAuto, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="18,4,0,0"
+                                IsEnabled="{Binding IsChecked, ElementName=formatSymbolButton}">
+                        <RadioButton GroupName="Part" Content="Low"
+                                     IsChecked="{Binding FormatPartLow}"/>
+                        <RadioButton GroupName="Part" Content="High" Margin="10,0,0,0"
+                                     IsChecked="{Binding FormatPartHigh}"/>
+                        <RadioButton GroupName="Part" Content="Bank" Margin="10,0,0,0"
+                                     IsChecked="{Binding FormatPartBank}"/>
+                    </StackPanel>
+
+                    <!-- show the symbol's value -->
+                    <Grid Grid.Column="0" Grid.Row="3" Margin="18,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Value:" Margin="0,0,16,0"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0"
+                                   Text="{Binding SymbolValueHex, FallbackValue=$112233}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="1"
+                                   Text="{Binding SymbolValueDecimal, FallbackValue=16777215}"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8">
+            <TextBlock Text="Preview:"/>
+            <TextBox IsReadOnly="True" Margin="8,1,0,0" Width="300"
+                     FontFamily="{StaticResource GeneralMonoFont}" Text="{Binding PreviewText}"/>
+        </StackPanel>
+
+        <GroupBox Grid.Column="0" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Numeric Address Reference">
             <StackPanel>
-                <RadioButton Name="operandOnlyButton" GroupName="Shortcut" Margin="0,2,0,0"
-                             Content="_Just set the operand (default)"/>
-                <RadioButton Name="labelInsteadButton" GroupName="Shortcut" Margin="0,2,0,0"
-                             Content="_Create label at target address instead"/>
+                <TextBlock Text="Address is inside the project"/>
+                <TextBlock Text="Address is NOT the start of a thing"/>
+                <TextBlock Text="Label at target address:  ______"/>
+                <Button Width="120" Content="Edit Label"/>
 
-                <RadioButton Name="operandAndLabelButton" GroupName="Shortcut" Margin="0,2,0,0"
-                             Content="Set _operand AND create label at target address"/>
-                <RadioButton Name="operandAndProjButton" GroupName="Shortcut" Margin="0,2,0,0"
-                             Content="Set operand AND create _project symbol"/>
+                <TextBlock Text="Address is outside the project"/>
+                <TextBlock Text="No matching platform / project symbol"/>
+                <TextBlock Text="Found matching {platform|project} symbol"/>
+                <TextBlock Text="[______] ($value)"/>
+                <Button Width="120" Content="Create/Edit Project Symbol"/>
             </StackPanel>
         </GroupBox>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-            <Button Name="okButton" Content="OK" IsDefault="True" Width="70"
-                    IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
-            <Button Name="cancelButton" Content="Cancel" IsCancel="True"
-                    Width="70" Margin="4,0,0,0"/>
-        </StackPanel>
+        <GroupBox Grid.Column="1" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Local Variable">
+            <StackPanel>
+                <TextBlock Text="Operand is NOT ZP or stack relative"/>
+                <TextBlock Text="No local variable tables found before this point" TextWrapping="Wrap"/>
+                <TextBlock Text="No entry in nearest table"/>
+                <TextBlock Text="Match found: [VAR]"/>
+                <Button Width="120" Content="Create/Edit LV Entry"/>
+            </StackPanel>
+        </GroupBox>
 
-    </StackPanel>
+        <DockPanel Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,16,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Right" Content="Cancel" Width="70" IsCancel="True" Margin="8,0,0,0"/>
+            <Button DockPanel.Dock="Right" Content="OK" Width="70" IsDefault="True"
+                    IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
+        </DockPanel>
+    </Grid>
 </Window>

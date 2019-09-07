@@ -26,78 +26,16 @@ using Asm65;
 namespace SourceGen.WpfGui {
     /// <summary>
     /// Instruction operand editor.
-    /// 
-    /// This is a pretty direct port from WinForms.
     /// </summary>
-    public partial class EditInstructionOperand : Window {
+    public partial class EditInstructionOperand : Window, INotifyPropertyChanged {
         /// <summary>
-        /// In/out.  May be null on entry if the offset doesn't have a format descriptor
-        /// specified.  Will be null on exit if "default" is selected.
+        /// Updated format descriptor.  Will be null if the user selected "default".
         /// </summary>
-        public FormatDescriptor FormatDescriptor { get; set; }
+        public FormatDescriptor FormatDescriptorResult { get; private set; }
 
-        public enum SymbolShortcutAction {
-            None = 0, CreateLabelInstead, CreateLabelAlso, CreateProjectSymbolAlso
-        }
-
-        /// <summary>
-        /// Remember the last option we used.
-        /// </summary>
-        private static SymbolShortcutAction sLastAction = SymbolShortcutAction.None;
-
-        /// <summary>
-        /// On OK dialog exit, specifies that an additional action should be taken.
-        /// </summary>
-        public SymbolShortcutAction ShortcutAction { get; private set; }
-
-        /// <summary>
-        /// Additional argument, meaning dependent on ShortcutAction.  This will either be
-        /// the target label offset or the project symbol value.
-        /// </summary>
-        public int ShortcutArg { get; private set; }
-
-        /// <summary>
-        /// Width of full instruction, including opcode.
-        /// </summary>
-        private int mInstructionLength;
-
-        /// <summary>
-        /// Number of hexadecimal digits to show in the preview.  Sometimes you want
-        /// to force this to be longer or shorter than InstructionLength would indicate,
-        /// e.g. "BRA $1000" has a 1-byte operand.
-        /// </summary>
-        private int mPreviewHexDigits;
-
-        /// <summary>
-        /// Operand value, extracted from file data.  For a relative branch, this will be
-        /// an address instead.  Only used for preview window.
-        /// </summary>
-        private int mOperandValue;
-
-        /// <summary>
-        /// Is the operand an immediate value?  If so, we enable the symbol part selection.
-        /// </summary>
-        private bool mIsExtendedImmediate;
-
-        /// <summary>
-        /// Is the operand a PC relative offset?
-        /// </summary>
-        private bool mIsPcRelative;
-
-        /// <summary>
-        /// Special handling for block move instructions (MVN/MVP).
-        /// </summary>
-        private bool mIsBlockMove;
-
-        /// <summary>
-        /// If set, show a '#' in the preview indow.
-        /// </summary>
-        private bool mShowHashPrefix;
-
-        ///// <summary>
-        ///// Symbol table to use when resolving symbolic values.
-        ///// </summary>
-        //private SymbolTable SymbolTable { get; set; }
+        private readonly string SYMBOL_NOT_USED;
+        private readonly string SYMBOL_UNKNOWN;
+        private readonly string SYMBOL_INVALID;
 
         /// <summary>
         /// Project reference.
@@ -105,305 +43,564 @@ namespace SourceGen.WpfGui {
         private DisasmProject mProject;
 
         /// <summary>
-        /// Formatter to use when displaying addresses and hex values.
+        /// Offset of instruction being edited.
+        /// </summary>
+        private int mOffset;
+
+        /// <summary>
+        /// Format object.
         /// </summary>
         private Formatter mFormatter;
 
         /// <summary>
-        /// Copy of operand Anattribs.
+        /// Operation definition, from file data.
         /// </summary>
-        private Anattrib mAttr;
+        private OpDef mOpDef;
 
         /// <summary>
-        /// Set this during initial control configuration, so we know to ignore the CheckedChanged
-        /// events.
+        /// Status flags at the point where the instruction is defined.  This tells us whether
+        /// an operand is 8-bit or 16-bit.
         /// </summary>
-        private bool mIsInitialSetup;
+        private StatusFlags mOpStatusFlags;
 
         /// <summary>
-        /// Set to true if the user has entered a symbol that matches an auto-generated symbol.
+        /// Operand value, extracted from file data.  For a relative branch, this will be
+        /// an address instead.
         /// </summary>
-        private bool mIsSymbolAuto;
+        private int mOperandValue;
+
+        /// <summary>
+        /// True when the input is valid.  Controls whether the OK button is enabled.
+        /// </summary>
+        public bool IsValid {
+            get { return mIsValid; }
+            set { mIsValid = value; OnPropertyChanged(); }
+        }
+        private bool mIsValid;
+
+        /// <summary>
+        /// Set when our load-time initialization is complete.
+        /// </summary>
+        private bool mLoadDone;
+
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
 
-        public EditInstructionOperand(Window owner, int offset, DisasmProject project,
-                Asm65.Formatter formatter) {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="owner">Parent window.</param>
+        /// <param name="project">Project reference.</param>
+        /// <param name="offset">File offset of instruction start.</param>
+        /// <param name="formatter">Formatter object, for preview window.</param>
+        public EditInstructionOperand(Window owner, DisasmProject project, int offset,
+                Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mProject = project;
+            mOffset = offset;
             mFormatter = formatter;
 
-            // Configure the appearance.
-            mAttr = mProject.GetAnattrib(offset);
-            OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[offset]);
-            mInstructionLength = mAttr.Length;
-            mPreviewHexDigits = (mAttr.Length - 1) * 2;
-            if (mAttr.OperandAddress >= 0) {
+            SYMBOL_NOT_USED = (string)FindResource("str_SymbolNotUsed");
+            SYMBOL_INVALID = (string)FindResource("str_SymbolNotValid");
+            SYMBOL_UNKNOWN = (string)FindResource("str_SymbolUnknown");
+
+            Debug.Assert(offset >= 0 && offset < project.FileDataLength);
+            mOpDef = project.CpuDef.GetOpDef(project.FileData[offset]);
+            Anattrib attr = project.GetAnattrib(offset);
+            mOpStatusFlags = attr.StatusFlags;
+            Debug.Assert(offset + mOpDef.GetLength(mOpStatusFlags) <= project.FileDataLength);
+
+            if (attr.OperandAddress >= 0) {
                 // Use this as the operand value when available.  This lets us present
                 // relative branch instructions in the expected form.
-                mOperandValue = mAttr.OperandAddress;
-
-                if (op.AddrMode == OpDef.AddressMode.PCRel) {
-                    mPreviewHexDigits = 4;
-                    mIsPcRelative = true;
-                } else if (op.AddrMode == OpDef.AddressMode.PCRelLong ||
-                        op.AddrMode == OpDef.AddressMode.StackPCRelLong) {
-                    mIsPcRelative = true;
-                }
+                mOperandValue = attr.OperandAddress;
             } else {
-                int opVal = op.GetOperand(mProject.FileData, offset, mAttr.StatusFlags);
-                mOperandValue = opVal;
-                if (op.AddrMode == OpDef.AddressMode.BlockMove) {
-                    // MVN and MVP screw things up by having two operands in one instruction.
-                    // We deal with this by passing in the value from the second byte
-                    // (source bank) as the value, and applying the chosen format to both bytes.
-                    mIsBlockMove = true;
-                    mOperandValue = opVal >> 8;
-                    mPreviewHexDigits = 2;
-                }
+                // For BlockMove this will have both parts.
+                mOperandValue = mOpDef.GetOperand(project.FileData, offset, attr.StatusFlags);
             }
-            mIsExtendedImmediate = op.IsExtendedImmediate;   // Imm, PEA, MVN/MVP
-            mShowHashPrefix = op.IsImmediate;                // just Imm
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            mIsInitialSetup = true;
-
-            // Can this be represented as a character?  We only allow the printable set
-            // here, not the extended set (which includes control characters).
-            if (mOperandValue == (byte) mOperandValue) {
-                asciiButton.IsEnabled =
-                    CharEncoding.IsPrintableLowOrHighAscii((byte)mOperandValue);
-                petsciiButton.IsEnabled =
-                    CharEncoding.IsPrintableC64Petscii((byte)mOperandValue);
-                screenCodeButton.IsEnabled =
-                    CharEncoding.IsPrintableC64ScreenCode((byte)mOperandValue);
-            } else {
-                asciiButton.IsEnabled = petsciiButton.IsEnabled = screenCodeButton.IsEnabled =
-                    false;
-            }
-
-            // Configure the dialog from the FormatDescriptor, if one is available.
-            SetControlsFromDescriptor(FormatDescriptor);
-
-            // Do this whether or not symbol is checked -- want to have this set when the
-            // dialog is initially in default format.
-            switch (sLastAction) {
-                case SymbolShortcutAction.CreateLabelInstead:
-                    labelInsteadButton.IsChecked = true;
-                    break;
-                case SymbolShortcutAction.CreateLabelAlso:
-                    operandAndLabelButton.IsChecked = true;
-                    break;
-                case SymbolShortcutAction.CreateProjectSymbolAlso:
-                    operandAndProjButton.IsChecked = true;
-                    break;
-                default:
-                    operandOnlyButton.IsChecked = true;
-                    break;
-            }
-
-            mIsInitialSetup = false;
-            UpdateControls();
+            BasicFormat_Loaded();
+            mLoadDone = true;
         }
 
-
         private void Window_ContentRendered(object sender, EventArgs e) {
-            // Start with the focus in the text box.  This way they can start typing
-            // immediately.
+            UpdateControls();
+            symbolTextBox.SelectAll();
             symbolTextBox.Focus();
         }
 
-
-        private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e) {
-            // Make sure Symbol is checked if they're typing text in.
-            symbolButton.IsChecked = true;
-            UpdateControls();
-        }
-
-        /// <summary>
-        /// Handles Checked/Unchecked events for all radio buttons in main group.
-        /// </summary>
-        private void MainGroup_CheckedChanged(object sender, RoutedEventArgs e) {
-            // Enable/disable the low/high/bank radio group.
-            // Update preview window.
-            UpdateControls();
-        }
-
-        /// <summary>
-        /// Handles Checked/Unchecked events for all radio buttons in symbol-part group.
-        /// </summary>
-        private void PartGroup_CheckedChanged(object sender, RoutedEventArgs e) {
-            // Update preview window.
-            UpdateControls();
-        }
-
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            FormatDescriptor = CreateDescriptorFromControls();
-
-            //
-            // Extract the current shortcut action.  For dialog configuration purposes we
-            // want to capture the current state.  For the caller, we force it to "none"
-            // if we're not using a symbol format.
-            //
-            SymbolShortcutAction action = SymbolShortcutAction.None;
-            if (labelInsteadButton.IsChecked == true) {
-                action = SymbolShortcutAction.CreateLabelInstead;
-            } else if (operandAndLabelButton.IsChecked == true) {
-                action = SymbolShortcutAction.CreateLabelAlso;
-            } else if (operandAndProjButton.IsChecked == true) {
-                action = SymbolShortcutAction.CreateProjectSymbolAlso;
-            } else if (operandOnlyButton.IsChecked == true) {
-                action = SymbolShortcutAction.None;
-            } else {
-                Debug.Assert(false);
-                action = SymbolShortcutAction.None;
-            }
-            sLastAction = action;
-
-            if (symbolButton.IsChecked == true && FormatDescriptor != null) {
-                // Only report a shortcut action if they've entered a symbol.  If they
-                // checked symbol but left the field blank, they're just trying to delete
-                // the format.
-                ShortcutAction = action;
-            } else {
-                ShortcutAction = SymbolShortcutAction.None;
-            }
-
+            FormatDescriptorResult = CreateDescriptorFromControls();
             DialogResult = true;
         }
 
         /// <summary>
-        /// Updates all of the controls to reflect the current internal state.
+        /// Updates the state of the UI controls as the user interacts with the dialog.
         /// </summary>
         private void UpdateControls() {
-            if (mIsInitialSetup) {
+            if (!mLoadDone) {
                 return;
             }
-            symbolPartPanel.IsEnabled = (symbolButton.IsChecked == true && mIsExtendedImmediate);
-            symbolShortcutsGroupBox.IsEnabled = symbolButton.IsChecked == true;
 
-            SetPreviewText();
+            // Parts panel IsEnabled depends directly on formatSymbolButton.IsChecked.
+            IsValid = true;
+            IsSymbolAuto = false;
+            SymbolValueDecimal = string.Empty;
+            if (FormatSymbol) {
+                if (!Asm65.Label.ValidateLabel(SymbolLabel)) {
+                    SymbolValueHex = SYMBOL_INVALID;
+                    IsValid = false;
+                } else if (mProject.SymbolTable.TryGetValue(SymbolLabel, out Symbol sym)) {
+                    if (sym.SymbolSource == Symbol.Source.Auto) {
+                        // We try to block references to auto labels, but it's possible to get
+                        // around it because FormatDescriptors are weak references (replace auto
+                        // label with user label, reference non-existent auto label, remove user
+                        // label).  We could try harder, but currently not necessary.
+                        IsValid = false;
+                        IsSymbolAuto = true;
+                    }
 
-            bool isOk = true;
-            if (symbolButton.IsChecked == true) {
-                // Just check for correct format.  References to non-existent labels are allowed.
-                //
-                // We try to block references to auto labels, but it's possible to get around it
-                // (replace auto label with user label, reference non-existent auto label,
-                // remove user label).  We could try harder, but currently not necessary.
-                isOk = !mIsSymbolAuto && Asm65.Label.ValidateLabel(symbolTextBox.Text);
-
-                // Allow empty strings as a way to delete the label and return to "default".
-                if (string.IsNullOrEmpty(symbolTextBox.Text)) {
-                    isOk = true;
+                    SymbolValueHex = mFormatter.FormatHexValue(sym.Value, 4);
+                    SymbolValueDecimal = mFormatter.FormatDecimalValue(sym.Value);
+                } else {
+                    // Valid but unknown symbol.  This is fine -- symbols don't have to exist.
+                    SymbolValueHex = SYMBOL_UNKNOWN;
                 }
-
-                ConfigureSymbolShortcuts();
+            } else {
+                SymbolValueHex = SYMBOL_NOT_USED;
             }
-            okButton.IsEnabled = isOk;
+
+            UpdatePreview();
         }
 
         /// <summary>
-        /// Sets the text displayed in the "preview" text box.
+        /// Updates the contents of the preview text box.
         /// </summary>
-        private void SetPreviewText() {
-            //symbolValueLabel.Text = string.Empty;
-            mIsSymbolAuto = false;
-
+        private void UpdatePreview() {
+            // Generate a descriptor from the controls.  This isn't strictly necessary, but it
+            // gets all of the data in one small package.
             FormatDescriptor dfd = CreateDescriptorFromControls();
+
             if (dfd == null) {
-                // Default format.  We can't actually know what this look like, so just
-                // clear the box.
-                previewTextBox.Text = string.Empty;
+                // Showing the right thing for the default format is surprisingly hard.  There
+                // are a bunch of complicated steps that are performed in sequence, including
+                // the "nearby label" lookups, the elision of hidden symbols, and other
+                // obscure bits that may get tweaked from time to time.  These things are not
+                // easy to factor out because we're slicing the data at a different angle: the
+                // initial pass walks the entire file looking for one thing at a point before
+                // analysis has completed, while here we're trying to mimic all of the
+                // steps for a single offset, after analysis has finished.  It's a lot of work
+                // to show text that they'll see as soon as they hit "OK".
+                PreviewText = string.Empty;
                 return;
             }
 
-            if (dfd.FormatSubType == FormatDescriptor.SubType.Symbol &&
-                    string.IsNullOrEmpty(dfd.SymbolRef.Label)) {
-                // no label yet, nothing to show
-                previewTextBox.Text = string.Empty;
-                return;
+            StringBuilder sb = new StringBuilder(16);
+
+            // Show the opcode.  Don't bother trying to figure out width disambiguation here.
+            sb.Append(mFormatter.FormatOpcode(mOpDef, OpDef.WidthDisambiguation.None));
+            sb.Append(' ');
+
+            bool showHashPrefix = mOpDef.IsImmediate ||
+                mOpDef.AddrMode == OpDef.AddressMode.BlockMove;
+            if (showHashPrefix) {
+                sb.Append('#');
             }
 
-            StringBuilder preview = new StringBuilder();
-            if (mShowHashPrefix) {
-                preview.Append('#');
+            Anattrib attr = mProject.GetAnattrib(mOffset);
+            int previewHexDigits = (attr.Length - 1) * 2;
+            int operandValue = mOperandValue;
+            bool isPcRelative = false;
+            bool isBlockMove = false;
+            if (attr.OperandAddress >= 0) {
+                if (mOpDef.AddrMode == OpDef.AddressMode.PCRel) {
+                    previewHexDigits = 4;   // show branches as $xxxx even when on zero page
+                    isPcRelative = true;
+                } else if (mOpDef.AddrMode == OpDef.AddressMode.PCRelLong ||
+                        mOpDef.AddrMode == OpDef.AddressMode.StackPCRelLong) {
+                    isPcRelative = true;
+                }
+            } else {
+                if (mOpDef.AddrMode == OpDef.AddressMode.BlockMove) {
+                    // MVN and MVP screw things up by having two operands in one instruction.
+                    // We deal with this by passing in the value from the second byte
+                    // (source bank) as the value, and applying the chosen format to both bytes.
+                    isBlockMove = true;
+                    operandValue = mOperandValue >> 8;
+                    previewHexDigits = 2;
+                }
             }
 
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Hex:
-                    preview.Append(mFormatter.FormatHexValue(mOperandValue, mPreviewHexDigits));
+                    sb.Append(mFormatter.FormatHexValue(operandValue, previewHexDigits));
                     break;
                 case FormatDescriptor.SubType.Decimal:
-                    preview.Append(mFormatter.FormatDecimalValue(mOperandValue));
+                    sb.Append(mFormatter.FormatDecimalValue(operandValue));
                     break;
                 case FormatDescriptor.SubType.Binary:
-                    preview.Append(mFormatter.FormatBinaryValue(mOperandValue, 8));
+                    sb.Append(mFormatter.FormatBinaryValue(operandValue, 8));
                     break;
                 case FormatDescriptor.SubType.Ascii:
                 case FormatDescriptor.SubType.HighAscii:
                 case FormatDescriptor.SubType.C64Petscii:
                 case FormatDescriptor.SubType.C64Screen:
                     CharEncoding.Encoding enc = PseudoOp.SubTypeToEnc(dfd.FormatSubType);
-                    preview.Append(mFormatter.FormatCharacterValue(mOperandValue, enc));
+                    sb.Append(mFormatter.FormatCharacterValue(operandValue, enc));
                     break;
                 case FormatDescriptor.SubType.Symbol:
                     if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
-                        if (mIsBlockMove) {
-                            // For a 24-bit symbol, we grab the high byte.  This is the
-                            // expected behavior, according to Eyes & Lichty; see the
-                            // explanation of the MVP instruction.  For an 8-bit symbol
-                            // the assembler just takes the value.
-                            // TODO(someday): allow a different symbol for each part of the
-                            // operand.
-                            if (sym.Value > 0xff) {
-                                bankButton.IsChecked = true;
-                            } else {
-                                lowButton.IsChecked = true;
-                            }
-                            dfd = CreateDescriptorFromControls();
-                        }
+                        // Block move is a little weird.  "MVN label1,label2" is supposed to use
+                        // the bank byte, while "MVN #const1,#const2" uses the entire symbol.
+                        // The easiest thing to do is require the user to specify the "bank"
+                        // part for 24-bit symbols, and always generate this as an immediate.
+                        //
+                        // MVN/MVP are also the only instructions with two operands, something
+                        // we don't really handle.
+                        // TODO(someday): allow a different symbol for each part of the operand.
 
                         // Hack to make relative branches look right in the preview window.
                         // Otherwise they show up like "<LABEL" because they appear to be
                         // only 8 bits.
                         int operandLen = dfd.Length - 1;
-                        if (operandLen == 1 && mIsPcRelative) {
+                        if (operandLen == 1 && isPcRelative) {
                             operandLen = 2;
                         }
+
+                        // Set the operand length to 1 for block move so we use the part
+                        // operators (<, >, ^) rather than bit-shifting.
+                        if (isBlockMove) {
+                            operandLen = 1;
+                        }
+
                         PseudoOp.FormatNumericOpFlags flags;
-                        if (mIsPcRelative) {
+                        if (isPcRelative) {
                             flags = PseudoOp.FormatNumericOpFlags.IsPcRel;
-                        } else if (mShowHashPrefix) {
+                        } else if (showHashPrefix) {
                             flags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
                         } else {
                             flags = PseudoOp.FormatNumericOpFlags.None;
                         }
                         string str = PseudoOp.FormatNumericOperand(mFormatter,
                             mProject.SymbolTable, null, dfd,
-                            mOperandValue, operandLen, flags);
-                        preview.Append(str);
+                            operandValue, operandLen, flags);
+                        sb.Append(str);
 
                         if (sym.SymbolSource == Symbol.Source.Auto) {
                             mIsSymbolAuto = true;
                         }
                     } else {
-                        preview.Append(dfd.SymbolRef.Label + " (?)");
+                        sb.Append(dfd.SymbolRef.Label + " (?)");
                         Debug.Assert(!string.IsNullOrEmpty(dfd.SymbolRef.Label));
                         //symbolValueLabel.Text = Properties.Resources.MSG_SYMBOL_NOT_FOUND;
                     }
                     break;
                 default:
                     Debug.Assert(false);
-                    preview.Append("BUG");
+                    sb.Append("BUG");
                     break;
             }
-            previewTextBox.Text = preview.ToString();
+
+            if (isBlockMove) {
+                sb.Append(",#<dest>");
+            }
+
+            PreviewText = sb.ToString();
         }
 
+        #region Basic Format
+
+        public bool FormatDefault {
+            get { return mFormatDefault; }
+            set { mFormatDefault = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatDefault;
+
+        public bool FormatHex {
+            get { return mFormatHex; }
+            set { mFormatHex = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatHex;
+
+        public bool FormatDecimal {
+            get { return mFormatDecimal; }
+            set { mFormatDecimal = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatDecimal;
+
+        public bool FormatBinary {
+            get { return mFormatBinary; }
+            set { mFormatBinary = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatBinary;
+
+        public bool IsFormatAsciiAllowed {
+            get { return mIsFormatAsciiAllowed; }
+            set { mIsFormatAsciiAllowed = value; OnPropertyChanged(); }
+        }
+        private bool mIsFormatAsciiAllowed;
+
+        public bool FormatAscii {
+            get { return mFormatAscii; }
+            set { mFormatAscii = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatAscii;
+
+        public bool IsFormatPetsciiAllowed {
+            get { return mIsFormatPetsciiAllowed; }
+            set { mIsFormatPetsciiAllowed = value; OnPropertyChanged(); }
+        }
+        private bool mIsFormatPetsciiAllowed;
+
+        public bool FormatPetscii {
+            get { return mFormatPetscii; }
+            set { mFormatPetscii = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatPetscii;
+
+        public bool IsFormatScreenCodeAllowed {
+            get { return mIsFormatScreenCodeAllowed; }
+            set { mIsFormatScreenCodeAllowed = value; OnPropertyChanged(); }
+        }
+        private bool mIsFormatScreenCodeAllowed;
+
+        public bool FormatScreenCode {
+            get { return mFormatScreenCode; }
+            set { mFormatScreenCode = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatScreenCode;
+
+        public bool FormatSymbol {
+            get { return mFormatSymbol; }
+            set { mFormatSymbol = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatSymbol;
+
+        public string SymbolLabel {
+            get { return mSymbolLabel; }
+            set {
+                mSymbolLabel = value;
+                OnPropertyChanged();
+                // Set the radio button when the user starts typing.
+                if (mLoadDone) {
+                    FormatSymbol = true;
+                }
+                UpdateControls();
+            }
+        }
+        private string mSymbolLabel;
+
+        public bool IsSymbolAuto {
+            get { return mIsSymbolAuto; }
+            set { mIsSymbolAuto = value; OnPropertyChanged(); }
+        }
+        private bool mIsSymbolAuto;
+
+        public string SymbolValueHex {
+            get { return mSymbolValueHex; }
+            set { mSymbolValueHex = value; OnPropertyChanged(); }
+        }
+        private string mSymbolValueHex;
+
+        public string SymbolValueDecimal {
+            get { return mSymbolValueDecimal; }
+            set { mSymbolValueDecimal = value; OnPropertyChanged(); }
+        }
+        private string mSymbolValueDecimal;
+
+        public bool FormatPartLow {
+            get { return mFormatPartLow; }
+            set { mFormatPartLow = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatPartLow;
+
+        public bool FormatPartHigh {
+            get { return mFormatPartHigh; }
+            set { mFormatPartHigh = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatPartHigh;
+
+        public bool FormatPartBank {
+            get { return mFormatPartBank; }
+            set { mFormatPartBank = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatPartBank;
+
+        public string PreviewText {
+            get { return mPreviewText; }
+            set { mPreviewText = value; OnPropertyChanged(); }
+        }
+        private string mPreviewText;
+
+        /// <summary>
+        /// Configures the basic formatting options, based on the existing format descriptor.
+        /// </summary>
+        private void BasicFormat_Loaded() {
+            // Can this be represented as a character?  We only allow the printable set
+            // here, not the extended set (which includes control characters).
+            if (mOperandValue == (byte) mOperandValue) {
+                IsFormatAsciiAllowed =
+                    CharEncoding.IsPrintableLowOrHighAscii((byte)mOperandValue);
+                IsFormatPetsciiAllowed =
+                    CharEncoding.IsPrintableC64Petscii((byte)mOperandValue);
+                IsFormatScreenCodeAllowed =
+                    CharEncoding.IsPrintableC64ScreenCode((byte)mOperandValue);
+            } else {
+                IsFormatAsciiAllowed = IsFormatPetsciiAllowed = IsFormatScreenCodeAllowed =
+                    false;
+            }
+
+            SymbolLabel = string.Empty;
+            FormatPartLow = true;       // could default to high for MVN/MVP
+            FormatDefault = true;       // if nothing better comes along
+
+            // Is there an operand format at this location?  If not, we're done.
+            if (!mProject.OperandFormats.TryGetValue(mOffset, out FormatDescriptor dfd)) {
+                return;
+            }
+
+            // NOTE: it's entirely possible to have a weird format (e.g. string) if the
+            // instruction used to be hinted as data.  Handle it gracefully.
+            switch (dfd.FormatType) {
+                case FormatDescriptor.Type.NumericLE:
+                    switch (dfd.FormatSubType) {
+                        case FormatDescriptor.SubType.Hex:
+                            FormatHex = true;
+                            break;
+                        case FormatDescriptor.SubType.Decimal:
+                            FormatDecimal = true;
+                            break;
+                        case FormatDescriptor.SubType.Binary:
+                            FormatBinary = true;
+                            break;
+                        case FormatDescriptor.SubType.Ascii:
+                        case FormatDescriptor.SubType.HighAscii:
+                            if (IsFormatAsciiAllowed) {
+                                FormatAscii = true;
+                            }
+                            break;
+                        case FormatDescriptor.SubType.C64Petscii:
+                            if (IsFormatPetsciiAllowed) {
+                                FormatPetscii = true;
+                            }
+                            break;
+                        case FormatDescriptor.SubType.C64Screen:
+                            if (IsFormatScreenCodeAllowed) {
+                                FormatScreenCode = true;
+                            }
+                            break;
+                        case FormatDescriptor.SubType.Symbol:
+                            Debug.Assert(dfd.HasSymbol);
+                            FormatSymbol = true;
+                            switch (dfd.SymbolRef.ValuePart) {
+                                case WeakSymbolRef.Part.Low:
+                                    FormatPartLow = true;
+                                    break;
+                                case WeakSymbolRef.Part.High:
+                                    FormatPartHigh = true;
+                                    break;
+                                case WeakSymbolRef.Part.Bank:
+                                    FormatPartBank = true;
+                                    break;
+                                default:
+                                    Debug.Assert(false);
+                                    break;
+                            }
+                            SymbolLabel = dfd.SymbolRef.Label;
+                            break;
+                        case FormatDescriptor.SubType.None:
+                        default:
+                            break;
+                    }
+                    break;
+                case FormatDescriptor.Type.NumericBE:
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                case FormatDescriptor.Type.StringNullTerm:
+                case FormatDescriptor.Type.StringL8:
+                case FormatDescriptor.Type.StringL16:
+                case FormatDescriptor.Type.StringDci:
+                case FormatDescriptor.Type.Dense:
+                case FormatDescriptor.Type.Fill:
+                default:
+                    // Unexpected; used to be data?
+                    break;
+            }
+
+            // In theory, if FormatDefault is still checked, we failed to find a useful match
+            // for the format descriptor.  In practice, the radio button checkification stuff
+            // happens later.  If we want to tell the user that there's a bad descriptor present,
+            // we'll need to track it locally, or test all known radio buttons for True.
+        }
+
+        /// <summary>
+        /// Creates a FormatDescriptor from the current state of the dialog controls.
+        /// </summary>
+        /// <returns>New FormatDescriptor.  Will return null if the default format is
+        ///   selected, or symbol is selected with an empty label.</returns>
+        private FormatDescriptor CreateDescriptorFromControls() {
+            int instructionLength = mProject.GetAnattrib(mOffset).Length;
+
+            if (FormatSymbol) {
+                if (string.IsNullOrEmpty(SymbolLabel)) {
+                    // empty symbol --> default format (intuitive way to delete label reference)
+                    return null;
+                }
+                WeakSymbolRef.Part part;
+                if (FormatPartLow) {
+                    part = WeakSymbolRef.Part.Low;
+                } else if (FormatPartHigh) {
+                    part = WeakSymbolRef.Part.High;
+                } else if (FormatPartBank) {
+                    part = WeakSymbolRef.Part.Bank;
+                } else {
+                    Debug.Assert(false);
+                    part = WeakSymbolRef.Part.Low;
+                }
+                return FormatDescriptor.Create(instructionLength,
+                    new WeakSymbolRef(SymbolLabel, part), false);
+            }
+
+            FormatDescriptor.SubType subType;
+            if (FormatDefault) {
+                return null;
+            } else if (FormatHex) {
+                subType = FormatDescriptor.SubType.Hex;
+            } else if (FormatDecimal) {
+                subType = FormatDescriptor.SubType.Decimal;
+            } else if (FormatBinary) {
+                subType = FormatDescriptor.SubType.Binary;
+            } else if (FormatAscii) {
+                if (mOperandValue > 0x7f) {
+                    subType = FormatDescriptor.SubType.HighAscii;
+                } else {
+                    subType = FormatDescriptor.SubType.Ascii;
+                }
+            } else if (FormatPetscii) {
+                subType = FormatDescriptor.SubType.C64Petscii;
+            } else if (FormatScreenCode) {
+                subType = FormatDescriptor.SubType.C64Screen;
+            } else {
+                Debug.Assert(false);
+                subType = FormatDescriptor.SubType.None;
+            }
+
+            return FormatDescriptor.Create(instructionLength,
+                FormatDescriptor.Type.NumericLE, subType);
+        }
+
+        #endregion Basic Format
+
+#if false
         /// <summary>
         /// Configures the buttons in the "symbol shortcuts" group box.  The entire box is
         /// disabled unless "symbol" is selected.  Other options are selectively enabled or
@@ -456,139 +653,6 @@ namespace SourceGen.WpfGui {
                 operandOnlyButton.IsChecked = true;
             }
         }
-
-        /// <summary>
-        /// Configures the dialog controls based on the provided format descriptor.
-        /// </summary>
-        /// <param name="dfd">FormatDescriptor to use.</param>
-        private void SetControlsFromDescriptor(FormatDescriptor dfd) {
-            Debug.Assert(mIsInitialSetup);
-            lowButton.IsChecked = true;
-
-            if (dfd == null) {
-                defaultButton.IsChecked = true;
-                return;
-            }
-
-            // NOTE: it's entirely possible to have a weird format (e.g. string) if the
-            // instruction used to be hinted as data.  Handle it gracefully.
-            switch (dfd.FormatType) {
-                case FormatDescriptor.Type.NumericLE:
-                    switch (dfd.FormatSubType) {
-                        case FormatDescriptor.SubType.Hex:
-                            hexButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.Decimal:
-                            decimalButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.Binary:
-                            binaryButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.Ascii:
-                        case FormatDescriptor.SubType.HighAscii:
-                            asciiButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.C64Petscii:
-                            petsciiButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.C64Screen:
-                            screenCodeButton.IsChecked = true;
-                            break;
-                        case FormatDescriptor.SubType.Symbol:
-                            Debug.Assert(dfd.HasSymbol);
-                            symbolButton.IsChecked = true;
-                            switch (dfd.SymbolRef.ValuePart) {
-                                case WeakSymbolRef.Part.Low:
-                                    lowButton.IsChecked = true;
-                                    break;
-                                case WeakSymbolRef.Part.High:
-                                    highButton.IsChecked = true;
-                                    break;
-                                case WeakSymbolRef.Part.Bank:
-                                    bankButton.IsChecked = true;
-                                    break;
-                                default:
-                                    Debug.Assert(false);
-                                    break;
-                            }
-                            symbolTextBox.Text = dfd.SymbolRef.Label;
-                            break;
-                        case FormatDescriptor.SubType.None:
-                        default:
-                            // Unexpected; call it hex.
-                            hexButton.IsChecked = true;
-                            break;
-                    }
-                    break;
-                case FormatDescriptor.Type.NumericBE:
-                case FormatDescriptor.Type.StringGeneric:
-                case FormatDescriptor.Type.StringReverse:
-                case FormatDescriptor.Type.StringNullTerm:
-                case FormatDescriptor.Type.StringL8:
-                case FormatDescriptor.Type.StringL16:
-                case FormatDescriptor.Type.StringDci:
-                case FormatDescriptor.Type.Dense:
-                case FormatDescriptor.Type.Fill:
-                default:
-                    // Unexpected; used to be data?
-                    defaultButton.IsChecked = true;
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Creates a FormatDescriptor from the current state of the dialog controls.
-        /// </summary>
-        /// <returns>New FormatDescriptor.</returns>
-        private FormatDescriptor CreateDescriptorFromControls() {
-            if (symbolButton.IsChecked == true) {
-                if (string.IsNullOrEmpty(symbolTextBox.Text)) {
-                    // empty symbol --> default format (intuitive way to delete label reference)
-                    return null;
-                }
-                WeakSymbolRef.Part part;
-                if (lowButton.IsChecked == true) {
-                    part = WeakSymbolRef.Part.Low;
-                } else if (highButton.IsChecked == true) {
-                    part = WeakSymbolRef.Part.High;
-                } else if (bankButton.IsChecked == true) {
-                    part = WeakSymbolRef.Part.Bank;
-                } else {
-                    Debug.Assert(false);
-                    part = WeakSymbolRef.Part.Low;
-                }
-                return FormatDescriptor.Create(mInstructionLength,
-                    new WeakSymbolRef(symbolTextBox.Text, part), false);
-            }
-
-            FormatDescriptor.SubType subType;
-            if (defaultButton.IsChecked == true) {
-                return null;
-            } else if (hexButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.Hex;
-            } else if (decimalButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.Decimal;
-            } else if (binaryButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.Binary;
-            } else if (asciiButton.IsChecked == true) {
-                if (mOperandValue > 0x7f) {
-                    subType = FormatDescriptor.SubType.HighAscii;
-                } else {
-                    subType = FormatDescriptor.SubType.Ascii;
-                }
-            } else if (petsciiButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.C64Petscii;
-            } else if (screenCodeButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.C64Screen;
-            } else if (symbolButton.IsChecked == true) {
-                subType = FormatDescriptor.SubType.Symbol;
-            } else {
-                Debug.Assert(false);
-                subType = FormatDescriptor.SubType.None;
-            }
-
-            return FormatDescriptor.Create(mInstructionLength,
-                FormatDescriptor.Type.NumericLE, subType);
-        }
+#endif
     }
 }
