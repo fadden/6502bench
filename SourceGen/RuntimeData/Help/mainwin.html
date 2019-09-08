@@ -92,8 +92,8 @@ assembler directive.</p>
 <p>The list is divided into columns:</p>
 <ul>
   <li><b>Offset</b>. The offset within the file where the instruction
-    or data item starts.  Always shown as a six-digit hex value
-    with a leading '+'.</li>
+    or data item starts.  Throughout the UI, file offsets are shown as
+    six-digit hex values with a leading '+'.</li>
   <li><b>Address</b>.  The address where the assembled code will execute.
     For 8-bit CPUs this is shown as a 4-digit hex number, for 16-bit
     CPUs the bank is shown as well.  Double-click on this field to open the
@@ -104,8 +104,8 @@ assembler directive.</p>
     to open the
     <a href="tools.html#hexdump">Hex Dump Viewer</a>.  This is
     a floating window, so you can keep it open while you work.
-    Double-clicking in the bytes column in other rows will update
-    the window position and selection.</li>
+    Double-clicking in the bytes column while the window is open will
+    update the viewer's position and selection.</li>
   <li><b>Flags</b>.  This shows the state of the status flags as they
     are before the instruction is executed.  Double-click on this
     field to open the
@@ -126,7 +126,8 @@ assembler directive.</p>
     will appear.
     If you double-click this field for an instruction or data item
     whose operand refers to an address in the file, the selection will
-    jump to that location.</li>
+    jump to that location.  If the operand is a local variable, the
+    selection will jump to the point where the variable was defined.</li>
   <li><b>Operand</b>.  The instruction or data operand.  Data operands
     may span a large number of bytes.  Double-click on this field to
     open the
@@ -151,8 +152,8 @@ to select an item, ctrl-left-click to toggle individual items on and
 off, and shift-left-click to select a range.  You can select all lines
 with Edit &gt; Select All.  Resize columns by
 left-clicking on the divider in the header and dragging it.</p>
-<p>Multi-line items, such as long comments or character strings, are
-selected as a whole when any part is selected.</p>
+<p>Selecting any part of a multi-line item, such as a long comment
+or character string, effectively selects the entire item.</p>
 
 <p>Right-clicking opens a menu.  The contents are the same as those in
 the Actions menu item in the menu bar.  The set of options that are
@@ -185,15 +186,22 @@ enabled will depend on what you have selected in the main window.</p>
     Sets the name, value, and comment of the project symbol.  Enabled
     when a single equate directive, generated from a project symbol, is
     selected.</li>
+  <li><a href="editors.html#lvtable">Edit Local Variable Table</a>.
+    Create, modify, or delete entries in a local variable table.</li>
 
   <li><a href="#hints">Hinting</a> (Hint As Code Entry Point, Hint As
     Data Start, Hint As Inline Data, Remove Hints).  Enabled when one or more
     code and data lines are selected.  Remove Hints is only enabled when
     at least one line has hints.  The keyboard shortcuts for hints are
     two-key combinations.</li>
+
+  <li><a href="#split-address">Format Split-Address Table</a>.  Formats
+    a series of bytes as parts of a table of addresses.</li>
   <li><a href="#toggle-single">Toggle Single-Byte Format</a>.  Toggles
     a range of lines between default format and single-byte format.  Enabled
     when one or more data lines are selected.</li>
+  <li><a href="#format-as-word">Format As Word</a>.  Formats two bytes as
+    a 16-bit little-endian word.</li>
   <li>Delete Note / Long Comment.  Deletes the selected note or long
     comment.  Enabled when a single note or long comment is selected.</li>
   <li><a href="tools.html#hexdump">Show Hex Dump</a>.  Opens the hex dump
@@ -211,7 +219,7 @@ are added to the undo/redo buffer.  This has no fixed size limit, so no
 matter how much you change, you can always undo back to the point where
 the project was opened.</p>
 <p>The undo history is not saved as part of the project.  Closing a project
-clears the buffer.</p>
+clears it.</p>
 
 
 <h3><a name="references">References Window</a></h3>
@@ -224,21 +232,47 @@ type of reference will be shown.</p>
 <p>The reference type indicates whether the origin is an instruction or
 data operand, and provides an indication of the nature of the reference:</p>
 <ul>
-  <li>call - subroutine call (e.g. JSR addr, JSL addr)</li>
-  <li>branch - conditional or unconditional branch (e.g. JMP addr, BCC addr)</li>
-  <li>read - read from memory (e.g. LDA addr, BIT addr)</li>
-  <li>write - write to memory (e.g. STA addr)</li>
-  <li>rmw - read-modify-write (e.g. LSR addr, TSB addr)</li>
-  <li>ref - address reference only (e.g. LDA #&lt;addr, PEA addr)</li>
-  <li>data - address referenced by data (e.g. .DD2 addr)</li>
+  <li>call - subroutine call
+    (e.g. <code>JSR addr</code>, <code>JSL addr</code>)</li>
+  <li>branch - conditional or unconditional branch
+    (e.g. <code>JMP addr</code>, <code>BCC addr</code>)</li>
+  <li>read - read from memory
+    (e.g. <code>LDA addr</code>, <code>BIT addr</code>)</li>
+  <li>write - write to memory
+    (e.g. <code>STA addr</code>)</li>
+  <li>rmw - read-modify-write
+    (e.g. <code>LSR addr</code>, <code>TSB addr</code>)</li>
+  <li>ref - reference to address by instruction
+    (e.g. <code>LDA #&lt;addr</code>, <code>PEA addr</code>)</li>
+  <li>data - reference to address by data
+    (e.g. <code>.DD2 addr</code>)</li>
 </ul>
-<p>In addition, the source will be identified as a symbolic ("Sym") or
-numeric ("Num") reference.  Most will be symbolic, because SourceGen
-generates symbols automatically.  However, references to addresses that
-are offset from a symbol will also create a numeric reference entry.
-For example, "LDA addr+1" will create a symbolic reference at &lt;addr&gt;
-(shown in the table with an adjustment of "+1") and a numeric reference
-at &lt;addr+1&gt;.</p>
+<p>This will be prefixed with "Sym" or "Oth" to indicate whether or not
+the reference used the label at the current address.  To understand
+this, consider that addresses can be referenced in different ways.
+For example:</p>
+<pre>
+         LDA     DATA0
+         LDX     DATA0+1
+         RTS
+DATA0    .DD1    $80
+DATA1    .DD2    $90
+</pre>
+<p>Both <code>DATA0</code> and <code>DATA1</code> are accessed, but
+both operands used <code>DATA0</code>.  When the <code>DATA0</code> line
+is selected in the code list, the references window will show the
+<code>LDA</code> and <code>LDX</code> instructions, because both
+instructions referenced it.  When <code>DATA1</code> is selected, the
+references window will show the <code>LDX</code>, because that
+instruction accessed <code>DATA1</code>'s location even though it didn't
+use the symbol.  To make the difference clear, the lines in the references
+window will either show "Sym" (to indicate that the symbol at the selected
+line was referenced) or "Oth" (to indicate that some other symbol, or no
+symbol, was used).</p>
+<p>This is also relevant for project and platform symbols.  If the
+DATA0/1 labels were project symbols, the entry for <code>DATA1</code>
+would not be included in the list of equates, because the symbol is
+never used.</p>
 
 <p>Double-clicking on a reference moves the code list selection to that
 reference, and adds the previous selection to the navigation stack.</p>
@@ -412,7 +446,7 @@ is just significantly more convenient.  It also does everything as a single
 undoable action, so if it comes out looking wrong, just hit "undo".</p>
 
 
-<h3><a name="toggle-format">Toggle Single-Byte Format</a></h3>
+<h3><a name="toggle-single">Toggle Single-Byte Format</a></h3>
 
 <p>The "Toggle Single-Byte Format" feature provides a quick way to
 change a range of bytes to single bytes

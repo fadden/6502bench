@@ -51,7 +51,8 @@ limitations under the License.
         <TextBlock Grid.Column="0" Grid.Row="1" Text="Value:"/>
         <StackPanel Grid.Column="1" Grid.Row="1">
             <TextBox Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
-                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                     FontFamily="{StaticResource GeneralMonoFont}"
+                     IsReadOnly="{Binding ReadOnlyValueAndType}"/>
             <TextBlock Name="valueRangeLabel" Text="• Value between 0-255, including width" Margin="0,4,0,0"/>
             <TextBlock Name="valueUniqueLabel" Text="• Values in table must not overlap" Margin="0,4,0,0"/>
             <TextBlock Name="valueNotesLabel" Text="• Decimal, hex ($), or binary (%)" Margin="0,4,0,16"/>
@@ -72,7 +73,7 @@ limitations under the License.
         </StackPanel>
 
         <GroupBox Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Header="Symbol Type" Padding="4">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" IsEnabled="{Binding NotReadOnlyValueAndType}">
                 <RadioButton Content="Address" IsChecked="{Binding IsAddress}"/>
                 <RadioButton Content="Constant" Margin="24,0,0,0" IsChecked="{Binding IsConstant}"/>
             </StackPanel>

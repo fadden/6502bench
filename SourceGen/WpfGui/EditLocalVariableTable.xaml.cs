@@ -211,7 +211,7 @@ namespace SourceGen.WpfGui {
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.GetSortedByLabel(),
-                null, mSymbolTable, true);
+                null, mSymbolTable, true, false);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 Debug.WriteLine("ADD: " + dlg.NewSym);
@@ -235,7 +235,7 @@ namespace SourceGen.WpfGui {
 
         private void DoEditSymbol(DefSymbol defSym) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkTable.GetSortedByLabel(),
-                defSym, mSymbolTable, true);
+                defSym, mSymbolTable, true, false);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.

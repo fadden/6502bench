@@ -195,6 +195,8 @@ namespace SourceGen {
             // the current offset.  We may need to do this even when variables can be
             // redefined, because we might have a variable that's a duplicate of a user label
             // or project symbol.
+
+            // Start by applying the de-duplication map.
             string label = symRef.Label;
             if (mDupRemap.TryGetValue(symRef.Label, out string remap)) {
                 label = remap;
@@ -214,6 +216,36 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Identifies the LocalVariableTable that defined the symbol reference.
+        /// </summary>
+        /// <param name="offset">Offset at which the symbol was referenced.</param>
+        /// <param name="symRef">Reference to symbol.</param>
+        /// <returns>Table index, or -1 if not found.</returns>
+        public int GetDefiningTableOffset(int offset, WeakSymbolRef symRef) {
+            // symRef is the non-uniquified, non-de-duplicated symbol that was generated
+            // during the analysis pass.  This matches the contents of the tables, so we don't
+            // need to transform it at all.
+            //
+            // Walk backward through the list of tables until we find a match.
+            IList<int> keys = mLvTables.Keys;
+            for (int i = keys.Count - 1; i >= 0; i--) {
+                if (keys[i] > offset) {
+                    // table comes after the point of reference
+                    continue;
+                }
+
+                if (mLvTables.Values[i].GetByLabel(symRef.Label) != null) {
+                    // found it
+                    return keys[i];
+                }
+            }
+
+            // if we didn't find it, it doesn't exist... right?
+            Debug.Assert(mCurrentTable.GetByLabel(symRef.Label) == null);
+            return -1;
+        }
+
+        /// <summary>
         /// Gets a LocalVariableTable that is the result of merging all tables up to this point.
         /// </summary>
         /// <param name="offset">Target offset.</param>
@@ -221,6 +253,25 @@ namespace SourceGen {
         public LocalVariableTable GetMergedTableAtOffset(int offset) {
             AdvanceToOffset(offset);
             return mCurrentTable;
+        }
+
+        /// <summary>
+        /// Finds the closest table that is defined at or before the specified offset.
+        /// </summary>
+        /// <param name="offset">Target offset.</param>
+        /// <returns>The table's definition offset, or -1 if no tables were defined before this
+        ///   point.</returns>
+        public int GetNearestTableOffset(int offset) {
+            int nearest = -1;
+
+            // Could do a smarter search, but I'm expecting the set to be small.
+            foreach (KeyValuePair<int, LocalVariableTable> kvp in mLvTables) {
+                if (kvp.Key > offset) {
+                    break;
+                }
+                nearest = kvp.Key;
+            }
+            return nearest;
         }
 
         /// <summary>

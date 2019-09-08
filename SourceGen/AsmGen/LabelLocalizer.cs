@@ -250,7 +250,7 @@ namespace SourceGen.AsmGen {
                 XrefSet xrefs = mProject.GetXrefSet(i);
                 if (xrefs != null) {
                     foreach (XrefSet.Xref xref in xrefs) {
-                        if (!xref.IsSymbolic) {
+                        if (!xref.IsByName) {
                             continue;
                         }
 

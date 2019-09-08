@@ -34,6 +34,9 @@ limitations under the License.
         <system:String x:Key="str_SymbolNotUsed">N/A</system:String>
         <system:String x:Key="str_SymbolNotValid">[invalid symbol name]</system:String>
         <system:String x:Key="str_SymbolUnknown">?</system:String>
+
+        <system:String x:Key="str_CreateLocalVariable">Create Local Variable</system:String>
+        <system:String x:Key="str_EditLocalVariable">Edit Local Variable</system:String>
     </Window.Resources>
 
     <Grid Margin="8" Width="500">
@@ -101,7 +104,7 @@ limitations under the License.
                                    Visibility="{Binding IsSymbolAuto, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="18,4,0,0"
-                                IsEnabled="{Binding IsChecked, ElementName=formatSymbolButton}">
+                                IsEnabled="{Binding IsPartPanelEnabled}">
                         <RadioButton GroupName="Part" Content="Low"
                                      IsChecked="{Binding FormatPartLow}"/>
                         <RadioButton GroupName="Part" Content="High" Margin="10,0,0,0"
@@ -130,14 +133,19 @@ limitations under the License.
             </Grid>
         </GroupBox>
 
-        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8">
-            <TextBlock Text="Preview:"/>
-            <TextBox IsReadOnly="True" Margin="8,1,0,0" Width="300"
+        <!-- Preview box spans the full window.  Most of the time this isn't necessary, but
+        sometimes you get long symbols with complex expressions, and the window needs to be
+        fairly wide.  So might as well just use it all. -->
+        <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,8">
+            <TextBlock DockPanel.Dock="Left" Text="Preview:"/>
+            <TextBox DockPanel.Dock="Left" IsReadOnly="True" Margin="8,1,0,0"
                      FontFamily="{StaticResource GeneralMonoFont}" Text="{Binding PreviewText}"/>
-        </StackPanel>
+        </DockPanel>
 
+        <!-- numeric reference box, for labels and project/platform symbols -->
         <GroupBox Grid.Column="0" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Numeric Address Reference">
             <StackPanel>
+                <TextBlock Text="Operand is not an 8, 16, or 24-bit address"/>
                 <TextBlock Text="Address is inside the project"/>
                 <TextBlock Text="Address is NOT the start of a thing"/>
                 <TextBlock Text="Label at target address:  ______"/>
@@ -151,13 +159,25 @@ limitations under the License.
             </StackPanel>
         </GroupBox>
 
+        <!-- local variable controls -->
         <GroupBox Grid.Column="1" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Local Variable">
             <StackPanel>
-                <TextBlock Text="Operand is NOT ZP or stack relative"/>
-                <TextBlock Text="No local variable tables found before this point" TextWrapping="Wrap"/>
-                <TextBlock Text="No entry in nearest table"/>
-                <TextBlock Text="Match found: [VAR]"/>
-                <Button Width="120" Content="Create/Edit LV Entry"/>
+                <TextBlock Text="Operand is not a zero page address or stack relative" TextWrapping="Wrap"
+                           Visibility="{Binding ShowLvNotApplicable, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="No local variable tables have been defined before this point" TextWrapping="Wrap"
+                           Visibility="{Binding ShowLvTableNotFound, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="No matching local variable found" TextWrapping="Wrap"
+                           Visibility="{Binding ShowLvNoMatchFound, Converter={StaticResource BoolToVis}}"/>
+                <StackPanel Orientation="Horizontal"
+                            Visibility="{Binding ShowLvMatchFound, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Match found:"/>
+                    <TextBlock Margin="4,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                               Text="{Binding LocalVariableLabel, FallbackValue=VAR_NAME}"/>
+                </StackPanel>
+                <Button Width="150" Margin="0,4,0,0"
+                        Content="{Binding CreateEditLocalVariableText, FallbackValue=Diddle Local Variable}"
+                        Visibility="{Binding ShowLvCreateEditButton, Converter={StaticResource BoolToVis}}"
+                        Click="EditLocalVariableButton_Click"/>
             </StackPanel>
         </GroupBox>
 

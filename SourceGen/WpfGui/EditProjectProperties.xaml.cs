@@ -440,7 +440,7 @@ namespace SourceGen.WpfGui {
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms, null,
-                null, false);
+                null);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 Debug.WriteLine("ADD: " + dlg.NewSym);
@@ -476,7 +476,7 @@ namespace SourceGen.WpfGui {
 
         private void DoEditSymbol(DefSymbol defSym) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms,
-                defSym, null, false);
+                defSym, null);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.

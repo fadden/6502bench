@@ -33,9 +33,23 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public FormatDescriptor FormatDescriptorResult { get; private set; }
 
+
+        /// <summary>
+        /// Updated local variable table.  Will be null if no changes were made.
+        /// </summary>
+        public LocalVariableTable LocalVariableResult { get; private set; }
+
+        /// <summary>
+        /// Offset of the local variable table we updated in LocalVariableResult.
+        /// </summary>
+        public int LocalVariableTableOffsetResult { get; private set; }
+
         private readonly string SYMBOL_NOT_USED;
         private readonly string SYMBOL_UNKNOWN;
         private readonly string SYMBOL_INVALID;
+
+        private readonly string CREATE_LOCAL_VARIABLE;
+        private readonly string EDIT_LOCAL_VARIABLE;
 
         /// <summary>
         /// Project reference.
@@ -111,6 +125,9 @@ namespace SourceGen.WpfGui {
             SYMBOL_INVALID = (string)FindResource("str_SymbolNotValid");
             SYMBOL_UNKNOWN = (string)FindResource("str_SymbolUnknown");
 
+            CREATE_LOCAL_VARIABLE = (string)FindResource("str_CreateLocalVariable");
+            EDIT_LOCAL_VARIABLE = (string)FindResource("str_EditLocalVariable");
+
             Debug.Assert(offset >= 0 && offset < project.FileDataLength);
             mOpDef = project.CpuDef.GetOpDef(project.FileData[offset]);
             Anattrib attr = project.GetAnattrib(offset);
@@ -129,6 +146,7 @@ namespace SourceGen.WpfGui {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             BasicFormat_Loaded();
+            NumericRefs_Loaded();
             mLoadDone = true;
         }
 
@@ -140,6 +158,20 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             FormatDescriptorResult = CreateDescriptorFromControls();
+
+            // Export the updated local variable table if we made changes.
+            if (mEditedLvTable != null) {
+                LocalVariableTable lvt = mProject.LvTables[mLvTableOffset];
+                if (mEditedLvTable != lvt) {
+                    LocalVariableResult = mEditedLvTable;
+                    LocalVariableTableOffsetResult = mLvTableOffset;
+
+                    Debug.WriteLine("NEW TABLE:");
+                    mEditedLvTable.DebugDump(mLvTableOffset);
+                } else {
+                    Debug.WriteLine("No change to LvTable, not exporting");
+                }
+            }
             DialogResult = true;
         }
 
@@ -154,8 +186,11 @@ namespace SourceGen.WpfGui {
             // Parts panel IsEnabled depends directly on formatSymbolButton.IsChecked.
             IsValid = true;
             IsSymbolAuto = false;
+            IsPartPanelEnabled = false;
             SymbolValueDecimal = string.Empty;
             if (FormatSymbol) {
+                IsPartPanelEnabled = mOpDef.IsExtendedImmediate;
+
                 if (!Asm65.Label.ValidateLabel(SymbolLabel)) {
                     SymbolValueHex = SYMBOL_INVALID;
                     IsValid = false;
@@ -417,6 +452,12 @@ namespace SourceGen.WpfGui {
         }
         private string mSymbolValueDecimal;
 
+        public bool IsPartPanelEnabled {
+            get { return mIsPartPanelEnabled; }
+            set { mIsPartPanelEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsPartPanelEnabled;
+
         public bool FormatPartLow {
             get { return mFormatPartLow; }
             set { mFormatPartLow = value; OnPropertyChanged(); UpdateControls(); }
@@ -599,6 +640,167 @@ namespace SourceGen.WpfGui {
         }
 
         #endregion Basic Format
+
+        #region Numeric References
+
+        public bool ShowLvNotApplicable {
+            get { return mShowLvNotApplicable; }
+            set { mShowLvNotApplicable = value; OnPropertyChanged(); }
+        }
+        private bool mShowLvNotApplicable;
+
+        public bool ShowLvTableNotFound {
+            get { return mShowLvTableNotFound; }
+            set { mShowLvTableNotFound = value; OnPropertyChanged(); }
+        }
+        private bool mShowLvTableNotFound;
+
+        public bool ShowLvNoMatchFound {
+            get { return mShowLvNoMatchFound; }
+            set { mShowLvNoMatchFound = value; OnPropertyChanged(); }
+        }
+        private bool mShowLvNoMatchFound;
+
+        public bool ShowLvMatchFound {
+            get { return mShowLvMatchFound; }
+            set { mShowLvMatchFound = value; OnPropertyChanged(); }
+        }
+        private bool mShowLvMatchFound;
+
+        public string LocalVariableLabel {
+            get { return mLocalVariableLabel; }
+            set { mLocalVariableLabel = value; OnPropertyChanged(); }
+        }
+        private string mLocalVariableLabel;
+
+        public bool ShowLvCreateEditButton {
+            get { return mShowLvCreateEditButton; }
+            set { mShowLvCreateEditButton = value; OnPropertyChanged(); }
+        }
+        private bool mShowLvCreateEditButton;
+
+        public string CreateEditLocalVariableText {
+            get { return mCreateEditLocalVariableText; }
+            set { mCreateEditLocalVariableText = value; OnPropertyChanged(); }
+        }
+        private string mCreateEditLocalVariableText;
+
+        /// <summary>
+        /// Offset of LocalVariableTable we're going to modify.
+        /// </summary>
+        private int mLvTableOffset;
+
+        /// <summary>
+        /// Local variable value.  If there's already a definition, this will be pre-filled
+        /// with the current contents.  Otherwise it will be null.
+        /// </summary>
+        private DefSymbol mEditedLocalVar;
+
+        /// <summary>
+        /// Clone of original table, with local edits.
+        /// </summary>
+        private LocalVariableTable mEditedLvTable;
+
+
+        /// <summary>
+        /// Configures the UI on the bottom half of the dialog.
+        /// </summary>
+        private void NumericRefs_Loaded() {
+            if (mOpDef.IsDirectPageInstruction || mOpDef.IsStackRelInstruction) {
+                LocalVariableLookup lvLookup =
+                    new LocalVariableLookup(mProject.LvTables, mProject, false);
+
+                // If the operand is already a local variable, use whichever one the
+                // analyzer found.
+                Anattrib attr = mProject.GetAnattrib(mOffset);
+                if (attr.DataDescriptor != null && attr.DataDescriptor.HasSymbol &&
+                        attr.DataDescriptor.SymbolRef.IsVariable) {
+                    // Select the table that defines the local variable that's currently
+                    // associated with this operand.
+                    mLvTableOffset = lvLookup.GetDefiningTableOffset(mOffset,
+                        attr.DataDescriptor.SymbolRef);
+                    Debug.Assert(mLvTableOffset >= 0);
+                    Debug.WriteLine("Symbol " + attr.DataDescriptor.SymbolRef +
+                        " from var table at +" + mLvTableOffset.ToString("x6"));
+                } else {
+                    // Operand is not a local variable.  Find the closest table.
+                    mLvTableOffset = lvLookup.GetNearestTableOffset(mOffset);
+                    Debug.WriteLine("Closest table is at +" + mLvTableOffset.ToString("x6"));
+                }
+
+                if (mLvTableOffset < 0) {
+                    ShowLvTableNotFound = true;
+                } else {
+                    // Found a table.  Do we have a matching symbol?
+                    ShowLvCreateEditButton = true;
+                    mEditedLocalVar = lvLookup.GetSymbol(mOffset, mOperandValue,
+                        mOpDef.IsDirectPageInstruction ?
+                            Symbol.Type.ExternalAddr : Symbol.Type.Constant);
+                    if (mEditedLocalVar == null) {
+                        ShowLvNoMatchFound = true;
+                        CreateEditLocalVariableText = CREATE_LOCAL_VARIABLE;
+                    } else {
+                        ShowLvMatchFound = true;
+                        CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
+                        LocalVariableLabel = mEditedLocalVar.Label;
+                    }
+
+                    // We need to update the symbol table while we work to make the uniqueness
+                    // check come out right.  Otherwise if you edit, rename FOO to BAR,
+                    // then edit again, you won't be able to rename BAR back to FOO because
+                    // it's already in the list and it's not self.
+                    //
+                    // We don't need the full LVT, just the list of symbols, but we'll want
+                    // to hand the modified table to the caller when we exit.
+                    LocalVariableTable lvt = mProject.LvTables[mLvTableOffset];
+                    mEditedLvTable = new LocalVariableTable(lvt);
+                }
+            } else {
+                ShowLvNotApplicable = true;
+            }
+        }
+
+        private void EditLocalVariableButton_Click(object sender, RoutedEventArgs e) {
+            Debug.Assert(mOpDef.IsDirectPageInstruction || mOpDef.IsStackRelInstruction);
+            Debug.Assert(mLvTableOffset >= 0);
+
+            DefSymbol initialVar = mEditedLocalVar;
+
+            if (initialVar == null) {
+                Symbol.Type symType;
+                if (mOpDef.IsDirectPageInstruction) {
+                    symType = Symbol.Type.ExternalAddr;
+                } else {
+                    symType = Symbol.Type.Constant;
+                }
+
+                // We need to pre-load the value and type, but we can't create a symbol with
+                // an empty name.  We don't really need to create something unique since the
+                // dialog will handle it.
+                initialVar = new DefSymbol("VAR", mOperandValue,
+                    Symbol.Source.Variable, symType, FormatDescriptor.SubType.None,
+                    string.Empty, string.Empty, 1);
+            }
+
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,
+                mEditedLvTable.GetSortedByLabel(), initialVar, mProject.SymbolTable,
+                true, true);
+            if (dlg.ShowDialog() == true) {
+                if (mEditedLocalVar != dlg.NewSym) {
+                    // Integrate result.  Future edits will start with this.
+                    // We can't delete a symbol, just create or modify.
+                    Debug.Assert(dlg.NewSym != null);
+                    mEditedLocalVar = dlg.NewSym;
+                    mEditedLvTable.AddOrReplace(dlg.NewSym);
+                    LocalVariableLabel = mEditedLocalVar.Label;
+                    CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
+                } else {
+                    Debug.WriteLine("No change to def symbol, ignoring edit");
+                }
+            }
+        }
+
+        #endregion Numeric References
 
 #if false
         /// <summary>

@@ -79,6 +79,15 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsConstant;
 
+        public bool ReadOnlyValueAndType {
+            get { return mReadOnlyValueAndType; }
+            set { mReadOnlyValueAndType = value; OnPropertyChanged(); }
+        }
+        public bool NotReadOnlyValueAndType {
+            get { return !mReadOnlyValueAndType; }
+        }
+        private bool mReadOnlyValueAndType;
+
         /// <summary>
         /// Format object to use when formatting addresses and constants.
         /// </summary>
@@ -115,11 +124,19 @@ namespace SourceGen.WpfGui {
 
 
         /// <summary>
-        /// Constructor, for editing a project symbol.
+        /// Constructor, for editing a project or platform symbol.
         /// </summary>
         public EditDefSymbol(Window owner, Formatter formatter,
                 SortedList<string, DefSymbol> defList, DefSymbol defSym,
-                SymbolTable symbolTable, bool isVariable) {
+                SymbolTable symbolTable)
+            : this(owner, formatter, defList, defSym, symbolTable, false, false) { }
+
+        /// <summary>
+        /// Constructor, for editing a local variable.
+        /// </summary>
+        public EditDefSymbol(Window owner, Formatter formatter,
+                SortedList<string, DefSymbol> defList, DefSymbol defSym,
+                SymbolTable symbolTable, bool isVariable, bool lockValueAndType) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
@@ -129,6 +146,7 @@ namespace SourceGen.WpfGui {
             mOldSym = defSym;
             mSymbolTable = symbolTable;
             mIsVariable = isVariable;
+            mReadOnlyValueAndType = lockValueAndType;
 
             Label = Value = VarWidth = Comment = string.Empty;
             if (isVariable) {

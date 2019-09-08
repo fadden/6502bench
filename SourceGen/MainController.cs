@@ -1508,10 +1508,14 @@ namespace SourceGen {
                                     GoToOffset(attr.OperandOffset, false, true);
                                 } else if (dfd != null && dfd.HasSymbol) {
                                     // Operand has a symbol, do a symbol lookup.
-                                    int labelOffset = mProject.FindLabelOffsetByName(
-                                        dfd.SymbolRef.Label);
-                                    if (labelOffset >= 0) {
-                                        GoToOffset(labelOffset, false, true);
+                                    if (dfd.SymbolRef.IsVariable) {
+                                        GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
+                                    } else {
+                                        int labelOffset = mProject.FindLabelOffsetByName(
+                                            dfd.SymbolRef.Label);
+                                        if (labelOffset >= 0) {
+                                            GoToOffset(labelOffset, false, true);
+                                        }
                                     }
                                 } else if (attr.IsDataStart || attr.IsInlineDataStart) {
                                     // If it's an Address or Symbol, we can try to resolve
@@ -1926,8 +1930,23 @@ namespace SourceGen {
                 UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
                     dfd, dlg.FormatDescriptorResult);
                 cs.Add(uc);
+            } else {
+                Debug.WriteLine("No change to operand format");
+            }
+
+            // We can't delete an LvTable, so a null value here means no changes made.
+            if (dlg.LocalVariableResult != null) {
+                int tableOffset = dlg.LocalVariableTableOffsetResult;
+                LocalVariableTable lvt = mProject.LvTables[tableOffset];
+                Debug.Assert(lvt != null);  // cannot create or delete a table
+                UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(tableOffset,
+                    lvt, dlg.LocalVariableResult);
+                cs.Add(uc);
+            } else {
+                Debug.WriteLine("No change to LvTable");
             }
 #endif
+            Debug.WriteLine("EditInstructionOperand: " + cs.Count + " changes");
             if (cs.Count != 0) {
                 ApplyUndoableChanges(cs);
             }
@@ -1996,7 +2015,7 @@ namespace SourceGen {
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mOutputFormatter,
-                mProject.ProjectProps.ProjectSyms, origDefSym, null, false);
+                mProject.ProjectProps.ProjectSyms, origDefSym, null);
             if (dlg.ShowDialog() == true) {
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
                 newProps.ProjectSyms.Remove(origDefSym.Label);
@@ -2345,6 +2364,67 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Moves the view and selection to the definition of a local variable.
+        /// </summary>
+        /// <param name="offset">Offset at which the variable was referenced.</param>
+        /// <param name="symRef">Reference to variable.</param>
+        public void GoToVarDefinition(int offset, WeakSymbolRef symRef, bool doPush) {
+            Debug.Assert(offset >= 0);
+            Debug.Assert(symRef.IsVariable);
+
+            LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables, mProject,
+                false);
+            int varOffset = lvLookup.GetDefiningTableOffset(offset, symRef);
+            if (varOffset <= 0) {
+                Debug.WriteLine("Local variable not found; offset=" + offset + " ref=" + symRef);
+                return;
+            }
+
+            // We have the offset to which the local variable table is bound.  We need to
+            // walk down until we find the variable definitions, and find the line with the
+            // matching symbol.
+            //
+            // We're comparing to the formatted strings -- safer than trying to find the symbol
+            // in the table and then guess at how the table arranges itself for display -- so we
+            // need to compare the formatted form of the label.
+            string cmpStr = mOutputFormatter.FormatVariableLabel(symRef.Label);
+            int lineIndex = CodeLineList.FindLineIndexByOffset(varOffset);
+            while (lineIndex < mProject.FileDataLength) {
+                LineListGen.Line line = CodeLineList[lineIndex];
+                if (line.FileOffset != varOffset) {
+                    // we've gone too far
+                    Debug.WriteLine("ran out of LV table");
+                    return;
+                }
+
+                if (line.LineType == LineListGen.Line.Type.LocalVariableTable) {
+                    DisplayList.FormattedParts parts = CodeLineList.GetFormattedParts(lineIndex);
+                    if (cmpStr.Equals(parts.Label)) {
+                        // Eureka
+                        NavStack.Location prevLoc = GetCurrentlySelectedLocation();
+
+                        mMainWin.CodeListView_EnsureVisible(lineIndex);
+
+                        // Update the selection.
+                        mMainWin.CodeListView_DeselectAll();
+                        mMainWin.CodeListView_SelectRange(lineIndex, 1);
+
+                        if (doPush) {
+                            // Update the back stack and associated controls.
+                            mNavStack.Push(prevLoc);
+                        }
+
+                        return;
+                    } else {
+                        //Debug.WriteLine("Var: '" + cmpStr + "' != '" + parts.Label + "'");
+                    }
+                }
+
+                lineIndex++;
+            }
+        }
+
         private NavStack.Location GetCurrentlySelectedLocation() {
             int index = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (index < 0) {
@@ -2604,6 +2684,7 @@ namespace SourceGen {
             return false;
         }
 
+        private bool mUpdatingSelectionHighlight;       // recursion guard
         /// <summary>
         /// Updates the selection highlight.  When a code item with an operand offset is
         /// selected, such as a branch, we want to highlight the address and label of the
@@ -2612,12 +2693,26 @@ namespace SourceGen {
         private void UpdateSelectionHighlight() {
             int targetIndex = FindSelectionHighlight();
 
-            if (mTargetHighlightIndex != targetIndex) {
+            if (mTargetHighlightIndex != targetIndex && !mUpdatingSelectionHighlight) {
+                Debug.WriteLine("Target highlight moving from " + mTargetHighlightIndex +
+                    " to " + targetIndex);
+
+                // The highlight is currently implemented by modifying the item in the
+                // display list.  Because those items are immutable, we have to remove the
+                // old and add a new.  The WPF ListView maintains its selection by object
+                // reference, so replacing an item requires removing the old item from the
+                // selection set and adding it to the new.
+                //
+                // So if a line references itself (like the ZipGS cache conditioner loop does),
+                // it will be the selected line while we're doing this little dance.  When the
+                // calls below update the selection, this method will be called again. This
+                // turns into infinite recursion.
+                mUpdatingSelectionHighlight = true;
                 mMainWin.CodeListView_RemoveSelectionHighlight(mTargetHighlightIndex);
                 mMainWin.CodeListView_AddSelectionHighlight(targetIndex);
+                mUpdatingSelectionHighlight = false;
 
                 mTargetHighlightIndex = targetIndex;
-                Debug.WriteLine("Selection highlight now " + targetIndex);
             }
         }
 
@@ -3075,7 +3170,7 @@ namespace SourceGen {
                 MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(xr.Offset,
                     formatter.FormatOffset24(xr.Offset),
                     formatter.FormatAddress(mProject.GetAnattrib(xr.Offset).Address, showBank),
-                    (xr.IsSymbolic ? "Sym " : "Num ") + typeStr +
+                    (xr.IsByName ? "Sym " : "Oth ") + typeStr +
                         formatter.FormatAdjustment(-xr.Adjustment));
 
                 mMainWin.ReferencesList.Add(rli);

@@ -51,7 +51,13 @@ namespace SourceGen {
             /// <summary>
             /// True if this reference is by name.
             /// </summary>
-            public bool IsSymbolic { get; private set; }
+            /// <remarks>
+            /// The time this is of use is when determining the set of project/platform symbols
+            /// that are actually used.  If we have FOO1=$101 and FOO2=$102, and we LDA FOO1
+            /// and LDA FOO1+1, we only want to output an equate for FOO1 even though FOO2's
+            /// address was referenced.
+            /// </remarks>
+            public bool IsByName { get; private set; }
 
             /// <summary>
             /// Type of reference.
@@ -69,17 +75,17 @@ namespace SourceGen {
             /// </summary>
             public int Adjustment { get; private set; }
 
-            public Xref(int offset, bool isSymbolic, XrefType type,
+            public Xref(int offset, bool isByName, XrefType type,
                     Asm65.OpDef.MemoryEffect accType, int adjustment) {
                 Offset = offset;
-                IsSymbolic = isSymbolic;
+                IsByName = isByName;
                 Type = type;
                 AccType = accType;
                 Adjustment = adjustment;
             }
 
             public override string ToString() {
-                return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsSymbolic +
+                return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsByName +
                     " type=" + Type + " accType= " + AccType + " adj=" + Adjustment;
             }
         }

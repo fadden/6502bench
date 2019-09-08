@@ -339,12 +339,13 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// True if the operand is an "extended immediate" value, which includes PEA in
-        /// addition to Imm/ImmLongA/ImmLongXY.
+        /// True if the operand is an "extended immediate" value, which includes PEA and MVN/MVP
+        /// in addition to Imm/ImmLongA/ImmLongXY.
         /// </summary>
         public bool IsExtendedImmediate {
             get {
-                return IsImmediate || AddrMode == AddressMode.StackAbs;
+                return IsImmediate || AddrMode == AddressMode.StackAbs ||
+                    AddrMode == AddressMode.BlockMove;
             }
         }
 
