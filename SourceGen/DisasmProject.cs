@@ -1214,8 +1214,7 @@ namespace SourceGen {
                                     new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             }
                         } else if (SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
-                            // Is this a reference to a project/platform symbol?  We also handle
-                            // local variables here.
+                            // Is this a reference to a project/platform symbol?
                             if (sym.SymbolSource == Symbol.Source.Project ||
                                     sym.SymbolSource == Symbol.Source.Platform) {
                                 DefSymbol defSym = sym as DefSymbol;
@@ -1226,8 +1225,10 @@ namespace SourceGen {
                                 defSym.Xrefs.Add(
                                     new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             } else {
-                                Debug.WriteLine("NOTE: not xrefing '" + sym.Label + "'");
-                                Debug.Assert(false);    // not possible?
+                                // Can get here if somebody creates an address operand symbol
+                                // that refers to a local variable.
+                                Debug.WriteLine("NOTE: not xrefing +" + offset.ToString("x6") +
+                                    " " + sym);
                             }
                         }
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.Address) {

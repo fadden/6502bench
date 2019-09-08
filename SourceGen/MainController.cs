@@ -1849,75 +1849,6 @@ namespace SourceGen {
         }
 
         private void EditInstructionOperand(int offset) {
-#if false
-            EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, offset,
-                mProject, mOutputFormatter);
-
-            // We'd really like to pass in an indication of what the "default" format actually
-            // resolved to, but we don't always know.  If this offset has a FormatDescriptor,
-            // we might not have auto-generated the label that would have been used otherwise.
-
-            // We're editing the FormatDescriptor from OperandFormats, not Anattribs;
-            // the latter may have auto-generated stuff.
-            if (mProject.OperandFormats.TryGetValue(offset, out FormatDescriptor dfd)) {
-                dlg.FormatDescriptor = dfd;
-            }
-
-            dlg.ShowDialog();
-            if (dlg.DialogResult != true) {
-                return;
-            }
-
-            ChangeSet cs = new ChangeSet(1);
-
-            // Handle shortcut actions.
-
-            if (dlg.FormatDescriptor != dfd && dlg.ShortcutAction !=
-                    WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead) {
-                // Note EditOperand returns a null descriptor when the user selects Default.
-                // This is different from how EditData works, since that has to deal with
-                // multiple regions.
-                Debug.WriteLine("Changing " + dfd + " to " + dlg.FormatDescriptor);
-                UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
-                    dfd, dlg.FormatDescriptor);
-                cs.Add(uc);
-            } else if (dfd != null && dlg.ShortcutAction ==
-                    WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead) {
-                Debug.WriteLine("Removing existing label for CreateLabelInstead");
-                UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
-                    dfd, null);
-                cs.Add(uc);
-            } else {
-                Debug.WriteLine("No change to format descriptor");
-            }
-
-            switch (dlg.ShortcutAction) {
-                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelInstead:
-                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateLabelAlso:
-                    Debug.Assert(!mProject.UserLabels.ContainsKey(dlg.ShortcutArg));
-                    Anattrib targetAttr = mProject.GetAnattrib(dlg.ShortcutArg);
-                    Symbol newLabel = new Symbol(dlg.FormatDescriptor.SymbolRef.Label,
-                        targetAttr.Address, Symbol.Source.User, Symbol.Type.LocalOrGlobalAddr);
-                    UndoableChange uc = UndoableChange.CreateLabelChange(dlg.ShortcutArg,
-                        null, newLabel);
-                    cs.Add(uc);
-                    break;
-                case WpfGui.EditInstructionOperand.SymbolShortcutAction.CreateProjectSymbolAlso:
-                    Debug.Assert(!mProject.ProjectProps.ProjectSyms.ContainsKey(
-                        dlg.FormatDescriptor.SymbolRef.Label));
-                    DefSymbol defSym = new DefSymbol(dlg.FormatDescriptor.SymbolRef.Label,
-                        dlg.ShortcutArg, Symbol.Source.Project, Symbol.Type.ExternalAddr,
-                        FormatDescriptor.SubType.Hex, string.Empty, string.Empty);
-                    ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
-                    newProps.ProjectSyms.Add(defSym.Label, defSym);
-                    uc = UndoableChange.CreateProjectPropertiesChange(
-                        mProject.ProjectProps, newProps);
-                    cs.Add(uc);
-                    break;
-                case WpfGui.EditInstructionOperand.SymbolShortcutAction.None:
-                    break;
-            }
-#else
             EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, mProject,
                 offset, mOutputFormatter);
             if (dlg.ShowDialog() != true) {
@@ -1934,18 +1865,45 @@ namespace SourceGen {
                 Debug.WriteLine("No change to operand format");
             }
 
-            // We can't delete an LvTable, so a null value here means no changes made.
+            // Check for changes to a local variable table.  The edit dialog can't delete an
+            // entire table, so a null value here means no changes were made.
             if (dlg.LocalVariableResult != null) {
                 int tableOffset = dlg.LocalVariableTableOffsetResult;
                 LocalVariableTable lvt = mProject.LvTables[tableOffset];
-                Debug.Assert(lvt != null);  // cannot create or delete a table
+                Debug.Assert(lvt != null);  // cannot create a table either
                 UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(tableOffset,
                     lvt, dlg.LocalVariableResult);
                 cs.Add(uc);
             } else {
                 Debug.WriteLine("No change to LvTable");
             }
-#endif
+
+            // Check for changes to label at operand target address.  Labels can be created,
+            // modified, or deleted.
+            if (dlg.SymbolEditOffsetResult >= 0) {
+                mProject.UserLabels.TryGetValue(dlg.SymbolEditOffsetResult, out Symbol oldLabel);
+                UndoableChange uc = UndoableChange.CreateLabelChange(dlg.SymbolEditOffsetResult,
+                    oldLabel, dlg.SymbolEditResult);
+                cs.Add(uc);
+            } else {
+                Debug.WriteLine("No change to label");
+            }
+
+            // Check for changes to a project property.  The dialog can create a new entry or
+            // modify an existing entry.
+            if (dlg.ProjectPropertyResult != null) {
+                DefSymbol defSym = dlg.ProjectPropertyResult;
+                ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
+                // Add new entry, or replace existing entry.
+                newProps.ProjectSyms.Remove(dlg.PrevProjectPropertyResult.Label);
+                newProps.ProjectSyms.Add(defSym.Label, defSym);
+                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
+                    mProject.ProjectProps, newProps);
+                cs.Add(uc);
+            } else {
+                Debug.WriteLine("No change to project property");
+            }
+
             Debug.WriteLine("EditInstructionOperand: " + cs.Count + " changes");
             if (cs.Count != 0) {
                 ApplyUndoableChanges(cs);

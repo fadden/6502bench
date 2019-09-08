@@ -33,7 +33,6 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public FormatDescriptor FormatDescriptorResult { get; private set; }
 
-
         /// <summary>
         /// Updated local variable table.  Will be null if no changes were made.
         /// </summary>
@@ -44,12 +43,42 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public int LocalVariableTableOffsetResult { get; private set; }
 
+        /// <summary>
+        /// Offset of label that was edited.  A non-negative value here indicates that an
+        /// edit has been made.
+        /// </summary>
+        public int SymbolEditOffsetResult { get; private set; }
+
+        /// <summary>
+        /// Edited project property, or null if no changes were made.
+        /// </summary>
+        public DefSymbol ProjectPropertyResult { get; private set; }
+
+        /// <summary>
+        /// The project property that was modified, or null if none.
+        /// </summary>
+        public DefSymbol PrevProjectPropertyResult { get; private set; }
+
+        /// <summary>
+        /// Updated label.
+        /// </summary>
+        public Symbol SymbolEditResult { get; private set; }
+
         private readonly string SYMBOL_NOT_USED;
         private readonly string SYMBOL_UNKNOWN;
         private readonly string SYMBOL_INVALID;
 
         private readonly string CREATE_LOCAL_VARIABLE;
         private readonly string EDIT_LOCAL_VARIABLE;
+        private readonly string LV_MATCH_FOUND_ADDRESS;
+        private readonly string LV_MATCH_FOUND_CONSTANT;
+
+        private readonly string CREATE_LABEL;
+        private readonly string EDIT_LABEL;
+        private readonly string CREATE_PROJECT_SYMBOL;
+        private readonly string EDIT_PROJECT_SYMBOL;
+        private readonly string CURRENT_LABEL;
+        private readonly string CURRENT_LABEL_ADJUSTED_FMT;
 
         /// <summary>
         /// Project reference.
@@ -127,6 +156,15 @@ namespace SourceGen.WpfGui {
 
             CREATE_LOCAL_VARIABLE = (string)FindResource("str_CreateLocalVariable");
             EDIT_LOCAL_VARIABLE = (string)FindResource("str_EditLocalVariable");
+            LV_MATCH_FOUND_ADDRESS = (string)FindResource("str_LvMatchFoundAddress");
+            LV_MATCH_FOUND_CONSTANT = (string)FindResource("str_LvMatchFoundConstant");
+
+            CREATE_LABEL = (string)FindResource("str_CreateLabel");
+            EDIT_LABEL = (string)FindResource("str_EditLabel");
+            CREATE_PROJECT_SYMBOL = (string)FindResource("str_CreateProjectSymbol");
+            EDIT_PROJECT_SYMBOL = (string)FindResource("str_EditProjectSymbol");
+            CURRENT_LABEL = (string)FindResource("str_CurrentLabel");
+            CURRENT_LABEL_ADJUSTED_FMT = (string)FindResource("str_CurrentLabelAdjustedFmt");
 
             Debug.Assert(offset >= 0 && offset < project.FileDataLength);
             mOpDef = project.CpuDef.GetOpDef(project.FileData[offset]);
@@ -146,7 +184,8 @@ namespace SourceGen.WpfGui {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             BasicFormat_Loaded();
-            NumericRefs_Loaded();
+            NumericReferences_Loaded();
+            LocalVariables_Loaded();
             mLoadDone = true;
         }
 
@@ -172,6 +211,14 @@ namespace SourceGen.WpfGui {
                     Debug.WriteLine("No change to LvTable, not exporting");
                 }
             }
+
+            if (mLabelHasBeenEdited) {
+                SymbolEditOffsetResult = mEditedLabelOffset;
+                SymbolEditResult = mEditedLabel;
+            }
+
+            ProjectPropertyResult = mEditedProjectSymbol;
+
             DialogResult = true;
         }
 
@@ -186,6 +233,7 @@ namespace SourceGen.WpfGui {
             // Parts panel IsEnabled depends directly on formatSymbolButton.IsChecked.
             IsValid = true;
             IsSymbolAuto = false;
+            IsSymbolVar = false;
             IsPartPanelEnabled = false;
             SymbolValueDecimal = string.Empty;
             if (FormatSymbol) {
@@ -200,8 +248,17 @@ namespace SourceGen.WpfGui {
                         // around it because FormatDescriptors are weak references (replace auto
                         // label with user label, reference non-existent auto label, remove user
                         // label).  We could try harder, but currently not necessary.
+                        //
+                        // Referencing an auto label is unwise because we use weak references
+                        // by name, and auto labels can appear, disappear, or be renamed.
                         IsValid = false;
                         IsSymbolAuto = true;
+                    } else if (sym.SymbolSource == Symbol.Source.Variable) {
+                        // Local variables can be de-duplicated and uniquified, so referring to
+                        // them by name doesn't make sense.  The numeric operand formatter will
+                        // disregard attempts to use them in this way.
+                        IsValid = false;
+                        IsSymbolVar = true;
                     }
 
                     SymbolValueHex = mFormatter.FormatHexValue(sym.Value, 4);
@@ -440,6 +497,12 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsSymbolAuto;
 
+        public bool IsSymbolVar{
+            get { return mIsSymbolVar; }
+            set { mIsSymbolVar = value; OnPropertyChanged(); }
+        }
+        private bool mIsSymbolVar;
+
         public string SymbolValueHex {
             get { return mSymbolValueHex; }
             set { mSymbolValueHex = value; OnPropertyChanged(); }
@@ -643,6 +706,239 @@ namespace SourceGen.WpfGui {
 
         #region Numeric References
 
+        public bool ShowNarNotAddress {
+            get { return mShowNarNotAddress; }
+            set { mShowNarNotAddress = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarNotAddress;
+
+        public bool ShowNarEditLabel {
+            get { return mShowNarEditLabel; }
+            set { mShowNarEditLabel = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarEditLabel;
+
+        public bool ShowNarCurrentLabel {
+            get { return mShowNarCurrentLabel; }
+            set { mShowNarCurrentLabel = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarCurrentLabel;
+
+        public string NarLabelOffsetText {
+            get { return mNarLabelOffsetText; }
+            set { mNarLabelOffsetText = value; OnPropertyChanged(); }
+        }
+        private string mNarLabelOffsetText;
+
+        public string NarTargetLabel {
+            get { return mNarTargetLabel; }
+            set { mNarTargetLabel = value; OnPropertyChanged(); }
+        }
+        private string mNarTargetLabel;
+
+        public string CreateEditLabelText {
+            get { return mCreateEditLabelText; }
+            set { mCreateEditLabelText = value; OnPropertyChanged(); }
+        }
+        private string mCreateEditLabelText;
+
+        public bool ShowNarExternalSymbol {
+            get { return mShowNarExternalSymbol; }
+            set { mShowNarExternalSymbol = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarExternalSymbol;
+
+        public bool ShowNarPlatformSymbol {
+            get { return mShowNarPlatformSymbol; }
+            set { mShowNarPlatformSymbol = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarPlatformSymbol;
+
+        public string NarPlatformSymbol {
+            get { return mNarPlatformSymbol; }
+            set { mNarPlatformSymbol = value; OnPropertyChanged(); }
+        }
+        private string mNarPlatformSymbol;
+
+        public bool ShowNarNoProjectMatch {
+            get { return mShowNarNoProjectMatch; }
+            set { mShowNarNoProjectMatch = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarNoProjectMatch;
+
+        public bool ShowNarProjectSymbol {
+            get { return mShowNarProjectSymbol; }
+            set { mShowNarProjectSymbol = value; OnPropertyChanged(); }
+        }
+        private bool mShowNarProjectSymbol;
+
+        public string NarProjectSymbol {
+            get { return mNarProjectSymbol; }
+            set { mNarProjectSymbol = value; OnPropertyChanged(); }
+        }
+        private string mNarProjectSymbol;
+
+        public string CreateEditProjectSymbolText {
+            get { return mCreateEditProjectSymbolText; }
+            set { mCreateEditProjectSymbolText = value; OnPropertyChanged(); }
+        }
+        private string mCreateEditProjectSymbolText;
+
+        /// <summary>
+        /// Edited label value.  Will be null if the label hasn't been created, or has been
+        /// deleted (by entering a blank string in the label edit box).
+        /// </summary>
+        private Symbol mEditedLabel;
+        private bool mLabelHasBeenEdited;
+
+        /// <summary>
+        /// Address associated with the label (for the Symbol's value).
+        /// </summary>
+        private int mLabelTargetAddress = -1;
+
+        /// <summary>
+        /// Offset of edited label.
+        /// </summary>
+        private int mEditedLabelOffset = -1;
+
+        /// <summary>
+        /// Edited project symbol.  Will be null if the symbol doesn't exist.  Symbols can't
+        /// be deleted.
+        /// </summary>
+        private DefSymbol mEditedProjectSymbol;
+
+        /// <summary>
+        /// Configures the UI in the local variables box at load time.
+        /// </summary>
+        private void NumericReferences_Loaded() {
+            SymbolEditOffsetResult = -1;
+
+            Anattrib attr = mProject.GetAnattrib(mOffset);
+
+            if (attr.OperandOffset >= 0) {
+                // Operand target is inside the file.
+                ShowNarEditLabel = true;
+
+                // Seek back to the start of the instruction or data item if the operand points
+                // into the middle of one.  This is *not* the same as the "nearby" search,
+                // which will traverse multiple items to find a match.
+                mEditedLabelOffset =
+                    DataAnalysis.GetBaseOperandOffset(mProject, attr.OperandOffset);
+                mLabelTargetAddress = mProject.GetAnattrib(mEditedLabelOffset).Address;
+                if (mProject.UserLabels.TryGetValue(mEditedLabelOffset, out Symbol sym)) {
+                    // Has a label.
+                    ShowNarCurrentLabel = true;
+                    if (mEditedLabelOffset != attr.OperandOffset) {
+                        NarLabelOffsetText = string.Format(CURRENT_LABEL_ADJUSTED_FMT,
+                            mFormatter.FormatAdjustment(attr.OperandOffset - mEditedLabelOffset));
+                    } else {
+                        NarLabelOffsetText = CURRENT_LABEL;
+                    }
+                    NarTargetLabel = sym.Label;
+                    mEditedLabel = sym;
+                    CreateEditLabelText = EDIT_LABEL;
+                } else {
+                    NarLabelOffsetText = CURRENT_LABEL;
+                    CreateEditLabelText = CREATE_LABEL;
+                }
+            } else if (attr.OperandAddress >= 0) {
+                ShowNarExternalSymbol = true;
+
+                // There can be multiple symbols with the same value, so we walk through the
+                // list and identify the first matching platform and project symbols.  We're
+                // only interested in address symbols, not constants.
+                Symbol firstPlatform = null;
+                Symbol firstProject = null;
+                foreach (Symbol sym in mProject.SymbolTable) {
+                    if (sym.Value == attr.OperandAddress &&
+                            sym.SymbolType != Symbol.Type.Constant) {
+                        if (firstPlatform == null && sym.SymbolSource == Symbol.Source.Platform) {
+                            firstPlatform = sym;
+                        } else if (firstProject == null &&
+                                    sym.SymbolSource == Symbol.Source.Project) {
+                            firstProject = sym;
+                        }
+
+                        if (firstPlatform != null && firstProject != null) {
+                            break;
+                        }
+                    }
+                }
+
+                if (firstPlatform != null) {
+                    ShowNarPlatformSymbol = true;
+                    NarPlatformSymbol = firstPlatform.Label;
+                }
+                if (firstProject != null) {
+                    ShowNarProjectSymbol = true;
+                    NarProjectSymbol = firstProject.Label;
+                    CreateEditProjectSymbolText = EDIT_PROJECT_SYMBOL;
+
+                    mEditedProjectSymbol = (DefSymbol)firstProject;
+                    PrevProjectPropertyResult = mEditedProjectSymbol;
+                } else {
+                    ShowNarNoProjectMatch = true;
+                    CreateEditProjectSymbolText = CREATE_PROJECT_SYMBOL;
+                }
+            } else {
+                // Probably an immediate operand.
+                ShowNarNotAddress = true;
+            }
+        }
+
+        private void EditLabel_Click(object sender, RoutedEventArgs e) {
+            EditLabel dlg = new EditLabel(this, mEditedLabel, mLabelTargetAddress,
+                mProject.SymbolTable);
+            if (dlg.ShowDialog() != true || mEditedLabel == dlg.LabelSym) {
+                Debug.WriteLine("No change to label, ignoring edit");
+                return;
+            }
+
+            mEditedLabel = dlg.LabelSym;
+            mLabelHasBeenEdited = true;
+
+            // Update UI to match current state.
+            if (mEditedLabel == null) {
+                ShowNarCurrentLabel = false;
+                CreateEditLabelText = CREATE_LABEL;
+            } else {
+                ShowNarCurrentLabel = true;
+                CreateEditLabelText = EDIT_LABEL;
+                NarTargetLabel = mEditedLabel.Label;
+            }
+        }
+
+        private void EditProjectSymbol_Click(object sender, RoutedEventArgs e) {
+            DefSymbol origSym = mEditedProjectSymbol;
+            if (origSym == null) {
+                // Need to start with a symbol so we can set the value field.
+                origSym = new DefSymbol("SYM", mOperandValue, Symbol.Source.Project,
+                    Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
+                    string.Empty, string.Empty);
+            }
+
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,
+                mProject.ProjectProps.ProjectSyms, origSym, null, false, true);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+            Debug.Assert(dlg.NewSym != null);   // can't delete a symbol from dialog
+
+            if (mEditedProjectSymbol == dlg.NewSym) {
+                Debug.WriteLine("No change to project symbol, ignoring edit");
+                return;
+            }
+            mEditedProjectSymbol = dlg.NewSym;
+            ShowNarProjectSymbol = true;
+            ShowNarNoProjectMatch = false;
+            NarProjectSymbol = mEditedProjectSymbol.Label;
+            CreateEditProjectSymbolText = EDIT_PROJECT_SYMBOL;
+        }
+
+        #endregion Numeric References
+
+        #region Local Variables
+
         public bool ShowLvNotApplicable {
             get { return mShowLvNotApplicable; }
             set { mShowLvNotApplicable = value; OnPropertyChanged(); }
@@ -667,6 +963,12 @@ namespace SourceGen.WpfGui {
         }
         private bool mShowLvMatchFound;
 
+        public string LvMatchFoundText {
+            get { return mLvMatchFoundText; }
+            set { mLvMatchFoundText = value; OnPropertyChanged(); }
+        }
+        private string mLvMatchFoundText;
+
         public string LocalVariableLabel {
             get { return mLocalVariableLabel; }
             set { mLocalVariableLabel = value; OnPropertyChanged(); }
@@ -688,7 +990,7 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// Offset of LocalVariableTable we're going to modify.
         /// </summary>
-        private int mLvTableOffset;
+        private int mLvTableOffset = -1;
 
         /// <summary>
         /// Local variable value.  If there's already a definition, this will be pre-filled
@@ -703,60 +1005,64 @@ namespace SourceGen.WpfGui {
 
 
         /// <summary>
-        /// Configures the UI on the bottom half of the dialog.
+        /// Configures the UI in the local variables box at load time.
         /// </summary>
-        private void NumericRefs_Loaded() {
-            if (mOpDef.IsDirectPageInstruction || mOpDef.IsStackRelInstruction) {
-                LocalVariableLookup lvLookup =
-                    new LocalVariableLookup(mProject.LvTables, mProject, false);
-
-                // If the operand is already a local variable, use whichever one the
-                // analyzer found.
-                Anattrib attr = mProject.GetAnattrib(mOffset);
-                if (attr.DataDescriptor != null && attr.DataDescriptor.HasSymbol &&
-                        attr.DataDescriptor.SymbolRef.IsVariable) {
-                    // Select the table that defines the local variable that's currently
-                    // associated with this operand.
-                    mLvTableOffset = lvLookup.GetDefiningTableOffset(mOffset,
-                        attr.DataDescriptor.SymbolRef);
-                    Debug.Assert(mLvTableOffset >= 0);
-                    Debug.WriteLine("Symbol " + attr.DataDescriptor.SymbolRef +
-                        " from var table at +" + mLvTableOffset.ToString("x6"));
-                } else {
-                    // Operand is not a local variable.  Find the closest table.
-                    mLvTableOffset = lvLookup.GetNearestTableOffset(mOffset);
-                    Debug.WriteLine("Closest table is at +" + mLvTableOffset.ToString("x6"));
-                }
-
-                if (mLvTableOffset < 0) {
-                    ShowLvTableNotFound = true;
-                } else {
-                    // Found a table.  Do we have a matching symbol?
-                    ShowLvCreateEditButton = true;
-                    mEditedLocalVar = lvLookup.GetSymbol(mOffset, mOperandValue,
-                        mOpDef.IsDirectPageInstruction ?
-                            Symbol.Type.ExternalAddr : Symbol.Type.Constant);
-                    if (mEditedLocalVar == null) {
-                        ShowLvNoMatchFound = true;
-                        CreateEditLocalVariableText = CREATE_LOCAL_VARIABLE;
-                    } else {
-                        ShowLvMatchFound = true;
-                        CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
-                        LocalVariableLabel = mEditedLocalVar.Label;
-                    }
-
-                    // We need to update the symbol table while we work to make the uniqueness
-                    // check come out right.  Otherwise if you edit, rename FOO to BAR,
-                    // then edit again, you won't be able to rename BAR back to FOO because
-                    // it's already in the list and it's not self.
-                    //
-                    // We don't need the full LVT, just the list of symbols, but we'll want
-                    // to hand the modified table to the caller when we exit.
-                    LocalVariableTable lvt = mProject.LvTables[mLvTableOffset];
-                    mEditedLvTable = new LocalVariableTable(lvt);
-                }
-            } else {
+        private void LocalVariables_Loaded() {
+            if (!mOpDef.IsDirectPageInstruction && !mOpDef.IsStackRelInstruction) {
                 ShowLvNotApplicable = true;
+                return;
+            }
+
+            LvMatchFoundText = mOpDef.IsDirectPageInstruction ?
+                LV_MATCH_FOUND_ADDRESS : LV_MATCH_FOUND_CONSTANT;
+
+            LocalVariableLookup lvLookup =
+                new LocalVariableLookup(mProject.LvTables, mProject, false);
+
+            // If the operand is already a local variable, use whichever one the
+            // analyzer found.
+            Anattrib attr = mProject.GetAnattrib(mOffset);
+            if (attr.DataDescriptor != null && attr.DataDescriptor.HasSymbol &&
+                    attr.DataDescriptor.SymbolRef.IsVariable) {
+                // Select the table that defines the local variable that's currently
+                // associated with this operand.
+                mLvTableOffset = lvLookup.GetDefiningTableOffset(mOffset,
+                    attr.DataDescriptor.SymbolRef);
+                Debug.Assert(mLvTableOffset >= 0);
+                Debug.WriteLine("Symbol " + attr.DataDescriptor.SymbolRef +
+                    " from var table at +" + mLvTableOffset.ToString("x6"));
+            } else {
+                // Operand is not a local variable.  Find the closest table.
+                mLvTableOffset = lvLookup.GetNearestTableOffset(mOffset);
+                Debug.WriteLine("Closest table is at +" + mLvTableOffset.ToString("x6"));
+            }
+
+            if (mLvTableOffset < 0) {
+                ShowLvTableNotFound = true;
+            } else {
+                // Found a table.  Do we have a matching symbol?
+                ShowLvCreateEditButton = true;
+                mEditedLocalVar = lvLookup.GetSymbol(mOffset, mOperandValue,
+                    mOpDef.IsDirectPageInstruction ?
+                        Symbol.Type.ExternalAddr : Symbol.Type.Constant);
+                if (mEditedLocalVar == null) {
+                    ShowLvNoMatchFound = true;
+                    CreateEditLocalVariableText = CREATE_LOCAL_VARIABLE;
+                } else {
+                    ShowLvMatchFound = true;
+                    CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
+                    LocalVariableLabel = mEditedLocalVar.Label;
+                }
+
+                // We need to update the symbol table while we work to make the uniqueness
+                // check come out right.  Otherwise if you edit, rename FOO to BAR,
+                // then edit again, you won't be able to rename BAR back to FOO because
+                // it's already in the list and it's not self.
+                //
+                // We don't need the full LVT, just the list of symbols, but we'll want
+                // to hand the modified table to the caller when we exit.
+                LocalVariableTable lvt = mProject.LvTables[mLvTableOffset];
+                mEditedLvTable = new LocalVariableTable(lvt);
             }
         }
 
@@ -794,67 +1100,14 @@ namespace SourceGen.WpfGui {
                     mEditedLvTable.AddOrReplace(dlg.NewSym);
                     LocalVariableLabel = mEditedLocalVar.Label;
                     CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
+                    ShowLvNoMatchFound = false;
+                    ShowLvMatchFound = true;
                 } else {
                     Debug.WriteLine("No change to def symbol, ignoring edit");
                 }
             }
         }
 
-        #endregion Numeric References
-
-#if false
-        /// <summary>
-        /// Configures the buttons in the "symbol shortcuts" group box.  The entire box is
-        /// disabled unless "symbol" is selected.  Other options are selectively enabled or
-        /// disabled as appropriate for the current input.  If we disable the selection option,
-        /// the selection will be reset to default.
-        /// </summary>
-        private void ConfigureSymbolShortcuts() {
-            // operandOnlyRadioButton: always enabled
-            // labelInsteadRadioButton: symbol is unknown and operand address has no label
-            // operandAndLabelRadioButton: same as labelInstead
-            // operandAndProjRadioButton: symbol is unknown and operand address is outside project
-
-            string labelStr = symbolTextBox.Text;
-            ShortcutArg = -1;
-
-            // Is this a known symbol?  If so, disable most options and bail.
-            if (mProject.SymbolTable.TryGetValue(labelStr, out Symbol sym)) {
-                labelInsteadButton.IsEnabled = operandAndLabelButton.IsEnabled =
-                    operandAndProjButton.IsEnabled = false;
-                operandOnlyButton.IsChecked = true;
-                return;
-            }
-
-            if (mAttr.OperandOffset >= 0) {
-                // Operand target is inside the file.  Does the target offset already have a label?
-                int targetOffset =
-                    DataAnalysis.GetBaseOperandOffset(mProject, mAttr.OperandOffset);
-                bool hasLabel = mProject.UserLabels.ContainsKey(targetOffset);
-                labelInsteadButton.IsEnabled = operandAndLabelButton.IsEnabled =
-                    !hasLabel;
-                operandAndProjButton.IsEnabled = false;
-                ShortcutArg = targetOffset;
-            } else if (mAttr.OperandAddress >= 0) {
-                // Operand target is outside the file.
-                labelInsteadButton.IsEnabled = operandAndLabelButton.IsEnabled = false;
-                operandAndProjButton.IsEnabled = true;
-                ShortcutArg = mAttr.OperandAddress;
-            } else {
-                // Probably an immediate operand.
-                // ?? Should operandAndProjButton be enabled for 8-bit constants?  We'd want
-                //    to add it as a constant rather than an address.
-                labelInsteadButton.IsEnabled = operandAndLabelButton.IsEnabled =
-                    operandAndProjButton.IsEnabled = false;
-            }
-
-            // Select the default option if the currently-selected option is no longer available.
-            if ((labelInsteadButton.IsChecked == true && labelInsteadButton.IsEnabled != true) ||
-                    (operandAndLabelButton.IsChecked == true && !operandAndLabelButton.IsEnabled == true) ||
-                    (operandAndProjButton.IsChecked == true && !operandAndProjButton.IsEnabled == true)) {
-                operandOnlyButton.IsChecked = true;
-            }
-        }
-#endif
+        #endregion Local Variables
     }
 }

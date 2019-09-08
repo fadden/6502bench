@@ -132,7 +132,8 @@ namespace SourceGen.WpfGui {
             : this(owner, formatter, defList, defSym, symbolTable, false, false) { }
 
         /// <summary>
-        /// Constructor, for editing a local variable.
+        /// Constructor, for editing a local variable, or editing a project symbol with
+        /// the value field locked.
         /// </summary>
         public EditDefSymbol(Window owner, Formatter formatter,
                 SortedList<string, DefSymbol> defList, DefSymbol defSym,

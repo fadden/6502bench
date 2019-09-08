@@ -37,6 +37,15 @@ limitations under the License.
 
         <system:String x:Key="str_CreateLocalVariable">Create Local Variable</system:String>
         <system:String x:Key="str_EditLocalVariable">Edit Local Variable</system:String>
+        <system:String x:Key="str_LvMatchFoundAddress">Match found (ZP address):</system:String>
+        <system:String x:Key="str_LvMatchFoundConstant">Match found (StackRel constant):</system:String>
+
+        <system:String x:Key="str_CreateLabel">Create Label</system:String>
+        <system:String x:Key="str_EditLabel">Edit Label</system:String>
+        <system:String x:Key="str_CreateProjectSymbol">Create Project Symbol</system:String>
+        <system:String x:Key="str_EditProjectSymbol">Edit Project Symbol</system:String>
+        <system:String x:Key="str_CurrentLabel">Current label:</system:String>
+        <system:String x:Key="str_CurrentLabelAdjustedFmt">Current label (adjusted {0}):</system:String>
     </Window.Resources>
 
     <Grid Margin="8" Width="500">
@@ -102,6 +111,8 @@ limitations under the License.
                                  Text="{Binding SymbolLabel, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="(auto)" Foreground="Red" Margin="4,0,0,0"
                                    Visibility="{Binding IsSymbolAuto, Converter={StaticResource BoolToVis}}"/>
+                        <TextBlock Text="(var)" Foreground="Red" Margin="4,0,0,0"
+                                   Visibility="{Binding IsSymbolVar, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="18,4,0,0"
                                 IsEnabled="{Binding IsPartPanelEnabled}">
@@ -145,17 +156,42 @@ limitations under the License.
         <!-- numeric reference box, for labels and project/platform symbols -->
         <GroupBox Grid.Column="0" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Numeric Address Reference">
             <StackPanel>
-                <TextBlock Text="Operand is not an 8, 16, or 24-bit address"/>
-                <TextBlock Text="Address is inside the project"/>
-                <TextBlock Text="Address is NOT the start of a thing"/>
-                <TextBlock Text="Label at target address:  ______"/>
-                <Button Width="120" Content="Edit Label"/>
+                <TextBlock Text="Operand is not an 8, 16, or 24-bit address" TextWrapping="Wrap"
+                           Visibility="{Binding ShowNarNotAddress, Converter={StaticResource BoolToVis}}"/>
+                <!--<TextBlock Text="Operand does not reference the start of an instruction or data item"
+                            TextWrapping="Wrap" IsEnabled="{Binding ShowNarNotStart}"/>-->
+                <StackPanel Visibility="{Binding ShowNarEditLabel, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Operand's address is inside project"/>
+                    <StackPanel Visibility="{Binding ShowNarCurrentLabel, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding NarLabelOffsetText, FallbackValue=Current label (adjusted +1):}"/>
+                        <TextBlock Margin="16,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                                   Text="{Binding NarTargetLabel, FallbackValue=LABEL_67890123456789012345678901}"/>
+                    </StackPanel>
+                    <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
+                            Content="{Binding CreateEditLabelText, FallbackValue=Diddle Label}"
+                            Click="EditLabel_Click"/>
+                </StackPanel>
 
-                <TextBlock Text="Address is outside the project"/>
-                <TextBlock Text="No matching platform / project symbol"/>
-                <TextBlock Text="Found matching {platform|project} symbol"/>
-                <TextBlock Text="[______] ($value)"/>
-                <Button Width="120" Content="Create/Edit Project Symbol"/>
+                <StackPanel Visibility="{Binding ShowNarExternalSymbol, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Operand's address is outside project" Margin="0,0,0,2"/>
+                    <StackPanel Visibility="{Binding ShowNarPlatformSymbol, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Found a matching symbol in platform defs:"/>
+                        <TextBlock Margin="16,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                                   Text="{Binding NarPlatformSymbol, FallbackValue=PLATFORM_SYMBOL}"/>
+                    </StackPanel>
+                    <TextBlock Text="No matching project symbol"
+                               Visibility="{Binding ShowNarNoProjectMatch, Converter={StaticResource BoolToVis}}"/>
+                    <StackPanel Visibility="{Binding ShowNarProjectSymbol, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Found matching project symbol:"/>
+                        <TextBlock Margin="16,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                                   Text="{Binding NarProjectSymbol, FallbackValue=PROJECT_SYMBOL}"/>
+                    </StackPanel>
+
+                    <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
+                            Content="{Binding CreateEditProjectSymbolText, FallbackValue=Diddle Project Symbol}"
+                            Click="EditProjectSymbol_Click"/>
+                </StackPanel>
+
             </StackPanel>
         </GroupBox>
 
@@ -168,20 +204,19 @@ limitations under the License.
                            Visibility="{Binding ShowLvTableNotFound, Converter={StaticResource BoolToVis}}"/>
                 <TextBlock Text="No matching local variable found" TextWrapping="Wrap"
                            Visibility="{Binding ShowLvNoMatchFound, Converter={StaticResource BoolToVis}}"/>
-                <StackPanel Orientation="Horizontal"
-                            Visibility="{Binding ShowLvMatchFound, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="Match found:"/>
-                    <TextBlock Margin="4,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
-                               Text="{Binding LocalVariableLabel, FallbackValue=VAR_NAME}"/>
+                <StackPanel Visibility="{Binding ShowLvMatchFound, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding LvMatchFoundText, FallbackValue=Match found (ZP address):}"/>
+                    <TextBlock Margin="16,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                               Text="{Binding LocalVariableLabel, FallbackValue=VAR_NAME_90123456789012345678901}"/>
                 </StackPanel>
-                <Button Width="150" Margin="0,4,0,0"
+                <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
                         Content="{Binding CreateEditLocalVariableText, FallbackValue=Diddle Local Variable}"
                         Visibility="{Binding ShowLvCreateEditButton, Converter={StaticResource BoolToVis}}"
                         Click="EditLocalVariableButton_Click"/>
             </StackPanel>
         </GroupBox>
 
-        <DockPanel Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,16,0,0" LastChildFill="False">
+        <DockPanel Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" IsCancel="True" Margin="8,0,0,0"/>
             <Button DockPanel.Dock="Right" Content="OK" Width="70" IsDefault="True"
                     IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>

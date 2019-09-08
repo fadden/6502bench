@@ -246,7 +246,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="proj">Project reference.</param>
         /// <param name="offset">Start offset.</param>
-        /// <returns></returns>
+        /// <returns>Base offset.</returns>
         public static int GetBaseOperandOffset(DisasmProject proj, int offset) {
             Debug.Assert(offset >= 0 && offset < proj.FileDataLength);
             while (!proj.GetAnattrib(offset).IsStart) {
@@ -302,6 +302,8 @@ namespace SourceGen {
                     // descriptor includes this offset, we set the target offset to that.
                     // (Note the uncategorized data pass hasn't run yet, so only instructions
                     // and offsets identified by users or scripts have been categorized.)
+                    //
+                    // ?? Can we use GetBaseOperandOffset(), which searches for IsStart?
                     int scanOffset = targetOffset;
                     while (--scanOffset >= 0) {
                         FormatDescriptor dfd = mAnattribs[scanOffset].DataDescriptor;
