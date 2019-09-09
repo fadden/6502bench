@@ -198,7 +198,7 @@ limitations under the License.
         <!-- local variable controls -->
         <GroupBox Grid.Column="1" Grid.Row="4" Margin="0,4,0,0" Padding="2,4" Header="Local Variable">
             <StackPanel>
-                <TextBlock Text="Operand is not a zero page address or stack relative" TextWrapping="Wrap"
+                <TextBlock Text="Operand is not a zero page address or stack-relative constant" TextWrapping="Wrap"
                            Visibility="{Binding ShowLvNotApplicable, Converter={StaticResource BoolToVis}}"/>
                 <TextBlock Text="No local variable tables have been defined before this point" TextWrapping="Wrap"
                            Visibility="{Binding ShowLvTableNotFound, Converter={StaticResource BoolToVis}}"/>

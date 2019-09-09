@@ -912,7 +912,11 @@ namespace SourceGen.WpfGui {
             DefSymbol origSym = mEditedProjectSymbol;
             if (origSym == null) {
                 // Need to start with a symbol so we can set the value field.
-                origSym = new DefSymbol("SYM", mOperandValue, Symbol.Source.Project,
+                string symName = "SYM";
+                if (!string.IsNullOrEmpty(SymbolLabel)) {
+                    symName = SymbolLabel;  // may not be valid, but it doesn't have to be
+                }
+                origSym = new DefSymbol(symName, mOperandValue, Symbol.Source.Project,
                     Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
                     string.Empty, string.Empty);
             }

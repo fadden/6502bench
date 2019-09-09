@@ -131,8 +131,8 @@ assembler directive.</p>
   <li><b>Operand</b>.  The instruction or data operand.  Data operands
     may span a large number of bytes.  Double-click on this field to
     open the
-    <a href="editors.html#operand">Edit Operand</a> or
-    <a href="editors.html#data">Edit Data Format</a> dialog, as
+    <a href="editors.html#instruction-operand">Edit Instruction Operand</a>
+    or <a href="editors.html#data-operand">Edit Data Operand</a> dialog, as
     appropriate.  (Note you can shift-double-click on data items to
     edit multiple lines.)</li>
   <li><b>Comment</b>.  End-of-line comment, generally shown with a ';'
@@ -168,8 +168,8 @@ enabled will depend on what you have selected in the main window.</p>
   <li><a href="editors.html#label">Edit Label</a>.  Sets the label
     at that offset.  Enabled when a single instruction or data line is
     selected.</li>
-  <li><a href="editors.html#operand">Edit Operand</a>.  Opens the
-    Edit Instruction Operand or Edit Data Format window, depending on
+  <li><a href="editors.html#instruction-operand">Edit Operand</a>.  Opens the
+    Edit Instruction Operand or Edit Data Operand window, depending on
     what's selected.
     Enabled when a single instruction line is selected, or when one
     or more data lines are selected.</li>
@@ -451,7 +451,7 @@ undoable action, so if it comes out looking wrong, just hit "undo".</p>
 <p>The "Toggle Single-Byte Format" feature provides a quick way to
 change a range of bytes to single bytes
 or back to their default format.  It's equivalent to opening the Edit
-Data Format dialog and selecting "Single bytes" displayed as hex, or
+Data Operand dialog and selecting "Single bytes" displayed as hex, or
 selecting "Default".</p>
 <p>This can be handy if the default format for a range of bytes is a
 string, but you want to see it as bytes or set a label in the middle.</p>
@@ -460,7 +460,7 @@ string, but you want to see it as bytes or set a label in the middle.</p>
 <h3><a name="format-as-word">Format As Word</a></h3>
 
 <p>This is a quick way to format pairs of bytes as 16-bit words.  It's
-equivalent to opening the Edit Data Format dialog and selecting
+equivalent to opening the Edit Data Operand dialog and selecting
 "16-bit words, little-endian", displayed as hex.</p>
 
 <p>To avoid some confusing situations, it only works on sets of
@@ -472,7 +472,7 @@ can turn off auto-generation of strings and .FILLs with
 <p>As a special case, if you select a single byte, the following byte will
 also be selected.  This won't work if the following byte is part of a
 multi-byte data item, is the start of a new region (see
-<a href="editors.html#data">Edit Data Format</a> for a definition of
+<a href="editors.html#data-operand">Edit Data Operand</a> for a definition of
 what splits a region), or is the last byte in the file.</p>
 
 

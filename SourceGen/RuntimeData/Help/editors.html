@@ -51,45 +51,81 @@ be imported by other projects (see
 <a href="advanced.html#multi-bin">Working With Multiple Binaries</a>).</p>
 
 
-<h2><a name="operand">Edit Instruction Operand</a></h2>
+<h2><a name="instruction-operand">Edit Instruction Operand</a></h2>
+<p>Operands can be formatted explicitly, or you can let the disassembler
+select the format for you.  By default, immediate constants and
+addresses with no matching symbol are formatted as hex.  Symbols
+defined as address labels, platform/project symbols, and local
+variables will be identified and applied automatically.</p>
+
+<h3><a name="explicit-format">Explicit Formats</a></h3>
 <p>Operands can be displayed in a variety of numeric formats, or as a
 symbol.  The character formats are only available for operands
 whose value falls into the proper range.  The ASCII format handles
 both plain and high ASCII; the correct encoding is chosen based on
-the character data.</p>
-<p>Symbols may be used in their entirety, or shifted and masked.
+the operand's value.</p>
+<p>Symbols may be used in their entirety, or, when used as constants,
+can be shifted and masked.
 The low / high / bank selector determines which byte is used as the
 low byte.  For 16-bit operands, this acts as a shift rather than a byte
-select.  If the symbol is wider than the operand field, a mask will be
+select.  If the symbol is wider than the operand field, e.g. you're
+referencing a 16-bit address in an 8-bit constant, a mask will be
 applied automatically.</p>
-
-<p>A few shortcuts are provided when specifying a symbol.  As noted in
-the introductory sections, operand symbols are weak references.  If the
-symbol hasn't been defined as a label yet, the operand will be formatted
-as hex, which is probably not what you want.</p>
-<p>The default behavior is just to set the operand's symbol.</p>
-<p>For operands that target an offset inside the file, if the target
-address does not yet have a label, and the symbol doesn't exist, you may
-set the symbol as the label on the target address as well.  You can do
-this in addition to setting the operand symbol, or in lieu of setting the
-operand symbol.  (You will often want to only create the label, and let
-SourceGen convert the numeric reference to a symbolic reference
-automatically.)  If you select the "set label instead" option, and the
-operand already had a symbol reference defined, the operand's format will
-be set to default.</p>
-<p>For operands that target an external address, if the symbol doesn't
-exist, you can ask the editor to create a project symbol with the
-appropriate label and address value.  The operand symbol will also be set.</p>
-
+<p>The editor will try to prevent you from using auto-generated
+labels and local variables in the symbol field.  These types of symbols
+can be freely renamed by SourceGen, and thus cannot be reliably
+referenced by name.</p>
+<p>When you select a non-default format option, a "preview" of the
+formatted operand will be shown.</p>
 <p>The <code>MVN</code> and <code>MVP</code> instructions on the 65816
 are a bit peculiar, because they have two operands rather than one.
 SourceGen currently only allows you to set one format, which will be
 applied to both operands.  If you specify a symbol, the symbol will
-be used twice, adjusted if necessary.  (This may be addressed in a
-future release.)</p>
+be used twice, adjusted if necessary.  (This limitation may be addressed
+in a future release.)</p>
+
+<p>The bottom part of the window has some shortcuts for working with
+address references and local variables.  These are primarily used to
+change the way things work when "Default" is selected.  The shortcuts
+don't cause any changes to the recorded format of the instruction
+being edited.  All of the actions can be performed elsewhere, by
+editing the label at the target address, editing the project symbol
+set, or editing a local variable table.</p>
+
+<h3><a name="shortcut-nar">Numeric Address References</a></h3>
+
+<p>For operands that are 8-bit, 16-bit, or 24-bit addresses, you can
+define a symbol for the address as a label or project symbol.</p>
+<p>If the operand is an address inside the project, you can set a
+label at that address.  If the address falls in the middle of an
+instruction or multi-byte data item, its position will be adjusted to
+the start.  Labels may be created, modified, or (by erasing the label)
+deleted.</p>
+<p>The label finder does not do the optional search for "nearby" labels
+that the main analyzer does, so there will be times when an instruction
+that is shown with a symbol in the code list won't have a label
+in the editor.</p>
+
+<p>If the operand is an address outside the project, e.g. a ROM
+address or frame buffer, you can define a project symbol.  If a
+match was found in the configured platform definition files, it will be
+shown; it can't be edited, but it can be overridden by a project symbol.
+You can create or modify a project symbol, but you can't delete one
+from this editor (use Project Properties instead).  If more than one
+project symbol has the same address, the first one found will be used.</p>
+
+<h3><a name="shortcut-local-var">Local Variable References</a></h3>
+
+<p>For zero-page address operands and (65816-only) stack-relative
+constant operands, a local variable can be created or modified.  This
+requires that a local variable table has been defined at or before
+the instruction being edited.</p>
+<p>If an existing entry is found, you will be able to edit the name
+and comment fields.  If not, a new entry with a generic name and
+pre-filled value field will be created in the nearest table.</p>
 
 
-<h2><a name="data">Edit Data Operand</a></h2>
+<h2><a name="data-operand">Edit Data Operand</a></h2>
 <p>This dialog offers a variety of choices, and can be used to apply a
 format to multiple lines.  You must select all of the bytes you want
 to format.  For example, to format two bytes as a 16-bit word, you must

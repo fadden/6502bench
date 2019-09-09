@@ -45,7 +45,7 @@ open the Examples folder, then open the "Tutorial" folder.  Select the
 file named "Tutorial1", and click "Open".</p>
 <p>The filename now appears in the bottom window, along with an indication
 of the file's size.</p>
-<p>Click OK to create the project.</p>
+<p>Click "OK" to create the project.</p>
 
 
 <h3>Getting Around</h3>
@@ -142,7 +142,7 @@ convenient way to edit something: point and click.</p>
 upper window, and note that a formatted version appears in the bottom
 window.  Experiment with the maximum line width and "render in box"
 settings to see what they do.  You can hit Enter to create line breaks,
-or let SourceGen wrap lines for you.  When you're done, click OK.  (Or
+or let SourceGen wrap lines for you.  When you're done, click "OK".  (Or
 hit Ctrl+Enter.)</p>
 <p>When the dialog closes, you'll see your new comment in place at the
 top of the file.  If you typed enough words, your comment will span
@@ -206,8 +206,9 @@ or double-click on "$3000".  Select the "Symbol" radio button, then type
 "INPUT" in the text box.  Click "OK".</p>
 <p>Disappointed?  Nothing seems to have happened.  The problem is that we
 updated the operand to reference a symbol that doesn't exist.  Open the
-operand editor again, but this time click on "Set operand AND create project
-symbol".  Click "OK".</p>
+operand editor again, but this time click on "Create Project Symbol" at
+the bottom left.  Enter "INPUT" in the Label field, and click "OK", then
+click "OK" in the operand editor.</p>
 <p>That's better.  If you scroll up to the top of the project, you'll see
 that there's now a ".EQ" line for the symbol.</p>
 <p>Operands that refer to in-file locations behave similarly.  Select the
@@ -228,18 +229,17 @@ as a hexadecimal value.</p>
 Actions &gt; Edit Label.  Enter "IS_OK", and hit Enter.  (NOTE: labels are
 case-sensitive, so it needs to match the operand at $2005 exactly.)  You'll
 see the new label appear, and the operand at line $2005 will use it.</p>
-<p>There's an easier way.  Use Edit &gt; Undo twice, to get back to the time
-where line $2005 is using "L2009" as its operand.  Select that line and
-Actions &gt; Edit Operand.  Enter "IS_OK", then select "Create label at target
-address instead".  Hit "OK".</p>
+<p>There's an easier way.  Double-click on the "BCC" opcode at address
+$2005.  This moves the selection to $2009.  Double-click on the label field,
+and enter "IS_OK".  Hit "OK".</p>
 <p>You should now see that both the operand at $2005 and the label at
 $2009 have changed to IS_OK, accomplishing what we wanted to do in a
-single step.  (There's actually a subtle difference compared to the two-step
-process: the operand at $2005 is still a numeric reference.  It was
-automatically changed to match IS_OK in the same way that the references
-to MAIN were when we renamed "L2000" earlier.  If you actually do want the
-symbolic reference, there's another option in the Edit Operand dialog that
-does it.  The difference can be noted in the Info window.)</p>
+single step.  The key difference is that we haven't explicitly set a
+format for the BCC operand -- we just defined a label, and SourceGen
+used it automatically.</p>
+<p>We could do the exact same thing by using Edit Operand on
+the BCC line, clicking the "Create Label" button, and typing "IS_OK".
+Sometimes one approach is more convenient than the other.</p>
 
 
 <h3>Editing Data Operands</h3>
@@ -264,7 +264,8 @@ label to "STR1".  Move up a bit and select address $2030, then scroll to
 the bottom and shift-click address $2070.  Select Actions &gt; Edit Operand.
 At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
-two separate regions.  Select "Low or High ASCII" encoding, select the
+two separate regions.  From the "Character encoding" pop-up select
+"Low or High ASCII" encoding, select the
 "mixed character and non-character" string type, then click "OK".</p>
 <p>We now have two ".STR" lines, one for "string zero  ", and one with the
 STR1 label and the rest of the string data.  This is okay, but it's not
@@ -336,14 +337,14 @@ can do.  We assume you've already finished the Basic Features tutorial.</p>
 
 <p>Start a new project.  Select the Apple //e platform, click Select File
 and navigate to the Examples directory.  In A2-Amper-fdraw, select
-<code>AMPERFDRAW#061d60</code>.  Click OK to create the project.</p>
+<code>AMPERFDRAW#061d60</code>.  Click "OK" to create the project.</p>
 <p>Not a lot to see here -- just half a dozen lines of loads and stores.
 This particular program interfaces with Applesoft BASIC, so we can make it
 a bit more meaningful by loading an additional platform
 symbol file.  Select Edit &gt; Project Properties, then the Symbol Files
 tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
 directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
-click Open.  Click OK to close the project properties window.</p>
+click Open.  Click "OK" to close the project properties window.</p>
 <p>The STA instructions now reference <code>AMPERV</code>, which is noted
 as a call vector.  We can see the code setting up a jump (opcode $4c) to
 $1d70.  As it happens, the start address of the code is $1d60 -- the last
@@ -370,7 +371,7 @@ up a bit.  Set a label on the code at $1db5 called "FUNC".  At $1d97, edit
 the data item (double-click on "$b4"), click "Single bytes", then type "FUNC"
 (note the text field gets focus immediately, and the radio button
 automatically switches to "symbolic reference" when you start typing).
-Click OK.  The operand at $1d97 should now say <code>&lt;FUNC-1</code>.
+Click "OK".  The operand at $1d97 should now say <code>&lt;FUNC-1</code>.
 Repeat the process at $1da6, this time clicking the "High" part radio button
 below the symbol entry text box,
 to make the operand there say <code>&gt;FUNC</code>.  (If it says
@@ -390,7 +391,7 @@ that location, so a label will be generated automatically.</p>
 <p>Down near the bottom, check the "add code entry hint if needed" checkbox.
 Because we saw the table contents being pushed onto the stack for RTS,
 we know that they're all code entry points.</p>
-<p>Click OK.  The table of address bytes at $1d97 should now all be
+<p>Click "OK".  The table of address bytes at $1d97 should now all be
 references to symbols -- 15 low parts followed by 15 high parts.  If you
 scroll down, you should see nothing but instructions until you get to the
 last dozen bytes at the end of the file.  (If this isn't the case, use
@@ -439,15 +440,16 @@ it official.  But first, let's do it wrong.  Click on the line with
 address $2004 to select it.  Hold the shift key down, then double-click
 on the operand field of the line with address $2031 (i.e. double-click on
 the words "last string").</p>
-<p>The Edit Data Format dialog opens, but the null-terminated strings
+<p>The Edit Data Operand dialog opens, but the null-terminated strings
 option is not available.  This is because we didn't include the null byte
 on the last string.  To be recognized as one of the "special" string types,
 every selected string must match the expected pattern.</p>
 <p>Cancel out of the dialog.  Hold the shift key down, and double-click
 on the operand on line $203c (<code>$00</code>).
 You should see "Null-terminated strings (4)" as an available
-option now.  Click on that, then click OK.  The strings are now shown
-as .ZSTR operands.</p>
+option now (make sure the Character Encoding pop-up is set to
+"Low or High ASCII").  Click on that, then click "OK".  The strings are now
+shown as .ZSTR operands.</p>
 
 <p>It's wise to save your work periodically.  Use File &gt; Save to create
 a project file for Tutorial2.</p>
@@ -460,16 +462,20 @@ pointer to $2063, which is a data area inside the file.  So let's make it
 official.</p>
 <p>Select the line at address $2063, and use Actions &gt; Edit Label to
 give it the label "XDATA".  Now edit the operand on line $203d, and set it
-to the symbol "XDATA", with the part "low".  Edit the operand on line $2043,
+to the symbol "XDATA", with the part "low".  Edit the operand on line $2041,
 and set it to "XDATA" with the part "high".  (Note the symbol text box
 gets focus immediately, so you can start typing the symbol name as soon
 as the dialog opens; you don't need to click around first.)  If all
 went well, the operands should now read <code>LDA #&lt;XDATA</code>
 and <code>LDA #&gt;XDATA</code>.</p>
-<p>Let's name the pointer.  Edit the operand on line $203f, enter the
-symbol "PTR1", and in the Symbol Shorcuts section, click "Set operand
-AND create project symbol".  Click OK.  Note that operand on line $2043
-has changed to "PTR1+1".</p>
+<p>Let's give the pointer a name.  Select line $203d, and use
+Actions &gt; Edit Local Variable Table to create an empty table.
+Click "New Symbol" on the right side.  Set the Label field to "PTR1",
+the Value field to $02, and the width to 2 (it's a 2-byte pointer).  Leave
+the Address button selected.  Click "OK" to create the entry, and then
+"OK" to update the table.</p>
+<p>There's now a ".var" statement (similar to a .equ) above line $203d,
+and the stores to $02/$03 have changed to "PTR1" and "PTR1+1".</p>
 <p>Double-click on the JSR on line $2045 to jump to L209A.  This just
 loads a value from $3000 into the accumulator and returns, so not much
 to see here.  Hit the back-arrow in the toolbar to jump back to the JSR.</p>
@@ -477,10 +483,14 @@ to see here.  Hit the back-arrow in the toolbar to jump back to the JSR.</p>
 0 and 3, then doubles it and uses it as an index into PTR1.  We know PTR1
 points to XDATA, which looks like it has some 16-bit addresses.  The
 values loaded are stored in two more zero-page locations, $04-05.</p>
-<p>$04 is being displayed as "PTR1+2", which isn't quite right, so let's
-fix that.  Double-click on the operand of address $204e, set the symbol
-to "PTR2", and again click "Set operand AND create project symbol".
-Click OK.  That looks better.</p>
+<p>Let's make these a pointer as well.  Double-click the operand on
+line $204e ("$04"), and click "Create Local Variable".  Set the Label
+to "PTR2" and the width to 2.  Click "OK" to create the symbol, then
+"OK" to close the operand editor, which should still be set to Default --
+we didn't actually edit the operand, we just used the operand edit
+dialog as a convenient way to create a local variable table entry.  All
+accesses to $04/$05 now use PTR2, and there's a new entry in the local
+variable table we created earlier.</p>
 
 <p>The next bit of code copies bytes from PTR2 to $0400, stopping when it
 hits a zero byte.  Looks like this is copying null-terminated strings.
@@ -488,16 +498,16 @@ This confirms our idea that XDATA holds 16-bit addresses, so let's
 format it.  Select lines $2063 to $2066, and Actions &gt; Edit Operand.
 It should say "8 bytes selected" at the top.  Select "16-bit words,
 little-endian", and then from the Display As box, select "Address".
-Click OK.  XDATA should now be four <code>.dd2</code> 16-bit addresses.
+Click "OK".  XDATA should now be four <code>.dd2</code> 16-bit addresses.
 If you scroll up, you'll see that the .ZSTR strings near the top now have
-labels that match the labels in XDATA.</p>
+labels that match the operands in XDATA.</p>
 <p>Now that we know what XDATA holds, let's rename it.  Change the label
 to STRADDR.  The symbol parts in the operands at $203d and $2041 update
 automatically.</p>
 
 <p>Let's pause briefly to look at the cycle-count feature.  Use
 Edit &gt; Settings to open the app settings panel, then select the
-Asm Config tab.  Click the "Show cycle counts" checkbox, then click OK.</p>
+Asm Config tab.  Click the "Show cycle counts" checkbox, then click "OK".</p>
 <p>Every line with an instruction now has a cycle count on it.  The cycle
 counts are adjusted for everything SourceGen can figure out.  For example,
 the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
@@ -527,19 +537,20 @@ the flags should be before the instruction is executed.  For each flag,
 we can override the default behavior and specify that the flag is
 clear (0), set (1), or indeterminate (could be 0 or 1).  In this case,
 we know that the self-modified code will be loading a non-zero value, so
-in the "Z" column click on the button in the "Zero" row.  Click OK.  The
+in the "Z" column click on the button in the "Zero" row.  Click "OK".  The
 BNE is now an always-taken branch, and the code list rearranges itself
 appropriately (and the cycle count is now 3).</p>
 
 <p>Continuing on, the code at $2079 touches a few consecutive locations.  Edit
-the label on line $2074, setting it to "VAR".  Notice how the references
+the label on line $2074, setting it to "STUFF".  Notice how the references
 to $2074 through $2077 have changed from auto-generated labels to
-references to VAR.  For some projects this may be undesirable.  Use
+references to STUFF.  For some projects this may be undesirable.  Use
 Edit &gt; Project Properties, then in the Analysis Parameters box
-un-check "Seek nearby targets", and click OK.  You'll notice that the
-references to $2075 on have switched back to auto labels.  Furthermore, if
-you scroll up, you'll see that the stores to PTR1+1 and PTR2+1 are now
-just stores to $03 and $05.</p>
+un-check "Seek nearby targets", and click "OK".  You'll notice that the
+references to $2075 and later have switched back to auto labels.  If
+you scroll up, you'll see that the references to PTR1+1 and PTR2+1 were
+not affected, because local variables use explicit widths rather
+than the "nearby" logic.</p>
 <p>The nearby-target behavior is generally desirable, because it lets you
 avoid explicitly labeling every part of a multi-byte data item.  For now,
 use Edit &gt; Undo to switch it back on.</p>
@@ -564,6 +575,10 @@ all aspects of SourceGen in the manual.</p>
 <p>While you can do some fancy things, nothing you do will alter the
 data file.  The assembled output will always match the original.  So
 don't be afraid to play around.</p>
+<p>If you want to work on something large over a long period, save your
+progress by putting the .dis65 project into a source code control system
+like git.  Project files are stored in a text format that, while not meant
+to be human-readable, will yield reasonable diffs.</p>
 
 </div>
 

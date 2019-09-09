@@ -1892,11 +1892,14 @@ namespace SourceGen {
             // Check for changes to a project property.  The dialog can create a new entry or
             // modify an existing entry.
             if (dlg.ProjectPropertyResult != null) {
-                DefSymbol defSym = dlg.ProjectPropertyResult;
+                DefSymbol oldSym = dlg.PrevProjectPropertyResult;
+                DefSymbol newSym = dlg.ProjectPropertyResult;
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
                 // Add new entry, or replace existing entry.
-                newProps.ProjectSyms.Remove(dlg.PrevProjectPropertyResult.Label);
-                newProps.ProjectSyms.Add(defSym.Label, defSym);
+                if (oldSym != null) {
+                    newProps.ProjectSyms.Remove(oldSym.Label);
+                }
+                newProps.ProjectSyms.Add(newSym.Label, newSym);
                 UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
                     mProject.ProjectProps, newProps);
                 cs.Add(uc);
