@@ -76,6 +76,7 @@
     <Compile Include="AsmGen\IAssembler.cs" />
     <Compile Include="AsmGen\IGenerator.cs" />
     <Compile Include="AsmGen\LabelLocalizer.cs" />
+    <Compile Include="Exporter.cs" />
     <Compile Include="FormattedOperandCache.cs" />
     <Compile Include="LocalVariableLookup.cs" />
     <Compile Include="Tests\GenTest.cs" />
@@ -126,6 +127,9 @@
     </Compile>
     <Compile Include="WpfGui\EditProjectProperties.xaml.cs">
       <DependentUpon>EditProjectProperties.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\Export.xaml.cs">
+      <DependentUpon>Export.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\FindBox.xaml.cs">
       <DependentUpon>FindBox.xaml</DependentUpon>
@@ -287,6 +291,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditProjectProperties.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\Export.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

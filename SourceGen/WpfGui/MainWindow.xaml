@@ -94,6 +94,7 @@ limitations under the License.
             <RoutedUICommand x:Key="EditProjectSymbolCmd" Text="Edit Project Symbol..."/>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
             <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
+            <RoutedUICommand x:Key="ExportCmd" Text="Export..."/>
             <RoutedUICommand x:Key="FindNextCmd" Text="Find Next">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>F3</KeyGesture>
@@ -207,6 +208,8 @@ limitations under the License.
                         CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
         <CommandBinding Command="{StaticResource ExitCmd}"
                         Executed="ExitCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ExportCmd}"
+                        CanExecute="IsProjectOpen" Executed="ExportCmd_Executed"/>
         <CommandBinding Command="Find"
                         CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindNextCmd}"
@@ -291,7 +294,8 @@ limitations under the License.
                 <MenuItem Command="{StaticResource CloseCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource AssembleCmd}"/>
-                <MenuItem Command="Print"/>
+                <!--<MenuItem Command="Print"/>-->
+                <MenuItem Command="{StaticResource ExportCmd}"/>
                 <Separator/>
                 <MenuItem Name="recentProjectsMenu" Header="Recent Projects" SubmenuOpened="RecentProjectsMenu_SubmenuOpened">
                     <MenuItem Header="(none)"/>

@@ -2,7 +2,7 @@
 {
 "_ContentVersion":2,"FileDataLength":137,"FileDataCrc32":708791740,"ProjectProps":{
 "CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
-"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true},
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":false},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 "CONST_ONE":{
 "DataDescriptor":{
@@ -38,7 +38,8 @@
 "81":{
 "Text":"Test name redefinition.  This is mostly of interest for assemblers without redefinable variables, but also of interest to the cross-reference window.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
-},
+"0":{
+"Text":"Should add a variable that conflicts with an auto-label.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-256}},
 "UserLabels":{
 "87":{
 "Label":"PTR_1","Value":4183,"Source":"User","Type":"LocalOrGlobalAddr"},

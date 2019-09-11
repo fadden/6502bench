@@ -88,7 +88,7 @@ limitations under the License.
                     <GroupBox Grid.Column="1" Grid.Row="1" Header="Upper Case Display"
                               Margin="5,0,5,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Hexadecimal Values" Margin="0,4"
+                            <CheckBox Content="Hexadecimal values" Margin="0,4"
                                       IsChecked="{Binding UpperHexValues}"/>
                             <CheckBox Content="Opcodes" Margin="0,4"
                                       IsChecked="{Binding UpperOpcodes}"/>
@@ -444,8 +444,7 @@ limitations under the License.
                             <TextBlock Grid.Column="0" Grid.Row="2" Text="Column widths:"
                                        HorizontalAlignment="Right" Margin="0,0,4,0"/>
                             <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
-                                <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0">
                                     <TextBox.Text>
                                         <Binding Path="AsmLabelColWidth" UpdateSourceTrigger="PropertyChanged">
                                             <Binding.ValidationRules>
@@ -454,8 +453,7 @@ limitations under the License.
                                         </Binding>
                                     </TextBox.Text>
                                 </TextBox>
-                                <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0">
                                     <TextBox.Text>
                                         <Binding Path="AsmOpcodeColWidth" UpdateSourceTrigger="PropertyChanged">
                                             <Binding.ValidationRules>
@@ -464,8 +462,7 @@ limitations under the License.
                                         </Binding>
                                     </TextBox.Text>
                                 </TextBox>
-                                <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0"
-                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0">
                                     <TextBox.Text>
                                         <Binding Path="AsmOperandColWidth" UpdateSourceTrigger="PropertyChanged">
                                             <Binding.ValidationRules>
@@ -474,8 +471,7 @@ limitations under the License.
                                         </Binding>
                                     </TextBox.Text>
                                 </TextBox>
-                                <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0"
-                                         TextChanged="AsmColWidthTextBox_TextChanged">
+                                <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0">
                                     <TextBox.Text>
                                         <Binding Path="AsmCommentColWidth" UpdateSourceTrigger="PropertyChanged">
                                             <Binding.ValidationRules>

@@ -577,6 +577,11 @@ namespace SourceGen.WpfGui {
         // Apply/OK buttons when invalid input is present.  Instead we just set the width to
         // the minimum value when validation fails.
         //
+        // Note that the "set" property is only called when the value changes, which only
+        // happens when a valid integer is typed.  If you enter garbage, the dirty flag doesn't
+        // get set.  That's just fine for us, but if you need to disable an "is valid" flag
+        // on bad input you can't rely on updating it at "set" time.
+        //
         // See also https://stackoverflow.com/a/44586784/294248
         //
         private int mAsmLabelColWidth;
@@ -586,7 +591,7 @@ namespace SourceGen.WpfGui {
                 if (mAsmLabelColWidth != value) {
                     mAsmLabelColWidth = value;
                     OnPropertyChanged();
-                    IsDirty = true;
+                    AsmColWidthTextChanged();
                 }
             }
         }
@@ -597,7 +602,7 @@ namespace SourceGen.WpfGui {
                 if (mAsmOpcodeColWidth != value) {
                     mAsmOpcodeColWidth = value;
                     OnPropertyChanged();
-                    IsDirty = true;
+                    AsmColWidthTextChanged();
                 }
             }
         }
@@ -608,7 +613,7 @@ namespace SourceGen.WpfGui {
                 if (mAsmOperandColWidth != value) {
                     mAsmOperandColWidth = value;
                     OnPropertyChanged();
-                    IsDirty = true;
+                    AsmColWidthTextChanged();
                 }
             }
         }
@@ -619,7 +624,7 @@ namespace SourceGen.WpfGui {
                 if (mAsmCommentColWidth != value) {
                     mAsmCommentColWidth = value;
                     OnPropertyChanged();
-                    IsDirty = true;
+                    AsmColWidthTextChanged();
                 }
             }
         }
@@ -711,7 +716,7 @@ namespace SourceGen.WpfGui {
         /// populated.  That means we'll have incorrect intermediate states, but should
         /// finish up correctly.
         /// </remarks>
-        private void AsmColWidthTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+        private void AsmColWidthTextChanged() {
             AssemblerInfo asm = (AssemblerInfo)asmConfigComboBox.SelectedItem;
             if (asm == null) {
                 // fires during dialog initialization, before anything is selected

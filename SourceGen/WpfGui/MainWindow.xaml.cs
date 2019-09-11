@@ -1101,6 +1101,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.EditOperand();
         }
 
+        private void EditProjectPropertiesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditProjectProperties();
+        }
+
         private void EditProjectSymbolCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditProjectSymbol();
         }
@@ -1111,6 +1115,10 @@ namespace SourceGen.WpfGui {
 
         private void ExitCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Close();
+        }
+
+        private void ExportCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Export();
         }
 
         private void FindCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -1166,10 +1174,6 @@ namespace SourceGen.WpfGui {
 
         private void OpenCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.OpenProject();
-        }
-
-        private void EditProjectPropertiesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.EditProjectProperties();
         }
 
         private void RecentProjectCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
