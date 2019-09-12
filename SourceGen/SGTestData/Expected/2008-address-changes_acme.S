@@ -55,8 +55,8 @@ L2080   bit     L2080
         jsr     offend
         lda     offend+1
         jsr     offend+1
-        lda     $207f
-        jsr     $207f
+        lda     L2080-1
+        jsr     L2080-1
         lda     L2080
         jsr     L2080
         lda     $00

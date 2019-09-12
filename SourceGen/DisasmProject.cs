@@ -1075,6 +1075,21 @@ namespace SourceGen {
                     if (sym == null && (attr.OperandAddress & 0xffff) > 1 && checkNearby) {
                         sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 2);
                     }
+                    // Still nothing, try addr+1.  Sometimes indexed addressing will use
+                    // "STA addr-1,y".  This will also catch "STA addr-1" when addr is the
+                    // very start of a segment, which means we're actually finding a label
+                    // reference rather than project/platform symbol; only works if the
+                    // location already has a label.
+                    if (sym == null && (attr.OperandAddress & 0xffff) < 0xffff && checkNearby) {
+                        sym = SymbolTable.FindAddressByValue(attr.OperandAddress + 1);
+                        if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
+                                sym.SymbolSource != Symbol.Source.Platform) {
+                            Debug.WriteLine("Applying non-platform in GeneratePlatform: " + sym);
+                            // should be okay to do this
+                        }
+                    }
+
+                    // If we found something, and it's not a variable, create a descriptor.
                     if (sym != null && !sym.IsVariable) {
                         mAnattribs[offset].DataDescriptor =
                             FormatDescriptor.Create(mAnattribs[offset].Length,

@@ -1624,10 +1624,17 @@ namespace SourceGen {
                 if (mProject.UserLabels.ContainsKey(offset)) {
                     oldUserValue = mProject.UserLabels[offset];
                 }
-                UndoableChange uc = UndoableChange.CreateLabelChange(offset,
-                    oldUserValue, dlg.LabelSym);
-                ChangeSet cs = new ChangeSet(uc);
-                ApplyUndoableChanges(cs);
+                if (oldUserValue == dlg.LabelSym) {
+                    // Only expected when attr.Symbol is Auto
+                    Debug.Assert(attr.Symbol.SymbolSource == Symbol.Source.Auto);
+                    Debug.Assert(oldUserValue == null);
+                    Debug.WriteLine("Ignoring attempt to delete an auto label");
+                } else {
+                    UndoableChange uc = UndoableChange.CreateLabelChange(offset,
+                        oldUserValue, dlg.LabelSym);
+                    ChangeSet cs = new ChangeSet(uc);
+                    ApplyUndoableChanges(cs);
+                }
             }
         }
 
