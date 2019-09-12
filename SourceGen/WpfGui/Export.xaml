@@ -23,7 +23,8 @@ limitations under the License.
         mc:Ignorable="d"
         Title="Export Source"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -32,12 +33,15 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <GroupBox Grid.Row="0" Header="General Options" Padding="2,4">
             <StackPanel>
-                <CheckBox Content="Include notes"/>
-                <CheckBox Content="Show address column" Margin="0,2,0,0"/>
-                <CheckBox Content="Show bytes column" Margin="0,2,0,0"/>
+                <CheckBox Content="Include notes" IsChecked="{Binding IncludeNotes}"/>
+                <CheckBox Content="Show Offset column" Margin="0,2,0,0" IsChecked="{Binding ShowOffset}"/>
+                <CheckBox Content="Show Address column" Margin="0,2,0,0" IsChecked="{Binding ShowAddress}"/>
+                <CheckBox Content="Show Bytes column" Margin="0,2,0,0" IsChecked="{Binding ShowBytes}"/>
+                <CheckBox Content="Show Flags column" Margin="0,2,0,0" IsChecked="{Binding ShowFlags}"/>
+                <CheckBox Content="Show Attributes column" Margin="0,2,0,0" IsChecked="{Binding ShowAttr}"/>
 
                 <TextBlock Text="Column widths (label, opcode, operand, comment):" Margin="0,4,0,0"/>
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -82,20 +86,23 @@ limitations under the License.
                         </TextBox.Text>
                     </TextBox>
                 </StackPanel>
+
+                <CheckBox Content="Include only selected lines" Margin="0,4,0,0" IsChecked="{Binding SelectionOnly}"/>
+
             </StackPanel>
         </GroupBox>
 
         <GroupBox Grid.Row="1" Header="Text Options" Padding="2,4">
             <StackPanel>
-                <RadioButton Content="Plain text (UTF-8)" GroupName="TextMode"/>
-                <RadioButton Content="CSV" GroupName="TextMode" Margin="0,2,0,0"/>
+                <RadioButton Content="Plain text (UTF-8)" GroupName="TextMode" IsChecked="{Binding TextModePlain}"/>
+                <RadioButton Content="CSV" GroupName="TextMode" Margin="0,2,0,0" IsChecked="{Binding TextModeCsv}"/>
             </StackPanel>
         </GroupBox>
 
         <GroupBox Grid.Row="2" Header="HTML Options" Padding="2,4">
             <StackPanel>
-                <CheckBox Content="Include symbol table"/>
-                <CheckBox Content="Overwrite CSS file" Margin="0,2,0,0"/>
+                <CheckBox Content="Include symbol table" IsChecked="{Binding IncludeSymbolTable}"/>
+                <CheckBox Content="Overwrite CSS file" Margin="0,2,0,0" IsChecked="{Binding OverwriteCss}"/>
             </StackPanel>
         </GroupBox>
 
@@ -107,9 +114,9 @@ limitations under the License.
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" Content="Generate HTML" Width="100"
-                    IsEnabled="{Binding IsValid}"/>
+                    IsEnabled="{Binding IsValid}" Click="GenerateHtmlButton_Click"/>
             <Button Grid.Column="1" Content="Generate Text" Width="100" Margin="8,0,0,0"
-                    IsEnabled="{Binding IsValid}"/>
+                    IsEnabled="{Binding IsValid}" Click="GenerateTextButton_Click"/>
             <Button Grid.Column="2" Content="Cancel" IsCancel="True" Width="70" Margin="8,0,0,0"
                     HorizontalAlignment="Right"/>
         </Grid>

@@ -53,6 +53,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_DefaultC64PetsciiDelimPat");
         public static string DEFAULT_C64_SCREEN_CODE_DELIM_PAT =
             (string)Application.Current.FindResource("str_DefaultC64ScreenCodeDelimPat");
+        public static string CLIPFORMAT_ALL_COLUMNS =
+            (string)Application.Current.FindResource("str_ClipformatAllColumns");
         public static string CLIPFORMAT_ASSEMBLER_SOURCE =
             (string)Application.Current.FindResource("str_ClipformatAssemblerSource");
         public static string CLIPFORMAT_DISASSEMBLY =
@@ -111,10 +113,16 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_FileFilterAll");
         public static string FILE_FILTER_CS =
             (string)Application.Current.FindResource("str_FileFilterCs");
+        public static string FILE_FILTER_CSV =
+            (string)Application.Current.FindResource("str_FileFilterCsv");
         public static string FILE_FILTER_DIS65 =
             (string)Application.Current.FindResource("str_FileFilterDis65");
+        public static string FILE_FILTER_HTML =
+            (string)Application.Current.FindResource("str_FileFilterHtml");
         public static string FILE_FILTER_SYM65 =
             (string)Application.Current.FindResource("str_FileFilterSym65");
+        public static string FILE_FILTER_TEXT =
+            (string)Application.Current.FindResource("str_FileFilterText");
         public static string FILE_INFO_FMT =
             (string)Application.Current.FindResource("str_FileInfoFmt");
         public static string FIND_REACHED_START =

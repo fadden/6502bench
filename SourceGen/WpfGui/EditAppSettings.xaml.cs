@@ -247,7 +247,9 @@ namespace SourceGen.WpfGui {
             new ClipboardFormatItem(Res.Strings.CLIPFORMAT_ASSEMBLER_SOURCE,
                 MainController.ClipLineFormat.AssemblerSource),
             new ClipboardFormatItem(Res.Strings.CLIPFORMAT_DISASSEMBLY,
-                MainController.ClipLineFormat.Disassembly)
+                MainController.ClipLineFormat.Disassembly),
+            new ClipboardFormatItem(Res.Strings.CLIPFORMAT_ALL_COLUMNS,
+                MainController.ClipLineFormat.AllColumns)
         };
         // ItemsSource for combo box
         public ClipboardFormatItem[] ClipboardFormatItems {

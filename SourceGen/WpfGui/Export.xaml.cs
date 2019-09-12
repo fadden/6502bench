@@ -16,15 +16,85 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+
+using CommonUtil;
+using Microsoft.Win32;
 
 namespace SourceGen.WpfGui {
     /// <summary>
     /// Export selection dialog.
     /// </summary>
     public partial class Export : Window, INotifyPropertyChanged {
+        /// <summary>
+        /// Indicates which type of file the user wants to generate.
+        /// </summary>
+        public enum GenerateFileType {
+            Unknown = 0,
+            Text,
+            Html
+        }
+
+        /// <summary>
+        /// Result: type of file to generate.
+        /// </summary>
+        public GenerateFileType GenType { get; private set; }
+
+        /// <summary>
+        /// Result: full pathname of output file.
+        /// </summary>
+        public string PathName { get; private set; }
+
+        /// <summary>
+        /// Result: flags indicating which of the optional columns should be shown.
+        /// </summary>
+        public Exporter.ActiveColumnFlags ColFlags { get; private set; }
+
+        private bool mIncludeNotes;
+        public bool IncludeNotes {
+            get { return mIncludeNotes; }
+            set { mIncludeNotes = value; OnPropertyChanged(); }
+        }
+
+        private bool mShowOffset;
+        public bool ShowOffset {
+            get { return mShowOffset; }
+            set { mShowOffset = value; OnPropertyChanged(); }
+        }
+
+        private bool mShowAddress;
+        public bool ShowAddress {
+            get { return mShowAddress; }
+            set { mShowAddress = value; OnPropertyChanged(); }
+        }
+
+        private bool mShowBytes;
+        public bool ShowBytes {
+            get { return mShowBytes; }
+            set { mShowBytes = value; OnPropertyChanged(); }
+        }
+
+        private bool mShowFlags;
+        public bool ShowFlags {
+            get { return mShowFlags; }
+            set { mShowFlags = value; OnPropertyChanged(); }
+        }
+
+        private bool mShowAttrs;
+        public bool ShowAttr {
+            get { return mShowAttrs; }
+            set { mShowAttrs = value; OnPropertyChanged(); }
+        }
+
+        private bool mSelectionOnly;
+        public bool SelectionOnly {
+            get { return mSelectionOnly; }
+            set { mSelectionOnly = value; OnPropertyChanged(); }
+        }
+
         //
         // Numeric input fields, bound directly to TextBox.Text.  These rely on a TextChanged
         // field to update the IsValid flag, because the "set" method is only called when the
@@ -71,6 +141,36 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        private bool mTextModePlain;
+        public bool TextModePlain {
+            get { return mTextModePlain; }
+            set { mTextModePlain = value; OnPropertyChanged(); }
+        }
+
+        private bool mTextModeCsv;
+        public bool TextModeCsv {
+            get { return mTextModeCsv; }
+            set { mTextModeCsv = value; OnPropertyChanged(); }
+        }
+
+        private bool mIncludeSymbolTable;
+        public bool IncludeSymbolTable {
+            get { return mIncludeSymbolTable; }
+            set { mIncludeSymbolTable = value; OnPropertyChanged(); }
+        }
+
+        private bool mOverwriteCss;
+        public bool OverwriteCss {
+            get { return mOverwriteCss; }
+            set { mOverwriteCss = value; OnPropertyChanged(); }
+        }
+
+        private enum TextMode {
+            Unknown = 0,
+            PlainText,
+            Csv
+        }
+
         /// <summary>
         /// Valid flag, used to enable the "generate" buttons.
         /// </summary>
@@ -80,23 +180,96 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsValid;
 
-
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Export(Window owner) {
+        /// <summary>
+        /// Filename of project file.
+        /// </summary>
+        string mProjectFileName;
+
+
+        public Export(Window owner, string projectFileName) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
+
+            mProjectFileName = projectFileName;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            // TODO
+            IncludeNotes = AppSettings.Global.GetBool(AppSettings.EXPORT_INCLUDE_NOTES, false);
+            ShowOffset = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_OFFSET, false);
+            ShowAddress = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_ADDR, false);
+            ShowBytes = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_BYTES, false);
+            ShowFlags = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_FLAGS, false);
+            ShowAttr = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_ATTR, false);
+            SelectionOnly = AppSettings.Global.GetBool(AppSettings.EXPORT_SELECTION_ONLY, false);
+            IncludeSymbolTable = AppSettings.Global.GetBool(AppSettings.EXPORT_INCLUDE_SYMTAB,
+                false);
+
+            int[] colWidths = new int[] { 9, 8, 11, 72 };   // 100-col output
+            string colStr = AppSettings.Global.GetString(AppSettings.EXPORT_COL_WIDTHS, null);
+            try {
+                if (!string.IsNullOrEmpty(colStr)) {
+                    colWidths = TextUtil.DeserializeIntArray(colStr);
+                    if (colWidths.Length != 4) {
+                        throw new InvalidOperationException("Bad length " + colWidths.Length);
+                    }
+                }
+            } finally {
+                AsmLabelColWidth = colWidths[0];
+                AsmOpcodeColWidth = colWidths[1];
+                AsmOperandColWidth = colWidths[2];
+                AsmCommentColWidth = colWidths[3];
+            }
+
+            TextMode mode = (TextMode)AppSettings.Global.GetEnum(AppSettings.EXPORT_TEXT_MODE,
+                typeof(TextMode), (int)TextMode.PlainText);
+            if (mode == TextMode.PlainText) {
+                TextModePlain = true;
+            } else {
+                TextModeCsv = true;
+            }
         }
 
+        /// <summary>
+        /// Saves the settings to the global settings object.
+        /// </summary>
+        private void SaveSettings() {
+            AppSettings.Global.SetBool(AppSettings.EXPORT_INCLUDE_NOTES, IncludeNotes);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_OFFSET, ShowOffset);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_ADDR, ShowAddress);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_BYTES, ShowBytes);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_FLAGS, ShowFlags);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_ATTR, ShowAttr);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_SELECTION_ONLY, SelectionOnly);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_INCLUDE_SYMTAB, IncludeSymbolTable);
+            int[] colWidths = new int[] {
+                AsmLabelColWidth, AsmOpcodeColWidth, AsmOperandColWidth, AsmCommentColWidth
+            };
+            string cereal = TextUtil.SerializeIntArray(colWidths);
+            AppSettings.Global.SetString(AppSettings.EXPORT_COL_WIDTHS, cereal);
+            // OverwriteCss is not saved, since there's generally no reason to replace it.
+            // Forcing the user to check it every time is essentially the same as popping
+            // up an "are you sure you want to overwrite" dialog, but less annoying for the
+            // common case.
+
+            TextMode mode;
+            if (TextModePlain) {
+                mode = TextMode.PlainText;
+            } else {
+                mode = TextMode.Csv;
+            }
+            AppSettings.Global.SetEnum(AppSettings.EXPORT_TEXT_MODE, typeof(TextMode), (int)mode);
+        }
+
+        /// <summary>
+        /// Updates the state of the UI.
+        /// </summary>
         private void UpdateControls() {
             bool isValid = true;
 
@@ -108,8 +281,69 @@ namespace SourceGen.WpfGui {
             IsValid = isValid;
         }
 
+        /// <summary>
+        /// Called whenever something is typed in one of the column width entry boxes.
+        /// </summary>
+        /// <remarks>
+        /// We need this because we're using validated int fields rather than strings.  The
+        /// "set" call doesn't fire if the user types garbage.
+        /// </remarks>
         private void AsmColWidthTextBox_TextChanged(object sender, TextChangedEventArgs e) {
             UpdateControls();
+        }
+
+        private void GenerateHtmlButton_Click(object sender, RoutedEventArgs e) {
+            GenType = GenerateFileType.Html;
+            Finish(Res.Strings.FILE_FILTER_HTML, ".html");
+        }
+
+        private void GenerateTextButton_Click(object sender, RoutedEventArgs e) {
+            GenType = GenerateFileType.Text;
+            if (TextModeCsv) {
+                Finish(Res.Strings.FILE_FILTER_CSV, ".csv");
+            } else {
+                Finish(Res.Strings.FILE_FILTER_TEXT, ".txt");
+            }
+        }
+
+        /// <summary>
+        /// Handles a click on one of the "generate" buttons.
+        /// </summary>
+        private void Finish(string fileFilter, string fileExt) {
+            Debug.Assert(mProjectFileName == Path.GetFileName(mProjectFileName));
+            string initialName = Path.GetFileNameWithoutExtension(mProjectFileName) + fileExt;
+
+            SaveFileDialog fileDlg = new SaveFileDialog() {
+                Filter = fileFilter + "|" + Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1,
+                ValidateNames = true,
+                AddExtension = true,    // doesn't add extension if non-ext file exists
+                FileName = initialName
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+            PathName = Path.GetFullPath(fileDlg.FileName);
+
+            ColFlags = Exporter.ActiveColumnFlags.None;
+            if (ShowOffset) {
+                ColFlags |= Exporter.ActiveColumnFlags.Offset;
+            }
+            if (ShowAddress) {
+                ColFlags |= Exporter.ActiveColumnFlags.Address;
+            }
+            if (ShowBytes) {
+                ColFlags |= Exporter.ActiveColumnFlags.Bytes;
+            }
+            if (ShowFlags) {
+                ColFlags |= Exporter.ActiveColumnFlags.Flags;
+            }
+            if (ShowAttr) {
+                ColFlags |= Exporter.ActiveColumnFlags.Attr;
+            }
+
+            SaveSettings();
+            DialogResult = true;
         }
     }
 }

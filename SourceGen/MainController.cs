@@ -185,7 +185,8 @@ namespace SourceGen {
         public enum ClipLineFormat {
             Unknown = -1,
             AssemblerSource = 0,
-            Disassembly = 1
+            Disassembly = 1,
+            AllColumns = 2
         }
 
         /// <summary>
@@ -1291,14 +1292,29 @@ namespace SourceGen {
         /// </summary>
         public void CopyToClipboard() {
             DisplayListSelection selection = mMainWin.CodeDisplayList.SelectedIndices;
+            if (selection.Count == 0) {
+                Debug.WriteLine("Selection is empty!");
+                return;
+            }
+
             ClipLineFormat format = (ClipLineFormat)AppSettings.Global.GetEnum(
                     AppSettings.CLIP_LINE_FORMAT,
                     typeof(ClipLineFormat),
                     (int)ClipLineFormat.AssemblerSource);
 
-            Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter);
-            eport.SelectionToText(selection, format, true,
-                out string fullText, out string csvText);
+            int[] rightWidths = new int[] { 9, 8, 11, 100 };
+
+            Exporter.ActiveColumnFlags colFlags = Exporter.ActiveColumnFlags.None;
+            if (format == ClipLineFormat.Disassembly) {
+                colFlags |= Exporter.ActiveColumnFlags.Address |
+                    Exporter.ActiveColumnFlags.Bytes;
+            } else if (format == ClipLineFormat.AllColumns) {
+                colFlags = Exporter.ActiveColumnFlags.ALL;
+            }
+            Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
+                colFlags, rightWidths);
+            eport.Selection = selection;
+            eport.SelectionToString(true, out string fullText, out string csvText);
 
             DataObject dataObject = new DataObject();
             dataObject.SetText(fullText.ToString());
@@ -1954,12 +1970,45 @@ namespace SourceGen {
         }
 
         public void Export() {
-            Export dlg = new Export(mMainWin);
+            string outName;
+            if (string.IsNullOrEmpty(mProjectPathName)) {
+                outName = Path.GetFileName(mDataPathName);
+            } else {
+                outName = Path.GetFileName(mProjectPathName);
+            }
+
+            Export dlg = new Export(mMainWin, outName);
             if (dlg.ShowDialog() == false) {
                 return;
             }
 
-            // TODO
+            int[] rightWidths = new int[] {
+                dlg.AsmLabelColWidth, dlg.AsmOpcodeColWidth,
+                dlg.AsmOperandColWidth, dlg.AsmCommentColWidth
+            };
+            Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
+                dlg.ColFlags, rightWidths);
+            eport.IncludeNotes = dlg.IncludeNotes;
+            if (dlg.SelectionOnly) {
+                DisplayListSelection selection = mMainWin.CodeDisplayList.SelectedIndices;
+                if (selection.Count == 0) {
+                    // no selection == select all
+                    selection = null;
+                }
+                eport.Selection = selection;
+            }
+
+            try {
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                if (dlg.GenType == WpfGui.Export.GenerateFileType.Html) {
+                    eport.OutputToHtml(dlg.PathName, dlg.OverwriteCss);
+                } else {
+                    eport.OutputToText(dlg.PathName, dlg.TextModeCsv);
+                }
+            } finally {
+                Mouse.OverrideCursor = null;
+            }
         }
 
         public void Find() {

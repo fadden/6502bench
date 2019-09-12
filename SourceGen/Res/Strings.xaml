@@ -30,6 +30,7 @@ limitations under the License.
     <system:String x:Key="str_AsmMismatchDataFmt">Assembled output does not match: offset +{0:x6} has value ${1:x2}, expected ${2:x2}.</system:String>
     <system:String x:Key="str_AsmMismatchLengthFmt">Assembled output does not match: length is {0}, expected {1}.</system:String>
     <system:String x:Key="str_AsmOutputNotFound">Expected output file wasn't created</system:String>
+    <system:String x:Key="str_ClipformatAllColumns">All Columns</system:String>
     <system:String x:Key="str_ClipformatAssemblerSource">Assembler Source</system:String>
     <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>
     <system:String x:Key="str_DefaultHeaderCommentFmt">6502bench SourceGen v{0}</system:String>
@@ -64,9 +65,12 @@ limitations under the License.
     <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
     <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
     <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>
-    <system:String x:Key="str_FileFilterCs">C# Source Files(*.cs)|*.cs</system:String>
-    <system:String x:Key="str_FileFilterDis65">SourceGen projects(*.dis65)|*.dis65</system:String>
+    <system:String x:Key="str_FileFilterCs">C# Source Files (*.cs)|*.cs</system:String>
+    <system:String x:Key="str_FileFilterCsv">CSV files (*.csv)|*.csv</system:String>
+    <system:String x:Key="str_FileFilterDis65">SourceGen projects (*.dis65)|*.dis65</system:String>
+    <system:String x:Key="str_FileFilterHtml">HTML files (*.html)|*.html</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
+    <system:String x:Key="str_FileFilterText">Text files (*.txt)|*.txt</system:String>
     <system:String x:Key="str_FileInfoFmt">File is {0:N1} KB of raw data.</system:String>
     <system:String x:Key="str_FindReachedStart">Find reached the starting point of the search.</system:String>
     <system:String x:Key="str_FindReachedStartCaption">Find...</system:String>

@@ -115,6 +115,18 @@ namespace SourceGen {
         // Assembler settings prefix
         public const string ASM_CONFIG_PREFIX = "asm-config-";
 
+        // Text/HTML export settings.
+        public const string EXPORT_INCLUDE_NOTES = "export-include-notes";
+        public const string EXPORT_SHOW_OFFSET = "export-show-offset";
+        public const string EXPORT_SHOW_ADDR = "export-show-addr";
+        public const string EXPORT_SHOW_BYTES = "export-show-bytes";
+        public const string EXPORT_SHOW_FLAGS = "export-show-flags";
+        public const string EXPORT_SHOW_ATTR = "export-show-attr";
+        public const string EXPORT_COL_WIDTHS = "export-col-widths";
+        public const string EXPORT_TEXT_MODE = "export-text-mode";
+        public const string EXPORT_SELECTION_ONLY = "export-selection-only";
+        public const string EXPORT_INCLUDE_SYMTAB = "export-include-symtab";
+
         // Internal debugging features.
         public const string DEBUG_MENU_ENABLED = "debug-menu-enabled";
 
