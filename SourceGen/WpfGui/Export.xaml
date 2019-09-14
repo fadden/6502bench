@@ -99,7 +99,6 @@ limitations under the License.
 
         <GroupBox Grid.Row="2" Header="HTML Options" Padding="2,4">
             <StackPanel>
-                <CheckBox Content="Include symbol table" IsChecked="{Binding IncludeSymbolTable}"/>
                 <CheckBox Content="Overwrite CSS file" Margin="0,2,0,0" IsChecked="{Binding OverwriteCss}"/>
             </StackPanel>
         </GroupBox>

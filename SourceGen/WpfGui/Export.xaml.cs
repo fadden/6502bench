@@ -153,12 +153,6 @@ namespace SourceGen.WpfGui {
             set { mTextModeCsv = value; OnPropertyChanged(); }
         }
 
-        private bool mIncludeSymbolTable;
-        public bool IncludeSymbolTable {
-            get { return mIncludeSymbolTable; }
-            set { mIncludeSymbolTable = value; OnPropertyChanged(); }
-        }
-
         private bool mOverwriteCss;
         public bool OverwriteCss {
             get { return mOverwriteCss; }
@@ -208,8 +202,6 @@ namespace SourceGen.WpfGui {
             ShowFlags = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_FLAGS, false);
             ShowAttr = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_ATTR, false);
             SelectionOnly = AppSettings.Global.GetBool(AppSettings.EXPORT_SELECTION_ONLY, false);
-            IncludeSymbolTable = AppSettings.Global.GetBool(AppSettings.EXPORT_INCLUDE_SYMTAB,
-                false);
 
             int[] colWidths = new int[] { 9, 8, 11, 72 };   // 100-col output
             string colStr = AppSettings.Global.GetString(AppSettings.EXPORT_COL_WIDTHS, null);
@@ -247,7 +239,6 @@ namespace SourceGen.WpfGui {
             AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_FLAGS, ShowFlags);
             AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_ATTR, ShowAttr);
             AppSettings.Global.SetBool(AppSettings.EXPORT_SELECTION_ONLY, SelectionOnly);
-            AppSettings.Global.SetBool(AppSettings.EXPORT_INCLUDE_SYMTAB, IncludeSymbolTable);
             int[] colWidths = new int[] {
                 AsmLabelColWidth, AsmOpcodeColWidth, AsmOperandColWidth, AsmCommentColWidth
             };

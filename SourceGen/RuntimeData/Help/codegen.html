@@ -18,6 +18,9 @@ the target assembler, will recreate the original data file exactly.
 Every assembler is different, so support must be added to SourceGen
 for each.</p>
 <p>The generation / assembly dialog can be opened with File &gt; Assemble.</p>
+<p>If you want to show code to others, perhaps by adding a page to
+your web site, you can "export" the formatted code as text or HTML.
+This is explained in more detail <a href="#export-source">below</a>.
 
 
 <h2><a name="supported">Supported Assemblers</a></h2>
@@ -298,6 +301,57 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>Non-unique local labels should cause an error, but don't.</li>
   <li>No undocumented opcodes are supported.</li>
 </ul>
+
+
+
+<h2><a name="export-source">Exporting Source Code</a></h2>
+<p>The "export" function takes what you see in the code list in the app
+and converts it to text or HTML.  The options you've set in the app
+settings, such as capitalization, text delimiters, pseudo-opcode names,
+and operand expression style, are all taken into account.  The file
+generated is not expected to work with an actual assembler.</p>
+<p>The text output is similar to what you'd get by copying lines to the
+clipboard and pasting them into a text file, except that you have greater
+control over which columns are included.  The HTML version is augmented
+with links.</p>
+
+<p>Use File > Export to open the export dialog.  You have several options:</p>
+<ul>
+  <li><b>Include only selected lines</b>.  This allows you to choose between
+    exporting all or part of a file.  If no lines are selected, the entire
+    file will exported.  This setting does <b>not</b> affect link generation
+    for HTML output, so you my have some dead internal links if you don't
+    export the entire file.</li>
+  <li><b>Include notes</b>.  Notes are normally excluded from generated
+    sources.  Check this to include them.</li>
+  <li><b>Show &lt;Column&gt;</b>.  The leftmost five columns are optional,
+    and will not appear in the output unless the appropriate option is
+    checked.</li>
+  <li><b>Column widths</b>.  These determine the minimum widths of the
+    rightmost four columns.  These are not hard limits: if the contents
+    of the column are too wide, the next column will start farther over.
+    The width specified does not include the space character that is
+    automatically added between fields.  The widths are not used at
+    all for CSV output.</li>
+  <li><b>Text vs. CSV</b>.  For text generation, you can choose between
+    plain text and Comma-Separated Value format.  The latter is useful
+    for importing source code into another application, such as a
+    spreadsheet.</li>
+  <li><b>Overwrite CSS file</b>.  Some aspects of the HTML output's format
+    are defined by a file called "SGStyle.css", which may be shared between
+    multiple HTML files and customized.  The file is copied out
+    of the RuntimeData directory without modification.  It will be
+    created if it doesn't exist, but will not be overwritten unless this
+    box is checked.  The setting is <b>not</b> sticky, and will revert
+    to unchecked.  (Think of this as a proactive alternative to "are you
+    sure you wish to overwrite SGStyle.css?")</li>
+</ul>
+<p>Once you've picked your options, click either "Generate HTML" or
+"Generate Text", then select an output file name from the standard file
+dialog.  Any additional files generated, such as graphics for HTML pages,
+will be written to the same directory.</p>
+
+<p>All output uses UTF-8 encoding.</p>
 
 </div>
 

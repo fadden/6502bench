@@ -57,12 +57,13 @@ is no setting for labels, which are always case-sensitive.</p>
 <a href="mainwin.html#clipboard">copied to the clipboard</a>.  The
 "Assembler Source" format includes the rightmost columns (label,
 opcode, operand, and comment), like assembly source code does.  The
-"Disassembly" format adds the address and bytes on the left.</p>
+"Disassembly" format adds the address and bytes on the left.  Use
+the "All Columns" format to get all columns.</p>
 
 <p>The "add spaces in bytes column" checkbox changes the format of the
 hex data in the code list "bytes" column from dense (<code>20edfd</code>)
-to spaced (<code>20 ed fd</code>).  This also affects the way the
-"Disassembly" copy &amp; paste format looks.</p>
+to spaced (<code>20 ed fd</code>).  This also affects the format of
+clipboard copies and exports.</p>
 
 
 <h3><a name="appset-textdelim">Text Delimiters</a></h3>
@@ -88,7 +89,7 @@ and end of the operand.  For string operands, the prefix is added to the
 start of the first line, and suffixes aren't allowed.
 <p>These options change the way the code list looks on screen.  They
 do not affect generated code, which must use the delimiter characters
-specified by the assembler.</p>
+specified by the chosen assembler.</p>
 
 
 <h3><a name="appset-asmconfig">Asm Config</a></h3>
