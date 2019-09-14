@@ -858,6 +858,31 @@ namespace SourceGen {
                     genLog.LogW("+" + offset.ToString("x6") +
                         ": unexpected mid-instruction format descriptor");
                     continue;       // ignore this one
+                } else {
+                    // Data or inline data.  The data analyzer hasn't run yet.  We want to
+                    // confirm that the descriptor doesn't overlap with code.
+                    //
+                    // Data descriptors that overlap code are problematic, for two reasons.
+                    // First, we end up with references to hidden labels, because the code that
+                    // tries to prevent it sees an Anattrib with code at the target address and
+                    // assumes all is well.  Second, if the overlap ends partway into an
+                    // instruction, an Anattrib-walker will move from a data region to the middle
+                    // of an instruction, which should never happen.
+                    //
+                    // All instruction bytes have been marked, so we just need to confirm that
+                    // none of the bytes spanned by this descriptor are instructions.
+                    bool overlap = false;
+                    for (int i = offset; i < offset + kvp.Value.Length; i++) {
+                        if (mAnattribs[i].IsInstruction) {
+                            genLog.LogW("+" + offset.ToString("x6") +
+                                ": data format descriptor overlaps code at +" + i.ToString("x6"));
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (overlap) {
+                        continue;
+                    }
                 }
 
                 mAnattribs[offset].DataDescriptor = kvp.Value;

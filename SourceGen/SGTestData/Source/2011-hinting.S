@@ -51,11 +51,18 @@ magic33 lda     #$33
 
         lda     MAGIC           ;EDIT: hint as data, format as dense hex, remove hint
 
+        jsr     dataolap
+
         rts
 
 
 part1   jsr     MAGIC
 part2   lda     #$55
         ldx     #$66
+        rts
+
+; Make sure that data descriptors that overlap with code are ignored.
+        hex     818283          ;EDIT: format as 4-byte int, so it overlaps with dataolap
+dataolap lda    #$99
         rts
 

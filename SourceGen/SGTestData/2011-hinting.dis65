@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":63,"FileDataCrc32":977869194,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":72,"FileDataCrc32":-800253778,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":["PROJ:2011-hinting.cs"],"ProjectSyms":{
 }},
 "AddressMap":[{
@@ -27,4 +27,8 @@
 },
 "OperandFormats":{
 "51":{
-"Length":3,"Format":"Dense","SubFormat":"None","SymbolRef":null}}}
+"Length":3,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"66":{
+"Length":4,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null}},
+"LvTables":{
+}}

@@ -22,14 +22,22 @@ L101B   !32     $22a211a9
         jsr     L1028
         jsr     $2456
 L1028   !32     $44a233a9
-        jsr     L1037
         jsr     L103A
+        jsr     L103D
         nop
         lda     $2456
+        jsr     L1045
         rts
 
-L1037   jsr     $2456
-L103A   lda     #$55
+L103A   jsr     $2456
+L103D   lda     #$55
         ldx     #$66
+        rts
+
+        !byte   $81
+        !byte   $82
+        !byte   $83
+
+L1045   lda     #$99
         rts
 
