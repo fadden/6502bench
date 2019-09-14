@@ -135,9 +135,8 @@ namespace SourceGen {
         /// </summary>
         public string ProjectPathName { get; set; }
 
-        // Name of data file.  This is used for debugging and when naming DLLs for
-        // project-local extension scripts.  Just the filename, not the path.
-        private string mDataFileName;
+        // Filename only of data file.  This is used for debugging and text export.
+        public string DataFileName { get; private set; }
 
         // This holds working state for the code and data analyzers.  Some of the state
         // is presented directly to the user, e.g. status flags.  All of the data here
@@ -258,7 +257,7 @@ namespace SourceGen {
             Debug.Assert(fileData.Length == FileDataLength);
 
             mFileData = fileData;
-            mDataFileName = dataFileName;
+            DataFileName = dataFileName;
             FileDataCrc32 = CommonUtil.CRC32.OnWholeBuffer(0, mFileData);
 #if DATA_PRESCAN
             ScanFileData();
@@ -343,7 +342,7 @@ namespace SourceGen {
             Debug.Assert(fileData.Length == FileDataLength);
             Debug.Assert(CRC32.OnWholeBuffer(0, fileData) == FileDataCrc32);
             mFileData = fileData;
-            mDataFileName = dataFileName;
+            DataFileName = dataFileName;
 
             FixAndValidate(ref report);
 

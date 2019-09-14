@@ -36,7 +36,8 @@ limitations under the License.
 
         <GroupBox Grid.Row="0" Header="General Options" Padding="2,4">
             <StackPanel>
-                <CheckBox Content="Include notes" IsChecked="{Binding IncludeNotes}"/>
+                <CheckBox Content="Include only selected lines" IsChecked="{Binding SelectionOnly}"/>
+                <CheckBox Content="Include notes" Margin="0,2,0,0" IsChecked="{Binding IncludeNotes}"/>
                 <CheckBox Content="Show Offset column" Margin="0,2,0,0" IsChecked="{Binding ShowOffset}"/>
                 <CheckBox Content="Show Address column" Margin="0,2,0,0" IsChecked="{Binding ShowAddress}"/>
                 <CheckBox Content="Show Bytes column" Margin="0,2,0,0" IsChecked="{Binding ShowBytes}"/>
@@ -86,9 +87,6 @@ limitations under the License.
                         </TextBox.Text>
                     </TextBox>
                 </StackPanel>
-
-                <CheckBox Content="Include only selected lines" Margin="0,4,0,0" IsChecked="{Binding SelectionOnly}"/>
-
             </StackPanel>
         </GroupBox>
 

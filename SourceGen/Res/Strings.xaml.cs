@@ -79,12 +79,16 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadTypeHint");
         public static string ERR_DUPLICATE_LABEL_FMT =
             (string)Application.Current.FindResource("str_ErrDuplicateLabelFmt");
+        public static string ERR_FILE_COPY_FAILED_FMT =
+            (string)Application.Current.FindResource("str_ErrFileCopyFailedFmt");
         public static string ERR_FILE_EXISTS_NOT_DIR_FMT =
             (string)Application.Current.FindResource("str_ErrFileExistsNotDirFmt");
         public static string ERR_FILE_GENERIC_CAPTION =
             (string)Application.Current.FindResource("str_ErrFileGenericCaption");
         public static string ERR_FILE_NOT_FOUND_FMT =
             (string)Application.Current.FindResource("str_ErrFileNotFoundFmt");
+        public static string ERR_FILE_READ_FAILED_FMT =
+            (string)Application.Current.FindResource("str_ErrFileReadFailedFmt");
         public static string ERR_FILE_READ_ONLY_FMT =
             (string)Application.Current.FindResource("str_ErrFileReadOnlyFmt");
         public static string ERR_INVALID_INT_VALUE =
@@ -163,6 +167,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_LocalVariableTableEmpty");
         public static string NO_FILES_AVAILABLE =
             (string)Application.Current.FindResource("str_NoFilesAvailable");
+        public static string NO_EXPORTED_SYMBOLS_FOUND =
+            (string)Application.Current.FindResource("str_NoExportedSymbolsFound");
         public static string OPEN_DATA_DOESNT_EXIST =
             (string)Application.Current.FindResource("str_OpenDataDoesntExist");
         public static string OPEN_DATA_EMPTY =

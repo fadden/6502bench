@@ -1314,6 +1314,9 @@ namespace SourceGen {
             Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
                 colFlags, rightWidths);
             eport.Selection = selection;
+
+            // Might want to set Mouse.OverrideCursor if the selection exceeds a few
+            // hundred thousand lines.
             eport.SelectionToString(true, out string fullText, out string csvText);
 
             DataObject dataObject = new DataObject();
@@ -2005,6 +2008,8 @@ namespace SourceGen {
                 eport.Selection = selection;
             }
 
+            // This is generally fast enough that I don't feel the need to create a
+            // progress window.
             try {
                 Mouse.OverrideCursor = Cursors.Wait;
 
