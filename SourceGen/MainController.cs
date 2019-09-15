@@ -2181,14 +2181,14 @@ namespace SourceGen {
             }
         }
 
-        public bool CanFormatSplitAddress() {
+        public bool CanFormatAddressTable() {
             EntityCounts counts = SelectionAnalysis.mEntityCounts;
             // Must be at least one line of data, and no code.  Note this is lines, not bytes,
             // so we can't screen out single-byte lines without additional work.
             return (counts.mDataLines > 0 && counts.mCodeLines == 0);
         }
 
-        public void FormatSplitAddress() {
+        public void FormatAddressTable() {
             TypedRangeSet trs = GroupedOffsetSetFromSelected();
             if (trs.Count == 0) {
                 // shouldn't happen
@@ -2196,7 +2196,7 @@ namespace SourceGen {
                 return;
             }
 
-            FormatSplitAddress dlg = new FormatSplitAddress(mMainWin, mProject, trs,
+            FormatAddressTable dlg = new FormatAddressTable(mMainWin, mProject, trs,
                 mOutputFormatter);
 
             dlg.ShowDialog();

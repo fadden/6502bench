@@ -333,7 +333,7 @@ on to the next tutorial to learn more.</p>
 can do.  We assume you've already finished the Basic Features tutorial.</p>
 
 
-<h3>Split-Address Table Formatting</h3>
+<h3>Address Table Formatting</h3>
 
 <p>Start a new project.  Select the Apple //e platform, click Select File
 and navigate to the Examples directory.  In A2-Amper-fdraw, select
@@ -381,9 +381,10 @@ to make the operand there say <code>&gt;FUNC</code>.  (If it says
 You could repeat these steps for the remaining items, but there's a faster
 way.  Click on the line at address $1d97, then shift-click the line at
 address $1da9 (which should be <code>.FILL 12,$1e</code>).  Select
-Actions &gt; Format Split-Address Table.</p>
+Actions &gt; Format Address Table.</p>
 <p>The message at the top should indicate that there are 30 bytes
-selected.  In Address Characteristics, click the "adjusted for RTS/RTL"
+selected.  In Address Characteristics, click the "Parts are split across
+sub-tables" checkbox and the "adjusted for RTS/RTL"
 checkbox.  As soon as you do, the first line of the Generated Addresses
 list should show the symbol "FUNC".  The rest of the addresses will look like
 <code>(+) T1DD0</code>.  The "(+)" means that a label was not found at

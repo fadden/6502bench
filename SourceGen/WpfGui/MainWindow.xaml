@@ -105,7 +105,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+W</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="FormatSplitAddressCmd" Text="Format Split-Address Table..."/>
+            <RoutedUICommand x:Key="FormatAddressTableCmd" Text="Format Address Table..."/>
             <RoutedUICommand x:Key="GotoCmd" Text="Go To...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+G</KeyGesture>
@@ -216,8 +216,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
         <CommandBinding Command="{StaticResource FormatAsWordCmd}"
                         CanExecute="CanFormatAsWord" Executed="FormatAsWordCmd_Executed"/>
-        <CommandBinding Command="{StaticResource FormatSplitAddressCmd}"
-                        CanExecute="CanFormatSplitAddress" Executed="FormatSplitAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FormatAddressTableCmd}"
+                        CanExecute="CanFormatAddressTable" Executed="FormatAddressTableCmd_Executed"/>
         <CommandBinding Command="{StaticResource GotoCmd}"
                         CanExecute="IsProjectOpen" Executed="GotoCmd_Executed"/>
         <CommandBinding Command="Help"
@@ -338,7 +338,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource HintAsInlineDataCmd}" InputGestureText="Ctrl+H, Ctrl+I"/>
                 <MenuItem Command="{StaticResource RemoveHintsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
                 <Separator/>
-                <MenuItem Command="{StaticResource FormatSplitAddressCmd}"/>
+                <MenuItem Command="{StaticResource FormatAddressTableCmd}"/>
                 <MenuItem Command="{StaticResource ToggleSingleByteFormatCmd}"/>
                 <MenuItem Command="{StaticResource FormatAsWordCmd}"/>
                 <MenuItem Command="{StaticResource DeleteMlcCmd}"/>

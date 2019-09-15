@@ -137,8 +137,8 @@
     <Compile Include="WpfGui\FontPicker.xaml.cs">
       <DependentUpon>FontPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WpfGui\FormatSplitAddress.xaml.cs">
-      <DependentUpon>FormatSplitAddress.xaml</DependentUpon>
+    <Compile Include="WpfGui\FormatAddressTable.xaml.cs">
+      <DependentUpon>FormatAddressTable.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\GotoBox.xaml.cs">
       <DependentUpon>GotoBox.xaml</DependentUpon>
@@ -306,7 +306,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WpfGui\FormatSplitAddress.xaml">
+    <Page Include="WpfGui\FormatAddressTable.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

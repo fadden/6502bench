@@ -979,8 +979,8 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatAsWord();
         }
 
-        private void CanFormatSplitAddress(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatSplitAddress();
+        private void CanFormatAddressTable(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatAddressTable();
         }
 
         private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
@@ -1133,8 +1133,8 @@ namespace SourceGen.WpfGui {
             mMainCtrl.FormatAsWord();
         }
 
-        private void FormatSplitAddressCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.FormatSplitAddress();
+        private void FormatAddressTableCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FormatAddressTable();
         }
 
         private void GotoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

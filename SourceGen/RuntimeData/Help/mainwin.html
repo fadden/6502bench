@@ -195,7 +195,7 @@ enabled will depend on what you have selected in the main window.</p>
     at least one line has hints.  The keyboard shortcuts for hints are
     two-key combinations.</li>
 
-  <li><a href="#split-address">Format Split-Address Table</a>.  Formats
+  <li><a href="#address-table">Format Address Table</a>.  Formats
     a series of bytes as parts of a table of addresses.</li>
   <li><a href="#toggle-single">Toggle Single-Byte Format</a>.  Toggles
     a range of lines between default format and single-byte format.  Enabled
@@ -357,7 +357,7 @@ again to re-enable the string &amp; fill analyzer.</p>
 menu item to "flatten" the item.</p>
 
 
-<h3><a name="split-address">Format Split-Address Table</a></h3>
+<h3><a name="address-table">Format Address Table</a></h3>
 
 <p>Tables of addresses are fairly common.  Sometimes you'll find them as a
 series of 16-bit words, like this:</p>
@@ -383,12 +383,14 @@ values are to be pushed onto the stack for an RTS call.</p>
 
 <p>While the .dd2 case is easy to format with the data operand editor,
 formatting addresses whose components are split into multiple tables can
-be tedious.</p>
+be tedious.  Even in the easy case, you may want to create labels and set
+code hints for each item.</p>
 
-<p>The Split-Address Table Formatter helps you associate symbols with the
-addresses in the table.  To use it, start by selecting the entire table.
-In the example above, you would select all 6 bytes.  The number of bytes
-in each part must be equal: here, it's 3 low bytes, followed by 3 high
+<p>The Address Table Formatter helps you associate symbols with the
+addresses in the table.  It works for simple and "split" tables.</p>
+<p>To use it, start by selecting the entire table.  In the examples above,
+you would select all 6 bytes.  The number of bytes in each part of a
+split table must be equal: here, it's 3 low bytes, followed by 3 high
 bytes.  If the number of bytes selected can't be evenly divided by the
 number of parts -- two parts for 16-bit data, three parts for 24-bit data --
 the formatter will report an error.</p>
@@ -398,15 +400,19 @@ is split into sections.</p>
 <ul>
   <li>Address Characteristics: select whether the table has 16-bit
   addresses or 24-bit addresses.  (24-bit addresses are disabled if you
-  don't have the CPU set to 65816.)  If the address parts are being pushed
+  don't have the CPU set to 65816.)  If the table is split into individual
+  sub-tables for low bytes and high bytes, check the "Parts are split
+  across sub-tables" box.  If the address parts are being pushed
   on the stack for an RTS/RTL, check the "Adjusted for RTS/RTL" box to
   adjust them by 1.</li>
-  <li>Low Byte Source: indicate which part of the table holds the low bytes.  In
-  the example above, the low bytes came first, followed by the high bytes,
-  so you would select "first part of selection".  If they were stored the
-  other way around, you would click "second part" instead.</li>
-  <li>High Byte Source: indicate which part of the table holds the high bytes.  For
-  a 16-bit address this will be the part you didn't pick for the low bytes.
+  <li>Low Byte Source: indicate which part of the table or word holds the
+  low bytes.  For common little-endian words, the low bytes come first.  In
+  the split-table example above, the low bytes came first, followed by the
+  high bytes, so you would select "first part of selection".  If they were
+  stored the other way around, you would click "second part" instead.</li>
+  <li>High Byte Source: indicate which part of the table or word holds
+  the high bytes.  For a 16-bit address this will be the part you didn't
+  pick for the low bytes.
   Sometimes, if all addresses land on the same 256-byte page, the high byte
   will be a constant in the code, and only the low bytes will be stored in
   a table.  If that's the case, select "Constant", and enter the high byte
@@ -424,7 +430,9 @@ is split into sections.</p>
   file, the offset is shown as dashes instead.  If the address can be
   mapped, and it already has a user-specified label, the label will be
   shown.  If no label was found, the table will show "(+)", indicating
-  that a permanent label will be added at the target offset.</li>
+  that a permanent label will be added at the target offset.  If everything
+  is set up correctly, and the addresses fall entirely within the program,
+  you shouldn't see any unknown entries here.</li>
 </ul>
 
 <p>For a 16-bit address, you have three choices: low byte first, high byte
@@ -443,7 +451,8 @@ pages.  You just need to have all of the data selected.</p>
 data in question is part of a table.  The formatting, labels, and code hints
 are applied as if you entered them all individually by hand.  The formatter
 is just significantly more convenient.  It also does everything as a single
-undoable action, so if it comes out looking wrong, just hit "undo".</p>
+undoable action, so if it comes out looking wrong, just hit "undo" and
+try something else.</p>
 
 
 <h3><a name="toggle-single">Toggle Single-Byte Format</a></h3>

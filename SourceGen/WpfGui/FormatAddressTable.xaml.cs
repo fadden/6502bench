@@ -29,7 +29,7 @@ namespace SourceGen.WpfGui {
     /// <summary>
     /// Split-address table generator.
     /// </summary>
-    public partial class FormatSplitAddress : Window, INotifyPropertyChanged {
+    public partial class FormatAddressTable : Window, INotifyPropertyChanged {
         /// Format descriptors to apply.
         /// </summary>
         public SortedList<int, FormatDescriptor> NewFormatDescriptors { get; private set; }
@@ -155,7 +155,7 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public FormatSplitAddress(Window owner, DisasmProject project, TypedRangeSet selection,
+        public FormatAddressTable(Window owner, DisasmProject project, TypedRangeSet selection,
                 Formatter formatter) {
             InitializeComponent();
             Owner = owner;
