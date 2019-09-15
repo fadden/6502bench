@@ -47,15 +47,21 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// If set, targets are offset by one for RTS/RTL.
         /// </summary>
-        public bool AdjustedForReturn {
-            get { return mAdjustedForReturn; }
-            set {
-                mAdjustedForReturn = value;
-                OnPropertyChanged();
-                UpdateControls();
-            }
+        public bool IsAdjustedForReturn {
+            get { return mIsAdjustedForReturn; }
+            set { mIsAdjustedForReturn = value; OnPropertyChanged(); UpdateControls(); }
         }
-        private bool mAdjustedForReturn;
+        private bool mIsAdjustedForReturn;
+
+        /// <summary>
+        /// If set, this is a split-address table, e.g. all of the low bytes are followed
+        /// by all of the high bytes.
+        /// </summary>
+        public bool IsSplitTable {
+            get { return mIsSplitTable; }
+            set { mIsSplitTable = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mIsSplitTable;
 
         /// <summary>
         /// If set, caller will add code entry hints to targets.
@@ -103,10 +109,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public bool IsValid {
             get { return mIsValid; }
-            set {
-                mIsValid = value;
-                OnPropertyChanged();
-            }
+            set { mIsValid = value; OnPropertyChanged(); }
         }
         private bool mIsValid;
 
@@ -370,27 +373,33 @@ namespace SourceGen.WpfGui {
             SortedList<int, FormatDescriptor> newDfds = new SortedList<int, FormatDescriptor>();
             Dictionary<int, Symbol> newLabels = new Dictionary<int, Symbol>();
             List<int> targetOffsets = new List<int>();
+            bool isBigEndian;
 
             // Identify the offset where each set of data starts.
             int span = mSelection.Count / div;
             int lowOff, highOff, bankOff;
+            int stride;
 
             if (lowFirstPartRadio.IsChecked == true) {
                 lowOff = 0;
+                isBigEndian = false;
             } else if (lowSecondPartRadio.IsChecked == true) {
-                lowOff = span;
+                lowOff = 1;
+                isBigEndian = true;
             } else if (lowThirdPartRadio.IsChecked == true) {
-                lowOff = span * 2;
+                lowOff = 2;
+                isBigEndian = true;
             } else {
                 Debug.Assert(false);
                 lowOff = -1;
+                isBigEndian = false;
             }
             if (highFirstPartRadio.IsChecked == true) {
                 highOff = 0;
             } else if (highSecondPartRadio.IsChecked == true) {
-                highOff = span;
+                highOff = 1;
             } else if (highThirdPartRadio.IsChecked == true) {
-                highOff = span * 2;
+                highOff = 2;
             } else {
                 highOff = -1;   // use constant
             }
@@ -399,11 +408,11 @@ namespace SourceGen.WpfGui {
                     // Use whichever part isn't being used by the other two.
                     if (lowOff != 0 && highOff != 0) {
                         bankOff = 0;
-                    } else if (lowOff != span && highOff != span) {
-                        bankOff = span;
+                    } else if (lowOff != 1 && highOff != 1) {
+                        bankOff = 1;
                     } else {
-                        Debug.Assert(lowOff != span * 2 && highOff != span * 2);
-                        bankOff = span * 2;
+                        Debug.Assert(lowOff != 2 && highOff != 2);
+                        bankOff = 2;
                     }
                 } else {
                     bankOff = -1;   // use constant
@@ -413,8 +422,26 @@ namespace SourceGen.WpfGui {
                 bankConst = 0;      // always bank 0
             }
 
-            Debug.WriteLine("Extract from low=" + lowOff + " high=" + highOff +
-                " bank=" + bankOff);
+            if (IsSplitTable) {
+                // Split table, so stride is 1 and each section start is determined by the span.
+                stride = 1;
+                lowOff *= span;
+                highOff *= span;
+                bankOff *= span;
+            } else {
+                // For non-split table, the stride is the width of each entry.
+                stride = 1;
+                if (highOff >= 0) {
+                    stride++;
+                }
+                if (bankOff >= 0) {
+                    stride++;
+                }
+            }
+
+            Debug.WriteLine("FormatAddressTable: stride=" + stride + " span=" + span +
+                " count=" + mSelection.Count);
+            Debug.WriteLine("  low=" + lowOff + " high=" + highOff + " bank=" + bankOff);
 
             // The TypedRangeSet doesn't have an index operation, so copy the values into
             // an array.
@@ -425,7 +452,7 @@ namespace SourceGen.WpfGui {
             }
 
             int adj = 0;
-            if (AdjustedForReturn) {
+            if (IsAdjustedForReturn) {
                 adj = 1;
             }
 
@@ -434,14 +461,14 @@ namespace SourceGen.WpfGui {
             for (int i = 0; i < span; i++) {
                 byte low, high, bank;
 
-                low = fileData[offsets[lowOff + i]];
+                low = fileData[offsets[lowOff + i * stride]];
                 if (highOff >= 0) {
-                    high = fileData[offsets[highOff + i]];
+                    high = fileData[offsets[highOff + i * stride]];
                 } else {
                     high = (byte) highConst;
                 }
                 if (bankOff >= 0) {
-                    bank = fileData[offsets[bankOff + i]];
+                    bank = fileData[offsets[bankOff + i * stride]];
                 } else {
                     bank = (byte) bankConst;
                 }
@@ -479,17 +506,30 @@ namespace SourceGen.WpfGui {
                         AddPreviewItem(addr, targetOffset, "(+) " + targetLabel);
                     }
 
-                    // Now we need to create format descriptors for the addresses where we
-                    // extracted the low, high, and bank values.
-                    newDfds.Add(offsets[lowOff + i], FormatDescriptor.Create(1,
-                        new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Low), false));
-                    if (highOff >= 0) {
-                        newDfds.Add(offsets[highOff + i], FormatDescriptor.Create(1,
-                            new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.High), false));
-                    }
-                    if (bankOff >= 0) {
-                        newDfds.Add(offsets[bankOff + i], FormatDescriptor.Create(1,
-                            new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Bank), false));
+                    if (IsSplitTable) {
+                        // Now we need to create format descriptors for the addresses where we
+                        // extracted the low, high, and bank values.
+                        newDfds.Add(offsets[lowOff + i * stride], FormatDescriptor.Create(1,
+                            new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Low), false));
+                        if (highOff >= 0) {
+                            newDfds.Add(offsets[highOff + i * stride], FormatDescriptor.Create(1,
+                                new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.High), false));
+                        }
+                        if (bankOff >= 0) {
+                            newDfds.Add(offsets[bankOff + i * stride], FormatDescriptor.Create(1,
+                                new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Bank), false));
+                        }
+                    } else {
+                        // Create a single format descriptor that spans all bytes.  Note we
+                        // don't want to use lowOff here -- we want to put the format on
+                        // whichever byte came first.
+                        // TODO(maybe): we don't correctly deal with a "scrambled" non-split
+                        //   24-bit table, i.e. low then bank then high.  This is not really
+                        //   a thing, but we should either prevent it or punt to single-byte
+                        //   like we do for split tables.
+                        Debug.Assert(stride >= 1 && stride <= 3);
+                        newDfds.Add(offsets[0 + i * stride], FormatDescriptor.Create(stride,
+                            new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Low), isBigEndian));
                     }
                 }
             }
@@ -498,7 +538,8 @@ namespace SourceGen.WpfGui {
             NewUserLabels = newLabels;
             AllTargetOffsets = targetOffsets;
 
-            // Don't show ready if all addresses are invalid.
+            // Don't show ready if all addresses are invalid.  It's okay if some work and
+            // some don't.
             mOutputReady = (AllTargetOffsets.Count > 0);
         }
 

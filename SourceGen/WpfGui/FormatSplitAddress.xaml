@@ -55,8 +55,10 @@ limitations under the License.
                                  Content="16-bit" Checked="WidthRadio_CheckedChanged"/>
                     <RadioButton Name="width24Radio" GroupName="Addr" Margin="0,4,0,0"
                                  Content="24-bit" Checked="WidthRadio_CheckedChanged"/>
+                    <CheckBox Margin="0,4,0,0" Content="Parts are split across tables"
+                              IsChecked="{Binding IsSplitTable}"/>
                     <CheckBox Margin="0,4,0,0" Content="Adjusted for RTS/RTL (target - 1)"
-                              IsChecked="{Binding AdjustedForReturn}"/>
+                              IsChecked="{Binding IsAdjustedForReturn}"/>
                 </StackPanel>
             </GroupBox>
 

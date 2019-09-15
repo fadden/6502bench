@@ -74,32 +74,40 @@ limitations under the License.
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Column="0" Grid.Row="0">
-                        <RadioButton Name="radioSimpleDataHex" GroupName="Display" Content="Hex"
-                                     Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataDecimal" GroupName="Display" Content="Decimal"
-                                     Margin="0,4,18,0" Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataBinary" GroupName="Display" Content="Binary"
-                                     Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataAddress" GroupName="Display" Content="_Address"
-                                     Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Grid.Row="0">
-                        <RadioButton Name="radioSimpleDataAscii" GroupName="Display"
-                                     Content="ASCII (low or high) character"
-                                     Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataPetscii" GroupName="Display"
-                                     Content="C64 PETSCII character"
-                                     Checked="SimpleDisplay_CheckedChanged"/>
-                        <RadioButton Name="radioSimpleDataScreenCode" GroupName="Display"
-                                     Content="C64 Screen character"
-                                     Checked="SimpleDisplay_CheckedChanged"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+                    <RadioButton Name="radioSimpleDataHex" Grid.Column="0" Grid.Row="0"
+                                 GroupName="Display" Content="Hex" Checked="SimpleDisplay_CheckedChanged"/>
+                    <RadioButton Name="radioSimpleDataDecimal" Grid.Column="0" Grid.Row="1"
+                                 GroupName="Display" Content="Decimal" Margin="0,4,18,0"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+                    <RadioButton Name="radioSimpleDataBinary" Grid.Column="0" Grid.Row="2"
+                                 GroupName="Display" Content="Binary" Margin="0,4,0,0"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+
+                    <RadioButton Name="radioSimpleDataAscii" Grid.Column="1" Grid.Row="0"
+                                 GroupName="Display" Content="ASCII (low or high) character"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+                    <RadioButton Name="radioSimpleDataPetscii" Grid.Column="1" Grid.Row="1"
+                                 GroupName="Display" Content="C64 PETSCII character" Margin="0,4,0,0"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+                    <RadioButton Name="radioSimpleDataScreenCode" Grid.Column="1" Grid.Row="2"
+                                 GroupName="Display" Content="C64 Screen character" Margin="0,4,0,0"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+
+                    <RadioButton Name="radioSimpleDataAddress" Grid.Column="0" Grid.Row="3" GroupName="Display"
+                                 Content="_Address" Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
+                    <!--<TextBox Grid.Column="1" Grid.Row="3" Margin="-8,4,0,0" Width="50" HorizontalAlignment="Left"
+                             FontFamily="{StaticResource GeneralMonoFont}"
+                             Text="{Binding SomethingCool, FallbackValue=+1Add}"/>-->
+
+                    <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2">
                         <RadioButton Name="radioSimpleDataSymbolic" GroupName="Display" Content="_Symbolic reference"
                                      Margin="0,4,0,0" Checked="SimpleDisplay_CheckedChanged"/>
-                        <TextBox Name="symbolEntryTextBox" Margin="20,4,0,0" TextChanged="SymbolEntryTextBox_TextChanged"/>
+                        <TextBox Name="symbolEntryTextBox" Margin="20,4,0,0" FontFamily="{StaticResource GeneralMonoFont}"
+                                 TextChanged="SymbolEntryTextBox_TextChanged"/>
 
                         <StackPanel Orientation="Horizontal" Margin="20,4,0,0"
                                     IsEnabled="{Binding ElementName=radioSimpleDataSymbolic, Path=IsChecked}">
