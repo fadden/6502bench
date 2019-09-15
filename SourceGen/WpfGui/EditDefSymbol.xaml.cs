@@ -185,6 +185,11 @@ namespace SourceGen.WpfGui {
             UpdateControls();
         }
 
+        private void Window_ContentRendered(object sender, EventArgs e) {
+            labelTextBox.SelectAll();
+            labelTextBox.Focus();
+        }
+
         private void UpdateControls() {
             if (!IsLoaded) {
                 return;

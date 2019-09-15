@@ -95,7 +95,8 @@ set, or editing a local variable table.</p>
 <h3><a name="shortcut-nar">Numeric Address References</a></h3>
 
 <p>For operands that are 8-bit, 16-bit, or 24-bit addresses, you can
-define a symbol for the address as a label or project symbol.</p>
+define a symbol for the address as a label or
+<a href="intro.html#symbol-types">project symbol</a>.</p>
 <p>If the operand is an address inside the project, you can set a
 label at that address.  If the address falls in the middle of an
 instruction or multi-byte data item, its position will be adjusted to
@@ -103,16 +104,30 @@ the start.  Labels may be created, modified, or (by erasing the label)
 deleted.</p>
 <p>The label finder does not do the optional search for "nearby" labels
 that the main analyzer does, so there will be times when an instruction
-that is shown with a symbol in the code list won't have a label
+that is shown with a symbol in the code list won't have a symbol
 in the editor.</p>
 
 <p>If the operand is an address outside the project, e.g. a ROM
-address or frame buffer, you can define a project symbol.  If a
+address or I/O location, you can define a project symbol.  If a
 match was found in the configured platform definition files, it will be
 shown; it can't be edited, but it can be overridden by a project symbol.
-You can create or modify a project symbol, but you can't delete one
-from this editor (use Project Properties instead).  If more than one
-project symbol has the same address, the first one found will be used.</p>
+You can create or modify a project symbol by clicking on "Create Project
+Symbol" or "Edit Project Symbol".  You can't delete project symbols
+from this editor (use Project Properties instead).</p>
+
+<p>It's possible to have more than one project symbol for the same
+address.  For example, on the Apple II, reading from the memory-mapped
+I/O address $C000 returns the last key pressed, but writing to it
+changes the state of the 80-column display hardware, so it's useful to
+have two different names for it.  If more than one project symbol has the
+same address, the first one found will be used, which may not be
+what is desired.  In such situations, you should create the project
+symbol and then copy the symbol name into the operand.  You can do this
+in one step by clicking the "Copy to Operand" button.
+(In most cases you don't want to do this, because if the project
+symbol is deleted or renamed, you'll have operands that refer to a
+nonexistent symbol.  Unlike labels, project symbol renames do not
+refactor the rest of the project.)
 
 <h3><a name="shortcut-local-var">Local Variable References</a></h3>
 

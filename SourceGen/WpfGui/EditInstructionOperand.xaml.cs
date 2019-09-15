@@ -19,7 +19,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 
 using Asm65;
 
@@ -223,6 +222,21 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
+        /// Looks up the symbol in the symbol table.  If not found there, it checks for a
+        /// match against the existing or edited project symbol.
+        /// </summary>
+        private bool LookupSymbol(string label, out Symbol sym) {
+            if (mProject.SymbolTable.TryGetValue(label, out sym)) {
+                return true;
+            }
+            if (mEditedProjectSymbol != null && label.Equals(mEditedProjectSymbol.Label)) {
+                sym = mEditedProjectSymbol;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Updates the state of the UI controls as the user interacts with the dialog.
         /// </summary>
         private void UpdateControls() {
@@ -242,7 +256,7 @@ namespace SourceGen.WpfGui {
                 if (!Asm65.Label.ValidateLabel(SymbolLabel)) {
                     SymbolValueHex = SYMBOL_INVALID;
                     IsValid = false;
-                } else if (mProject.SymbolTable.TryGetValue(SymbolLabel, out Symbol sym)) {
+                } else if (LookupSymbol(SymbolLabel, out Symbol sym)) {
                     if (sym.SymbolSource == Symbol.Source.Auto) {
                         // We try to block references to auto labels, but it's possible to get
                         // around it because FormatDescriptors are weak references (replace auto
@@ -272,6 +286,7 @@ namespace SourceGen.WpfGui {
             }
 
             UpdatePreview();
+            UpdateCopyToOperand();
         }
 
         /// <summary>
@@ -350,7 +365,7 @@ namespace SourceGen.WpfGui {
                     sb.Append(mFormatter.FormatCharacterValue(operandValue, enc));
                     break;
                 case FormatDescriptor.SubType.Symbol:
-                    if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+                    if (LookupSymbol(dfd.SymbolRef.Label, out Symbol sym)) {
                         // Block move is a little weird.  "MVN label1,label2" is supposed to use
                         // the bank byte, while "MVN #const1,#const2" uses the entire symbol.
                         // The easiest thing to do is require the user to specify the "bank"
@@ -784,11 +799,21 @@ namespace SourceGen.WpfGui {
         }
         private string mCreateEditProjectSymbolText;
 
+        public bool IsCopyToOperandEnabled {
+            get { return mIsCopyToOperandEnabled; }
+            set { mIsCopyToOperandEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsCopyToOperandEnabled;
+
         /// <summary>
         /// Edited label value.  Will be null if the label hasn't been created, or has been
         /// deleted (by entering a blank string in the label edit box).
         /// </summary>
         private Symbol mEditedLabel;
+
+        /// <summary>
+        /// Set to true if the label has been edited.
+        /// </summary>
         private bool mLabelHasBeenEdited;
 
         /// <summary>
@@ -802,9 +827,13 @@ namespace SourceGen.WpfGui {
         private int mEditedLabelOffset = -1;
 
         /// <summary>
-        /// Edited project symbol.  Will be null if the symbol doesn't exist.  Symbols can't
-        /// be deleted.
+        /// Edited project symbol.  If a symbol already exists, this will be initialized to the
+        /// existing value.  Otherwise this will be null.
         /// </summary>
+        /// <remarks>
+        /// Project symbols can't be deleted from here, so a null reference always means that
+        /// there's no symbol and we haven't made an edit.
+        /// </remarks>
         private DefSymbol mEditedProjectSymbol;
 
         /// <summary>
@@ -886,6 +915,17 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        private void UpdateCopyToOperand() {
+            IsCopyToOperandEnabled = false;
+            if (mEditedProjectSymbol != null) {
+                // We have a pre-existing or recently-edited symbol.  See if the current
+                // operand configuration already matches.
+                if (!FormatSymbol || !mEditedProjectSymbol.Label.Equals(SymbolLabel)) {
+                    IsCopyToOperandEnabled = true;
+                }
+            }
+        }
+
         private void EditLabel_Click(object sender, RoutedEventArgs e) {
             EditLabel dlg = new EditLabel(this, mEditedLabel, mLabelTargetAddress,
                 mProject.SymbolTable);
@@ -937,6 +977,17 @@ namespace SourceGen.WpfGui {
             ShowNarNoProjectMatch = false;
             NarProjectSymbol = mEditedProjectSymbol.Label;
             CreateEditProjectSymbolText = EDIT_PROJECT_SYMBOL;
+
+            // The preview and symbol value display will use mEditedProjectSymbol if it's the
+            // only place the symbol exists, so we want to keep the other controls updated.
+            UpdateControls();
+        }
+
+        private void CopyToOperandButton_Click(object sender, RoutedEventArgs e) {
+            FormatSymbol = true;
+            SymbolLabel = mEditedProjectSymbol.Label;
+            IsCopyToOperandEnabled = false;
+            // changes to controls will call UpdateControls() for us
         }
 
         #endregion Numeric References

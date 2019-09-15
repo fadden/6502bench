@@ -24,7 +24,8 @@ limitations under the License.
         Title="Edit Symbol"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered">
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>

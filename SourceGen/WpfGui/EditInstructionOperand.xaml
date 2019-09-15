@@ -190,6 +190,9 @@ limitations under the License.
                     <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
                             Content="{Binding CreateEditProjectSymbolText, FallbackValue=Diddle Project Symbol}"
                             Click="EditProjectSymbol_Click"/>
+                    <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
+                            Content="Copy to Operand" IsEnabled="{Binding IsCopyToOperandEnabled}"
+                            Click="CopyToOperandButton_Click"/>
                 </StackPanel>
 
             </StackPanel>
