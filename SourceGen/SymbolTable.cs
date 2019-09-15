@@ -144,11 +144,12 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Searches the table for symbols with matching address values.  Ignores constants.
+        /// Searches the table for symbols with matching address values.  Ignores constants and
+        /// variables.
         /// </summary>
         /// <param name="value">Value to find.</param>
         /// <returns>First matching symbol found, or null if nothing matched.</returns>
-        public Symbol FindAddressByValue(int value) {
+        public Symbol FindNonVariableByAddress(int value) {
             // Get sorted list of values.  This is documented as efficient.
             IList<Symbol> values = mSymbolsByValue.Values;
 
@@ -169,8 +170,9 @@ namespace SourceGen {
                     while (mid > 0 && values[mid - 1].Value == value) {
                         mid--;
                     }
-                    // now skip past constants
-                    while (mid < values.Count && values[mid].SymbolType == Symbol.Type.Constant) {
+                    // now skip past constants and variables
+                    while (mid < values.Count && (values[mid].SymbolType == Symbol.Type.Constant ||
+                            values[mid].SymbolSource == Symbol.Source.Variable)) {
                         //Debug.WriteLine("disregarding " + values[mid]);
                         mid++;
                     }

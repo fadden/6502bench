@@ -1069,6 +1069,8 @@ namespace SourceGen {
 
             for (int offset = 0; offset < mAnattribs.Length; ) {
                 Anattrib attr = mAnattribs[offset];
+                Symbol sym;
+                int address;
                 if (attr.IsInstructionStart && attr.DataDescriptor == null &&
                         attr.OperandAddress >= 0 && attr.OperandOffset < 0) {
                     // Has an operand address, but not an offset, meaning it's a reference
@@ -1083,29 +1085,56 @@ namespace SourceGen {
                     // Using the full symbol table is potentially a tad less efficient than
                     // looking for a match exclusively in project/platform symbols, but it's
                     // the correct thing to do.
-                    Symbol sym = SymbolTable.FindAddressByValue(attr.OperandAddress);
+                    address = attr.OperandAddress;
+                    sym = SymbolTable.FindNonVariableByAddress(address);
+                } else if (attr.IsDataStart && attr.DataDescriptor != null &&
+                        attr.DataDescriptor.IsNumeric &&
+                        attr.DataDescriptor.FormatSubType == FormatDescriptor.SubType.Address) {
+                    // Found a Numeric/Address item that matches.  Data items don't have
+                    // OperandAddress or OperandOffset set, so we need to check manually to
+                    // see if the address falls within the project.  In most situations this
+                    // isn't really necessary, because the data analysis pass will have resolved
+                    // interal references to auto-generated labels.
+                    //
+                    // This is only firing if the item is explicitly formatted as an
+                    // Address, so we're essentially "upgrading" the user format.
+                    address = RawData.GetWord(mFileData, offset, attr.DataDescriptor.Length,
+                        attr.DataDescriptor.FormatType == FormatDescriptor.Type.NumericBE);
+                    if (AddrMap.AddressToOffset(offset, address) < 0) {
+                        sym = SymbolTable.FindNonVariableByAddress(address);
+                    } else {
+                        Debug.WriteLine("Found unhandled internal data addr ref at +" +
+                            offset.ToString("x6"));
+                        address = -1;       // don't touch interior stuff
+                        sym = null;
+                    }
+                } else {
+                    address = -1;
+                    sym = null;
+                }
 
+                if (address >= 0) {
                     // If we didn't find it, check addr-1.  This is very helpful when working
                     // with pointers, because it gets us references to "PTR+1" when "PTR" is
                     // defined.  (It's potentially helpful in labeling the "near side" of an
                     // address map split as well, since the first byte past is an external
                     // address, and a label at the end of the current region will be offset
                     // from by this.)
-                    if (sym == null && (attr.OperandAddress & 0xffff) > 0 && checkNearby) {
-                        sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 1);
+                    if (sym == null && (address & 0xffff) > 0 && checkNearby) {
+                        sym = SymbolTable.FindNonVariableByAddress(address - 1);
                     }
                     // If that didn't work, try addr-2.  Good for 24-bit addresses and jump
                     // vectors that start with a JMP instruction.
-                    if (sym == null && (attr.OperandAddress & 0xffff) > 1 && checkNearby) {
-                        sym = SymbolTable.FindAddressByValue(attr.OperandAddress - 2);
+                    if (sym == null && (address & 0xffff) > 1 && checkNearby) {
+                        sym = SymbolTable.FindNonVariableByAddress(address - 2);
                     }
                     // Still nothing, try addr+1.  Sometimes indexed addressing will use
                     // "STA addr-1,y".  This will also catch "STA addr-1" when addr is the
                     // very start of a segment, which means we're actually finding a label
                     // reference rather than project/platform symbol; only works if the
                     // location already has a label.
-                    if (sym == null && (attr.OperandAddress & 0xffff) < 0xffff && checkNearby) {
-                        sym = SymbolTable.FindAddressByValue(attr.OperandAddress + 1);
+                    if (sym == null && (address & 0xffff) < 0xffff && checkNearby) {
+                        sym = SymbolTable.FindNonVariableByAddress(address + 1);
                         if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
                                 sym.SymbolSource != Symbol.Source.Platform) {
                             Debug.WriteLine("Applying non-platform in GeneratePlatform: " + sym);
@@ -1118,11 +1147,6 @@ namespace SourceGen {
                         mAnattribs[offset].DataDescriptor =
                             FormatDescriptor.Create(mAnattribs[offset].Length,
                                 new WeakSymbolRef(sym.Label, WeakSymbolRef.Part.Low), false);
-
-                        // Used to do this here; now do it in GenerateXrefs() so we can
-                        // pick up user-edited operand formats that reference project symbols.
-                        //(sym as DefSymbol).Xrefs.Add(new XrefSet.Xref(offset,
-                        //    XrefSet.XrefType.NameReference, 0));
                     }
                 }
 

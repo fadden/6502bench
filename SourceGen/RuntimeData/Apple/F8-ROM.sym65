@@ -13,7 +13,10 @@ WNDTOP      @ $22       ;top of scroll window
 WNDBTM      @ $23       ;bottom of scsroll window
 CH          @ $24       ;cursor horizontal displacement
 CV          @ $25       ;cursor vertical displacement
-GBASL       @ $26       ;base address for lo-res drawing
+GBASL       @ $26       ;base address for lo-res drawing (lo)
+GBASH       @ $27       ;base address for lo-res drawing (hi)
+H2          @ $2C       ;right end of horizontal line drawn by HLINE
+V2          @ $2D       ;bottom of vertical line drawn by VLINE
 INVFLAG     @ $32       ;text mask (255=normal, 127=flash, 63=inv)
 PROMPT      @ $33       ;prompt character
 CSWL        @ $36       ;character output hook (lo)
@@ -24,12 +27,14 @@ PCL         @ $3A       ;program counter save
 PCH         @ $3B       ;program counter save
 A1L         @ $3C       ;general purpose
 A1H         @ $3D       ;general purpose
+A2L         @ $3E       ;general purpose
+A2H         @ $3F       ;general purpose
 
-SPDBYT      @ $E7       ;text output speed limiter
+SPDBYT      @ $F1       ;text output speed limiter
 
-BRKV        @ $03f0     ;address of BRK handler
-SOFTEVEC    @ $03f2     ;address of RESET handler
-PWREDUP     @ $03f4     ;power-up RESET checksum
+BRKV        @ $03F0     ;address of BRK handler
+SOFTEVEC    @ $03F2     ;address of RESET handler
+PWREDUP     @ $03F4     ;power-up RESET checksum
 USRADDR     @ $03F8     ;jump to function that handles monitor Ctrl-Y
 NMIVEC      @ $03FB     ;jump to function that handles NMI
 IRQADDR     @ $03FE     ;address of IRQ handler

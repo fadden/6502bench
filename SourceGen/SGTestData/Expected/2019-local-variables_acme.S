@@ -9,7 +9,7 @@ CONST_ZERO =    $f0        ;project const
         !rs
         ldy     PROJ_ZERO
         lda     (PROJ_ONE),y
-        sta     $03
+        sta     $03        ;could be PROJ_ONE+2, but "nearby" is off
         ldx     $04
         lda     CONST_ZERO,S
         sta     $f1,S

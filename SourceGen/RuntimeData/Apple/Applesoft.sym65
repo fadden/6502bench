@@ -6,6 +6,7 @@
 
 *SYNOPSIS Applesoft BASIC addresses and constants
 
+USRVEC      @ $0A       ;USR() command vector
 HCOLOR1     @ $1C       ;hi-res color mask
 COUNTH      @ $1D       ;hi-res high-order byte of step for line
 HBASL       @ $26       ;base address for hi-res drawing
@@ -23,6 +24,7 @@ CURLIN      @ $75       ;Applesoft current line number (2b)
 FACMO       @ $A0       ;middle-order byte of mantissa of FAC
 FACLO       @ $A1       ;low-order byte of mantissa of FAC
 FACSIGN     @ $A2       ;single byte sign of FAC
+PRGEND      @ $AF       ;pointer to end of program (2b)
 CHRGET      @ $B1       ;get next character or Applesoft token
 CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
 TXTPTR      @ $B8       ;points at next char or token
