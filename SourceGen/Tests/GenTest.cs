@@ -422,12 +422,16 @@ namespace SourceGen.Tests {
             // desired value.  Easier to just have a set of named features.
             const string ENABLE_LABEL_LOCALIZATION = "__ENABLE_LABEL_LOCALIZATION";
             const string ENABLE_LABEL_NEWLINE = "__ENABLE_LABEL_NEWLINE";
+            const string ENABLE_CYCLE_COUNTS = "__ENABLE_CYCLE_COUNTS";
 
             if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_LABEL_LOCALIZATION)) {
                 settings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false);
             }
             if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_LABEL_NEWLINE)) {
                 settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, true);
+            }
+            if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_CYCLE_COUNTS)) {
+                settings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, true);
             }
         }
 

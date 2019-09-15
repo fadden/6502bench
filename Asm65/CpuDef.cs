@@ -242,7 +242,8 @@ namespace Asm65 {
         /// <returns>Cycle count.</returns>
         public int GetCycles(int opNum, StatusFlags flags, OpDef.BranchTaken branchTaken,
                 bool branchCrossesPage) {
-            // The irrelevant modifiers have already been stripped out.
+            // The irrelevant modifiers have already been stripped out, e.g. OneIfD1 only
+            // affects the 65C02.
             OpDef.CycleMod mods = mCycleMods[opNum];
             int cycles = mCycleCounts[opNum];
 
