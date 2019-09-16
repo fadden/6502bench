@@ -6,159 +6,170 @@
 
 *SYNOPSIS Applesoft BASIC addresses and constants
 
-USRVEC      @ $0A       ;USR() command vector
-HCOLOR1     @ $1C       ;hi-res color mask
-COUNTH      @ $1D       ;hi-res high-order byte of step for line
-HBASL       @ $26       ;base address for hi-res drawing
+BAS_USRVEC      @ $0A       ;USR() command vector
+BAS_HCOLOR1     @ $1C       ;hi-res color mask
+BAS_COUNTH      @ $1D       ;hi-res high-order byte of step for line
+BAS_HBASL       @ $26       ;base address for hi-res drawing
 
-RNDL        @ $4E       ;low byte of KEYIN "random" value
-RNDH        @ $4F       ;high byte of KEYIN "random" value
-LINNUM      @ $50       ;line number ($50-51)
-TEXTTAB     @ $67       ;pointer to start of Applesoft program (2b)
-VARTAB      @ $69       ;pointer to start of Applesoft variables (2b)
-ARYTAB      @ $6B       ;pointer to start of Applesoft array space (2b)
-STREND      @ $6D       ;pointer to end of numeric storage (2b)
-FRETOP      @ $6F       ;pointer to end of string storage (2b)
-MEMSIZE     @ $73       ;Applesoft HIMEM (2b)
-CURLIN      @ $75       ;Applesoft current line number (2b)
-FACMO       @ $A0       ;middle-order byte of mantissa of FAC
-FACLO       @ $A1       ;low-order byte of mantissa of FAC
-FACSIGN     @ $A2       ;single byte sign of FAC
-PRGEND      @ $AF       ;pointer to end of program (2b)
-CHRGET      @ $B1       ;get next character or Applesoft token
-CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
-TXTPTR      @ $B8       ;points at next char or token
+BAS_RNDL        @ $4E       ;low byte of KEYIN "random" value
+BAS_RNDH        @ $4F       ;high byte of KEYIN "random" value
+BAS_LINNUM      @ $50       ;line number (2b)
+BAS_TEMPPT      @ $52       ;temporary point (2b)
+BAS_INDEX       @ $5E       ;temp (stack) pointer for moving strings (2b)
+BAS_TEXTTAB     @ $67       ;pointer to start of Applesoft program (2b)
+BAS_VARTAB      @ $69       ;pointer to start of Applesoft variables (2b)
+BAS_ARYTAB      @ $6B       ;pointer to start of Applesoft array space (2b)
+BAS_STREND      @ $6D       ;pointer to end of numeric storage (2b)
+BAS_FRETOP      @ $6F       ;pointer to end of string storage (2b)
+BAS_MEMSIZE     @ $73       ;HIMEM (2b)
+BAS_CURLIN      @ $75       ;current line number (2b)
+BAS_OLDTEXT     @ $79       ;old text pointer
+BAS_FORPNT      @ $85       ;general pointer (2b)
+BAS_TEMP1       @ $93       ;fp register TEMP1
+BAS_HIGHDS      @ $94       ;block copy pointer (2b)
+BAS_HIGHTR      @ $96       ;block copy pointer (2b)
+BAS_LOWTR       @ $9B       ;general pointer
+BAS_FAC         @ $9D       ;floating point accumulator (6b)
+BAS_FACMO       @ $A0       ;middle-order byte of mantissa of FAC
+BAS_FACLO       @ $A1       ;low-order byte of mantissa of FAC
+BAS_FACSIGN     @ $A2       ;single byte sign of FAC
+BAS_STRING1     @ $AB       ;pointer to a string
+BAS_STRING2     @ $AD       ;pointer to a string
+BAS_PRGEND      @ $AF       ;pointer to end of program (2b)
+BAS_CHRGET      @ $B1       ;get next character or Applesoft token
+BAS_CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
+BAS_TXTPTR      @ $B8       ;points at next char or token
 
-AUTORUN     @ $D6       ;set to $80 to auto-run
-ERRFLG      @ $D8       ;$80 if onerr active
+BAS_AUTORUN     @ $D6       ;set to $80 to auto-run
+BAS_ERRFLG      @ $D8       ;$80 if onerr active
 
-HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
-SCALE       @ $E7       ;hi-res graphics scale factor
+BAS_HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
+BAS_SCALE       @ $E7       ;hi-res graphics scale factor
 
-AMPERV      @ $03F5     ;JMP to function that handles Applesoft '&' cmds
+BAS_AMPERV      @ $03F5     ;JMP to function that handles Applesoft '&' cmds
 
 ;
 ; Useful Applesoft routines.
 ; TODO: there are many more
 ;
-ERROR       @ $D412     ;print error based on X-reg
-FRMNUM      @ $DD67     ;evalute expression at TXTPTR, result into FAC
-SYN_ERROR   @ $DEC9     ;throw SYNTAX ERROR
-CHKCOM      @ $DEBE     ;checks TXTPTR for comma
-ILLQ_ERROR  @ $E199     ;throw ILLEGAL QUANTITY ERROR
-GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
-GETBYT      @ $E6F8     ;gets byte, in X/FACLO
-HFNS        @ $F6B9     ;get hi-res x/y for hplot
+BAS_ERROR       @ $D412     ;print error based on X-reg
+BAS_FRMNUM      @ $DD67     ;evalute expression at TXTPTR, result into FAC
+BAS_SYN_ERROR   @ $DEC9     ;throw SYNTAX ERROR
+BAS_CHKCOM      @ $DEBE     ;checks TXTPTR for comma
+BAS_ILLQ_ERROR  @ $E199     ;throw ILLEGAL QUANTITY ERROR
+BAS_GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
+BAS_GETBYT      @ $E6F8     ;gets byte, in X/FACLO
+BAS_HFNS        @ $F6B9     ;get hi-res x/y for hplot
 
 ;
 ; Applesoft BASIC tokens.
 ;
 *TAG Applesoft-Tokens
-TOK_END     = $80
-TOK_FOR     = $81
-TOK_NEXT    = $82
-TOK_DATA    = $83
-TOK_INPUT   = $84
-TOK_DEL     = $85
-TOK_DIM     = $86
-TOK_READ    = $87
-TOK_GR      = $88
-TOK_TEXT    = $89
-TOK_PR      = $8a
-TOK_IN      = $8b
-TOK_CALL    = $8c
-TOK_PLOT    = $8d
-TOK_HLIN    = $8e
-TOK_VLIN    = $8f
-TOK_HGR2    = $90
-TOK_HGR     = $91
-TOK_HCOLOR  = $92
-TOK_HPLOT   = $93
-TOK_DRAW    = $94
-TOK_XDRAW   = $95
-TOK_HTAB    = $96
-TOK_HOME    = $97
-TOK_ROT     = $98
-TOK_SCALE   = $99
-TOK_SHLOAD  = $9a
-TOK_TRACE   = $9b
-TOK_NOTRACE = $9c
-TOK_NORMAL  = $9d
-TOK_INVERSE = $9e
-TOK_FLASH   = $9f
-TOK_COLOR   = $a0
-TOK_POP     = $a1
-TOK_VTAB    = $a2
-TOK_HIMEM   = $a3
-TOK_LOMEM   = $a4
-TOK_ONERR   = $a5
-TOK_RESUME  = $a6
-TOK_RECALL  = $a7
-TOK_STORE   = $a8
-TOK_SPEED   = $a9
-TOK_LET     = $aa
-TOK_GOTO    = $ab
-TOK_RUN     = $ac
-TOK_IF      = $ad
-TOK_RESTORE = $ae
-TOK_AMPER   = $af
-TOK_GOSUB   = $b0
-TOK_RETURN  = $b1
-TOK_REM     = $b2
-TOK_STOP    = $b3
-TOK_ON      = $b4
-TOK_WAIT    = $b5
-TOK_LOAD    = $b6
-TOK_SAVE    = $b7
-TOK_DEF     = $b8
-TOK_POKE    = $b9
-TOK_PRINT   = $ba
-TOK_CONT    = $bb
-TOK_LIST    = $bc
-TOK_CLEAR   = $bd
-TOK_GET     = $be
-TOK_NEW     = $bf
-TOK_TAB     = $c0
-TOK_TO      = $c1
-TOK_FN      = $c2
-TOK_SPC     = $c3
-TOK_THEN    = $c4
-TOK_AT      = $c5
-TOK_NOT     = $c6
-TOK_STEP    = $c7
-TOK_PLUS    = $c8
-TOK_MINUS   = $c9
-TOK_MULT    = $ca
-TOK_DIV     = $cb
-TOK_EXPOP   = $cc
-TOK_AND     = $cd
-TOK_OR      = $ce
-TOK_GREATER = $cf
-TOK_EQUAL   = $d0
-TOK_LESSER  = $d1
-TOK_SGN     = $d2
-TOK_INT     = $d3
-TOK_ABS     = $d4
-TOK_USR     = $d5
-TOK_FRE     = $d6
-TOK_SCRN    = $d7
-TOK_PDL     = $d8
-TOK_POS     = $d9
-TOK_SQR     = $da
-TOK_RND     = $db
-TOK_LOG     = $dc
-TOK_EXP     = $dd
-TOK_COS     = $de
-TOK_SIN     = $df
-TOK_TAN     = $e0
-TOK_ATN     = $e1
-TOK_PEEK    = $e2
-TOK_LEN     = $e3
-TOK_STR     = $e4
-TOK_VAL     = $e5
-TOK_ASC     = $e6
-TOK_CHR     = $e7
-TOK_LEFT    = $e8
-TOK_RIGHT   = $e9
-TOK_MID     = $ea
+TOK_END         = $80
+TOK_FOR         = $81
+TOK_NEXT        = $82
+TOK_DATA        = $83
+TOK_INPUT       = $84
+TOK_DEL         = $85
+TOK_DIM         = $86
+TOK_READ        = $87
+TOK_GR          = $88
+TOK_TEXT        = $89
+TOK_PR          = $8a
+TOK_IN          = $8b
+TOK_CALL        = $8c
+TOK_PLOT        = $8d
+TOK_HLIN        = $8e
+TOK_VLIN        = $8f
+TOK_HGR2        = $90
+TOK_HGR         = $91
+TOK_HCOLOR      = $92
+TOK_HPLOT       = $93
+TOK_DRAW        = $94
+TOK_XDRAW       = $95
+TOK_HTAB        = $96
+TOK_HOME        = $97
+TOK_ROT         = $98
+TOK_SCALE       = $99
+TOK_SHLOAD      = $9a
+TOK_TRACE       = $9b
+TOK_NOTRACE     = $9c
+TOK_NORMAL      = $9d
+TOK_INVERSE     = $9e
+TOK_FLASH       = $9f
+TOK_COLOR       = $a0
+TOK_POP         = $a1
+TOK_VTAB        = $a2
+TOK_HIMEM       = $a3
+TOK_LOMEM       = $a4
+TOK_ONERR       = $a5
+TOK_RESUME      = $a6
+TOK_RECALL      = $a7
+TOK_STORE       = $a8
+TOK_SPEED       = $a9
+TOK_LET         = $aa
+TOK_GOTO        = $ab
+TOK_RUN         = $ac
+TOK_IF          = $ad
+TOK_RESTORE     = $ae
+TOK_AMPER       = $af
+TOK_GOSUB       = $b0
+TOK_RETURN      = $b1
+TOK_REM         = $b2
+TOK_STOP        = $b3
+TOK_ON          = $b4
+TOK_WAIT        = $b5
+TOK_LOAD        = $b6
+TOK_SAVE        = $b7
+TOK_DEF         = $b8
+TOK_POKE        = $b9
+TOK_PRINT       = $ba
+TOK_CONT        = $bb
+TOK_LIST        = $bc
+TOK_CLEAR       = $bd
+TOK_GET         = $be
+TOK_NEW         = $bf
+TOK_TAB         = $c0
+TOK_TO          = $c1
+TOK_FN          = $c2
+TOK_SPC         = $c3
+TOK_THEN        = $c4
+TOK_AT          = $c5
+TOK_NOT         = $c6
+TOK_STEP        = $c7
+TOK_PLUS        = $c8
+TOK_MINUS       = $c9
+TOK_MULT        = $ca
+TOK_DIV         = $cb
+TOK_EXPOP       = $cc
+TOK_AND         = $cd
+TOK_OR          = $ce
+TOK_GREATER     = $cf
+TOK_EQUAL       = $d0
+TOK_LESSER      = $d1
+TOK_SGN         = $d2
+TOK_INT         = $d3
+TOK_ABS         = $d4
+TOK_USR         = $d5
+TOK_FRE         = $d6
+TOK_SCRN        = $d7
+TOK_PDL         = $d8
+TOK_POS         = $d9
+TOK_SQR         = $da
+TOK_RND         = $db
+TOK_LOG         = $dc
+TOK_EXP         = $dd
+TOK_COS         = $de
+TOK_SIN         = $df
+TOK_TAN         = $e0
+TOK_ATN         = $e1
+TOK_PEEK        = $e2
+TOK_LEN         = $e3
+TOK_STR         = $e4
+TOK_VAL         = $e5
+TOK_ASC         = $e6
+TOK_CHR         = $e7
+TOK_LEFT        = $e8
+TOK_RIGHT       = $e9
+TOK_MID         = $ea
 ; end of tokens

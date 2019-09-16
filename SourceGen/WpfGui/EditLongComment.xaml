@@ -60,7 +60,7 @@ limitations under the License.
             <TextBlock Text="Maximum line width:"/>
             <ComboBox Name="maxWidthComboBox" Width="75" Margin="8,0,0,0"
                       ItemsSource="{Binding LineWidthItems}" SelectionChanged="MaxWidthComboBox_SelectionChanged"/>
-            <CheckBox Content="Render in box" Margin="40,1,0,0" IsChecked="{Binding RenderInBox}"/>
+            <CheckBox Content="Render in _box" Margin="40,1,0,0" IsChecked="{Binding RenderInBox}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="3" Text="Expected output:" Margin="0,20,0,0"/>

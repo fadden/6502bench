@@ -1,7 +1,7 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":1,"FileDataLength":661,"FileDataCrc32":2075163852,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AnalysisParams":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
 "PlatformSymbolFileIdentifiers":["RT:Apple/F8-ROM.sym65","RT:Apple/Cxxx-IO.sym65","RT:Apple/Applesoft.sym65","PROJ:fdraw-exports.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
@@ -235,15 +235,9 @@
 "5":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"dispatch","Part":"Low"}},
-"7":{
-"Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"AMPERV","Part":"Low"}},
 "10":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"dispatch","Part":"High"}},
-"12":{
-"Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"AMPERV","Part":"Low"}},
 "40":{
 "Length":1,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"TOK_NEW","Part":"Low"}},
@@ -394,20 +388,11 @@
 "363":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"TOK_TO","Part":"Low"}},
-"473":{
-"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"LINNUM","Part":"Low"}},
 "492":{
 "Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
 "512":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"TOK_AT","Part":"Low"}},
-"522":{
-"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"LINNUM","Part":"Low"}},
-"529":{
-"Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"LINNUM","Part":"Low"}},
 "582":{
 "Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
 "586":{
