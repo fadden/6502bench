@@ -2049,6 +2049,7 @@ namespace Asm65 {
             Opcode = 0x6c,
             AddrMode = AddressMode.AbsInd,
             CycDef = 5 | (int)(CycleMod.OneIf65C02)
+            // takes one extra cycle on CMOS 6502 if low byte is 0xff?? (it also has a bug)
         };
         public static readonly OpDef OpADC_Abs = new OpDef(OpADC) {
             Opcode = 0x6d,
