@@ -291,9 +291,17 @@ namespace SourceGen.AsmGen {
                 int cycles = proj.CpuDef.GetCycles(op.Opcode, attr.StatusFlags, attr.BranchTaken,
                     branchCross);
                 if (cycles > 0) {
-                    eolComment = cycles.ToString() + "  " + eolComment;
+                    if (!string.IsNullOrEmpty(eolComment)) {
+                        eolComment = cycles.ToString() + "  " + eolComment;
+                    } else {
+                        eolComment = cycles.ToString();
+                    }
                 } else {
-                    eolComment = (-cycles).ToString() + "+ " + eolComment;
+                    if (!string.IsNullOrEmpty(eolComment)) {
+                        eolComment = (-cycles).ToString() + "+ " + eolComment;
+                    } else {
+                        eolComment = (-cycles).ToString() + "+";
+                    }
                 }
             }
             string commentStr = formatter.FormatEolComment(eolComment);

@@ -13,10 +13,9 @@
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
-},
+"2":"crosses page boundary","28":"branch always","32":"branch never","37":"branch maybe","39":"BRK with E=1","66":"BRK with E=0","105":"should have no effect on cycle counts on 65816"},
 "LongComments":{
-"-2147483647":{
-"Text":"6502bench SourceGen v1.3.0-dev6","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+},
 "Notes":{
 },
 "UserLabels":{
