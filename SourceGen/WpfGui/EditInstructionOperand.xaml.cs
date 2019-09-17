@@ -946,6 +946,10 @@ namespace SourceGen.WpfGui {
                 CreateEditLabelText = EDIT_LABEL;
                 NarTargetLabel = mEditedLabel.Label;
             }
+
+            // Sort nice to just hit return twice after entering a label, so move the focus
+            // to the OK button.
+            okButton.Focus();
         }
 
         private void EditProjectSymbol_Click(object sender, RoutedEventArgs e) {

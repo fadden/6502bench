@@ -204,6 +204,18 @@ ok_rol1
         brk     $00
 ok_plp
 
+; regression test for bug in analyzer
+        sec                 ;here carry is clear
+        bcs     flg2
+flg1    clc
+
+flg2    lda     $33
+        beq     flg1
+        bcs     flg3        ;this should NOT be branch-always
+        lda     $44
+flg3    nop
+
+; test tracking across subroutine calls
         rep     #$20        ;long a
         sep     #$10        ;short x/y
         mx      %01

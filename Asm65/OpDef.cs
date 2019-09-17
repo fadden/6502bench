@@ -821,6 +821,7 @@ namespace Asm65 {
             BaseMemEffect = MemoryEffect.Read,
             FlagsAffected = FlagsAffected_NVZC,
             StatusFlagUpdater = FlagUpdater_NVZC
+            // We can assert C=0 after ADC #$00, but only if C=0 on entry.  Doesn't seem useful.
         };
         private static OpDef OpAND = new OpDef() {
             Mnemonic = OpName.AND,

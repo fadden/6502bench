@@ -228,32 +228,41 @@ L10FA   clc
         .byte   $00
         .byte   $00
 
-L1102   rep     #$20
-        .al
-        sep     #$10
-        jsr     L111D
-        rep     #$30
-        .xl
-        jsr     L1123
-        sep     #$30
-        .as
-        .xs
-        jsr     L1123
+L1102   sec
+        bcs     L1106
+
+L1105   clc
+L1106   lda     $33
+        beq     L1105
+        bcs     L110E
+        lda     $44
+L110E   nop
         rep     #$20
         .al
         sep     #$10
-        jsr     L111D
+        jsr     L112A
+        rep     #$30
+        .xl
+        jsr     L1130
+        sep     #$30
+        .as
+        .xs
+        jsr     L1130
+        rep     #$20
+        .al
+        sep     #$10
+        jsr     L112A
         sep     #$30
         .as
         rts
 
         .al
-L111D   lda     #$1234
+L112A   lda     #$1234
         ldx     #$ff
         rts
 
         .as
-L1123   lda     #$ff
+L1130   lda     #$ff
         ldx     #$ee
         ldy     #$dd
         rts

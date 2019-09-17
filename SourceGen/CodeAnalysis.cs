@@ -757,14 +757,16 @@ namespace SourceGen {
                 // If we've already visited the next offset, and the updated status flags are
                 // the same as the previous status flags, then there's nothing to gain by
                 // continuing forward.
-                if (mAnattribs[nextOffset].IsVisited) {
-                    if (!mAnattribs[nextOffset].IsChanged &&
-                            nextStatusBefore == mAnattribs[nextOffset].StatusFlags) {
+                if (mAnattribs[nextOffset].IsVisited && !mAnattribs[nextOffset].IsChanged) {
+                    if (nextStatusBefore == mAnattribs[nextOffset].StatusFlags) {
                         // Instruction has been visited, hasn't been flagged as changed,
                         // and our status flag merge had no effect. No need to continue
                         // through.
                         LogV(offset, "Not re-examining " + nextOffset);
                         break;
+                    } else {
+                        // We changed the flags, need to re-evaluate conditional branches.
+                        mAnattribs[nextOffset].IsChanged = true;
                     }
                 }
 

@@ -35,15 +35,15 @@ limitations under the License.
         <system:String x:Key="str_SymbolNotValid">[invalid symbol name]</system:String>
         <system:String x:Key="str_SymbolUnknown">?</system:String>
 
-        <system:String x:Key="str_CreateLocalVariable">Create Local Variable</system:String>
-        <system:String x:Key="str_EditLocalVariable">Edit Local Variable</system:String>
+        <system:String x:Key="str_CreateLocalVariable">Create Local _Variable</system:String>
+        <system:String x:Key="str_EditLocalVariable">Edit Local _Variable</system:String>
         <system:String x:Key="str_LvMatchFoundAddress">Match found (ZP address):</system:String>
         <system:String x:Key="str_LvMatchFoundConstant">Match found (StackRel constant):</system:String>
 
-        <system:String x:Key="str_CreateLabel">Create Label</system:String>
-        <system:String x:Key="str_EditLabel">Edit Label</system:String>
-        <system:String x:Key="str_CreateProjectSymbol">Create Project Symbol</system:String>
-        <system:String x:Key="str_EditProjectSymbol">Edit Project Symbol</system:String>
+        <system:String x:Key="str_CreateLabel">Create _Label</system:String>
+        <system:String x:Key="str_EditLabel">Edit _Label</system:String>
+        <system:String x:Key="str_CreateProjectSymbol">Create _Project Symbol</system:String>
+        <system:String x:Key="str_EditProjectSymbol">Edit _Project Symbol</system:String>
         <system:String x:Key="str_CurrentLabel">Current label:</system:String>
         <system:String x:Key="str_CurrentLabelAdjustedFmt">Current label (adjusted {0}):</system:String>
     </Window.Resources>
@@ -67,7 +67,7 @@ limitations under the License.
 
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,8">
             <RadioButton GroupName="Main" Margin="0,2,0,0"
-                         Content="Default (auto-format as hex, local var, or reference to label/platform/project symbol)"
+                         Content="D_efault (auto-format as hex, local var, or reference to label/platform/project symbol)"
                          IsChecked="{Binding FormatDefault}"/>
         </StackPanel>
 
@@ -79,17 +79,17 @@ limitations under the License.
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
-                    <RadioButton GroupName="Main" Content="Hexadecimal"
+                    <RadioButton GroupName="Main" Content="_Hexadecimal"
                                  IsChecked="{Binding FormatHex}"/>
-                    <RadioButton GroupName="Main" Content="Decimal" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="_Decimal" Margin="0,2,0,0"
                                  IsChecked="{Binding FormatDecimal}"/>
-                    <RadioButton GroupName="Main" Content="Binary" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="_Binary" Margin="0,2,0,0"
                                  IsChecked="{Binding FormatBinary}"/>
-                    <RadioButton GroupName="Main" Content="ASCII (low or high) character" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="_ASCII (low or high) character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatAsciiAllowed}" IsChecked="{Binding FormatAscii}"/>
-                    <RadioButton GroupName="Main" Content="C64 PETSCII character" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="C64 _PETSCII character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatPetsciiAllowed}" IsChecked="{Binding FormatPetscii}"/>
-                    <RadioButton GroupName="Main" Content="C64 Screen character" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="C64 Sc_reen character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatScreenCodeAllowed}" IsChecked="{Binding FormatScreenCode}"/>
                 </StackPanel>
 
@@ -104,7 +104,7 @@ limitations under the License.
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <RadioButton Name="formatSymbolButton" Grid.Column="0" Grid.Row="0" GroupName="Main"
-                                 Content="Symbol" IsChecked="{Binding FormatSymbol}"/>
+                                 Content="_Symbol" IsChecked="{Binding FormatSymbol}"/>
                     <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" Margin="18,1,0,0">
                         <TextBox Name="symbolTextBox" Grid.Column="0" Grid.Row="1" Width="150"
                                  FontFamily="{StaticResource GeneralMonoFont}"
@@ -118,7 +118,7 @@ limitations under the License.
                                 IsEnabled="{Binding IsPartPanelEnabled}">
                         <RadioButton GroupName="Part" Content="Low"
                                      IsChecked="{Binding FormatPartLow}"/>
-                        <RadioButton GroupName="Part" Content="High" Margin="10,0,0,0"
+                        <RadioButton GroupName="Part" Content="_High" Margin="10,0,0,0"
                                      IsChecked="{Binding FormatPartHigh}"/>
                         <RadioButton GroupName="Part" Content="Bank" Margin="10,0,0,0"
                                      IsChecked="{Binding FormatPartBank}"/>
@@ -221,7 +221,7 @@ limitations under the License.
 
         <DockPanel Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" IsCancel="True" Margin="8,0,0,0"/>
-            <Button DockPanel.Dock="Right" Content="OK" Width="70" IsDefault="True"
+            <Button Name="okButton" DockPanel.Dock="Right" Content="OK" Width="70" IsDefault="True"
                     IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
         </DockPanel>
     </Grid>
