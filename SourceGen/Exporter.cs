@@ -366,6 +366,11 @@ namespace SourceGen {
             // Perform some quick substitutions.
             tmplStr = tmplStr.Replace("$ProjectName$", mProject.DataFileName);
             tmplStr = tmplStr.Replace("$AppVersion$", App.ProgramVersion.ToString());
+            string expModeStr = ((Formatter.FormatConfig.ExpressionMode)
+                AppSettings.Global.GetEnum(AppSettings.FMT_EXPRESSION_MODE,
+                    typeof(Formatter.FormatConfig.ExpressionMode),
+                    (int)Formatter.FormatConfig.ExpressionMode.Unknown)).ToString();
+            tmplStr = tmplStr.Replace("$ExpressionStyle$", expModeStr);
 
             // Generate and substitute the symbol table.  This should be small enough that
             // we won't break the world by doing it with string.Replace().
@@ -693,7 +698,7 @@ namespace SourceGen {
                 sb.Append("  <tr>");
                 sb.Append("<td><a href=#" + LABEL_LINK_PREFIX + sym.Label + ">" +
                     sym.Label + "</a></td>");
-                sb.Append("<td>" + mFormatter.FormatHexValue(sym.Value, 2) + "</td>");
+                sb.Append("<td><code>" + mFormatter.FormatHexValue(sym.Value, 2) + "</code></td>");
                 sb.Append("</tr>\r\n");
                 count++;
             }
