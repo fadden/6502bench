@@ -200,6 +200,27 @@ namespace CommonUtil {
         }
 
         /// <summary>
+        /// Escapes a string for HTML.
+        /// </summary>
+        /// <param name="str">String to process.</param>
+        /// <returns>Escaped string.</returns>
+        public static string EscapeHTML(string str) {
+            StringBuilder sb = new StringBuilder(str.Length);
+            for (int i = 0; i < str.Length; i++) {
+                if (str[i] == '<') {
+                    sb.Append("&lt;");
+                } else if (str[i] == '>') {
+                    sb.Append("&gt;");
+                } else if (str[i] == '&') {
+                    sb.Append("&amp;");
+                } else {
+                    sb.Append(str[i]);
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Serializes an integer array into a string.
         /// </summary>
         /// <param name="values">Array to serialize.</param>

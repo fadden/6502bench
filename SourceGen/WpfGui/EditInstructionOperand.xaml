@@ -118,7 +118,7 @@ limitations under the License.
                                 IsEnabled="{Binding IsPartPanelEnabled}">
                         <RadioButton GroupName="Part" Content="Low"
                                      IsChecked="{Binding FormatPartLow}"/>
-                        <RadioButton GroupName="Part" Content="_High" Margin="10,0,0,0"
+                        <RadioButton GroupName="Part" Content="H_igh" Margin="10,0,0,0"
                                      IsChecked="{Binding FormatPartHigh}"/>
                         <RadioButton GroupName="Part" Content="Bank" Margin="10,0,0,0"
                                      IsChecked="{Binding FormatPartBank}"/>

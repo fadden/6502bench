@@ -947,7 +947,7 @@ namespace SourceGen.WpfGui {
                 NarTargetLabel = mEditedLabel.Label;
             }
 
-            // Sort nice to just hit return twice after entering a label, so move the focus
+            // Sort of nice to just hit return twice after entering a label, so move the focus
             // to the OK button.
             okButton.Focus();
         }
@@ -985,6 +985,9 @@ namespace SourceGen.WpfGui {
             // The preview and symbol value display will use mEditedProjectSymbol if it's the
             // only place the symbol exists, so we want to keep the other controls updated.
             UpdateControls();
+
+            // Move the focus to the OK button.
+            okButton.Focus();
         }
 
         private void CopyToOperandButton_Click(object sender, RoutedEventArgs e) {

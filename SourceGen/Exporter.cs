@@ -96,6 +96,11 @@ namespace SourceGen {
             COUNT           // number of elements, must be last
         }
 
+        /// <summary>
+        /// If set, labels that are wider than the label column should go on their own line.
+        /// </summary>
+        private bool mLongLabelNewLine;
+
 
         /// <summary>
         /// Constructor.
@@ -106,6 +111,10 @@ namespace SourceGen {
             mCodeLineList = codeLineList;
             mFormatter = formatter;
             mLeftFlags = leftFlags;
+
+            // Go ahead and latch this here.
+            mLongLabelNewLine =
+                AppSettings.Global.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
 
             ConfigureColumns(leftFlags, rightWidths);
         }
@@ -399,7 +408,8 @@ namespace SourceGen {
 
                 // With the style "code { white-space: pre; }", leading spaces and EOL markers
                 // are preserved.
-                sw.Write("<code style=\"white-space: pre;\">");
+                //sw.Write("<code style=\"white-space: pre;\">");
+                sw.Write("<pre>");
                 StringBuilder sb = new StringBuilder(128);
                 for (int lineIndex = 0; lineIndex < mCodeLineList.Count; lineIndex++) {
                     if (Selection != null && !Selection[lineIndex]) {
@@ -407,12 +417,12 @@ namespace SourceGen {
                     }
 
                     if (GenerateHtmlLine(lineIndex, sb)) {
-                        sw.WriteLine(sb.ToString());
-                        //sw.WriteLine("<br/>");
+                        sw.Write(sb.ToString());
                     }
                     sb.Clear();
                 }
-                sw.WriteLine("</code>\r\n");
+                //sw.WriteLine("</code>\r\n");
+                sw.WriteLine("</pre>\r\n");
 
                 sw.Write(template2);
             }
@@ -433,8 +443,11 @@ namespace SourceGen {
                 }
             }
         }
+
         /// <summary>
-        /// Generates a line of HTML output.  The line will not have EOL markers added.
+        /// Generates HTML output for one display line.  This may result in more than one line
+        /// of HTML output, e.g. if the label is longer than the field.  EOL markers will
+        /// be added.
         /// </summary>
         /// <remarks>
         /// Currently just generating a line of pre-formatted text.  We could also output
@@ -452,7 +465,43 @@ namespace SourceGen {
             LineListGen.Line line = mCodeLineList[index];
             DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
 
-            // TODO: linkify label and operand fields
+            int maxLabelLen = mColEnd[(int)Col.Label] - mColEnd[(int)Col.Attr] - 1;
+
+            string anchorLabel = null;
+            if ((line.LineType == LineListGen.Line.Type.Code ||
+                        line.LineType == LineListGen.Line.Type.Data ||
+                        line.LineType == LineListGen.Line.Type.EquDirective) &&
+                    !string.IsNullOrEmpty(parts.Label)) {
+                anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + parts.Label +
+                    "\">" + parts.Label + "</a>";
+            }
+
+            string linkOperand = null;
+            if ((line.LineType == LineListGen.Line.Type.Code ||
+                        line.LineType == LineListGen.Line.Type.Data) &&
+                    parts.Operand.Length > 0) {
+                linkOperand = GetLinkOperand(index, parts.Operand);
+            }
+
+            int colPos = 0;
+
+            bool suppressLabel = false;
+            if (mLongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
+                    line.LineType == LineListGen.Line.Type.Data)) {
+                int labelLen = string.IsNullOrEmpty(parts.Label) ? 0 : parts.Label.Length;
+                if (labelLen > maxLabelLen) {
+                    // put on its own line
+                    AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr], string.Empty, 0);
+                    if (anchorLabel != null) {
+                        sb.Append(anchorLabel);
+                    } else {
+                        sb.Append(parts.Label);
+                    }
+                    sb.Append("\r\n");
+                    suppressLabel = true;
+                    Debug.Assert(colPos == 0);
+                }
+            }
 
             switch (line.LineType) {
                 case LineListGen.Line.Type.Code:
@@ -462,17 +511,19 @@ namespace SourceGen {
                 case LineListGen.Line.Type.OrgDirective:
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {
-                        // This happens for long comments embedded in LV tables.
-                        if (mColEnd[(int)Col.Attr] != 0) {
-                            TextUtil.AppendPaddedString(sb, string.Empty, mColEnd[(int)Col.Attr]);
-                        }
-                        sb.Append(parts.Comment);
+                        // This happens for long comments embedded in LV tables, e.g.
+                        // "clear table".
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
+                            string.Empty, 0);
+                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
                         break;
                     }
 
+                    // these columns are optional
+
                     if ((mLeftFlags & ActiveColumnFlags.Offset) != 0) {
-                        TextUtil.AppendPaddedString(sb, parts.Offset,
-                            mColEnd[(int)Col.Offset]);
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Offset],
+                            parts.Offset, parts.Offset.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Address) != 0) {
                         string str;
@@ -481,71 +532,72 @@ namespace SourceGen {
                         } else {
                             str = string.Empty;
                         }
-                        TextUtil.AppendPaddedString(sb, str, mColEnd[(int)Col.Address]);
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Address],
+                            str, str.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Bytes) != 0) {
                         // Shorten the "...".
                         string bytesStr = parts.Bytes;
-                        if (bytesStr != null && bytesStr.Length > bytesWidth) {
+                        if (bytesStr == null) {
+                            bytesStr = string.Empty;
+                        }
+                        if (bytesStr.Length > bytesWidth) {
                             bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
                         }
-                        TextUtil.AppendPaddedString(sb, bytesStr, mColEnd[(int)Col.Bytes]);
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Bytes],
+                            bytesStr, bytesStr.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Flags) != 0) {
-                        TextUtil.AppendPaddedString(sb, parts.Flags, mColEnd[(int)Col.Flags]);
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Flags],
+                            parts.Flags, parts.Flags.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Attr) != 0) {
-                        TextUtil.AppendPaddedString(sb, parts.Attr, mColEnd[(int)Col.Attr]);
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
+                            TextUtil.EscapeHTML(parts.Attr), parts.Attr.Length);
                     }
-                    int labelOffset = sb.Length;
-                    TextUtil.AppendPaddedString(sb, parts.Label, mColEnd[(int)Col.Label]);
-                    TextUtil.AppendPaddedString(sb, parts.Opcode, mColEnd[(int)Col.Opcode]);
-                    int operandOffset = sb.Length;
-                    TextUtil.AppendPaddedString(sb, parts.Operand, mColEnd[(int)Col.Operand]);
+
+                    // remaining columns are mandatory, but may be empty
+
+                    if (suppressLabel) {
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
+                            string.Empty, 0);
+                    } else if (anchorLabel != null) {
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
+                            anchorLabel, parts.Label.Length);
+                    } else if (parts.Label != null) {
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
+                            parts.Label, parts.Label.Length);
+                    }
+
+                    colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Opcode],
+                            parts.Opcode, parts.Opcode.Length);
+
+                    if (linkOperand != null) {
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Operand],
+                            linkOperand, parts.Operand.Length);
+                    } else {
+                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Operand],
+                            TextUtil.EscapeHTML(parts.Operand), parts.Operand.Length);
+                    }
+
                     if (string.IsNullOrEmpty(parts.Comment)) {
                         // Trim trailing spaces off opcode or operand.  Would be more efficient
                         // to just not generate the spaces, but this is simpler and we're not
                         // in a hurry.
                         TextUtil.TrimEnd(sb);
                     } else {
-                        sb.Append(parts.Comment);
+                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
                     }
 
-                    // Replace label with anchor label.  We do it this late because we need the
-                    // spacing to be properly set, and I don't feel like changing how all the
-                    // AppendPaddedString code works.
-                    if ((line.LineType == LineListGen.Line.Type.Code ||
-                            line.LineType == LineListGen.Line.Type.Data ||
-                            line.LineType == LineListGen.Line.Type.EquDirective) &&
-                            !string.IsNullOrEmpty(parts.Label)) {
-                        string linkLabel = "<a name=\"" + LABEL_LINK_PREFIX + parts.Label +
-                            "\">" + parts.Label + "</a>";
-                        sb.Remove(labelOffset, parts.Label.Length);
-                        sb.Insert(labelOffset, linkLabel);
-
-                        // Adjust operand position.
-                        operandOffset += linkLabel.Length - parts.Label.Length;
-                    }
-
-                    if ((line.LineType == LineListGen.Line.Type.Code ||
-                            line.LineType == LineListGen.Line.Type.Data) &&
-                            parts.Operand.Length > 0) {
-                        string linkOperand = GetLinkOperand(index, parts.Operand);
-                        if (!string.IsNullOrEmpty(linkOperand)) {
-                            sb.Remove(operandOffset, parts.Operand.Length);
-                            sb.Insert(operandOffset, linkOperand);
-                        }
-                    }
                     break;
                 case LineListGen.Line.Type.LongComment:
                 case LineListGen.Line.Type.Note:
                     if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
                         return false;
                     }
-                    if (mColEnd[(int)Col.Attr] != 0) {
-                        // Long comments aren't the left-most field, so pad it out.
-                        TextUtil.AppendPaddedString(sb, string.Empty, mColEnd[(int)Col.Attr]);
-                    }
+                    // Long comments aren't the left-most field, so pad it out.
+                    colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
+                        string.Empty, 0);
 
                     // Notes have a background color.  Use this to highlight the text.  We
                     // don't apply it to the padding on the left columns.
@@ -558,10 +610,10 @@ namespace SourceGen {
                     }
                     if (rgb != 0) {
                         sb.AppendFormat("<span style=\"background-color: #{0:x6}\">", rgb);
-                        sb.Append(parts.Comment);
+                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
                         sb.Append("</span>");
                     } else {
-                        sb.Append(parts.Comment);
+                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
                     }
                     break;
                 case LineListGen.Line.Type.Blank:
@@ -570,7 +622,31 @@ namespace SourceGen {
                     Debug.Assert(false);
                     break;
             }
+
+            sb.Append("\r\n");
             return true;
+        }
+
+        private int AddSpacedString(StringBuilder sb, int startPosn, int colEnd, string str,
+                int virtualLength) {
+            int newLen = startPosn + virtualLength;
+            if (startPosn + virtualLength >= colEnd) {
+                // Off end of column.  Output string plus one space, unless the length is zero
+                // (because that means we're just padding to the start of a column).
+                sb.Append(str);
+                if (virtualLength != 0) {
+                    sb.Append(' ');
+                }
+                return newLen + 1;
+            } else {
+                // Short of column end.  Add spaces until we reach it.
+                sb.Append(str);
+                while (newLen < colEnd) {
+                    sb.Append(' ');
+                    newLen++;
+                }
+            }
+            return newLen;
         }
 
         /// <summary>
@@ -613,7 +689,7 @@ namespace SourceGen {
 
             string linkified = "<a href=#" + LABEL_LINK_PREFIX + sym.Label + ">" +
                 sym.Label + "</a>";
-            return operand.Replace(sym.Label, linkified);
+            return TextUtil.EscapeHTML(operand).Replace(sym.Label, linkified);
         }
 
         /// <summary>

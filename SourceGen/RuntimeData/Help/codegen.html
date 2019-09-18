@@ -118,8 +118,8 @@ so any failure is an opportunity for improvement.</p>
 SourceGen works around when generating code.</p>
 <p>Every assembler seems to have a different way of dealing with expressions.
 Most of them will let you group expressions with parenthesis, but that
-doesn't always help.  For example, <code>PEA label >> 8 + 1</code> is
-perfectly valid, but writing <code>PEA (label >> 8) + 1</code> will cause
+doesn't always help.  For example, <code>PEA label &gt;&gt; 8 + 1</code> is
+perfectly valid, but writing <code>PEA (label &gt;&gt; 8) + 1</code> will cause
 most assemblers to assume you're trying to use an alternate (and non-existent)
 form of <code>PEA</code> with indirect addressing, causing the assembler
 to halt with an error message.  The code generator needs
@@ -236,11 +236,11 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <p>Quirks:</p>
 <ul>
-  <li>Operator precedence is unusual.  Consider <code>label >> 8 - 16</code>.
+  <li>Operator precedence is unusual.  Consider <code>label &gt;&gt; 8 - 16</code>.
     cc65 puts shift higher than subtraction, whereas languages like C
     and assemblers like 64tass do it the other way around.  So cc65
-    regards the expression as <code>(label >> 8) - 16</code>, while the
-    more common interpretation would be <code>label >> (8 - 16)</code>.
+    regards the expression as <code>(label &gt;&gt; 8) - 16</code>, while the
+    more common interpretation would be <code>label &gt;&gt; (8 - 16)</code>.
     (This is actually somewhat convenient, since none of the expressions
     SourceGen currently generates require parenthesis.)</li>
   <li>Undocumented opcode <code>SBX</code> ($cb) uses the mnemonic AXS.  All
@@ -308,14 +308,15 @@ code, but also needs to know how to handle the corner cases.</p>
 <p>The "export" function takes what you see in the code list in the app
 and converts it to text or HTML.  The options you've set in the app
 settings, such as capitalization, text delimiters, pseudo-opcode names,
-and operand expression style, are all taken into account.  The file
-generated is not expected to work with an actual assembler.</p>
+operand expression style, and display of cycle counts are all taken into
+account.  The file generated is not expected to work with an actual
+assembler.</p>
 <p>The text output is similar to what you'd get by copying lines to the
 clipboard and pasting them into a text file, except that you have greater
 control over which columns are included.  The HTML version is augmented
 with links.</p>
 
-<p>Use File > Export to open the export dialog.  You have several options:</p>
+<p>Use File &gt; Export to open the export dialog.  You have several options:</p>
 <ul>
   <li><b>Include only selected lines</b>.  This allows you to choose between
     exporting all or part of a file.  If no lines are selected, the entire
@@ -330,9 +331,7 @@ with links.</p>
   <li><b>Column widths</b>.  These determine the minimum widths of the
     rightmost four columns.  These are not hard limits: if the contents
     of the column are too wide, the next column will start farther over.
-    The width specified does not include the space character that is
-    automatically added between fields.  The widths are not used at
-    all for CSV output.</li>
+    The widths are not used at all for CSV output.</li>
   <li><b>Text vs. CSV</b>.  For text generation, you can choose between
     plain text and Comma-Separated Value format.  The latter is useful
     for importing source code into another application, such as a
