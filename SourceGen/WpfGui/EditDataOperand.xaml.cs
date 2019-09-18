@@ -967,6 +967,7 @@ namespace SourceGen.WpfGui {
             }
             while (low <= high) {
                 if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                    // should not be REMOVE with a meaningful subtype
                     Debug.Assert(dfd.IsNumeric);
                     int val = RawData.GetWord(mFileData, low, dfd.Length,
                         type == FormatDescriptor.Type.NumericBE);
