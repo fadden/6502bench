@@ -158,28 +158,32 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Pads a string with trailing spaces so that the total length of the line, including
-        /// previous contents, is the length specified.  One trailing space will be added even
-        /// if the string's length is >= toLen.
+        /// Appends a string to the string buffer.  If the number of characters in the buffer
+        /// is less than the desired start position, spaces will be added.  At least one space
+        /// will always be added if the start position is greater than zero and the string
+        /// is non-empty.
         /// 
         /// You must begin with an empty StringBuilder at the start of each line.
         /// </summary>
         /// <param name="sb">StringBuilder to append to.</param>
-        /// <param name="str">String to add.</param>
-        /// <param name="toLen">Total line width to pad to.</param>
-        public static void AppendPaddedString(StringBuilder sb, string str, int toLen) {
-            if (str == null) {
-                str = string.Empty;
+        /// <param name="str">String to add.  null strings are treated as empty strings.</param>
+        /// <param name="startPos">Desired starting position.</param>
+        public static void AppendPaddedString(StringBuilder sb, string str, int startPos) {
+            if (string.IsNullOrEmpty(str)) {
+                return;
             }
-            int newLen = sb.Length + str.Length;
-            if (newLen >= toLen) {
-                sb.Append(str);
-                sb.Append(' ');
-            } else {
-                sb.Append(str);
+            int toAdd = startPos - sb.Length;
+            if (toAdd < 1 && startPos > 0) {
+                // Already some text present, and we're adding more text, but we're past the
+                // column start.  Add a space so the columns don't run into each other.
+                toAdd = 1;
+            }
+
+            if (toAdd > 0) {
                 // would be nice to avoid this allocation/copy
-                sb.Append(SPACES.Substring(0, toLen - newLen));
+                sb.Append(SPACES.Substring(0, toAdd));
             }
+            sb.Append(str);
         }
 
         /// <summary>

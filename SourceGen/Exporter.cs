@@ -79,9 +79,9 @@ namespace SourceGen {
         private Formatter mFormatter;
 
         /// <summary>
-        /// The cumulative width of the columns determines the end point.
+        /// The cumulative width of the columns determines the start point.
         /// </summary>
-        private int[] mColEnd;
+        private int[] mColStart;
 
         private enum Col {
             Offset = 0,
@@ -120,23 +120,25 @@ namespace SourceGen {
         }
 
         private void ConfigureColumns(ActiveColumnFlags leftFlags, int[] rightWidths) {
-            mColEnd = new int[(int)Col.COUNT];
+            mColStart = new int[(int)Col.COUNT];
             int total = 0;
             int width;
 
+            // mColStart[(int)Col.Offset] = 0
+
             // offset "+123456"
             if ((leftFlags & ActiveColumnFlags.Offset) != 0) {
-                total = mColEnd[(int)Col.Offset] = total + 7 + 1;
+                total = mColStart[(int)Col.Offset + 1] = total + 7 + 1;
             } else {
-                mColEnd[(int)Col.Offset] = total;
+                mColStart[(int)Col.Offset + 1] = total;
             }
 
             // address "1234:" or "12/4567:"
             if ((leftFlags & ActiveColumnFlags.Address) != 0) {
                 width = mProject.CpuDef.HasAddr16 ? 5 : 8;
-                total = mColEnd[(int)Col.Address] = total + width + 1;
+                total = mColStart[(int)Col.Address + 1] = total + width + 1;
             } else {
-                mColEnd[(int)Col.Address] = total;
+                mColStart[(int)Col.Address + 1] = total;
             }
 
             // bytes "12345678+" or "12 45 78 01+"
@@ -145,35 +147,35 @@ namespace SourceGen {
                 // are included ("20 ed fd") with no excess.  We want to increase it to 11 so
                 // we can always show 4 bytes.  Add one for a trailing "+".
                 width = mFormatter.Config.mSpacesBetweenBytes ? 12 : 9;
-                total = mColEnd[(int)Col.Bytes] = total + width + 1;
+                total = mColStart[(int)Col.Bytes + 1] = total + width + 1;
             } else {
-                mColEnd[(int)Col.Bytes] = total;
+                mColStart[(int)Col.Bytes + 1] = total;
             }
 
             // flags "NVMXDIZC" or "NVMXDIZC E"
             if ((leftFlags & ActiveColumnFlags.Flags) != 0) {
                 width = mProject.CpuDef.HasEmuFlag ? 10 : 8;
-                total = mColEnd[(int)Col.Flags] = total + width + 1;
+                total = mColStart[(int)Col.Flags + 1] = total + width + 1;
             } else {
-                mColEnd[(int)Col.Flags] = total;
+                mColStart[(int)Col.Flags + 1] = total;
             }
 
             // attributes "@H!#>"
             if ((leftFlags & ActiveColumnFlags.Attr) != 0) {
-                total = mColEnd[(int)Col.Attr] = total + 5 + 1;
+                total = mColStart[(int)Col.Attr + 1] = total + 5 + 1;
             } else {
-                mColEnd[(int)Col.Attr] = total;
+                mColStart[(int)Col.Attr + 1] = total;
             }
 
-            total = mColEnd[(int)Col.Label] = total + rightWidths[0];
-            total = mColEnd[(int)Col.Opcode] = total + rightWidths[1];
-            total = mColEnd[(int)Col.Operand] = total + rightWidths[2];
-            total = mColEnd[(int)Col.Comment] = total + rightWidths[3];
+            total = mColStart[(int)Col.Label + 1] = total + rightWidths[0];
+            total = mColStart[(int)Col.Opcode + 1] = total + rightWidths[1];
+            total = mColStart[(int)Col.Operand + 1] = total + rightWidths[2];
+            //total = mColStart[(int)Col.Comment] = total + rightWidths[3];
 
-            //Debug.WriteLine("Export col ends:");
-            //for (int i = 0; i < (int)Col.COUNT; i++) {
-            //    Debug.WriteLine("  " + i + "(" + ((Col)i) + ") " + mColEnd[i]);
-            //}
+            Debug.WriteLine("Export col starts:");
+            for (int i = 0; i < (int)Col.COUNT; i++) {
+                Debug.WriteLine("  " + i + "(" + ((Col)i) + ") " + mColStart[i]);
+            }
         }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace SourceGen {
             Debug.Assert(sb.Length == 0);
 
             // Width of "bytes" field, without '+' or trailing space.
-            int bytesWidth = mColEnd[(int)Col.Bytes] - mColEnd[(int)Col.Address] - 2;
+            int bytesWidth = mColStart[(int)Col.Bytes + 1] - mColStart[(int)Col.Bytes] - 2;
 
             LineListGen.Line line = mCodeLineList[index];
             DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
@@ -265,25 +267,19 @@ namespace SourceGen {
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {
                         // This happens for long comments embedded in LV tables.
-                        if (mColEnd[(int)Col.Attr] != 0) {
-                            TextUtil.AppendPaddedString(sb, string.Empty, mColEnd[(int)Col.Attr]);
-                        }
-                        sb.Append(parts.Comment);
+                        TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Label]);
                         break;
                     }
 
                     if ((mLeftFlags & ActiveColumnFlags.Offset) != 0) {
                         TextUtil.AppendPaddedString(sb, parts.Offset,
-                            mColEnd[(int)Col.Offset]);
+                            mColStart[(int)Col.Offset]);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Address) != 0) {
-                        string str;
                         if (!string.IsNullOrEmpty(parts.Addr)) {
-                            str = parts.Addr + ":";
-                        } else {
-                            str = string.Empty;
+                            TextUtil.AppendPaddedString(sb, parts.Addr + ":",
+                                mColStart[(int)Col.Address]);
                         }
-                        TextUtil.AppendPaddedString(sb, str, mColEnd[(int)Col.Address]);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Bytes) != 0) {
                         // Shorten the "...".
@@ -291,36 +287,22 @@ namespace SourceGen {
                         if (bytesStr != null && bytesStr.Length > bytesWidth) {
                             bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
                         }
-                        TextUtil.AppendPaddedString(sb, bytesStr, mColEnd[(int)Col.Bytes]);
+                        TextUtil.AppendPaddedString(sb, bytesStr, mColStart[(int)Col.Bytes]);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Flags) != 0) {
-                        TextUtil.AppendPaddedString(sb, parts.Flags, mColEnd[(int)Col.Flags]);
+                        TextUtil.AppendPaddedString(sb, parts.Flags, mColStart[(int)Col.Flags]);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Attr) != 0) {
-                        TextUtil.AppendPaddedString(sb, parts.Attr, mColEnd[(int)Col.Attr]);
+                        TextUtil.AppendPaddedString(sb, parts.Attr, mColStart[(int)Col.Attr]);
                     }
-                    TextUtil.AppendPaddedString(sb, parts.Label, mColEnd[(int)Col.Label]);
-                    TextUtil.AppendPaddedString(sb, parts.Opcode, mColEnd[(int)Col.Opcode]);
-                    TextUtil.AppendPaddedString(sb, parts.Operand, mColEnd[(int)Col.Operand]);
-                    if (string.IsNullOrEmpty(parts.Comment)) {
-                        // Trim trailing spaces off opcode or operand.  Would be more efficient
-                        // to just not generate the spaces, but this is simpler and we're not
-                        // in a hurry.
-                        TextUtil.TrimEnd(sb);
-                    } else {
-                        sb.Append(parts.Comment);
-                    }
+                    TextUtil.AppendPaddedString(sb, parts.Label, mColStart[(int)Col.Label]);
+                    TextUtil.AppendPaddedString(sb, parts.Opcode, mColStart[(int)Col.Opcode]);
+                    TextUtil.AppendPaddedString(sb, parts.Operand, mColStart[(int)Col.Operand]);
+                    TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Comment]);
                     break;
                 case LineListGen.Line.Type.LongComment:
                 case LineListGen.Line.Type.Note:
-                    if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
-                        return false;
-                    }
-                    if (mColEnd[(int)Col.Attr] != 0) {
-                        // Long comments aren't the left-most field, so pad it out.
-                        TextUtil.AppendPaddedString(sb, string.Empty, mColEnd[(int)Col.Attr]);
-                    }
-                    sb.Append(parts.Comment);
+                    TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Label]);
                     break;
                 case LineListGen.Line.Type.Blank:
                     break;
@@ -406,8 +388,6 @@ namespace SourceGen {
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
                 sw.Write(template1);
 
-                // With the style "code { white-space: pre; }", leading spaces and EOL markers
-                // are preserved.
                 //sw.Write("<code style=\"white-space: pre;\">");
                 sw.Write("<pre>");
                 StringBuilder sb = new StringBuilder(128);
@@ -421,7 +401,6 @@ namespace SourceGen {
                     }
                     sb.Clear();
                 }
-                //sw.WriteLine("</code>\r\n");
                 sw.WriteLine("</pre>\r\n");
 
                 sw.Write(template2);
@@ -460,12 +439,12 @@ namespace SourceGen {
             Debug.Assert(sb.Length == 0);
 
             // Width of "bytes" field, without '+' or trailing space.
-            int bytesWidth = mColEnd[(int)Col.Bytes] - mColEnd[(int)Col.Address] - 2;
+            int bytesWidth = mColStart[(int)Col.Bytes + 1] - mColStart[(int)Col.Bytes] - 2;
 
             LineListGen.Line line = mCodeLineList[index];
             DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
 
-            int maxLabelLen = mColEnd[(int)Col.Label] - mColEnd[(int)Col.Attr] - 1;
+            int maxLabelLen = mColStart[(int)Col.Label + 1] - mColStart[(int)Col.Label] - 1;
 
             string anchorLabel = null;
             if ((line.LineType == LineListGen.Line.Type.Code ||
@@ -483,25 +462,25 @@ namespace SourceGen {
                 linkOperand = GetLinkOperand(index, parts.Operand);
             }
 
-            int colPos = 0;
-
             bool suppressLabel = false;
             if (mLongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
                     line.LineType == LineListGen.Line.Type.Data)) {
                 int labelLen = string.IsNullOrEmpty(parts.Label) ? 0 : parts.Label.Length;
                 if (labelLen > maxLabelLen) {
                     // put on its own line
-                    AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr], string.Empty, 0);
+                    string lstr;
                     if (anchorLabel != null) {
-                        sb.Append(anchorLabel);
+                        lstr = anchorLabel;
                     } else {
-                        sb.Append(parts.Label);
+                        lstr = parts.Label;
                     }
+                    AddSpacedString(sb, 0, mColStart[(int)Col.Label], lstr, parts.Label.Length);
                     sb.Append("\r\n");
                     suppressLabel = true;
-                    Debug.Assert(colPos == 0);
                 }
             }
+
+            int colPos = 0;
 
             switch (line.LineType) {
                 case LineListGen.Line.Type.Code:
@@ -513,91 +492,77 @@ namespace SourceGen {
                     if (parts.IsLongComment) {
                         // This happens for long comments embedded in LV tables, e.g.
                         // "clear table".
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
-                            string.Empty, 0);
-                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
+                        AddSpacedString(sb, 0, mColStart[(int)Col.Label],
+                            TextUtil.EscapeHTML(parts.Comment), parts.Comment.Length);
                         break;
                     }
 
                     // these columns are optional
 
                     if ((mLeftFlags & ActiveColumnFlags.Offset) != 0) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Offset],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Offset],
                             parts.Offset, parts.Offset.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Address) != 0) {
-                        string str;
                         if (!string.IsNullOrEmpty(parts.Addr)) {
-                            str = parts.Addr + ":";
-                        } else {
-                            str = string.Empty;
+                            string str = parts.Addr + ":";
+                            colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Address],
+                                str, str.Length);
                         }
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Address],
-                            str, str.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Bytes) != 0) {
                         // Shorten the "...".
                         string bytesStr = parts.Bytes;
-                        if (bytesStr == null) {
-                            bytesStr = string.Empty;
+                        if (bytesStr != null) {
+                            if (bytesStr.Length > bytesWidth) {
+                                bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
+                            }
+                            colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Bytes],
+                                bytesStr, bytesStr.Length);
                         }
-                        if (bytesStr.Length > bytesWidth) {
-                            bytesStr = bytesStr.Substring(0, bytesWidth) + "+";
-                        }
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Bytes],
-                            bytesStr, bytesStr.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Flags) != 0) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Flags],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Flags],
                             parts.Flags, parts.Flags.Length);
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Attr) != 0) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Attr],
                             TextUtil.EscapeHTML(parts.Attr), parts.Attr.Length);
                     }
 
                     // remaining columns are mandatory, but may be empty
 
                     if (suppressLabel) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
-                            string.Empty, 0);
+                        // label on previous line
                     } else if (anchorLabel != null) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Label],
                             anchorLabel, parts.Label.Length);
                     } else if (parts.Label != null) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Label],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Label],
                             parts.Label, parts.Label.Length);
                     }
 
-                    colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Opcode],
+                    colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Opcode],
                             parts.Opcode, parts.Opcode.Length);
 
                     if (linkOperand != null) {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Operand],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Operand],
                             linkOperand, parts.Operand.Length);
                     } else {
-                        colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Operand],
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Operand],
                             TextUtil.EscapeHTML(parts.Operand), parts.Operand.Length);
                     }
 
-                    if (string.IsNullOrEmpty(parts.Comment)) {
-                        // Trim trailing spaces off opcode or operand.  Would be more efficient
-                        // to just not generate the spaces, but this is simpler and we're not
-                        // in a hurry.
-                        TextUtil.TrimEnd(sb);
-                    } else {
-                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
+                    if (parts.Comment != null) {
+                        colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Comment],
+                            TextUtil.EscapeHTML(parts.Comment), parts.Comment.Length);
                     }
-
                     break;
                 case LineListGen.Line.Type.LongComment:
                 case LineListGen.Line.Type.Note:
                     if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
                         return false;
                     }
-                    // Long comments aren't the left-most field, so pad it out.
-                    colPos = AddSpacedString(sb, colPos, mColEnd[(int)Col.Attr],
-                        string.Empty, 0);
 
                     // Notes have a background color.  Use this to highlight the text.  We
                     // don't apply it to the padding on the left columns.
@@ -608,13 +573,15 @@ namespace SourceGen {
                             rgb = (b.Color.R << 16) | (b.Color.G << 8) | (b.Color.B);
                         }
                     }
+                    string cstr;
                     if (rgb != 0) {
-                        sb.AppendFormat("<span style=\"background-color: #{0:x6}\">", rgb);
-                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
-                        sb.Append("</span>");
+                        cstr = string.Format("<span style=\"background-color: #{0:x6}\">{1}</span>",
+                            rgb, TextUtil.EscapeHTML(parts.Comment));
                     } else {
-                        sb.Append(TextUtil.EscapeHTML(parts.Comment));
+                        cstr = TextUtil.EscapeHTML(parts.Comment);
                     }
+                    colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Label], cstr,
+                        parts.Comment.Length);
                     break;
                 case LineListGen.Line.Type.Blank:
                     break;
@@ -627,26 +594,42 @@ namespace SourceGen {
             return true;
         }
 
-        private int AddSpacedString(StringBuilder sb, int startPosn, int colEnd, string str,
+        /// <summary>
+        /// Appends a string to the string buffer.  If the number of characters in the buffer
+        /// is less than the desired start position, spaces will be added.  At least one space
+        /// will always be added if the start position is greater than zero and the string
+        /// is non-empty.
+        /// </summary>
+        /// <remarks>
+        /// This is useful for things like linkified HTML, where we want to pad out the
+        /// string with spaces based on the text that will be presented to the user, rather
+        /// than the text that has HTML markup and other goodies.
+        /// </remarks>
+        /// <param name="sb">Line being constructed.</param>
+        /// <param name="initialPosn">Line position on entry.</param>
+        /// <param name="colStart">Desired starting position.</param>
+        /// <param name="str">String to append.</param>
+        /// <param name="virtualLength">Length of string we're pretending to add.</param>
+        /// <returns>Updated line position.</returns>
+        private int AddSpacedString(StringBuilder sb, int initialPosn, int colStart, string str,
                 int virtualLength) {
-            int newLen = startPosn + virtualLength;
-            if (startPosn + virtualLength >= colEnd) {
-                // Off end of column.  Output string plus one space, unless the length is zero
-                // (because that means we're just padding to the start of a column).
-                sb.Append(str);
-                if (virtualLength != 0) {
-                    sb.Append(' ');
-                }
-                return newLen + 1;
-            } else {
-                // Short of column end.  Add spaces until we reach it.
-                sb.Append(str);
-                while (newLen < colEnd) {
-                    sb.Append(' ');
-                    newLen++;
-                }
+            if (string.IsNullOrEmpty(str)) {
+                return initialPosn;
             }
-            return newLen;
+            int toAdd = colStart - initialPosn;
+            if (toAdd < 1 && colStart > 0) {
+                // Already some text present, and we're adding more text, but we're past the
+                // column start.  Add a space so the columns don't run into each other.
+                toAdd = 1;
+            }
+
+            int newPosn = initialPosn;
+            while (toAdd-- > 0) {
+                sb.Append(' ');
+                newPosn++;
+            }
+            sb.Append(str);
+            return newPosn + virtualLength;
         }
 
         /// <summary>

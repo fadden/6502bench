@@ -531,10 +531,12 @@ namespace SourceGen.AsmGen {
             }
 
             mLineBuilder.Clear();
-            TextUtil.AppendPaddedString(mLineBuilder, ";", mColumnWidths[0]);
-            TextUtil.AppendPaddedString(mLineBuilder, SourceFormatter.FormatPseudoOp(" .segment"),
-                mColumnWidths[1]);
-            mLineBuilder.AppendFormat("\"SEG{0:D3}\"", index);
+            TextUtil.AppendPaddedString(mLineBuilder, ";", 0);
+            // using +1 to make it look like the comment ';' shifted it over
+            TextUtil.AppendPaddedString(mLineBuilder, SourceFormatter.FormatPseudoOp(".segment"),
+                mColumnWidths[0] + 1);
+            TextUtil.AppendPaddedString(mLineBuilder, string.Format("\"SEG{0:D3}\"", index),
+                mColumnWidths[0] + mColumnWidths[1] + 1);
             OutputLine(mLineBuilder.ToString());
 
             OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
@@ -580,17 +582,12 @@ namespace SourceGen.AsmGen {
             }
 
             mLineBuilder.Clear();
-            TextUtil.AppendPaddedString(mLineBuilder, label, mColumnWidths[0]);
-            TextUtil.AppendPaddedString(mLineBuilder, opcode, mColumnWidths[0] + mColumnWidths[1]);
+            TextUtil.AppendPaddedString(mLineBuilder, label, 0);
+            TextUtil.AppendPaddedString(mLineBuilder, opcode, mColumnWidths[0]);
             TextUtil.AppendPaddedString(mLineBuilder, operand,
+                mColumnWidths[0] + mColumnWidths[1]);
+            TextUtil.AppendPaddedString(mLineBuilder, comment,
                 mColumnWidths[0] + mColumnWidths[1] + mColumnWidths[2]);
-            if (string.IsNullOrEmpty(comment)) {
-                // Trim trailing spaces off of opcode or operand.  If they want trailing
-                // spaces at the end of a comment, that's fine.
-                CommonUtil.TextUtil.TrimEnd(mLineBuilder);
-            } else {
-                mLineBuilder.Append(comment);
-            }
 
             mOutStream.WriteLine(mLineBuilder.ToString());
         }
