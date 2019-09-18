@@ -486,7 +486,7 @@ limitations under the License.
                     </GroupBox>
 
                     <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
-                    <CheckBox Content="Show cycle counts" Margin="4,8,0,0"
+                    <CheckBox Content="Show cycle counts (also appears on screen)" Margin="4,8,0,0"
                               IsChecked="{Binding ShowCycleCounts}"/>
                     <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"
                               IsChecked="{Binding LongLabelNewLine}"/>

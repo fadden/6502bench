@@ -87,6 +87,9 @@ limitations under the License.
                         </TextBox.Text>
                     </TextBox>
                 </StackPanel>
+
+                <CheckBox Content="Put long labels on separate line" Margin="0,8,0,0"
+                              IsChecked="{Binding LongLabelNewLine}"/>
             </StackPanel>
         </GroupBox>
 

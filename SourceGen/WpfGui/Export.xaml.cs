@@ -95,6 +95,12 @@ namespace SourceGen.WpfGui {
             set { mSelectionOnly = value; OnPropertyChanged(); }
         }
 
+        private bool mLongLabelNewLine;
+        public bool LongLabelNewLine {
+            get { return mLongLabelNewLine; }
+            set { mLongLabelNewLine = value; OnPropertyChanged(); }
+        }
+
         //
         // Numeric input fields, bound directly to TextBox.Text.  These rely on a TextChanged
         // field to update the IsValid flag, because the "set" method is only called when the
@@ -202,6 +208,8 @@ namespace SourceGen.WpfGui {
             ShowFlags = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_FLAGS, false);
             ShowAttr = AppSettings.Global.GetBool(AppSettings.EXPORT_SHOW_ATTR, false);
             SelectionOnly = AppSettings.Global.GetBool(AppSettings.EXPORT_SELECTION_ONLY, false);
+            LongLabelNewLine =
+                AppSettings.Global.GetBool(AppSettings.EXPORT_LONG_LABEL_NEW_LINE, false);
 
             int[] colWidths = new int[] { 9, 8, 11, 72 };   // 100-col output
             string colStr = AppSettings.Global.GetString(AppSettings.EXPORT_COL_WIDTHS, null);
@@ -239,6 +247,7 @@ namespace SourceGen.WpfGui {
             AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_FLAGS, ShowFlags);
             AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_ATTR, ShowAttr);
             AppSettings.Global.SetBool(AppSettings.EXPORT_SELECTION_ONLY, SelectionOnly);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_LONG_LABEL_NEW_LINE, LongLabelNewLine);
             int[] colWidths = new int[] {
                 AsmLabelColWidth, AsmOpcodeColWidth, AsmOperandColWidth, AsmCommentColWidth
             };

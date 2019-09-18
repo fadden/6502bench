@@ -44,6 +44,11 @@ namespace SourceGen {
         public bool IncludeNotes { get; set; }
 
         /// <summary>
+        /// If set, labels that are wider than the label column should go on their own line.
+        /// </summary>
+        public bool LongLabelNewLine { get; set; }
+
+        /// <summary>
         /// Bit flags, used to indicate which of the optional columns are active.
         /// </summary>
         [FlagsAttribute]
@@ -96,11 +101,6 @@ namespace SourceGen {
             COUNT           // number of elements, must be last
         }
 
-        /// <summary>
-        /// If set, labels that are wider than the label column should go on their own line.
-        /// </summary>
-        private bool mLongLabelNewLine;
-
 
         /// <summary>
         /// Constructor.
@@ -111,10 +111,6 @@ namespace SourceGen {
             mCodeLineList = codeLineList;
             mFormatter = formatter;
             mLeftFlags = leftFlags;
-
-            // Go ahead and latch this here.
-            mLongLabelNewLine =
-                AppSettings.Global.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
 
             ConfigureColumns(leftFlags, rightWidths);
         }
@@ -170,12 +166,12 @@ namespace SourceGen {
             total = mColStart[(int)Col.Label + 1] = total + rightWidths[0];
             total = mColStart[(int)Col.Opcode + 1] = total + rightWidths[1];
             total = mColStart[(int)Col.Operand + 1] = total + rightWidths[2];
-            //total = mColStart[(int)Col.Comment] = total + rightWidths[3];
+            //total = mColStart[(int)Col.Comment + 1] = total + rightWidths[3];
 
-            Debug.WriteLine("Export col starts:");
-            for (int i = 0; i < (int)Col.COUNT; i++) {
-                Debug.WriteLine("  " + i + "(" + ((Col)i) + ") " + mColStart[i]);
-            }
+            //Debug.WriteLine("Export col starts:");
+            //for (int i = 0; i < (int)Col.COUNT; i++) {
+            //    Debug.WriteLine("  " + i + "(" + ((Col)i) + ") " + mColStart[i]);
+            //}
         }
 
         /// <summary>
@@ -185,31 +181,26 @@ namespace SourceGen {
         /// <param name="csvText">Result; holds text of all selected lines, in CSV format.</param>
         public void SelectionToString(bool addCsv, out string fullText, out string csvText) {
             StringBuilder sb = new StringBuilder(128);
-            StringBuilder plainText = new StringBuilder(Selection.Count * 50);
-            StringBuilder csv = null;
+            StringWriter plainText = new StringWriter();
+            StringWriter csv = null;
             if (addCsv) {
-                csv = new StringBuilder(Selection.Count * 40);
+                csv = new StringWriter();
             }
 
             for (int lineIndex = 0; lineIndex < mCodeLineList.Count; lineIndex++) {
                 if (!Selection[lineIndex]) {
                     continue;
                 }
-                if (GenerateTextLine(lineIndex, sb)) {
-                    plainText.Append(sb.ToString());
-                    plainText.Append("\r\n");
-                }
-                sb.Clear();
+                GenerateTextLine(lineIndex, plainText, sb);
                 if (addCsv) {
-                    GenerateCsvLine(lineIndex, sb);
-                    csv.Append(sb.ToString());
-                    csv.Append("\r\n");
-                    sb.Clear();
+                    GenerateCsvLine(lineIndex, csv, sb);
                 }
             }
 
+            plainText.Close();
             fullText = plainText.ToString();
             if (addCsv) {
+                csv.Close();
                 csvText = csv.ToString();
             } else {
                 csvText = null;
@@ -232,32 +223,49 @@ namespace SourceGen {
                     }
 
                     if (asCsv) {
-                        GenerateCsvLine(lineIndex, sb);
-                        sw.WriteLine(sb.ToString());
+                        GenerateCsvLine(lineIndex, sw, sb);
                     } else {
-                        if (GenerateTextLine(lineIndex, sb)) {
-                            sw.WriteLine(sb.ToString());
-                        }
+                        GenerateTextLine(lineIndex, sw, sb);
                     }
-                    sb.Clear();
                 }
             }
         }
 
         /// <summary>
-        /// Generates a line of plain text output.  The line will not have EOL markers added.
+        /// Generates text output for one display line.  This may result in more than one line
+        /// of output, e.g. if the label is longer than the field.  EOL markers will be added.
         /// </summary>
         /// <param name="index">Index of line to output.</param>
-        /// <param name="sb">String builder to append text to.  Must be cleared before
-        ///   calling here.  (This is a minor optimization.)</param>
-        private bool GenerateTextLine(int index, StringBuilder sb) {
-            Debug.Assert(sb.Length == 0);
+        /// <param name="tw">Text output destination.</param>
+        /// <param name="sb">Pre-allocated string builder (this is a minor optimization).</param>
+        private void GenerateTextLine(int index, TextWriter tw, StringBuilder sb) {
+            LineListGen.Line line = mCodeLineList[index];
+            if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
+                return;
+            }
 
             // Width of "bytes" field, without '+' or trailing space.
             int bytesWidth = mColStart[(int)Col.Bytes + 1] - mColStart[(int)Col.Bytes] - 2;
+            // Width of "label" field, without trailing space.
+            int maxLabelLen = mColStart[(int)Col.Label + 1] - mColStart[(int)Col.Label] - 1;
 
-            LineListGen.Line line = mCodeLineList[index];
             DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
+            sb.Clear();
+
+            // Put long labels on their own line if desired.
+            bool suppressLabel = false;
+            if (LongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
+                    line.LineType == LineListGen.Line.Type.Data)) {
+                int labelLen = string.IsNullOrEmpty(parts.Label) ? 0 : parts.Label.Length;
+                if (labelLen > maxLabelLen) {
+                    // put on its own line
+                    TextUtil.AppendPaddedString(sb, parts.Label, mColStart[(int)Col.Label]);
+                    tw.WriteLine(sb);
+                    sb.Clear();
+                    suppressLabel = true;
+                }
+            }
+
             switch (line.LineType) {
                 case LineListGen.Line.Type.Code:
                 case LineListGen.Line.Type.Data:
@@ -295,7 +303,9 @@ namespace SourceGen {
                     if ((mLeftFlags & ActiveColumnFlags.Attr) != 0) {
                         TextUtil.AppendPaddedString(sb, parts.Attr, mColStart[(int)Col.Attr]);
                     }
-                    TextUtil.AppendPaddedString(sb, parts.Label, mColStart[(int)Col.Label]);
+                    if (!suppressLabel) {
+                        TextUtil.AppendPaddedString(sb, parts.Label, mColStart[(int)Col.Label]);
+                    }
                     TextUtil.AppendPaddedString(sb, parts.Opcode, mColStart[(int)Col.Opcode]);
                     TextUtil.AppendPaddedString(sb, parts.Operand, mColStart[(int)Col.Operand]);
                     TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Comment]);
@@ -310,12 +320,17 @@ namespace SourceGen {
                     Debug.Assert(false);
                     break;
             }
-            return true;
+
+            tw.WriteLine(sb);
         }
 
-        private void GenerateCsvLine(int index, StringBuilder sb) {
+        private void GenerateCsvLine(int index, TextWriter tw, StringBuilder sb) {
             LineListGen.Line line = mCodeLineList[index];
+            if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
+                return;
+            }
             DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
+            sb.Clear();
 
             if ((mLeftFlags & ActiveColumnFlags.Offset) != 0) {
                 sb.Append(TextUtil.EscapeCSV(parts.Offset)); sb.Append(',');
@@ -341,6 +356,8 @@ namespace SourceGen {
                 sb.Append(TextUtil.EscapeCSV(parts.Operand)); sb.Append(',');
                 sb.Append(TextUtil.EscapeCSV(parts.Comment));
             }
+
+            tw.WriteLine(sb);
         }
 
         #region HTML
@@ -349,6 +366,12 @@ namespace SourceGen {
         private const string HTML_EXPORT_CSS_FILE = "SGStyle.css";
         private const string LABEL_LINK_PREFIX = "Sym";
 
+        /// <summary>
+        /// Generates HTML output to the specified path.
+        /// </summary>
+        /// <param name="pathName">Full pathname of output file.  This defines the root
+        ///   directory if there are additional files.</param>
+        /// <param name="overwriteCss">If set, existing CSS file will be replaced.</param>
         public void OutputToHtml(string pathName, bool overwriteCss) {
             string exportTemplate = RuntimeDataAccess.GetPathName(HTML_EXPORT_TEMPLATE);
             string tmplStr;
@@ -401,10 +424,7 @@ namespace SourceGen {
                         continue;
                     }
 
-                    if (GenerateHtmlLine(lineIndex, sb)) {
-                        sw.Write(sb.ToString());
-                    }
-                    sb.Clear();
+                    GenerateHtmlLine(lineIndex, sw, sb);
                 }
                 sw.WriteLine("</pre>\r\n");
 
@@ -438,19 +458,25 @@ namespace SourceGen {
         /// every line as a table row, with HTML column definitions for each of our columns.
         /// </remarks>
         /// <param name="index">Index of line to output.</param>
+        /// <param name="tw">Text output destination.</param>
         /// <param name="sb">String builder to append text to.  Must be cleared before
         ///   calling here.  (This is a minor optimization.)</param>
-        private bool GenerateHtmlLine(int index, StringBuilder sb) {
-            Debug.Assert(sb.Length == 0);
+        private void GenerateHtmlLine(int index, TextWriter tw, StringBuilder sb) {
+            LineListGen.Line line = mCodeLineList[index];
+            if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
+                return;
+            }
+
+            sb.Clear();
 
             // Width of "bytes" field, without '+' or trailing space.
             int bytesWidth = mColStart[(int)Col.Bytes + 1] - mColStart[(int)Col.Bytes] - 2;
-
-            LineListGen.Line line = mCodeLineList[index];
-            DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
-
+            // Width of "label" field, without trailing space.
             int maxLabelLen = mColStart[(int)Col.Label + 1] - mColStart[(int)Col.Label] - 1;
 
+            DisplayList.FormattedParts parts = mCodeLineList.GetFormattedParts(index);
+
+            // If needed, create an HTML anchor for the label field.
             string anchorLabel = null;
             if ((line.LineType == LineListGen.Line.Type.Code ||
                         line.LineType == LineListGen.Line.Type.Data ||
@@ -460,6 +486,7 @@ namespace SourceGen {
                     "\">" + parts.Label + "</a>";
             }
 
+            // If needed, create an HTML link for the operand field.
             string linkOperand = null;
             if ((line.LineType == LineListGen.Line.Type.Code ||
                         line.LineType == LineListGen.Line.Type.Data) &&
@@ -467,8 +494,9 @@ namespace SourceGen {
                 linkOperand = GetLinkOperand(index, parts.Operand);
             }
 
+            // Put long labels on their own line if desired.
             bool suppressLabel = false;
-            if (mLongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
+            if (LongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
                     line.LineType == LineListGen.Line.Type.Data)) {
                 int labelLen = string.IsNullOrEmpty(parts.Label) ? 0 : parts.Label.Length;
                 if (labelLen > maxLabelLen) {
@@ -480,7 +508,8 @@ namespace SourceGen {
                         lstr = parts.Label;
                     }
                     AddSpacedString(sb, 0, mColStart[(int)Col.Label], lstr, parts.Label.Length);
-                    sb.Append("\r\n");
+                    tw.WriteLine(sb);
+                    sb.Clear();
                     suppressLabel = true;
                 }
             }
@@ -565,10 +594,6 @@ namespace SourceGen {
                     break;
                 case LineListGen.Line.Type.LongComment:
                 case LineListGen.Line.Type.Note:
-                    if (line.LineType == LineListGen.Line.Type.Note && !IncludeNotes) {
-                        return false;
-                    }
-
                     // Notes have a background color.  Use this to highlight the text.  We
                     // don't apply it to the padding on the left columns.
                     int rgb = 0;
@@ -595,8 +620,7 @@ namespace SourceGen {
                     break;
             }
 
-            sb.Append("\r\n");
-            return true;
+            tw.WriteLine(sb);
         }
 
         /// <summary>

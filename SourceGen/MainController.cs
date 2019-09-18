@@ -1999,6 +1999,7 @@ namespace SourceGen {
             Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
                 dlg.ColFlags, rightWidths);
             eport.IncludeNotes = dlg.IncludeNotes;
+            eport.LongLabelNewLine = dlg.LongLabelNewLine;
             if (dlg.SelectionOnly) {
                 DisplayListSelection selection = mMainWin.CodeDisplayList.SelectedIndices;
                 if (selection.Count == 0) {
