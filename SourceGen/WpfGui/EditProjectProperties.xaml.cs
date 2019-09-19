@@ -452,6 +452,8 @@ namespace SourceGen.WpfGui {
                 // the symbol at the correct sorted position.
                 LoadProjectSymbols();
                 UpdateControls();
+
+                okButton.Focus();
             }
         }
 
@@ -485,6 +487,8 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
                 LoadProjectSymbols();
                 UpdateControls();
+
+                okButton.Focus();
             }
         }
 

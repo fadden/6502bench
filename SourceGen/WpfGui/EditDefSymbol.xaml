@@ -22,7 +22,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Symbol"
-        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        SizeToContent="Height" Width="320" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         ContentRendered="Window_ContentRendered">
@@ -69,7 +69,7 @@ limitations under the License.
         <TextBlock Grid.Column="0" Grid.Row="3" Text="Comment:" Margin="0,0,8,0"/>
         <StackPanel Grid.Column="1" Grid.Row="3">
             <TextBox Margin="0,1,0,0" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
-                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                     FontFamily="{StaticResource GeneralMonoFont}" ScrollViewer.CanContentScroll="True"/>
             <TextBlock Text="• Optional" Margin="0,4,0,16"/>
         </StackPanel>
 

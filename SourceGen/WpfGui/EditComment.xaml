@@ -30,6 +30,7 @@ limitations under the License.
     <StackPanel Margin="8">
         <TextBlock Text="Enter comment:"/>
         <TextBox Name="commentTextBox" Text="{Binding CommentText}" Width="480" Margin="0,4,0,0"
+                 FontFamily="{StaticResource GeneralMonoFont}"
                  TextChanged="CommentTextBox_TextChanged"/>
         <DockPanel>
             <TextBlock DockPanel.Dock="Right"

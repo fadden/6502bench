@@ -3270,6 +3270,11 @@ namespace SourceGen {
                             sourceStr = "???";
                         }
                         extraStr = "Source: " + sourceStr;
+                        if (defSym.SymbolType == Symbol.Type.Constant) {
+                            extraStr += " (constant)";
+                        } else {
+                            extraStr += " (address)";
+                        }
                     }
                     break;
                 case LineListGen.Line.Type.LocalVariableTable:

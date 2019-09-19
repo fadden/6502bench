@@ -788,21 +788,6 @@ namespace SourceGen {
             return true;
         }
 
-        ///// <summary>
-        ///// Removes all header lines from the line list.
-        ///// </summary>
-        //private void ClearHeaderLines() {
-        //    // Find the first non-header item.
-        //    int endIndex = FindLineByOffset(mLineList, 0);
-        //    if (endIndex == 0) {
-        //        // no header lines present
-        //        Debug.WriteLine("No header lines found");
-        //        return;
-        //    }
-        //    Debug.WriteLine("Removing " + endIndex + " header lines");
-        //    mLineList.RemoveRange(0, endIndex);
-        //}
-
         /// <summary>
         /// Generates a synthetic offset for the FileOffset field from an index value.  The
         /// index arg is the index of an entry in the DisasmProject.ActiveDefSymbolList.
@@ -823,6 +808,10 @@ namespace SourceGen {
             return offset + (1 << 24);
         }
 
+        // NOTE: the two functions above are tied to the implementation of the function
+        // below: we output the lines in the order in which they appear in ActiveDefSymbolList.
+        // If we want to get fancy and sort them, we'll need to do some additional work.
+
         /// <summary>
         /// Generates the header lines (header comment, EQU directives).
         /// </summary>
@@ -834,7 +823,6 @@ namespace SourceGen {
                 PseudoOp.PseudoOpNames opNames) {
             List<Line> tmpLines = new List<Line>();
             Line line;
-            FormattedParts parts;
 
             // Check for header comment.
             if (proj.LongComments.TryGetValue(Line.HEADER_COMMENT_OFFSET,
@@ -853,7 +841,7 @@ namespace SourceGen {
                     null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
                 string comment = formatter.FormatEolComment(defSym.Comment);
-                parts = FormattedParts.CreateEquDirective(defSym.Label,
+                FormattedParts parts = FormattedParts.CreateEquDirective(defSym.Label,
                     formatter.FormatPseudoOp(opNames.EquDirective),
                     valueStr, comment);
                 line.Parts = parts;
