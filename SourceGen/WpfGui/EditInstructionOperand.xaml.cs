@@ -1167,6 +1167,8 @@ namespace SourceGen.WpfGui {
                 } else {
                     Debug.WriteLine("No change to def symbol, ignoring edit");
                 }
+
+                okButton.Focus();
             }
         }
 

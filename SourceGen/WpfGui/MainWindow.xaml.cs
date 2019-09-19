@@ -935,6 +935,10 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen();
         }
 
+        private void CanCreateLocalVariableTable(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanCreateLocalVariableTable();
+        }
+
         private void CanDeleteMlc(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanDeleteMlc();
         }
@@ -1055,6 +1059,10 @@ namespace SourceGen.WpfGui {
             if (!mMainCtrl.CloseProject()) {
                 Debug.WriteLine("Close canceled");
             }
+        }
+
+        private void CreateLocalVariableTableCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.CreateLocalVariableTable();
         }
 
         private void CopyCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

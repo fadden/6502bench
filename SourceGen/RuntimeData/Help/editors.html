@@ -309,15 +309,20 @@ operand references an address outside the scope of the data file.  Symbols
 marked as "constant" will not, though you can still specify them manually.</p>
 
 
-<h2><a name="lvtable">Edit Local Variable Table</a></h2>
+<h2><a name="lvtable">Create/Edit Local Variable Table</a></h2>
 <p><a href="intro.html#local-vars">Local variables</a> are arranged in
 tables, which are created at a specific file offset.  They must be
 associated with a line of code, and are usually placed at the start of
-a subroutine.  The editor allows you to create, edit, delete, and
-move tables.</p>
-<p>Empty tables are allowed.  These can be useful if the "clear previous"
-flag is set.  If you want to delete the table, click the "Delete Table"
-button.</p>
+a subroutine.
+The "Create Local Variable Table" action creates a new table, and
+opens the editor.  The "Edit Prior Local Variable Table" searches
+for the closest table that appears at or before the selected line,
+and edits that.</p>
+<p>The editor allows you to create, edit, and delete entries, as well
+as move and delete entire tables (though these last two options are not
+available when creating a new table).  Empty tables are allowed.  These
+can be useful if the "clear previous" flag is set.  If you want to
+delete the table, click the "Delete Table" button.</p>
 <p>Use the buttons to add, edit, or remove individual variables.  Each
 variable has a name, a value, a width, and an optional comment.  The
 standard naming rules for symbols apply.  Variables are only used for
@@ -326,8 +331,8 @@ range 0-255, with their width factored in.  So the maximum address for
 a two-byte pointer is $fe.</p>
 <p>You can move a table to any offset that is the start of an instruction
 and doesn't already have a local variable table present.  Click the
-"Move Table" button and enter the new offset in hex.  You can also use the
-up/down arrows to move to the next valid offset.</p>
+"Move Table" button and enter the new offset in hex.  You can also click
+on the up/down buttons to move to the next valid offset.</p>
 
 </div>
 

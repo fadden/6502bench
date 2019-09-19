@@ -56,6 +56,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
+            <RoutedUICommand x:Key="CreateLocalVariableTableCmd" Text="Create Local Variable Table..."/>
             <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Del</KeyGesture>
@@ -80,7 +81,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+L</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="EditLocalVariableTableCmd" Text="Edit Local Variable Table..."/>
+            <RoutedUICommand x:Key="EditLocalVariableTableCmd" Text="Edit Prior Local Variable Table..."/>
             <RoutedUICommand x:Key="EditLongCommentCmd" Text="Edit Long Comment...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+M</KeyGesture>
@@ -176,18 +177,20 @@ limitations under the License.
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource AboutCmd}"
                         Executed="AboutCmd_Executed"/>
-        <CommandBinding Command="{StaticResource EditAppSettingsCmd}"
-                        Executed="EditAppSettingsCmd_Executed"/>
         <CommandBinding Command="{StaticResource AssembleCmd}"
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="{StaticResource CreateLocalVariableTableCmd}"
+                        CanExecute="CanCreateLocalVariableTable" Executed="CreateLocalVariableTableCmd_Executed"/>
         <CommandBinding Command="{StaticResource DeleteMlcCmd}"
                         CanExecute="CanDeleteMlc" Executed="DeleteMlcCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_SourceGenerationTestsCmd}"
                         Executed="Debug_SourceGenerationTestsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditAddressCmd}"
                         CanExecute="CanEditAddress" Executed="EditAddressCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditAppSettingsCmd}"
+                        Executed="EditAppSettingsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditCommentCmd}"
                         CanExecute="CanEditComment" Executed="EditCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditHeaderCommentCmd}"
@@ -331,6 +334,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
                 <MenuItem Command="{StaticResource EditNoteCmd}"/>
                 <MenuItem Command="{StaticResource EditProjectSymbolCmd}"/>
+                <MenuItem Command="{StaticResource CreateLocalVariableTableCmd}"/>
                 <MenuItem Command="{StaticResource EditLocalVariableTableCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource HintAsCodeEntryPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>

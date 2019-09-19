@@ -80,6 +80,15 @@ namespace SourceGen.WpfGui {
         private bool mIsNotNewTable;
 
         /// <summary>
+        /// Table header text string, formatted at load time.
+        /// </summary>
+        public string TableHeaderText {
+            get { return mTableHeaderText; }
+            set { mTableHeaderText = value; OnPropertyChanged(); }
+        }
+        private string mTableHeaderText;
+
+        /// <summary>
         /// Working set.  Used internally to hold state.
         /// </summary>
         private LocalVariableTable mWorkTable;
@@ -136,6 +145,9 @@ namespace SourceGen.WpfGui {
         }
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
+            string fmt = (string)FindResource("str_TableHeaderFmt");
+            TableHeaderText = string.Format(fmt, mFormatter.FormatOffset24(mOffset));
+
             UpdateControls();
         }
 

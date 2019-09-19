@@ -30,7 +30,7 @@ namespace SourceGen {
         // width to use when width doesn't matter; use 1 to try to get a prefab object
         public const int NO_WIDTH = 1;
         public const int MIN_WIDTH = 1;
-        public const int MAX_WIDTH = 4;
+        public const int MAX_WIDTH = 8;
 
         /// <summary>
         /// Data format descriptor.

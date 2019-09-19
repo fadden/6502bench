@@ -30,6 +30,7 @@ limitations under the License.
     <Window.Resources>
         <system:String x:Key="str_ConfirmDelete">Are you sure you want to delete the entire table?</system:String>
         <system:String x:Key="str_ConfirmDeleteCaption">Confirm Deletion</system:String>
+        <system:String x:Key="str_TableHeaderFmt">Symbols defined in table at {0}:</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -44,8 +45,8 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
-                   Margin="0,4,0,0" Text="Symbols defined in project:"/>
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,4,0,0"
+                   Text="{Binding TableHeaderText, FallbackValue=Symbols defined in table at +######:}"/>
 
         <ListView Name="symbolsListView" Grid.Column="0" Grid.Row="1" Margin="0,4,4,0"
                   Height="300"

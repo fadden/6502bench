@@ -1641,19 +1641,52 @@ namespace SourceGen {
             }
         }
 
+        public bool CanCreateLocalVariableTable() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            // Only allow on code lines.  This is somewhat arbitrary; data would work fine.
+            if (CodeLineList[selIndex].LineType != LineListGen.Line.Type.Code) {
+                return false;
+            }
+            int offset = CodeLineList[selIndex].FileOffset;
+            // Don't allow creation if a table already exists.
+            return !mProject.LvTables.ContainsKey(offset);
+        }
+
+        public void CreateLocalVariableTable() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            Debug.Assert(!mProject.LvTables.ContainsKey(offset));
+            CreateOrEditLocalVariableTable(offset);
+        }
+
         public bool CanEditLocalVariableTable() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
-            EntityCounts counts = SelectionAnalysis.mEntityCounts;
-            // Single line of code, or a local variable table.
-            return SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
-                SelectionAnalysis.mLineType == LineListGen.Line.Type.LocalVariableTable;
+            // Check to see if the offset of the first-defined table is less than or equal to
+            // the offset of the selected line.  If so, we know there's a table, though we
+            // don't know which one.
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            return mProject.LvTables.Count > 0 && mProject.LvTables.Keys[0] <= offset;
         }
 
         public void EditLocalVariableTable() {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
+            // Find the offset of the nearest table that's earlier in the file.
+            int bestOffset = -1;
+            foreach (KeyValuePair<int,LocalVariableTable> kvp in mProject.LvTables) {
+                if (kvp.Key > offset) {
+                    break;      // too far
+                }
+                bestOffset = kvp.Key;
+            }
+            Debug.Assert(bestOffset >= 0);
+            CreateOrEditLocalVariableTable(bestOffset);
+        }
+
+        private void CreateOrEditLocalVariableTable(int offset) {
             // Get existing table, if any.
             mProject.LvTables.TryGetValue(offset, out LocalVariableTable oldLvt);
 
