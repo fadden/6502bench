@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":87,"FileDataCrc32":255194945,"ProjectProps":{
-"CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":103,"FileDataCrc32":1381810255,"ProjectProps":{
+"CpuName":"65C02","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 "__ENABLE_LABEL_LOCALIZATION":{
 "DataDescriptor":{
@@ -21,7 +21,7 @@
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
-},
+"92":"local","94":"global"},
 "LongComments":{
 },
 "Notes":{
@@ -64,7 +64,25 @@
 "14":{
 "Label":"__nopped","Value":4110,"Source":"User","Type":"LocalOrGlobalAddr"},
 "13":{
-"Label":"start","Value":4109,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"Label":"start","Value":4109,"Source":"User","Type":"LocalOrGlobalAddr"},
+"86":{
+"Label":"_uname","Value":4182,"Source":"User","Type":"LocalOrGlobalAddr"},
+"87":{
+"Label":"X_uname11","Value":4183,"Source":"User","Type":"LocalOrGlobalAddr"},
+"88":{
+"Label":"X_uname1","Value":4184,"Source":"User","Type":"LocalOrGlobalAddr"},
+"92":{
+"Label":"AND","Value":4188,"Source":"User","Type":"LocalOrGlobalAddr"},
+"94":{
+"Label":"JMP","Value":4190,"Source":"User","Type":"GlobalAddr"},
+"96":{
+"Label":"jmp","Value":4192,"Source":"User","Type":"GlobalAddr"},
+"98":{
+"Label":"TSB","Value":4194,"Source":"User","Type":"GlobalAddr"},
+"89":{
+"Label":"X_uname","Value":4185,"Source":"User","Type":"LocalOrGlobalAddr"},
+"100":{
+"Label":"XCE","Value":4196,"Source":"User","Type":"GlobalAddr"}},
 "OperandFormats":{
 "23":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
@@ -76,4 +94,6 @@
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
 "Label":"_reach4","Part":"Low"}},
 "58":{
-"Length":3,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null}}}
+"Length":3,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null}},
+"LvTables":{
+}}

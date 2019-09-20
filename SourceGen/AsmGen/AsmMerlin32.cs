@@ -191,6 +191,7 @@ namespace SourceGen.AsmGen {
                 mLocalizer.LocalPrefix = ":";
                 mLocalizer.Analyze();
             }
+            //mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {

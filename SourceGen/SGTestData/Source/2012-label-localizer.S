@@ -3,6 +3,8 @@
 ;
 ; Assembler: Merlin 32
 
+; NOTE: select CPU=65C02
+
 EXTSYM      equ     $8888           ;EDIT: give this a long label
 
             org     $1000
@@ -62,4 +64,20 @@ globlat     jsr     nglobal         ;EDIT: mark label as global
             bra     cont
 cont        nop                     ;EDIT: mark label as global
             lda     EXTSYM
+
+; test localizer uniquification
+; only relevant for 64tass, which uses a leading '_' to indicate local labels
+_uname      nop
+X_uname11   nop
+X_uname1    nop
+X_uname     nop
+
+; test labels with opcode names (not really a localization thing)
+; EDIT: set these names, mark as global to prevent localization
+            lda     #$00
+ANDl        bne     ANDl            ;leave label local
+JMPg        bne     JMPg            ;make label global
+jmpg        bne     jmpg            ;lower case name
+TSBg        bne     TSBg
+XCEg        bne     XCEg            ;should be allowed
             rts

@@ -332,11 +332,12 @@ namespace SourceGen.AsmGen {
         /// This is necessary for assemblers like 64tass that use a leading underscore to
         /// indicate that a label should be local.
         /// 
-        /// This may be called even if label localization is disabled.  In that case we just
-        /// create an empty label map and populate as needed.
-        /// 
         /// Only call this if underscores are used to indicate local labels.
         /// </summary>
+        /// <remarks>
+        /// This may be called even if label localization is disabled.  In that case we just
+        /// create an empty label map and populate as needed.
+        /// </remarks>
         public void MaskLeadingUnderscores() {
             bool allGlobal = false;
             if (LabelMap == null) {
@@ -383,8 +384,9 @@ namespace SourceGen.AsmGen {
 
                 // Make sure it's unique.
                 string uniqueLabel = newLabel;
-                int uval = 1;
+                int uval = 0;
                 while (allLabels.ContainsKey(uniqueLabel)) {
+                    uval++;
                     uniqueLabel = newLabel + uval.ToString();
                 }
                 allLabels.Add(uniqueLabel, uniqueLabel);
@@ -396,6 +398,92 @@ namespace SourceGen.AsmGen {
             }
 
             Debug.WriteLine("UMAP: allcount=" + allLabels.Count + " mapcount=" + LabelMap.Count);
+        }
+
+        /// <summary>
+        /// Remaps labels that match opcode names.  Updated names will be added to LabelMap.
+        /// This should be run after localization and underscore concealment have finished.
+        /// </summary>
+        /// <remarks>
+        /// Most assemblers don't like it if you create a label with the same name as an
+        /// opcode, e.g. "jmp LSR" doesn't work.  We can use the label map to work around
+        /// the issue.
+        ///
+        /// Most assemblers regard mnemonics as case-insensitive, even if labels are
+        /// case-sensitive, so we want to remap both "lsr" and "LSR".
+        ///
+        /// This doesn't really have anything to do with label localization other than that
+        /// we're updating the label remap table.
+        /// </remarks>
+        public void FixOpcodeLabels() {
+            if (LabelMap == null) {
+                LabelMap = new Dictionary<string, string>();
+            }
+
+            // Create a searchable list of opcode names using the current CPU definition.
+            // (All tested assemblers that failed on opcode names only did so for names
+            // that were part of the current definition, e.g. "TSB" was accepted as a label
+            // when the CPU was set to 6502.)
+            Dictionary<string, Asm65.OpDef> opnames = new Dictionary<string, Asm65.OpDef>();
+            Asm65.CpuDef cpuDef = mProject.CpuDef;
+            for (int i = 0; i < 256; i++) {
+                Asm65.OpDef op = cpuDef.GetOpDef(i);
+                // There may be multiple entries with the same name (e.g. "NOP").  That's fine.
+                opnames[op.Mnemonic.ToUpperInvariant()] = op;
+            }
+
+            // Create a list of all labels, for uniqueness testing.  If a label has been
+            // remapped, we add the remapped entry.
+            // (All tested assemblers that failed on opcode names only did so for names
+            // in their non-localized form.  While "LSR" failed, "@LSR", "_LSR", ".LSR", etc.
+            // were accepted.  So if it  was remapped by the localizer, we don't need to
+            // worry about it.)
+            SortedList<string, string> allLabels = new SortedList<string, string>();
+            for (int i = 0; i < mProject.FileDataLength; i++) {
+                Symbol sym = mProject.GetAnattrib(i).Symbol;
+                if (sym == null) {
+                    continue;
+                }
+                LabelMap.TryGetValue(sym.Label, out string mapLabel);
+                if (mapLabel != null) {
+                    allLabels.Add(mapLabel, mapLabel);
+                } else {
+                    allLabels.Add(sym.Label, sym.Label);
+                }
+            }
+
+            // Now run through the list of labels, looking for any that match opcode
+            // mnemonics.
+            for (int i = 0; i < mProject.FileDataLength; i++) {
+                Symbol sym = mProject.GetAnattrib(i).Symbol;
+                if (sym == null) {
+                    // No label at this offset.
+                    continue;
+                }
+                string cmpLabel = sym.Label;
+                if (LabelMap.TryGetValue(sym.Label, out string mapLabel)) {
+                    cmpLabel = mapLabel;
+                }
+
+                if (opnames.ContainsKey(cmpLabel.ToUpperInvariant())) {
+                    //Debug.WriteLine("Remapping label (op mnemonic): " + sym.Label);
+
+                    int uval = 0;
+                    string uniqueLabel;
+                    do {
+                        uval++;
+                        uniqueLabel = cmpLabel + "_" + uval.ToString();
+                    } while (allLabels.ContainsKey(uniqueLabel));
+
+                    allLabels.Add(uniqueLabel, uniqueLabel);
+                    LabelMap.Add(sym.Label, uniqueLabel);
+                }
+            }
+
+            if (LabelMap.Count == 0) {
+                // didn't do anything, lose the table
+                LabelMap = null;
+            }
         }
     }
 }

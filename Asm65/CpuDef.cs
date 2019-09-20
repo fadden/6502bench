@@ -227,7 +227,7 @@ namespace Asm65 {
         /// Returns an entry from the OpDef array for the specified opcode, 0-255.  (We could
         /// probably just make this the class indexer.)
         /// </summary>
-        /// <param name="op">Instruction opcode</param>
+        /// <param name="op">Instruction opcode number (0-255).</param>
         /// <returns>Instruction definition.</returns>
         public OpDef GetOpDef(int op) { return mOpDefs[op]; }
 

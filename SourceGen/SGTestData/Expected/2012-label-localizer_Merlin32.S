@@ -49,5 +49,17 @@ globlat  jsr   nglobal
 end      nop
 EXCESSIVELY_LONG_LABEL
          lda   REALLYLONGLABELNAME
+:_uname  nop
+:X_uname11
+         nop
+:X_uname1
+         nop
+:X_uname nop
+         lda   #$00
+:AND     bne   :AND       ;local
+JMP      bne   JMP        ;global
+jmp      bne   jmp
+TSB      bne   TSB
+XCE      bne   XCE
          rts
 

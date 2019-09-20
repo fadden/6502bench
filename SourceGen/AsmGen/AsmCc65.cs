@@ -220,6 +220,7 @@ namespace SourceGen.AsmGen {
                 mLocalizer.QuirkVariablesEndScope = true;
                 mLocalizer.Analyze();
             }
+            mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(cfgName, false, new UTF8Encoding(false))) {

@@ -1,9 +1,7 @@
-        .cpu    "65816"
+        .cpu    "65c02"
 REALLYLONGLABELNAME = $8888 ;that's a long name
 
 *       =       $1000
-        .as
-        .xs
         nop
 X_start lda     _start
         lda     X_start1
@@ -56,5 +54,19 @@ globlat jsr     nglobal
 end     nop
 EXCESSIVELY_LONG_LABEL
         lda     REALLYLONGLABELNAME
+_X_uname
+        nop
+_X_uname11
+        nop
+_X_uname1
+        nop
+_X_uname2
+        nop
+        lda     #$00
+_AND    bne     _AND       ;local
+JMP_1   bne     JMP_1      ;global
+jmp_1   bne     jmp_1
+TSB_1   bne     TSB_1
+XCE     bne     XCE
         rts
 
