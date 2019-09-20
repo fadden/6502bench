@@ -99,7 +99,7 @@ L103C   lda     #$fe
 .CONST0 =       $10
 .PTR    =       $24        ;#3
         ldx     .PTR
-PTR_1   nop
+@PTR_1  nop
         !zone   Z000058
 .NH0    =       $00        ;not hidden
 .NH1    =       $01        ;not hidden
@@ -191,6 +191,36 @@ DPCODE  nop
         lda+1   DPCODE
         lda+2   DPCODE
         lda+3   DPCODE
+@SPLIT1 lda     #','
+        !zone   Z00008a
+.NH0    =       $00        ;not hidden
+.NH1    =       $01        ;not hidden
+.PTR0   =       $10
+.CONST0 =       $10
+.PTR_C  =       $1d
+.PTR_D  =       $21
+.PTR    =       $24        ;#3
+.VAL0   =       $30
+.VAL14  =       $31
+.VAL5   =       $35
+.SPLITTER =     $80
+        ldx     $1234
+        beq     @SPLIT1
+@SPLIT2 lda     ','
+        !zone   Z000091
+.NH0    =       $00        ;not hidden
+.NH1    =       $01        ;not hidden
+.PTR0   =       $10
+.CONST0 =       $10
+.PTR_C  =       $1d
+.PTR_D  =       $21
+.PTR    =       $24        ;#3
+.VAL0   =       $30
+.VAL14  =       $31
+.VAL5   =       $35
+.SPLITTER =     $80
+        ldx     $5678
+        beq     @SPLIT2
         rts
 
         } ;!pseudopc

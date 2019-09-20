@@ -342,6 +342,12 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
+        public FormatDescriptor ModifyInstructionOperandFormat(int offset, FormatDescriptor dfd,
+                int operand) {
+            return dfd;
+        }
+
+        // IGenerator
         public void UpdateCharacterEncoding(FormatDescriptor dfd) {
             CharEncoding.Encoding newEnc = PseudoOp.SubTypeToEnc(dfd.FormatSubType);
             if (newEnc == CharEncoding.Encoding.Unknown) {

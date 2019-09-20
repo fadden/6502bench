@@ -106,5 +106,12 @@ DPCODE:  nop
          lda     DPCODE
          lda     a:DPCODE
          lda     f:DPCODE
+SPLIT1:  lda     #','
+SPLITTER .set    $80
+         ldx     $1234
+         beq     SPLIT1
+@SPLIT2: lda     ','
+         ldx     $5678
+         beq     @SPLIT2
          rts
 

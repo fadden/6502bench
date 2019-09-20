@@ -1,9 +1,13 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":2,"FileDataLength":137,"FileDataCrc32":708791740,"ProjectProps":{
+"_ContentVersion":2,"FileDataLength":151,"FileDataCrc32":-814797830,"ProjectProps":{
 "CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":false,"SmartPlpHandling":false},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
+"__ENABLE_LABEL_LOCALIZATION":{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"Comment":"","Label":"__ENABLE_LABEL_LOCALIZATION","Value":1,"Source":"Project","Type":"Constant"},
 "CONST_ONE":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
@@ -44,7 +48,11 @@
 "87":{
 "Label":"PTR_1","Value":4183,"Source":"User","Type":"LocalOrGlobalAddr"},
 "126":{
-"Label":"DPCODE","Value":128,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"Label":"DPCODE","Value":128,"Source":"User","Type":"LocalOrGlobalAddr"},
+"136":{
+"Label":"SPLIT1","Value":138,"Source":"User","Type":"LocalOrGlobalAddr"},
+"143":{
+"Label":"SPLIT2","Value":145,"Source":"User","Type":"LocalOrGlobalAddr"}},
 "OperandFormats":{
 "8":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
@@ -52,7 +60,11 @@
 "24":{
 "Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
 "26":{
-"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null}},
+"Length":2,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
+"136":{
+"Length":2,"Format":"NumericLE","SubFormat":"Ascii","SymbolRef":null},
+"143":{
+"Length":2,"Format":"NumericLE","SubFormat":"Ascii","SymbolRef":null}},
 "LvTables":{
 "12":{
 "Variables":[{
@@ -180,4 +192,16 @@
 "Variables":[{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"same as org","Label":"DPNOP","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false}}}
+"Comment":"same as org","Label":"DPNOP","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false},
+"138":{
+"Variables":[{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","Label":"SPLITTER","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false},
+"139":{
+"Variables":[{
+"DataDescriptor":{
+"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","Label":"FOO","Value":128,"Source":"Variable","Type":"ExternalAddr"}],"ClearPrevious":false},
+"145":{
+"Variables":[],"ClearPrevious":false}}}

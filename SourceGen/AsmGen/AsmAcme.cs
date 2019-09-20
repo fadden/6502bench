@@ -321,6 +321,12 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
+        public FormatDescriptor ModifyInstructionOperandFormat(int offset, FormatDescriptor dfd,
+                int operand) {
+            return dfd;
+        }
+
+        // IGenerator
         public void UpdateCharacterEncoding(FormatDescriptor dfd) { }
 
         // IGenerator

@@ -217,6 +217,7 @@ namespace SourceGen.AsmGen {
             mLocalizer = new LabelLocalizer(Project);
             if (!Settings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false)) {
                 mLocalizer.LocalPrefix = "@";
+                mLocalizer.QuirkVariablesEndScope = true;
                 mLocalizer.Analyze();
             }
 
@@ -344,6 +345,12 @@ namespace SourceGen.AsmGen {
             } else {
                 return string.Empty;
             }
+        }
+
+        // IGenerator
+        public FormatDescriptor ModifyInstructionOperandFormat(int offset, FormatDescriptor dfd,
+                int operand) {
+            return dfd;
         }
 
         // IGenerator

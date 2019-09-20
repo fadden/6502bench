@@ -96,6 +96,19 @@ namespace SourceGen.AsmGen {
         string ModifyOpcode(int offset, OpDef op);
 
         /// <summary>
+        /// Provides an opportunity for the assembler to replace an instruction's format
+        /// descriptor with another.  Only called if the instruction is explicitly formatted
+        /// (i.e. has a non-null descriptor).
+        /// </summary>
+        /// <param name="offset">Instruction offset.</param>
+        /// <param name="dfd">Existing descriptor.</param>
+        /// <param name="operand">Operand value.</param>
+        /// <returns>Replacement format descriptor.  If no changes are desired, returns
+        ///   the dfd argument.</returns>
+        FormatDescriptor ModifyInstructionOperandFormat(int offset, FormatDescriptor dfd,
+            int operand);
+
+        /// <summary>
         /// Allows the generator to issue character encoding update instructions for source
         /// files with more than one encoding.
         /// </summary>

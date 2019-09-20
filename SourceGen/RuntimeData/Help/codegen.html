@@ -251,6 +251,9 @@ code, but also needs to know how to handle the corner cases.</p>
     where the labels are used, the assembler will already have generated them
     as absolute values.  Width disambiguation must be applied to operands
     that wouldn't be ambiguous to a multi-pass assembler.</li>
+  <li>Assignment of constants and variables (<code>=</code> and
+    <code>.set</code>) ends local label scope, so the label localizer
+    has to take variable assignment into account.</li>
   <li>The assembler is geared toward generating relocatable code with
     multiple segments (it is, after all, an assembler for a C compiler).
     A linker configuration script is expected to be provided for anything
@@ -269,6 +272,8 @@ code, but also needs to know how to handle the corner cases.</p>
 <ul>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>For some failures, an exit code of zero is returned.</li>
+  <li>Immediate operands with a comma (e.g. <code>LDA #','</code>)
+    cause an error.</li>
   <li>Some DP indexed store instructions cause errors if the label isn't
     unambiguously DP (e.g. <code>STX $00,X</code> vs.
     <code>STX $0000,X</code>).  This isn't a problem with project/platform

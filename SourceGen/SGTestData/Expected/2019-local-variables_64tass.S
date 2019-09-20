@@ -1,5 +1,7 @@
 ;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
         .cpu    "65816"
+        .enc    sg_ascii
+        .cdef   $20,$7e,$20
 PROJ_ZERO =     $00        ;project addr
 PROJ_ONE =      $01        ;project addr
 CONST_ZERO =    $f0        ;project const
@@ -66,7 +68,7 @@ PTR     .var    $22        ;#2
         ldx     PTR
 PTR     .var    $24        ;#3
         ldx     PTR
-PTR_1   nop
+_PTR_1  nop
 PTR_A   .var    $20
         ldy     PTR_A
 PTR_B   .var    $1f
@@ -104,6 +106,13 @@ DPCODE  nop
         lda     DPCODE
         lda     @wDPCODE
         lda     @lDPCODE
+_SPLIT1 lda     #','
+SPLITTER .var   $80
+        ldx     $1234
+        beq     _SPLIT1
+_SPLIT2 lda     ','
+        ldx     $5678
+        beq     _SPLIT2
         rts
 
         .here

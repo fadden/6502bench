@@ -368,6 +368,19 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
+        public FormatDescriptor ModifyInstructionOperandFormat(int offset, FormatDescriptor dfd,
+                int operand) {
+            if (dfd.FormatType == FormatDescriptor.Type.NumericLE && dfd.IsStringOrCharacter &&
+                    (operand & 0x7f) == (byte)',') {
+                // Merlin throws an error on comma operands, e.g. LDA #','
+                dfd = FormatDescriptor.Create(dfd.Length,
+                    FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.None);
+            }
+
+            return dfd;
+        }
+
+        // IGenerator
         public void UpdateCharacterEncoding(FormatDescriptor dfd) { }
 
         // IGenerator

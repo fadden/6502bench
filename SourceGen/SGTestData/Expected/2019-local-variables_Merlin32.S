@@ -63,7 +63,7 @@ L103C    lda   #$fe
          ldx   ]PTR
 ]PTR     equ   $24        ;#3
          ldx   ]PTR
-PTR_1    nop
+:PTR_1   nop
 ]PTR_A   equ   $20
          ldy   ]PTR_A
 ]PTR_B   equ   $1f
@@ -101,5 +101,12 @@ DPCODE   nop
          lda   DPCODE
          lda:  DPCODE
          ldal  DPCODE
+:SPLIT1  lda   #$2c
+]SPLITTER equ  $80
+         ldx   $1234
+         beq   :SPLIT1
+:SPLIT2  lda   $2c
+         ldx   $5678
+         beq   :SPLIT2
          rts
 

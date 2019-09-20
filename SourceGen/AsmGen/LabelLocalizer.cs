@@ -131,6 +131,11 @@ namespace SourceGen.AsmGen {
         public string LocalPrefix { get; set; }
 
         /// <summary>
+        /// Set this if the declaration of a local variable ends the current scope.
+        /// </summary>
+        public bool QuirkVariablesEndScope { get; set; }
+
+        /// <summary>
         /// Project reference.
         /// </summary>
         private DisasmProject mProject;
@@ -230,8 +235,18 @@ namespace SourceGen.AsmGen {
 
             bool first = true;
 
-            for (int i = 0; i < mProject.FileDataLength; i++) {
-                Symbol sym = mProject.GetAnattrib(i).Symbol;
+            for (int offset = 0; offset < mProject.FileDataLength; offset++) {
+                Symbol sym = mProject.GetAnattrib(offset).Symbol;
+
+                // In cc65, variable declarations end the local label scope.  We insert a
+                // fake global symbol if we counter a table with a nonzero number of entries.
+                if (QuirkVariablesEndScope &&
+                        mProject.LvTables.TryGetValue(offset, out LocalVariableTable value) &&
+                        value.Count > 0) {
+                    mGlobalFlags[offset] = true;
+                    mGlobalLabels.Add(new OffsetLabel(offset, "!VARTAB!"));
+                    continue;
+                }
                 if (sym == null) {
                     // No label at this offset.
                     continue;
@@ -239,22 +254,22 @@ namespace SourceGen.AsmGen {
 
                 if (first || sym.SymbolType != Symbol.Type.LocalOrGlobalAddr) {
                     first = false;
-                    mGlobalFlags[i] = true;
-                    mGlobalLabels.Add(new OffsetLabel(i, sym.Label));
+                    mGlobalFlags[offset] = true;
+                    mGlobalLabels.Add(new OffsetLabel(offset, sym.Label));
 
                     // Don't add to pairs list.
                     continue;
                 }
 
                 // If nothing actually references this label, the xref set will be empty.
-                XrefSet xrefs = mProject.GetXrefSet(i);
+                XrefSet xrefs = mProject.GetXrefSet(offset);
                 if (xrefs != null) {
                     foreach (XrefSet.Xref xref in xrefs) {
                         if (!xref.IsByName) {
                             continue;
                         }
 
-                        mOffsetPairs.Add(new OffsetPair(xref.Offset, i));
+                        mOffsetPairs.Add(new OffsetPair(xref.Offset, offset));
                     }
                 }
             }

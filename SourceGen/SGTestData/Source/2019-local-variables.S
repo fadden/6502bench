@@ -3,6 +3,8 @@
 ;
 ; Assembler: Merlin 32
 
+; EDIT: add __ENABLE_LABEL_LOCALIZATION to project symbols
+
         org     $1000
 
 ; Define these as project symbols.
@@ -145,4 +147,13 @@ DPCODE  nop
         lda     DPCODE          ;should be DPNOP
         lda     |DPCODE         ;should be DPCODE
         lda     >DPCODE         ;should be DPCODE
+
+; Local label test.  ca65 v2.18 erases cheap local label scope when it
+; encounters a constant or .set.
+LOCAL1  lda     #$2c            ;EDIT: format as ASCII
+        ldx     $1234           ;put variable table here with one arbitrary entry
+        beq     LOCAL1
+LOCAL2  lda     $2c             ;EDIT: format as ASCII
+        ldx     $5678           ;put empty variable table here
+        beq     LOCAL2
         rts

@@ -230,14 +230,17 @@ namespace SourceGen.AsmGen {
             // Check Length to watch for bogus descriptors.  (ApplyFormatDescriptors() should
             // now be screening bad descriptors out, so we may not need the Length test.)
             if (attr.DataDescriptor != null && attr.Length == attr.DataDescriptor.Length) {
+                FormatDescriptor dfd = gen.ModifyInstructionOperandFormat(offset,
+                    attr.DataDescriptor, operand);
+
                 // Format operand as directed.
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     // Special handling for the double-operand block move.
                     string opstr1 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        gen.Localizer.LabelMap, attr.DataDescriptor, operand >> 8, 1,
+                        gen.Localizer.LabelMap, dfd, operand >> 8, 1,
                         PseudoOp.FormatNumericOpFlags.None);
                     string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        gen.Localizer.LabelMap, attr.DataDescriptor, operand & 0xff, 1,
+                        gen.Localizer.LabelMap, dfd, operand & 0xff, 1,
                         PseudoOp.FormatNumericOpFlags.None);
                     if (gen.Quirks.BlockMoveArgsReversed) {
                         string tmp = opstr1;
@@ -248,10 +251,10 @@ namespace SourceGen.AsmGen {
                     formattedOperand = hash + opstr1 + "," + hash + opstr2;
                 } else {
                     if (attr.DataDescriptor.IsStringOrCharacter) {
-                        gen.UpdateCharacterEncoding(attr.DataDescriptor);
+                        gen.UpdateCharacterEncoding(dfd);
                     }
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
-                        lvLookup, gen.Localizer.LabelMap, attr.DataDescriptor,
+                        lvLookup, gen.Localizer.LabelMap, dfd,
                         offset, operandForSymbol, operandLen, opFlags);
                 }
             } else {
