@@ -164,6 +164,7 @@ limitations under the License.
             <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
             <RoutedUICommand x:Key="Debug_ShowAnalysisTimersCmd" Text="Show Analysis Timers"/>
             <RoutedUICommand x:Key="Debug_ShowAnalyzerOutputCmd" Text="Show Analyzer Output"/>
+            <RoutedUICommand x:Key="Debug_ShowProblemListCmd" Text="Show Problem List Viewer"/>
             <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
             <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
@@ -279,6 +280,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="Debug_ShowAnalysisTimersCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowAnalyzerOutputCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ShowAnalyzerOutputCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ShowProblemListCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ShowProblemListCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ShowUndoRedoHistoryCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ToggleCommentRulersCmd}"
@@ -361,6 +364,8 @@ limitations under the License.
             <MenuItem Header="_DEBUG" Name="DebugMenu" SubmenuOpened="DebugMenu_SubmenuOpened"
                       Visibility="{Binding ShowDebugMenu, Converter={StaticResource BoolToVis}}">
                 <MenuItem Command="Refresh" Header="Re-analyze"/>
+                <MenuItem Name="debugProblemListMenuItem"
+                          Command="{StaticResource Debug_ShowProblemListCmd}" IsCheckable="True"/>
                 <MenuItem Name ="debugUndoRedoHistoryMenuItem"
                           Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}" IsCheckable="True"/>
                 <MenuItem Name="debugAnalyzerOutputMenuItem"

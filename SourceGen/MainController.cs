@@ -74,6 +74,8 @@ namespace SourceGen {
         public bool IsDebugAnalysisTimersOpen { get { return mShowAnalysisTimersDialog != null; } }
         private Tools.WpfGui.ShowText mShowAnalyzerOutputDialog;
         public bool IsDebugAnalyzerOutputOpen { get { return mShowAnalyzerOutputDialog != null; } }
+        private Tools.WpfGui.ProblemListViewer mShowProblemListDialog;
+        public bool IsDebugProblemListOpen { get { return mShowProblemListDialog != null; } }
         private Tools.WpfGui.ShowText mShowUndoRedoHistoryDialog;
         public bool IsDebugUndoRedoHistoryOpen { get { return mShowUndoRedoHistoryDialog != null; } }
 
@@ -855,6 +857,10 @@ namespace SourceGen {
                 }
             }
 
+            if (mShowProblemListDialog != null) {
+                mShowProblemListDialog.Update();
+            }
+
             if (FormatDescriptor.DebugCreateCount != 0) {
                 Debug.WriteLine("FormatDescriptor total=" + FormatDescriptor.DebugCreateCount +
                     " prefab=" + FormatDescriptor.DebugPrefabCount + " (" +
@@ -1201,6 +1207,7 @@ namespace SourceGen {
             mHexDumpDialog?.Close();
             mShowAnalysisTimersDialog?.Close();
             mShowAnalyzerOutputDialog?.Close();
+            mShowProblemListDialog?.Close();
             mShowUndoRedoHistoryDialog?.Close();
 
             while (mUnownedWindows.Count > 0) {
@@ -1242,6 +1249,7 @@ namespace SourceGen {
             mHexDumpDialog?.Close();
             mShowAnalysisTimersDialog?.Close();
             mShowAnalyzerOutputDialog?.Close();
+            mShowProblemListDialog?.Close();
             mShowUndoRedoHistoryDialog?.Close();
 
             // Discard all project state.
@@ -3528,6 +3536,22 @@ namespace SourceGen {
             } else {
                 // Ask the dialog to close.  Do the cleanup in the event.
                 mShowAnalyzerOutputDialog.Close();
+            }
+        }
+
+        public void Debug_ShowProblemList() {
+            if (mShowProblemListDialog == null) {
+                Tools.WpfGui.ProblemListViewer dlg =
+                    new Tools.WpfGui.ProblemListViewer(null, mProject, mOutputFormatter);
+                dlg.Closing += (sender, e) => {
+                    Debug.WriteLine("Problem list window closed");
+                    mShowProblemListDialog = null;
+                };
+                dlg.Show();
+                mShowProblemListDialog = dlg;
+            } else {
+                // Ask the dialog to close.  Do the cleanup in the event.
+                mShowProblemListDialog.Close();
             }
         }
 

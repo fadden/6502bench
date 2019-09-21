@@ -168,6 +168,9 @@ namespace SourceGen {
         // Project and platform symbols that are being referenced from code.
         public List<DefSymbol> ActiveDefSymbolList { get; private set; }
 
+        // List of problems detected during analysis.
+        public ProblemList Problems { get; private set; }
+
 #if DATA_PRESCAN
         // Data scan results.
         public TypedRangeSet RepeatedBytes { get; private set; }
@@ -229,6 +232,8 @@ namespace SourceGen {
             SymbolTable = new SymbolTable();
             PlatformSyms = new List<PlatformSymbols>();
             ActiveDefSymbolList = new List<DefSymbol>();
+
+            Problems = new ProblemList();
 
             // Default to 65816.  This will be replaced with value from project file or
             // system definition.
@@ -645,6 +650,10 @@ namespace SourceGen {
             // the program will never generate bad data, and any bad project file contents
             // (possibly introduced by hand-editing) are identified at load time, called out
             // to the user, and discarded.
+            //
+            // We do want to collect the failures so we can present them to the user.
+            Problems.Clear();
+
             Debug.Assert(reanalysisRequired != UndoableChange.ReanalysisScope.None);
             reanalysisTimer.StartTask("DisasmProject.Analyze()");
 
@@ -773,6 +782,7 @@ namespace SourceGen {
             //reanalysisTimer.DumpTimes("DisasmProject timers:", debugLog);
 
             debugLog.LogI("Analysis complete");
+            Problems.DebugDump();
         }
 
         /// <summary>
@@ -809,6 +819,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="genLog">Log for debug messages.</param>
         private void ApplyFormatDescriptors(DebugLog genLog) {
+            // TODO: add these to ProblemList
             foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
                 int offset = kvp.Key;
 
@@ -970,6 +981,13 @@ namespace SourceGen {
                 if (!mAnattribs[offset].IsStart) {
                     Debug.WriteLine("Stripping hidden label '" + kvp.Value.Label + "'");
                     SymbolTable.Remove(kvp.Value);
+
+                    Problems.Add(new ProblemList.ProblemEntry(
+                        ProblemList.ProblemEntry.SeverityLevel.Warning,
+                        offset,
+                        ProblemList.ProblemEntry.ProblemType.HiddenLabel,
+                        kvp.Value.Label,
+                        ProblemList.ProblemEntry.ProblemResolution.LabelIgnored));
                 }
             }
         }
@@ -1293,6 +1311,14 @@ namespace SourceGen {
                                 Debug.WriteLine("NOTE: not xrefing +" + offset.ToString("x6") +
                                     " " + sym);
                             }
+                        } else {
+                            // Reference to non-existent symbol.
+                            Problems.Add(new ProblemList.ProblemEntry(
+                                ProblemList.ProblemEntry.SeverityLevel.Info,
+                                offset,
+                                ProblemList.ProblemEntry.ProblemType.UnresolvedWeakRef,
+                                dfd.SymbolRef.Label,
+                                ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                         }
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.Address) {
                         // not expecting this format on an instruction operand

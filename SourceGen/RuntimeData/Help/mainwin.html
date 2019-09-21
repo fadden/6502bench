@@ -272,10 +272,18 @@ use the symbol.  To make the difference clear, the lines in the references
 window will either show "Sym" (to indicate that the symbol at the selected
 line was referenced) or "Oth" (to indicate that some other symbol, or no
 symbol, was used).</p>
-<p>This is also relevant for project and platform symbols.  If the
-DATA0/1 labels were project symbols, the entry for <code>DATA1</code>
-would not be included in the list of equates, because the symbol is
-never used.</p>
+
+<p>When an equate directive (generated for platform and project
+symbols) or local variable assignment is selected, the References
+window will show all references to that symbol.  Unlike in-file
+references, only the uses of that symbol are shown.  So if you have
+both a project symbol and a local variable for address $30, they
+will show disjoint sets of references.  Furthermore, if you explicitly
+format an instruction operand as hex, e.g. <code>LDA $30</code>, it will
+not appear in either set because it's not a symbolic reference.</p>
+<p>The cross-reference data is used to generate the set of equate
+directives at the top of the listing.  If nothing references a platform
+or project symbol, an equate directive will not be generated for it.</p>
 
 <p>Double-clicking on a reference moves the code list selection to that
 reference, and adds the previous selection to the navigation stack.</p>

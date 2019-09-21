@@ -1278,6 +1278,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ShowAnalyzerOutput();
         }
 
+        private void Debug_ShowProblemListCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ShowProblemList();
+        }
+
         private void Debug_ShowUndoRedoHistoryCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ShowUndoRedoHistory();
@@ -1384,6 +1388,7 @@ namespace SourceGen.WpfGui {
             debugKeepAliveHackMenuItem.IsChecked = Sandbox.ScriptManager.UseKeepAliveHack;
             debugAnalysisTimersMenuItem.IsChecked = mMainCtrl.IsDebugAnalysisTimersOpen;
             debugAnalyzerOutputMenuItem.IsChecked = mMainCtrl.IsDebugAnalyzerOutputOpen;
+            debugProblemListMenuItem.IsChecked = mMainCtrl.IsDebugProblemListOpen;
             debugUndoRedoHistoryMenuItem.IsChecked = mMainCtrl.IsDebugUndoRedoHistoryOpen;
         }
 

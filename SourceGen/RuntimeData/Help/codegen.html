@@ -33,26 +33,29 @@ This is explained in more detail <a href="#export-source">below</a>.
   <li><a href="#merlin32">Merlin 32</a></li>
 </ul>
 
-
 <h3><a name="version">Version-Specific Code Generation</a></h3>
 
 <p>Code generation must be tailored to the specific version of the
 assembler.  This is most easily understood with an example.</p>
-<p>If you write <code>MVN $01,$02</code>, the assembler is expected to output
-<code>54 02 01</code>, with the arguments reversed.  cc65 v2.17 doesn't
-do that; this is a bug that was fixed in a later version.  So if you're
-generating code for v2.17, you want to create source code with the
-arguments the wrong way around.</p>
-<p>Having version-dependent source code is a bad idea, so SourceGen
-just outputs raw hex bytes for MVN/MVP instructions.  This yields the
-correct code for all versions of the assembler, but is ugly and
-annoying.  So we want to output actual MVN/MVP instructions when producing
-code for newer versions of the assembler.</p>
+<p>If the code has a statement like <code>MVN #$01,#$02</code>, the
+assembler is expected to output <code>54 02 01</code>, with the arguments
+reversed.  cc65 v2.17 got it backward; the behavior was fixed in v2.18.  The
+bug means we can't generate the same <code>MVN</code>/<code>MVP</code>
+instructions for both versions of the assembler.</p>
+<p>Having version-dependent source code is a bad idea.  If we generated
+reversed operands (<code>MVN #$02,#$01</code>), we'd get the correct
+output with v2.17, but the wrong output for v2.18.  Unambiguous code can
+be generated for all versions of the assembler by just outputting raw hex
+bytes, but that's ugly and annoying, so we don't want to be stuck doing
+that forever.  We want to detect which version of the assembler is in
+use, and output actual <code>MVN</code>/<code>MVP</code> instructions
+when producing code for newer versions of the assembler.</p>
 <p>When you configure a cross-assembler, SourceGen runs the executable with
 version query args, and extracts the version information from the output
 stream.  This is used by the generator to ensure that the output will compile.
 If no assembler is configured, SourceGen will produce code optimized
 for the latest version of the assembler.</p>
+
 
 <h2><a name="generate">Generating Source Code</a></h2>
 
@@ -73,8 +76,8 @@ of a version number.</p>
 <p>The Settings button will take you directly to the assembler configuration
 tab in the application settings dialog.</p>
 <p>Hit the Generate button to generate the source code into a file on disk.
-The file will use the project name, with the ".dis65" replaced by
-"_&lt;assembler&gt;.S".</p>
+The file will use the project name, with the <code>.dis65</code> extension
+replaced by <code>_&lt;assembler&gt;.S</code>.</p>
 <p>The first 64KiB of each generated file will be shown in the preview
 window.  If multiple files were generated, you can use the "preview file"
 drop-down to select between them.  Line numbers are
@@ -93,6 +96,15 @@ global label definition, which the localizer factors in automatically.</p>
 <p>The localizer is somewhat experimental at this time, and can be
 disabled from the
 <a href="settings.html#app-settings">application settings</a>.</p>
+
+
+<h3><a name="reserved-labels">Reserved Label Names</a></h3>
+<p>Some label names aren't allowed.  For example, 64tass reserves the
+use of labels that begin with two underscores.  Most assemblers will
+also prevent you from using opcode mnemonics as labels (which means
+you can't assemble <code>jmp jmp jmp</code>).</p>
+<p>If a label doesn't appear to be legal, the generated code will have
+a suitable replacement (e.g. <code>jmp_1 jmp jmp_1</code>).</p>
 
 
 <h2><a name="assemble">Cross-Assembling Generated Code</a></h2>
@@ -152,8 +164,8 @@ code, but also needs to know how to handle the corner cases.</p>
     the load address.  The <code>--nostart</code> flag is used to
     suppress this.</li>
   <li>By default, 64tass is case-insensitive, but SourceGen treats labels
-    as case-sensitive.  The <code>--case-sensitive</code> must be passed to
-    the assembler.</li>
+    as case-sensitive.  The <code>--case-sensitive</code> flag must be passed
+    to the assembler.</li>
   <li>If you set the <code>--case-sensitive</code> flag, <b>all</b> opcodes
     and operands must be lower-case.  Most of the SourceGen options that
     cause things to appear in upper case must be disabled.</li>
@@ -170,15 +182,6 @@ code, but also needs to know how to handle the corner cases.</p>
     the documentation says you're required to pass the "--ascii" flag when
     the input is ASCII/UTF-8, so to build files that want ASCII operands
     an explicit character encoding definition must be provided.</li>
-</ul>
-
-<p>Notes:</p>
-<ul>
-  <li>The "default text encoding" project property is used by SourceGen
-    to set the text encoding for the entire source file.  For non-ASCII
-    projects, a small encoding table is generated at the top of the output.
-    This works for C64 PETSCII and C64 screen codes, but not for high
-    ASCII.  This is done without passing "--ascii" on the command line.</li>
 </ul>
 
 
@@ -326,7 +329,7 @@ with links.</p>
   <li><b>Include only selected lines</b>.  This allows you to choose between
     exporting all or part of a file.  If no lines are selected, the entire
     file will exported.  This setting does <b>not</b> affect link generation
-    for HTML output, so you my have some dead internal links if you don't
+    for HTML output, so you may have some dead internal links if you don't
     export the entire file.</li>
   <li><b>Include notes</b>.  Notes are normally excluded from generated
     sources.  Check this to include them.</li>
