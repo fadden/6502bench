@@ -7,12 +7,14 @@
 *SYNOPSIS Applesoft BASIC addresses and constants
 
 BAS_USRVEC      @ $0A       ;USR() command vector
+BAS_CHARAC      @ $0D       ;used by string utility
+BAS_ENDCHR      @ $0E       ;used by string utility
+BAS_VALTYP      @ $11       ;flag for last FAC operation ($00=num, $FF=str)
+BAS_SUBFLG      @ $14       ;subscript flag ($00=allowed, $80=not)
 BAS_HCOLOR1     @ $1C       ;hi-res color mask
 BAS_COUNTH      @ $1D       ;hi-res high-order byte of step for line
-BAS_HBASL       @ $26       ;base address for hi-res drawing
-
-BAS_RNDL        @ $4E       ;low byte of KEYIN "random" value
-BAS_RNDH        @ $4F       ;high byte of KEYIN "random" value
+BAS_HBASL       @ $26       ;base address for hi-res drawing (2b)
+BAS_HMASK       @ $30       ;hi-res graphics on-the-fly bit mask
 BAS_LINNUM      @ $50       ;line number (2b)
 BAS_TEMPPT      @ $52       ;temporary point (2b)
 BAS_INDEX       @ $5E       ;temp (stack) pointer for moving strings (2b)
@@ -23,28 +25,38 @@ BAS_STREND      @ $6D       ;pointer to end of numeric storage (2b)
 BAS_FRETOP      @ $6F       ;pointer to end of string storage (2b)
 BAS_MEMSIZE     @ $73       ;HIMEM (2b)
 BAS_CURLIN      @ $75       ;current line number (2b)
+BAS_OLDLIN      @ $77       ;last line executed (2b)
 BAS_OLDTEXT     @ $79       ;old text pointer
+BAS_DATLIN      @ $7B       ;current line # from which data is being read (2b)
+BAS_DATPTR      @ $7D       ;points to mem from which data is being read (2b)
+BAS_VARNAM      @ $81       ;holds last-used variable's name (2b)
+BAS_VARPNT      @ $83       ;pointer to last-used variable's value (2b)
 BAS_FORPNT      @ $85       ;general pointer (2b)
-BAS_TEMP1       @ $93       ;fp register TEMP1
+BAS_JMPADRS     @ $90       ;jump address; $90 is set to $4C (3b)
+BAS_TEMP1       @ $93       ;fp math register
 BAS_HIGHDS      @ $94       ;block copy pointer (2b)
 BAS_HIGHTR      @ $96       ;block copy pointer (2b)
-BAS_LOWTR       @ $9B       ;general pointer
+BAS_TEMP2       @ $98       ;fp math register
+BAS_LOWTR       @ $9B       ;general pointer (2b)
 BAS_FAC         @ $9D       ;floating point accumulator (6b)
-BAS_FACMO       @ $A0       ;middle-order byte of mantissa of FAC
-BAS_FACLO       @ $A1       ;low-order byte of mantissa of FAC
+BAS_FACMO       = $A0       ;middle-order byte of mantissa of FAC
+BAS_FACLO       = $A1       ;low-order byte of mantissa of FAC
 BAS_FACSIGN     @ $A2       ;single byte sign of FAC
-BAS_STRING1     @ $AB       ;pointer to a string
-BAS_STRING2     @ $AD       ;pointer to a string
+BAS_ARG         @ $A5       ;secondary floating point accumulator (6b)
+BAS_STRNG1      @ $AB       ;pointer to a string (2b)
+BAS_STRNG2      @ $AD       ;pointer to a string (2b)
 BAS_PRGEND      @ $AF       ;pointer to end of program (2b)
 BAS_CHRGET      @ $B1       ;get next character or Applesoft token
 BAS_CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
 BAS_TXTPTR      @ $B8       ;points at next char or token
-
+BAS_RND         @ $B8       ;floating point random number (5b)
 BAS_AUTORUN     @ $D6       ;set to $80 to auto-run
 BAS_ERRFLG      @ $D8       ;$80 if onerr active
-
 BAS_HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
 BAS_SCALE       @ $E7       ;hi-res graphics scale factor
+BAS_FIRST       @ $F0       ;used for lo-res plot coordinates
+BAS_ORMASK      @ $F3       ;mask for output control
+BAS_REMSTK      @ $F8       ;stack pointer saved before each statement
 
 BAS_AMPERV      @ $03F5     ;JMP to function that handles Applesoft '&' cmds
 

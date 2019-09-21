@@ -17,6 +17,7 @@ MON_GBASL       @ $26       ;base address for lo-res drawing (lo)
 MON_GBASH       @ $27       ;base address for lo-res drawing (hi)
 MON_H2          @ $2C       ;right end of horizontal line drawn by HLINE
 MON_V2          @ $2D       ;bottom of vertical line drawn by VLINE
+MON_COLOR       = $30       ;lo-res graphics color
 MON_INVFLAG     @ $32       ;text mask (255=normal, 127=flash, 63=inv)
 MON_PROMPT      @ $33       ;prompt character
 MON_CSWL        @ $36       ;character output hook (lo)
@@ -29,6 +30,8 @@ MON_A1L         @ $3C       ;general purpose
 MON_A1H         @ $3D       ;general purpose
 MON_A2L         @ $3E       ;general purpose
 MON_A2H         @ $3F       ;general purpose
+MON_RNDL        @ $4E       ;low byte of KEYIN "random" value
+MON_RNDH        @ $4F       ;high byte of KEYIN "random" value
 
 MON_SPDBYT      @ $F1       ;text output speed limiter
 
@@ -106,6 +109,7 @@ MON_NXTA4       @ $FCB4     ;increment A4
 MON_NXTA1       @ $FCBA     ;increment A1
 MON_HEADR       @ $FCC9     ;write cassette sync
 MON_WRTAPE      @ $FCE5     ;casssette write
+MON_RD2BIT      @ $FCFA     ;cassette read
 MON_RDKEY       @ $FD0C     ;read key
 MON_FD10        @ $FD10
 MON_RDKEY1      @ $FD18
@@ -135,6 +139,7 @@ MON_OUTPORT     @ $FE95
 MON_GO          @ $FEB6
 MON_WRITE       @ $FECD     ;write data to cassette
 MON_READ        @ $FEFD     ;read data from cassette
+MON_READ2       @ $FF02     ;read data from cassette
 MON_PRERR       @ $FF2D     ;print "ERR" and sound bell
 MON_BELL        @ $FF3A     ;sound bell
 MON_RESTORE     @ $FF3F     ;restore 6502 registers from $45-48
