@@ -18,13 +18,13 @@ using System.Windows;
 
 namespace SourceGen {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Application class.
     /// </summary>
     public partial class App : Application {
         /// <summary>
         /// SourceGen version number.
         /// </summary>
         public static readonly CommonUtil.Version ProgramVersion =
-            new CommonUtil.Version(1, 3, 0, CommonUtil.Version.PreRelType.Dev, 6);
+            new CommonUtil.Version(1, 3, 0, CommonUtil.Version.PreRelType.Alpha, 1);
     }
 }
