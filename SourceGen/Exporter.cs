@@ -386,7 +386,8 @@ namespace SourceGen {
                 return;
             }
 
-            // Perform some quick substitutions.
+            // Perform some quick substitutions.  This could be done more efficiently,
+            // but we're only doing this on the template file, which should be small.
             tmplStr = tmplStr.Replace("$ProjectName$", mProject.DataFileName);
             tmplStr = tmplStr.Replace("$AppVersion$", App.ProgramVersion.ToString());
             string expModeStr = ((Formatter.FormatConfig.ExpressionMode)
@@ -394,6 +395,10 @@ namespace SourceGen {
                     typeof(Formatter.FormatConfig.ExpressionMode),
                     (int)Formatter.FormatConfig.ExpressionMode.Unknown)).ToString();
             tmplStr = tmplStr.Replace("$ExpressionStyle$", expModeStr);
+            string dateStr = DateTime.Now.ToString("yyyy/MM/dd");
+            string timeStr = DateTime.Now.ToString("HH:mm:ss zzz");
+            tmplStr = tmplStr.Replace("$CurrentDate$", dateStr);
+            tmplStr = tmplStr.Replace("$CurrentTime$", timeStr);
 
             // Generate and substitute the symbol table.  This should be small enough that
             // we won't break the world by doing it with string.Replace().
@@ -410,7 +415,6 @@ namespace SourceGen {
             }
             string template1 = tmplStr.Substring(0, splitPoint);
             string template2 = tmplStr.Substring(splitPoint + CodeLinesStr.Length);
-
 
             // Generate UTF-8 text, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {

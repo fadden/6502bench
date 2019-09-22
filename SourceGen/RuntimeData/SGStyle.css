@@ -11,3 +11,16 @@ table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
+
+/*
+ * Blue underlined text is distracting.  Change internal links to be
+ * plain black text until they're hovered over.
+ */
+a[href^="#"]:link, a[href^="#"]:visited {
+    color: black;
+    text-decoration: none;
+}
+a[href^="#"]:hover {
+    color: blue;
+    text-decoration: underline;
+}
