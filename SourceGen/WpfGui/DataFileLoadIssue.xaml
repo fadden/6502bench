@@ -29,7 +29,8 @@ limitations under the License.
         <TextBox Margin="0,8,0,0" IsReadOnly="True"
                  Width="540" MaxLines="1" Text="{Binding PathName}"/>
         <TextBlock Margin="0,8,0,0" Text="There was a problem:"/>
-        <TextBox Margin="0,8,0,0" IsReadOnly="True" Text="{Binding Message}"/>
+        <TextBox Margin="0,8,0,0" IsReadOnly="True" Text="{Binding Message}"
+                 ScrollViewer.CanContentScroll="True"/>
         <DockPanel Margin="0,8,0,0" LastChildFill="False">
             <TextBlock DockPanel.Dock="Left" Text="Do you want to locate the data file?"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>

@@ -699,7 +699,7 @@ namespace SourceGen {
                 return null;
             }
 
-            string linkified = "<a href=#" + LABEL_LINK_PREFIX + sym.Label + ">" +
+            string linkified = "<a href=\"#" + LABEL_LINK_PREFIX + sym.Label + "\">" +
                 sym.Label + "</a>";
             return TextUtil.EscapeHTML(operand).Replace(sym.Label, linkified);
         }
@@ -720,7 +720,7 @@ namespace SourceGen {
                     sb.Append("<table>\r\n");
                 }
                 sb.Append("  <tr>");
-                sb.Append("<td><a href=#" + LABEL_LINK_PREFIX + sym.Label + ">" +
+                sb.Append("<td><a href=\"#" + LABEL_LINK_PREFIX + sym.Label + "\">" +
                     sym.Label + "</a></td>");
                 sb.Append("<td><code>" + mFormatter.FormatHexValue(sym.Value, 2) + "</code></td>");
                 sb.Append("</tr>\r\n");

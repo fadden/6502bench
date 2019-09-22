@@ -109,9 +109,12 @@ executable.</p>
     with all configuration files and libraries
   <li>Merlin 32: <code>Merlin32.exe</code>
 </ul>
-<p>The "column widths" section allows you to specify the width of the
-label, opcode, operand, and comment fields.  If the width is less than 1,
-or isn't a valid number, 1 will be used.</p>
+<p>The "column widths" section allows you to specify the minimum
+width of the label, opcode, operand, and comment fields.  If the width
+is less than 1, or isn't a valid number, 1 will be used.  These are
+not hard stops: if the contents of a field are too wide, the contents
+of the next column will be pushed over.  (The comment field width is
+not currently being used, but may be used to fold lines in the future.)</p>
 
 <p>When "show cycle counts" is checked, every instruction line will have
 an end-of-line comment that indicates the number of cycles required for

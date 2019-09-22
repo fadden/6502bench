@@ -28,7 +28,8 @@ limitations under the License.
     <DockPanel LastChildFill="False" Margin="8">
         <TextBlock DockPanel.Dock="Top">Problems were detected while loading the project file:</TextBlock>
         <TextBox Name="messageTextBox" DockPanel.Dock="Top" Margin="0,8,0,0"
-                 Width="540" Height="110" IsReadOnly="True" TextWrapping="Wrap" Text=""/>
+                 Width="540" Height="110" IsReadOnly="True" TextWrapping="Wrap" Text=""
+                 VerticalScrollBarVisibility="Auto"/>
         <TextBlock Name="invalidDiscardLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Foreground="Red">
             Invalid data items will be discarded when you save the project.
         </TextBlock>
