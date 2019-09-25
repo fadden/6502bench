@@ -43,6 +43,9 @@ namespace SourceGen {
         /// 
         /// The type comparison ensures that project symbols appear before platform symbols,
         /// so that you can "overwrite" a platform symbol with the same value.
+        /// 
+        /// TODO(someday): sort by symbol file load order, so you can choose which set of
+        /// symbols gets to represent a given address.  Mostly useful for zero-page variables.
         /// </summary>
         private class CompareByValue : IComparer<Symbol> {
             public int Compare(Symbol a, Symbol b) {

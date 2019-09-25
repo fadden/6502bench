@@ -956,6 +956,7 @@ namespace SourceGen {
                         Line line = new Line(offset, 0, Line.Type.LocalVariableTable, i);
                         lines.Add(line);
                     }
+                    lines.Add(GenerateBlankLine(offset));
                 }
 
                 if (attr.IsInstructionStart) {

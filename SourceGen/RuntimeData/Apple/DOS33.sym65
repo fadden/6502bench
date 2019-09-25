@@ -5,9 +5,9 @@
 
 *SYNOPSIS DOS 3.3 public addresses and constants.
 
-DOSWRM      @ $3d0      ;DOS warmstart entry point
-DOSCLD      @ $3d3      ;DOS coldstart entry point
-FM          @ $3d6      ;DOS file manager entry point
-RWTS        @ $3d9      ;RWTS entry point
-LOCFPL      @ $3dc      ;loads Y/A with address of FM param list
-LOCRPL      @ $3e3      ;loads Y/A with address of RWTS IOB
+DOS_WRM         @ $3d0      ;DOS warmstart entry point
+DOS_CLD         @ $3d3      ;DOS coldstart entry point
+DOS_FM          @ $3d6      ;DOS file manager entry point
+DOS_RWTS        @ $3d9      ;RWTS entry point
+DOS_LOCFPL      @ $3dc      ;loads Y/A with address of FM param list
+DOS_LOCRPL      @ $3e3      ;loads Y/A with address of RWTS IOB

@@ -13,7 +13,8 @@ BAS_VALTYP      @ $11       ;flag for last FAC operation ($00=num, $FF=str)
 BAS_SUBFLG      @ $14       ;subscript flag ($00=allowed, $80=not)
 BAS_HCOLOR1     @ $1C       ;hi-res color mask
 BAS_COUNTH      @ $1D       ;hi-res high-order byte of step for line
-BAS_HBASL       @ $26       ;base address for hi-res drawing (2b)
+BAS_HBASL       @ $26       ;base address for hi-res drawing (lo part)
+BAS_HBASH       @ $27       ;base address for hi-res drawing (hi part)
 BAS_HMASK       @ $30       ;hi-res graphics on-the-fly bit mask
 BAS_LINNUM      @ $50       ;line number (2b)
 BAS_TEMPPT      @ $52       ;temporary point (2b)

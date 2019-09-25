@@ -68,7 +68,7 @@ limitations under the License.
                  Text="{Binding TextOutput,
                     FallbackValue=01234567890123456789012345678901234567890123456789012345678901234567890123456789}"
                  FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Visible"
-                 IsReadOnly="True"/>
+                 IsReadOnly="True" Background="#f8f8f8"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
             <Button Content="OK" IsDefault="True" Width="70" Click="OkButton_Click"/>
