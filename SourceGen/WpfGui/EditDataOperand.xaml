@@ -113,7 +113,7 @@ limitations under the License.
                         <StackPanel Orientation="Horizontal" Margin="20,4,0,0"
                                     IsEnabled="{Binding ElementName=radioSimpleDataSymbolic, Path=IsChecked}">
                             <RadioButton Name="radioSymbolPartLow" GroupName="Part" Content="Low"/>
-                            <RadioButton Name="radioSymbolPartHigh" GroupName="Part" Content="High" Margin="8,0,0,0"/>
+                            <RadioButton Name="radioSymbolPartHigh" GroupName="Part" Content="H_igh" Margin="8,0,0,0"/>
                             <RadioButton Name="radioSymbolPartBank" GroupName="Part" Content="Bank" Margin="8,0,8,0"/>
                         </StackPanel>
                     </StackPanel>

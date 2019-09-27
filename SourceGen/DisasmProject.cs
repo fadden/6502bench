@@ -1657,6 +1657,14 @@ namespace SourceGen {
 
             mUndoList.Add(changeSet);
             mUndoTop = mUndoList.Count;
+
+            // If the user makes a change, saves the file, hits undo, then makes another change,
+            // the "undo top" and "save index" will be equal, which will make us think the
+            // file doesn't need to be saved.  In reality there is no longer any undo index that
+            // matches the saved file state.
+            if (mUndoSaveIndex >= mUndoTop) {
+                mUndoSaveIndex = -1;
+            }
         }
 
         public string DebugGetUndoRedoHistory() {
