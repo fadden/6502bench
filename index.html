@@ -20,8 +20,8 @@ features one tool, the SourceGen disassembler.</p>
 <ul>
   <li>Watch a 9-minute video of
   <a href="https://youtu.be/dalISyBPQq8">the product in action</a></li>
-  <li>Download source &amp; binaries for v1.2
-  <a href="https://github.com/fadden/6502bench/releases/tag/v1.2.0">from the Releases page</a></li>
+  <li>Download source &amp; binaries for v1.3
+  <a href="https://github.com/fadden/6502bench/releases/tag/v1.3.0">from the Releases page</a></li>
   <li>Check out the
   <a href="https://github.com/fadden/6502bench/">GitHub project</a></li>
 </ul>
@@ -40,7 +40,7 @@ features one tool, the SourceGen disassembler.</p>
   that are always/never taken, accurate cycle count listings, and correct
   analysis of 65816 code with variable-width registers.</li>
   <li>Easy generation of assembly source code in popular formats (currently
-  cc65, 64tass, and Merlin 32).  Cross-assemblers can be invoked from the GUI to
+  64tass, ACME, cc65, and Merlin 32).  Cross-assemblers can be invoked from the GUI to
   verify correctness.</li>
   <li>Symbols and constants are provided for ROM and operating system entry
   points on several popular systems.</li>
@@ -62,23 +62,27 @@ features one tool, the SourceGen disassembler.</p>
     inline data.</li>
     <li>Editable labels are generated for every branch destination and data
     target.</li>
-    <li>Automatic detection and classification of ASCII strings and runs
+    <li>Automatic detection and classification of character strings and runs
     of identical bytes.</li>
     <li>Symbol files for ROM entry points, operating system constants, and
-    other platform-specific data are stored in plain text files.</li>
+    other platform-specific data are stored in plain text files loaded at runtime.</li>
     <li>Extension scripts can be defined that automatically reformat code and
-    identify inline data that follows a JSR/JSL.</li>
+    identify inline data that follows a JSR, JSL, or BRK.</li>
   </ul></li>
   <li>User interface:
   <ul>
     <li>"Infinite" undo/redo of all operations.</li>
     <li>Cross-reference tables are generated for every branch and data target
     address, as well as for external platform symbols.</li>
-    <li>Instruction operand formats (hex, decimal, binary, ASCII, symbol) can
+    <li>Instruction operand formats (hex, decimal, binary, character, symbol) can
     be set for individual instructions.  References to nearby symbols are
     offset, allowing simple expressions like "addr + 1".</li>
     <li>Data areas can be formatted in various formats, including individual
-    bytes, 16-bit and 24-bit words, addresses, or strings.</li>
+    bytes, 16-bit and 24-bit words, addresses, or strings.
+    Multiple character encodings are supported, including ASCII, high ASCII,
+    C64 PETSCII, and C64 screen codes.</li>
+    <li>Zero-page variables can be given different labels at different points
+    in the program.</li>
     <li>Multi-line comments can be "boxed" for an authentic retro feel.</li>
     <li>Notes can be added that aren't included in generated output.  These
     also function as color-coded bookmarks.  Very useful for marking up a
@@ -96,6 +100,8 @@ features one tool, the SourceGen disassembler.</p>
     assembler.</li>
     <li>Symbols may be exported from one project and imported into another
     to facilitate multi-binary disassembly.</li>
+    <li>Listings can be generated in HTML form for publication on the web. Many
+    aspects of the output format can be configured.</li>
   </ul></li>
   <li>Miscellaneous:
   <ul>
@@ -106,11 +112,10 @@ features one tool, the SourceGen disassembler.</p>
   </ul></li>
 </ul>
 
-<p>SourceGen is written in C# .NET, with the WinForms API for the user
-interface.  The full source code for the project is available on GitHub,
-licensed under Apache 2.0.</p>
-
-
+<p>SourceGen is written in C# .NET, using the (free to download) Visual
+Studio Community 2017 IDE as the primary development environment.
+The user interface uses the WPF API.
+The full source code for the project is available on GitHub, licensed under Apache 2.0.</p>
 
 </div>
 
