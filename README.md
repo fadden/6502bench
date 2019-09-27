@@ -8,7 +8,7 @@ the SourceGen disassembler, and runs on Windows 7 or later.
 
 You can download the source code and build it yourself, or click the
 [Releases tab](https://github.com/fadden/6502bench/releases) for
-pre-built downloads.
+downloads with pre-built binaries.
 
 
 ## SourceGen ##
@@ -28,11 +28,11 @@ as well as many less-common ones.
   that are always/never taken, accurate cycle count listings, and correct
   analysis of 65816 code with variable-width registers.
 - Easy generation of assembly source code for popular cross-assemblers
-  (currently cc65, 64tass, and Merlin 32). Cross-assemblers can be invoked
-  from the GUI to verify correctness.
+  (currently 64tass, ACME, cc65, and Merlin 32). Cross-assemblers can be
+  invoked from the GUI to verify correctness.
 - Symbols and constants are provided for ROM and operating system entry
   points on several popular systems.
-- Project files are designed for sharing and collaboration.</li>
+- Project files are designed for sharing and collaboration.
 
 A demo video is [available on YouTube](https://youtu.be/dalISyBPQq8).
 
@@ -43,22 +43,26 @@ Analyzer:
 - Hinting mechanism allows manual identification of code, data, and inline
   data.
 - Editable labels are generated for every branch destination and data target.
-- Automatic detection and classification of ASCII strings and runs of
+- Automatic detection and classification of character strings and runs of
   identical bytes.
 - Symbol files for ROM entry points, operating system constants, and other
-  platform-specific data are stored in plain text files.
+  platform-specific data are stored in plain text files loaded at runtime.
 - Extension scripts can be defined that automatically reformat code and
-  identify inline data that follows a JSR/JSL.
+  identify inline data that follows a JSR, JSL, or BRK.
 
 User interface:
 - "Infinite" undo/redo of all operations.
 - Cross-reference tables are generated for every branch and data target
   address, as well as for external platform symbols.
-- Instruction operand formats (hex, decimal, binary, ASCII, symbol) can be
-  set for individual instructions. References to nearby symbols are offset,
-  allowing simple expressions like "addr + 1".
+- Instruction operand formats (hex, decimal, binary, character, symbol) can
+  be set for individual instructions. References to nearby symbols are
+  offset, allowing simple expressions like "addr + 1".
 - Data areas can be formatted in various formats, including individual
-  bytes, 16-bit and 24-bit words, addresses, or strings.
+  bytes, 16-bit and 24-bit words, addresses, or strings.  Multiple
+  character encodings are supported, including ASCII, high ASCII,
+  C64 PETSCII, and C64 screen codes.
+- Zero-page variables can be given different labels at different points
+  in the program.
 - Multi-line comments can be "boxed" for an authentic retro feel.
 - Notes can be added that aren't included in generated output. These also
   function as color-coded bookmarks. Very useful for marking up a work in
@@ -74,6 +78,8 @@ Code generation:
 - Labels can be coaxed from global to local as allowed by the assembler.
 - Symbols may be exported from one project and imported into another to
   facilitate multi-binary disassembly.
+- Listings can be generated in HTML form for publication on the web.
+  Many aspects of the output format can be configured.
 
 Miscellaneous:
 - All data files are stored in text formats (primarily JSON).
@@ -81,9 +87,13 @@ Miscellaneous:
   allow the project to be shared without violating copyrights (subject to
   local laws).
 
-Some planned features are not yet implemented.  Notable among them are
-support for multi-bank 65816 files (IIgs OMF, SNES), and alternate
-character sets (e.g. PETSCII).  Visit the wiki section for the
+#### Limitations ####
+
+Support for 65816 code is largely complete, lacking only a way to specify
+the data bank register.  However, the current user interface tries to
+keep everything in a single list, which works poorly for multi-bank binaries.
+
+To learn about other areas for improvement, visit the wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
 To learn about the past, check the
@@ -93,8 +103,8 @@ To learn about the past, check the
 ## Installation ##
 
 There is currently no installer -- just unzip the archive and run the
-executable.  The data files used by the program are found automatically
-based on the path to the .EXE file.
+"SourceGen.exe" executable.  The data files used by the program are found
+automatically in the directory where the .EXE lives.
 
 You need to have Microsoft .NET Framework v4.6.2 or later installed.  Most
 people will already have this.  If SourceGen doesn't seem to want to start,
@@ -118,6 +128,8 @@ The best way to get started is by working through the tutorial.  Launch
 SourceGen, hit F1 to open the user manual in your web browser, then look
 for the Tutorial link in the index.  Click it and follow the instructions
 there.
+
+I strongly recommend doing this.  Some aspects of SourceGen are non-obvious.
 
 The tutorial is one of several examples included in the SourceGen
 distribution.  The other directories contain project and data files for
