@@ -961,8 +961,7 @@ namespace SourceGen.WpfGui {
                     symName = SymbolLabel;  // may not be valid, but it doesn't have to be
                 }
                 origSym = new DefSymbol(symName, mOperandValue, Symbol.Source.Project,
-                    Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
-                    string.Empty, string.Empty);
+                    Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
             }
 
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,
@@ -1147,7 +1146,7 @@ namespace SourceGen.WpfGui {
                 // dialog will handle it.
                 initialVar = new DefSymbol("VAR", mOperandValue,
                     Symbol.Source.Variable, symType, FormatDescriptor.SubType.None,
-                    string.Empty, string.Empty, 1);
+                    string.Empty, string.Empty, 1, true);
             }
 
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,

@@ -104,9 +104,9 @@ namespace SourceGen {
         /// Constructs immutable object.
         /// </summary>
         /// <param name="label">Label string.  Syntax assumed valid.</param>
-        /// <param name="source">User-defined or auto-generated?</param>
+        /// <param name="value">Symbol value.</param>
+        /// <param name="source">User-defined, auto-generated, ?</param>
         /// <param name="type">Type of symbol this is.</param>
-        ///   user-defined.</param>
         public Symbol(string label, int value, Source source, Type type) {
             Debug.Assert(!string.IsNullOrEmpty(label));
             Label = label;

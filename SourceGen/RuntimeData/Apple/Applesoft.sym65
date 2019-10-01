@@ -3,10 +3,11 @@
 ;
 ; Sources:
 ;  What's Where in the Apple, by William F. Luebbert
+;  S-C DocuMentor: Applesoft, by Bob Sander-Cederlof
 
 *SYNOPSIS Applesoft BASIC addresses and constants
 
-BAS_USRVEC      @ $0A       ;USR() command vector
+BAS_USRVEC      @ $0A 3     ;USR() command vector
 BAS_CHARAC      @ $0D       ;used by string utility
 BAS_ENDCHR      @ $0E       ;used by string utility
 BAS_VALTYP      @ $11       ;flag for last FAC operation ($00=num, $FF=str)
@@ -16,41 +17,41 @@ BAS_COUNTH      @ $1D       ;hi-res high-order byte of step for line
 BAS_HBASL       @ $26       ;base address for hi-res drawing (lo part)
 BAS_HBASH       @ $27       ;base address for hi-res drawing (hi part)
 BAS_HMASK       @ $30       ;hi-res graphics on-the-fly bit mask
-BAS_LINNUM      @ $50       ;line number (2b)
-BAS_TEMPPT      @ $52       ;temporary point (2b)
-BAS_INDEX       @ $5E       ;temp (stack) pointer for moving strings (2b)
-BAS_TEXTTAB     @ $67       ;pointer to start of Applesoft program (2b)
-BAS_VARTAB      @ $69       ;pointer to start of Applesoft variables (2b)
-BAS_ARYTAB      @ $6B       ;pointer to start of Applesoft array space (2b)
-BAS_STREND      @ $6D       ;pointer to end of numeric storage (2b)
-BAS_FRETOP      @ $6F       ;pointer to end of string storage (2b)
-BAS_MEMSIZE     @ $73       ;HIMEM (2b)
-BAS_CURLIN      @ $75       ;current line number (2b)
-BAS_OLDLIN      @ $77       ;last line executed (2b)
+BAS_LINNUM      @ $50 2     ;line number (2b)
+BAS_TEMPPT      @ $52 2     ;temporary point (2b)
+BAS_INDEX       @ $5E 2     ;temp (stack) pointer for moving strings (2b)
+BAS_TEXTTAB     @ $67 2     ;pointer to start of Applesoft program (2b)
+BAS_VARTAB      @ $69 2     ;pointer to start of Applesoft variables (2b)
+BAS_ARYTAB      @ $6B 2     ;pointer to start of Applesoft array space (2b)
+BAS_STREND      @ $6D 2     ;pointer to end of numeric storage (2b)
+BAS_FRETOP      @ $6F 2     ;pointer to end of string storage (2b)
+BAS_MEMSIZE     @ $73 2     ;HIMEM (2b)
+BAS_CURLIN      @ $75 2     ;current line number (2b)
+BAS_OLDLIN      @ $77 2     ;last line executed (2b)
 BAS_OLDTEXT     @ $79       ;old text pointer
-BAS_DATLIN      @ $7B       ;current line # from which data is being read (2b)
-BAS_DATPTR      @ $7D       ;points to mem from which data is being read (2b)
-BAS_VARNAM      @ $81       ;holds last-used variable's name (2b)
-BAS_VARPNT      @ $83       ;pointer to last-used variable's value (2b)
-BAS_FORPNT      @ $85       ;general pointer (2b)
-BAS_JMPADRS     @ $90       ;jump address; $90 is set to $4C (3b)
+BAS_DATLIN      @ $7B 2     ;current line # from which data is being read (2b)
+BAS_DATPTR      @ $7D 2     ;points to mem from which data is being read (2b)
+BAS_VARNAM      @ $81 2     ;holds last-used variable's name (2b)
+BAS_VARPNT      @ $83 2     ;pointer to last-used variable's value (2b)
+BAS_FORPNT      @ $85 2     ;general pointer (2b)
+BAS_JMPADRS     @ $90 3     ;jump address; $90 is set to $4C (3b)
 BAS_TEMP1       @ $93       ;fp math register
-BAS_HIGHDS      @ $94       ;block copy pointer (2b)
-BAS_HIGHTR      @ $96       ;block copy pointer (2b)
+BAS_HIGHDS      @ $94 2     ;block copy pointer (2b)
+BAS_HIGHTR      @ $96 2     ;block copy pointer (2b)
 BAS_TEMP2       @ $98       ;fp math register
-BAS_LOWTR       @ $9B       ;general pointer (2b)
-BAS_FAC         @ $9D       ;floating point accumulator (6b)
+BAS_LOWTR       @ $9B 2     ;general pointer (2b)
+BAS_FAC         @ $9D 6     ;floating point accumulator (6b)
 BAS_FACMO       = $A0       ;middle-order byte of mantissa of FAC
 BAS_FACLO       = $A1       ;low-order byte of mantissa of FAC
 BAS_FACSIGN     @ $A2       ;single byte sign of FAC
-BAS_ARG         @ $A5       ;secondary floating point accumulator (6b)
-BAS_STRNG1      @ $AB       ;pointer to a string (2b)
-BAS_STRNG2      @ $AD       ;pointer to a string (2b)
-BAS_PRGEND      @ $AF       ;pointer to end of program (2b)
+BAS_ARG         @ $A5 6     ;secondary floating point accumulator (6b)
+BAS_STRNG1      @ $AB 2     ;pointer to a string (2b)
+BAS_STRNG2      @ $AD 2     ;pointer to a string (2b)
+BAS_PRGEND      @ $AF 2     ;pointer to end of program (2b)
 BAS_CHRGET      @ $B1       ;get next character or Applesoft token
 BAS_CHRGOT      @ $B7       ;get next, but don't advance TXTPTR
-BAS_TXTPTR      @ $B8       ;points at next char or token
-BAS_RND         @ $B8       ;floating point random number (5b)
+BAS_TXTPTR      @ $B8 2     ;points at next char or token (2b)
+BAS_RND         @ $C9 5     ;floating point random number (5b)
 BAS_AUTORUN     @ $D6       ;set to $80 to auto-run
 BAS_ERRFLG      @ $D8       ;$80 if onerr active
 BAS_HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
@@ -59,7 +60,7 @@ BAS_FIRST       @ $F0       ;used for lo-res plot coordinates
 BAS_ORMASK      @ $F3       ;mask for output control
 BAS_REMSTK      @ $F8       ;stack pointer saved before each statement
 
-BAS_AMPERV      @ $03F5     ;JMP to function that handles Applesoft '&' cmds
+BAS_AMPERV      @ $03F5 3   ;JMP to function that handles Applesoft '&' cmds
 
 ;
 ; Useful Applesoft routines.

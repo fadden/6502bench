@@ -840,6 +840,7 @@ namespace SourceGen {
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                     null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
+                valueStr = PseudoOp.AnnotateEquDirective(formatter, valueStr, defSym);
                 string comment = formatter.FormatEolComment(defSym.Comment);
                 FormattedParts parts = FormattedParts.CreateEquDirective(defSym.Label,
                     formatter.FormatPseudoOp(opNames.EquDirective),
@@ -1344,6 +1345,7 @@ namespace SourceGen {
                 string addrStr = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                     null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
+                addrStr = PseudoOp.AnnotateEquDirective(mFormatter, addrStr, defSym);
                 string comment = mFormatter.FormatEolComment(defSym.Comment);
                 return FormattedParts.CreateEquDirective(
                     mFormatter.FormatVariableLabel(defSym.Label),

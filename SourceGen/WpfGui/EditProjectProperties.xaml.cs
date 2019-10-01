@@ -538,14 +538,13 @@ namespace SourceGen.WpfGui {
             }
 
             // Import all user labels that were marked as "global export".  These become
-            // external-address project symbols.
+            // external-address project symbols with unspecified width.
             int foundCount = 0;
             foreach (KeyValuePair<int, Symbol> kvp in newProject.UserLabels) {
                 if (kvp.Value.SymbolType == Symbol.Type.GlobalAddrExport) {
                     Symbol sym = kvp.Value;
                     DefSymbol defSym = new DefSymbol(sym.Label, sym.Value, Symbol.Source.Project,
-                        Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None,
-                        string.Empty, string.Empty);
+                        Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
                     mWorkProps.ProjectSyms[defSym.Label] = defSym;
                     foundCount++;
                 }

@@ -371,6 +371,43 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Adds an additional annotation to an EQU directive, indicating whether the symbol
+        /// is a constant or an address, and (if address) how many bytes it spans.
+        /// </summary>
+        /// <param name="formatter">Formatter object.</param>
+        /// <param name="operand">Formatted operand string.</param>
+        /// <param name="defSym">Project/platform/variable symbol.</param>
+        /// <returns></returns>
+        public static string AnnotateEquDirective(Formatter formatter, string operand,
+                DefSymbol defSym) {
+            string typeStr;
+            if (defSym.SymbolType == Symbol.Type.Constant) {
+                if (defSym.SymbolSource == Symbol.Source.Variable) {
+                    typeStr = Res.Strings.EQU_STACK_RELATIVE;
+                } else {
+                    typeStr = Res.Strings.EQU_CONSTANT;
+                }
+            } else {
+                typeStr = Res.Strings.EQU_ADDRESS;
+            }
+
+            string msgStr = null;
+            if (defSym.HasWidth) {
+                msgStr = typeStr + "/" + defSym.DataDescriptor.Length;
+            } else if (defSym.SymbolType == Symbol.Type.Constant) {
+                // not entirely convinced we want this, but there's currently no other way
+                // to tell the difference between an address and a constant from the code list
+                msgStr = typeStr;
+            }
+
+            if (msgStr == null) {
+                return operand;
+            } else {
+                return operand + "  {" + msgStr + "}";
+            }
+        }
+
+        /// <summary>
         /// Converts a collection of bytes that represent a string into an array of formatted
         /// string operands.
         /// </summary>

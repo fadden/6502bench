@@ -162,7 +162,7 @@ namespace SourceGen {
         /// <summary>
         /// Constructor for base type data item.
         /// </summary>
-        /// <param name="Length">Length, in bytes.</param>
+        /// <param name="length">Length, in bytes.</param>
         /// <param name="fmt">Format type.</param>
         /// <param name="subFmt">Format sub-type.</param>
         private FormatDescriptor(int length, Type fmt, SubType subFmt) {

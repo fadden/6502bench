@@ -34,23 +34,23 @@ namespace SourceGen {
         /// Regex pattern for name/value pairs in symbol file.
         ///
         /// Alphanumeric ASCII + underscore for label, which must start at beginning of line.
-        /// Value is somewhat arbitrary, but ends if we see a comment delimiter (semicolon).
-        /// Spaces are allowed between tokens.
+        /// Value is somewhat arbitrary, but ends if we see a comment delimiter (semicolon) or
+        /// whitespace.  Width is decimal or hex.  Spaces are allowed between tokens.
         ///
         /// Group 1 is the name, group 2 is '=' or '@', group 3 is the value, group 4 is
-        /// the comment (optional).
+        /// the symbol width (optional), group 5 is the comment (optional).
         /// </summary>
+        /// <remarks>
+        /// If you want to make sense of this, I highly recommend https://regex101.com/ .
+        /// </remarks>
         private const string NAME_VALUE_PATTERN =
-            @"^([A-Za-z0-9_]+)\s*([@=])\s*([^\ ;]+)\s*(;.*)?$";
+            @"^([A-Za-z0-9_]+)\s*([@=])\s*([^\ ;]+)\s*([0-9\$]+)?\s*(;.*)?$";
         private static Regex sNameValueRegex = new Regex(NAME_VALUE_PATTERN);
 
         private const string TAG_CMD = "*TAG";
 
         /// <summary>
         /// List of symbols.  We keep them sorted by label because labels must be unique.
-        /// 
-        /// Idea: we could retain the end-of-line comments, and add them as comments in the
-        /// EQU section of the disassembly.
         /// </summary>
         private SortedList<string, Symbol> mSymbols =
             new SortedList<string, Symbol>(Asm65.Label.LABEL_COMPARER);
@@ -139,11 +139,27 @@ namespace SourceGen {
                                 (1 << 24) - 1, out value);
                             badParseMsg = CommonUtil.Properties.Resources.ERR_INVALID_ADDRESS;
                         }
+
+                        int width = -1;
+                        string widthStr = matches[0].Groups[4].Value;
+                        if (parseOk && !string.IsNullOrEmpty(widthStr)) {
+                            parseOk = Asm65.Number.TryParseInt(widthStr, out width,
+                                    out int ignoredBase);
+                            if (parseOk) {
+                                if (width < DefSymbol.MIN_WIDTH || width > DefSymbol.MAX_WIDTH) {
+                                    parseOk = false;
+                                }
+                            } else {
+                                badParseMsg =
+                                    CommonUtil.Properties.Resources.ERR_INVALID_NUMERIC_CONSTANT;
+                            }
+                        }
+
                         if (!parseOk) {
                             report.Add(lineNum, FileLoadItem.NO_COLUMN, FileLoadItem.Type.Warning,
                                 badParseMsg);
                         } else {
-                            string comment = matches[0].Groups[4].Value;
+                            string comment = matches[0].Groups[5].Value;
                             if (comment.Length > 0) {
                                 // remove ';'
                                 comment = comment.Substring(1);
@@ -152,7 +168,7 @@ namespace SourceGen {
                                 FormatDescriptor.GetSubTypeForBase(numBase);
                             DefSymbol symDef = new DefSymbol(label, value, Symbol.Source.Platform,
                                 isConst ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                                subType, comment, tag);
+                                subType, comment, tag, width, width > 0);
                             if (mSymbols.ContainsKey(label)) {
                                 // This is very easy to do -- just define the same symbol twice
                                 // in the same file.  We don't really need to do anything about

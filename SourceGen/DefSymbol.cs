@@ -18,24 +18,38 @@ using System.Diagnostics;
 
 namespace SourceGen {
     /// <summary>
-    /// Subclass of Symbol used for symbols defined in the platform or project.
+    /// Subclass of Symbol used for symbols defined in a platform symbol file, in the project
+    /// symbol table, or in a local variable table.
     ///
     /// Instances are immutable, except for the Xrefs field.
     /// </summary>
     /// <remarks>
-    /// The Xrefs field isn't really part of the object.  It's just convenient to reference
+    /// The Xrefs field isn't really part of the object.  It's just convenient to access
     /// them from here.
     /// </remarks>
     public class DefSymbol : Symbol {
-        // width to use when width doesn't matter; use 1 to try to get a prefab object
-        public const int NO_WIDTH = 1;
+        // Absolute min/max width.  Zero-page variables are more limited, because they're not
+        // allowed to wrap around the end of the page.
         public const int MIN_WIDTH = 1;
-        public const int MAX_WIDTH = 8;
+        public const int MAX_WIDTH = 65536;
+
+        // Value to pass to the FormatDescriptor when no width is given.
+        private const int DEFAULT_WIDTH = 1;
 
         /// <summary>
         /// Data format descriptor.
         /// </summary>
         public FormatDescriptor DataDescriptor { get; private set; }
+
+        /// <summary>
+        /// True if a width was specified for this symbol.
+        /// </summary>
+        /// <remarks>
+        /// All symbols have a positive width, stored in the FormatDescriptor Length property.
+        /// We may not want to display widths that haven't been explicitly set, however, so we
+        /// keep track here.
+        /// </remarks>
+        public bool HasWidth { get; private set; }
 
         /// <summary>
         /// User-supplied comment.
@@ -65,6 +79,8 @@ namespace SourceGen {
         // NOTE: might be nice to identify the symbol's origin, e.g. which platform
         //       symbol file it was defined in.  This could then be stored in a
         //       DisplayList line, for benefit of the Info panel.
+        // NOTE: if this also gets us the load order, we can properly select symbols
+        //       by address when multiple platform symbols have the same value
 
 
         /// <summary>
@@ -79,7 +95,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Constructor.
+        /// Constructor.  Limited form, used in a couple of places.
         /// </summary>
         /// <param name="label">Symbol's label.</param>
         /// <param name="value">Symbol's value.</param>
@@ -87,14 +103,13 @@ namespace SourceGen {
         /// <param name="type">Symbol type.</param>
         /// <param name="formatSubType">Format descriptor sub-type, so we know how the
         ///   user wants the value to be displayed.</param>
-        /// <param name="comment">End-of-line comment.</param>
-        /// <param name="tag">Symbol tag, used for grouping platform symbols.</param>
         public DefSymbol(string label, int value, Source source, Type type,
-                FormatDescriptor.SubType formatSubType, string comment, string tag)
-                : this(label, value, source, type, formatSubType, comment, tag, NO_WIDTH) { }
+                FormatDescriptor.SubType formatSubType)
+                : this(label, value, source, type, formatSubType,
+                       string.Empty, string.Empty, -1, false) { }
 
         /// <summary>
-        /// Constructor.  Used for local variables, which have a meaningful width.
+        /// Constructor.  General form.
         /// </summary>
         /// <param name="label">Symbol's label.</param>
         /// <param name="value">Symbol's value.</param>
@@ -105,31 +120,52 @@ namespace SourceGen {
         /// <param name="comment">End-of-line comment.</param>
         /// <param name="tag">Symbol tag, used for grouping platform symbols.</param>
         /// <param name="width">Variable width.</param>
+        /// <param name="widthSpecified">True if width was explicitly specified.  If this is
+        ///   false, the value of the "width" argument is ignored.</param>
         public DefSymbol(string label, int value, Source source, Type type,
-                FormatDescriptor.SubType formatSubType, string comment, string tag, int width)
+                FormatDescriptor.SubType formatSubType, string comment, string tag, int width,
+                bool widthSpecified)
                 : this(label, value, source, type) {
             Debug.Assert(comment != null);
             Debug.Assert(tag != null);
 
+            if (widthSpecified && type == Type.Constant && source != Source.Variable) {
+                // non-variable constants don't have a width; override arg
+                Debug.WriteLine("Overriding constant DefSymbol width");
+                widthSpecified = false;
+            }
+            HasWidth = widthSpecified;
+            if (!widthSpecified) {
+                width = DEFAULT_WIDTH;
+            }
+            Debug.Assert(width >= MIN_WIDTH && width <= MAX_WIDTH);
+
             DataDescriptor = FormatDescriptor.Create(width,
                 FormatDescriptor.Type.NumericLE, formatSubType);
-
             Comment = comment;
             Tag = tag;
         }
 
         /// <summary>
-        /// Constructs a DefSymbol from a Symbol and a format descriptor.  This is used
-        /// for project symbols.
+        /// Constructor.  Used for deserialization, when we have a FormatDescriptor and a Symbol.
         /// </summary>
         /// <param name="sym">Base symbol.</param>
         /// <param name="dfd">Format descriptor.</param>
+        /// <param name="widthSpecified">Set if a width was explicitly specified.</param>
         /// <param name="comment">End-of-line comment.</param>
-        public DefSymbol(Symbol sym, FormatDescriptor dfd, string comment)
+        public DefSymbol(Symbol sym, FormatDescriptor dfd, bool widthSpecified, string comment)
                 : this(sym.Label, sym.Value, sym.SymbolSource, sym.SymbolType) {
             Debug.Assert(comment != null);
 
+            if (widthSpecified && sym.SymbolType == Type.Constant &&
+                    sym.SymbolSource != Source.Variable) {
+                // non-variable constants don't have a width; override arg
+                Debug.WriteLine("Overriding constant DefSymbol width");
+                widthSpecified = false;
+            }
+
             DataDescriptor = dfd;
+            HasWidth = widthSpecified;
             Comment = comment;
             Tag = string.Empty;
         }
@@ -143,7 +179,7 @@ namespace SourceGen {
         public DefSymbol(DefSymbol defSym, string label)
             : this(label, defSym.Value, defSym.SymbolSource, defSym.SymbolType,
                   defSym.DataDescriptor.FormatSubType, defSym.Comment, defSym.Tag,
-                  defSym.DataDescriptor.Length) { }
+                  defSym.DataDescriptor.Length, defSym.HasWidth) { }
 
         /// <summary>
         /// Determines whether a symbol overlaps with a region.  Useful for variables.

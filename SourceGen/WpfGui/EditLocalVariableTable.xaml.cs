@@ -161,7 +161,7 @@ namespace SourceGen.WpfGui {
                 DefSymbol defSym = mWorkTable[i];
                 string typeStr;
                 if (defSym.SymbolType == Symbol.Type.Constant) {
-                    typeStr = Res.Strings.ABBREV_CONSTANT;
+                    typeStr = Res.Strings.ABBREV_STACK_RELATIVE;
                 } else {
                     typeStr = Res.Strings.ABBREV_ADDRESS;
                 }

@@ -35,12 +35,12 @@ MON_RNDH        @ $4F       ;high byte of KEYIN "random" value
 
 MON_SPDBYT      @ $F1       ;text output speed limiter
 
-MON_BRKV        @ $03F0     ;address of BRK handler
-MON_SOFTEVEC    @ $03F2     ;address of RESET handler
+MON_BRKV        @ $03F0  2  ;address of BRK handler
+MON_SOFTEVEC    @ $03F2  2  ;address of RESET handler
 MON_PWREDUP     @ $03F4     ;power-up RESET checksum
-MON_USRADDR     @ $03F8     ;jump to function that handles monitor Ctrl-Y
-MON_NMIVEC      @ $03FB     ;jump to function that handles NMI
-MON_IRQADDR     @ $03FE     ;address of IRQ handler
+MON_USRADDR     @ $03F8  3  ;jump to function that handles monitor Ctrl-Y
+MON_NMIVEC      @ $03FB  3  ;jump to function that handles NMI
+MON_IRQADDR     @ $03FE  2  ;address of IRQ handler
 
 MON_PLOT        @ $F800     ;lo-res plot at X=Y-reg, Y=Acc
 MON_PLOT1       @ $F80E     ;lo-res plot at X=Y-reg, Y per GBASL/H
@@ -101,7 +101,7 @@ MON_CLREOP      @ $FC42     ;clear screen from cursor to end of page
 MON_HOME        @ $FC58     ;clear screen and reset text output to top-left
 MON_CR          @ $FC62     ;perform a carriage return
 MON_LF          @ $FC66     ;perform a line feed
-MON_SCROLL      @ $FC70     ;scroll up 1 line
+MON_SCROLL      @ $FC70     ;scroll up one line
 MON_CLREOL      @ $FC9C     ;clear to end of line
 MON_CLREOLZ     @ $FC9E
 MON_WAIT        @ $FCA8     ;delay for (26 + 27*Acc + 5*(Acc*Acc))/2 cycles

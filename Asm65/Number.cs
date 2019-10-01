@@ -19,7 +19,8 @@ using System.Diagnostics;
 namespace Asm65 {
     public class Number {
         /// <summary>
-        /// Parses an integer in a variety of formats (hex, decimal, binary).
+        /// Parses an integer in a variety of formats (hex, decimal, binary).  We allow
+        /// hex to be identified with a leading '$' as well as "0x".
         /// 
         /// Trim whitespace before calling here.
         /// </summary>

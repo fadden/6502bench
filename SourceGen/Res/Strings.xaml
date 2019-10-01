@@ -23,6 +23,7 @@ limitations under the License.
 
     <system:String x:Key="str_AbbrevAddress">Addr</system:String>
     <system:String x:Key="str_AbbrevConstant">Const</system:String>
+    <system:String x:Key="str_AbbrevStackRelative">StkRl</system:String>
     <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
     <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
     <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>
@@ -39,10 +40,14 @@ limitations under the License.
     <system:String x:Key="str_DefaultHighAsciiDelimPat">&#x201c;#&#x201d;</system:String>
     <system:String x:Key="str_DefaultC64PetsciiDelimPat">pet:&#x201c;#&#x201d;</system:String>
     <system:String x:Key="str_DefaultC64ScreenCodeDelimPat">scr:&#x201c;#&#x201d;</system:String>
+    <system:String x:Key="str_EquAddress">addr</system:String>
+    <system:String x:Key="str_EquConstant">const</system:String>
+    <system:String x:Key="str_EquStackRelative">stkrl</system:String>
     <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
     <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
     <system:String x:Key="str_ErrBadIdent">Invalid file identifier</system:String>
+    <system:String x:Key="str_ErrBadLocalVariableFmt">Bad local variable {0}</system:String>
     <system:String x:Key="str_ErrBadLvTableFmt">Invalid local variable table at +{0:x6}</system:String>
     <system:String x:Key="str_ErrBadRange">Bad range</system:String>
     <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>

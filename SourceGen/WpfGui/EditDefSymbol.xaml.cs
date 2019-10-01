@@ -61,6 +61,12 @@ namespace SourceGen.WpfGui {
         }
         private string mWidth;
 
+        public string WidthLimitLabel {
+            get { return mWidthLimitLabel; }
+            set { mWidthLimitLabel = value; OnPropertyChanged(); }
+        }
+        private string mWidthLimitLabel;
+
         public string Comment {
             get { return mComment; }
             set { mComment = value; OnPropertyChanged(); }
@@ -78,6 +84,12 @@ namespace SourceGen.WpfGui {
             set { mIsConstant = value; OnPropertyChanged(); UpdateControls(); }
         }
         private bool mIsConstant;
+
+        public string ConstantLabel {
+            get { return mConstantLabel; }
+            set { mConstantLabel = value; OnPropertyChanged(); }
+        }
+        private string mConstantLabel;
 
         public bool ReadOnlyValueAndType {
             get { return mReadOnlyValueAndType; }
@@ -113,6 +125,11 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private bool mIsVariable;
 
+        /// <summary>
+        /// Set to true if the width value is optional.
+        /// </summary>
+        private bool mIsWidthOptional;
+
         // Saved off at dialog load time.
         private Brush mDefaultLabelColor;
 
@@ -135,6 +152,9 @@ namespace SourceGen.WpfGui {
         /// Constructor, for editing a local variable, or editing a project symbol with
         /// the value field locked.
         /// </summary>
+        /// <remarks>
+        /// TODO(someday): disable the "constant" radio button unless CPU=65816.
+        /// </remarks>
         public EditDefSymbol(Window owner, Formatter formatter,
                 SortedList<string, DefSymbol> defList, DefSymbol defSym,
                 SymbolTable symbolTable, bool isVariable, bool lockValueAndType) {
@@ -150,16 +170,24 @@ namespace SourceGen.WpfGui {
             mReadOnlyValueAndType = lockValueAndType;
 
             Label = Value = VarWidth = Comment = string.Empty;
+
+            // hide the inappropriate stuff
+            int maxWidth;
             if (isVariable) {
-                widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
-                    Visibility.Visible;
-                projectLabelUniqueLabel.Visibility = Visibility.Collapsed;
-            } else {
-                widthEntry1.Visibility = widthEntry2.Visibility = labelUniqueLabel.Visibility =
+                projectLabelUniqueLabel.Visibility = widthOptionalLabel.Visibility =
                     Visibility.Collapsed;
-                labelUniqueLabel.Visibility = Visibility.Collapsed;
-                valueRangeLabel.Visibility = valueUniqueLabel.Visibility = Visibility.Collapsed;
+                ConstantLabel = (string)FindResource("str_VariableConstant");
+                maxWidth = 256;
+            } else {
+                labelUniqueLabel.Visibility = varValueRangeLabel.Visibility =
+                    varValueUniqueLabel.Visibility = Visibility.Collapsed;
+                ConstantLabel = (string)FindResource("str_ProjectConstant");
+                maxWidth = 65536;
             }
+            mIsWidthOptional = !isVariable;
+
+            string fmt = (string)FindResource("str_WidthLimitFmt");
+            WidthLimitLabel = string.Format(fmt, maxWidth);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -169,7 +197,9 @@ namespace SourceGen.WpfGui {
                 Label = mOldSym.Label;
                 Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
                     mOldSym.DataDescriptor.NumBase);
-                VarWidth = mOldSym.DataDescriptor.Length.ToString();
+                if (mOldSym.HasWidth) {
+                    VarWidth = mOldSym.DataDescriptor.Length.ToString();
+                }
                 Comment = mOldSym.Comment;
 
                 if (mOldSym.SymbolType == Symbol.Type.Constant) {
@@ -190,6 +220,9 @@ namespace SourceGen.WpfGui {
             labelTextBox.Focus();
         }
 
+        /// <summary>
+        /// Validates input and updates controls appropriately.
+        /// </summary>
         private void UpdateControls() {
             if (!IsLoaded) {
                 return;
@@ -227,12 +260,19 @@ namespace SourceGen.WpfGui {
             //}
 
             bool widthValid = true;
-            int thisWidth = 0;
-            if (widthEntry1.Visibility == Visibility.Visible) {
-                if (!int.TryParse(VarWidth, out thisWidth) ||
-                        thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH) {
-                    widthValid = false;
-                }
+            int thisWidth = -1;
+            if (IsConstant && !mIsVariable) {
+                // width field is ignored
+            } else if (string.IsNullOrEmpty(VarWidth)) {
+                // blank field is okay if the width is optional
+                widthValid = mIsWidthOptional;
+            } else if (!Asm65.Number.TryParseInt(VarWidth, out thisWidth, out int unusedBase) ||
+                    thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH ||
+                    (mIsVariable && thisWidth > 256)) {
+                // All widths must be between 1 and 65536.  For a variable, the full thing must
+                // fit on zero page without wrapping.  We test for 256 here so that we highlight
+                // the "bad width" label, rather than the "it doesn't fit on the page" label.
+                widthValid = false;
             }
 
             bool valueRangeValid = true;
@@ -262,8 +302,8 @@ namespace SourceGen.WpfGui {
             labelUniqueLabel.Foreground = projectLabelUniqueLabel.Foreground =
                 labelUnique ? mDefaultLabelColor : Brushes.Red;
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
-            valueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
-            valueUniqueLabel.Foreground = valueUniqueValid ? mDefaultLabelColor : Brushes.Red;
+            varValueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
+            varValueUniqueLabel.Foreground = valueUniqueValid ? mDefaultLabelColor : Brushes.Red;
             widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;
 
             IsValid = labelValid && labelUnique && valueValid && valueRangeValid &&
@@ -284,15 +324,18 @@ namespace SourceGen.WpfGui {
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             ParseValue(out int value, out int numBase);
             FormatDescriptor.SubType subType = FormatDescriptor.GetSubTypeForBase(numBase);
-            int width = DefSymbol.NO_WIDTH;
-            if (!string.IsNullOrEmpty(VarWidth)) {
-                width = int.Parse(VarWidth);
+            int width = -1;
+            if (IsConstant && !mIsVariable) {
+                // width field is ignored, don't bother parsing
+            } else if (!string.IsNullOrEmpty(VarWidth)) {
+                bool ok = Asm65.Number.TryParseInt(VarWidth, out width, out int unusedNumBase);
+                Debug.Assert(ok);
             }
 
             NewSym = new DefSymbol(Label, value,
                 mIsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
                 IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                subType, Comment, string.Empty, width);
+                subType, Comment, string.Empty, width, width > 0);
 
             DialogResult = true;
         }

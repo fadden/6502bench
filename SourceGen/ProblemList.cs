@@ -119,7 +119,7 @@ namespace SourceGen {
         }
 
         public void DebugDump() {
-            Debug.WriteLine("Problem list:");
+            Debug.WriteLine("Problem list (" + mList.Count + " entries):");
             foreach (ProblemEntry entry in mList) {
                 Debug.WriteLine(entry);
             }

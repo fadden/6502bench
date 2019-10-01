@@ -27,6 +27,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AbbrevAddress");
         public static string ABBREV_CONSTANT =
             (string)Application.Current.FindResource("str_AbbrevConstant");
+        public static string ABBREV_STACK_RELATIVE =
+            (string)Application.Current.FindResource("str_AbbrevStackRelative");
         public static string ASM_LATEST_VERSION =
             (string)Application.Current.FindResource("str_AsmLatestVersion");
         public static string ASM_MATCH_FAILURE =
@@ -59,6 +61,12 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ClipformatAssemblerSource");
         public static string CLIPFORMAT_DISASSEMBLY =
             (string)Application.Current.FindResource("str_ClipformatDisassembly");
+        public static string EQU_ADDRESS =
+            (string)Application.Current.FindResource("str_EquAddress");
+        public static string EQU_CONSTANT =
+            (string)Application.Current.FindResource("str_EquConstant");
+        public static string EQU_STACK_RELATIVE =
+            (string)Application.Current.FindResource("str_EquStackRelative");
         public static string ERR_BAD_FD_FMT =
             (string)Application.Current.FindResource("str_ErrBadFdFmt");
         public static string ERR_BAD_FD_FORMAT =
@@ -67,6 +75,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadFileLength");
         public static string ERR_BAD_IDENT =
             (string)Application.Current.FindResource("str_ErrBadIdent");
+        public static string ERR_BAD_LOCAL_VARIABLE_FMT =
+            (string)Application.Current.FindResource("str_ErrBadLocalVariableFmt");
         public static string ERR_BAD_LV_TABLE_FMT =
             (string)Application.Current.FindResource("str_ErrBadLvTableFmt");
         public static string ERR_BAD_RANGE =

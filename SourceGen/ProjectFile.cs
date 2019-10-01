@@ -311,10 +311,13 @@ namespace SourceGen {
         public class SerDefSymbol : SerSymbol {
             public SerFormatDescriptor DataDescriptor { get; set; }
             public string Comment { get; set; }
+            public bool HasWidth { get; set; }
+            // Tag not relevant, Xrefs not recorded
 
             public SerDefSymbol() { }
             public SerDefSymbol(DefSymbol defSym) : base(defSym) {
                 DataDescriptor = new SerFormatDescriptor(defSym.DataDescriptor);
+                HasWidth = defSym.HasWidth;
                 Comment = defSym.Comment;
             }
         }
@@ -736,7 +739,7 @@ namespace SourceGen {
                 return false;
             }
 
-            outDefSym = new DefSymbol(sym, dfd, serDefSym.Comment);
+            outDefSym = new DefSymbol(sym, dfd, serDefSym.HasWidth, serDefSym.Comment);
             return true;
         }
 
@@ -837,13 +840,20 @@ namespace SourceGen {
             outLvt = new LocalVariableTable();
             outLvt.ClearPrevious = serTable.ClearPrevious;
             foreach (SerDefSymbol serDef in serTable.Variables) {
+                // Force the "has width" field to true for local variables, because it's
+                // non-optional there.  This is really only needed for loading projects
+                // created in v1.3, which didn't have the "has width" property.
+                serDef.HasWidth = true;
                 if (!CreateDefSymbol(serDef, contentVersion, report, out DefSymbol defSym)) {
                     return false;
                 }
                 if (!defSym.IsVariable) {
-                    // not expected to happen
+                    // not expected to happen; skip it
                     Debug.WriteLine("Found local variable with bad source: " +
                         defSym.SymbolSource);
+                    string str = string.Format(Res.Strings.ERR_BAD_LOCAL_VARIABLE_FMT,
+                        defSym);
+                    report.Add(FileLoadItem.Type.Warning, str);
                     continue;
                 }
                 outLvt.AddOrReplace(defSym);
