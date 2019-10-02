@@ -48,28 +48,37 @@ limitations under the License.
         <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,4,0,0"
                    Text="{Binding TableHeaderText, FallbackValue=Symbols defined in table at +######:}"/>
 
-        <ListView Name="symbolsListView" Grid.Column="0" Grid.Row="1" Margin="0,4,4,0"
-                  Height="300"
-                  FontFamily="{StaticResource GeneralMonoFont}"
+        <DataGrid Name="symbolsList" Grid.Column="0" Grid.Row="1" Margin="0,4,4,0"
+                  Width="582" Height="300"
                   ItemsSource="{Binding Variables}"
-                  SnapsToDevicePixels="True" SelectionMode="Single"
-                  SelectionChanged="SymbolsListView_SelectionChanged"
-                  MouseDoubleClick="SymbolsListView_MouseDoubleClick">
-            <ListView.Resources>
-                <Style TargetType="TextBlock">
-                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                </Style>
-            </ListView.Resources>
-            <ListView.View>
-                <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Name" Width="118" DisplayMemberBinding="{Binding Label}"/>
-                    <GridViewColumn Header="Value" Width="72" DisplayMemberBinding="{Binding Value}"/>
-                    <GridViewColumn Header="Type" Width="45" DisplayMemberBinding="{Binding Type}"/>
-                    <GridViewColumn Header="Width" Width="45" DisplayMemberBinding="{Binding Width}"/>
-                    <GridViewColumn Header="Comment" Width="300" DisplayMemberBinding="{Binding Comment}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                  IsReadOnly="True"
+                  FontFamily="{StaticResource GeneralMonoFont}"
+                  SnapsToDevicePixels="True"
+                  GridLinesVisibility="Vertical"
+                  VerticalGridLinesBrush="#FF7F7F7F"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserReorderColumns="False"
+                  SelectionMode="Single"
+                  SelectionChanged="SymbolsList_SelectionChanged"
+                  Sorting="SymbolsList_Sorting"
+                  MouseDoubleClick="SymbolsList_MouseDoubleClick">
+            <DataGrid.Resources>
+                <!-- make the no-focus color the same as the in-focus color -->
+                <!-- thanks: https://stackoverflow.com/a/13053511/294248 -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightColor}"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightTextColor}"/>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Width="118" Binding="{Binding Label}"/>
+                <DataGridTextColumn Header="Value" Width="72" Binding="{Binding Value}"/>
+                <DataGridTextColumn Header="Type" Width="45" Binding="{Binding Type}"/>
+                <DataGridTextColumn Header="Width" Width="45" Binding="{Binding Width}"/>
+                <DataGridTextColumn Header="Comment" Width="300" Binding="{Binding Comment}"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <StackPanel Grid.Column="1" Grid.Row="1">
             <Button Name="newSymbolButton" Width="120" Margin="4" Content="_New Symbol..."

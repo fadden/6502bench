@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -23,6 +24,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Win32;
 
@@ -36,6 +38,8 @@ namespace SourceGen.WpfGui {
     /// Project properties dialog.
     /// </summary>
     public partial class EditProjectProperties : Window, INotifyPropertyChanged {
+        private const string NO_WIDTH_STR = "-";
+
         /// <summary>
         /// New set.  Updated when Apply or OK is hit.  This will be null if no changes have
         /// been applied.
@@ -169,7 +173,7 @@ namespace SourceGen.WpfGui {
             //
             // Enable or disable the edit/remove buttons based on how many items are selected.
             // (We're currently configured for single-select, so this is really just a != 0 test.)
-            int symSelCount = projectSymbolsListView.SelectedItems.Count;
+            int symSelCount = projectSymbolsList.SelectedItems.Count;
             removeSymbolButton.IsEnabled = (symSelCount == 1);
             editSymbolButton.IsEnabled = (symSelCount == 1);
 
@@ -401,13 +405,23 @@ namespace SourceGen.WpfGui {
             public string Label { get; private set; }
             public string Value { get; private set; }
             public string Type { get; private set; }
+            public string Width { get; private set; }
             public string Comment { get; private set; }
 
-            public FormattedSymbol(string label, string value, string type, string comment) {
+            // Numeric form of Value, used so we can sort hex/dec/binary correctly.
+            public int NumericValue { get; private set; }
+            public int NumericWidth { get; private set; }
+
+            public FormattedSymbol(string label, int numericValue, string value, string type,
+                    int numericWidth, string width, string comment) {
                 Label = label;
                 Value = value;
                 Type = type;
+                Width = width;
                 Comment = comment;
+
+                NumericValue = numericValue;
+                NumericWidth = numericWidth;
             }
         }
         public ObservableCollection<FormattedSymbol> ProjectSymbols { get; private set; } =
@@ -421,20 +435,121 @@ namespace SourceGen.WpfGui {
 
             foreach (KeyValuePair<string, DefSymbol> kvp in mWorkProps.ProjectSyms) {
                 DefSymbol defSym = kvp.Value;
-                string typeStr;
-                if (defSym.SymbolType == Symbol.Type.Constant) {
-                    typeStr = Res.Strings.ABBREV_CONSTANT;
-                } else {
-                    typeStr = Res.Strings.ABBREV_ADDRESS;
+                ProjectSymbols.Add(CreateFormattedSymbol(defSym));
+            }
+
+            // This doesn't seem to enable "live sorting".  It does an initial sort, but
+            // without calling the Sorting function.  I'm not sure what the point of this is,
+            // or how to cause the DataGrid to behave like somebody clicked on a header.
+
+            //ICollectionView view =
+            //    CollectionViewSource.GetDefaultView(projectSymbolsList.ItemsSource);
+            //SortDescriptionCollection sortDes = view.SortDescriptions;
+            //sortDes.Add(new SortDescription("Value", ListSortDirection.Descending));
+            //projectSymbolsList.Columns[0].SortDirection = ListSortDirection.Ascending;
+            //view.Refresh();
+        }
+
+        private FormattedSymbol CreateFormattedSymbol(DefSymbol defSym) {
+            string typeStr;
+            if (defSym.SymbolType == Symbol.Type.Constant) {
+                typeStr = Res.Strings.ABBREV_CONSTANT;
+            } else {
+                typeStr = Res.Strings.ABBREV_ADDRESS;
+            }
+
+            FormattedSymbol fsym = new FormattedSymbol(
+                defSym.Label,
+                defSym.Value,
+                mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
+                typeStr,
+                defSym.DataDescriptor.Length,
+                defSym.HasWidth ? defSym.DataDescriptor.Length.ToString() : NO_WIDTH_STR,
+                defSym.Comment);
+            return fsym;
+        }
+
+        private void ProjectSymbolsList_Sorting(object sender, DataGridSortingEventArgs e) {
+            DataGridColumn col = e.Column;
+
+            // Set the SortDirection to a specific value.  If we don't do this, SortDirection
+            // remains un-set, and the column header doesn't show up/down arrows or change
+            // direction when clicked twice.
+            ListSortDirection direction = (col.SortDirection != ListSortDirection.Ascending) ?
+                ListSortDirection.Ascending : ListSortDirection.Descending;
+            col.SortDirection = direction;
+
+            bool isAscending = direction != ListSortDirection.Descending;
+
+            IComparer comparer = new ProjectSymbolComparer(col.DisplayIndex, isAscending);
+            ListCollectionView lcv = (ListCollectionView)
+                CollectionViewSource.GetDefaultView(projectSymbolsList.ItemsSource);
+            lcv.CustomSort = comparer;
+            e.Handled = true;
+        }
+
+        private class ProjectSymbolComparer : IComparer {
+            // Must match order of items in DataGrid.  DataGrid must not allow columns to be
+            // reordered.  We could check col.Header instead, but then we have to assume that
+            // the Header is a string that doesn't get renamed.
+            private enum SortField {
+                Label = 0, Value = 1, Type = 2, Width = 3, Comment = 4
+            }
+            private SortField mSortField;
+            private bool mIsAscending;
+
+            public ProjectSymbolComparer(int displayIndex, bool isAscending) {
+                Debug.Assert(displayIndex >= 0 && displayIndex <= 4);
+                mIsAscending = isAscending;
+                mSortField = (SortField)displayIndex;
+            }
+
+            // IComparer interface
+            public int Compare(object o1, object o2) {
+                FormattedSymbol fsym1 = (FormattedSymbol)o1;
+                FormattedSymbol fsym2 = (FormattedSymbol)o2;
+
+                // Sort primarily by specified field, secondarily by label (which should
+                // be unique).
+                int cmp;
+                switch (mSortField) {
+                    case SortField.Label:
+                        cmp = string.Compare(fsym1.Label, fsym2.Label);
+                        break;
+                    case SortField.Value:
+                        cmp = fsym1.NumericValue - fsym2.NumericValue;
+                        break;
+                    case SortField.Type:
+                        cmp = string.Compare(fsym1.Type, fsym2.Type);
+                        break;
+                    case SortField.Width:
+                        // The no-width case is a little weird, because the actual width will
+                        // be 1, but we want it to sort separately.
+                        if (fsym1.Width == fsym2.Width) {
+                            cmp = 0;
+                        } else if (fsym1.Width == NO_WIDTH_STR) {
+                            cmp = -1;
+                        } else if (fsym2.Width == NO_WIDTH_STR) {
+                            cmp = 1;
+                        } else {
+                            cmp = fsym1.NumericWidth - fsym2.NumericWidth;
+                        }
+                        break;
+                    case SortField.Comment:
+                        cmp = string.Compare(fsym1.Comment, fsym2.Comment);
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        return 0;
                 }
 
-                FormattedSymbol fsym = new FormattedSymbol(
-                    defSym.Label,
-                    mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
-                    typeStr,
-                    defSym.Comment);
-
-                ProjectSymbols.Add(fsym);
+                if (cmp == 0) {
+                    cmp = string.Compare(fsym1.Label, fsym2.Label);
+                }
+                if (!mIsAscending) {
+                    cmp = -cmp;
+                }
+                return cmp;
             }
         }
 
@@ -447,31 +562,31 @@ namespace SourceGen.WpfGui {
                 mWorkProps.ProjectSyms[dlg.NewSym.Label] = dlg.NewSym;
                 IsDirty = true;
 
-                // Reload the contents.  This loses the selection, but that shouldn't be an
-                // issue when adding new symbols.  To do this incrementally we'd need to add
-                // the symbol at the correct sorted position.
-                LoadProjectSymbols();
-                UpdateControls();
+                FormattedSymbol newItem = CreateFormattedSymbol(dlg.NewSym);
+                ProjectSymbols.Add(newItem);
+                projectSymbolsList.SelectedItem = newItem;
+                projectSymbolsList.ScrollIntoView(newItem);
 
+                UpdateControls();
                 okButton.Focus();
             }
         }
 
         private void EditSymbolButton_Click(object sender, EventArgs e) {
             // Single-select list view, button dimmed when no selection.
-            Debug.Assert(projectSymbolsListView.SelectedItems.Count == 1);
-            FormattedSymbol item = (FormattedSymbol)projectSymbolsListView.SelectedItems[0];
+            Debug.Assert(projectSymbolsList.SelectedItems.Count == 1);
+            FormattedSymbol item = (FormattedSymbol)projectSymbolsList.SelectedItems[0];
             DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
             DoEditSymbol(defSym);
         }
 
-        private void ProjectSymbolsListView_MouseDoubleClick(object sender,
-                MouseButtonEventArgs e) {
-            ListViewItem lvi = projectSymbolsListView.GetClickedItem(e);
-            if (lvi == null) {
+        private void ProjectSymbolsList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (!projectSymbolsList.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
+                    out object objItem)) {
+                // Header or empty area; ignore.
                 return;
             }
-            FormattedSymbol item = (FormattedSymbol)lvi.Content;
+            FormattedSymbol item = (FormattedSymbol)objItem;
             DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
             DoEditSymbol(defSym);
         }
@@ -485,33 +600,46 @@ namespace SourceGen.WpfGui {
                 mWorkProps.ProjectSyms.Remove(defSym.Label);
                 mWorkProps.ProjectSyms[dlg.NewSym.Label] = dlg.NewSym;
                 IsDirty = true;
-                LoadProjectSymbols();
-                UpdateControls();
 
+                // Replace entry in items source.
+                for (int i = 0; i < ProjectSymbols.Count; i++) {
+                    if (ProjectSymbols[i].Label.Equals(defSym.Label)) {
+                        ProjectSymbols[i] = CreateFormattedSymbol(dlg.NewSym);
+                        break;
+                    }
+                }
+
+                UpdateControls();
                 okButton.Focus();
             }
         }
 
         private void RemoveSymbolButton_Click(object sender, RoutedEventArgs e) {
             // Single-select list view, button dimmed when no selection.
-            Debug.Assert(projectSymbolsListView.SelectedItems.Count == 1);
+            Debug.Assert(projectSymbolsList.SelectedItems.Count == 1);
 
-            int selectionIndex = projectSymbolsListView.SelectedIndex;
-            FormattedSymbol item = (FormattedSymbol)projectSymbolsListView.SelectedItems[0];
+            int selectionIndex = projectSymbolsList.SelectedIndex;
+            FormattedSymbol item = (FormattedSymbol)projectSymbolsList.SelectedItems[0];
             DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
             mWorkProps.ProjectSyms.Remove(defSym.Label);
             IsDirty = true;
-            LoadProjectSymbols();
+
+            for (int i = 0; i < ProjectSymbols.Count; i++) {
+                if (ProjectSymbols[i].Label.Equals(item.Label)) {
+                    ProjectSymbols.RemoveAt(i);
+                    break;
+                }
+            }
             UpdateControls();
 
             // Restore selection to the item that used to come after the one we just deleted,
             // so you can hit "Remove" repeatedly to delete multiple items.
-            int newCount = projectSymbolsListView.Items.Count;
+            int newCount = projectSymbolsList.Items.Count;
             if (selectionIndex >= newCount) {
                 selectionIndex = newCount - 1;
             }
             if (selectionIndex >= 0) {
-                projectSymbolsListView.SelectedIndex = selectionIndex;
+                projectSymbolsList.SelectedIndex = selectionIndex;
                 removeSymbolButton.Focus();
             }
         }
@@ -551,7 +679,7 @@ namespace SourceGen.WpfGui {
             }
             if (foundCount != 0) {
                 IsDirty = true;
-                LoadProjectSymbols();
+                LoadProjectSymbols();   // just reload the whole set
                 UpdateControls();
             }
 

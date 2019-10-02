@@ -462,8 +462,9 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Notes">
-                    <DataGrid Name="notesGrid" IsReadOnly="True"
+                    <DataGrid Name="notesGrid"
                               ItemsSource="{Binding NotesList}"
+                              IsReadOnly="True"
                               FontFamily="{StaticResource GeneralMonoFont}"
                               SnapsToDevicePixels="True"
                               GridLinesVisibility="Vertical"

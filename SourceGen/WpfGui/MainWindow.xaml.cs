@@ -1420,7 +1420,7 @@ namespace SourceGen.WpfGui {
             new ObservableCollection<ReferencesListItem>();
 
         private void ReferencesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if (!referencesGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+            if (!referencesGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
                     out object item)) {
                 // Header or empty area; ignore.
                 return;
@@ -1460,7 +1460,7 @@ namespace SourceGen.WpfGui {
             new ObservableCollection<NotesListItem>();
 
         private void NotesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if (!notesGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+            if (!notesGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
                     out object item)) {
                 // Header or empty area; ignore.
                 return;
@@ -1501,7 +1501,7 @@ namespace SourceGen.WpfGui {
             new ObservableCollection<SymbolsListItem>();
 
         private void SymbolsList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            if (!symbolsGrid.GetClickRowColItem(e, out int rowIndex, out int colIndex,
+            if (!symbolsGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
                     out object item)) {
                 // Header or empty area; ignore.
                 return;
@@ -1544,6 +1544,9 @@ namespace SourceGen.WpfGui {
         /// Handles a Sorting event.  We want to do a secondary sort on Name when one of the
         /// other columns is the primary sort key.
         /// </summary>
+        /// <remarks>
+        /// https://stackoverflow.com/a/2130557/294248
+        /// </remarks>
         private void SymbolsList_Sorting(object sender, DataGridSortingEventArgs e) {
             DataGridColumn col = e.Column;
 

@@ -23,7 +23,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Project Properties"
-        Width="600" Height="400" ResizeMode="NoResize"
+        Width="640" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
 
@@ -146,26 +146,36 @@ limitations under the License.
                     <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
                                Margin="4,0,0,0" Text="Symbols defined in project:"/>
 
-                    <ListView Name="projectSymbolsListView" Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
-                              FontFamily="{StaticResource GeneralMonoFont}"
+                    <DataGrid Name="projectSymbolsList" Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
                               ItemsSource="{Binding ProjectSymbols}"
-                              SnapsToDevicePixels="True" SelectionMode="Single"
+                              IsReadOnly="True"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="#FF7F7F7F"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              SelectionMode="Single"
                               SelectionChanged="List_SelectionChanged"
-                              MouseDoubleClick="ProjectSymbolsListView_MouseDoubleClick">
-                        <ListView.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                            </Style>
-                        </ListView.Resources>
-                        <ListView.View>
-                            <GridView AllowsColumnReorder="False">
-                                <GridViewColumn Header="Name" Width="118" DisplayMemberBinding="{Binding Label}"/>
-                                <GridViewColumn Header="Value" Width="72" DisplayMemberBinding="{Binding Value}"/>
-                                <GridViewColumn Header="Type" Width="45" DisplayMemberBinding="{Binding Type}"/>
-                                <GridViewColumn Header="Comment" Width="300" DisplayMemberBinding="{Binding Comment}"/>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                              Sorting="ProjectSymbolsList_Sorting"
+                              MouseDoubleClick="ProjectSymbolsList_MouseDoubleClick">
+                        <DataGrid.Resources>
+                            <!-- make the no-focus color the same as the in-focus color -->
+                            <!-- thanks: https://stackoverflow.com/a/13053511/294248 -->
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightColor}"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightTextColor}"/>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Width="118" Binding="{Binding Label}"/>
+                            <DataGridTextColumn Header="Value" Width="72" Binding="{Binding Value}"/>
+                            <DataGridTextColumn Header="Type" Width="45" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Width" Width="45" Binding="{Binding Width}"/>
+                            <DataGridTextColumn Header="Comment" Width="300" Binding="{Binding Comment}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
                         <Button Name="newSymbolButton" Width="120" Margin="4" Content="_New Symbol..."
@@ -230,7 +240,7 @@ limitations under the License.
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Column="0" Grid.Row="0" Margin="4,0,0,0"
-                               Text="Currently configured symbol files:"/>
+                               Text="Currently configured extension scripts:"/>
 
                     <ListBox Name="extensionScriptsListBox" Grid.Column="0" Grid.Row="1" Margin="4"
                              SelectionMode="Extended"
