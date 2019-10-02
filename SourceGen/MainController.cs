@@ -1650,8 +1650,11 @@ namespace SourceGen {
         }
 
         public bool CanCreateLocalVariableTable() {
-            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
             // Only allow on code lines.  This is somewhat arbitrary; data would work fine.
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (CodeLineList[selIndex].LineType != LineListGen.Line.Type.Code) {
                 return false;
             }
