@@ -82,7 +82,8 @@ namespace SourceGen {
         public int Value { get; private set; }
 
         /// <summary>
-        /// Symbol origin, e.g. auto-generated or entered by user.
+        /// Symbol origin, e.g. auto-generated or entered by user.  Enum values are in
+        /// priority order.
         /// </summary>
         public Source SymbolSource { get; private set; }
 

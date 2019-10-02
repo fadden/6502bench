@@ -20,6 +20,12 @@ using System.Linq;
 
 namespace CommonUtil {
     public static class Misc {
+        /// <summary>
+        /// Application identifier.  This is an arbitrary string set by the application.  It
+        /// will be included in the crash dump.
+        /// </summary>
+        public static string AppIdent { get; set; } = "(app ident unset)";
+
         // Given a type, dump all namespaces found in the same assembly.
         // https://stackoverflow.com/a/1549216/294248
         public static void DumpNamespacesInAssembly(Type type) {
@@ -50,6 +56,10 @@ namespace CommonUtil {
             try {
                 using (StreamWriter writer = new StreamWriter(CRASH_PATH, true)) {
                     writer.WriteLine("*** " + DateTime.Now.ToLocalTime() + " ***");
+                    writer.WriteLine("  App: " + AppIdent);
+                    writer.WriteLine("  OS: " +
+                        System.Runtime.InteropServices.RuntimeInformation.OSDescription);
+                    writer.WriteLine(string.Empty);
                     while (ex != null) {
                         writer.WriteLine(ex.GetType().FullName + ": " + ex.Message);
                         writer.WriteLine("Trace:");

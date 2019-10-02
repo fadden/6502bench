@@ -533,7 +533,7 @@ namespace SourceGen {
         /// 
         /// Failures here will be reported to the user but aren't fatal.
         /// </summary>
-        /// <returns>String with all warnings from load process.</returns>
+        /// <returns>Multi-line string with all warnings from load process.</returns>
         public string LoadExternalFiles() {
             TaskTimer timer = new TaskTimer();
             timer.StartTask("Total");
@@ -548,15 +548,18 @@ namespace SourceGen {
             // Load the platform symbols first.
             timer.StartTask("Platform Symbols");
             PlatformSyms.Clear();
+            int loadOrdinal = 0;
             foreach (string fileIdent in ProjectProps.PlatformSymbolFileIdentifiers) {
                 PlatformSymbols ps = new PlatformSymbols();
-                bool ok = ps.LoadFromFile(fileIdent, projectDir, out FileLoadReport report);
+                bool ok = ps.LoadFromFile(fileIdent, projectDir, loadOrdinal,
+                    out FileLoadReport report);
                 if (ok) {
                     PlatformSyms.Add(ps);
                 }
                 if (report.Count > 0) {
                     sb.Append(report.Format());
                 }
+                loadOrdinal++;
             }
             timer.EndTask("Platform Symbols");
 
@@ -664,6 +667,7 @@ namespace SourceGen {
             reanalysisTimer.StartTask("SymbolTable init");
             SymbolTable.Clear();
             MergePlatformProjectSymbols();
+
             // Merge user labels into the symbol table, overwriting platform/project symbols
             // where they conflict.  Labels whose values are out of sync (because of a change
             // to the address map) are updated as part of this.
@@ -911,7 +915,8 @@ namespace SourceGen {
         /// so that ordering of platform files behaves in an intuitive fashion.
         /// </summary>
         private void MergePlatformProjectSymbols() {
-            // Start by pulling in the platform symbols.
+            // Start by pulling in the platform symbols.  The list in PlatformSymbols is in
+            // order, so we can just overwrite earlier symbols with matching labels.
             foreach (PlatformSymbols ps in PlatformSyms) {
                 foreach (Symbol sym in ps) {
                     SymbolTable[sym.Label] = sym;
@@ -1080,7 +1085,8 @@ namespace SourceGen {
         /// This works pretty well for addresses, but is a little rough for constants.
         /// 
         /// Call this after the code and data analysis passes have completed.  This doesn't
-        /// interact with labels, so the ordering there doesn't matter.
+        /// interact with labels, so the ordering there doesn't matter.  This should come after
+        /// local variable resolution, so that those have priority.
         /// </summary>
         private void GeneratePlatformSymbolRefs() {
             bool checkNearby = ProjectProps.AnalysisParams.SeekNearbyTargets;
@@ -1132,25 +1138,11 @@ namespace SourceGen {
                 }
 
                 if (address >= 0) {
-                    // If we didn't find it, check addr-1.  This is very helpful when working
-                    // with pointers, because it gets us references to "PTR+1" when "PTR" is
-                    // defined.  (It's potentially helpful in labeling the "near side" of an
-                    // address map split as well, since the first byte past is an external
-                    // address, and a label at the end of the current region will be offset
-                    // from by this.)
-                    if (sym == null && (address & 0xffff) > 0 && checkNearby) {
-                        sym = SymbolTable.FindNonVariableByAddress(address - 1);
-                    }
-                    // If that didn't work, try addr-2.  Good for 24-bit addresses and jump
-                    // vectors that start with a JMP instruction.
-                    if (sym == null && (address & 0xffff) > 1 && checkNearby) {
-                        sym = SymbolTable.FindNonVariableByAddress(address - 2);
-                    }
-                    // Still nothing, try addr+1.  Sometimes indexed addressing will use
-                    // "STA addr-1,y".  This will also catch "STA addr-1" when addr is the
-                    // very start of a segment, which means we're actually finding a label
-                    // reference rather than project/platform symbol; only works if the
-                    // location already has a label.
+                    // If we didn't find it, see if addr+1 has a label.  Sometimes indexed
+                    // addressing will use "STA addr-1,y".  This will also catch "STA addr-1"
+                    // when addr is the very start of a segment, which means we're actually
+                    // finding a label reference rather than project/platform symbol; only
+                    // works if the location already has a label.
                     if (sym == null && (address & 0xffff) < 0xffff && checkNearby) {
                         sym = SymbolTable.FindNonVariableByAddress(address + 1);
                         if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
@@ -1790,7 +1782,7 @@ namespace SourceGen {
                             if (newValue == null) {
                                 // We're removing a user label.
                                 UserLabels.Remove(offset);
-                                SymbolTable.Remove((Symbol)oldValue);   // unnecessary?
+                                SymbolTable.Remove((Symbol)oldValue);   // unnecessary? will regen
                                 Debug.Assert(uc.ReanalysisRequired ==
                                     UndoableChange.ReanalysisScope.DataOnly);
                             } else {

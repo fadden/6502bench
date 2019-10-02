@@ -162,8 +162,10 @@ namespace SourceGen.WpfGui {
             Debug.WriteLine("START at " + DateTime.Now.ToLocalTime());
             InitializeComponent();
 
+            // Prep the crash handler.
+            Misc.AppIdent = "6502bench SourceGen v" + App.ProgramVersion.ToString();
             AppDomain.CurrentDomain.UnhandledException +=
-                new UnhandledExceptionEventHandler(CommonUtil.Misc.CrashReporter);
+                new UnhandledExceptionEventHandler(Misc.CrashReporter);
 
             listViewSetSelectedItems = codeListView.GetType().GetMethod("SetSelectedItems",
                 BindingFlags.NonPublic | BindingFlags.Instance);

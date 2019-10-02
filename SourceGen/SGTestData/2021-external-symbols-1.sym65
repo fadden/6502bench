@@ -1,0 +1,49 @@
+; Copyright 2019 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Symbol set 1 for test 2021-external-symbols
+
+; Platform symbols aren't applied to file data.
+PlatStart   @   $1000
+
+; SameName2 and SameName3 are replaced by later file
+SameName1   @   $2000
+SameName2   @   $2010
+SameName3   @   $2020
+
+; Symbols with the same values but different names are defined
+; in later files.  Names are chosen to not provide a strict
+; alphabetical progression.
+SameValA_C  @   $2100
+SameValB_B  @   $2110
+SameValC_A  @   $2120
+
+; Test overlap with project symbol.  Declare at $2202(4b), and $220a(1b).
+ChkProj1    @   $2200   4
+ChkProj2    @   $2204   4
+
+; Overlapping regions, defined within a single platform file.  We
+; should always use the most-recently-defined symbol.  When all
+; else is equal, alphabetical.
+Over1       @   $3000   16      ;$3000-300f, inclusive
+Over2       @   $3002   8       ;$3002-3009
+Over3       @   $3006   7       ;$3006-300c
+Over2a      @   $3006   1       ;$3006
+
+; Expected result:
+;  $3000-3001: Over1
+;  $3002-3005: Over2
+;  $3006     : Over4
+;  $3007-300c: Over3
+;  $300d-300f: Over1
+
+; Overlapping regions defined in multiple files.  The later definition
+; takes priority.  So while SepOver1 would normally end at $3102,
+; instead it steps on the first two bytes of SepOver2.
+SepOver2    @   $3102   4       ;$3102-3105, inclusive
+
+; Test overlap with local variable.  Declare at $41(2b).
+OverVar     @   $40     4
+
+; Width specifiers on constants should be ignored.
+FatConst    =   $4000   8

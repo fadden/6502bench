@@ -393,7 +393,10 @@ namespace SourceGen {
                         if (addrDiff == targetOffset - probeOffset) {
                             targetOffset = probeOffset;
                         } else {
-                            Debug.WriteLine("NOT probing past address boundary change");
+                            Debug.WriteLine("NOT probing past address boundary change (src=+" +
+                                srcOffset.ToString("x6") +
+                                " targ=+" + targetOffset.ToString("x6") +
+                                " probe=+" + probeOffset.ToString("x6") + ")");
                         }
                         break;
                     }

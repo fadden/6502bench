@@ -31,42 +31,18 @@ namespace SourceGen {
             new SortedList<string, Symbol>(Asm65.Label.LABEL_COMPARER);
 
         /// <summary>
-        /// Same content, but ordered by value.  Note the key and the value are the same object.
-        /// </summary>
-        private SortedList<Symbol, Symbol> mSymbolsByValue =
-            new SortedList<Symbol, Symbol>(new CompareByValue());
-
-        /// <summary>
-        /// Compare two symbols, primarily by value, secondarily by source, and tertiarily
-        /// by label.  The primary SortedList guarantees that the label is unique, so we
-        /// should never have two equal Symbols in the list.
+        /// By-address lookup table.  Because symbols can span more than one byte, there may
+        /// be more than one entry per symbol here.  If two symbols cover the same address,
+        /// only the highest-priority symbol is kept, so not all symbols are represented here.
         /// 
-        /// The type comparison ensures that project symbols appear before platform symbols,
-        /// so that you can "overwrite" a platform symbol with the same value.
-        /// 
-        /// TODO(someday): sort by symbol file load order, so you can choose which set of
-        /// symbols gets to represent a given address.  Mostly useful for zero-page variables.
+        /// This does not contain constants or local variables.
         /// </summary>
-        private class CompareByValue : IComparer<Symbol> {
-            public int Compare(Symbol a, Symbol b) {
-                if (a.Value < b.Value) {
-                    return -1;
-                } else if (a.Value > b.Value) {
-                    return 1;
-                }
-
-                if ((int)a.SymbolSource < (int)b.SymbolSource) {
-                    return -1;
-                } else if ((int)a.SymbolSource > (int)b.SymbolSource) {
-                    return 1;
-                }
-
-                // Equal values, check string.  We'll get a match on Remove or when
-                // replacing an entry with itself, but no two Symbols in the list
-                // should have the same label.
-                return Asm65.Label.LABEL_COMPARER.Compare(a.Label, b.Label);
-            }
-        }
+        /// <remarks>
+        /// For efficiency on larger data files, we may want to break this up by bank.  That
+        /// way we can do a partial update.
+        /// </remarks>
+        private Dictionary<int, Symbol> mSymbolsByAddress =
+            new Dictionary<int, Symbol>();
 
         /// <summary>
         /// This is incremented whenever the contents of the symbol table change.  External
@@ -75,7 +51,7 @@ namespace SourceGen {
         /// 
         /// We could theoretically miss something at the 2^32 rollover.  Not worried.
         /// </summary>
-        public int ChangeSerial { get; private set; }
+        //public int ChangeSerial { get; private set; }
 
 
         public SymbolTable() { }
@@ -96,15 +72,14 @@ namespace SourceGen {
         /// </summary>
         public void Clear() {
             mSymbols.Clear();
-            mSymbolsByValue.Clear();
-            ChangeSerial++;
+            mSymbolsByAddress.Clear();
+            //ChangeSerial++;
         }
 
         /// <summary>
         /// Returns the number of symbols in the table.
         /// </summary>
         public int Count() {
-            Debug.Assert(mSymbolsByValue.Count == mSymbols.Count);
             return mSymbols.Count;
         }
 
@@ -116,85 +91,31 @@ namespace SourceGen {
             // If Symbol with matching label is in list, this will throw an exception,
             // and the by-value add won't happen.
             mSymbols.Add(sym.Label, sym);
-            mSymbolsByValue.Add(sym, sym);
-            ChangeSerial++;
+            AddAddressTableEntry(sym);
+            //ChangeSerial++;
         }
 
         /// <summary>
-        /// Finds the specified symbol by label.  Throws an exception if it's not found.
+        /// get: Finds the specified symbol by label.  Throws an exception if it's not found.
         /// 
-        /// Adds the specified symbol to the list, or replaces it if it's already present.
+        /// set: Adds the specified symbol to the list, or replaces it if it's already present.
         /// </summary>
         public Symbol this[string key] {
             get {
-                Debug.Assert(mSymbolsByValue.Count == mSymbols.Count);
                 return mSymbols[key];
             }
             set {
-                // Replacing {"foo", 1} with ("foo", 2} works correctly for mSymbols, because
-                // the label is the unique key.  For mSymbolsByValue we have to explicitly
-                // remove it, because the entire Symbol is used as the key.
                 mSymbols.TryGetValue(key, out Symbol oldValue);
-                if (oldValue != null) {
-                    mSymbolsByValue.Remove(oldValue);
-                }
                 mSymbols[key] = value;
-                mSymbolsByValue[value] = value;
-                ChangeSerial++;
-            }
-        }
-
-        /// <summary>
-        /// Searches the table for symbols with matching address values.  Ignores constants and
-        /// variables.
-        /// </summary>
-        /// <param name="value">Value to find.</param>
-        /// <returns>First matching symbol found, or null if nothing matched.</returns>
-        public Symbol FindNonVariableByAddress(int value) {
-            // Get sorted list of values.  This is documented as efficient.
-            IList<Symbol> values = mSymbolsByValue.Values;
-
-            //for (int i = 0; i < values.Count; i++) {
-            //    if (values[i].Value == value && values[i].SymbolType != Symbol.Type.Constant) {
-            //        return values[i];
-            //    }
-            //}
-
-            int low = 0;
-            int high = values.Count - 1;
-            while (low <= high) {
-                int mid = (low + high) / 2;
-                Symbol midValue = values[mid];
-
-                if (midValue.Value == value) {
-                    // found a match, walk back to find first match
-                    while (mid > 0 && values[mid - 1].Value == value) {
-                        mid--;
-                    }
-                    // now skip past constants and variables
-                    while (mid < values.Count && (values[mid].SymbolType == Symbol.Type.Constant ||
-                            values[mid].SymbolSource == Symbol.Source.Variable)) {
-                        //Debug.WriteLine("disregarding " + values[mid]);
-                        mid++;
-                    }
-                    if (mid < values.Count && values[mid].Value == value) {
-                        return values[mid];
-                    }
-                    //Debug.WriteLine("Found value " + value + " but only constants");
-                    return null;
-                } else if (midValue.Value < value) {
-                    // move the low end in
-                    low = mid + 1;
+                if (oldValue != null) {
+                    ReplaceAddressTableEntry(oldValue, value);
                 } else {
-                    // move the high end in
-                    Debug.Assert(midValue.Value > value);
-                    high = mid - 1;
+                    AddAddressTableEntry(value);
                 }
+                //ChangeSerial++;
             }
-
-            // not found
-            return null;
         }
+
 
         /// <summary>
         /// Gets the value associated with the key.
@@ -226,8 +147,140 @@ namespace SourceGen {
         /// </summary>
         public void Remove(Symbol sym) {
             mSymbols.Remove(sym.Label);
-            mSymbolsByValue.Remove(sym);
-            ChangeSerial++;
+            RemoveAddressTableEntry(sym);
+            //ChangeSerial++;
+        }
+
+        /// <summary>
+        /// Adds a symbol to the address table.  All affected addresses are updated.  If an
+        /// existing symbol is already present at an address, the new or old symbol will be
+        /// selected in priority order.
+        /// </summary>
+        /// <param name="sym">Symbol to add.</param>
+        private void AddAddressTableEntry(Symbol sym) {
+            if (sym.SymbolType == Symbol.Type.Constant) {
+                return;
+            }
+            if (sym.SymbolSource == Symbol.Source.Variable) {
+                return;
+            }
+
+            int width = 1;
+            if (sym is DefSymbol) {
+                width = ((DefSymbol)sym).DataDescriptor.Length;
+            }
+            // we could restore some older behavior by giving user labels a width of 3, but
+            // we'd have to make sure that they didn't win for addresses outside the file
+
+            for (int i = 0; i < width; i++) {
+                // see if there's already something here
+                mSymbolsByAddress.TryGetValue(sym.Value + i, out Symbol curSym);
+                mSymbolsByAddress[sym.Value + i] = (curSym == null) ? sym :
+                    HighestPriority(sym, curSym);
+            }
+        }
+
+        private Symbol HighestPriority(Symbol sym1, Symbol sym2) {
+            // First determinant is symbol source.  User labels have highest priority, then
+            // project symbols, then platform symbols, then auto labels.
+            if ((int)sym1.SymbolSource < (int)sym2.SymbolSource) {
+                return sym1;
+            } else if ((int)sym1.SymbolSource > (int)sym2.SymbolSource) {
+                return sym2;
+            }
+
+            // Same source.  Are they platform symbols?
+            if (sym1.SymbolSource == Symbol.Source.Platform) {
+                // Sort by file load order.  Symbols from files loaded later, which will have
+                // a higher ordinal, have priority.
+                int lo1 = ((DefSymbol)sym1).LoadOrdinal;
+                int lo2 = ((DefSymbol)sym2).LoadOrdinal;
+                if (lo1 > lo2) {
+                    return sym1;
+                } else if (lo1 < lo2) {
+                    return sym2;
+                }
+            }
+
+            // Same source, so this is e.g. two project symbol definitions that overlap.  We
+            // handle this by selecting whichever one was defined closer to the target address,
+            // i.e. whichever one has the higher value.
+            if (sym1.Value > sym2.Value) {
+                return sym1;
+            } else if (sym1.Value < sym2.Value) {
+                return sym2;
+            }
+
+            // In the absence of anything better, we select them alphabetically.  (If they have
+            // the same name, value, and source, there's not much to distinguish them anyway.)
+            if (Asm65.Label.LABEL_COMPARER.Compare(sym1.Label, sym2.Label) < 0) {
+                return sym1;
+            } else {
+                return sym2;
+            }
+        }
+
+        /// <summary>
+        /// Replaces an entry in the address table.  Must be called AFTER the by-label list
+        /// has been updated.
+        /// </summary>
+        /// <param name="oldSym">Symbol being replaced.</param>
+        /// <param name="newSym">New symbol.</param>
+        private void ReplaceAddressTableEntry(Symbol oldSym, Symbol newSym) {
+            RemoveAddressTableEntry(oldSym);
+            AddAddressTableEntry(newSym);
+        }
+
+        /// <summary>
+        /// Removes an entry from the address table.  Must be called AFTER the by-label list
+        /// has been updated.
+        /// </summary>
+        /// <param name="sym">Symbol to remove.</param>
+        private void RemoveAddressTableEntry(Symbol sym) {
+            // Easiest thing to do is just regenerate the table.  Since we don't track
+            // constants or variables, we can just ignore those.
+            if (sym.SymbolType == Symbol.Type.Constant) {
+                return;
+            }
+            if (sym.SymbolSource == Symbol.Source.Variable) {
+                return;
+            }
+            if (sym.SymbolSource == Symbol.Source.User || sym.SymbolSource == Symbol.Source.Auto) {
+                // These have a width of 1 and can't overlap with anything meaningful... even
+                // if there's a project symbol for the address, it won't be used, because it's
+                // an in-file address.  So we can just remove the entry.
+                mSymbolsByAddress.Remove(sym.Value);
+            }
+            RegenerateAddressTable();
+        }
+
+        /// <summary>
+        /// Regenerates the entire by-address table, from the contents of the by-label list.
+        /// </summary>
+        /// <remarks>
+        /// This is a little painful, but if a symbol gets removed we don't have a way to
+        /// restore lower-priority items.  If this becomes a performance issue we can create
+        /// an ordered list of symbols at each address, but with a few hundred symbols this
+        /// should take very little time.
+        /// </remarks>
+        private void RegenerateAddressTable() {
+            Debug.WriteLine("SymbolTable: regenerating address table");
+            mSymbolsByAddress.Clear();
+
+            foreach (KeyValuePair<string, Symbol> kvp in mSymbols) {
+                AddAddressTableEntry(kvp.Value);
+            }
+        }
+
+        /// <summary>
+        /// Searches the table for symbols with matching address values.  Ignores constants and
+        /// variables.
+        /// </summary>
+        /// <param name="addr">Address to find.</param>
+        /// <returns>First matching symbol found, or null if nothing matched.</returns>
+        public Symbol FindNonVariableByAddress(int addr) {
+            mSymbolsByAddress.TryGetValue(addr, out Symbol sym);
+            return sym;
         }
     }
 }

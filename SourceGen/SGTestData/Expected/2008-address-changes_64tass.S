@@ -44,7 +44,7 @@ L2000   bit     L2000
         .here
         .logical $2020
 L2020   bit     L2020
-        beq     offend+1
+        beq     $2029
         brl     L2080
 
 offend  nop
@@ -53,8 +53,8 @@ offend  nop
 L2080   bit     L2080
         lda     offend
         jsr     offend
-        lda     offend+1
-        jsr     offend+1
+        lda     $2029
+        jsr     $2029
         lda     L2080-1
         jsr     L2080-1
         lda     L2080
@@ -95,7 +95,7 @@ L3100   .byte   $02
 fwd     bit     fwd
         lda     ulabel
         lda     ulabel+1
-        lda     ulabel+2
+        lda     $300e
         lda     $300f
         lda     L3100
         beq     L3182

@@ -71,12 +71,13 @@ namespace SourceGen {
         /// <summary>
         /// Loads platform symbols.
         /// </summary>
-        /// <param name="fileIdent">Relative pathname of file to open.</param>
+        /// <param name="fileIdent">External file identifier of symbol file.</param>
         /// <param name="projectDir">Full path to project directory.</param>
+        /// <param name="loadOrdinal">Platform file load order.</param>
         /// <param name="report">Report of warnings and errors.</param>
         /// <returns>True on success (no errors), false on failure.</returns>
-        public bool LoadFromFile(string fileIdent, string projectDir, out FileLoadReport report) {
-            // These files shouldn't be enormous.  Do it the easy way.
+        public bool LoadFromFile(string fileIdent, string projectDir, int loadOrdinal,
+                out FileLoadReport report) {
             report = new FileLoadReport(fileIdent);
 
             ExternalFile ef = ExternalFile.CreateFromIdent(fileIdent);
@@ -85,13 +86,14 @@ namespace SourceGen {
                     CommonUtil.Properties.Resources.ERR_FILE_NOT_FOUND + ": " + fileIdent);
                 return false;
             }
-
             string pathName = ef.GetPathName(projectDir);
             if (pathName == null) {
                 report.Add(FileLoadItem.Type.Error,
                     Res.Strings.ERR_BAD_IDENT + ": " + fileIdent);
                 return false;
             }
+
+            // These files shouldn't be enormous.  Just read the entire thing into a string array.
             string[] lines;
             try {
                 lines = File.ReadAllLines(pathName);
@@ -168,7 +170,7 @@ namespace SourceGen {
                                 FormatDescriptor.GetSubTypeForBase(numBase);
                             DefSymbol symDef = new DefSymbol(label, value, Symbol.Source.Platform,
                                 isConst ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                                subType, comment, tag, width, width > 0);
+                                subType, comment, tag, width, width > 0, loadOrdinal, fileIdent);
                             if (mSymbols.ContainsKey(label)) {
                                 // This is very easy to do -- just define the same symbol twice
                                 // in the same file.  We don't really need to do anything about

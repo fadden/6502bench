@@ -19,9 +19,10 @@ using System.Diagnostics;
 namespace CommonUtil {
     /// <summary>
     /// Version number container.  Instances are immutable.
-    /// 
-    /// See https://semver.org/ for explanation of system.
     /// </summary>
+    /// <remarks>
+    /// See https://semver.org/ for explanation of system.
+    /// </remarks>
     public struct Version {
         // Must be in ascending order, e.g. Alpha release comes before Beta.
         public enum PreRelType { Dev, Alpha, Beta, Final };
@@ -47,7 +48,7 @@ namespace CommonUtil {
         public PreRelType PreReleaseType { get; private set; }
 
         /// <summary>
-        /// Pre-release version.
+        /// Pre-release version.  Always zero when PreReleaseType is Final.
         /// </summary>
         public int PreRelease { get; private set; }
 
@@ -109,6 +110,7 @@ namespace CommonUtil {
         }
 
 
+        // this is a struct, so no need for null checks
         public static bool operator ==(Version a, Version b) {
             return a.Major == b.Major && a.Minor == b.Minor && a.Patch == b.Patch &&
                 a.PreReleaseType == b.PreReleaseType && a.PreRelease == b.PreRelease;
@@ -185,7 +187,7 @@ namespace CommonUtil {
             ok &= (checkVers > new Version(1, 2, 2));
             ok &= (checkVers < new Version(1, 3, 1));
 
-            Debug.WriteLine("Version struct test complete (ok=" + ok + ")");
+            Debug.WriteLine("Version struct: test complete (ok=" + ok + ")");
             return ok;
         }
     }

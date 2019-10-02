@@ -229,6 +229,10 @@ namespace SourceGen {
         /// to this point so we can report fatal errors directly to the user.
         /// </summary>
         public void WindowLoaded() {
+            Debug.Assert(CommonUtil.RangeSet.Test());
+            Debug.Assert(CommonUtil.TypedRangeSet.Test());
+            Debug.Assert(CommonUtil.Version.Test());
+
             if (RuntimeDataAccess.GetDirectory() == null) {
                 MessageBox.Show(Res.Strings.RUNTIME_DIR_NOT_FOUND,
                     Res.Strings.RUNTIME_DIR_NOT_FOUND_CAPTION,
@@ -3309,7 +3313,8 @@ namespace SourceGen {
                         if (defSym.SymbolSource == Symbol.Source.Project) {
                             sourceStr = "project symbol definition";
                         } else if (defSym.SymbolSource == Symbol.Source.Platform) {
-                            sourceStr = "platform symbol file";
+                            sourceStr = "platform symbol file (#" + defSym.LoadOrdinal +
+                                ":" + defSym.FileIdentifier + ")";
                         } else {
                             sourceStr = "???";
                         }
@@ -3602,6 +3607,6 @@ namespace SourceGen {
             ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
         }
 
-        #endregion
+        #endregion Debug features
     }
 }
