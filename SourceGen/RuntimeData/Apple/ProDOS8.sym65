@@ -1,13 +1,16 @@
 ; Copyright 2018 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
-; Source: Beneath Apple ProDOS
+; Sources:
+;   Beneath Apple ProDOS
+;   ProDOS 8 Technical Reference Manual
 
 *SYNOPSIS ProDOS 8 public addresses and constants.
 
-P8_MLI          @ $BF00     ;ProDOS MLI entry point
 
+;
 ; ProDOS 8 MLI function codes.
+;
 *TAG ProDOS8-MLI-Functions 
 
 P8_ALLOC_INTERRUPT = $40
@@ -38,3 +41,88 @@ P8_SET_EOF      = $D0
 P8_GET_EOF      = $D1
 P8_SET_BUF      = $D2
 P8_GET_BUF      = $D3
+
+*TAG
+
+
+;
+; System global page.  Labels and comments are from the ProDOS 8
+; Technical Reference Manual (section 5.2.4).
+;
+P8_MLI          @ $BF00         ;ProDOS MLI call entry point
+
+; "do not use these"
+P8_JSPARE       @ $BF03         ;jump vector to cold start, selector pgm, etc.
+P8_DATETIME     @ $BF06         ;clock calendar routine
+P8_SYSERR       @ $BF09         ;error reporting hook
+P8_SYSDEATH     @ $BF0C         ;system failure hook
+P8_SERR         @ $BF0F         ;err code, 0=no error
+
+; disk device driver vectors
+; two bytes each; slot 0-7 drive 1, then slot 0-7 drive 2
+; (s0d1/s0d2 are reserved; s3d2 @BF26-7 is /RAM)
+P8_DEVADR01     @ $BF10 $20     ;device driver vectors
+
+; list of active devices by unit number
+P8_DEVNUM       @ $BF30         ;most recent accessed device
+P8_DEVCNT       @ $BF31         ;number of on-line devices (-1)
+P8_DEVLST       @ $BF32 14      ;up to 14 units may be active
+
+; copyright notice at $BF40-4A
+
+; routines reserved for MLI and subject to change
+;P8_MLIENT1      @ $BF4B
+;P8_AFTIRQ       @ $BF50
+;P8_OLD45        @ $BF56
+;P8_AFBANK       @ $BF57
+
+; memory in-use map, one bit per 256-byte page
+P8_MEMTABL      @ $BF58 24      ;memory map of lower 48K
+
+; buffer addresses for 8 open files
+P8_GL_BUFF      @ $BF70 16
+
+; interrupt vectors
+P8_INTRUPT1     @ $BF80 2
+P8_INTRUPT2     @ $BF82 2
+P8_INTRUPT3     @ $BF84 2
+P8_INTRUPT4     @ $BF86 2
+P8_INTAREG      @ $BF88         ;A-register
+P8_INTXREG      @ $BF89         ;X-register
+P8_INTYREG      @ $BF8A         ;Y-register
+P8_INTSREG      @ $BF8B         ;stack register
+P8_INTPREG      @ $BF8C         ;status register
+P8_INTBANKID    @ $BF8D         ;ROM, RAM1, or RAM2 ($D000 in LC)
+P8_INTADDR      @ $BF8E 2       ;program counter retn addr
+
+; the following options can be changed before calls to the MLI
+P8_DATELO       @ $BF90 2       ;bits 15-9=yr, 8-5=mo, 4-0=day
+P8_TIMELO       @ $BF92 2       ;bits 12-8=hr, 5-0=min; low-hi format
+P8_LEVEL        @ $BF94         ;file level: used in open, flush, close
+P8_BUBIT        @ $BF95         ;backup bit disable, SetFileInfo only
+P8_SPARE1       @ $BF96 2       ;reserved for MLI use
+
+P8_MACHID       @ $BF98         ;machine identification
+P8_SLTBYT       @ $BF99         ;'1' bits indicate ROM in slot(bit#)
+P8_PFIXPTR      @ $BF9A         ;if = 0, no prefix active
+P8_MLIACTV      @ $BF9B         ;if <> 0, MLI call in progress
+P8_CMDADR       @ $BF9C 2       ;return address of last call to MLI
+P8_SAVEX        @ $BF9E         ;X-reg on entry to MLI
+P8_SAVEY        @ $BF9F         ;Y-reg on entry to MLI
+
+; the following space is reserved for Language Card bank-switching routines
+; $BFA0..BFCF
+
+; interrupt exit and entry routines
+P8_IRQXIT       @ $BFD0
+P8_IRQENT       @ $BFEB
+
+P8_BNKBYT1      @ $BFF4
+P8_BNKBYT2      @ $BFF5
+P8_SYS_RTS      @ $BFF6
+
+; each system program should set IVERSION to its own current version number
+P8_IBAKVER      @ $BFFC         ;undefined; reserved for future use
+P8_IVERSION     @ $BFFD         ;version # of currently running Interpreter
+P8_KBAKVER      @ $BFFE         ;undefined; reserved for future use
+P8_KVERSION     @ $BFFF         ;version no. (release ID)

@@ -3315,6 +3315,9 @@ namespace SourceGen {
                         } else if (defSym.SymbolSource == Symbol.Source.Platform) {
                             sourceStr = "platform symbol file (#" + defSym.LoadOrdinal +
                                 ":" + defSym.FileIdentifier + ")";
+                            if (!string.IsNullOrEmpty(defSym.Tag)) {
+                                sourceStr += ", tag=" + defSym.Tag;
+                            }
                         } else {
                             sourceStr = "???";
                         }

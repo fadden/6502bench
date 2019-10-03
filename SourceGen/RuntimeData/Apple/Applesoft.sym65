@@ -10,7 +10,7 @@
 BAS_USRVEC      @ $0A 3     ;USR() command vector
 BAS_CHARAC      @ $0D       ;used by string utility
 BAS_ENDCHR      @ $0E       ;used by string utility
-BAS_VALTYP      @ $11       ;flag for last FAC operation ($00=num, $FF=str)
+BAS_VALTYP      @ $11 2     ;flag for last FAC operation ($00=num, $FF=str)
 BAS_SUBFLG      @ $14       ;subscript flag ($00=allowed, $80=not)
 BAS_HCOLOR1     @ $1C       ;hi-res color mask
 BAS_COUNTH      @ $1D       ;hi-res high-order byte of step for line
@@ -28,7 +28,7 @@ BAS_FRETOP      @ $6F 2     ;pointer to end of string storage (2b)
 BAS_MEMSIZE     @ $73 2     ;HIMEM (2b)
 BAS_CURLIN      @ $75 2     ;current line number (2b)
 BAS_OLDLIN      @ $77 2     ;last line executed (2b)
-BAS_OLDTEXT     @ $79       ;old text pointer
+BAS_OLDTEXT     @ $79 2     ;old text pointer (2b)
 BAS_DATLIN      @ $7B 2     ;current line # from which data is being read (2b)
 BAS_DATPTR      @ $7D 2     ;points to mem from which data is being read (2b)
 BAS_VARNAM      @ $81 2     ;holds last-used variable's name (2b)
@@ -56,6 +56,7 @@ BAS_AUTORUN     @ $D6       ;set to $80 to auto-run
 BAS_ERRFLG      @ $D8       ;$80 if onerr active
 BAS_HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
 BAS_SCALE       @ $E7       ;hi-res graphics scale factor
+BAS_HSHAPE      @ $E8 2     ;hi-res shape table pointer (2b)
 BAS_FIRST       @ $F0       ;used for lo-res plot coordinates
 BAS_ORMASK      @ $F3       ;mask for output control
 BAS_REMSTK      @ $F8       ;stack pointer saved before each statement

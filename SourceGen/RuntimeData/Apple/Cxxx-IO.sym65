@@ -147,3 +147,29 @@ CLRROM          @ $CFFF
 ; Not strictly I/O locations, but they're in the neighborhood.
 ROM_AUXMOVE     @ $C311
 ROM_XFER        @ $C314
+
+
+;
+; I/O scratchpad RAM addresses
+;
+; Each slot has 8 bytes of storage available in the "screen holes" in
+; text page 1.  See Apple II Reference Manual table page 83,
+; "Peripheral Slot Scratchpad RAM", and
+; https://retrocomputing.stackexchange.com/a/2541/56
+;
+; Slot number:
+;   *     1     2     3     4     5     6     7
+; $0478 $0479 $047A $047B $047C $047D $047E $047F
+; $04F8 $04F9 $04FA $04FB $04FC $04FD $04FE $04FF
+; $0578 $0579 $057A $057B $057C $057D $057E $057F
+; $05F8 $05F9 $05FA $05FB $05FC $05FD $0SFE $05FF
+; $0678 $0679 $067A $067B $067C $067D $067E $067F
+; $06F8 $06F9 $06FA $06FB $06FC $06FD $06FE $06FF
+; $0778 $0779 $077A $077B $077C $077D $077E $077F
+; $07F8 $07F9 $07FA $07FB $07FC $07FD $07FE $07FF
+;
+; The slot 0 holes are shared among peripheral cards and the operating
+; system, e.g. DOS puts the slot number of the peripheral card from
+; which it was booted into $5F8.
+;
+ACTV_PERIP_SLOT @ $07F8     ;slot num ($Cn) of active peripheral card
