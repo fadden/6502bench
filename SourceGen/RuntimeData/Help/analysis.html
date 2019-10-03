@@ -80,9 +80,11 @@ method in <code>DisasmProject.cs</code>):</p>
 </ul>
 
 <p>Once analysis is complete, a line-by-line display list is generated
-by walking through the annotated file data.  Most of the actual strings
-aren't rendered until they're needed.  For complicated multi-line items
-like string operands, the formatted text is cached.</p>
+by walking through the annotated file data.  Most of the actual text
+isn't rendered until they're needed.  For complicated multi-line items
+like string operands, the formatted text must be generated to know how
+many lines it will occupy, so it's done immediately and cached for re-use
+on subsequent runs.</p>
 
 
 <h3><a name="auto-format">Automatic Formatting</a></h3>

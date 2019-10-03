@@ -4,7 +4,7 @@
 *SYNOPSIS Symbol set 1 for test 2021-external-symbols
 
 ; Platform symbols aren't applied to file data.
-PlatStart   @   $1000
+CodeWrap    @   $0f00  $1000    ;encases program
 
 ; SameName2 and SameName3 are replaced by later file
 SameName1   @   $2000
@@ -14,6 +14,9 @@ SameName3   @   $2020
 ; Symbols with the same values but different names are defined
 ; in later files.  Names are chosen to not provide a strict
 ; alphabetical progression.
+;
+; These do not have widths, so we can check N+1 to confirm that it does
+; not resolve to a symbol.
 SameValA_C  @   $2100
 SameValB_B  @   $2110
 SameValC_A  @   $2120
@@ -44,6 +47,9 @@ SepOver2    @   $3102   4       ;$3102-3105, inclusive
 
 ; Test overlap with local variable.  Declare at $41(2b).
 OverVar     @   $40     4
+
+; Test bank wrap.
+BankWrap    @   $fff0   $20
 
 ; Width specifiers on constants should be ignored.
 FatConst    =   $4000   8

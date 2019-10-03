@@ -238,7 +238,8 @@ nearby labels for data loads and stores, adjusting them to fit
 (e.g. <code>LDA LABEL+1</code>).  If not enabled, labels are not applied
 unless they match exactly.  Note that references into the middle of an
 instruction or formatted data area are always adjusted, regardless of
-how this is set.  This setting has no effect on local variables.</p>
+how this is set.  This setting has no effect on local variables, and
+only enables a 1-byte backward search on project/platform symbols.</p>
 <p>If "smart PLP handling" is checked, the analyzer will try to use
 the processor status flags from a nearby <code>PHP</code> when a
 <code>PLP</code> is encountered.  If not enabled, all flags are set to

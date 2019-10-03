@@ -173,9 +173,11 @@ namespace SourceGen {
             // we'd have to make sure that they didn't win for addresses outside the file
 
             for (int i = 0; i < width; i++) {
-                // see if there's already something here
-                mSymbolsByAddress.TryGetValue(sym.Value + i, out Symbol curSym);
-                mSymbolsByAddress[sym.Value + i] = (curSym == null) ? sym :
+                // See if there's already something here.  If we reach the end of the
+                // bank, wrap around.
+                int addr = (sym.Value & 0xff0000) + ((sym.Value + i) & 0xffff);
+                mSymbolsByAddress.TryGetValue(addr, out Symbol curSym);
+                mSymbolsByAddress[addr] = (curSym == null) ? sym :
                     HighestPriority(sym, curSym);
             }
         }
@@ -205,6 +207,7 @@ namespace SourceGen {
             // Same source, so this is e.g. two project symbol definitions that overlap.  We
             // handle this by selecting whichever one was defined closer to the target address,
             // i.e. whichever one has the higher value.
+            // TODO(someday): this mishandles bank wrap... do we care?
             if (sym1.Value > sym2.Value) {
                 return sym1;
             } else if (sym1.Value < sym2.Value) {

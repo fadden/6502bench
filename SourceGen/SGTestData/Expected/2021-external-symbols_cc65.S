@@ -1,6 +1,6 @@
          .setcpu "6502"
 OverVar  =       $40
-PlatStart =      $1000
+CodeWrap =       $0f00      ;encases program
 SameName1 =      $2000
 SameName2 =      $2011
 SameName3 =      $2022
@@ -8,9 +8,9 @@ SameValA_A =     $2100
 SameValB_A =     $2110
 SameValC_C =     $2120
 ChkProj1 =       $2200
-ProjSim1 =       $2202
+ProjSym1 =       $2202
 ChkProj2 =       $2204
-ProjSim2 =       $220a
+ProjSym2 =       $220a
 Over1    =       $3000      ;$3000-300f, inclusive
 Over2    =       $3002      ;$3002-3009
 Over2a   =       $3006      ;$3006
@@ -18,12 +18,16 @@ Over3    =       $3006      ;$3006-300c
 SepOver1 =       $3100      ;$3100-3103, inclusive
 SepOver2 =       $3102      ;$3102-3105, inclusive
 FatConst =       $4000
+BankWrap =       $fff0
 
 ;         .segment "SEG000"
          .org    $1000
-L1000:   lda     PlatStart-1
+L1000:   lda     CodeWrap+255
          ldx     L1000
          ldy     L1000+1
+         lda     L10DD
+         lda     CodeWrap+478
+         lda     CodeWrap+485
          nop
          lda     $1ffe
          lda     SameName1-1
@@ -31,6 +35,7 @@ L1000:   lda     PlatStart-1
          lda     $200f
          lda     SameName2-1
          lda     SameName2
+         lda     $2012
          lda     $201f
          lda     $2020
          lda     SameName3-1
@@ -44,15 +49,15 @@ L1000:   lda     PlatStart-1
          lda     ChkProj1-1
          lda     ChkProj1
          lda     ChkProj1+1
-         lda     ProjSim1
-         lda     ProjSim1+1
-         lda     ProjSim1+2
-         lda     ProjSim1+3
+         lda     ProjSym1
+         lda     ProjSym1+1
+         lda     ProjSym1+2
+         lda     ProjSym1+3
          lda     ChkProj2+2
          lda     ChkProj2+3
          lda     $2208
-         lda     ProjSim2-1
-         lda     ProjSim2
+         lda     ProjSym2-1
+         lda     ProjSym2
          lda     $220b
          nop
          lda     $2ffe
@@ -97,5 +102,7 @@ LocalVar .set    $41
          lda     FatConst-1
          lda     $4000
          lda     $4001
-         rts
+         lda     BankWrap+8
+         lda     <BankWrap-232
+L10DD:   rts
 

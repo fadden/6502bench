@@ -934,7 +934,9 @@ namespace SourceGen {
 
             keepLen = Math.Max(keepLen, operandLen);
             adjustment = adjOperand - sym.Value;
+
             if (keepLen == 1) {
+                int origAdjust = adjustment;
                 adjustment %= 256;
                 // Adjust for aesthetics.  The assembler implicitly applies a modulo operation,
                 // so we can use the value closest to zero.
@@ -942,6 +944,21 @@ namespace SourceGen {
                     adjustment = -(256 - adjustment) /*% 256*/;
                 } else if (adjustment < -128) {
                     adjustment = (256 + adjustment) /*% 256*/;
+                }
+
+                // We have a problem with ambiguous direct-page arguments if the adjusted
+                // value crosses a bank boundary.  For example, "LDA $fff0+24" is computed
+                // as $010008, which is too big for a DP arg, so Merlin treats it as absolute
+                // (LDA $0008) instead of DP.  If Merlin had done the implicit "& $ffff" before
+                // testing the value for DP range, this would behave correctly.  Unfortunately
+                // there is no "force DP" modifier, so we either need to add an explicit mask
+                // or just punt and use the original adjustment.
+                // TODO(someday): we only need to do this for ambiguous DP.  If the instruction
+                // is imm or doesn't have an abs equivalent, or it's a fixed-width data item
+                // like .DD1, we can still use the nicer-looking adjustment.  We don't currently
+                // pass the OpDef in here.
+                if ((sym.Value & 0xff0000) != ((sym.Value + adjustment) & 0xff0000)) {
+                    adjustment = origAdjust;
                 }
             } else if (keepLen == 2) {
                 adjustment %= 65536;

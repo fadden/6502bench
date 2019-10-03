@@ -395,7 +395,7 @@ by splitting formatted data into sub-regions at label boundaries.</p>
 
 <h2><a name="about-symbols">All About Symbols</a></h2>
 
-<p>A symbol has two parts, a label and a value.  The label is a short
+<p>A symbol has two basic parts, a label and a value.  The label is a short
 ASCII string; the value may be an 8-to-24-bit address or a numeric
 constant.  Symbols can be defined in different ways, and applied in
 different ways.</p>
@@ -441,9 +441,23 @@ it finds one, it automatically uses that symbol.  Symbolic constants
 can be used the same way, but are not matched automatically.  This makes
 them useful for things like operating system function numbers.</p>
 
-<p>If two platform symbols have the same value, the one whose label comes
-first alphabetically is used.  If two platform symbols have the same label,
-the most recently read one is kept.</p>
+<p>If two platform symbols have the same label, only the most recently read
+one is kept.  If two platform symbols have different labels but the
+same value, both symbols will be kept, but the one in the file loaded
+last will take priority when doing a lookup by address.  If symbols with
+the same value are defined in the same file, the one whose symbol appears
+first alphabetically takes priority.</p>
+
+<p>Platform address symbols have an optional width.  This can be used
+to define multi-byte items, such as two-byte pointers or 256-byte stacks.
+If no width is specified, a default value of 1 is used.  Widths are ignored
+for constants.
+Overlapping symbols are resolved as described earlier, with symbols loaded
+later taking priority over previously-loaded symbols.  In addition,
+symbols defined closer to the target address take priority, so if you put
+a 4-byte symbol in the middle of a 256-byte symbol, the 4-byte symbol will
+be visible because the start point is closer to the addresses it covers
+than the start of the 256-byte range.</p>
 
 <p><b>Project symbols</b> behave like platform symbols, but they are
 defined in the project file itself.  The editor will prevent you from
