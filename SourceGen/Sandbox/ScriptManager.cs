@@ -156,39 +156,73 @@ namespace SourceGen.Sandbox {
         /// </summary>
         /// <param name="appRef">Reference to object providing app services.</param>
         public void PrepareScripts(IApplication appRef) {
-            List<PlatSym> platSyms = GeneratePlatSymList();
+            List<PlSymbol> plSyms = GeneratePlSymbolList();
 
             if (DomainMgr == null) {
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    kvp.Value.Prepare(appRef, mProject.FileData, platSyms);
+                    kvp.Value.Prepare(appRef, mProject.FileData, plSyms);
                 }
             } else {
-                DomainMgr.PluginMgr.PreparePlugins(appRef, platSyms);
+                DomainMgr.PluginMgr.PreparePlugins(appRef, plSyms);
             }
         }
 
         /// <summary>
         /// Gathers a list of platform symbols from the project's symbol table.
         /// </summary>
-        private List<PlatSym> GeneratePlatSymList() {
-            List<PlatSym> platSyms = new List<PlatSym>();
+        private List<PlSymbol> GeneratePlSymbolList() {
+            List<PlSymbol> plSymbols = new List<PlSymbol>();
             SymbolTable symTab = mProject.SymbolTable;
 
             foreach (Symbol sym in symTab) {
-                if (!(sym is DefSymbol)) {
-                    // ignore user labels
-                    continue;
+                PlSymbol.Source plsSource;
+                switch (sym.SymbolSource) {
+                    case Symbol.Source.Platform:
+                        plsSource = PlSymbol.Source.Platform;
+                        break;
+                    case Symbol.Source.Project:
+                        plsSource = PlSymbol.Source.Project;
+                        break;
+                    case Symbol.Source.User:
+                        plsSource = PlSymbol.Source.User;
+                        break;
+                    case Symbol.Source.Variable:
+                    case Symbol.Source.Auto:
+                        // don't forward these to plugins
+                        continue;
+                    default:
+                        Debug.Assert(false);
+                        continue;
                 }
-                DefSymbol defSym = sym as DefSymbol;
-                if (defSym.SymbolSource != Symbol.Source.Platform) {
-                    // ignore project symbols
-                    continue;
+                PlSymbol.Type plsType;
+                switch (sym.SymbolType) {
+                    case Symbol.Type.LocalOrGlobalAddr:
+                    case Symbol.Type.GlobalAddr:
+                    case Symbol.Type.GlobalAddrExport:
+                    case Symbol.Type.ExternalAddr:
+                        plsType = PlSymbol.Type.Address;
+                        break;
+                    case Symbol.Type.Constant:
+                        plsType = PlSymbol.Type.Constant;
+                        break;
+                    default:
+                        Debug.Assert(false);
+                        continue;
                 }
 
-                platSyms.Add(new PlatSym(defSym.Label, defSym.Value, defSym.Tag));
+                int width = -1;
+                string tag = string.Empty;
+                if (sym is DefSymbol) {
+                    DefSymbol defSym = sym as DefSymbol;
+                    width = defSym.DataDescriptor.Length;
+                    tag = defSym.Tag;
+                }
+
+
+                plSymbols.Add(new PlSymbol(sym.Label, sym.Value, width, plsSource, plsType, tag));
             }
 
-            return platSyms;
+            return plSymbols;
         }
 
         /// <summary>

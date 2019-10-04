@@ -101,6 +101,12 @@ namespace SourceGen.Tools.WpfGui {
                 case ProblemList.ProblemEntry.ProblemType.UnresolvedWeakRef:
                     problem = (string)FindResource("str_UnresolvedWeakRef");
                     break;
+                case ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength:
+                    problem = (string)FindResource("str_InvalidOffsetOrLength");
+                    break;
+                case ProblemList.ProblemEntry.ProblemType.InvalidDescriptor:
+                    problem = (string)FindResource("str_InvalidDescriptor");
+                    break;
                 default:
                     problem = "???";
                     break;

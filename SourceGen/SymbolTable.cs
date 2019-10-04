@@ -252,8 +252,14 @@ namespace SourceGen {
                 // These have a width of 1 and can't overlap with anything meaningful... even
                 // if there's a project symbol for the address, it won't be used, because it's
                 // an in-file address.  So we can just remove the entry.
+                //
+                // Note we do this *a lot* when the fancier auto labels are enabled, because we
+                // generate plain labels and then replace them with annotated labels.
                 mSymbolsByAddress.Remove(sym.Value);
+                return;
             }
+
+            // Removing a project/platform symbol requires re-evaluating the by-address table.
             RegenerateAddressTable();
         }
 

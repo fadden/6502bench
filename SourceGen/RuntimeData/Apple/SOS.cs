@@ -35,7 +35,7 @@ namespace RuntimeData.Apple {
 
         private IApplication mAppRef;
         private byte[] mFileData;
-        private Dictionary<int, PlatSym> mFunctionList;
+        private Dictionary<int, PlSymbol> mFunctionList;
 
         public string Identifier {
             get {
@@ -43,14 +43,14 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlatSym> platSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("SOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
 
-            mFunctionList = PlatSym.GenerateValueList(platSyms, SOS_MLI_TAG, appRef);
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, SOS_MLI_TAG, appRef);
         }
 
         public void CheckBrk(int offset, out bool noContinue) {
@@ -70,7 +70,7 @@ namespace RuntimeData.Apple {
                     ", cmd=$" + req.ToString("x2") + " addr=$" + addr.ToString("x4"));
             }
 
-            PlatSym sym;
+            PlSymbol sym;
             if (!mFunctionList.TryGetValue(req, out sym)) {
                 return;
             }

@@ -29,11 +29,6 @@ namespace PluginCommon {
         string Identifier { get; }
 
         /// <summary>
-        /// Returns true if this plugin checks JSR/JSL for inline data.
-        /// </summary>
-        //bool HasInlineDataAnalyzer { get; }
-
-        /// <summary>
         /// Initializes the plugin with an application reference and a buffer with file
         /// data.  Called before each analysis pass.
         /// 
@@ -43,8 +38,8 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="appRef">Reference to application interface.</param>
         /// <param name="fileData">65xx code and data.</param>
-        /// <param name="platSyms">Platform symbols, in no particular order.</param>
-        void Prepare(IApplication appRef, byte[] fileData, List<PlatSym> platSyms);
+        /// <param name="plSyms">Symbols available to plugins, in no particular order.</param>
+        void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms);
     }
 
     public interface IPlugin_InlineJsr {

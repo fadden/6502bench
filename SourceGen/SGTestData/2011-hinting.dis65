@@ -26,6 +26,8 @@
 "UserLabels":{
 },
 "OperandFormats":{
+"13":{
+"Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
 "51":{
 "Length":3,"Format":"Dense","SubFormat":"None","SymbolRef":null},
 "66":{

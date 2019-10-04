@@ -33,7 +33,7 @@ namespace RuntimeData.Apple {
 
         private IApplication mAppRef;
         private byte[] mFileData;
-        private Dictionary<int, PlatSym> mFunctionList;
+        private Dictionary<int, PlSymbol> mFunctionList;
 
         public string Identifier {
             get {
@@ -41,13 +41,13 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlatSym> platSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("IIgsToolbox(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
 
-            mFunctionList = PlatSym.GenerateValueList(platSyms, TOOLBOX_FUNC_TAG, appRef);
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, TOOLBOX_FUNC_TAG, appRef);
         }
 
         public void CheckJsl(int offset, out bool noContinue) {
@@ -67,7 +67,7 @@ namespace RuntimeData.Apple {
                         ", func=$" + func.ToString("x4"));
                 }
 
-                PlatSym sym;
+                PlSymbol sym;
                 if (mFunctionList.TryGetValue(func, out sym)) {
                     mAppRef.SetOperandFormat(offset - 3, DataSubType.Symbol, sym.Label);
                 }

@@ -52,11 +52,10 @@ namespace SourceGen {
 
         /// <summary>
         /// True if the symbol's type is an internal label (auto or user).  Will be false
-        /// for external addresses and constants.
+        /// for external addresses (including variables) and constants.
         /// </summary>
         public bool IsInternalLabel {
             get {
-                // Could also check Type instead.  Either works for now.
                 return SymbolSource == Source.User || SymbolSource == Source.Auto;
             }
         }

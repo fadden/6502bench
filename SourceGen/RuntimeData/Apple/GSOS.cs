@@ -40,7 +40,7 @@ namespace RuntimeData.Apple {
 
         private IApplication mAppRef;
         private byte[] mFileData;
-        private Dictionary<int, PlatSym> mFunctionList;
+        private Dictionary<int, PlSymbol> mFunctionList;
 
         public string Identifier {
             get {
@@ -48,14 +48,14 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlatSym> platSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("GSOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
 
-            mFunctionList = PlatSym.GenerateValueList(platSyms, GSOS_FUNC_TAG, appRef);
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, GSOS_FUNC_TAG, appRef);
         }
 
         public void CheckJsl(int offset, out bool noContinue) {
@@ -71,7 +71,7 @@ namespace RuntimeData.Apple {
                         ", cmd=$" + req.ToString("x4") + " addr=$" + addr.ToString("x6"));
                 }
 
-                PlatSym sym;
+                PlSymbol sym;
                 if (mFunctionList.TryGetValue(req, out sym)) {
                     mAppRef.SetInlineDataFormat(offset + 4, 2, DataType.NumericLE,
                         DataSubType.Symbol, sym.Label);

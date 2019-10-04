@@ -29,6 +29,8 @@ limitations under the License.
     <Window.Resources>
         <system:String x:Key="str_HiddenLabel">Hidden label</system:String>
         <system:String x:Key="str_UnresolvedWeakRef">Ref'd symbol not found</system:String>
+        <system:String x:Key="str_InvalidOffsetOrLength">Invalid offset or len</system:String>
+        <system:String x:Key="str_InvalidDescriptor">Invalid format desc</system:String>
 
         <system:String x:Key="str_LabelIgnored">Label ignored</system:String>
         <system:String x:Key="str_FormatDescriptorIgnored">Format ignored</system:String>

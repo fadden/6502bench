@@ -152,9 +152,9 @@ namespace PluginCommon {
         /// Invokes the Prepare() method on all active plugins.
         /// </summary>
         /// <param name="appRef">Reference to host object providing app services.</param>
-        public void PreparePlugins(IApplication appRef, List<PlatSym> platSyms) {
+        public void PreparePlugins(IApplication appRef, List<PlSymbol> plSyms) {
             foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                kvp.Value.Prepare(appRef, mFileData, platSyms);
+                kvp.Value.Prepare(appRef, mFileData, plSyms);
             }
         }
 

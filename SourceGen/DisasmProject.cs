@@ -823,7 +823,8 @@ namespace SourceGen {
         /// </summary>
         /// <param name="genLog">Log for debug messages.</param>
         private void ApplyFormatDescriptors(DebugLog genLog) {
-            // TODO: add these to ProblemList
+            genLog.LogI("Applying format descriptors");
+
             foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
                 int offset = kvp.Key;
 
@@ -834,16 +835,29 @@ namespace SourceGen {
 
                 // Check offset.
                 if (offset < 0 || offset >= mAnattribs.Length) {
-                    genLog.LogE("Invalid offset +" + offset.ToString("x6") +
-                        "(desc=" + kvp.Value + ")");
+                    string msg = "invalid offset (desc=" + kvp.Value + ")";
+                    genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
+                    Problems.Add(new ProblemList.ProblemEntry(
+                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                        offset,
+                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        msg,
+                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
                     continue;       // ignore this one
                 }
 
                 // Make sure it doesn't run off the end
                 if (offset + kvp.Value.Length > mAnattribs.Length) {
-                    genLog.LogE("Invalid offset+len +" + offset.ToString("x6") +
-                        " len=" + kvp.Value.Length + " file=" + mAnattribs.Length);
+                    string msg = "invalid offset+len: len=" + kvp.Value.Length +
+                        " file=" + mAnattribs.Length;
+                    genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
+                    Problems.Add(new ProblemList.ProblemEntry(
+                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                        offset,
+                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        msg,
+                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
                     continue;       // ignore this one
                 }
@@ -853,25 +867,50 @@ namespace SourceGen {
                     // a bunch of bytes as single-byte data items and then add a code entry
                     // point.
                     if (kvp.Value.Length != mAnattribs[offset].Length) {
-                        genLog.LogW("+" + offset.ToString("x6") +
-                            ": unexpected length on instr format descriptor (" +
-                            kvp.Value.Length + " vs " + mAnattribs[offset].Length + ")");
+                        string msg = "unexpected length on instr format descriptor (" +
+                            kvp.Value.Length + " vs " + mAnattribs[offset].Length + ")";
+                        genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
+                        Problems.Add(new ProblemList.ProblemEntry(
+                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                            offset,
+                            ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                            msg,
+                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;       // ignore this one
                     }
                     if (kvp.Value.Length == 1) {
                         // No operand to format!
-                        genLog.LogW("+" + offset.ToString("x6") +
-                            ": unexpected format descriptor on single-byte op");
+                        string msg = "unexpected format descriptor on single-byte op";
+                        genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
+                        Problems.Add(new ProblemList.ProblemEntry(
+                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                            offset,
+                            ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                            msg,
+                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;       // ignore this one
                     }
                     if (!kvp.Value.IsValidForInstruction) {
-                        genLog.LogW("Descriptor not valid for instruction: " + kvp.Value);
+                        string msg = "descriptor not valid for instruction: " + kvp.Value;
+                        genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
+                        Problems.Add(new ProblemList.ProblemEntry(
+                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                            offset,
+                            ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                            msg,
+                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;       // ignore this one
                     }
                 } else if (mAnattribs[offset].IsInstruction) {
                     // Mid-instruction format.
-                    genLog.LogW("+" + offset.ToString("x6") +
-                        ": unexpected mid-instruction format descriptor");
+                    string msg = "unexpected mid-instruction format descriptor";
+                    genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
+                    Problems.Add(new ProblemList.ProblemEntry(
+                        ProblemList.ProblemEntry.SeverityLevel.Warning,
+                        offset,
+                        ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                        msg,
+                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                     continue;       // ignore this one
                 } else {
                     // Data or inline data.  The data analyzer hasn't run yet.  We want to
@@ -889,8 +928,15 @@ namespace SourceGen {
                     bool overlap = false;
                     for (int i = offset; i < offset + kvp.Value.Length; i++) {
                         if (mAnattribs[i].IsInstruction) {
-                            genLog.LogW("+" + offset.ToString("x6") +
-                                ": data format descriptor overlaps code at +" + i.ToString("x6"));
+                            string msg =
+                                "data format descriptor overlaps code at +" + i.ToString("x6");
+                            genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
+                            Problems.Add(new ProblemList.ProblemEntry(
+                                ProblemList.ProblemEntry.SeverityLevel.Warning,
+                                offset,
+                                ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                                msg,
+                                ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                             overlap = true;
                             break;
                         }

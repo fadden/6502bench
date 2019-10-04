@@ -370,49 +370,50 @@ namespace SourceGen {
         public string ToUiString() {
             // NOTE: this should be made easier to localize
 
+            string retstr = Length + "-byte ";
+
             if (IsString) {
-                string descr;
                 switch (FormatSubType) {
                     case SubType.Ascii:
-                        descr = "ASCII";
+                        retstr += "ASCII";
                         break;
                     case SubType.HighAscii:
-                        descr = "ASCII (high)";
+                        retstr += "ASCII (high)";
                         break;
                     case SubType.C64Petscii:
-                        descr = "C64 PETSCII";
+                        retstr += "C64 PETSCII";
                         break;
                     case SubType.C64Screen:
-                        descr = "C64 Screen";
+                        retstr += "C64 Screen";
                         break;
                     default:
-                        descr = "???";
+                        retstr += "???";
                         break;
                 }
                 switch (FormatType) {
                     case Type.StringGeneric:
-                        descr += " string";
+                        retstr += " string";
                         break;
                     case Type.StringReverse:
-                        descr += " string (reverse)";
+                        retstr += " string (reverse)";
                         break;
                     case Type.StringNullTerm:
-                        descr += " string (null term)";
+                        retstr += " string (null term)";
                         break;
                     case Type.StringL8:
-                        descr += " string (1-byte len)";
+                        retstr += " string (1-byte len)";
                         break;
                     case Type.StringL16:
-                        descr += " string (2-byte len)";
+                        retstr += " string (2-byte len)";
                         break;
                     case Type.StringDci:
-                        descr += " string (DCI)";
+                        retstr += " string (DCI)";
                         break;
                     default:
-                        descr += " ???";
+                        retstr += " ???";
                         break;
                 }
-                return descr;
+                return retstr;
             }
 
             switch (FormatSubType) {
@@ -420,43 +421,60 @@ namespace SourceGen {
                     switch (FormatType) {
                         case Type.Default:
                         case Type.NumericLE:
-                            return "Numeric (little-endian)";
+                            retstr += "Numeric (little-endian)";
+                            break;
                         case Type.NumericBE:
-                            return "Numeric (big-endian)";
+                            retstr += "Numeric (big-endian)";
+                            break;
                         case Type.Dense:
-                            return "Dense";
+                            retstr += "Dense";
+                            break;
                         case Type.Fill:
-                            return "Fill";
+                            retstr += "Fill";
+                            break;
                         default:
                             // strings handled earlier
-                            return "???";
+                            retstr += "???";
+                            break;
                     }
+                    break;
                 case SubType.Hex:
-                    return "Numeric, Hex";
+                    retstr += "Numeric, Hex";
+                    break;
                 case SubType.Decimal:
-                    return "Numeric, Decimal";
+                    retstr += "Numeric, Decimal";
+                    break;
                 case SubType.Binary:
-                    return "Numeric, Binary";
+                    retstr += "Numeric, Binary";
+                    break;
                 case SubType.Address:
-                    return "Address";
+                    retstr += "Address";
+                    break;
                 case SubType.Symbol:
                     if (SymbolRef.IsVariable) {
-                        return "Local var \"" + SymbolRef.Label + "\"";
+                        retstr += "Local var \"" + SymbolRef.Label + "\"";
                     } else {
-                        return "Symbol \"" + SymbolRef.Label + "\"";
+                        retstr += "Symbol \"" + SymbolRef.Label + "\"";
                     }
+                    break;
                 case SubType.Ascii:
-                    return "Numeric, ASCII";
+                    retstr += "Numeric, ASCII";
+                    break;
                 case SubType.HighAscii:
-                    return "Numeric, ASCII (high)";
+                    retstr += "Numeric, ASCII (high)";
+                    break;
                 case SubType.C64Petscii:
-                    return "Numeric, C64 PETSCII";
+                    retstr += "Numeric, C64 PETSCII";
+                    break;
                 case SubType.C64Screen:
-                    return "Numeric, C64 Screen";
+                    retstr += "Numeric, C64 Screen";
+                    break;
 
                 default:
-                    return "???";
+                    retstr += "???";
+                    break;
             }
+            return retstr;
         }
 
         public override string ToString() {

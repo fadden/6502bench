@@ -47,6 +47,8 @@ namespace SourceGen {
                 Unknown = 0,
                 HiddenLabel,
                 UnresolvedWeakRef,
+                InvalidOffsetOrLength,
+                InvalidDescriptor,
             }
             public ProblemType Problem { get; private set; }
 
