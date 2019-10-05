@@ -30,21 +30,21 @@ Blank lines, and lines that begin with a semicolon (';'), are ignored.  Lines
 that begin with an asterisk ('*') are commands.  Two are currently
 defined:</p>
 <ul>
-  <li>*SYNOPSIS - a short summary of the file contents.</li>
-  <li>*TAG - a tag string to apply to all symbols that follow in this
-    file.</li>
+  <li><code>*SYNOPSIS</code> - a short summary of the file contents.</li>
+  <li><code>*TAG</code> - a tag string to apply to all symbols that follow
+    in this file.</li>
 </ul>
 
 <p>Tags can be used by extension scripts to identify a subset of symbols.
 The symbols are still part of the global set; the tag just provides a
 way to extract a subset.  Tags should be comprised of non-whitespace ASCII
-characters.  Tags are global, so use a long, descriptive string.  If *TAG
-is not followed by a string, the symbols that follow are treated as
-untagged.</p>
+characters.  Tags are global, so use a long, descriptive string.  If
+<code>*TAG</code> is not followed by a string, the symbols that follow
+are treated as untagged.</p>
 
 <p>All other lines are symbols, which have the form:</p>
 <pre>
-  label {=|@} value [;comment]
+  label {=|@} value [width] [;comment]
 </pre>
 
 <p>Labels must be at least two characters long, begin with a letter or
@@ -61,6 +61,10 @@ binary (with a leading '%').  The numeric base will be recorded and used when
 formatting the symbol in generated output, so use whichever form is most
 appropriate.  Values are unsigned 24-bit numbers.</p>
 
+<p>The width is optional, and ignored for constants.  It must be a
+decimal or hexadecimal value between 1 and 65536, inclusive.  If omitted,
+the default width is 1.</p>
+
 <p>The comment is optional.  If present, it will be saved and used as the
 end-of-line comment on the .EQ directive if the symbol is used.</p>
 
@@ -70,20 +74,20 @@ end-of-line comment on the .EQ directive if the symbol is used.</p>
 text file, named with a ".sym65" extension.  (If your text editor of choice
 doesn't like that, you can put a ".txt" on the end while you're editing.)
 Make sure you create it in the same directory where your project file
-(the file that ends with ".dis65") lives.  Add a *SYNOPSIS, then add
-the desired symbols.</p>
+(the file that ends with ".dis65") lives.  Add a <code>*SYNOPSIS</code>,
+then add the desired symbols.</p>
 <p>Finally, add it to your project.  Select Edit &gt; Project Properties,
 switch to the Symbol Files tab, click Add Symbol Files, and select your
 symbol file.  It should appear in the list with a "PROJ:" prefix.</p>
 
 <p>If an example helps, the A2-Amper-fdraw project in the Examples
 directory has a project-local symbol file, called "fdraw-exports".
-(Amper-fdraw provides an Applesoft BASIC interface to a machine-language
-library.)</p>
+(Amper-fdraw provides an Applesoft BASIC interface to the machine-language
+fdraw library.)</p>
 
 <p>NOTE: in the current version of SourceGen, changes to .sym65 files are
 not detected automatically.  Closing and re-opening the project
-(File &gt; Close, then click on the first recent-file link) will reload
+(File &gt; Recent Projects, then select the first entry) will reload
 them.</p>
 
 
