@@ -366,7 +366,10 @@ namespace SourceGen {
 
 
             // Private constructor -- create instances with factory methods.
-            private FormattedParts() { }
+            private FormattedParts() {
+                Offset = Addr = Bytes = Flags = Attr = Label = Opcode = Operand = Comment =
+                    string.Empty;
+            }
 
             /// <summary>
             /// Clones the specified object.

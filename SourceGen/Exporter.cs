@@ -502,7 +502,7 @@ namespace SourceGen {
             bool suppressLabel = false;
             if (LongLabelNewLine && (line.LineType == LineListGen.Line.Type.Code ||
                     line.LineType == LineListGen.Line.Type.Data)) {
-                int labelLen = string.IsNullOrEmpty(parts.Label) ? 0 : parts.Label.Length;
+                int labelLen = parts.Label.Length;
                 if (labelLen > maxLabelLen) {
                     // put on its own line
                     string lstr;
