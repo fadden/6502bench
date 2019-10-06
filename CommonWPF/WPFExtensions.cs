@@ -147,9 +147,13 @@ namespace CommonWPF {
             // for it, so for now just fudge it.
             const int FUDGE = 4;
 
+            // Need to take horizontal scrolling into account.
+            ScrollViewer sv = lv.GetVisualChild<ScrollViewer>();
+            double scrollPos = sv.HorizontalOffset;
+
             Point p = e.GetPosition(lv);
             GridView gv = (GridView)lv.View;
-            double startPos = FUDGE;
+            double startPos = FUDGE - scrollPos;
             for (int index = 0; index < gv.Columns.Count; index++) {
                 GridViewColumn col = gv.Columns[index];
 
