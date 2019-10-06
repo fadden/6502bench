@@ -275,6 +275,7 @@ out wrong more often than right.</p>
   <li>Jumping to an address by pushing the location onto the stack,
     then executing an <code>RTS</code>.</li>
   <li>Self-modifying code, e.g. overwriting a <code>JMP</code> instruction.</li>
+  <li>Addresses invoked by external code, e.g. interrupt handlers.</li>
 </ul>
 <p>Sometimes the indirect jump targets are coming from a table of
 addresses in the file.  If so, these can be formatted as addresses,

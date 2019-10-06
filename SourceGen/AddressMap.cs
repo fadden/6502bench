@@ -253,6 +253,19 @@ namespace SourceGen {
             return mAddrList[srcOffIndex].Addr + (offset - mAddrList[srcOffIndex].Offset);
         }
 
+        /// <summary>
+        /// Checks to see if the specified range of offsets is in a contiguous range of
+        /// addresses.  Use this to see if something crosses an address-change boundary.
+        /// </summary>
+        /// <param name="offset">Start offset.</param>
+        /// <param name="length">Length of region.</param>
+        /// <returns>True if the data area is unbroken.</returns>
+        public bool IsContiguous(int offset, int length) {
+            Debug.Assert(offset >= 0 && offset < mTotalLength);
+            Debug.Assert(length > 0 && offset + length <= mTotalLength);
+            return (IndexForOffset(offset) == IndexForOffset(offset + length - 1));
+        }
+
 
         /// <summary>
         /// Internal consistency checks.

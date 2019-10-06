@@ -2947,7 +2947,8 @@ namespace SourceGen {
                 firstOffset = tup.Value;
                 break;
             }
-            Debug.Assert(mProject.GetAnattrib(firstOffset).IsDataStart);
+            Debug.Assert(mProject.GetAnattrib(firstOffset).IsDataStart ||
+                mProject.GetAnattrib(firstOffset).IsInlineDataStart);
             bool toDefault = false;
             if (mProject.OperandFormats.TryGetValue(firstOffset, out FormatDescriptor curDfd)) {
                 if (curDfd.FormatType == FormatDescriptor.Type.NumericLE &&

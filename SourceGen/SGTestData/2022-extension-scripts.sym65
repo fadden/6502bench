@@ -1,0 +1,7 @@
+; Copyright 2019 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Symbols test 2022-extension-scripts
+
+PrintInlineL1String     @   $011000
+PrintInlineL2String     @   $012000

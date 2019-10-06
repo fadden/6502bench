@@ -18,7 +18,7 @@ using System.Collections.Generic;
 
 namespace PluginCommon {
     /// <summary>
-    /// Script "plugins" must implement this interface.
+    /// Extension script "plugins" must implement this interface.
     /// </summary>
     public interface IPlugin {
         /// <summary>
@@ -29,19 +29,23 @@ namespace PluginCommon {
         string Identifier { get; }
 
         /// <summary>
-        /// Initializes the plugin with an application reference and a buffer with file
-        /// data.  Called before each analysis pass.
+        /// Prepares the plugin for action.  Called at the start of the code analysis pass.
         /// 
         /// In the current implementation, the file data will be the same every time,
-        /// because plugins are discarded when a project is closed.  However, this may
+        /// because it doesn't change after the project is opened.  However, this could
         /// change if we add a descramble feature.
         /// </summary>
         /// <param name="appRef">Reference to application interface.</param>
         /// <param name="fileData">65xx code and data.</param>
-        /// <param name="plSyms">Symbols available to plugins, in no particular order.</param>
+        /// <param name="plSyms">Symbols available to plugins, in no particular order.  All
+        ///   platform, project, and user labels are included; auto-generated symbols and
+        ///   local variables are not.</param>
         void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms);
     }
 
+    /// <summary>
+    /// Extension scripts that want to handle inline JSRs must implement this interface.
+    /// </summary>
     public interface IPlugin_InlineJsr {
         /// <summary>
         /// Checks to see if code/data near a JSR instruction should be formatted.
@@ -53,6 +57,9 @@ namespace PluginCommon {
         void CheckJsr(int offset, out bool noContinue);
     }
 
+    /// <summary>
+    /// Extension scripts that want to handle inline JSLs must implement this interface.
+    /// </summary>
     public interface IPlugin_InlineJsl {
         /// <summary>
         /// Checks to see if code/data near a JSL instruction should be formatted.
@@ -64,6 +71,9 @@ namespace PluginCommon {
         void CheckJsl(int offset, out bool noContinue);
     }
 
+    /// <summary>
+    /// Extension scripts that want to handle inline BRKs must implement this interface.
+    /// </summary>
     public interface IPlugin_InlineBrk {
         /// <summary>
         /// Checks to see if code/data near a BRK instruction should be formatted.
@@ -76,7 +86,8 @@ namespace PluginCommon {
     }
 
     /// <summary>
-    /// Interfaces provided by the application for use by plugins.
+    /// Interfaces provided by the application for use by plugins.  An IApplication instance
+    /// is passed to the plugin as an argument Prepare().
     /// </summary>
     public interface IApplication {
         /// <summary>
@@ -103,15 +114,12 @@ namespace PluginCommon {
         /// <param name="type">Type of item.  Must be NumericLE, NumericBE, or Dense.</param>
         /// <param name="subType">Sub-type.  Must be appropriate for type.</param>
         /// <param name="label">Optional symbolic label.</param>
-        /// <returns>True if the change was made, false if it was rejected.</returns>
+        /// <returns>True if the change was made, false if it was rejected (e.g. because
+        ///   the area is already formatted, or contains code).</returns>
+        /// <exception cref="PluginException">If something is really wrong, e.g. data runs
+        ///   off end of file.</exception>
         bool SetInlineDataFormat(int offset, int length, DataType type,
                 DataSubType subType, string label);
-
-        // Might want to add:
-        //  int AddressToOffset(int address)  // returns 24-bit offset, or -1 if outside file
-        //  int OffsetToAddress(int offset)   // returns 24-bit address
-        // (although we could also just pass the address map in at Prepare() -- more efficient
-        //  if this gets called frequently)
     }
 
     /// <summary>
@@ -122,6 +130,11 @@ namespace PluginCommon {
         NumericLE,
         NumericBE,
         StringGeneric,
+        StringReverse,
+        StringNullTerm,
+        StringL8,
+        StringL16,
+        StringDci,
         Dense,
         Fill
     }
@@ -137,8 +150,13 @@ namespace PluginCommon {
         Hex,
         Decimal,
         Binary,
-        Ascii,
         Address,
-        Symbol
+        Symbol,
+
+        // Strings and NumericLE/BE (single character)
+        Ascii,
+        HighAscii,
+        C64Petscii,
+        C64Screen
     }
 }

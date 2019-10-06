@@ -936,30 +936,44 @@ namespace SourceGen {
         /// <param name="op">Instruction being examined.</param>
         /// <param name="offset">File offset of start of instruction.</param>
         /// <param name="noContinue">Set if any plugin declares the call to be no-continue.</param>
+        /// <returns>Updated value for noContinue.</returns>
         private bool CheckForInlineCall(OpDef op, int offset, bool noContinue) {
             for (int i = 0; i < mScriptArray.Length; i++) {
-                IPlugin script = mScriptArray[i];
-                // The IPlugin object is a MarshalByRefObject, which doesn't define the
-                // interface directly.  A simple test showed it was fairly quick when the
-                // interface was implemented but a bit slow when it wasn't.  For performance
-                // we query the capability flags instead.
-                if (op == OpDef.OpJSR_Abs && (mPluginCaps[i] & PluginCap.JSR) != 0) {
-                    ((IPlugin_InlineJsr)script).CheckJsr(offset, out bool noCont);
-                    noContinue |= noCont;
-                } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
-                    ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
-                    noContinue |= noCont;
-                } else if (op == OpDef.OpBRK_Implied && (mPluginCaps[i] & PluginCap.BRK) != 0) {
-                    ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
-                    noContinue &= noCont;
+                try {
+                    IPlugin script = mScriptArray[i];
+                    // The IPlugin object is a MarshalByRefObject, which doesn't define the
+                    // interface directly.  A simple test showed it was fairly quick when the
+                    // interface was implemented but a bit slow when it wasn't.  For performance
+                    // we query the capability flags instead.
+                    if (op == OpDef.OpJSR_Abs && (mPluginCaps[i] & PluginCap.JSR) != 0) {
+                        ((IPlugin_InlineJsr)script).CheckJsr(offset, out bool noCont);
+                        noContinue |= noCont;
+                    } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
+                        ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
+                        noContinue |= noCont;
+                    } else if (op == OpDef.OpBRK_Implied && (mPluginCaps[i] & PluginCap.BRK) != 0) {
+                        ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
+                        noContinue &= noCont;
+                    }
+                } catch (PluginException plex) {
+                    LogW(offset, "Uncaught PluginException: " + plex.Message);
+                } catch (Exception ex) {
+                    LogW(offset, "Plugin threw exception: " + ex);
                 }
             }
             return noContinue;
         }
 
+        /// <summary>
+        /// Sets the format of an instruction operand.
+        /// </summary>
+        /// <param name="offset">Offset of opcode.</param>
+        /// <param name="subType">Format sub-type.</param>
+        /// <param name="label">Label, for subType=Symbol.</param>
+        /// <returns>True if the format was applied.</returns>
         private bool SetOperandFormat(int offset, DataSubType subType, string label) {
             if (offset <= 0 || offset > mFileData.Length) {
-                throw new Exception("SOF: bad args: offset=+" + offset.ToString("x6") +
+                throw new PluginException("SOF: bad args: offset=+" + offset.ToString("x6") +
                     " subType=" + subType + " label='" + label + "'; file length is" +
                     mFileData.Length);
             }
@@ -981,8 +995,8 @@ namespace SourceGen {
                 return false;
             }
 
-            FormatDescriptor.SubType subFmt = ConvertPluginSubType(subType, out bool isNumericSub);
-            if (!isNumericSub && subFmt != FormatDescriptor.SubType.None) {
+            FormatDescriptor.SubType subFmt = ConvertPluginSubType(subType, out bool isStringSub);
+            if (subFmt == FormatDescriptor.SubType.None) {
                 LogW(offset, "SOF: bad sub-type " + subType);
                 return false;
             }
@@ -1003,14 +1017,24 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Handles a set data format call from an extension script.
+        /// Handles a set inline data format call from an extension script.
         /// </summary>
+        /// <param name="offset">Offset of start of data item.</param>
+        /// <param name="length">Length of data item.  Must be greater than zero.</param>
+        /// <param name="type">Data type.</param>
+        /// <param name="subType">Data sub-type.</param>
+        /// <param name="label">Label, for type=Symbol.</param>
         private bool SetInlineDataFormat(int offset, int length, DataType type,
                 DataSubType subType, string label) {
-            if (offset <= 0 || offset + length > mFileData.Length) {
-                throw new Exception("SIDF: bad args: offset=+" + offset.ToString("x6") +
+            if (offset <= 0 || length <= 0 || offset + length > mFileData.Length) {
+                throw new PluginException("SIDF: bad args: offset=+" + offset.ToString("x6") +
                     " len=" + length + " type=" + type + " subType=" + subType +
                     " label='" + label + "'; file length is" + mFileData.Length);
+            }
+
+            if (!mAddrMap.IsContiguous(offset, length)) {
+                LogW(offset, "SIDF: format crosses address map boundary (len=" + length + ")");
+                return false;
             }
 
             // Already formatted?  We only check the initial offset -- overlapping format
@@ -1035,26 +1059,40 @@ namespace SourceGen {
                 }
             }
 
-            // Convert type to FormatDescriptor type, and do some validity checks.
-            FormatDescriptor.Type fmt = ConvertPluginType(type);
-            FormatDescriptor.SubType subFmt = ConvertPluginSubType(subType, out bool isNumericSub);
+            //
+            // Convert types to FormatDescriptor types, and do some validity checks.
+            //
+            FormatDescriptor.Type fmt = ConvertPluginType(type, out bool isStringType);
+            FormatDescriptor.SubType subFmt = ConvertPluginSubType(subType, out bool isStringSub);
 
             if (type == DataType.Dense && subType != DataSubType.None) {
-                throw new Exception("SIDF rej: dense data must use subType=None");
+                throw new PluginException("SIDF rej: dense data must use subType=None");
+            }
+            if (type == DataType.Fill && subType != DataSubType.None) {
+                throw new PluginException("SIDF rej: fill data must use subType=None");
             }
 
-            if (isNumericSub && fmt != FormatDescriptor.Type.NumericLE &&
-                    fmt != FormatDescriptor.Type.NumericBE) {
-                throw new Exception("SIDF rej: bad type/subType combo: type=" +
+            if (isStringType && !isStringSub) {
+                throw new PluginException("SIDF rej: bad type/subType combo: type=" +
                     type + " subType= " + subType);
             }
             if ((type == DataType.NumericLE || type == DataType.NumericBE) &&
                     (length < 1 || length > 4)) {
-                throw new Exception("SIDF rej: bad length for numeric item (" +
+                throw new PluginException("SIDF rej: bad length for numeric item (" +
                     length + ")");
             }
             if (subType == DataSubType.Symbol && string.IsNullOrEmpty(label)) {
-                throw new Exception("SIDF rej: label required for subType=" + subType);
+                throw new PluginException("SIDF rej: label required for subType=" + subType);
+            }
+
+            if (isStringType) {
+                if (!VerifyStringData(offset, length, fmt)) {
+                    return false;
+                }
+            } else if (type == DataType.Fill) {
+                if (!VerifyFillData(offset, length)) {
+                    return false;
+                }
             }
 
             // Looks good, create a descriptor, and mark all bytes as inline data.
@@ -1073,28 +1111,120 @@ namespace SourceGen {
             return true;
         }
 
-        private FormatDescriptor.Type ConvertPluginType(DataType pluginType) {
+        /// <summary>
+        /// Verifies that the string data is what is expected.  Does not attempt to check
+        /// the character encoding, just the structure.
+        /// </summary>
+        /// <returns>True if all is well.</returns>
+        private bool VerifyStringData(int offset, int length, FormatDescriptor.Type type) {
+            switch (type) {
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                    return true;
+                case FormatDescriptor.Type.StringNullTerm:
+                    // must end in null byte, and have no null bytes before the end
+                    int chk = offset;
+                    while (length-- != 0) {
+                        byte val = mFileData[chk++];
+                        if (val == 0x00) {
+                            if (length != 0) {
+                                LogW(offset, "found null in middle of null-term string");
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+                    LogW(offset, "no null at end of null-term string");
+                    return false;
+                case FormatDescriptor.Type.StringL8:
+                    if (mFileData[offset] != length - 1) {
+                        LogW(offset, "L1 string with mismatched length");
+                        return false;
+                    }
+                    return true;
+                case FormatDescriptor.Type.StringL16:
+                    int len = RawData.GetWord(mFileData, offset, 2, false);
+                    if (len != length - 2) {
+                        LogW(offset, "L2 string with mismatched length");
+                        return false;
+                    }
+                    return true;
+                case FormatDescriptor.Type.StringDci:
+                    if (length < 2) {
+                        LogW(offset, "DCI string is too short");
+                        return false;
+                    }
+                    byte first = (byte) (mFileData[offset] & 0x80);
+                    for (int i = offset + 1; i < offset + length - 1; i++) {
+                        if ((mFileData[i] & 0x80) != first) {
+                            LogW(offset, "mixed DCI string");
+                            return false;
+                        }
+                    }
+                    if ((mFileData[offset + length - 1] & 0x80) == first) {
+                        LogW(offset, "DCI string did not end");
+                        return false;
+                    }
+                    return true;
+                default:
+                    Debug.Assert(false);
+                    return false;
+            }
+        }
+
+        private bool VerifyFillData(int offset, int length) {
+            byte first = mFileData[offset];
+            while (--length != 0) {
+                if (mFileData[++offset] != first) {
+                    LogW(offset, "SIDF: mismatched fill data");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private FormatDescriptor.Type ConvertPluginType(DataType pluginType,
+                out bool isStringType) {
+            isStringType = false;
             switch (pluginType) {
                 case DataType.NumericLE:
                     return FormatDescriptor.Type.NumericLE;
                 case DataType.NumericBE:
                     return FormatDescriptor.Type.NumericBE;
+                case DataType.StringGeneric:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringGeneric;
+                case DataType.StringReverse:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringReverse;
+                case DataType.StringNullTerm:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringNullTerm;
+                case DataType.StringL8:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringL8;
+                case DataType.StringL16:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringL16;
+                case DataType.StringDci:
+                    isStringType = true;
+                    return FormatDescriptor.Type.StringDci;
+                case DataType.Fill:
+                    return FormatDescriptor.Type.Fill;
                 case DataType.Dense:
                     return FormatDescriptor.Type.Dense;
-                case DataType.StringGeneric:
-                case DataType.Fill:
                 default:
-                    // not appropriate for operands, or inline data (?)
-                    throw new Exception("Instr format rej: unexpected format type " + pluginType);
+                    Debug.Assert(false);
+                    throw new PluginException("Instr format rej: unknown format type " + pluginType);
             }
         }
 
         private FormatDescriptor.SubType ConvertPluginSubType(DataSubType pluginSubType,
-                out bool isNumericSub) {
-            isNumericSub = true;
+                out bool isStringSub) {
+            isStringSub = false;
             switch (pluginSubType) {
                 case DataSubType.None:
-                    isNumericSub = false;
                     return FormatDescriptor.SubType.None;
                 case DataSubType.Hex:
                     return FormatDescriptor.SubType.Hex;
@@ -1106,8 +1236,20 @@ namespace SourceGen {
                     return FormatDescriptor.SubType.Address;
                 case DataSubType.Symbol:
                     return FormatDescriptor.SubType.Symbol;
+                case DataSubType.Ascii:
+                    isStringSub = true;
+                    return FormatDescriptor.SubType.Ascii;
+                case DataSubType.HighAscii:
+                    isStringSub = true;
+                    return FormatDescriptor.SubType.HighAscii;
+                case DataSubType.C64Petscii:
+                    isStringSub = true;
+                    return FormatDescriptor.SubType.C64Petscii;
+                case DataSubType.C64Screen:
+                    isStringSub = true;
+                    return FormatDescriptor.SubType.C64Screen;
                 default:
-                    throw new Exception("Instr format rej: unexpected sub type " + pluginSubType);
+                    throw new PluginException("Instr format rej: unknown sub type " + pluginSubType);
             }
         }
     }
