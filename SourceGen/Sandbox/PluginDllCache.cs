@@ -149,8 +149,17 @@ namespace SourceGen.Sandbox {
             string destFileName = ef.GenerateDllName(projectPathName);
             string destPathName = Path.Combine(GetPluginDirPath(), destFileName);
 
-            // Compile if necessary.
-            if (FileUtil.FileMissingOrOlder(destPathName, srcPathName)) {
+            // Compile if necessary.  We do this if the source code is newer, or if the
+            // DLLs that plugins depend on have been updated.  (We're checking the dates on
+            // the DLLs the app uses, not the copy the plugins use, but earlier we made sure
+            // that they were the same.  This test doesn't handle the case where the DLLs
+            // get rolled back, but that's probably not interesting for us.)
+            bool needCompile = FileUtil.FileMissingOrOlder(destPathName, srcPathName) ||
+                FileUtil.FileMissingOrOlder(destPathName,
+                    typeof(PluginCommon.PluginManager).Assembly.Location) ||
+                FileUtil.FileMissingOrOlder(destPathName,
+                    typeof(CommonUtil.CRC32).Assembly.Location);
+            if (needCompile) {
                 Debug.WriteLine("Compiling " + srcPathName + " to " + destPathName);
                 Assembly asm = CompileCode(srcPathName, destPathName, out report);
                 if (asm == null) {
