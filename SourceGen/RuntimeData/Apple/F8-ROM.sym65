@@ -60,7 +60,7 @@ MON_PRNTYX      @ $F940     ;print Y-reg/X-reg as 4 hex digits
 MON_PRNTAX      @ $F941     ;print Acc/X-reg as 4 hex digits
 MON_PRNTX       @ $F944     ;print X-reg as 2 hex digits
 MON_PRBLNK      @ $F948     ;print 3 spaces
-MON_PRBL2       @ $F94A
+MON_PRBL2       @ $F94A     ;print multiple spaces, count in X-reg
 MON_PCADJ       @ $F953     ;monitor/mini-asm PC adjust
 MON_TEXT2COPY   @ $F962
 MON_OLDIRQ      @ $FA40     ;autostart ROM IRQ handler

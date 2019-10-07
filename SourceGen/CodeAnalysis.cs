@@ -1086,7 +1086,9 @@ namespace SourceGen {
             }
 
             if (isStringType) {
-                if (!VerifyStringData(offset, length, fmt)) {
+                if (!DataAnalysis.VerifyStringData(mFileData, offset, length, fmt,
+                        out string failMsg)) {
+                    LogW(offset, failMsg);
                     return false;
                 }
             } else if (type == DataType.Fill) {
@@ -1111,67 +1113,6 @@ namespace SourceGen {
             return true;
         }
 
-        /// <summary>
-        /// Verifies that the string data is what is expected.  Does not attempt to check
-        /// the character encoding, just the structure.
-        /// </summary>
-        /// <returns>True if all is well.</returns>
-        private bool VerifyStringData(int offset, int length, FormatDescriptor.Type type) {
-            switch (type) {
-                case FormatDescriptor.Type.StringGeneric:
-                case FormatDescriptor.Type.StringReverse:
-                    return true;
-                case FormatDescriptor.Type.StringNullTerm:
-                    // must end in null byte, and have no null bytes before the end
-                    int chk = offset;
-                    while (length-- != 0) {
-                        byte val = mFileData[chk++];
-                        if (val == 0x00) {
-                            if (length != 0) {
-                                LogW(offset, "found null in middle of null-term string");
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        }
-                    }
-                    LogW(offset, "no null at end of null-term string");
-                    return false;
-                case FormatDescriptor.Type.StringL8:
-                    if (mFileData[offset] != length - 1) {
-                        LogW(offset, "L1 string with mismatched length");
-                        return false;
-                    }
-                    return true;
-                case FormatDescriptor.Type.StringL16:
-                    int len = RawData.GetWord(mFileData, offset, 2, false);
-                    if (len != length - 2) {
-                        LogW(offset, "L2 string with mismatched length");
-                        return false;
-                    }
-                    return true;
-                case FormatDescriptor.Type.StringDci:
-                    if (length < 2) {
-                        LogW(offset, "DCI string is too short");
-                        return false;
-                    }
-                    byte first = (byte) (mFileData[offset] & 0x80);
-                    for (int i = offset + 1; i < offset + length - 1; i++) {
-                        if ((mFileData[i] & 0x80) != first) {
-                            LogW(offset, "mixed DCI string");
-                            return false;
-                        }
-                    }
-                    if ((mFileData[offset + length - 1] & 0x80) == first) {
-                        LogW(offset, "DCI string did not end");
-                        return false;
-                    }
-                    return true;
-                default:
-                    Debug.Assert(false);
-                    return false;
-            }
-        }
 
         private bool VerifyFillData(int offset, int length) {
             byte first = mFileData[offset];

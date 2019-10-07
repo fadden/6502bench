@@ -135,6 +135,13 @@ limitations under the License.
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
     <system:String x:Key="str_ShowCol">Show</system:String>
     <system:String x:Key="str_StatusReady">Ready</system:String>
+    <system:String x:Key="str_StrVfyDciMixedData">DCI string has mixed data</system:String>
+    <system:String x:Key="str_StrVfyDciNotTerminated">DCI string not terminated</system:String>
+    <system:String x:Key="str_StrVfyDciShort">DCI string is too short</system:String>
+    <system:String x:Key="str_StrVfyL1LengthMismatch">length of string doesn't match length byte</system:String>
+    <system:String x:Key="str_StrVfyL2LengthMismatch">length of string doesn't match length word</system:String>
+    <system:String x:Key="str_StrVfyMissingNullTerm">null-terminated string doesn't end with null byte</system:String>
+    <system:String x:Key="str_StrVfyNullInsideNullTerm">found null byte in the middle of null-terminated string</system:String>
     <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
     <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
     <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>

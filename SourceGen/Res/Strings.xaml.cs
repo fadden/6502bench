@@ -251,6 +251,20 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ShowCol");
         public static string STATUS_READY =
             (string)Application.Current.FindResource("str_StatusReady");
+        public static string STR_VFY_DCI_MIXED_DATA =
+            (string)Application.Current.FindResource("str_StrVfyDciMixedData");
+        public static string STR_VFY_DCI_NOT_TERMINATED =
+            (string)Application.Current.FindResource("str_StrVfyDciNotTerminated");
+        public static string STR_VFY_DCI_SHORT =
+            (string)Application.Current.FindResource("str_StrVfyDciShort");
+        public static string STR_VFY_L1_LENGTH_MISMATCH =
+            (string)Application.Current.FindResource("str_StrVfyL1LengthMismatch");
+        public static string STR_VFY_L2_LENGTH_MISMATCH =
+            (string)Application.Current.FindResource("str_StrVfyL2LengthMismatch");
+        public static string STR_VFY_MISSING_NULL_TERM =
+            (string)Application.Current.FindResource("str_StrVfyMissingNullTerm");
+        public static string STR_VFY_NULL_INSIDE_NULL_TERM =
+            (string)Application.Current.FindResource("str_StrVfyNullInsideNullTerm");
         public static string SYMBOL_IMPORT_CAPTION =
             (string)Application.Current.FindResource("str_SymbolImportCaption");
         public static string SYMBOL_IMPORT_GOOD_FMT =

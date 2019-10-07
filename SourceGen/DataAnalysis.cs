@@ -1144,6 +1144,77 @@ namespace SourceGen {
             return stringCount;
         }
 
+        /// <summary>
+        /// Verifies that the string data is what is expected.  Does not attempt to check
+        /// the character encoding, just the structure.
+        /// </summary>
+        /// <param name="fileData">Raw data.</param>
+        /// <param name="offset">Start offset of string.</param>
+        /// <param name="length">Length of string, including leading length and terminating
+        ///   null bytes.</param>
+        /// <param name="type">Expected string type.</param>
+        /// <param name="failMsg">Detailed failure message.</param>
+        /// <returns>True if all is well.</returns>
+        public static bool VerifyStringData(byte[] fileData, int offset, int length,
+                FormatDescriptor.Type type, out string failMsg) {
+            failMsg = string.Empty;
+
+            switch (type) {
+                case FormatDescriptor.Type.StringGeneric:
+                case FormatDescriptor.Type.StringReverse:
+                    return true;
+                case FormatDescriptor.Type.StringNullTerm:
+                    // must end in null byte, and have no null bytes before the end
+                    int chk = offset;
+                    while (length-- != 0) {
+                        byte val = fileData[chk++];
+                        if (val == 0x00) {
+                            if (length != 0) {
+                                failMsg = Res.Strings.STR_VFY_NULL_INSIDE_NULL_TERM;
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+                    failMsg = Res.Strings.STR_VFY_MISSING_NULL_TERM;
+                    return false;
+                case FormatDescriptor.Type.StringL8:
+                    if (fileData[offset] != length - 1) {
+                        failMsg = Res.Strings.STR_VFY_L1_LENGTH_MISMATCH;
+                        return false;
+                    }
+                    return true;
+                case FormatDescriptor.Type.StringL16:
+                    int len = RawData.GetWord(fileData, offset, 2, false);
+                    if (len != length - 2) {
+                        failMsg = Res.Strings.STR_VFY_L2_LENGTH_MISMATCH;
+                        return false;
+                    }
+                    return true;
+                case FormatDescriptor.Type.StringDci:
+                    if (length < 2) {
+                        failMsg = Res.Strings.STR_VFY_DCI_SHORT;
+                        return false;
+                    }
+                    byte first = (byte)(fileData[offset] & 0x80);
+                    for (int i = offset + 1; i < offset + length - 1; i++) {
+                        if ((fileData[i] & 0x80) != first) {
+                            failMsg = Res.Strings.STR_VFY_DCI_MIXED_DATA;
+                            return false;
+                        }
+                    }
+                    if ((fileData[offset + length - 1] & 0x80) == first) {
+                        failMsg = Res.Strings.STR_VFY_DCI_NOT_TERMINATED;
+                        return false;
+                    }
+                    return true;
+                default:
+                    Debug.Assert(false);
+                    return false;
+            }
+        }
+
         #endregion // Static analyzers
     }
 }

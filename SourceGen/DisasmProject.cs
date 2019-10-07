@@ -437,6 +437,7 @@ namespace SourceGen {
         /// Walks the list of format descriptors, fixing places where the data doesn't match.
         /// </summary>
         private void FixAndValidate(ref FileLoadReport report) {
+            // Can't modify a list while we're iterating through it, so gather changes here.
             Dictionary<int, FormatDescriptor> changes = new Dictionary<int, FormatDescriptor>();
 
             foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
@@ -505,24 +506,33 @@ namespace SourceGen {
                     changes[kvp.Key] = newDfd;
                     Debug.WriteLine("Fix +" + kvp.Key.ToString("x6") + ": " +
                         dfd + " -> " + newDfd);
+                    // possibly interesting, but rarely; very noisy
+                    //report.Add(FileLoadItem.Type.Notice,
+                    //    "Fixed format at +" + kvp.Key.ToString("x6"));
                 }
             }
 
-            // apply changes to main list
-            foreach (KeyValuePair<int, FormatDescriptor> kvp in changes) {
-                OperandFormats[kvp.Key] = kvp.Value;
-                //report.Add(FileLoadItem.Type.Notice,
-                //    "Fixed format at +" + kvp.Key.ToString("x6"));
+            // Run through the list again, this time looking for badly-formed strings.  We're
+            // only checking structure, not character encoding, because you're allowed to have
+            // non-printable characters in strings.
+            foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
+                FormatDescriptor dfd = kvp.Value;
+                if (dfd.IsString && !DataAnalysis.VerifyStringData(FileData, kvp.Key, dfd.Length,
+                        dfd.FormatType, out string failMsg)) {
+                    report.Add(FileLoadItem.Type.Warning,
+                        "+" + kvp.Key.ToString("x6") + ": " + failMsg);
+                    changes[kvp.Key] = null;
+                }
             }
 
-            // TODO: validate strings
-            // - null-terminated strings must not have 0x00 bytes, except for the last byte,
-            //   which must be 0x00
-            // - the length stored in L8/L16 strings much match the format descriptor length
-            // - DCI strings must have the appropriate pattern for the high bit
-            //
-            // Note it is not required that string data match the encoding, since you're allowed
-            // to have random gunk mixed in.  It just can't violate the above rules.
+            // Apply changes to main list.
+            foreach (KeyValuePair<int, FormatDescriptor> kvp in changes) {
+                if (kvp.Value == null) {
+                    OperandFormats.Remove(kvp.Key);
+                } else {
+                    OperandFormats[kvp.Key] = kvp.Value;
+                }
+            }
         }
 
         /// <summary>
@@ -821,20 +831,28 @@ namespace SourceGen {
         /// Applies user-defined format descriptors to the Anattribs array.  This specifies the
         /// format for instruction operands, and identifies data items.
         /// </summary>
+        /// <remarks>
+        /// In an ideal world, this would be a trivial function.  In practice it's possible for
+        /// all sorts of weird edge cases to arise, e.g. if you hint something as data, apply
+        /// formats, and then hint it as code, many strange things are possible.  We don't want
+        /// to delete user data if it seems out of place, but we do want to ignore anything
+        /// that's going to confuse the source generator later on.
+        ///
+        /// Problem reports are written to a log (which is shown by the Analyzer Output
+        /// window) and the Problems list.  Once the latter is better established we can
+        /// stop sending them to the log.
+        /// </remarks>
         /// <param name="genLog">Log for debug messages.</param>
         private void ApplyFormatDescriptors(DebugLog genLog) {
             genLog.LogI("Applying format descriptors");
 
+            // TODO(someday): move error format strings to string dictionary
+
             foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
                 int offset = kvp.Key;
 
-                // If you hint as data, apply formats, and then hint as code, all sorts
-                // of strange things can happen.  We want to ignore anything that doesn't
-                // appear to be valid.  While we're at it, we do some internal consistency
-                // checks in the name of catching bugs as soon as possible.
-
                 // Check offset.
-                if (offset < 0 || offset >= mAnattribs.Length) {
+                if (offset < 0 || offset >= mFileData.Length) {
                     string msg = "invalid offset (desc=" + kvp.Value + ")";
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Problems.Add(new ProblemList.ProblemEntry(
@@ -844,13 +862,13 @@ namespace SourceGen {
                         msg,
                         ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
-                    continue;       // ignore this one
+                    continue;
                 }
 
                 // Make sure it doesn't run off the end
-                if (offset + kvp.Value.Length > mAnattribs.Length) {
+                if (offset + kvp.Value.Length > mFileData.Length) {
                     string msg = "invalid offset+len: len=" + kvp.Value.Length +
-                        " file=" + mAnattribs.Length;
+                        " file=" + mFileData.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Problems.Add(new ProblemList.ProblemEntry(
                         ProblemList.ProblemEntry.SeverityLevel.Error,
@@ -859,7 +877,19 @@ namespace SourceGen {
                         msg,
                         ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
-                    continue;       // ignore this one
+                    continue;
+                }
+
+                if (!AddrMap.IsContiguous(offset, kvp.Value.Length)) {
+                    string msg = "descriptor straddles address change; len=" + kvp.Value.Length;
+                    genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
+                    Problems.Add(new ProblemList.ProblemEntry(
+                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                        offset,
+                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        msg,
+                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                    continue;
                 }
 
                 if (mAnattribs[offset].IsInstructionStart) {
@@ -876,7 +906,7 @@ namespace SourceGen {
                             ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
                             msg,
                             ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
-                        continue;       // ignore this one
+                        continue;
                     }
                     if (kvp.Value.Length == 1) {
                         // No operand to format!
@@ -888,7 +918,7 @@ namespace SourceGen {
                             ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
                             msg,
                             ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
-                        continue;       // ignore this one
+                        continue;
                     }
                     if (!kvp.Value.IsValidForInstruction) {
                         string msg = "descriptor not valid for instruction: " + kvp.Value;
@@ -899,7 +929,7 @@ namespace SourceGen {
                             ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
                             msg,
                             ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
-                        continue;       // ignore this one
+                        continue;
                     }
                 } else if (mAnattribs[offset].IsInstruction) {
                     // Mid-instruction format.
@@ -911,7 +941,7 @@ namespace SourceGen {
                         ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
                         msg,
                         ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
-                    continue;       // ignore this one
+                    continue;
                 } else {
                     // Data or inline data.  The data analyzer hasn't run yet.  We want to
                     // confirm that the descriptor doesn't overlap with code.
@@ -946,6 +976,7 @@ namespace SourceGen {
                     }
                 }
 
+                // All tests passed.  Apply the descriptor.
                 mAnattribs[offset].DataDescriptor = kvp.Value;
             }
         }
