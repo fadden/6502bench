@@ -48,7 +48,8 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
+                List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 

@@ -45,6 +45,7 @@ namespace CommonUtil {
         /// Entries are mutable, but must only be altered by AddressMap.  Don't retain
         /// instances of this across other activity.
         /// </summary>
+        [Serializable]
         public class AddressMapEntry {
             public int Offset { get; set; }
             public int Addr { get; set; }
@@ -76,6 +77,30 @@ namespace CommonUtil {
             /// for file offset 0.  This can be changed, but can't be removed.
             mTotalLength = length;
             mAddrList.Add(new AddressMapEntry(0, 0, length));
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="entries">List of AddressMapEntry.</param>
+        public AddressMap(List<AddressMapEntry> entries) {
+            // TODO(someday): validate list contents
+            mTotalLength = entries[entries.Count - 1].Offset + entries[entries.Count - 1].Length;
+            foreach (AddressMapEntry ent in entries) {
+                mAddrList.Add(ent);
+            }
+        }
+
+        /// <summary>
+        /// Returns a copy of the list of entries.
+        /// </summary>
+        /// <returns></returns>
+        public List<AddressMapEntry> GetEntryList() {
+            List<AddressMapEntry> newList = new List<AddressMapEntry>(mAddrList.Count);
+            foreach (AddressMapEntry ent in mAddrList) {
+                newList.Add(ent);
+            }
+            return newList;
         }
 
         // IEnumerable

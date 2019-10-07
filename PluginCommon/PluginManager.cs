@@ -20,6 +20,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
+using CommonUtil;
+
 namespace PluginCommon {
     /// <summary>
     /// Manages loaded plugins, in the "remote" AppDomain.
@@ -152,9 +154,12 @@ namespace PluginCommon {
         /// Invokes the Prepare() method on all active plugins.
         /// </summary>
         /// <param name="appRef">Reference to host object providing app services.</param>
-        public void PreparePlugins(IApplication appRef, List<PlSymbol> plSyms) {
+        public void PreparePlugins(IApplication appRef,
+                List<AddressMap.AddressMapEntry> addrEntries, List<PlSymbol> plSyms) {
+            AddressMap addrMap = new AddressMap(addrEntries);
+            AddressTranslate addrTrans = new AddressTranslate(addrMap);
             foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                kvp.Value.Prepare(appRef, mFileData, plSyms);
+                kvp.Value.Prepare(appRef, mFileData, addrTrans, plSyms);
             }
         }
 

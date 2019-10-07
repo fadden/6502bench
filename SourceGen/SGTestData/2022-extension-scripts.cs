@@ -24,13 +24,14 @@ namespace RuntimeData.Test2022 {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSymbols) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
+                List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("Test2022(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
 
-            foreach (PlSymbol sym in plSymbols) {
+            foreach (PlSymbol sym in plSyms) {
                 switch (sym.Label) {
                     case "PrintInline8String":
                         mInline8StringAddr = sym.Value;

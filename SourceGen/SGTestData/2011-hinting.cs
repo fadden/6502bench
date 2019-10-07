@@ -17,7 +17,8 @@ namespace RuntimeData.Test2011 {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSymbols) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
+                List<PlSymbol> plSyms) {
             mAppRef = appRef;
             mFileData = fileData;
 

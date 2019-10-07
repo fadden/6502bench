@@ -37,10 +37,12 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="appRef">Reference to application interface.</param>
         /// <param name="fileData">65xx code and data.</param>
+        /// <param name="addrMap">Mapping between offsets and addresses.</param>
         /// <param name="plSyms">Symbols available to plugins, in no particular order.  All
         ///   platform, project, and user labels are included; auto-generated symbols and
         ///   local variables are not.</param>
-        void Prepare(IApplication appRef, byte[] fileData, List<PlSymbol> plSyms);
+        void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
+            List<PlSymbol> plSyms);
     }
 
     /// <summary>

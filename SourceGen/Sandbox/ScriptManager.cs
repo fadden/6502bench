@@ -159,11 +159,13 @@ namespace SourceGen.Sandbox {
             List<PlSymbol> plSyms = GeneratePlSymbolList();
 
             if (DomainMgr == null) {
+                AddressTranslate addrTrans = new AddressTranslate(mProject.AddrMap);
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    kvp.Value.Prepare(appRef, mProject.FileData, plSyms);
+                    kvp.Value.Prepare(appRef, mProject.FileData, addrTrans, plSyms);
                 }
             } else {
-                DomainMgr.PluginMgr.PreparePlugins(appRef, plSyms);
+                List<AddressMap.AddressMapEntry> addrEnts = mProject.AddrMap.GetEntryList();
+                DomainMgr.PluginMgr.PreparePlugins(appRef, addrEnts, plSyms);
             }
         }
 
