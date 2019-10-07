@@ -26,7 +26,8 @@ limitations under the License.
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         PreviewKeyDown="Window_KeyEventHandler">
     <Grid Margin="8">
-        <TextBox Name="textBox" VerticalScrollBarVisibility="Visible"
+        <TextBox Name="textBox"
+                 VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
                  Text="{Binding DisplayText,
                     FallbackValue=0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789}"
                  FontFamily="{StaticResource GeneralMonoFont}"/>
