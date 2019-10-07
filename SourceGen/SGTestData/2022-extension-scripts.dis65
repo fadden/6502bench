@@ -1,9 +1,9 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":2,"FileDataLength":156,"FileDataCrc32":-741040917,"ProjectProps":{
+"_ContentVersion":2,"FileDataLength":203,"FileDataCrc32":-1621468157,"ProjectProps":{
 "CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
-"PlatformSymbolFileIdentifiers":["PROJ:2022-extension-scripts.sym65"],"ExtensionScriptFileIdentifiers":["PROJ:2022-extension-scripts.cs"],"ProjectSyms":{
+"PlatformSymbolFileIdentifiers":["PROJ:2022-extension-scripts.sym65"],"ExtensionScriptFileIdentifiers":["PROJ:2022-extension-scripts-a.cs","PROJ:2022-extension-scripts-b.cs"],"ProjectSyms":{
 "PrintInlineDciString":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
@@ -11,7 +11,7 @@
 "AddressMap":[{
 "Offset":0,"Addr":4096},
 {
-"Offset":135,"Addr":4352}],"TypeHints":[{
+"Offset":182,"Addr":4352}],"TypeHints":[{
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
@@ -21,12 +21,18 @@
 "Notes":{
 },
 "UserLabels":{
-"121":{
-"Label":"PrintInline8String","Value":4217,"Source":"User","Type":"LocalOrGlobalAddr"},
-"122":{
-"Label":"PrintInlineRev8String","Value":4218,"Source":"User","Type":"LocalOrGlobalAddr"},
-"123":{
-"Label":"PrintInlineNullString","Value":4219,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"129":{
+"Label":"PrintInline8String","Value":4225,"Source":"User","Type":"LocalOrGlobalAddr"},
+"130":{
+"Label":"PrintInlineRev8String","Value":4226,"Source":"User","Type":"LocalOrGlobalAddr"},
+"131":{
+"Label":"PrintInlineNullString","Value":4227,"Source":"User","Type":"LocalOrGlobalAddr"},
+"160":{
+"Label":"data02","Value":4256,"Source":"User","Type":"LocalOrGlobalAddr"},
+"163":{
+"Label":"data03","Value":4259,"Source":"User","Type":"LocalOrGlobalAddr"},
+"132":{
+"Label":"data01","Value":4228,"Source":"User","Type":"LocalOrGlobalAddr"}},
 "OperandFormats":{
 },
 "LvTables":{

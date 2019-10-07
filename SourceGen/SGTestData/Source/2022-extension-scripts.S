@@ -17,9 +17,9 @@ PrintInlineDciString equ $013000        ;EDIT: add to project symbols
         mx      %11
 
 ; check basics
-        jsr     Print8String
+        jsr     PrintInline8String
         asc     '01234567'
-        jsr     PrintRev8String
+        jsr     PrintInlineRev8String
         asc     '76543210'
         jsr     PrintInlineNullString
         asc     'null-term string',00
@@ -36,11 +36,38 @@ PrintInlineDciString equ $013000        ;EDIT: add to project symbols
         jsr     off_end
         jsr     too_long
 
+; check block formatting
+        brk     $01
+        dw      data01
+
+        brk     $02
+        dw      data02
+
         rts
 
 PrintInline8String    rts               ;EDIT: set label
 PrintInlineRev8String rts               ;EDIT: set label
 PrintInlineNullString rts               ;EDIT: set label
+
+data01                                  ;EDIT: set label
+        dw      $1122                   ;should be little-endian
+        dw      $4433                   ;should be big-endian
+        hex     55667788                ;32-bit
+        hex     99887766                ;32-bit big-endian
+        dfb     'f'                     ;ASCII
+        dfb     "F"                     ;high ASCII
+        hex     40C142C344C546C7        ;bad DCI string
+        hex     002001                  ;24-bit addr
+        dw      data02                  ;by symbol
+
+        dfb     $80
+
+data02                                  ;EDIT: set label, must be "data02"
+        dw      data03
+        dfb     $80
+
+data03                                  ;EDIT: set label
+        asc     "AllEight"
 
 
 ; check address split across string

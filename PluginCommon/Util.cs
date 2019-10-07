@@ -39,7 +39,19 @@ namespace PluginCommon {
         }
 
         /// <summary>
-        /// Compute a standard CRC-32 (polynomial 0xedb88320) on a buffer of data.
+        /// Determines whether the provided offset and length are valid for the array.
+        /// </summary>
+        /// <param name="data">Data array that to check against.</param>
+        /// <param name="startOff">Start offset.</param>
+        /// <param name="len">Number of bytes.</param>
+        /// <returns>True if the specified range falls within the array bounds.</returns>
+        public static bool IsInBounds(byte[] data, int startOff, int len) {
+            return !(startOff < 0 || len < 0 || startOff >= data.Length || len > data.Length ||
+                startOff + len > data.Length);
+        }
+
+        /// <summary>
+        /// Computes a standard CRC-32 (polynomial 0xedb88320) on a buffer of data.
         /// </summary>
         /// <param name="data">Buffer to process.</param>
         /// <returns>CRC value.</returns>

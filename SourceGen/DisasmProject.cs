@@ -1188,8 +1188,8 @@ namespace SourceGen {
                     // the correct thing to do.
                     address = attr.OperandAddress;
                     sym = SymbolTable.FindNonVariableByAddress(address);
-                } else if (attr.IsDataStart && attr.DataDescriptor != null &&
-                        attr.DataDescriptor.IsNumeric &&
+                } else if ((attr.IsDataStart || attr.IsInlineDataStart) &&
+                        attr.DataDescriptor != null && attr.DataDescriptor.IsNumeric &&
                         attr.DataDescriptor.FormatSubType == FormatDescriptor.SubType.Address) {
                     // Found a Numeric/Address item that matches.  Data items don't have
                     // OperandAddress or OperandOffset set, so we need to check manually to

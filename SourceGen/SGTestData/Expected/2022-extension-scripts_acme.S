@@ -21,9 +21,15 @@ PrintInlineDciString = $013000
         !text   $14,$00,"string with length/2"
         jsl     PrintInlineDciString
         !text   "DCI strin",$e7
-        jsr     L107C
+        jsr     L10AB
         jsr     L110F
         jsr     L1108
+        brk
+        !byte   $01
+        !word   data01
+        brk
+        !byte   $02
+        !word   data02
         rts
 
 PrintInline8String rts
@@ -32,8 +38,31 @@ PrintInlineRev8String rts
 
 PrintInlineNullString rts
 
-L107C   jsr     PrintInlineNullString
-        per     $7ff4
+data01  !word   4386
+        !byte   $33,$44
+        !32     $88776655
+        !byte   $99,$88,$77,$66
+        !byte   'f'
+        !byte   'F' | $80
+        !byte   $40
+        !byte   $c1
+        !byte   $42
+        !byte   $c3
+        !byte   $44
+        !byte   $c5
+        !byte   $46
+        !byte   $c7
+        !24     PrintInlineL2String
+        !word   data02
+        !byte   $80
+data02  !word   data03
+        !byte   $80
+        !xor    $80 {
+data03  !text   "AllEight"
+        }
+
+L10AB   jsr     PrintInlineNullString
+        per     $8023
         rtl
 
         !byte   $65

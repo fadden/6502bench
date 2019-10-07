@@ -18,9 +18,15 @@ PrintInlineDciString equ $013000
          strl  'string with length/2'
          jsl   PrintInlineDciString
          dci   'DCI string'
-         jsr   L107C
+         jsr   L10AB
          jsr   L110F
          jsr   L1108
+         brk
+         dfb   $01
+         dw    data01
+         brk
+         dfb   $02
+         dw    data02
          rts
 
 PrintInline8String rts
@@ -29,8 +35,29 @@ PrintInlineRev8String rts
 
 PrintInlineNullString rts
 
-L107C    jsr   PrintInlineNullString
-         per   $7ff4
+data01   dw    4386
+         ddb   $3344
+         adrl  $88776655
+         dfb   $99,$88,$77,$66
+         dfb   'f'
+         dfb   "F"
+         dfb   $40
+         dfb   $c1
+         dfb   $42
+         dfb   $c3
+         dfb   $44
+         dfb   $c5
+         dfb   $46
+         dfb   $c7
+         adr   PrintInlineL2String
+         dw    data02
+         dfb   $80
+data02   dw    data03
+         dfb   $80
+data03   asc   "AllEight"
+
+L10AB    jsr   PrintInlineNullString
+         per   $8023
          rtl
 
          dfb   $65
