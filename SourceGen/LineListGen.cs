@@ -20,6 +20,7 @@ using System.Windows.Media;
 using System.Text;
 
 using Asm65;
+using CommonUtil;
 using FormattedParts = SourceGen.DisplayList.FormattedParts;
 
 namespace SourceGen {

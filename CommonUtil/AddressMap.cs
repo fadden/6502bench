@@ -18,7 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace SourceGen {
+namespace CommonUtil {
     /// <summary>
     /// Map file offsets to 65xx addresses and vice-versa.  Useful for sources with
     /// multiple ORG directives.
@@ -28,6 +28,10 @@ namespace SourceGen {
     /// it's useful to know the offset of the referring code when evaluating a
     /// reference, so that a "local" match can take priority.
     /// </summary>
+    /// <remarks>
+    /// This was part of the main SourceGen application, but I want to share it with
+    /// script extensions.
+    /// </remarks>
     public class AddressMap : IEnumerable<AddressMap.AddressMapEntry> {
         /// <summary>
         /// Code starting at the specified offset will have the specified address.
