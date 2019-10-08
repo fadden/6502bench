@@ -113,6 +113,21 @@ will fail.</p>
 <p>A project may load multiple scripts.  The order in which they are
 invoked is not defined.</p>
 
+<h4>Known Issues and Limitations</h4>
+
+<p>Sometimes a manual refresh (F5) is required.  Plugins are executed during
+the code analysis pass, but SourceGen doesn't perform code analysis on
+every change.  If you add or change a label that a plugin is looking
+for, you won't see the effects until you do something that causes the
+code analysis pass to be run.  Hitting F5 does this.  (There's no easy
+way around this -- either we have to re-run code analysis on every label
+change, or we need a way to know which labels a plugin is interested in.)</p>
+<p>When a project is opened, any errors encountered by the script compiler
+are reported to the user.  If the project is already open, and a script
+is added to the project through the Project Properties editor, compiler
+messages are silently discarded.  (This also applies if you undo/redo across
+the property edit.)</p>
+
 <h4>Development</h4>
 
 <p>The easiest way to develop extension scripts is inside the 6502bench
@@ -123,13 +138,15 @@ Visual Studio.)</p>
 
 <p>If you have the solution configured for debug builds, SourceGen will set
 the IncludeDebugInformation flag to true when compiling scripts.  This
-causes a .PDB file to be created.</p>
+causes a .PDB file to be created.  While this can help with debugging,
+it can sometimes get in the way: if you edit the script source code and
+reload the project, SourceGen will recompile the script, but the old .PDB
+file will still be open by VisualStudio and you'll get error messages.</p>
 
 <p>Some commonly useful functions are defined in the PluginCommon.Util class,
 which is available to plugins.  These call into the CommonUtil library,
-which is shared with SourceGen.</p>
-
-<p>While plugins can use CommonUtil directly, they should avoid doing so.  The
+which is shared with SourceGen.
+While plugins can use CommonUtil directly, they should avoid doing so.  The
 APIs there are not guaranteed to be stable, so plugins that rely on them
 may break in a subsequent release of SourceGen.</p>
 

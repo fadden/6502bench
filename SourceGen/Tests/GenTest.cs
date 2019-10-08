@@ -477,7 +477,10 @@ namespace SourceGen.Tests {
                 FileLoadReport unused = new FileLoadReport("test");
                 project.SetFileData(fileData, Path.GetFileName(dataPathName), ref unused);
                 project.ProjectPathName = projectPathName;
-                project.LoadExternalFiles();
+                string extMsgs = project.LoadExternalFiles();
+                if (!string.IsNullOrEmpty(extMsgs)) {
+                    ReportErrMsg(extMsgs);
+                }
             }
 
             TaskTimer genTimer = new TaskTimer();

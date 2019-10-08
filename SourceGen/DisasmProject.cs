@@ -2029,7 +2029,15 @@ namespace SourceGen {
                             UpdateCpuDef();
 
                             if (needExternalFileReload) {
-                                LoadExternalFiles();
+                                string errMsgs = LoadExternalFiles();
+
+                                // TODO(someday): if the plugin failed to compile, we will have
+                                //   one or more error messages, which we are currently discarding
+                                //   because we can't create UI here.  We either need a "change
+                                //   messages" feature, or we need to pre-flight the plugin and
+                                //   report the failure elsewhere.  (We also want a manual
+                                //   "reload all external files and plugins" command, which might
+                                //   run through here.)
                             }
                         }
                         // ignore affectedOffsets
