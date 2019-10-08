@@ -1,53 +1,53 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":194,"FileDataCrc32":177347202,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":194,"FileDataCrc32":177347202,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":["RT:Apple/F8-ROM.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 "A1H":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"hide platform def","Label":"A1H","Value":-1,"Source":"Project","Type":"Constant"},
+"Comment":"hide platform def","HasWidth":false,"Label":"A1H","Value":-1,"Source":"Project","Type":"Constant"},
 "copyptr":{
 "DataDescriptor":{
-"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"2b","Label":"copyptr","Value":0,"Source":"Project","Type":"ExternalAddr"},
+"Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b","HasWidth":true,"Label":"copyptr","Value":0,"Source":"Project","Type":"ExternalAddr"},
 "dstptr":{
 "DataDescriptor":{
-"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"2b A1H","Label":"dstptr","Value":62,"Source":"Project","Type":"ExternalAddr"},
+"Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b A2L","HasWidth":true,"Label":"dstptr","Value":62,"Source":"Project","Type":"ExternalAddr"},
 "in_dst":{
 "DataDescriptor":{
-"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"","Label":"in_dst","Value":766,"Source":"Project","Type":"ExternalAddr"},
+"Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","HasWidth":true,"Label":"in_dst","Value":766,"Source":"Project","Type":"ExternalAddr"},
 "in_src":{
 "DataDescriptor":{
-"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"","Label":"in_src","Value":764,"Source":"Project","Type":"ExternalAddr"},
+"Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"","HasWidth":true,"Label":"in_src","Value":764,"Source":"Project","Type":"ExternalAddr"},
 "lz4fh_magic":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"ascii \u0027f\u0027","Label":"lz4fh_magic","Value":102,"Source":"Project","Type":"Constant"},
+"Comment":"ascii \u0027f\u0027","HasWidth":false,"Label":"lz4fh_magic","Value":102,"Source":"Project","Type":"Constant"},
 "savlen":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"1b","Label":"savlen","Value":3,"Source":"Project","Type":"ExternalAddr"},
+"Comment":"1b","HasWidth":false,"Label":"savlen","Value":3,"Source":"Project","Type":"ExternalAddr"},
 "savmix":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"1b","Label":"savmix","Value":2,"Source":"Project","Type":"ExternalAddr"},
+"Comment":"1b","HasWidth":false,"Label":"savmix","Value":2,"Source":"Project","Type":"ExternalAddr"},
 "srcptr":{
 "DataDescriptor":{
-"Length":1,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
-"Comment":"2b A1L","Label":"srcptr","Value":60,"Source":"Project","Type":"ExternalAddr"},
+"Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
+"Comment":"2b A1L","HasWidth":true,"Label":"srcptr","Value":60,"Source":"Project","Type":"ExternalAddr"},
 "tok_empty":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
-"Comment":"","Label":"tok_empty","Value":253,"Source":"Project","Type":"Constant"},
+"Comment":"","HasWidth":false,"Label":"tok_empty","Value":253,"Source":"Project","Type":"Constant"},
 "tok_eod":{
 "DataDescriptor":{
 "Length":1,"Format":"NumericLE","SubFormat":"Decimal","SymbolRef":null},
-"Comment":"","Label":"tok_eod","Value":254,"Source":"Project","Type":"Constant"}}},
+"Comment":"","HasWidth":false,"Label":"tok_eod","Value":254,"Source":"Project","Type":"Constant"}}},
 "AddressMap":[{
 "Offset":0,"Addr":768}],"TypeHints":[{
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
@@ -163,4 +163,6 @@
 "Label":"copyptr","Part":"Low"}},
 "190":{
 "Length":2,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"dstptr","Part":"Low"}}}}
+"Label":"dstptr","Part":"Low"}}},
+"LvTables":{
+}}

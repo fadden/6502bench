@@ -4,8 +4,9 @@ These are some sample projects you can play with.  The binaries are
 accompanied by the original source code, so you can compare the SourceGen
 project to the original.
 
- * Tutorial: a simple project, intended for use with the tutorial in
+ * Tutorial: simples project, intended for use with the tutorial in
    the manual.
+ * Scripts: extension script samples.
  * A2-lz4fh: two functions for unpacking a simplified form of LZ4 compression.
    One is 6502, the other is 65816.  This is pretty straightforward.
    [(Full project)](https://github.com/fadden/fhpack)
