@@ -196,7 +196,7 @@ code, but also needs to know how to handle the corner cases.</p>
     outside bank zero cannot be assembled.  SourceGen currently deals with
     this by outputting the entire file as a hex dump.</li>
   <li>Undocumented opcode $AB (<code>LAX #imm</code>) generates an error.</li>
-  <li>WDM is not allowed to have an operand.</li>
+  <li>BRK and WDM are not allowed to have operands.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -231,6 +231,7 @@ code, but also needs to know how to handle the corner cases.</p>
 <p>Bugs:</p>
 <ul>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
+  <li>BRK can only be given an argument in 65816 mode.</li>
   <li>[Fixed in v2.18] The arguments to <code>MVN</code>/<code>MVP</code> are reversed.</li>
   <li>[Fixed in v2.18] <code>BRK &lt;arg&gt;</code> is assembled to opcode
     $05 rather than $00.</li>

@@ -314,8 +314,8 @@ namespace SourceGen.AsmGen {
                     return null;
                 }
             }
-            if (op == OpDef.OpWDM_WDM) {
-                // ACME doesn't like this to have an operand.  Output as hex.
+            if (op == OpDef.OpWDM_WDM || op == OpDef.OpBRK_StackInt) {
+                // ACME doesn't like these to have an operand.  Output as hex.
                 return null;
             }
             return string.Empty;        // indicate original is fine

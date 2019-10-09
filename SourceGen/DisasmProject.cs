@@ -239,6 +239,7 @@ namespace SourceGen {
             // system definition.
             ProjectProps.CpuType = CpuDef.CpuType.Cpu65816;
             ProjectProps.IncludeUndocumentedInstr = false;
+            ProjectProps.TwoByteBrk = false;
             UpdateCpuDef();
         }
 
@@ -281,7 +282,8 @@ namespace SourceGen {
         public void ApplySystemDef(SystemDef sysDef) {
             CpuDef.CpuType cpuType = CpuDef.GetCpuTypeFromName(sysDef.Cpu);
             bool includeUndoc = SystemDefaults.GetUndocumentedOpcodes(sysDef);
-            CpuDef tmpDef = CpuDef.GetBestMatch(cpuType, includeUndoc);
+            bool twoByteBrk = SystemDefaults.GetTwoByteBrk(sysDef);
+            CpuDef tmpDef = CpuDef.GetBestMatch(cpuType, includeUndoc, twoByteBrk);
 
             // Store the best-matched CPU in properties, rather than whichever was originally
             // requested.  This way the behavior of the project is the same for everyone, even
@@ -289,6 +291,7 @@ namespace SourceGen {
             // originally-specified CPU.
             ProjectProps.CpuType = tmpDef.Type;
             ProjectProps.IncludeUndocumentedInstr = includeUndoc;
+            ProjectProps.TwoByteBrk = twoByteBrk;
             UpdateCpuDef();
 
             ProjectProps.AnalysisParams.DefaultTextScanMode =
@@ -325,7 +328,7 @@ namespace SourceGen {
 
         public void UpdateCpuDef() {
             CpuDef = CpuDef.GetBestMatch(ProjectProps.CpuType,
-                ProjectProps.IncludeUndocumentedInstr);
+                ProjectProps.IncludeUndocumentedInstr, ProjectProps.TwoByteBrk);
         }
 
         /// <summary>

@@ -28,6 +28,7 @@ namespace SourceGen {
         private const string LOAD_ADDRESS = "load-address";
         private const string ENTRY_FLAGS = "entry-flags";
         private const string UNDOCUMENTED_OPCODES = "undocumented-opcodes";
+        private const string TWO_BYTE_BRK = "two-byte-brk";
         private const string FIRST_WORD_IS_LOAD_ADDR = "first-word-is-load-addr";
         private const string DEFAULT_TEXT_ENCODING = "default-text-encoding";
 
@@ -103,6 +104,15 @@ namespace SourceGen {
         /// <returns>Enable/disable value.</returns>
         public static bool GetUndocumentedOpcodes(SystemDef sysDef) {
             return GetBoolParam(sysDef, UNDOCUMENTED_OPCODES, false);
+        }
+
+        /// <summary>
+        /// Gets the default setting for two-byte BRKs.
+        /// </summary>
+        /// <param name="sysDef">SystemDef instance.</param>
+        /// <returns>Enable/disable value.</returns>
+        public static bool GetTwoByteBrk(SystemDef sysDef) {
+            return GetBoolParam(sysDef, TWO_BYTE_BRK, false);
         }
 
         /// <summary>

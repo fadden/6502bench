@@ -21,11 +21,9 @@ PrintInlineDciString equ $013000
          jsr   L10AB
          jsr   L110F
          jsr   L1108
-         brk
-         dfb   $01
+         brk   $01
          dw    data01
-         brk
-         dfb   $02
+         brk   $02
          dw    data02
          rts
 
@@ -71,9 +69,7 @@ L10AB    jsr   PrintInlineNullString
 
 L1108    jsl   PrintInlineL2String
          asl   A
-         brk
-
-         dfb   $60
+         brk   $60
 
 L110F    jsr   PrintInlineNullString
          adc   $6e

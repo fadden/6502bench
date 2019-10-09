@@ -2,8 +2,9 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Source: SOS programmer's guide
+;         SOS Reference Manual, Volume 2 (Apple 1982)
 
-*SYNOPSIS SOS constants.
+*SYNOPSIS Apple /// Sophisticated Operating System constants.
 
 ; SOS MLI function codes.
 *TAG SOS-MLI-Functions 
@@ -15,11 +16,17 @@ SOS_GET_SEG_INFO  = $43
 SOS_GET_SEG_NUM   = $44
 SOS_RELEASE_SEG   = $45
 
+SOS_SET_FENCE     = $60
+SOS_GET_FENCE     = $61
+SOS_SET_TIME      = $62
+SOS_GET_TIME      = $63
+SOS_GET_ANALOG    = $64
+; SOS ref: "TERMINATE"
+; SOS ref: "No errors are possible. This is an excellent call for beginners."
 SOS_QUIT          = $65
 
 SOS_READBLOCK     = $80
 SOS_WRITEBLOCK    = $81
-SOS_GET_TIME      = $82
 SOS_D_STATUS      = $82
 SOS_D_CONTROL     = $83
 SOS_GET_DEV_NUM   = $84
@@ -35,7 +42,9 @@ SOS_SET_PREFIX    = $C6
 SOS_GET_PREFIX    = $C7
 SOS_OPEN          = $C8
 SOS_NEWLINE       = $C9
+; SOS ref: "READ"
 SOS_READFILE      = $CA
+; SOS ref: "WRITE"
 SOS_WRITEFILE     = $CB
 SOS_CLOSE         = $CC
 SOS_FLUSH         = $CD

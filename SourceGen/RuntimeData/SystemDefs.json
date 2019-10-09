@@ -93,7 +93,8 @@
         "RT:Apple/SOS.cs"
       ],
       "Parameters" : {
-        "load-address":"0x2000"
+        "load-address":"0x2000",
+        "two-byte-brk":"true"
       }
     },
     {

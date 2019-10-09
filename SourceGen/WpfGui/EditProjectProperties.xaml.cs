@@ -254,12 +254,21 @@ namespace SourceGen.WpfGui {
         }
         public AutoLabelItem[] AutoLabelItems { get; private set; }
 
+        //
         // properties for checkboxes
-
+        //
         public bool IncludeUndocumentedInstr {
             get { return mWorkProps.IncludeUndocumentedInstr; }
             set {
                 mWorkProps.IncludeUndocumentedInstr = value;
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        public bool TwoByteBrk {
+            get { return mWorkProps.TwoByteBrk; }
+            set {
+                mWorkProps.TwoByteBrk = value;
                 OnPropertyChanged();
                 IsDirty = true;
             }
@@ -382,7 +391,7 @@ namespace SourceGen.WpfGui {
 
         private void ChangeFlagButton_Click(object sender, RoutedEventArgs e) {
             CpuDef cpuDef = CpuDef.GetBestMatch(mWorkProps.CpuType,
-                mWorkProps.IncludeUndocumentedInstr);
+                mWorkProps.IncludeUndocumentedInstr, mWorkProps.TwoByteBrk);
             EditStatusFlags dlg =
                 new EditStatusFlags(this, mWorkProps.EntryFlags, cpuDef.HasEmuFlag);
 

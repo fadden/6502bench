@@ -27,7 +27,7 @@ namespace RuntimeData.Test2022 {
             mAppRef.DebugLog("Test2022-B(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
-        public void CheckBrk(int offset, out bool noContinue) {
+        public void CheckBrk(int offset, bool twoByteBrk, out bool noContinue) {
             noContinue = true;
 
             // need BRK, function byte, and two-byte address
@@ -39,8 +39,7 @@ namespace RuntimeData.Test2022 {
                 return;
             }
 
-            mAppRef.SetInlineDataFormat(offset + 1, 1, DataType.NumericLE,
-                DataSubType.Hex, null);
+            Util.FormatBrkByte(mAppRef, twoByteBrk, offset, DataSubType.Hex, null);
             mAppRef.SetInlineDataFormat(offset + 2, 2, DataType.NumericLE,
                 DataSubType.Address, null);
             noContinue = false;

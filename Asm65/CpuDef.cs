@@ -146,7 +146,8 @@ namespace Asm65 {
         /// <param name="includeUndocumented">Set to true if "undocumented" opcodes should
         ///   be included in the definition.</param>
         /// <returns>Best CpuDef.</returns>
-        public static CpuDef GetBestMatch(CpuType type, bool includeUndocumented) {
+        public static CpuDef GetBestMatch(CpuType type, bool includeUndocumented,
+                bool twoByteBrk) {
             // Many 65xx variants boil down to a 6502, 65C02, or 65816, at least as far as
             // a disassembler needs to know.  These do not, and would need full definitions:
             //
@@ -188,6 +189,16 @@ namespace Asm65 {
                     }
                 }
                 cpuDef = stripped;
+            }
+
+            // If we want two-byte BRKs, replace the entry with the StackInt form.  Copy the rest.
+            if (twoByteBrk) {
+                CpuDef bigBrkDef = new CpuDef(cpuDef);
+                bigBrkDef.mOpDefs[0] = OpDef.OpBRK_StackInt;
+                for (int i = 1; i < 256; i++) {
+                    bigBrkDef.mOpDefs[i] = cpuDef.mOpDefs[i];
+                }
+                cpuDef = bigBrkDef;
             }
 
             cpuDef.HasUndocumented = includeUndocumented;

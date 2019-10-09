@@ -83,8 +83,9 @@ namespace PluginCommon {
         /// The file data is only guaranteed to hold the BRK opcode byte.
         /// </summary>
         /// <param name="offset">Offset of the BRK instruction.</param>
+        /// <param name="isTwoBytes">True if the CPU is configured for two-byte BRKs.</param>
         /// <param name="noContinue">Set to true if the BRK doesn't actually return.</param>
-        void CheckBrk(int offset, out bool noContinue);
+        void CheckBrk(int offset, bool isTwoBytes, out bool noContinue);
     }
 
     /// <summary>

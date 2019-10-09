@@ -672,7 +672,7 @@ namespace SourceGen {
 
                 // On first visit, check for BRK inline call.
                 if (firstVisit) {
-                    if (op == OpDef.OpBRK_Implied) {
+                    if (op == OpDef.OpBRK_Implied || op == OpDef.OpBRK_StackInt) {
                         bool noContinue = CheckForInlineCall(op, offset, !doContinue);
                         if (!noContinue) {
                             // We're expected to continue execution past the BRK.
@@ -951,8 +951,10 @@ namespace SourceGen {
                     } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
                         ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
                         noContinue |= noCont;
-                    } else if (op == OpDef.OpBRK_Implied && (mPluginCaps[i] & PluginCap.BRK) != 0) {
-                        ((IPlugin_InlineBrk)script).CheckBrk(offset, out bool noCont);
+                    } else if ((op == OpDef.OpBRK_Implied || op == OpDef.OpBRK_StackInt) &&
+                            (mPluginCaps[i] & PluginCap.BRK) != 0) {
+                        ((IPlugin_InlineBrk)script).CheckBrk(offset, op == OpDef.OpBRK_StackInt,
+                            out bool noCont);
                         noContinue &= noCont;
                     }
                 } catch (PluginException plex) {

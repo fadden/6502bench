@@ -54,7 +54,7 @@ namespace RuntimeData.Apple {
             mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, SOS_MLI_TAG, appRef);
         }
 
-        public void CheckBrk(int offset, out bool noContinue) {
+        public void CheckBrk(int offset, bool twoByteBrk, out bool noContinue) {
             noContinue = true;
             if (offset + 4 >= mFileData.Length) {
                 // ran off the end
@@ -75,8 +75,7 @@ namespace RuntimeData.Apple {
             if (!mFunctionList.TryGetValue(req, out sym)) {
                 return;
             }
-            mAppRef.SetInlineDataFormat(offset + 1, 1, DataType.NumericLE,
-                DataSubType.Symbol, sym.Label);
+            Util.FormatBrkByte(mAppRef, twoByteBrk, offset, DataSubType.Symbol, sym.Label);
             mAppRef.SetInlineDataFormat(offset + 2, 2, DataType.NumericLE,
                 DataSubType.Address, null);
 

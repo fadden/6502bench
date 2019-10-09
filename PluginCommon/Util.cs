@@ -58,5 +58,31 @@ namespace PluginCommon {
         public static uint ComputeBufferCRC(byte[] data) {
             return CRC32.OnBuffer(0, data, 0, data.Length);
         }
+
+        /// <summary>
+        /// Formats the byte that follows a BRK instruction.  How we do this depends on
+        /// whether the system is configured for two-byte BRKs.
+        /// </summary>
+        /// <remarks>
+        /// We can actually apply the format both ways and let the app ignore the one it
+        /// doesn't like, but this is cleaner.
+        /// </remarks>
+        /// <param name="appRef">Reference to application object.</param>
+        /// <param name="twoByteBrk">True if BRKs are handled as two-byte instructions.</param>
+        /// <param name="brkOffset">Offset of BRK instruction.</param>
+        /// <param name="type">Data type to apply.</param>
+        /// <param name="subType">Data sub-type to apply.</param>
+        /// <param name="label">Label, for subType=Symbol.</param>
+        public static void FormatBrkByte(IApplication appRef, bool twoByteBrk, int brkOffset,
+                DataSubType subType, string label) {
+            if (twoByteBrk) {
+                // Two-byte BRK, so we want to apply the format to the instruction itself.
+                appRef.SetOperandFormat(brkOffset, subType, label);
+            } else {
+                // Single-byte BRK, so we want to format the byte that follows the
+                // instruction as inline data.
+                appRef.SetInlineDataFormat(brkOffset + 1, 1, DataType.NumericLE, subType, label);
+            }
+        }
     }
 }

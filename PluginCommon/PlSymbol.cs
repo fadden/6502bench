@@ -123,7 +123,8 @@ namespace PluginCommon {
                         dict.Add(ps.Value, ps);
                     } catch (ArgumentException) {
                         appRef.DebugLog("WARNING: GenerateValueList: multiple entries with " +
-                            "value " + ps.Value.ToString("x4"));
+                            "value " + ps.Value.ToString("x4") + ": " + dict[ps.Value].Label +
+                            " and " + ps.Label);
                     }
                 }
             }

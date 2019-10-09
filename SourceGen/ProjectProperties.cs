@@ -81,6 +81,11 @@ namespace SourceGen {
         public bool IncludeUndocumentedInstr { get; set; }
 
         /// <summary>
+        /// Should we treat BRK instructions as 2 bytes?
+        /// </summary>
+        public bool TwoByteBrk { get; set; }
+
+        /// <summary>
         /// Initial status flags at entry points.
         /// </summary>
         public Asm65.StatusFlags EntryFlags { get; set; }
@@ -129,6 +134,7 @@ namespace SourceGen {
         public ProjectProperties(ProjectProperties src) : this() {
             CpuType = src.CpuType;
             IncludeUndocumentedInstr = src.IncludeUndocumentedInstr;
+            TwoByteBrk = src.TwoByteBrk;
             EntryFlags = src.EntryFlags;
             AutoLabelStyle = src.AutoLabelStyle;
 

@@ -28,11 +28,9 @@ PrintInlineDciString = $013000
         jsr     L10AB
         jsr     L110F
         jsr     L1108
-        brk
-        .byte   $01
+        brk     #$01
         .word   data01
-        brk
-        .byte   $02
+        brk     #$02
         .word   data02
         rts
 
@@ -80,9 +78,7 @@ L10AB   jsr     PrintInlineNullString
 
 L1108   jsl     PrintInlineL2String
         asl     a
-        brk
-
-        .byte   $60
+        brk     #$60
 
 L110F   jsr     PrintInlineNullString
         adc     $6e

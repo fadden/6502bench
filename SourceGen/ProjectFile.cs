@@ -188,6 +188,7 @@ namespace SourceGen {
         public class SerProjectProperties {
             public string CpuName { get; set; }
             public bool IncludeUndocumentedInstr { get; set; }
+            public bool TwoByteBrk { get; set; }
             public int EntryFlags { get; set; }
             public string AutoLabelStyle { get; set; }
             public SerAnalysisParameters AnalysisParams { get; set; }
@@ -199,6 +200,7 @@ namespace SourceGen {
             public SerProjectProperties(ProjectProperties props) {
                 CpuName = Asm65.CpuDef.GetCpuNameFromType(props.CpuType);
                 IncludeUndocumentedInstr = props.IncludeUndocumentedInstr;
+                TwoByteBrk = props.TwoByteBrk;
                 EntryFlags = props.EntryFlags.AsInt;
                 AutoLabelStyle = props.AutoLabelStyle.ToString();
                 AnalysisParams = new SerAnalysisParameters(props.AnalysisParams);
@@ -495,6 +497,7 @@ namespace SourceGen {
             // Deserialize ProjectProperties: misc items.
             proj.ProjectProps.CpuType = Asm65.CpuDef.GetCpuTypeFromName(spf.ProjectProps.CpuName);
             proj.ProjectProps.IncludeUndocumentedInstr = spf.ProjectProps.IncludeUndocumentedInstr;
+            proj.ProjectProps.TwoByteBrk = spf.ProjectProps.TwoByteBrk;
             proj.ProjectProps.EntryFlags = Asm65.StatusFlags.FromInt(spf.ProjectProps.EntryFlags);
             if (Enum.TryParse<AutoLabel.Style>(spf.ProjectProps.AutoLabelStyle,
                     out AutoLabel.Style als)) {

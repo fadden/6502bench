@@ -76,6 +76,8 @@ limitations under the License.
                                       SelectionChanged="CpuComboBox_SelectionChanged"/>
                             <CheckBox Margin="0,4,0,0" Content="Enable undocumented instructions"
                                       IsChecked="{Binding IncludeUndocumentedInstr}"/>
+                            <CheckBox Margin="0,4,0,0" Content="Treat BRK as two-byte instruction"
+                                      IsChecked="{Binding TwoByteBrk}"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Entry Flags" Grid.Column="0" Grid.Row="1" Padding="2,4">
