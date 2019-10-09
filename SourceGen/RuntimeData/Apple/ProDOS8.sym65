@@ -79,14 +79,14 @@ P8_DEVLST       @ $BF32 14      ;up to 14 units may be active
 ; memory in-use map, one bit per 256-byte page
 P8_MEMTABL      @ $BF58 24      ;memory map of lower 48K
 
-; buffer addresses for 8 open files
-P8_GL_BUFF      @ $BF70 16
+; 16-bit pointers to buffers
+P8_GL_BUFF      @ $BF70 16      ;buffer addresses for 8 open files
 
 ; interrupt vectors
-P8_INTRUPT1     @ $BF80 2
-P8_INTRUPT2     @ $BF82 2
-P8_INTRUPT3     @ $BF84 2
-P8_INTRUPT4     @ $BF86 2
+P8_INTRUPT1     @ $BF80 2       ;interrupt vector #1
+P8_INTRUPT2     @ $BF82 2       ;interrupt vector #2
+P8_INTRUPT3     @ $BF84 2       ;interrupt vector #3
+P8_INTRUPT4     @ $BF86 2       ;interrupt vector #4
 P8_INTAREG      @ $BF88         ;A-register
 P8_INTXREG      @ $BF89         ;X-register
 P8_INTYREG      @ $BF8A         ;Y-register
@@ -114,8 +114,8 @@ P8_SAVEY        @ $BF9F         ;Y-reg on entry to MLI
 ; $BFA0..BFCF
 
 ; interrupt exit and entry routines
-P8_IRQXIT       @ $BFD0
-P8_IRQENT       @ $BFEB
+P8_IRQXIT       @ $BFD0         ;interrupt exit
+P8_IRQENT       @ $BFEB         ;interrupt entry
 
 P8_BNKBYT1      @ $BFF4
 P8_BNKBYT2      @ $BFF5
