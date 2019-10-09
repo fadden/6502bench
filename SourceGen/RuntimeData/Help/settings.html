@@ -294,6 +294,13 @@ with SourceGen, or in the directory where the project file lives.  This
 is mostly to keep things manageable when projects are distributed to
 other people, but also acts as a minor security check, to prevent a
 wayward project from trying to open files it shouldn't.</p>
+<p>Click one of the "Add Symbol Files" buttons to include one or more
+symbol files in the project.
+The "Add Symbol Files from Platform" button sets the directory
+to the SourceGen RuntimeData directory, while "Add Symbol Files from Project"
+starts in the project directory.  If you haven't yet saved the project,
+the latter button will be disabled.  The only difference between the
+buttons is the initial directory.</p>
 <p>In the list, files loaded from the RuntimeData directory will be
 prefixed with <code>RT:</code>.  Files loaded from the project directory
 will be prefixed with <code>PROJ:</code>.</p>
@@ -303,15 +310,20 @@ you will receive a warning.</p>
 
 <h3><a name="projprop-extscripts">Extension Scripts</a></h3>
 <p>From here, you can add and remove extension script files.
-See the <a href="advanced.html#scripts">extension scripts</a> section for
-details on how extension scripts work.</p>
-
+See the <a href="advanced.html#extension-scripts">extension scripts</a>
+section for details on how extension scripts work.</p>
 
 <p>Extension script files must live in the RuntimeData directory that comes
 with SourceGen, or in the directory where the project file lives.  This
 is mostly to keep things manageable when projects are distributed to
 other people, but also acts as a minor security check, to prevent a
 wayward project from trying to open files it shouldn't.</p>
+<p>Click one of the "Add Scripts" buttons to include one more scripts in
+the project.  The "Add Scripts from Platform" button sets the directory
+to the SourceGen RuntimeData directory, while "Add Scripts from Project"
+starts in the project directory.  If you haven't yet saved the project,
+the latter button will be disabled.  The only difference between the
+buttons is the initial directory.</p>
 <p>In the list, files loaded from the RuntimeData directory will be
 prefixed with <code>RT:</code>.  Files loaded from the project directory
 will be prefixed with <code>PROJ:</code>.</p>

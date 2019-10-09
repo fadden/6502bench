@@ -211,9 +211,15 @@ limitations under the License.
                              ItemsSource="{Binding PlatformSymbolIdentifiers}"
                              SelectionChanged="List_SelectionChanged"/>
 
-                    <Button Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left"
-                            Margin="4" Content="Add Symbol Files..."
-                            Click="AddSymbolFilesButton_Click"/>
+                    <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+                        <Button Width="200" Margin="4"
+                                Content="Add Symbol Files from Platform..."
+                                Click="AddSymbolFilesPlatformButton_Click"/>
+                        <Button Width="200" Margin="4"
+                                Content="Add Symbol Files from Project..."
+                                IsEnabled="{Binding HasProjectDir}"
+                                Click="AddSymbolFilesProjectButton_Click"/>
+                    </StackPanel>
 
                     <StackPanel Grid.Column="2" Grid.Row="1">
                         <Button Name="symbolFileUpButton" Width="75" Margin="4" Content="_Up"
@@ -247,9 +253,15 @@ limitations under the License.
                              ItemsSource="{Binding ExtensionScriptIdentifiers}"
                              SelectionChanged="List_SelectionChanged"/>
 
-                    <Button Grid.Column="0" Grid.Row="3" Width="120" HorizontalAlignment="Left"
-                            Margin="4" Content="Add Scripts..."
-                            Click="AddExtensionScriptsButton_Click"/>
+                    <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+                        <Button Width="200" Margin="4"
+                                Content="Add Scripts from Platform..."
+                                Click="AddExtensionScriptsPlatformButton_Click"/>
+                        <Button Width="200" Margin="4"
+                                Content="Add Scripts from Project..."
+                                IsEnabled="{Binding HasProjectDir}"
+                                Click="AddExtensionScriptsProjectButton_Click"/>
+                    </StackPanel>
 
                     <StackPanel Grid.Column="1" Grid.Row="1">
                         <Button Name="extensionScriptRemoveButton" Width="75" Margin="4" Content="_Remove"

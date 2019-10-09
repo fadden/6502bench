@@ -76,6 +76,7 @@ namespace SourceGen.WpfGui {
         /// Project directory, if one has been established; otherwise empty.
         /// </summary>
         private string mProjectDir;
+        public bool HasProjectDir { get { return !string.IsNullOrEmpty(mProjectDir); } }
 
 
         /// <summary>
@@ -714,11 +715,17 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void AddSymbolFilesButton_Click(object sender, RoutedEventArgs e) {
+        private void AddSymbolFilesPlatformButton_Click(object sender, RoutedEventArgs e) {
+            AddSymbolFiles(true);
+        }
+        private void AddSymbolFilesProjectButton_Click(object sender, RoutedEventArgs e) {
+            AddSymbolFiles(false);
+        }
+        private void AddSymbolFiles(bool fromPlatform) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = PlatformSymbols.FILENAME_FILTER,
                 Multiselect = true,
-                InitialDirectory = RuntimeDataAccess.GetDirectory(),
+                InitialDirectory = fromPlatform ? RuntimeDataAccess.GetDirectory() : mProjectDir,
                 RestoreDirectory = true     // doesn't seem to work?
             };
             if (fileDlg.ShowDialog() != true) {
@@ -822,11 +829,17 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void AddExtensionScriptsButton_Click(object sender, EventArgs e) {
+        private void AddExtensionScriptsPlatformButton_Click(object sender, RoutedEventArgs e) {
+            AddExtensionScripts(true);
+        }
+        private void AddExtensionScriptsProjectButton_Click(object sender, RoutedEventArgs e) {
+            AddExtensionScripts(false);
+        }
+        private void AddExtensionScripts(bool fromPlatform) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Sandbox.ScriptManager.FILENAME_FILTER,
                 Multiselect = true,
-                InitialDirectory = RuntimeDataAccess.GetDirectory(),
+                InitialDirectory = fromPlatform ? RuntimeDataAccess.GetDirectory() : mProjectDir,
                 RestoreDirectory = true     // doesn't seem to work?
             };
             if (fileDlg.ShowDialog() != true) {
