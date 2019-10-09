@@ -17,7 +17,8 @@ limitations under the License.
 <!--
 ListViewItem control template and style.  This is used for the main code ListView.  The
 most significant consideration is getting long comments and notes into the 5th column and
-having them span multiple columns.  Most of this came from the default style (WPF 4.5).
+having them span multiple columns.  Most of this came from the default style (WPF 4.5 on
+Win10, default theme).
 
 This interacts with DisplayList.FormattedParts.
 
@@ -74,6 +75,66 @@ See also https://github.com/fadden/DisasmUiTest
         <GridViewColumn Header="(long comment)" DisplayMemberBinding="{Binding Path=Comment}"
                         Width="{Binding LongCommentWidth}"/>
     </GridViewColumnCollection>
+
+    <!-- Base template for ListView items, derived from the system default.  We have to define
+    this fully so things don't turn into a big mess on long-comment lines. -->
+    <ControlTemplate x:Key="baseListItemTemplate" TargetType="{x:Type ListViewItem}">
+        <StackPanel>
+            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="2"
+                    SnapsToDevicePixels="true">
+                <Border x:Name="InnerBorder" BorderThickness="1" CornerRadius="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition MaxHeight="11"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Rectangle x:Name="UpperHighlight" Fill="#75FFFFFF" Visibility="Collapsed"/>
+                        <GridViewRowPresenter Grid.RowSpan="2"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </Border>
+            </Border>
+        </StackPanel>
+
+        <!-- triggers for hover, selection, and activation effects -->
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Background" Value="{StaticResource ListItemHoverFill}"/>
+                <Setter Property="BorderBrush" Value="#FFCCF0FF"/>
+                <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="true">
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedFill}"/>
+                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+                <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#80FFFFFF"/>
+                <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
+                <Setter Property="Fill" TargetName="UpperHighlight" Value="#40FFFFFF"/>
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected" Value="true"/>
+                    <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedInactiveFill}"/>
+                <Setter Property="BorderBrush" Value="#FFCFCFCF"/>
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected" Value="true"/>
+                    <Condition Property="IsMouseOver" Value="true"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedHoverFill}"/>
+                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 
     <!-- Template for long lines.  This is a modification of the default style, with
     Content and Columns attributes defined in the GridViewRowPresenter.  It appears we
@@ -138,7 +199,17 @@ See also https://github.com/fadden/DisasmUiTest
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <!-- ListView style.  We have to override the general foreground/background colors to
+    avoid making the whole thing look freakish. -->
+    <Style x:Key="codeListStyle" TargetType="{x:Type ListView}">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+
     <Style x:Key="codeListItemStyle" TargetType="{x:Type ListViewItem}">
+        <!-- Base template. -->
+        <Setter Property="Template" Value="{StaticResource baseListItemTemplate}"/>
+
         <!-- There's a one-pixel gap between items, possibly space for grid lines, that
         can't seem to be eliminated.  Declaring a negative margin removes it.  This is
         necessary because the gap isn't a mouse target, so if your mouse is in just the
@@ -174,6 +245,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
+                            <Setter Property="TextBlock.Foreground" Value="Black"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -191,6 +263,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
+                            <Setter Property="TextBlock.Foreground" Value="Black"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

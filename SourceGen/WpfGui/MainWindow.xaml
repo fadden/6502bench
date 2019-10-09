@@ -481,9 +481,13 @@ limitations under the License.
                                     <Style TargetType="{x:Type TextBlock}">
                                         <!-- The default highlight uses dark blue background with
                                         white text, but our highlight colors are meant to work
-                                        with black text.  So override Foreground as well. -->
+                                        with black text.  So override Foreground as well.  For
+                                        non-highlighted entries we have to force (in code) the
+                                        color to white to keep things consistent. -->
                                         <Setter Property="Background" Value="{Binding BackBrush}"/>
                                         <Setter Property="Foreground" Value="Black"/>
+                                        <!--<Setter Property="Foreground"
+                                                Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>-->
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
@@ -546,6 +550,7 @@ limitations under the License.
             </Grid>
 
             <ListView Name="codeListView" Grid.Column="2"
+                      Style="{StaticResource codeListStyle}"
                       FontFamily="{StaticResource GeneralMonoFont}"
                       Visibility="{Binding Path=CodeListVisibility}"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"

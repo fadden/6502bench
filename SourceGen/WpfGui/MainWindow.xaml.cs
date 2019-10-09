@@ -1449,6 +1449,10 @@ namespace SourceGen.WpfGui {
                 OffsetValue = offsetValue;
                 Offset = offset;
                 Note = note;
+                if (backColor == CommonWPF.Helper.ZeroColor) {
+                    // Force this to white, so we can always use black text.  This is not ideal.
+                    backColor = Colors.White;
+                }
                 BackBrush = new SolidColorBrush(backColor);
             }
 
