@@ -312,6 +312,11 @@ namespace SourceGen.WpfGui {
         private void Finish(string fileFilter, string fileExt) {
             Debug.Assert(mProjectFileName == Path.GetFileName(mProjectFileName));
             string initialName = Path.GetFileNameWithoutExtension(mProjectFileName) + fileExt;
+            if (GenType == GenerateFileType.Html) {
+                // Can't link to a file with an unescaped '#' -- the browser will think
+                // it's an anchor.
+                initialName = initialName.Replace('#', '_');
+            }
 
             SaveFileDialog fileDlg = new SaveFileDialog() {
                 Filter = fileFilter + "|" + Res.Strings.FILE_FILTER_ALL,
