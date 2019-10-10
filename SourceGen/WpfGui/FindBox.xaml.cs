@@ -25,18 +25,28 @@ namespace SourceGen.WpfGui {
     /// Find text dialog.
     /// </summary>
     public partial class FindBox : Window, INotifyPropertyChanged {
+        static bool sLastSearchBackward = false;
+
         /// <summary>
         /// Text to find.  On success, holds the string searched for.  This is bound to the
         /// text field.
         /// </summary>
         public string TextToFind {
             get { return mTextToFind; }
-            set {
-                mTextToFind = value;
-                OnPropertyChanged();
-            }
+            set { mTextToFind = value; OnPropertyChanged(); }
         }
         private string mTextToFind;
+
+        private bool mIsForward;
+        public bool IsForward {
+            get { return mIsForward; }
+            set { mIsForward = value; OnPropertyChanged(); }
+        }
+        private bool mIsBackward;
+        public bool IsBackward {
+            get { return mIsBackward; }
+            set { mIsBackward = value; OnPropertyChanged(); }
+        }
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -55,6 +65,12 @@ namespace SourceGen.WpfGui {
 
             Debug.Assert(findStr != null);
             TextToFind = findStr;
+
+            if (sLastSearchBackward) {
+                IsBackward = true;
+            } else {
+                IsForward = true;
+            }
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
@@ -77,6 +93,7 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             DialogResult = true;
+            sLastSearchBackward = IsBackward;
         }
     }
 }

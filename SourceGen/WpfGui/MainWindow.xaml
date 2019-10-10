@@ -101,6 +101,12 @@ limitations under the License.
                     <KeyGesture>F3</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="FindPreviousCmd" Text="Find Previous">
+                <RoutedUICommand.InputGestures>
+                    <!-- should be Shift+F3, but that causes ListView to do range selection -->
+                    <KeyGesture>Ctrl+F3</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="FormatAsWordCmd" Text="Format As Word">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+W</KeyGesture>
@@ -218,6 +224,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindNextCmd}"
                         CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FindPreviousCmd}"
+                        CanExecute="IsProjectOpen" Executed="FindPreviousCmd_Executed"/>
         <CommandBinding Command="{StaticResource FormatAsWordCmd}"
                         CanExecute="CanFormatAsWord" Executed="FormatAsWordCmd_Executed"/>
         <CommandBinding Command="{StaticResource FormatAddressTableCmd}"
@@ -318,6 +326,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource SelectAllCmd}"/>
                 <MenuItem Command="Find"/>
                 <MenuItem Command="{StaticResource FindNextCmd}"/>
+                <MenuItem Command="{StaticResource FindPreviousCmd}"/>
                 <MenuItem Command="{StaticResource GotoCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>

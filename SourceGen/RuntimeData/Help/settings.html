@@ -223,6 +223,8 @@ not part of the chip specification, but most of them have consistent
 behavior and can be used.  If the box is not checked, the instructions
 are treated as invalid and cause the code analyzer to assume that it
 has run into a data area.  This option has no effect on the 65816.</p>
+<p>The "treat BRK as two-byte instruction" checkbox determines whether
+BRK instructions should be handled as if they have an operand.</p>
 
 <p>The entry flags determine the initial value for the processor status
 flag register.  Code that is unreachable internally (requiring a code

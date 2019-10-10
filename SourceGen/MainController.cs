@@ -152,6 +152,12 @@ namespace SourceGen {
         private int mFindStartIndex = -1;
 
         /// <summary>
+        /// True if previous search was backward, so we can tell if we changed direction
+        /// (otherwise we think we immediately wrapped around and the search stops).
+        /// </summary>
+        private bool mFindBackward = false;
+
+        /// <summary>
         /// Used to highlight the line that is the target of the selected line.
         /// </summary>
         private int mTargetHighlightIndex = -1;
@@ -2077,30 +2083,45 @@ namespace SourceGen {
             if (dlg.ShowDialog() == true) {
                 mFindString = dlg.TextToFind;
                 mFindStartIndex = -1;
-                FindText();
+                FindText(dlg.IsBackward);
             }
         }
 
         public void FindNext() {
-            FindText();
+            FindText(false);
         }
 
-        private void FindText() {
+        public void FindPrevious() {
+            FindText(true);
+        }
+
+        private void FindText(bool goBackward) {
             if (string.IsNullOrEmpty(mFindString)) {
                 return;
+            }
+            int incr = goBackward ? -1 : 1;
+
+            // If we reversed direction, reset the "start index" so we don't tell the user
+            // we've wrapped around.
+            if (mFindBackward != goBackward) {
+                mFindStartIndex = -1;
+                mFindBackward = goBackward;
             }
 
             // Start from the topmost selected line, or the start of the file if nothing
             // is selected.
+            // TODO(maybe): if multiple lines are selected, search only within the selected set.
             int index = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (index < 0) {
                 index = 0;
             }
 
             // Start one past the selected item.
-            index++;
+            index += incr;
             if (index == CodeLineList.Count) {
                 index = 0;
+            } else if (index == -1) {
+                index = CodeLineList.Count - 1;
             }
             //Debug.WriteLine("FindText index=" + index + " start=" + mFindStartIndex +
             //    " str=" + mFindString);
@@ -2118,12 +2139,19 @@ namespace SourceGen {
                     mMainWin.CodeListView_EnsureVisible(index);
                     mMainWin.CodeListView_DeselectAll();
                     mMainWin.CodeListView_SelectRange(index, 1);
+                    // TODO(someday): I think we need to do something with the ListView
+                    // keyboard nav state here.  Otherwise Shift+F3 is regarded as selection
+                    // movement with shift held down, and it does a range select.  Currently
+                    // working around this by using Ctrl+F3 instead.  See also maybe the
+                    // ItemContainerGenerator stuff in MainWindow.
                     return;
                 }
 
-                index++;
+                index += incr;
                 if (index == CodeLineList.Count) {
                     index = 0;
+                } else if (index == -1) {
+                    index = CodeLineList.Count - 1;
                 }
             }
 

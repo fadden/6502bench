@@ -26,9 +26,15 @@ limitations under the License.
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered"
         PreviewKeyDown="Window_KeyEventHandler">
-    <StackPanel Margin="8" Orientation="Horizontal">
-        <TextBox Name="findTextBox" Width="200" Text="{Binding TextToFind}"/>
-        <Button Content="Find" Width="70" IsDefault="True" Margin="16,0,0,0"
-                Click="OkButton_Click"/>
+    <StackPanel Margin="8">
+        <StackPanel Orientation="Horizontal">
+            <TextBox Name="findTextBox" Width="200" Text="{Binding TextToFind}"/>
+            <Button Content="Find" Width="70" IsDefault="True" Margin="16,0,0,0"
+                    Click="OkButton_Click"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <RadioButton Content="_Forward" IsChecked="{Binding IsForward}"/>
+            <RadioButton Content="_Backward" Margin="16,0,0,0" IsChecked="{Binding IsBackward}"/>
+        </StackPanel>
     </StackPanel>
 </Window>

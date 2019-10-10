@@ -718,6 +718,11 @@ namespace SourceGen.WpfGui {
             Debug.Assert(start >= 0 && start < CodeDisplayList.Count);
             Debug.Assert(count > 0 && start + count <= CodeDisplayList.Count);
 
+            if (count == 1) {
+                codeListView.SelectedItems.Add(CodeDisplayList[start]);
+                return;
+            }
+
             DisplayList.FormattedParts[] tmpArray = new DisplayList.FormattedParts[count];
             for (int index = 0; index < count; index++) {
                 tmpArray[index] = CodeDisplayList[start + index];
@@ -1137,6 +1142,10 @@ namespace SourceGen.WpfGui {
 
         private void FindNextCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.FindNext();
+        }
+
+        private void FindPreviousCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FindPrevious();
         }
 
         private void FormatAsWordCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
