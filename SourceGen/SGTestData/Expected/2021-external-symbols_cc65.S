@@ -1,4 +1,5 @@
          .setcpu "6502"
+FatConst =       $4000
 OverVar  =       $40
 CodeWrap =       $0f00      ;encases program
 SameName1 =      $2000
@@ -17,7 +18,6 @@ Over2a   =       $3006      ;$3006
 Over3    =       $3006      ;$3006-300c
 SepOver1 =       $3100      ;$3100-3103, inclusive
 SepOver2 =       $3102      ;$3102-3105, inclusive
-FatConst =       $4000
 BankWrap =       $fff0
 
 ;         .segment "SEG000"

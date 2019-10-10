@@ -772,12 +772,13 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Generates a synthetic offset for the FileOffset field from an index value.  The
-        /// index arg is the index of an entry in the DisasmProject.ActiveDefSymbolList.
+        /// Generates a synthetic offset for the FileOffset field from an index value.
         /// (The exact algorithm isn't too important, as these offsets are not stored in the
         /// project file.)
         /// </summary>
-        private static int DefSymOffsetFromIndex(int index) {
+        /// <param name="index">Index into DisasmProject.ActiveDefSymbolListlist.</param>
+        /// <returns>Synthetic file offset.  Value will be < 0.</returns>
+        public static int DefSymOffsetFromIndex(int index) {
             Debug.Assert(index >= 0 && index < (1 << 24));
             return index - (1 << 24);
         }
@@ -786,6 +787,8 @@ namespace SourceGen {
         /// Returns the DisasmProject.ActiveDefSymbolList index for an EQU line with
         /// the specified file offset.
         /// </summary>
+        /// <param name="offset">Synthetic file offset, from DefSymOffsetFromIndex().</param>
+        /// <returns>Index into DisasmProject.ActiveDefSymbolListlist.</returns>
         public static int DefSymIndexFromOffset(int offset) {
             Debug.Assert(offset < 0);
             return offset + (1 << 24);

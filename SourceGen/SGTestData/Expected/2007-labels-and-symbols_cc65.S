@@ -3,11 +3,11 @@
          .setcpu "65816"
 zip      =       $cd
 absl     =       $1029
-plataddr =       $3000      ;address only in platform file
-projalsa =       $3200      ;same val as projalso
 absh     =       $feed
 biggie   =       $123456
 thirty2  =       $12345678  ;32-bit constant test
+plataddr =       $3000      ;address only in platform file
+projalsa =       $3200      ;same val as projalso
 
 ;         .segment "SEG000"
          .org    $012345

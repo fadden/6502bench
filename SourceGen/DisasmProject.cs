@@ -1479,7 +1479,8 @@ namespace SourceGen {
         /// Generates the list of project/platform symbols that are being used.  Any
         /// DefSymbol with a non-empty Xrefs is included.  Previous contents are cleared.
         /// 
-        /// The list is sorted primarily by value, secondarily by symbol name.
+        /// The list is sorted primarily by value, secondarily by symbol name, with constants
+        /// appearing before addresses.
         /// 
         /// Call this after Xrefs are generated.
         /// </summary>
@@ -1497,12 +1498,18 @@ namespace SourceGen {
                 ActiveDefSymbolList.Add(defSym);
             }
 
-            // We could make symbol source the primary sort key, so that all platform
-            // symbols appear before all project symbols.  Not sure if that's better.
-            //
-            // Could also skip this by replacing the earlier foreach with a walk through
-            // SymbolTable.mSymbolsByValue, but I'm not sure that should be exposed.
+            // Sort order:
+            // - constants appear before addresses
+            // - ascending numeric value
+            // - ascending label
             ActiveDefSymbolList.Sort(delegate (DefSymbol a, DefSymbol b) {
+                // Put constants first.
+                int ca = (a.SymbolType == Symbol.Type.Constant) ? 1 : 0;
+                int cb = (b.SymbolType == Symbol.Type.Constant) ? 1 : 0;
+                if (ca != cb) {
+                    return cb - ca;
+                }
+
                 if (a.Value < b.Value) {
                     return -1;
                 } else if (a.Value > b.Value) {

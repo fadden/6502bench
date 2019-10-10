@@ -1,3 +1,4 @@
+FatConst equ   $4000
 OverVar  equ   $40
 CodeWrap equ   $0f00      ;encases program
 SameName1 equ  $2000
@@ -16,7 +17,6 @@ Over2a   equ   $3006      ;$3006
 Over3    equ   $3006      ;$3006-300c
 SepOver1 equ   $3100      ;$3100-3103, inclusive
 SepOver2 equ   $3102      ;$3102-3105, inclusive
-FatConst equ   $4000
 BankWrap equ   $fff0
 
          org   $1000

@@ -2,11 +2,11 @@
 ;a duplicate label.
 zip      equ   $cd
 absl     equ   $1029
-plataddr equ   $3000      ;address only in platform file
-projalsa equ   $3200      ;same val as projalso
 absh     equ   $feed
 biggie   equ   $123456
 thirty2  equ   $12345678  ;32-bit constant test
+plataddr equ   $3000      ;address only in platform file
+projalsa equ   $3200      ;same val as projalso
 
          org   $012345
 start    clc

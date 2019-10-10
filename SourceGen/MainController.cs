@@ -1449,45 +1449,7 @@ namespace SourceGen {
                             }
                             break;
                         case CodeListColumn.Opcode:
-                            // File offset should always be valid, since we excluded the EQU
-                            // statements and header comment earlier.
-                            if (line.FileOffset >= 0) {
-                                Anattrib attr = mProject.GetAnattrib(line.FileOffset);
-                                FormatDescriptor dfd = attr.DataDescriptor;
-
-                                // Does this have an operand with an in-file target offset?
-                                // (Resolve it as a numeric reference.)
-                                if (attr.OperandOffset >= 0) {
-                                    // Yup, find the line for that offset and jump to it.
-                                    GoToLocation(
-                                        new NavStack.Location(attr.OperandOffset, 0, false),
-                                        GoToMode.JumpToCodeData, true);
-                                } else if (dfd != null && dfd.HasSymbol) {
-                                    // Operand has a symbol, do a symbol lookup.
-                                    if (dfd.SymbolRef.IsVariable) {
-                                        GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
-                                    } else {
-                                        int labelOffset = mProject.FindLabelOffsetByName(
-                                            dfd.SymbolRef.Label);
-                                        if (labelOffset >= 0) {
-                                            GoToLocation(
-                                                new NavStack.Location(labelOffset, 0, false),
-                                                GoToMode.JumpToCodeData, true);
-                                        }
-                                    }
-                                } else if (attr.IsDataStart || attr.IsInlineDataStart) {
-                                    // If it's an Address or Symbol, we can try to resolve
-                                    // the value.  (Symbols should have been resolved by the
-                                    // previous clause, but Address entries would not have been.)
-                                    int operandOffset = DataAnalysis.GetDataOperandOffset(
-                                        mProject, line.FileOffset);
-                                    if (operandOffset >= 0) {
-                                        GoToLocation(
-                                            new NavStack.Location(operandOffset, 0, false),
-                                            GoToMode.JumpToCodeData, true);
-                                    }
-                                }
-                            }
+                            HandleDoubleClickOnOpcode(line);
                             break;
                         case CodeListColumn.Operand:
                             if (CanEditOperand()) {
@@ -1506,6 +1468,66 @@ namespace SourceGen {
                 default:
                     Debug.WriteLine("Double-click: unhandled line type " + line.LineType);
                     break;
+            }
+        }
+
+        private void HandleDoubleClickOnOpcode(LineListGen.Line line) {
+            if (line.FileOffset < 0) {
+                // Double-click on project symbol EQUs and the file header comment are handled
+                // elsewhere.
+                return;
+            }
+
+            Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+            FormatDescriptor dfd = attr.DataDescriptor;
+
+            // Does this have an operand with an in-file target offset?
+            // (Resolve it as a numeric reference.)
+            if (attr.OperandOffset >= 0) {
+                // Yup, find the line for that offset and jump to it.
+                GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
+                    GoToMode.JumpToCodeData, true);
+            } else if (dfd != null && dfd.HasSymbol) {
+                // Operand has a symbol, do a symbol lookup.
+                if (dfd.SymbolRef.IsVariable) {
+                    GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
+                } else {
+                    if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
+                        if (sym.SymbolSource == Symbol.Source.User ||
+                                sym.SymbolSource == Symbol.Source.Auto) {
+                            int labelOffset = mProject.FindLabelOffsetByName(dfd.SymbolRef.Label);
+                            if (labelOffset >= 0) {
+                                GoToLocation(new NavStack.Location(labelOffset, 0, false),
+                                    GoToMode.JumpToCodeData, true);
+                            }
+                        } else if (sym.SymbolSource == Symbol.Source.Platform ||
+                                sym.SymbolSource == Symbol.Source.Project) {
+                            // find entry
+                            for (int i = 0; i < mProject.ActiveDefSymbolList.Count; i++) {
+                                if (mProject.ActiveDefSymbolList[i] == sym) {
+                                    int offset = LineListGen.DefSymOffsetFromIndex(i);
+                                    GoToLocation(new NavStack.Location(offset, 0, false),
+                                        GoToMode.JumpToCodeData, true);
+                                    break;
+                                }
+                            }
+                        } else {
+                            Debug.Assert(false);
+                        }
+                    } else {
+                        // must be a broken weak symbol ref
+                        Debug.WriteLine("Operand symbol not found: " + dfd.SymbolRef.Label);
+                    }
+                }
+            } else if (attr.IsDataStart || attr.IsInlineDataStart) {
+                // If it's an Address or Symbol, we can try to resolve
+                // the value.  (Symbols should have been resolved by the
+                // previous clause, but Address entries would not have been.)
+                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
+                if (operandOffset >= 0) {
+                    GoToLocation(new NavStack.Location(operandOffset, 0, false),
+                        GoToMode.JumpToCodeData, true);
+                }
             }
         }
 
@@ -2348,8 +2370,8 @@ namespace SourceGen {
         /// <param name="doPush">If set, push new offset onto navigation stack.</param>
         public void GoToLocation(NavStack.Location loc, GoToMode mode, bool doPush) {
             NavStack.Location prevLoc = GetCurrentlySelectedLocation();
-            Debug.WriteLine("GoToLocation: " + loc + " mode=" + mode + " doPush=" + doPush +
-                " (curLoc=" + prevLoc + ")");
+            //Debug.WriteLine("GoToLocation: " + loc + " mode=" + mode + " doPush=" + doPush +
+            //    " (curLoc=" + prevLoc + ")");
 
             // Avoid pushing multiple copies of the same address on.  This doesn't quite work
             // because we can't compare the LineDelta without figuring out JumpToCodeData first.
