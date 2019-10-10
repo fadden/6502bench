@@ -31,7 +31,7 @@ namespace SourceGen {
         // previously-recorded forward places.
         //
         // Jumping to Notes is a little different from jumping to anything else, because we
-        // want to highlight the note rather than the code at the associated offset.  This
+        // want to select the entire note rather than the code at the associated offset.  This
         // is especially important when moving upward through the file, or the note will be
         // off the top of the screen.
 
@@ -42,16 +42,38 @@ namespace SourceGen {
         /// Holds enough information to get us back where we were, in style.
         /// </summary>
         public class Location {
+            /// <summary>
+            /// Code/data offset.  May be less than zero for equates.
+            /// </summary>
             public int Offset { get; set; }
+
+            /// <summary>
+            /// Number of lines between the first line at the specified offset, and the
+            /// line we actually want to land on.
+            /// </summary>
+            /// <remarks>
+            /// It's possible this line no longer exists.  Easiest test is to compare the
+            /// offset of the unadjusted line to the offset of the adjusted line.  If not
+            /// equal, ignore the delta.
+            /// </remarks>
+            public int LineDelta { get; set; }
+
+            /// <summary>
+            /// True if the target is the note at the given offset, rather than the code/data.
+            /// </summary>
+            /// <remarks>
+            /// This is an alternative to LineDelta.
+            /// </remarks>
             public bool IsNote { get; set; }
 
-            public Location(int offset, bool isNote) {
+            public Location(int offset, int lineDelta, bool isNote) {
                 Offset = offset;
+                LineDelta = lineDelta;
                 IsNote = isNote;
             }
 
             public override string ToString() {
-                return string.Format("[+{0:x6},{1}]", Offset, IsNote);
+                return string.Format("[+{0:x6},{1},{2}]", Offset, LineDelta, IsNote);
             }
 
             public static bool operator ==(Location a, Location b) {
@@ -61,7 +83,7 @@ namespace SourceGen {
                 if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
                     return false;   // one is null
                 }
-                return a.Offset == b.Offset && a.IsNote == b.IsNote;
+                return a.Offset == b.Offset && a.LineDelta == b.LineDelta && a.IsNote == b.IsNote;
             }
             public static bool operator !=(Location a, Location b) {
                 return !(a == b);
@@ -70,7 +92,7 @@ namespace SourceGen {
                 return obj is Location && this == (Location)obj;
             }
             public override int GetHashCode() {
-                return Offset + (IsNote ? (1<<24) : 0);
+                return Offset + (LineDelta * 1000000) + (IsNote ? (1<<24) : 0);
             }
         }
 

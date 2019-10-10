@@ -231,31 +231,10 @@ namespace SourceGen {
             private List<Tag> mSelectionTags = new List<Tag>();
 
             /// <summary>
-            /// Holds data that helps us position the scroll view at the correct position
-            /// after changes have been applied.
-            /// </summary>
-            private class Top {
-                // File offset of line.
-                public int FileOffset { get; private set; }
-                // Number of lines between the first line at the specified offset and the
-                // target line.
-                public int LineDelta { get; private set; }
-
-                public Top(int fileOffset, int lineDelta) {
-                    FileOffset = fileOffset;
-                    LineDelta = lineDelta;
-                    Debug.WriteLine("New Top: " + this);
-                }
-                public override string ToString() {
-                    return "[Top: off=+" + FileOffset.ToString("x6") + " delta=" + LineDelta + "]";
-                }
-            }
-
-            /// <summary>
             /// This is a place to save the file offset associated with the ListView's
             /// TopItem, so we can position the list appropriately.
             /// </summary>
-            private Top mTopPosition;
+            private NavStack.Location mTopPosition;
 
             // Use Generate().
             private SavedSelection() { }
@@ -279,7 +258,8 @@ namespace SourceGen {
                 int topOffset = dl[topIndex].FileOffset;
                 int firstIndex = dl.FindLineIndexByOffset(topOffset);
                 Debug.Assert(topIndex >= firstIndex);
-                savedSel.mTopPosition = new Top(topOffset, topIndex - firstIndex);
+                savedSel.mTopPosition =
+                    new NavStack.Location(topOffset, topIndex - firstIndex, false);
 
                 List<Line> lineList = dl.mLineList;
                 Debug.Assert(lineList.Count == sel.Length);
@@ -357,12 +337,14 @@ namespace SourceGen {
 
                     // If a line encompassing this offset was at the top of the ListView
                     // control before, use this line's index as the top.
-                    if (topIndex < 0 && lineList[lineIndex].Contains(mTopPosition.FileOffset)) {
+                    if (topIndex < 0 && lineList[lineIndex].Contains(mTopPosition.Offset)) {
                         topIndex = lineIndex;
                     }
 
                     if (lineOffset >= tag.mOffset && lineOffset < tag.mOffset + tag.mSpan) {
                         // Intersection.  If the line type matches, add it to the set.
+                        // TODO(someday): this is doing the wrong thing when we have more
+                        //   than one blank line at an offset.
                         if ((tag.mTypes & lineList[lineIndex].LineType) != 0) {
                             sel[lineIndex] = true;
                         }
@@ -380,7 +362,7 @@ namespace SourceGen {
 
                 // Continue search for topIndex, if necessary.
                 while (topIndex < 0 && lineIndex < lineList.Count) {
-                    if (lineList[lineIndex].Contains(mTopPosition.FileOffset)) {
+                    if (lineList[lineIndex].Contains(mTopPosition.Offset)) {
                         topIndex = lineIndex;
                         break;
                     }
@@ -394,7 +376,7 @@ namespace SourceGen {
                 if (topIndex >= 0 && mTopPosition.LineDelta > 0) {
                     int adjIndex = topIndex + mTopPosition.LineDelta;
                     if (adjIndex >= lineList.Count ||
-                            lineList[adjIndex].FileOffset != mTopPosition.FileOffset) {
+                            lineList[adjIndex].FileOffset != mTopPosition.Offset) {
                         Debug.WriteLine("Can't adjust top position");
                         // can't adjust; maybe they deleted several lines from comment
                     } else {

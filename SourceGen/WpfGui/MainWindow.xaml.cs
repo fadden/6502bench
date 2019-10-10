@@ -1439,7 +1439,8 @@ namespace SourceGen.WpfGui {
             ReferencesListItem rli = (ReferencesListItem)item;
 
             // Jump to the offset, then shift the focus back to the code list.
-            mMainCtrl.GoToOffset(rli.OffsetValue, false, true);
+            mMainCtrl.GoToLocation(new NavStack.Location(rli.OffsetValue, 0, false),
+                MainController.GoToMode.JumpToCodeData, true);
             codeListView.Focus();
         }
 
@@ -1483,7 +1484,8 @@ namespace SourceGen.WpfGui {
             NotesListItem nli = (NotesListItem)item;
 
             // Jump to the offset, then shift the focus back to the code list.
-            mMainCtrl.GoToOffset(nli.OffsetValue, true, true);
+            mMainCtrl.GoToLocation(new NavStack.Location(nli.OffsetValue, 0, true),
+                MainController.GoToMode.JumpToNote, true);
             codeListView.Focus();
         }
 

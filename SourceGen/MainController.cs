@@ -1459,7 +1459,9 @@ namespace SourceGen {
                                 // (Resolve it as a numeric reference.)
                                 if (attr.OperandOffset >= 0) {
                                     // Yup, find the line for that offset and jump to it.
-                                    GoToOffset(attr.OperandOffset, false, true);
+                                    GoToLocation(
+                                        new NavStack.Location(attr.OperandOffset, 0, false),
+                                        GoToMode.JumpToCodeData, true);
                                 } else if (dfd != null && dfd.HasSymbol) {
                                     // Operand has a symbol, do a symbol lookup.
                                     if (dfd.SymbolRef.IsVariable) {
@@ -1468,7 +1470,9 @@ namespace SourceGen {
                                         int labelOffset = mProject.FindLabelOffsetByName(
                                             dfd.SymbolRef.Label);
                                         if (labelOffset >= 0) {
-                                            GoToOffset(labelOffset, false, true);
+                                            GoToLocation(
+                                                new NavStack.Location(labelOffset, 0, false),
+                                                GoToMode.JumpToCodeData, true);
                                         }
                                     }
                                 } else if (attr.IsDataStart || attr.IsInlineDataStart) {
@@ -1478,7 +1482,9 @@ namespace SourceGen {
                                     int operandOffset = DataAnalysis.GetDataOperandOffset(
                                         mProject, line.FileOffset);
                                     if (operandOffset >= 0) {
-                                        GoToOffset(operandOffset, false, true);
+                                        GoToLocation(
+                                            new NavStack.Location(operandOffset, 0, false),
+                                            GoToMode.JumpToCodeData, true);
                                     }
                                 }
                             }
@@ -2327,51 +2333,77 @@ namespace SourceGen {
         public void Goto() {
             GotoBox dlg = new GotoBox(mMainWin, mProject, mOutputFormatter);
             if (dlg.ShowDialog() == true) {
-                GoToOffset(dlg.TargetOffset, false, true);
+                GoToLocation(new NavStack.Location(dlg.TargetOffset, 0, false),
+                    GoToMode.JumpToCodeData, true);
                 mMainWin.CodeListView_Focus();
             }
         }
 
+        public enum GoToMode { Unknown = 0, JumpToCodeData, JumpToNote, JumpToAdjIndex };
         /// <summary>
         /// Moves the view and selection to the specified offset.  We want to select stuff
         /// differently if we're jumping to a note vs. jumping to an instruction.
         /// </summary>
         /// <param name="gotoOffset">Offset to jump to.</param>
         /// <param name="doPush">If set, push new offset onto navigation stack.</param>
-        public void GoToOffset(int gotoOffset, bool jumpToNote, bool doPush) {
+        public void GoToLocation(NavStack.Location loc, GoToMode mode, bool doPush) {
             NavStack.Location prevLoc = GetCurrentlySelectedLocation();
-            if (gotoOffset == prevLoc.Offset && jumpToNote == prevLoc.IsNote) {
+            Debug.WriteLine("GoToLocation: " + loc + " mode=" + mode + " doPush=" + doPush +
+                " (curLoc=" + prevLoc + ")");
+
+            // Avoid pushing multiple copies of the same address on.  This doesn't quite work
+            // because we can't compare the LineDelta without figuring out JumpToCodeData first.
+            // If we're sitting in a long comment or LvTable and the user double-clicks on the
+            // entry in the symbol table for the current offset, we want to move the selection,
+            // so we don't want to bail out if the offset matches.  Easiest thing to do is to
+            // do the move but not push it.
+            bool jumpToNote = (mode == GoToMode.JumpToNote);
+            if (loc.Offset == prevLoc.Offset && jumpToNote == prevLoc.IsNote) {
                 // we're jumping to ourselves?
-                Debug.WriteLine("Ignoring goto to current position");
-                return;
+                if (doPush) {
+                    Debug.WriteLine("Ignoring push for goto to current offset");
+                    doPush = false;
+                }
             }
 
-            int topLineIndex = CodeLineList.FindLineIndexByOffset(gotoOffset);
+            int topLineIndex = CodeLineList.FindLineIndexByOffset(loc.Offset);
             if (topLineIndex < 0) {
-                Debug.Assert(false, "failed goto offset +" + gotoOffset.ToString("x6"));
+                Debug.Assert(false, "failed goto offset +" + loc.Offset.ToString("x6"));
                 return;
             }
             int lastLineIndex;
-            if (jumpToNote) {
+            if (mode == GoToMode.JumpToNote) {
                 // Select all note lines, disregard the rest.
                 while (CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Note) {
                     topLineIndex++;
-                    Debug.Assert(CodeLineList[topLineIndex].FileOffset == gotoOffset);
+                    Debug.Assert(CodeLineList[topLineIndex].FileOffset == loc.Offset);
                 }
                 lastLineIndex = topLineIndex + 1;
                 while (lastLineIndex < CodeLineList.Count &&
                         CodeLineList[lastLineIndex].LineType == LineListGen.Line.Type.Note) {
                     lastLineIndex++;
                 }
-            } else if (gotoOffset < 0) {
+            } else if (loc.Offset < 0) {
                 // This is the offset of the header comment or a .EQ directive. Don't mess with it.
                 lastLineIndex = topLineIndex + 1;
-            } else {
+            } else if (mode == GoToMode.JumpToCodeData) {
                 // Advance to the code or data line.
                 while (CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Code &&
                         CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Data) {
                     topLineIndex++;
                 }
+
+                lastLineIndex = topLineIndex + 1;
+            } else if (mode == GoToMode.JumpToAdjIndex) {
+                // Adjust the line position by the line delta.  If the adjustment moves us to
+                // a different element, ignore the adjustment.
+                if (CodeLineList[topLineIndex].FileOffset ==
+                        CodeLineList[topLineIndex + loc.LineDelta].FileOffset) {
+                    topLineIndex += loc.LineDelta;
+                }
+                lastLineIndex = topLineIndex + 1;
+            } else {
+                Debug.Assert(false);
                 lastLineIndex = topLineIndex + 1;
             }
 
@@ -2450,6 +2482,18 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Calculates the currently-selected location.
+        /// </summary>
+        /// <remarks>
+        /// This is done whenever we jump somewhere else.  For the most part we'll be in a
+        /// line of code, jumping when an operand or reference is double-clicked, but we might
+        /// be in the middle of a long comment when a symbol is double-clicked or the
+        /// nav-forward arrow is clicked.  The most interesting case is when a reference for
+        /// a local variable table entry is double-clicked, since we want to be sure that we
+        /// return to the correct entry in the LvTable (assuming it still exists).
+        /// </remarks>
+        /// <returns>Returns the location.</returns>
         private NavStack.Location GetCurrentlySelectedLocation() {
             int index = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (index < 0) {
@@ -2457,8 +2501,9 @@ namespace SourceGen {
                 index = mMainWin.CodeListView_GetTopIndex();
             }
             int offset = CodeLineList[index].FileOffset;
+            int lineDelta = index - CodeLineList.FindLineIndexByOffset(offset);
             bool isNote = (CodeLineList[index].LineType == LineListGen.Line.Type.Note);
-            return new NavStack.Location(offset, isNote);
+            return new NavStack.Location(offset, lineDelta, isNote);
         }
 
         public bool CanNavigateBackward() {
@@ -2467,7 +2512,8 @@ namespace SourceGen {
         public void NavigateBackward() {
             Debug.Assert(mNavStack.HasBackward);
             NavStack.Location backLoc = mNavStack.MoveBackward(GetCurrentlySelectedLocation());
-            GoToOffset(backLoc.Offset, backLoc.IsNote, false);
+            GoToLocation(backLoc,
+                backLoc.IsNote ? GoToMode.JumpToNote : GoToMode.JumpToAdjIndex, false);
         }
 
         public bool CanNavigateForward() {
@@ -2476,7 +2522,8 @@ namespace SourceGen {
         public void NavigateForward() {
             Debug.Assert(mNavStack.HasForward);
             NavStack.Location fwdLoc = mNavStack.MoveForward(GetCurrentlySelectedLocation());
-            GoToOffset(fwdLoc.Offset, fwdLoc.IsNote, false);
+            GoToLocation(fwdLoc,
+                fwdLoc.IsNote ? GoToMode.JumpToNote : GoToMode.JumpToAdjIndex, false);
         }
 
         /// <summary>
@@ -2487,7 +2534,8 @@ namespace SourceGen {
             if (sym.IsInternalLabel) {
                 int offset = mProject.FindLabelOffsetByName(sym.Label);
                 if (offset >= 0) {
-                    GoToOffset(offset, false, true);
+                    GoToLocation(new NavStack.Location(offset, 0, false),
+                        GoToMode.JumpToCodeData, true);
                 } else {
                     Debug.WriteLine("DClick symbol: " + sym + ": label not found");
                 }
