@@ -136,26 +136,8 @@ namespace SourceGen.WpfGui {
             }
             // Can't set the selected item yet.
 
-            // Map text boxes to PseudoOpName fields.
-            mPseudoNameMap = new TextBoxPropertyMap[] {
-                new TextBoxPropertyMap(equDirectiveTextBox, "EquDirective"),
-                new TextBoxPropertyMap(varDirectiveTextBox, "VarDirective"),
-                new TextBoxPropertyMap(orgDirectiveTextBox, "OrgDirective"),
-                new TextBoxPropertyMap(regWidthDirectiveTextBox, "RegWidthDirective"),
-                new TextBoxPropertyMap(defineData1TextBox, "DefineData1"),
-                new TextBoxPropertyMap(defineData2TextBox, "DefineData2"),
-                new TextBoxPropertyMap(defineData3TextBox, "DefineData3"),
-                new TextBoxPropertyMap(defineData4TextBox, "DefineData4"),
-                new TextBoxPropertyMap(defineBigData2TextBox, "DefineBigData2"),
-                new TextBoxPropertyMap(fillTextBox, "Fill"),
-                new TextBoxPropertyMap(denseTextBox, "Dense"),
-                new TextBoxPropertyMap(strGenericTextBox, "StrGeneric"),
-                new TextBoxPropertyMap(strReverseTextBox, "StrReverse"),
-                new TextBoxPropertyMap(strLen8TextBox, "StrLen8"),
-                new TextBoxPropertyMap(strLen16TextBox, "StrLen16"),
-                new TextBoxPropertyMap(strNullTermTextBox, "StrNullTerm"),
-                new TextBoxPropertyMap(strDciTextBox, "StrDci"),
-            };
+            Construct_PseudoOp();
+            Construct_DisplayFormat();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -815,6 +797,75 @@ namespace SourceGen.WpfGui {
 
         #region Display Format
 
+        public string mOpcodeSuffixAbs;
+        public string OpcodeSuffixAbs {
+            get { return mOpcodeSuffixAbs; }
+            set {
+                if (mOpcodeSuffixAbs != value) {
+                    mOpcodeSuffixAbs = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+        public string mOpcodeSuffixLong;
+        public string OpcodeSuffixLong {
+            get { return mOpcodeSuffixLong; }
+            set {
+                if (mOpcodeSuffixLong != value) {
+                    mOpcodeSuffixLong = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+        public string mOperandPrefixAbs;
+        public string OperandPrefixAbs {
+            get { return mOperandPrefixAbs; }
+            set {
+                if (mOperandPrefixAbs != value) {
+                    mOperandPrefixAbs = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+        public string mOperandPrefixLong;
+        public string OperandPrefixLong {
+            get { return mOperandPrefixLong; }
+            set {
+                if (mOperandPrefixLong != value) {
+                    mOperandPrefixLong = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+        private string mLocalVarPrefix;
+        public string LocalVarPrefix {
+            get { return mLocalVarPrefix; }
+            set {
+                if (mLocalVarPrefix != value) {
+                    mLocalVarPrefix = value;
+                    OnPropertyChanged();
+                    mSettings.SetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+
+        // prevent recursion
+        private bool mSettingDisplayFmtCombo;
+
         /// <summary>
         /// Holds an item for the expression style selection combo box.
         /// </summary>
@@ -830,30 +881,90 @@ namespace SourceGen.WpfGui {
                 Name = name;
             }
         }
-        private static ExpressionStyleItem[] sExpStyleItems = new ExpressionStyleItem[] {
-            new ExpressionStyleItem(ExpressionMode.Common, "Common"),
-            new ExpressionStyleItem(ExpressionMode.Cc65, "cc65"),
-            new ExpressionStyleItem(ExpressionMode.Merlin, "Merlin"),
-        };
+        private static ExpressionStyleItem[] sExpStyleItems;
         public ExpressionStyleItem[] ExpressionStyleItems {
             get { return sExpStyleItems; }
         }
 
-        public string LocalVarPrefix {
-            get { return mLocalVarPrefix; }
-            set {
-                if (mLocalVarPrefix != value) {
-                    mLocalVarPrefix = value;
-                    OnPropertyChanged();
-                    mSettings.SetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, value);
-                    IsDirty = true;
-                }
+        private void ConstructExpressionStyleItems() {
+            sExpStyleItems = new ExpressionStyleItem[] {
+                new ExpressionStyleItem(ExpressionMode.Common,
+                    (string)FindResource("str_ExpStyleCommon")),
+                new ExpressionStyleItem(ExpressionMode.Cc65,
+                    (string)FindResource("str_ExpStyleCc65")),
+                new ExpressionStyleItem(ExpressionMode.Merlin,
+                    (string)FindResource("str_ExpStyleMerlin")),
+            };
+        }
+
+        public class DisplayFormatPreset {
+            public const int ID_CUSTOM = -2;
+            public const int ID_DEFAULT = -1;
+            public int Ident { get; private set; }      // positive values are AssemblerInfo.Id
+            public string Name { get; private set; }
+            public string OpcodeSuffixAbs { get; private set; }
+            public string OpcodeSuffixLong { get; private set; }
+            public string OperandPrefixAbs { get; private set; }
+            public string OperandPrefixLong { get; private set; }
+            public string LocalVarPrefix { get; private set; }
+            public ExpressionMode ExpressionStyle { get; private set; }
+
+            public DisplayFormatPreset(int id, string name, string opcSuffixAbs,
+                    string opcSuffixLong, string operPrefixAbs, string operPrefixLong,
+                    string localVarPrefix, ExpressionMode expStyle) {
+                Ident = id;
+                Name = name;
+                OpcodeSuffixAbs = opcSuffixAbs;
+                OpcodeSuffixLong = opcSuffixLong;
+                OperandPrefixAbs = operPrefixAbs;
+                OperandPrefixLong = operPrefixLong;
+                LocalVarPrefix = localVarPrefix;
+                ExpressionStyle = expStyle;
             }
         }
-        private string mLocalVarPrefix;
+        public DisplayFormatPreset[] DisplayPresets { get; private set; }
+
+        private void ConstructDisplayPresets() {
+            // "custom" must be in slot 0
+            DisplayPresets = new DisplayFormatPreset[AssemblerList.Count + 2];
+            DisplayPresets[0] = new DisplayFormatPreset(DisplayFormatPreset.ID_CUSTOM,
+                (string)FindResource("str_PresetCustom"), string.Empty, string.Empty,
+                string.Empty, string.Empty, string.Empty, ExpressionMode.Unknown);
+            DisplayPresets[1] = new DisplayFormatPreset(DisplayFormatPreset.ID_DEFAULT,
+                (string)FindResource("str_PresetDefault"), string.Empty, "l", "a:", "f:",
+                string.Empty, ExpressionMode.Common);
+            for (int i = 0; i < AssemblerList.Count; i++) {
+                AssemblerInfo asmInfo = AssemblerList[i];
+                AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+
+                gen.GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames unused,
+                    out Asm65.Formatter.FormatConfig formatConfig);
+
+                DisplayPresets[i + 2] = new DisplayFormatPreset((int)asmInfo.AssemblerId,
+                    asmInfo.Name, formatConfig.mForceAbsOpcodeSuffix,
+                    formatConfig.mForceLongOpcodeSuffix, formatConfig.mForceAbsOperandPrefix,
+                    formatConfig.mForceLongOperandPrefix, formatConfig.mLocalVariableLablePrefix,
+                    formatConfig.mExpressionMode);
+            }
+        }
+
+        private void Construct_DisplayFormat() {
+            ConstructExpressionStyleItems();
+            ConstructDisplayPresets();
+        }
 
         private void Loaded_DisplayFormat() {
-            PopulateWidthDisamSettings();
+            // Set values from settings.
+            OpcodeSuffixAbs =
+                mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, string.Empty);
+            OpcodeSuffixLong =
+                mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, string.Empty);
+            OperandPrefixAbs =
+                mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_ABS, string.Empty);
+            OperandPrefixLong =
+                mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG, string.Empty);
+            LocalVarPrefix =
+                mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
 
             string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
             ExpressionMode mode;
@@ -863,60 +974,7 @@ namespace SourceGen.WpfGui {
             SelectExpressionStyle(mode);
 
             // No need to set this to anything specific.
-            displayFmtQuickComboBox.SelectedIndex = 0;
-
-            LocalVarPrefix = mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX,
-                string.Empty);
-        }
-
-        /// <summary>
-        /// Populates the width disambiguation text boxes.
-        /// </summary>
-        private void PopulateWidthDisamSettings() {
-            // Operand width disambiguation.  This is a little tricky -- we have to query all
-            // settings then set all controls, or the field-updated callback may interfere
-            // with us by changing AppSettings.
-            string opcSuffixAbs = mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_ABS,
-                string.Empty);
-            string opcSuffixLong = mSettings.GetString(AppSettings.FMT_OPCODE_SUFFIX_LONG,
-                string.Empty);
-            string opPrefixAbs = mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_ABS,
-                string.Empty);
-            string opPrefixLong = mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG,
-                string.Empty);
-
-            disambSuffix16TextBox.Text = opcSuffixAbs;
-            disambSuffix24TextBox.Text = opcSuffixLong;
-            disambPrefix16TextBox.Text = opPrefixAbs;
-            disambPrefix24TextBox.Text = opPrefixLong;
-        }
-
-        /// <summary>
-        /// Sets all of the width disambiguation settings.  Used for the quick-set feature.
-        /// </summary>
-        private void SetWidthDisamSettings(string opcodeSuffixAbs, string opcodeSuffixLong,
-                string operandPrefixAbs, string operandPrefixLong) {
-            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, opcodeSuffixAbs);
-            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, opcodeSuffixLong);
-            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, operandPrefixAbs);
-            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, operandPrefixLong);
-            PopulateWidthDisamSettings();
-        }
-
-        /// <summary>
-        /// Exports the current state of the width controls to the settings object whenever
-        /// text is typed.
-        /// </summary>
-        private void WidthDisamControlChanged(object sender, TextChangedEventArgs e) {
-            if (mSettings == null) {
-                // initialization
-                return;
-            }
-            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, disambSuffix16TextBox.Text);
-            mSettings.SetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, disambSuffix24TextBox.Text);
-            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_ABS, disambPrefix16TextBox.Text);
-            mSettings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, disambPrefix24TextBox.Text);
-            IsDirty = true;
+            UpdateDisplayFormatQuickCombo();
         }
 
         /// <summary>
@@ -936,39 +994,73 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// Handles a change to the expression style.
         /// </summary>
-        private void ExpressionStyleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void ExpressionStyleComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
             ExpressionStyleItem esi = (ExpressionStyleItem)expressionStyleComboBox.SelectedItem;
             mSettings.SetString(AppSettings.FMT_EXPRESSION_MODE, esi.ExpMode.ToString());
+            UpdateDisplayFormatQuickCombo();
             IsDirty = true;
         }
 
-        private void DisplayFmtSetButton_Click(object sender, RoutedEventArgs e) {
-            AssemblerInfo asmInfo = (AssemblerInfo)displayFmtQuickComboBox.SelectedItem;
-            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+        private void DisplayFmtQuickComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
+            if (mSettingDisplayFmtCombo) {
+                // We shouldn't actually recurse indefinitely because we'll eventually
+                // decide that nothing is changing, but I feel better having this here.
+                return;
+            }
 
-            PseudoOp.PseudoOpNames unused;
-            Asm65.Formatter.FormatConfig formatConfig;
-            gen.GetDefaultDisplayFormat(out unused, out formatConfig);
+            DisplayFormatPreset preset = (DisplayFormatPreset)displayFmtQuickComboBox.SelectedItem;
+            if (preset.Ident == DisplayFormatPreset.ID_CUSTOM) {
+                // Not an actual preset.  Leave the combo box set to "Custom".
+                return;
+            }
 
-            SetWidthDisamSettings(formatConfig.mForceAbsOpcodeSuffix,
-                formatConfig.mForceLongOpcodeSuffix,
-                formatConfig.mForceAbsOperandPrefix,
-                formatConfig.mForceLongOperandPrefix);
-            SelectExpressionStyle(formatConfig.mExpressionMode);
-            LocalVarPrefix = formatConfig.mLocalVariableLablePrefix;
-            // dirty flag set by change watchers if one or more fields have changed
+            OpcodeSuffixAbs = preset.OpcodeSuffixAbs;
+            OpcodeSuffixLong = preset.OpcodeSuffixLong;
+            OperandPrefixAbs = preset.OperandPrefixAbs;
+            OperandPrefixLong = preset.OperandPrefixLong;
+            LocalVarPrefix = preset.LocalVarPrefix;
+
+            SelectExpressionStyle(preset.ExpressionStyle);
+            // dirty flag will be set by change watchers if one or more fields have changed
         }
 
-        private void QuickFmtDefaultButton_Click(object sender, RoutedEventArgs e) {
-            SetWidthDisamSettings(null, "l", "a:", "f:");
-            SelectExpressionStyle(ExpressionMode.Common);
-            LocalVarPrefix = string.Empty;
-            // dirty flag set by change watchers if one or more fields have changed
+        private void UpdateDisplayFormatQuickCombo() {
+            mSettingDisplayFmtCombo = true;
+
+            ExpressionStyleItem esi = (ExpressionStyleItem)expressionStyleComboBox.SelectedItem;
+            ExpressionMode expMode = ExpressionMode.Unknown;
+            if (esi != null) {
+                expMode = esi.ExpMode;
+            }
+
+            // If the current settings match one of the quick sets, update the combo box to
+            // match.  Otherwise, set it to "custom".
+            displayFmtQuickComboBox.SelectedIndex = 0;
+            for (int i = 1; i < DisplayPresets.Length; i++) {
+                DisplayFormatPreset preset = DisplayPresets[i];
+                if (OpcodeSuffixAbs == preset.OpcodeSuffixAbs &&
+                        OpcodeSuffixLong == preset.OpcodeSuffixLong &&
+                        OperandPrefixAbs == preset.OperandPrefixAbs &&
+                        OperandPrefixLong == preset.OperandPrefixLong &&
+                        LocalVarPrefix == preset.LocalVarPrefix &&
+                        expMode == preset.ExpressionStyle) {
+                    // match
+                    displayFmtQuickComboBox.SelectedIndex = i;
+                    break;
+                }
+            }
+
+            mSettingDisplayFmtCombo = false;
         }
 
         #endregion Display Format
 
         #region PseudoOp
+
+        // recursion preventer
+        private bool mSettingPseudoOpCombo;
 
         /// <summary>
         /// Map pseudo-op text entry fields to PseudoOpName properties.
@@ -984,6 +1076,68 @@ namespace SourceGen.WpfGui {
         }
         private TextBoxPropertyMap[] mPseudoNameMap;
 
+        private void ConstructPseudoOpMap() {
+            // Map text boxes to PseudoOpName fields.
+            mPseudoNameMap = new TextBoxPropertyMap[] {
+                new TextBoxPropertyMap(equDirectiveTextBox, "EquDirective"),
+                new TextBoxPropertyMap(varDirectiveTextBox, "VarDirective"),
+                new TextBoxPropertyMap(orgDirectiveTextBox, "OrgDirective"),
+                new TextBoxPropertyMap(regWidthDirectiveTextBox, "RegWidthDirective"),
+                new TextBoxPropertyMap(defineData1TextBox, "DefineData1"),
+                new TextBoxPropertyMap(defineData2TextBox, "DefineData2"),
+                new TextBoxPropertyMap(defineData3TextBox, "DefineData3"),
+                new TextBoxPropertyMap(defineData4TextBox, "DefineData4"),
+                new TextBoxPropertyMap(defineBigData2TextBox, "DefineBigData2"),
+                new TextBoxPropertyMap(fillTextBox, "Fill"),
+                new TextBoxPropertyMap(denseTextBox, "Dense"),
+                new TextBoxPropertyMap(strGenericTextBox, "StrGeneric"),
+                new TextBoxPropertyMap(strReverseTextBox, "StrReverse"),
+                new TextBoxPropertyMap(strLen8TextBox, "StrLen8"),
+                new TextBoxPropertyMap(strLen16TextBox, "StrLen16"),
+                new TextBoxPropertyMap(strNullTermTextBox, "StrNullTerm"),
+                new TextBoxPropertyMap(strDciTextBox, "StrDci"),
+            };
+        }
+
+        public class PseudoOpPreset {
+            public const int ID_CUSTOM = -2;
+            public const int ID_DEFAULT = -1;
+            public int Ident { get; private set; }      // positive values are AssemblerInfo.Id
+            public string Name { get; private set; }
+            public PseudoOp.PseudoOpNames OpNames { get; private set; }
+
+            public PseudoOpPreset(int id, string name, PseudoOp.PseudoOpNames opNames) {
+                Ident = id;
+                Name = name;
+                OpNames = opNames;
+            }
+        }
+
+        public PseudoOpPreset[] PseudoOpPresets { get; private set; }
+
+        private void ConstructPseudoOpPresets() {
+            // "custom" must be in slot 0
+            PseudoOpPresets = new PseudoOpPreset[AssemblerList.Count + 2];
+            PseudoOpPresets[0] = new PseudoOpPreset(PseudoOpPreset.ID_CUSTOM,
+                (string)FindResource("str_PresetCustom"), new PseudoOp.PseudoOpNames());
+            PseudoOpPresets[1] = new PseudoOpPreset(PseudoOpPreset.ID_DEFAULT,
+                (string)FindResource("str_PresetDefault"), new PseudoOp.PseudoOpNames());
+            for (int i = 0; i < AssemblerList.Count; i++) {
+                AssemblerInfo asmInfo = AssemblerList[i];
+                AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+
+                gen.GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames opNames,
+                    out Asm65.Formatter.FormatConfig unused);
+                PseudoOpPresets[i + 2] = new PseudoOpPreset((int)asmInfo.AssemblerId,
+                    asmInfo.Name, opNames);
+            }
+        }
+
+        private void Construct_PseudoOp() {
+            ConstructPseudoOpMap();
+            ConstructPseudoOpPresets();
+        }
+
         private void Loaded_PseudoOp() {
             string opStrCereal = mSettings.GetString(AppSettings.FMT_PSEUDO_OP_NAMES, null);
             if (!string.IsNullOrEmpty(opStrCereal)) {
@@ -991,12 +1145,10 @@ namespace SourceGen.WpfGui {
                 ImportPseudoOpNames(opNames);
             } else {
                 // no data available, populate with blanks
-                //PseudoOp.PseudoOpNames opNames = PseudoOp.sDefaultPseudoOpNames;
                 ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
             }
 
-            // No need to set this to anything specific.
-            pseudoOpQuickComboBox.SelectedIndex = 0;
+            UpdatePseudoOpQuickCombo();
 
             // Create text field listeners.
             foreach (TextBoxPropertyMap pmap in mPseudoNameMap) {
@@ -1032,23 +1184,43 @@ namespace SourceGen.WpfGui {
         private void PseudoOpTextChanged(object sender, EventArgs e) {
             // Just set the dirty flag.  The (somewhat expensive) export will happen
             // on Apply/OK.
+            UpdatePseudoOpQuickCombo();
             IsDirty = true;
         }
 
-        private void PseudoOpDefaultButton_Click(object sender, RoutedEventArgs e) {
-            ImportPseudoOpNames(new PseudoOp.PseudoOpNames());
+        private void UpdatePseudoOpQuickCombo() {
+            mSettingPseudoOpCombo = true;
+
+            PseudoOp.PseudoOpNames curNames = ExportPseudoOpNames();
+
+            // If the current settings match one of the quick sets, update the combo box to
+            // match.  Otherwise, set it to "custom".
+            pseudoOpQuickComboBox.SelectedIndex = 0;
+            for (int i = 1; i < PseudoOpPresets.Length; i++) {
+                PseudoOpPreset preset = PseudoOpPresets[i];
+                if (preset.OpNames == curNames) {
+                    // match
+                    pseudoOpQuickComboBox.SelectedIndex = i;
+                    break;
+                }
+            }
+
+            mSettingPseudoOpCombo = false;
         }
 
-        private void PseudoOpSetButton_Click(object sender, RoutedEventArgs e) {
-            AssemblerInfo asmInfo = (AssemblerInfo)pseudoOpQuickComboBox.SelectedItem;
-            AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
+        private void PseudoOpQuickComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
+            if (mSettingPseudoOpCombo) {
+                return;
+            }
 
-            PseudoOp.PseudoOpNames opNames;
-            Asm65.Formatter.FormatConfig formatConfig;
-            gen.GetDefaultDisplayFormat(out opNames, out formatConfig);
-            ImportPseudoOpNames(opNames);
+            PseudoOpPreset preset = (PseudoOpPreset)pseudoOpQuickComboBox.SelectedItem;
+            if (preset.Ident == PseudoOpPreset.ID_CUSTOM) {
+                // Not an actual preset.  Leave the combo box set to "Custom".
+                return;
+            }
 
-            // dirty flag set by change watchers if one or more fields have changed
+            ImportPseudoOpNames(preset.OpNames);
         }
 
         #endregion PseudoOp

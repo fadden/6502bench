@@ -19,12 +19,21 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Application Settings"
         Width="700" Height="440" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <system:String x:Key="str_ExpStyleCommon">Common</system:String>
+        <system:String x:Key="str_ExpStyleCc65">cc65</system:String>
+        <system:String x:Key="str_ExpStyleMerlin">Merlin</system:String>
+        <system:String x:Key="str_PresetCustom">Custom</system:String>
+        <system:String x:Key="str_PresetDefault">Default</system:String>
+    </Window.Resources>
 
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -525,29 +534,29 @@ limitations under the License.
 
                             <TextBlock Grid.Column="0" Grid.Row="1" Text="16-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Name="disambSuffix16TextBox" Grid.Column="1" Grid.Row="1"
-                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
                                      FontFamily="{StaticResource GeneralMonoFont}"
-                                     TextChanged="WidthDisamControlChanged"/>
+                                     Text="{Binding OpcodeSuffixAbs, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=.placeho}"/>
                             <TextBlock Grid.Column="3" Grid.Row="1" Text="16-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Name="disambPrefix16TextBox" Grid.Column="4" Grid.Row="1"
-                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                            <TextBox Grid.Column="4" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
                                      FontFamily="{StaticResource GeneralMonoFont}"
-                                     TextChanged="WidthDisamControlChanged"/>
+                                     Text="{Binding OperandPrefixAbs, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=.placeho}"/>
 
                             <TextBlock Grid.Column="0" Grid.Row="2" Text="24-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Name="disambSuffix24TextBox" Grid.Column="1" Grid.Row="2"
-                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                            <TextBox Grid.Column="1" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
                                      FontFamily="{StaticResource GeneralMonoFont}"
-                                     TextChanged="WidthDisamControlChanged"/>
+                                     Text="{Binding OpcodeSuffixLong, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=.placeho}"/>
                             <TextBlock Grid.Column="3" Grid.Row="2" Text="24-bit:"
                                        Margin="0,4,0,0"/>
-                            <TextBox Name="disambPrefix24TextBox" Grid.Column="4" Grid.Row="2"
-                                     Margin="0,4,0,0" Text=".placeho" MaxLength="8"
+                            <TextBox Grid.Column="4" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
                                      FontFamily="{StaticResource GeneralMonoFont}"
-                                     TextChanged="WidthDisamControlChanged"/>
+                                     Text="{Binding OperandPrefixLong, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=.placeho}"/>
                         </Grid>
                     </GroupBox>
 
@@ -568,16 +577,11 @@ limitations under the License.
                     </StackPanel>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              Width="400" HorizontalAlignment="Right" Padding="2,4">
-                        <DockPanel LastChildFill="False" Margin="4">
-                            <Button DockPanel.Dock="Left" Content="Default" Width="75"
-                                    Click="QuickFmtDefaultButton_Click"/>
-                            <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"
-                                    Click="DisplayFmtSetButton_Click"/>
-                            <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
-                                      Width="170" IsReadOnly="True"
-                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"/>
-                        </DockPanel>
+                              HorizontalAlignment="Right" Padding="2,4">
+                        <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
+                                  Width="170" IsReadOnly="True"
+                                  ItemsSource="{Binding DisplayPresets}" DisplayMemberPath="Name"
+                                  SelectionChanged="DisplayFmtQuickComboBox_SelectionChanged"/>
                     </GroupBox>
                 </DockPanel>
             </TabItem>
@@ -730,16 +734,11 @@ limitations under the License.
                     </Grid>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              Width="400" HorizontalAlignment="Right" Padding="2,4">
-                        <DockPanel LastChildFill="False" Margin="4">
-                            <Button DockPanel.Dock="Left" Content="Default" Width="75"
-                                    Click="PseudoOpDefaultButton_Click"/>
-                            <Button DockPanel.Dock="Right" Content="Set" Width="75" Margin="8,0,0,0"
-                                    Click="PseudoOpSetButton_Click"/>
-                            <ComboBox Name="pseudoOpQuickComboBox" DockPanel.Dock="Right"
-                                      Width="170" IsReadOnly="True"
-                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"/>
-                        </DockPanel>
+                              HorizontalAlignment="Right" Padding="2,4">
+                        <ComboBox Name="pseudoOpQuickComboBox" DockPanel.Dock="Right"
+                                  Width="170" IsReadOnly="True"
+                                  ItemsSource="{Binding PseudoOpPresets}" DisplayMemberPath="Name"
+                                  SelectionChanged="PseudoOpQuickComboBox_SelectionChanged"/>
                     </GroupBox>
                 </DockPanel>
             </TabItem>
