@@ -3,10 +3,27 @@
 ;
 ; Adapted from various online references.  Comments are most directly from
 ; http://www.classic-games.com/atari2600/specs.html 
+;
+; Some info from memory mirror maps by Chris Wilkson.
 
 *SYNOPSIS Atari 2600 (VCS) registers and constants
 
+; 128 bytes of RIOT RAM is primarily $80-ff and $180-1ff
+; mirror: $xy80
+;  x={even}
+;  y={0,1,4,5,8,9,C,D}
+
+; 4K ROM is primarily $f000-ffff
+; mirror: $x000
+;  x = {odd}
+;
+; For 8K ROM, second bank is primarily $d000-dfff
+
 ; TIA write registers
+; mirror: $xyz0
+;  x = {even}
+;  y = {anything}
+;  z = {0, 4}
 VSYNC   @   $00     ;W 0000 00x0  Vertical Sync Set-Clear
 VBLANK  @   $01     ;W xx00 00x0  Vertical Blank Set-Clear
 WSYNC   @   $02     ;W ---- ----  Wait for Horizontal Blank
@@ -52,6 +69,7 @@ RESMP1  @   $29     ;W 0000 00x0  Reset Missle 1 to Player 1
 HMOVE   @   $2a     ;W ---- ----  Apply Horizontal Motion
 HMCLR   @   $2b     ;W ---- ----  Clear Horizontal Move Registers
 CXCLR   @   $2c     ;W ---- ----  Clear Collision Latches
+; $2d-3f undefined, but $3e/3f may be used for bank switching
 
 ; TIA read registers.  The actual values are $0-d, but only 4 bits of the
 ; address are used on the hardware.  I'm using $3x because that's what
@@ -72,13 +90,17 @@ INPT4   @   $3c     ;R x000 0000  Read Input (Trigger) 0
 INPT5   @   $3d     ;R x000 0000  Read Input (Trigger) 1
 
 ; PIA/RIOT (6532) registers
-SWCHA   @   $280    ;Port A data register (joysticks...)
-SWACNT  @   $281    ;Port A data direction register (DDR)
-SWCHB   @   $282    ;Port B data (console switches)
-SWBCNT  @   $283    ;Port B DDR
-INTIM   @   $284    ;Timer output
+; mirror: $xyz0
+; x = {even}
+; y = {2,3,6,7,a,b,e,f}
+; z = {8,a,c,e}
+SWCHA   @   $280    ;RW Port A data register (joysticks...)
+SWACNT  @   $281    ;RW Port A data direction register (DDR)
+SWCHB   @   $282    ;RW Port B data (console switches)
+SWBCNT  @   $283    ;RW Port B DDR
+INTIM   @   $284    ;R Timer output
 
-TIM1T   @   $294    ;set 1 clock interval
-TIM8T   @   $295    ;set 8 clock interval
-TIM64T  @   $296    ;set 64 clock interval
-T1024T  @   $297    ;set 1024 clock interval
+TIM1T   @   $294    ;W set 1 clock interval
+TIM8T   @   $295    ;W set 8 clock interval
+TIM64T  @   $296    ;W set 64 clock interval
+T1024T  @   $297    ;W set 1024 clock interval
