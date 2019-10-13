@@ -163,6 +163,11 @@ namespace SourceGen {
         private int mTargetHighlightIndex = -1;
 
         /// <summary>
+        /// Code list color scheme.
+        /// </summary>
+        private MainWindow.ColorScheme mColorScheme = MainWindow.ColorScheme.Light;
+
+        /// <summary>
         /// CPU definition used when the Formatter was created.  If the CPU choice or
         /// inclusion of undocumented opcodes changes, we need to wipe the formatter.
         /// </summary>
@@ -517,6 +522,18 @@ namespace SourceGen {
             // Unpack the recent-project list.
             UnpackRecentProjectList();
 
+            // Set the color scheme.
+            bool useDark = settings.GetBool(AppSettings.SKIN_DARK_COLOR_SCHEME, false);
+            if (useDark) {
+                mColorScheme = MainWindow.ColorScheme.Dark;
+            } else {
+                mColorScheme = MainWindow.ColorScheme.Light;
+            }
+            mMainWin.SetColorScheme(mColorScheme);
+            if (CodeLineList != null) {
+                SetCodeLineListColorMultiplier();
+            }
+
             // Enable the DEBUG menu if configured.
             mMainWin.ShowDebugMenu =
                 AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
@@ -528,6 +545,14 @@ namespace SourceGen {
                 UndoableChange uc =
                     UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DisplayOnly);
                 ApplyChanges(new ChangeSet(uc), false);
+            }
+        }
+
+        private void SetCodeLineListColorMultiplier() {
+            if (mColorScheme == MainWindow.ColorScheme.Dark) {
+                CodeLineList.NoteColorMultiplier = 0.6f;
+            } else {
+                CodeLineList.NoteColorMultiplier = 1.0f;
             }
         }
 
@@ -670,6 +695,7 @@ namespace SourceGen {
         private void FinishPrep() {
             CodeLineList = new LineListGen(mProject, mMainWin.CodeDisplayList,
                 mOutputFormatter, mPseudoOpNames);
+            SetCodeLineListColorMultiplier();
 
             string messages = mProject.LoadExternalFiles();
             if (messages.Length != 0) {

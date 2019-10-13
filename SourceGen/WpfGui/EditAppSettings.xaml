@@ -129,8 +129,10 @@ limitations under the License.
                      <GroupBox Grid.Column="2" Grid.Row="1" Header="Miscellaneous"
                               Margin="10,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Add spaces in bytes column"
+                            <CheckBox Content="Add spaces in bytes column" Margin="0,4"
                                       IsChecked="{Binding SpacesBetweenBytes}"/>
+                            <CheckBox Content="Use &quot;dark&quot; color scheme" Margin="0,4"
+                                      IsChecked="{Binding DarkColorScheme}"/>
                         </StackPanel>
                     </GroupBox>
 

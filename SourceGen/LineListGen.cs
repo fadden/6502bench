@@ -29,6 +29,11 @@ namespace SourceGen {
     /// </summary>
     public class LineListGen {
         /// <summary>
+        /// Color multiplier for Notes.
+        /// </summary>
+        public float NoteColorMultiplier { get; set; } = 1.0f;
+
+        /// <summary>
         /// List of display lines.
         /// </summary>
         private List<Line> mLineList;
@@ -815,7 +820,7 @@ namespace SourceGen {
                     out MultiLineComment headerComment)) {
                 List<string> formatted = headerComment.FormatText(formatter, string.Empty);
                 StringListToLines(formatted, Line.HEADER_COMMENT_OFFSET, Line.Type.LongComment,
-                    CommonWPF.Helper.ZeroColor, tmpLines);
+                    CommonWPF.Helper.ZeroColor, 1.0f, tmpLines);
             }
 
             // Format symbols.
@@ -920,12 +925,12 @@ namespace SourceGen {
                 if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
                     List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
                     StringListToLines(formatted, offset, Line.Type.Note,
-                        noteData.BackgroundColor, lines);
+                        noteData.BackgroundColor, NoteColorMultiplier, lines);
                 }
                 if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
                     List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
                     StringListToLines(formatted, offset, Line.Type.LongComment,
-                        longComment.BackgroundColor, lines);
+                        longComment.BackgroundColor, NoteColorMultiplier, lines);
                 }
 
                 // Local variable tables come next.  Defer rendering.
@@ -1115,10 +1120,11 @@ namespace SourceGen {
         /// <param name="color">Background color (for Notes).</param>
         /// <param name="lines">Line list to add data to.</param>
         private static void StringListToLines(List<string> list, int offset, Line.Type lineType,
-                Color color, List<Line> lines) {
+                Color color, float mult, List<Line> lines) {
             foreach (string str in list) {
                 Line line = new Line(offset, 0, lineType);
-                FormattedParts parts = FormattedParts.CreateNote(str, color);
+                FormattedParts parts = FormattedParts.CreateNote(str,
+                    Color.Multiply(color, mult));
                 line.Parts = parts;
                 line.BackgroundColor = color;
                 lines.Add(line);

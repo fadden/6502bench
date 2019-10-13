@@ -414,6 +414,15 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        public bool DarkColorScheme {
+            get { return mSettings.GetBool(AppSettings.SKIN_DARK_COLOR_SCHEME, false); }
+            set {
+                mSettings.SetBool(AppSettings.SKIN_DARK_COLOR_SCHEME, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+
         public bool EnableDebugMenu {
             get { return mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false); }
             set {

@@ -237,6 +237,14 @@
     <Resource Include="Res\Logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Res\Theme_Dark.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Res\Theme_Light.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Tests\WpfGui\GenTestRunner.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

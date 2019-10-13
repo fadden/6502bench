@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 <!--
-ListViewItem control template and style.  This is used for the main code ListView.  The
-most significant consideration is getting long comments and notes into the 5th column and
+ListView/ListViewItem control template and style.  This is used for the main code ListView.
+The most significant consideration is getting long comments and notes into the 5th column and
 having them span multiple columns.  Most of this came from the default style (WPF 4.5 on
 Win10, default theme).
 
@@ -29,23 +29,23 @@ See also https://github.com/fadden/DisasmUiTest
 
     <!-- some brushes, extracted from the default style -->
     <LinearGradientBrush x:Key="ListItemHoverFill" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFF1FBFF" Offset="0"/>
-        <GradientStop Color="#FFD5F1FE" Offset="1"/>
+        <GradientStop Color="{DynamicResource Color_HoverFill0}" Offset="0"/>
+        <GradientStop Color="{DynamicResource Color_HoverFill1}" Offset="1"/>
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="ListItemSelectedFill" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFD9F4FF" Offset="0"/>
-        <GradientStop Color="#FF9BDDFB" Offset="1"/>
+        <GradientStop Color="{DynamicResource Color_SelectedFill0}" Offset="0"/>
+        <GradientStop Color="{DynamicResource Color_SelectedFill1}" Offset="1"/>
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="ListItemSelectedInactiveFill" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFEEEDED" Offset="0"/>
-        <GradientStop Color="#FFDDDDDD" Offset="1"/>
+        <GradientStop Color="{DynamicResource Color_SelectedInactiveFill0}" Offset="0"/>
+        <GradientStop Color="{DynamicResource Color_SelectedInactiveFill1}" Offset="1"/>
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="ListItemSelectedHoverFill" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFEAF9FF" Offset="0"/>
-        <GradientStop Color="#FFC9EDFD" Offset="1"/>
+        <GradientStop Color="{DynamicResource Color_SelectedHoverFill0}" Offset="0"/>
+        <GradientStop Color="{DynamicResource Color_SelectedHoverFill1}" Offset="1"/>
     </LinearGradientBrush>
 
     <!-- Column set for the long-comment lines.  The first five columns will be empty, but
@@ -91,7 +91,7 @@ See also https://github.com/fadden/DisasmUiTest
                             <RowDefinition MaxHeight="11"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Rectangle x:Name="UpperHighlight" Fill="#75FFFFFF" Visibility="Collapsed"/>
+                        <Rectangle x:Name="UpperHighlight" Fill="{DynamicResource Brush_SelectedUpperHighlight}" Visibility="Collapsed"/>
                         <GridViewRowPresenter Grid.RowSpan="2"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
@@ -104,15 +104,15 @@ See also https://github.com/fadden/DisasmUiTest
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Background" Value="{StaticResource ListItemHoverFill}"/>
-                <Setter Property="BorderBrush" Value="#FFCCF0FF"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_MouseOverBorder}"/>
                 <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="true">
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedFill}"/>
-                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedBorder}"/>
                 <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#80FFFFFF"/>
                 <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
-                <Setter Property="Fill" TargetName="UpperHighlight" Value="#40FFFFFF"/>
+                <Setter Property="Fill" TargetName="UpperHighlight" Value="{DynamicResource Brush_SelectedUpperHighlight}"/>
             </Trigger>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
@@ -120,7 +120,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Condition Property="Selector.IsSelectionActive" Value="false"/>
                 </MultiTrigger.Conditions>
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedInactiveFill}"/>
-                <Setter Property="BorderBrush" Value="#FFCFCFCF"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedActiveBorder}"/>
             </MultiTrigger>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
@@ -128,7 +128,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Condition Property="IsMouseOver" Value="true"/>
                 </MultiTrigger.Conditions>
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedHoverFill}"/>
-                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedMouseOverBorder}"/>
             </MultiTrigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -167,12 +167,12 @@ See also https://github.com/fadden/DisasmUiTest
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Background" Value="{StaticResource ListItemHoverFill}"/>
-                <Setter Property="BorderBrush" Value="#FFCCF0FF"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_MouseOverBorder}"/>
                 <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="true">
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedFill}"/>
-                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedBorder}"/>
                 <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#80FFFFFF"/>
                 <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
                 <Setter Property="Fill" TargetName="UpperHighlight" Value="#40FFFFFF"/>
@@ -183,7 +183,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Condition Property="Selector.IsSelectionActive" Value="false"/>
                 </MultiTrigger.Conditions>
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedInactiveFill}"/>
-                <Setter Property="BorderBrush" Value="#FFCFCFCF"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedActiveBorder}"/>
             </MultiTrigger>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
@@ -191,7 +191,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Condition Property="IsMouseOver" Value="true"/>
                 </MultiTrigger.Conditions>
                 <Setter Property="Background" Value="{StaticResource ListItemSelectedHoverFill}"/>
-                <Setter Property="BorderBrush" Value="#FF98DDFB"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedMouseOverBorder}"/>
             </MultiTrigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -202,8 +202,8 @@ See also https://github.com/fadden/DisasmUiTest
     <!-- ListView style.  We have to override the general foreground/background colors to
     avoid making the whole thing look freakish. -->
     <Style x:Key="codeListStyle" TargetType="{x:Type ListView}">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush_ListViewForeground}"/>
+        <Setter Property="Background" Value="{DynamicResource Brush_ListViewBackground}"/>
     </Style>
 
     <Style x:Key="codeListItemStyle" TargetType="{x:Type ListViewItem}">
@@ -233,8 +233,8 @@ See also https://github.com/fadden/DisasmUiTest
 
     <!-- Highlighting for individual cells. -->
     <LinearGradientBrush x:Key="HighlightedCellFill" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="#FFD9Fff4" Offset="0"/>
-        <GradientStop Color="#FF9Bfbdd" Offset="1"/>
+        <GradientStop Color="{DynamicResource Color_HighlightedCellFill0}" Offset="0"/>
+        <GradientStop Color="{DynamicResource Color_HighlightedCellFill1}" Offset="1"/>
     </LinearGradientBrush>
 
     <DataTemplate x:Key="addrHighlightTemplate">
@@ -245,7 +245,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
-                            <Setter Property="TextBlock.Foreground" Value="Black"/>
+                            <Setter Property="TextBlock.Foreground" Value="{DynamicResource Brush_ListViewForeground}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -263,7 +263,7 @@ See also https://github.com/fadden/DisasmUiTest
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
-                            <Setter Property="TextBlock.Foreground" Value="Black"/>
+                            <Setter Property="TextBlock.Foreground" Value="{DynamicResource Brush_ListViewForeground}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

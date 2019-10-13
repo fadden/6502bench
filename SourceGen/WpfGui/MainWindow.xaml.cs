@@ -157,6 +157,12 @@ namespace SourceGen.WpfGui {
         // Handle to protected ListView.SetSelectedItems() method
         private MethodInfo listViewSetSelectedItems;
 
+        // Color theme.
+        public enum ColorScheme { Unknown = 0, Light, Dark };
+        private ColorScheme mColorScheme;
+        private ResourceDictionary mLightTheme;
+        private ResourceDictionary mDarkTheme;
+
 
         public MainWindow() {
             Debug.WriteLine("START at " + DateTime.Now.ToLocalTime());
@@ -172,6 +178,16 @@ namespace SourceGen.WpfGui {
             Debug.Assert(listViewSetSelectedItems != null);
 
             this.DataContext = this;
+
+            mLightTheme = new ResourceDictionary() {
+                Source = new Uri("/Res/Theme_Light.xaml", UriKind.Relative)
+            };
+            mDarkTheme = new ResourceDictionary() {
+                Source = new Uri("/Res/Theme_Dark.xaml", UriKind.Relative)
+            };
+            Resources.MergedDictionaries.Add(mLightTheme);
+            mColorScheme = ColorScheme.Light;
+
 
             CodeDisplayList = new DisplayList();
             codeListView.ItemsSource = CodeDisplayList;
@@ -419,6 +435,38 @@ namespace SourceGen.WpfGui {
                     mMainCtrl.NavigateBackward();
                 }
             }
+        }
+
+        /// <summary>
+        /// Sets the primary color scheme.
+        /// </summary>
+        /// <remarks>
+        /// H/T http://www.markodevcic.com/post/changing_wpf_themes_dynamically
+        /// </remarks>
+        public void SetColorScheme(ColorScheme newScheme) {
+            if (mColorScheme == newScheme) {
+                // nothing to do
+                return;
+            }
+
+            ResourceDictionary oldDict, newDict;
+
+            if (mColorScheme == ColorScheme.Light) {
+                oldDict = mLightTheme;
+            } else {
+                oldDict = mDarkTheme;
+            }
+            if (newScheme == ColorScheme.Light) {
+                newDict = mLightTheme;
+            } else {
+                newDict = mDarkTheme;
+            }
+            Debug.WriteLine("Changing color scheme from " + mColorScheme + " to " + newScheme +
+                " (dict count=" + Resources.MergedDictionaries.Count + ")");
+
+            Resources.MergedDictionaries.Remove(oldDict);
+            Resources.MergedDictionaries.Add(newDict);
+            mColorScheme = newScheme;
         }
 
         #region Window placement

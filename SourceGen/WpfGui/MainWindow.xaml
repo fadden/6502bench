@@ -33,10 +33,10 @@ limitations under the License.
 
     <Window.Resources>
         <ResourceDictionary>
-            <!-- style and control templates for main code ListView items -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="CodeListItemStyle.xaml"/>
-                <ResourceDictionary Source="../Res/CommandIcons.xaml"/>
+                <ResourceDictionary Source="/Res/CommandIcons.xaml"/>
+                <!--<ResourceDictionary Source="/Res/Theme_Light.xaml"/>-->
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>

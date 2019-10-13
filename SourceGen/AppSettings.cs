@@ -69,8 +69,9 @@ namespace SourceGen {
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
-        // Main project view settings.
         public const string PRVW_RECENT_PROJECT_LIST = "prvw-recent-project-list";
+
+        public const string SKIN_DARK_COLOR_SCHEME = "skin-dark-color-scheme";
 
         // Symbol-list window options.
         public const string SYMWIN_SHOW_USER = "symwin-show-user";
