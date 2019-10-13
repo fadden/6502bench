@@ -68,6 +68,10 @@ namespace SourceGen {
             return mSymbols.Values.GetEnumerator();
         }
 
+        public bool ContainsKey(string label) {
+            return mSymbols.ContainsKey(label);
+        }
+
         /// <summary>
         /// Loads platform symbols.
         /// </summary>

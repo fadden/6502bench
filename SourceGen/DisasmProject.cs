@@ -799,7 +799,7 @@ namespace SourceGen {
             //reanalysisTimer.DumpTimes("DisasmProject timers:", debugLog);
 
             debugLog.LogI("Analysis complete");
-            Problems.DebugDump();
+            //Problems.DebugDump();
         }
 
         /// <summary>
@@ -1007,6 +1007,28 @@ namespace SourceGen {
             foreach (KeyValuePair<string, DefSymbol> kvp in ProjectProps.ProjectSyms) {
                 SymbolTable[kvp.Value.Label] = kvp.Value;
             }
+        }
+
+        /// <summary>
+        /// Returns true if a symbol with a matching label appears in the project symbols
+        /// or any of the platform lists.  This operates on the raw lists, not SymbolTable.
+        /// </summary>
+        /// <remarks>
+        /// Useful for determining whether a label masks a project or platform symbol.
+        /// </remarks>
+        private bool IsInProjectOrPlatformList(Symbol sym) {
+            if (sym == null) {
+                return false;
+            }
+            foreach (PlatformSymbols ps in PlatformSyms) {
+                if (ps.ContainsKey(sym.Label)) {
+                    return true;
+                }
+            }
+            if (ProjectProps.ProjectSyms.ContainsKey(sym.Label)) {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -1881,12 +1903,16 @@ namespace SourceGen {
                                 // auto-generated label, we'll have a duplicate label unless we
                                 // do a full code+data reanalysis.  If we're okay with reanalyzing
                                 // on user-label renames, we can allow such conflicts.
+                                //
+                                // We might be changing it to match an existing platform symbol
+                                // though.  (Ex: create label FOO, add .sym65 with symbol FOO,
+                                // edit FOO to BAR, then hit undo.)
                                 if (oldValue != null) {
                                     SymbolTable.Remove((Symbol)oldValue);
                                 }
                                 UserLabels[offset] = (Symbol)newValue;
-                                //SymbolTable[((Symbol)newValue).Label] = (Symbol)newValue;
-                                SymbolTable.Add((Symbol)newValue);
+                                SymbolTable[((Symbol)newValue).Label] = (Symbol)newValue;
+                                //SymbolTable.Add((Symbol)newValue);
                                 Debug.Assert(oldSym != null || uc.ReanalysisRequired ==
                                     UndoableChange.ReanalysisScope.DataOnly);
                             }
@@ -1908,18 +1934,33 @@ namespace SourceGen {
                                     RefactorLabel(offset, ((Symbol)oldValue).Label);
                                 }
 
-                                affectedOffsets.Add(offset);
+                                // Compute the affected offsets.  We have one special case to
+                                // consider: if we renamed a label, and the old or new name is
+                                // in project or platform symbols, we need to restore that
+                                // symbol to the symbol table.  The most reliable way to do that
+                                // is to switch us to a data re-analysis.
+                                //
+                                // The UI doesn't let you directly edit a label to overwrite a
+                                // symbol, but see FOO/BAR example above.
+                                if (IsInProjectOrPlatformList((Symbol)oldValue) ||
+                                        IsInProjectOrPlatformList((Symbol)newValue)) {
+                                    Debug.WriteLine("Label change masked/unmasked " +
+                                        "project/platform symbol");
+                                    needReanalysis |= UndoableChange.ReanalysisScope.DataOnly;
+                                } else {
+                                    affectedOffsets.Add(offset);
 
-                                // Use the cross-reference table to identify the offsets that
-                                // we need to update.
-                                if (mXrefs.TryGetValue(offset, out XrefSet xrefs)) {
-                                    foreach (XrefSet.Xref xr in xrefs) {
-                                        // This isn't quite right -- in theory we should be adding
-                                        // all offsets that are part of the instruction, so that
-                                        // affectedOffsets can hold a contiguous range instead of
-                                        // a collection of opcode offsets.  In practice, for a
-                                        // label change, it shouldn't matter.
-                                        affectedOffsets.Add(xr.Offset);
+                                    // Use the cross-reference table to identify the offsets that
+                                    // we need to update.
+                                    if (mXrefs.TryGetValue(offset, out XrefSet xrefs)) {
+                                        foreach (XrefSet.Xref xr in xrefs) {
+                                            // This isn't quite right -- in theory we should be
+                                            // adding all offsets that are part of the instruction,
+                                            // so that affectedOffsets can hold a contiguous range
+                                            // instead of a collection of opcode offsets.  In
+                                            // practice, for a label change, it shouldn't matter.
+                                            affectedOffsets.Add(xr.Offset);
+                                        }
                                     }
                                 }
                             } else {
