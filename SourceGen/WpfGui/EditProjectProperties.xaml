@@ -215,7 +215,7 @@ limitations under the License.
 
                     <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal">
                         <Button Width="200" Margin="4"
-                                Content="Add Symbol Files from Platform..."
+                                Content="Add Symbol Files from Runtime..."
                                 Click="AddSymbolFilesPlatformButton_Click"/>
                         <Button Width="200" Margin="4"
                                 Content="Add Symbol Files from Project..."
@@ -257,7 +257,7 @@ limitations under the License.
 
                     <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
                         <Button Width="200" Margin="4"
-                                Content="Add Scripts from Platform..."
+                                Content="Add Scripts from Runtime..."
                                 Click="AddExtensionScriptsPlatformButton_Click"/>
                         <Button Width="200" Margin="4"
                                 Content="Add Scripts from Project..."
