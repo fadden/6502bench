@@ -1970,6 +1970,16 @@ namespace SourceGen {
                                 // to do the refactor here, though we can skip Anattribs work.
                                 Debug.Assert(oldValue == null || newValue == null);
                             }
+
+                            // For add/edit/remove, we need to see if what we do will impact
+                            // the behavior of a plugin.  We don't need to do this on
+                            // project/platform symbol changes because project property changes
+                            // always update code and data.
+                            if (mScriptManager.IsLabelSignificant((Symbol)oldValue,
+                                    (Symbol)newValue)) {
+                                Debug.WriteLine("Plugin claims symbol is significant");
+                                needReanalysis |= UndoableChange.ReanalysisScope.CodeAndData;
+                            }
                         }
                         break;
                     case UndoableChange.ChangeType.SetOperandFormat: {

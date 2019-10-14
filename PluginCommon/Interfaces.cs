@@ -29,7 +29,7 @@ namespace PluginCommon {
         string Identifier { get; }
 
         /// <summary>
-        /// Prepares the plugin for action.  Called at the start of the code analysis pass.
+        /// Prepares the plugin for action.  Called at the start of every code analysis pass.
         /// 
         /// In the current implementation, the file data will be the same every time,
         /// because it doesn't change after the project is opened.  However, this could
@@ -38,11 +38,44 @@ namespace PluginCommon {
         /// <param name="appRef">Reference to application interface.</param>
         /// <param name="fileData">65xx code and data.</param>
         /// <param name="addrMap">Mapping between offsets and addresses.</param>
-        /// <param name="plSyms">Symbols available to plugins, in no particular order.  All
-        ///   platform, project, and user labels are included; auto-generated symbols and
-        ///   local variables are not.</param>
-        void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-            List<PlSymbol> plSyms);
+        void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans);
+    }
+
+    /// <summary>
+    /// Extension scripts that want to receive the list of symbols must implement this interface.
+    /// </summary>
+    public interface IPlugin_SymbolList {
+        /// <summary>
+        /// Receives a list of the currently defined platform, project, and user symbols.
+        /// The list does not include auto-generated labels or local variables.
+        ///
+        /// This is called immediately after Prepare(), before any other interfaces are
+        /// invoked, at the start of every code analysis pass.
+        /// </summary>
+        /// <param name="plSyms">Symbols available to plugins, in no particular order.</param>
+        void UpdateSymbolList(List<PlSymbol> plSyms);
+
+        /// <summary>
+        /// Handles a notification that a user symbol has been added, edited, or removed.  If the
+        /// label is of interest to the plugin, e.g. it changes how the plugin formats code or
+        /// data, the app needs to know.
+        /// </summary>
+        /// <remarks>
+        /// The application does a full re-analysis when project properties change, but not
+        /// when labels are edited.  The CheckJsr/Jsl/Brk methods are only called during code
+        /// analysis, so if their behavior changes based on the presence or absence of a user
+        /// label then we need to tell the application that a full re-analysis is needed.
+        ///
+        /// Plugins that don't care about user symbols, e.g. that just use tagged platform
+        /// symbols, can simply return false.  (Changes to user labels that overlap with
+        /// project/platform symbols are detected by the app.)
+        /// </remarks>
+        /// <param name="beforeLabel">The label before the change, or empty if this is a
+        ///   newly-added label.</param>
+        /// <param name="afterLabel">The label after the change, or empty if the label was
+        ///   removed.</param>
+        /// <returns>True if the label change could affect the plugin's actions.</returns>
+        bool IsLabelSignificant(string beforeLabel, string afterLabel);
     }
 
     /// <summary>
@@ -128,6 +161,9 @@ namespace PluginCommon {
     /// <summary>
     /// Data format type.
     /// </summary>
+    /// <remarks>
+    /// Essentially a clone of FormatDescriptor.Type.
+    /// </remarks>
     public enum DataType {
         Unknown = 0,
         NumericLE,
@@ -145,6 +181,9 @@ namespace PluginCommon {
     /// <summary>
     /// Data format sub-type.
     /// </summary>
+    /// <remarks>
+    /// Essentially a clone of FormatDescriptor.SubType.
+    /// </remarks>
     public enum DataSubType {
         // No sub-type specified.
         None = 0,

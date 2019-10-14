@@ -27,8 +27,8 @@ using PluginCommon;
 */
 
 namespace RuntimeData.Apple {
-    public class IIgsToolbox : MarshalByRefObject, IPlugin, IPlugin_InlineJsl {
-        private const string TOOLBOX_FUNC_TAG = "AppleIIgs-Toolbox-Functions";    // tag used in .sym65 file
+    public class IIgsToolbox : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineJsl {
+        private const string TOOLBOX_FUNC_TAG = "AppleIIgs-Toolbox-Functions"; // tag used in .sym65 file
         private bool VERBOSE = false;
 
         private IApplication mAppRef;
@@ -41,14 +41,19 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("IIgsToolbox(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
+        }
 
-            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, TOOLBOX_FUNC_TAG, appRef);
+        public void UpdateSymbolList(List<PlSymbol> plSyms) {
+            // Extract the list of function name constants from the platform symbol file.
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, TOOLBOX_FUNC_TAG, mAppRef);
+        }
+        public bool IsLabelSignificant(string beforeLabel, string afterLabel) {
+            return false;
         }
 
         public void CheckJsl(int offset, out bool noContinue) {

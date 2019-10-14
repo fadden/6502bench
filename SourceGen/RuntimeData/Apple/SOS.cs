@@ -29,7 +29,7 @@ parm_block
 */
 
 namespace RuntimeData.Apple {
-    public class SOS : MarshalByRefObject, IPlugin, IPlugin_InlineBrk {
+    public class SOS : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineBrk {
         private const string SOS_MLI_TAG = "SOS-MLI-Functions";   // tag used in .sym65 file
         private bool VERBOSE = true;
 
@@ -43,15 +43,20 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("SOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
+        }
 
-            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, SOS_MLI_TAG, appRef);
+        public void UpdateSymbolList(List<PlSymbol> plSyms) {
+            // Extract the list of function name constants from the platform symbol file.
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, SOS_MLI_TAG, mAppRef);
+        }
+        public bool IsLabelSignificant(string beforeLabel, string afterLabel) {
+            return false;
         }
 
         public void CheckBrk(int offset, bool twoByteBrk, out bool noContinue) {

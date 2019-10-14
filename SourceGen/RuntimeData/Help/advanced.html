@@ -115,13 +115,6 @@ invoked is not defined.</p>
 
 <h4>Known Issues and Limitations</h4>
 
-<p>Sometimes a manual refresh (F5) is required.  Plugins are executed during
-the code analysis pass, but SourceGen doesn't perform code analysis on
-every change.  If you add or change a label that a plugin is looking
-for, you won't see the effects until you do something that causes the
-code analysis pass to be run.  Hitting F5 does this.  (There's no easy
-way around this -- either we have to re-run code analysis on every label
-change, or we need a way to know which labels a plugin is interested in.)</p>
 <p>When a project is opened, any errors encountered by the script compiler
 are reported to the user.  If the project is already open, and a script
 is added to the project through the Project Properties editor, compiler

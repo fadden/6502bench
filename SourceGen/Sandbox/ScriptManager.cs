@@ -161,11 +161,37 @@ namespace SourceGen.Sandbox {
             if (DomainMgr == null) {
                 AddressTranslate addrTrans = new AddressTranslate(mProject.AddrMap);
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    kvp.Value.Prepare(appRef, mProject.FileData, addrTrans, plSyms);
+                    IPlugin ipl = kvp.Value;
+                    ipl.Prepare(appRef, mProject.FileData, addrTrans);
+                    if (ipl is IPlugin_SymbolList) {
+                        ((IPlugin_SymbolList)ipl).UpdateSymbolList(plSyms);
+                    }
                 }
             } else {
                 List<AddressMap.AddressMapEntry> addrEnts = mProject.AddrMap.GetEntryList();
                 DomainMgr.PluginMgr.PreparePlugins(appRef, addrEnts, plSyms);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if any of the plugins report that the before or after label is
+        /// significant.
+        /// </summary>
+        public bool IsLabelSignificant(Symbol before, Symbol after) {
+            string labelBefore = (before == null) ? string.Empty : before.Label;
+            string labelAfter = (after == null) ? string.Empty : after.Label;
+            if (DomainMgr == null) {
+                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                    IPlugin ipl = kvp.Value;
+                    if (ipl is IPlugin_SymbolList &&
+                            ((IPlugin_SymbolList)ipl).IsLabelSignificant(labelBefore,
+                                labelAfter)) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                return DomainMgr.PluginMgr.IsLabelSignificant(labelBefore, labelAfter);
             }
         }
 
@@ -261,6 +287,9 @@ namespace SourceGen.Sandbox {
             // The plugin is actually a MarshalByRefObject, so we can't use reflection
             // to gather the list of interfaces.
             // TODO(maybe): add a call that does the query on the remote site
+            if (plugin is PluginCommon.IPlugin_SymbolList) {
+                sb.Append(" SymbolList");
+            }
             if (plugin is PluginCommon.IPlugin_InlineJsr) {
                 sb.Append(" InlineJsr");
             }

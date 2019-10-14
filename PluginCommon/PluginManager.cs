@@ -154,13 +154,35 @@ namespace PluginCommon {
         /// Invokes the Prepare() method on all active plugins.
         /// </summary>
         /// <param name="appRef">Reference to host object providing app services.</param>
+        /// <param name="addrEntries">Serialized AddressMap entries.</param>
+        /// <param name="plSyms">SymbolTable contents, converted to PlSymbol.</param>
         public void PreparePlugins(IApplication appRef,
                 List<AddressMap.AddressMapEntry> addrEntries, List<PlSymbol> plSyms) {
             AddressMap addrMap = new AddressMap(addrEntries);
             AddressTranslate addrTrans = new AddressTranslate(addrMap);
             foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                kvp.Value.Prepare(appRef, mFileData, addrTrans, plSyms);
+                IPlugin ipl = kvp.Value;
+                ipl.Prepare(appRef, mFileData, addrTrans);
+                if (ipl is IPlugin_SymbolList) {
+                    ((IPlugin_SymbolList)ipl).UpdateSymbolList(plSyms);
+                }
             }
+        }
+
+        /// <summary>
+        /// Returns true if any of the plugins report that the before or after label is
+        /// significant.
+        /// </summary>
+        public bool IsLabelSignificant(string labelBefore, string labelAfter) {
+            foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                IPlugin ipl = kvp.Value;
+                if (ipl is IPlugin_SymbolList &&
+                        ((IPlugin_SymbolList)ipl).IsLabelSignificant(labelBefore,
+                            labelAfter)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
 #if false

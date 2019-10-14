@@ -34,7 +34,7 @@ using PluginCommon;
 */
 
 namespace RuntimeData.Apple {
-    public class GSOS : MarshalByRefObject, IPlugin, IPlugin_InlineJsl {
+    public class GSOS : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineJsl {
         private const string GSOS_FUNC_TAG = "AppleIIgs-GSOS-Functions";  // tag used in .sym65 file
         private bool VERBOSE = false;
 
@@ -48,15 +48,21 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("GSOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
 
-            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, GSOS_FUNC_TAG, appRef);
+        }
+
+        public void UpdateSymbolList(List<PlSymbol> plSyms) {
+            // Extract the list of function name constants from the platform symbol file.
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, GSOS_FUNC_TAG, mAppRef);
+        }
+        public bool IsLabelSignificant(string beforeLabel, string afterLabel) {
+            return false;
         }
 
         public void CheckJsl(int offset, out bool noContinue) {

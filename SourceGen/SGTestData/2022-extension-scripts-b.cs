@@ -18,8 +18,7 @@ namespace RuntimeData.Test2022 {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
             mAddrTrans = addrTrans;

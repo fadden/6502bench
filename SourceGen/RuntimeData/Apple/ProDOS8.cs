@@ -29,7 +29,7 @@ parm_block
 */
 
 namespace RuntimeData.Apple {
-    public class ProDOS8 : MarshalByRefObject, IPlugin, IPlugin_InlineJsr {
+    public class ProDOS8 : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineJsr {
         private const string P8_MLI_TAG = "ProDOS8-MLI-Functions";   // tag used in .sym65 file
         private bool VERBOSE = false;
 
@@ -161,8 +161,7 @@ namespace RuntimeData.Apple {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
             mAddrTrans = addrTrans;
@@ -170,8 +169,13 @@ namespace RuntimeData.Apple {
             mAppRef.DebugLog("ProDOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
 
+        }
+        public void UpdateSymbolList(List<PlSymbol> plSyms) {
             // Extract the list of function name constants from the platform symbol file.
-            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, P8_MLI_TAG, appRef);
+            mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, P8_MLI_TAG, mAppRef);
+        }
+        public bool IsLabelSignificant(string beforeLabel, string afterLabel) {
+            return false;
         }
 
         public void CheckJsr(int offset, out bool noContinue) {

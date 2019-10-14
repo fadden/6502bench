@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using PluginCommon;
 
 namespace RuntimeData.Test2022 {
-    public class Test2022A : MarshalByRefObject, IPlugin, IPlugin_InlineJsr, IPlugin_InlineJsl {
+    public class Test2022A : MarshalByRefObject, IPlugin, IPlugin_SymbolList,
+            IPlugin_InlineJsr, IPlugin_InlineJsl {
         private IApplication mAppRef;
         private byte[] mFileData;
 
@@ -24,13 +25,13 @@ namespace RuntimeData.Test2022 {
             }
         }
 
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans,
-                List<PlSymbol> plSyms) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
 
             mAppRef.DebugLog("Test2022-A(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
-
+        }
+        public void UpdateSymbolList(List<PlSymbol> plSyms) {
             foreach (PlSymbol sym in plSyms) {
                 switch (sym.Label) {
                     case "PrintInline8String":
@@ -53,6 +54,11 @@ namespace RuntimeData.Test2022 {
                         break;
                 }
             }
+        }
+
+        public bool IsLabelSignificant(string beforeLabel, string afterLabel) {
+            const string PREFIX = "PrintInline";    // all interesting labels start with this
+            return (beforeLabel.StartsWith(PREFIX) || afterLabel.StartsWith(PREFIX));
         }
 
         public void CheckJsr(int offset, out bool noContinue) {
@@ -99,6 +105,9 @@ namespace RuntimeData.Test2022 {
             if (target == mInlineL1StringAddr) {
                 //  0  1  2  3   4   5
                 // 22 00 10 01  01  66
+                if (offset + 4 >= mFileData.Length) {
+                    return;     // length byte is off end
+                }
                 int len = mFileData[offset + 4];    // 1-byte len in first byte past 4-byte JSL
                 if (offset + 5 + len > mFileData.Length) {
                     // ran off the end
@@ -109,6 +118,9 @@ namespace RuntimeData.Test2022 {
                 mAppRef.SetInlineDataFormat(offset + 4, len + 1,
                     DataType.StringL8, DataSubType.Ascii, null);
             } else if (target == mInlineL2StringAddr) {
+                if (offset + 5 >= mFileData.Length) {
+                    return;     // length word is off end
+                }
                 int len = Util.GetWord(mFileData, offset + 4, 2, false);
                 if (offset + 6 + len > mFileData.Length) {
                     // ran off the end
@@ -118,7 +130,7 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 4, len + 2,
                     DataType.StringL16, DataSubType.Ascii, null);
-            } else {
+            } else if (target == mInlineDciStringAddr) {
                 // look for the first byte whose high bit doesn't match the first byte's bit
                 //  0  1  2  3   4  5
                 // 22 00 30 01  66 c1
