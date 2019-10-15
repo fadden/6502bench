@@ -174,6 +174,11 @@ namespace Asm65 {
         /// <summary>
         /// Effect this instruction has on memory.
         /// </summary>
+        /// <remarks>
+        /// We don't consider execution to have a memory effect, so "LDA $1000" is Read but
+        /// "JMP $1000" is None.  That's because the instruction itself doesn't access the
+        /// memory at $1000, it just changes the program counter to point there.
+        /// </remarks>
         public MemoryEffect MemEffect {
             get {
                 // If we do this a lot, we should probably just go through and set the

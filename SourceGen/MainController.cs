@@ -3377,10 +3377,23 @@ namespace SourceGen {
         private void PopulateSymbolsList() {
             mMainWin.SymbolsList.Clear();
             foreach (Symbol sym in mProject.SymbolTable) {
+                string valueStr = mOutputFormatter.FormatHexValue(sym.Value, 0);
+                string sourceTypeStr = sym.SourceTypeString;
+                if (sym is DefSymbol) {
+                    DefSymbol defSym = (DefSymbol)sym;
+                    if (defSym.MultiMask != null) {
+                        valueStr += " & " +
+                            mOutputFormatter.FormatHexValue(defSym.MultiMask.AddressMask, 4);
+                    }
+                    if (defSym.Direction == DefSymbol.DirectionFlags.Read) {
+                        sourceTypeStr += '<';
+                    } else if (defSym.Direction == DefSymbol.DirectionFlags.Write) {
+                        sourceTypeStr += '>';
+                    }
+                }
+
                 MainWindow.SymbolsListItem sli = new MainWindow.SymbolsListItem(sym,
-                    sym.SourceTypeString,
-                    mOutputFormatter.FormatHexValue(sym.Value, 0),
-                    sym.Label);
+                    sourceTypeStr, valueStr, sym.Label);
                 mMainWin.SymbolsList.Add(sli);
             }
         }

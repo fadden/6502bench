@@ -23,12 +23,14 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Symbol"
-        SizeToContent="Height" Width="340" ResizeMode="NoResize"
+        SizeToContent="Height" Width="350" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         ContentRendered="Window_ContentRendered">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
         <system:String x:Key="str_WidthLimitFmt">• Decimal or hex value, 1-{0}</system:String>
         <system:String x:Key="str_ProjectConstant">Constant</system:String>
         <system:String x:Key="str_VariableConstant">Stack-Relative Offset</system:String>
@@ -46,51 +48,72 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0" Grid.Row="0" Text="Label:"/>
-        <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,0,16">
+        <TextBlock Grid.Column="0" Grid.Row="0" Margin="0,0,8,0">Symbol type:</TextBlock>
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="0,1,0,12"
+                    IsEnabled="{Binding NotReadOnlyValueAndType}">
+            <RadioButton Content="Address" GroupName="Type" Margin="0,0,0,0" IsChecked="{Binding IsAddress}"/>
+            <RadioButton Content="{Binding ConstantLabel, FallbackValue=Constant}" Margin="8,0,0,0"
+                            GroupName="Type" IsChecked="{Binding IsConstant}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="1" Text="Label:"/>
+        <StackPanel Grid.Column="1" Grid.Row="1" Margin="0,0,0,16">
             <TextBox Name="labelTextBox" Margin="0,1,0,0" Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
             <TextBlock Name="labelNotesLabel" Text="• 2+ alphanumerics, starting with letter" Margin="0,4,0,0"/>
-            <TextBlock Name="projectLabelUniqueLabel" Text="• Unique among project symbols" Margin="0,4,0,0"/>
-            <TextBlock Name="labelUniqueLabel" Text="• Unique" Margin="0,4,0,0"/>
+            <TextBlock Name="projectLabelUniqueLabel" Text="• Unique among project symbols" Margin="0,4,0,0"
+                       Visibility="{Binding IsNotVariable, Converter={StaticResource BoolToVis}}"/>
+            <TextBlock Name="labelUniqueLabel" Text="• Unique" Margin="0,4,0,0"
+                       Visibility="{Binding IsVariable, Converter={StaticResource BoolToVis}}"/>
         </StackPanel>
 
-        <TextBlock Grid.Column="0" Grid.Row="1" Text="Value:"/>
-        <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" Margin="0,0,0,16">
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="Value:"/>
+        <StackPanel Grid.Column="1" Grid.Row="2" VerticalAlignment="Top" Margin="0,0,0,16">
             <TextBox Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"
                      IsReadOnly="{Binding ReadOnlyValueAndType}"/>
-            <TextBlock Name="varValueRangeLabel" Text="• Value between 0-255, including width" Margin="0,4,0,0"/>
-            <TextBlock Name="varValueUniqueLabel" Text="• Values in table must not overlap" Margin="0,4,0,0"/>
+            <TextBlock Name="varValueRangeLabel" Text="• Value between 0-255, including width" Margin="0,4,0,0"
+                       Visibility="{Binding IsVariable, Converter={StaticResource BoolToVis}}"/>
+            <TextBlock Name="varValueUniqueLabel" Text="• Values in table must not overlap" Margin="0,4,0,0"
+                       Visibility="{Binding IsVariable, Converter={StaticResource BoolToVis}}"/>
             <TextBlock Name="valueNotesLabel" Text="• Decimal, hex ($), or binary (%)" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <TextBlock Grid.Column="0" Grid.Row="2" Text="Width:"/>
-        <StackPanel Grid.Column="1" Grid.Row="2" Margin="0,0,0,16">
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Width:"/>
+        <StackPanel Grid.Column="1" Grid.Row="3" Margin="0,0,0,16">
             <TextBox Margin="0,1,0,0" Text="{Binding VarWidth, UpdateSourceTrigger=PropertyChanged}"
-                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                     FontFamily="{StaticResource GeneralMonoFont}"
+                     IsEnabled="{Binding IsAddress}"/>
             <TextBlock Name="widthNotesLabel" Margin="0,4,0,0"
                        Text="{Binding WidthLimitLabel, FallbackValue=• Decimal or hex value\, 1-ZZZZZ}"/>
-            <TextBlock Name="widthOptionalLabel" Text="• Optional for Address, ignored for Constant" Margin="0,4,0,0"/>
+            <TextBlock Name="widthOptionalLabel" Text="• Optional for Address, ignored for Constant" Margin="0,4,0,0"
+                       Visibility="{Binding IsNotVariable, Converter={StaticResource BoolToVis}}"/>
         </StackPanel>
 
-        <TextBlock Grid.Column="0" Grid.Row="3" Text="Comment:" Margin="0,0,8,0"/>
-        <StackPanel Grid.Column="1" Grid.Row="3" Margin="0,0,0,16">
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Comment:" Margin="0,0,8,0"/>
+        <StackPanel Grid.Column="1" Grid.Row="4" Margin="0,0,0,16">
             <TextBox Margin="0,1,0,0" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}" ScrollViewer.CanContentScroll="True"/>
             <TextBlock Text="• Optional" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <GroupBox Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Header="Symbol Type" Padding="4">
-            <StackPanel Orientation="Horizontal" IsEnabled="{Binding NotReadOnlyValueAndType}">
-                <RadioButton Content="Address" IsChecked="{Binding IsAddress}"/>
-                <RadioButton Content="{Binding ConstantLabel, FallbackValue=Constant}" Margin="24,0,0,0" IsChecked="{Binding IsConstant}"/>
+        <TextBlock Grid.Column="0" Grid.Row="5"
+                   Visibility="{Binding IsNotVariable, Converter={StaticResource BoolToVis}}"
+                   Text="Access:"/>
+        <StackPanel Grid.Column="1" Grid.Row="5" Margin="0,0,0,4"
+                    Visibility="{Binding IsNotVariable, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Horizontal" Margin="0,1,0,0"
+                        IsEnabled="{Binding IsAddress}">
+                <CheckBox Content="Read" Margin="0,0,0,0" IsChecked="{Binding IsReadChecked}"/>
+                <CheckBox Content="Write" Margin="24,0,0,0" IsChecked="{Binding IsWriteChecked}"/>
             </StackPanel>
-        </GroupBox>
+            <TextBlock Name="checkReadWriteLabel" Text="• Check one or both for Address" Margin="0,4,0,0"/>
+        </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.Row="5" Margin="0,16,0,0"
+        <StackPanel Grid.Column="1" Grid.Row="6" Margin="0,16,0,0"
                     Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="70" IsDefault="True" IsEnabled="{Binding IsValid}"
                     Click="OkButton_Click"/>

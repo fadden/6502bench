@@ -18,6 +18,73 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+/*
+A few words about by-value lookups.
+
+We guarantee that symbol labels are unique, but multiple symbols can have the same value.
+This becomes interesting when we're trying to match external address references to symbols
+defined in a platform file or the project properties.  It becomes especially interesting
+when the symbols have widths larger than 1, and partially overlap each other.
+
+For deterministic behavior it's necessary to define a priority order in event of overlap.
+The basic rules for determining the symbol associated with a given address are:
+
+ 1. Newer platform symbol definitions replace older definitions, at file granularity.
+ 2. As an extension of rule #1, project symbols override platform symbols.
+ 3. User symbols override both platform and project symbols.  They can't overlap by value,
+    since one is internal and the others are external, but if a user symbol's label matches
+    a project/platform symbol, the project/platform symbol will be hidden.
+ 4. If two multi-byte symbol definitions overlap, we use whichever was defined closest
+    to the actual address while still appearing before it.  So if we have FOO=$2000/10 and
+    BAR=$2005/10, $2004 would be FOO and $2005 would be BAR.  (Note this can only happen for
+    two symbols inside the same platform file or in the project symbol definitions; otherwise
+    one of the previous rules would have determined it.)
+ 5. If everything else is equal, e.g. we have FOO=$2000 and BAR=$2000 in the same file,
+    the winner is determined alphabetically.  (We don't track symbol definition line numbers,
+    and there's no definite order in project properties, so there's not much else to do.)
+
+Working through the math on every access could get painful, so we create a dictionary with
+the value as the key, and add symbols to it as we work our way through that platform and
+project files.  Every address is represented, so a label with a width of 10 would have 10
+entries in the dictionary.  If we're adding a symbol at an address that already has an entry,
+we do a priority check, and either leave it alone or replace it with the new value.
+
+For 8-bit code it would be slightly more efficient to use a 64K array representing all of
+memory, but that doesn't scale for 65816.  That said, we probably want to break it up by
+bank anyway to allow for partial updates.
+
+----------
+
+A few words about address masks.
+
+On the Atari 2600, you can access registers, RAM, and ROM from multiple addresses.  For
+example, the first TIA register can be accessed at $0000, $0040, $0100, $0140, and so on,
+but only in "even" 4K pages ($0000, $2000, $4000, ...).  Because the underlying hardware is
+just watching for specific values on certain address lines, the set of matching addresses can
+be described with a pair of bit masks, plus one more mask to define which lines are relevant.
+
+The question is how to handle a by-address lookup here.  There are two basic approaches:
+
+ 1. Add all possible entries to the dictionary.
+ 2. Maintain a separate list of masked symbols, and match against those.
+
+Option #1 makes adding a symbol expensive, but lookups very cheap.  We have to add
+potentially thousands of entries to the dictionary for each masked symbol.  When we want
+to look up a symbol, though, we don't have to do anything different.
+
+Option #2 makes adding a symbol cheap, but lookups are problematic.  The problem arises if
+a masked symbol overlaps with a non-masked symbol.  If we want the priority to work the way
+we described earlier, some non-masked symbols might have priority over a given masked symbol
+while others don't.
+
+(I kinda feel like I'm solving problems I don't have, but consistent behavior is a Good Thing.)
+
+It's possible to mitigate the problems of both with a hybrid approach:
+ - Non-masked symbols get added to the dictionary as usual.
+ - Masked symbols are compared to all dictionary entries.  If the mask matches, the
+   existing entry is kept or replaced according to the usual rules.
+*/
+
 namespace SourceGen {
     /// <summary>
     /// List of all symbols, arranged primarily by label, but also accessible by value.  All
@@ -41,17 +108,7 @@ namespace SourceGen {
         /// For efficiency on larger data files, we may want to break this up by bank.  That
         /// way we can do a partial update.
         /// </remarks>
-        private Dictionary<int, Symbol> mSymbolsByAddress =
-            new Dictionary<int, Symbol>();
-
-        /// <summary>
-        /// This is incremented whenever the contents of the symbol table change.  External
-        /// code can compare this against a previous value to see if anything has changed
-        /// since the last visit.
-        /// 
-        /// We could theoretically miss something at the 2^32 rollover.  Not worried.
-        /// </summary>
-        //public int ChangeSerial { get; private set; }
+        private Dictionary<int, Symbol> mSymbolsByAddress = new Dictionary<int, Symbol>();
 
 
         public SymbolTable() { }

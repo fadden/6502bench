@@ -31,22 +31,46 @@ namespace SourceGen {
         public static readonly string FILENAME_FILTER = Res.Strings.FILE_FILTER_SYM65;
 
         /// <summary>
-        /// Regex pattern for name/value pairs in symbol file.
+        /// Regex pattern for symbol definition in platform symbol file.
         ///
         /// Alphanumeric ASCII + underscore for label, which must start at beginning of line.
         /// Value is somewhat arbitrary, but ends if we see a comment delimiter (semicolon) or
-        /// whitespace.  Width is decimal or hex.  Spaces are allowed between tokens.
+        /// whitespace.  Spaces are allowed between tokens, but not required.  Value, width,
+        /// and mask may be hex, decimal, or binary.
         ///
-        /// Group 1 is the name, group 2 is '=' or '@', group 3 is the value, group 4 is
-        /// the symbol width (optional), group 5 is the comment (optional).
+        /// Looks like:
+        ///   NAME {@,=,<,>} VALUE [& MASK] [WIDTH] [;COMMENT]
+        ///
+        /// Regex output groups are:
+        /// 1. NAME
+        /// 2. type/direction char
+        /// 3. VALUE (can be any non-whitespace)
+        /// 4. optional: WIDTH (can be any non-whitespace)
+        /// 5. optional: COMMENT with leading ';'
         /// </summary>
         /// <remarks>
         /// If you want to make sense of this, I highly recommend https://regex101.com/ .
         /// </remarks>
-        private const string NAME_VALUE_PATTERN =
-            @"^([A-Za-z0-9_]+)\s*([@=])\s*([^\ ;]+)\s*([0-9\$]+)?\s*(;.*)?$";
-        private static Regex sNameValueRegex = new Regex(NAME_VALUE_PATTERN);
+        private const string SYMBOL_PATTERN =
+            @"^([A-Za-z0-9_]+)\s*([@=<>])\s*([^\s;]+)\s*([^\s;]+)?\s*(;.*)?$";
+        private static Regex sNameValueRegex = new Regex(SYMBOL_PATTERN);
+        private const int GROUP_NAME = 1;
+        private const int GROUP_TYPE = 2;
+        private const int GROUP_VALUE = 3;
+        private const int GROUP_WIDTH = 4;
+        private const int GROUP_COMMENT = 5;
 
+        /// <summary>
+        /// Regex pattern for mask definition in platform symbol file.
+        ///
+        /// Looks like:
+        ///   CMP_MASK CMP_VALUE ADDR_MASK [;COMMENT]
+        /// </summary>
+        private const string MULTI_MASK_PATTERN =
+            @"^\s*([^\s]+)\s*([^\s]+)\s*([^\s;]+)\s*(;.*)?$";
+        private static Regex sMaskRegex = new Regex(MULTI_MASK_PATTERN);
+
+        private const string MULTI_MASK_CMD = "*MULTI_MASK";
         private const string TAG_CMD = "*TAG";
 
         /// <summary>
@@ -109,6 +133,7 @@ namespace SourceGen {
             }
 
             string tag = string.Empty;
+            DefSymbol.MultiAddressMask multiMask = null;
 
             int lineNum = 0;
             foreach (string line in lines) {
@@ -118,42 +143,54 @@ namespace SourceGen {
                 } else if (line[0] == '*') {
                     if (line.StartsWith(TAG_CMD)) {
                         tag = ParseTag(line);
+                    } else if (line.StartsWith(MULTI_MASK_CMD)) {
+                        if (!ParseMask(line, out multiMask)) {
+                            report.Add(lineNum, FileLoadItem.NO_COLUMN, FileLoadItem.Type.Warning,
+                                Res.Strings.ERR_INVALID_MASK);
+                        }
+                        //Debug.WriteLine("Mask is now " + mask.ToString("x6"));
                     } else {
                         // Do something clever with *SYNOPSIS?
-                        Debug.WriteLine("CMD: " + line);
+                        Debug.WriteLine("Ignoring CMD: " + line);
                     }
                 } else {
                     MatchCollection matches = sNameValueRegex.Matches(line);
                     if (matches.Count == 1) {
-                        //Debug.WriteLine("GOT '" + matches[0].Groups[1] + "' " +
-                        //    matches[0].Groups[2] + " '" + matches[0].Groups[3] + "'");
-                        string label = matches[0].Groups[1].Value;
-                        bool isConst = (matches[0].Groups[2].Value[0] == '=');
+                        string label = matches[0].Groups[GROUP_NAME].Value;
+                        char typeAndDir = matches[0].Groups[GROUP_TYPE].Value[0];
+                        bool isConst = (typeAndDir == '=');
+                        DefSymbol.DirectionFlags direction = DefSymbol.DirectionFlags.ReadWrite;
+                        if (typeAndDir == '<') {
+                            direction = DefSymbol.DirectionFlags.Read;
+                        } else if (typeAndDir == '>') {
+                            direction = DefSymbol.DirectionFlags.Write;
+                        }
                         string badParseMsg;
                         int value, numBase;
                         bool parseOk;
                         if (isConst) {
                             // Allow various numeric options, and preserve the value.
-                            parseOk = Asm65.Number.TryParseInt(matches[0].Groups[3].Value,
+                            parseOk = Asm65.Number.TryParseInt(matches[0].Groups[GROUP_VALUE].Value,
                                 out value, out numBase);
                             badParseMsg =
                                 CommonUtil.Properties.Resources.ERR_INVALID_NUMERIC_CONSTANT;
                         } else {
                             // Allow things like "05/1000".  Always hex.
                             numBase = 16;
-                            parseOk = Asm65.Address.ParseAddress(matches[0].Groups[3].Value,
+                            parseOk = Asm65.Address.ParseAddress(matches[0].Groups[GROUP_VALUE].Value,
                                 (1 << 24) - 1, out value);
                             badParseMsg = CommonUtil.Properties.Resources.ERR_INVALID_ADDRESS;
                         }
 
                         int width = -1;
-                        string widthStr = matches[0].Groups[4].Value;
+                        string widthStr = matches[0].Groups[GROUP_WIDTH].Value;
                         if (parseOk && !string.IsNullOrEmpty(widthStr)) {
                             parseOk = Asm65.Number.TryParseInt(widthStr, out width,
                                     out int ignoredBase);
                             if (parseOk) {
                                 if (width < DefSymbol.MIN_WIDTH || width > DefSymbol.MAX_WIDTH) {
                                     parseOk = false;
+                                    badParseMsg = Res.Strings.ERR_INVALID_WIDTH;
                                 }
                             } else {
                                 badParseMsg =
@@ -161,11 +198,29 @@ namespace SourceGen {
                             }
                         }
 
+                        if (parseOk && multiMask != null) {
+                            // We need to ensure that all possible values fit within the mask.
+                            // We don't test AddressValue here, because it's okay for the
+                            // canonical value to be outside the masked range.
+                            int testWidth = (width > 0) ? width : 1;
+                            for (int testValue = value; testValue < value + testWidth; testValue++) {
+                                if ((testValue & multiMask.CompareMask) != multiMask.CompareValue) {
+                                    parseOk = false;
+                                    badParseMsg = Res.Strings.ERR_VALUE_INCOMPATIBLE_WITH_MASK;
+                                    Debug.WriteLine("Mask FAIL: value=" + value.ToString("x6") +
+                                        " width=" + width +
+                                        " testValue=" + testValue.ToString("x6") +
+                                        " mask=" + multiMask);
+                                    break;
+                                }
+                            }
+                        }
+
                         if (!parseOk) {
                             report.Add(lineNum, FileLoadItem.NO_COLUMN, FileLoadItem.Type.Warning,
                                 badParseMsg);
                         } else {
-                            string comment = matches[0].Groups[5].Value;
+                            string comment = matches[0].Groups[GROUP_COMMENT].Value;
                             if (comment.Length > 0) {
                                 // remove ';'
                                 comment = comment.Substring(1);
@@ -174,7 +229,8 @@ namespace SourceGen {
                                 FormatDescriptor.GetSubTypeForBase(numBase);
                             DefSymbol symDef = new DefSymbol(label, value, Symbol.Source.Platform,
                                 isConst ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                                subType, comment, tag, width, width > 0, loadOrdinal, fileIdent);
+                                subType, width, width > 0, comment, direction, multiMask,
+                                tag, loadOrdinal, fileIdent);
                             if (mSymbols.ContainsKey(label)) {
                                 // This is very easy to do -- just define the same symbol twice
                                 // in the same file.  We don't really need to do anything about
@@ -204,6 +260,54 @@ namespace SourceGen {
             Debug.Assert(line.StartsWith(TAG_CMD));
             string tag = line.Substring(TAG_CMD.Length).Trim();
             return tag;
+        }
+
+        /// <summary>
+        /// Parses the mask value out of a mask command line.
+        /// </summary>
+        /// <param name="line">Line to parse.</param>
+        /// <param name="multiMask">Parsed mask value, or null if the line was empty.</param>
+        /// <returns>True if the mask was parsed successfully.</returns>
+        private bool ParseMask(string line, out DefSymbol.MultiAddressMask multiMask) {
+            Debug.Assert(line.StartsWith(MULTI_MASK_CMD));
+            const int MIN = 0;
+            const int MAX = 0x00ffff;
+
+            multiMask = null;
+            string maskStr = line.Substring(MULTI_MASK_CMD.Length).Trim();
+            if (string.IsNullOrEmpty(maskStr)) {
+                // empty line, disable mask
+                return true;
+            }
+
+            MatchCollection matches = sMaskRegex.Matches(maskStr);
+            if (matches.Count != 1) {
+                return false;
+            }
+
+            string cmpMaskStr = matches[0].Groups[1].Value;
+            string cmpValueStr = matches[0].Groups[2].Value;
+            string addrMaskStr = matches[0].Groups[3].Value;
+            int cmpMask, cmpValue, addrMask, ignoredBase;
+
+            if (!Asm65.Number.TryParseInt(cmpMaskStr, out cmpMask, out ignoredBase) ||
+                    cmpMask < MIN || cmpMask > MAX) {
+                Debug.WriteLine("Bad cmpMask: " + cmpMaskStr);
+                return false;
+            }
+            if (!Asm65.Number.TryParseInt(cmpValueStr, out cmpValue, out ignoredBase) ||
+                    cmpValue < MIN || cmpValue > MAX) {
+                Debug.WriteLine("Bad cmpValue: " + cmpValueStr);
+                return false;
+            }
+            if (!Asm65.Number.TryParseInt(addrMaskStr, out addrMask, out ignoredBase) ||
+                    addrMask < MIN || addrMask > MAX) {
+                Debug.WriteLine("Bad addrMask: " + addrMaskStr);
+                return false;
+            }
+
+            multiMask = new DefSymbol.MultiAddressMask(cmpMask, cmpValue, addrMask);
+            return true;
         }
 
         /// <summary>

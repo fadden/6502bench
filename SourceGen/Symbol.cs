@@ -182,6 +182,17 @@ namespace SourceGen {
                     if (isAscending) {
                         int cmp = string.Compare(a.SourceTypeString, b.SourceTypeString);
                         if (cmp == 0) {
+                            int aDir = 0;
+                            int bDir = 0;
+                            if (a is DefSymbol) {
+                                aDir = (int)((DefSymbol)a).Direction;
+                            }
+                            if (b is DefSymbol) {
+                                bDir = (int)((DefSymbol)b).Direction;
+                            }
+                            cmp = aDir - bDir;
+                        }
+                        if (cmp == 0) {
                             cmp = string.Compare(a.Label, b.Label);
                         }
                         return cmp;

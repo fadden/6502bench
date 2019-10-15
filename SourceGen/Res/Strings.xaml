@@ -43,6 +43,7 @@ limitations under the License.
     <system:String x:Key="str_EquAddress">addr</system:String>
     <system:String x:Key="str_EquConstant">const</system:String>
     <system:String x:Key="str_EquStackRelative">stkrl</system:String>
+    <system:String x:Key="str_ErrBadDefSymbolDir">Unknown I/O direction in symbol</system:String>
     <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>
     <system:String x:Key="str_ErrBadFileLength">Bad file length</system:String>
@@ -62,6 +63,8 @@ limitations under the License.
     <system:String x:Key="str_ErrFileReadOnlyFmt">Cannot write to read-only file {0}.</system:String>
     <system:String x:Key="str_ErrInvalidIntValue">Could not convert value to integer</system:String>
     <system:String x:Key="str_ErrInvalidKeyValue">Key value is out of range</system:String>
+    <system:String x:Key="str_ErrInvalidMask">Invalid mask value</system:String>
+    <system:String x:Key="str_ErrInvalidWidth">Invalid width value</system:String>
     <system:String x:Key="str_ErrInvalidSysdef" xml:space="preserve"> - INVALID DEFINITION</system:String>
     <system:String x:Key="str_ErrLoadConfigFile">Unable to load config file</system:String>
     <system:String x:Key="str_ErrNotProjectFile">This does not appear to be a valid .dis65 project file</system:String>
@@ -69,6 +72,7 @@ limitations under the License.
     <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
     <system:String x:Key="str_ErrProjectSaveFail">Unable to save project file</system:String>
     <system:String x:Key="str_ErrTooLargeForPreview">[File was too large for preview window]</system:String>
+    <system:String x:Key="str_ErrValueIncompatibleWithMask">Symbol value is incompatible with multi-mask</system:String>
     <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
     <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
     <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>

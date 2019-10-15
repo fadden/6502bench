@@ -310,17 +310,35 @@ namespace SourceGen {
                 Part = weakSym.ValuePart.ToString();
             }
         }
+        public class SerMultiMask {
+            public int CompareMask;
+            public int CompareValue;
+            public int AddressMask;
+
+            public SerMultiMask() { }
+            public SerMultiMask(DefSymbol.MultiAddressMask multiMask) {
+                CompareMask = multiMask.CompareMask;
+                CompareValue = multiMask.CompareValue;
+                AddressMask = multiMask.AddressMask;
+            }
+        }
         public class SerDefSymbol : SerSymbol {
             public SerFormatDescriptor DataDescriptor { get; set; }
             public string Comment { get; set; }
             public bool HasWidth { get; set; }
+            public string Direction { get; set; }
+            public SerMultiMask MultiMask { get; set; }
             // Tag not relevant, Xrefs not recorded
 
             public SerDefSymbol() { }
             public SerDefSymbol(DefSymbol defSym) : base(defSym) {
                 DataDescriptor = new SerFormatDescriptor(defSym.DataDescriptor);
-                HasWidth = defSym.HasWidth;
                 Comment = defSym.Comment;
+                HasWidth = defSym.HasWidth;
+                Direction = defSym.Direction.ToString();
+                if (defSym.MultiMask != null) {
+                    MultiMask = new SerMultiMask(defSym.MultiMask);
+                }
             }
         }
         public class SerLocalVariableTable {
@@ -741,8 +759,27 @@ namespace SourceGen {
                     out FormatDescriptor dfd)) {
                 return false;
             }
+            DefSymbol.DirectionFlags direction;
+            if (string.IsNullOrEmpty(serDefSym.Direction)) {
+                direction = DefSymbol.DirectionFlags.ReadWrite;
+            } else try {
+                direction = (DefSymbol.DirectionFlags)
+                    Enum.Parse(typeof(DefSymbol.DirectionFlags), serDefSym.Direction);
+            } catch (ArgumentException) {
+                report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_DEF_SYMBOL_DIR +
+                    ": " + serDefSym.Direction);
+                return false;
+            }
 
-            outDefSym = new DefSymbol(sym, dfd, serDefSym.HasWidth, serDefSym.Comment);
+
+            DefSymbol.MultiAddressMask multiMask = null;
+            if (serDefSym.MultiMask != null) {
+                multiMask = new DefSymbol.MultiAddressMask(serDefSym.MultiMask.CompareMask,
+                    serDefSym.MultiMask.CompareValue, serDefSym.MultiMask.AddressMask);
+            }
+
+            outDefSym = DefSymbol.Create(sym, dfd, serDefSym.HasWidth, serDefSym.Comment,
+                direction, multiMask);
             return true;
         }
 

@@ -67,6 +67,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_EquConstant");
         public static string EQU_STACK_RELATIVE =
             (string)Application.Current.FindResource("str_EquStackRelative");
+        public static string ERR_BAD_DEF_SYMBOL_DIR =
+            (string)Application.Current.FindResource("str_ErrBadDefSymbolDir");
         public static string ERR_BAD_FD_FMT =
             (string)Application.Current.FindResource("str_ErrBadFdFmt");
         public static string ERR_BAD_FD_FORMAT =
@@ -105,6 +107,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrInvalidIntValue");
         public static string ERR_INVALID_KEY_VALUE =
             (string)Application.Current.FindResource("str_ErrInvalidKeyValue");
+        public static string ERR_INVALID_MASK =
+            (string)Application.Current.FindResource("str_ErrInvalidMask");
+        public static string ERR_INVALID_WIDTH =
+            (string)Application.Current.FindResource("str_ErrInvalidWidth");
         public static string ERR_INVALID_SYSDEF =
             (string)Application.Current.FindResource("str_ErrInvalidSysdef");
         public static string ERR_LOAD_CONFIG_FILE =
@@ -119,6 +125,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrProjectSaveFail");
         public static string ERR_TOO_LARGE_FOR_PREVIEW =
             (string)Application.Current.FindResource("str_ErrTooLargeForPreview");
+        public static string ERR_VALUE_INCOMPATIBLE_WITH_MASK =
+            (string)Application.Current.FindResource("str_ErrValueIncompatibleWithMask");
         public static string EXTERNAL_FILE_BAD_DIR_FMT =
             (string)Application.Current.FindResource("str_ExternalFileBadDirFmt");
         public static string EXTERNAL_FILE_BAD_DIR_CAPTION =

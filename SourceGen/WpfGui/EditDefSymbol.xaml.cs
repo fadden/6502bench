@@ -91,6 +91,18 @@ namespace SourceGen.WpfGui {
         }
         private string mConstantLabel;
 
+        public bool IsReadChecked {
+            get { return mIsReadChecked; }
+            set { mIsReadChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mIsReadChecked;
+
+        public bool IsWriteChecked {
+            get { return mIsWriteChecked; }
+            set { mIsWriteChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mIsWriteChecked;
+
         public bool ReadOnlyValueAndType {
             get { return mReadOnlyValueAndType; }
             set { mReadOnlyValueAndType = value; OnPropertyChanged(); }
@@ -99,6 +111,18 @@ namespace SourceGen.WpfGui {
             get { return !mReadOnlyValueAndType; }
         }
         private bool mReadOnlyValueAndType;
+
+        /// <summary>
+        /// Set to true if we should create a Variable rather than a project symbol.
+        /// </summary>
+        public bool IsVariable {
+            get { return mIsVariable; }
+            set { mIsVariable = value; OnPropertyChanged(); }
+        }
+        public bool IsNotVariable {
+            get { return !mIsVariable; }
+        }
+        private bool mIsVariable;
 
         /// <summary>
         /// Format object to use when formatting addresses and constants.
@@ -119,11 +143,6 @@ namespace SourceGen.WpfGui {
         /// Full symbol table, for extended uniqueness check.
         /// </summary>
         private SymbolTable mSymbolTable;
-
-        /// <summary>
-        /// Set to true if we should create a Variable rather than a project symbol.
-        /// </summary>
-        private bool mIsVariable;
 
         /// <summary>
         /// Set to true if the width value is optional.
@@ -166,21 +185,16 @@ namespace SourceGen.WpfGui {
             mDefSymbolList = defList;
             mOldSym = defSym;
             mSymbolTable = symbolTable;
-            mIsVariable = isVariable;
+            IsVariable = isVariable;
             mReadOnlyValueAndType = lockValueAndType;
 
             Label = Value = VarWidth = Comment = string.Empty;
 
-            // hide the inappropriate stuff
             int maxWidth;
             if (isVariable) {
-                projectLabelUniqueLabel.Visibility = widthOptionalLabel.Visibility =
-                    Visibility.Collapsed;
                 ConstantLabel = (string)FindResource("str_VariableConstant");
                 maxWidth = 256;
             } else {
-                labelUniqueLabel.Visibility = varValueRangeLabel.Visibility =
-                    varValueUniqueLabel.Visibility = Visibility.Collapsed;
                 ConstantLabel = (string)FindResource("str_ProjectConstant");
                 maxWidth = 65536;
             }
@@ -207,11 +221,18 @@ namespace SourceGen.WpfGui {
                 } else {
                     IsAddress = true;
                 }
+
+                if (mOldSym.Direction == DefSymbol.DirectionFlags.Read) {
+                    IsReadChecked = true;
+                } else if (mOldSym.Direction == DefSymbol.DirectionFlags.Write) {
+                    IsWriteChecked = true;
+                } else {
+                    IsReadChecked = IsWriteChecked = true;
+                }
             } else {
-                IsAddress = true;
+                IsAddress = IsReadChecked = IsWriteChecked = true;
             }
 
-            labelTextBox.Focus();
             UpdateControls();
         }
 
@@ -246,7 +267,7 @@ namespace SourceGen.WpfGui {
                 labelUnique = !mSymbolTable.TryGetValue(Label, out Symbol sym);
 
                 // It's okay if this and the other are both variables.
-                if (!labelUnique && mIsVariable && sym.IsVariable) {
+                if (!labelUnique && IsVariable && sym.IsVariable) {
                     labelUnique = true;
                 }
             }
@@ -261,14 +282,14 @@ namespace SourceGen.WpfGui {
 
             bool widthValid = true;
             int thisWidth = -1;
-            if (IsConstant && !mIsVariable) {
+            if (IsConstant && !IsVariable) {
                 // width field is ignored
             } else if (string.IsNullOrEmpty(VarWidth)) {
                 // blank field is okay if the width is optional
                 widthValid = mIsWidthOptional;
             } else if (!Asm65.Number.TryParseInt(VarWidth, out thisWidth, out int unusedBase) ||
                     thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH ||
-                    (mIsVariable && thisWidth > 256)) {
+                    (IsVariable && thisWidth > 256)) {
                 // All widths must be between 1 and 65536.  For a variable, the full thing must
                 // fit on zero page without wrapping.  We test for 256 here so that we highlight
                 // the "bad width" label, rather than the "it doesn't fit on the page" label.
@@ -276,7 +297,7 @@ namespace SourceGen.WpfGui {
             }
 
             bool valueRangeValid = true;
-            if (mIsVariable && valueValid && widthValid) {
+            if (IsVariable && valueValid && widthValid) {
                 // $ff with width 1 is okay, $ff with width 2 is not
                 if (thisValue < 0 || thisValue + thisWidth > 256) {
                     valueRangeValid = false;
@@ -288,7 +309,7 @@ namespace SourceGen.WpfGui {
             // For a variable, the value must also be unique within the table.  Values have
             // width, so we need to check for overlap.
             bool valueUniqueValid = true;
-            if (mIsVariable && valueValid && widthValid) {
+            if (IsVariable && valueValid && widthValid) {
                 foreach (KeyValuePair<string, DefSymbol> kvp in mDefSymbolList) {
                     if (kvp.Value != mOldSym &&
                             DefSymbol.CheckOverlap(kvp.Value, thisValue, thisWidth, symbolType)) {
@@ -298,6 +319,11 @@ namespace SourceGen.WpfGui {
                 }
             }
 
+            bool rwValid = true;
+            if (!IsVariable && IsAddress) {
+                rwValid = IsReadChecked || IsWriteChecked;
+            }
+
             labelNotesLabel.Foreground = labelValid ? mDefaultLabelColor : Brushes.Red;
             labelUniqueLabel.Foreground = projectLabelUniqueLabel.Foreground =
                 labelUnique ? mDefaultLabelColor : Brushes.Red;
@@ -305,9 +331,10 @@ namespace SourceGen.WpfGui {
             varValueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
             varValueUniqueLabel.Foreground = valueUniqueValid ? mDefaultLabelColor : Brushes.Red;
             widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;
+            checkReadWriteLabel.Foreground = rwValid ? mDefaultLabelColor : Brushes.Red;
 
             IsValid = labelValid && labelUnique && valueValid && valueRangeValid &&
-                valueUniqueValid && widthValid;
+                valueUniqueValid && widthValid && rwValid;
         }
 
         private bool ParseValue(out int value, out int numBase) {
@@ -325,17 +352,29 @@ namespace SourceGen.WpfGui {
             ParseValue(out int value, out int numBase);
             FormatDescriptor.SubType subType = FormatDescriptor.GetSubTypeForBase(numBase);
             int width = -1;
-            if (IsConstant && !mIsVariable) {
+            if (IsConstant && !IsVariable) {
                 // width field is ignored, don't bother parsing
             } else if (!string.IsNullOrEmpty(VarWidth)) {
                 bool ok = Asm65.Number.TryParseInt(VarWidth, out width, out int unusedNumBase);
                 Debug.Assert(ok);
             }
 
+            DefSymbol.DirectionFlags direction;
+            if (IsReadChecked && IsWriteChecked) {
+                direction = DefSymbol.DirectionFlags.ReadWrite;
+            } else if (IsReadChecked) {
+                direction = DefSymbol.DirectionFlags.Read;
+            } else if (IsWriteChecked) {
+                direction = DefSymbol.DirectionFlags.Write;
+            } else {
+                Debug.Assert(false);
+                direction = DefSymbol.DirectionFlags.None;
+            }
+
             NewSym = new DefSymbol(Label, value,
-                mIsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
+                IsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
                 IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
-                subType, Comment, string.Empty, width, width > 0);
+                subType, width, width > 0, Comment, direction, null, string.Empty);
 
             DialogResult = true;
         }

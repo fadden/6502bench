@@ -1197,9 +1197,11 @@ namespace SourceGen {
                 Anattrib attr = mAnattribs[offset];
                 Symbol sym;
                 int address;
+                OpDef.MemoryEffect accType = OpDef.MemoryEffect.Unknown;
                 if (attr.IsInstructionStart && attr.DataDescriptor == null &&
                         attr.OperandAddress >= 0 && attr.OperandOffset < 0) {
-                    // Has an operand address, but not an offset, meaning it's a reference
+                    // This is an instruction that hasn't been explicitly formatted.  It
+                    // has an operand address, but not an offset, meaning it's a reference
                     // to an address outside the scope of the file. See if it has a
                     // platform symbol definition.
                     //
@@ -1211,12 +1213,14 @@ namespace SourceGen {
                     // Using the full symbol table is potentially a tad less efficient than
                     // looking for a match exclusively in project/platform symbols, but it's
                     // the correct thing to do.
+                    OpDef op = CpuDef.GetOpDef(FileData[offset]);
+                    accType = op.MemEffect;
                     address = attr.OperandAddress;
                     sym = SymbolTable.FindNonVariableByAddress(address);
                 } else if ((attr.IsDataStart || attr.IsInlineDataStart) &&
                         attr.DataDescriptor != null && attr.DataDescriptor.IsNumeric &&
                         attr.DataDescriptor.FormatSubType == FormatDescriptor.SubType.Address) {
-                    // Found a Numeric/Address item that matches.  Data items don't have
+                    // Found a Numeric/Address data item that matches.  Data items don't have
                     // OperandAddress or OperandOffset set, so we need to check manually to
                     // see if the address falls within the project.  In most situations this
                     // isn't really necessary, because the data analysis pass will have resolved
@@ -1227,6 +1231,7 @@ namespace SourceGen {
                     address = RawData.GetWord(mFileData, offset, attr.DataDescriptor.Length,
                         attr.DataDescriptor.FormatType == FormatDescriptor.Type.NumericBE);
                     if (AddrMap.AddressToOffset(offset, address) < 0) {
+                        accType = OpDef.MemoryEffect.ReadModifyWrite;   // guess
                         sym = SymbolTable.FindNonVariableByAddress(address);
                     } else {
                         Debug.WriteLine("Found unhandled internal data addr ref at +" +
