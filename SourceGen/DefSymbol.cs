@@ -102,15 +102,17 @@ namespace SourceGen {
         public DirectionFlags Direction { get; private set; }
 
         /// <summary>
-        /// Masks for symbols that represent multiple addresses.  Usage:
-        /// <pre>
-        ///   if ((addr & CompareMask) == CompareValue &&
-        ///           (addr & AddressMask) == (Value & AddressMask)) {
+        /// Bit masks for symbols that represent multiple addresses.  Instances are immutable.
+        /// </summary>
+        /// <remarks>
+        /// Given an integer "addr" to test:
+        /// <code>
+        ///   if ((addr &amp; CompareMask) == CompareValue &amp;&amp;
+        ///           (addr &amp; AddressMask) == (Value &amp; AddressMask)) {
         ///       // match!
         ///   }
-        /// </pre>
-        /// Instances are immutable.
-        /// </summary>
+        /// </code>
+        /// </remarks>
         public class MultiAddressMask {
             public int CompareMask { get; private set; }
             public int CompareValue { get; private set; }
@@ -125,6 +127,25 @@ namespace SourceGen {
                 return "MultiAddrMask: cmpMask=$" + CompareMask.ToString("x4") +
                     " cmpValue=$" + CompareValue.ToString("x4") +
                     " addrMask=$" + AddressMask.ToString("x4");
+            }
+            public static bool operator ==(MultiAddressMask a, MultiAddressMask b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;        // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;       // one is null
+                }
+                return a.CompareMask == b.CompareMask && a.CompareValue == b.CompareValue &&
+                    a.AddressMask == b.AddressMask;
+            }
+            public static bool operator !=(MultiAddressMask a, MultiAddressMask b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is MultiAddressMask && this == (MultiAddressMask)obj;
+            }
+            public override int GetHashCode() {
+                return CompareMask ^ CompareValue ^ AddressMask;
             }
         }
 

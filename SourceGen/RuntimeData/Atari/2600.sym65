@@ -32,8 +32,8 @@ VSYNC   >   $00     ;W 0000 00x0  Vertical Sync Set-Clear
 VBLANK  >   $01     ;W xx00 00x0  Vertical Blank Set-Clear
 WSYNC   >   $02     ;W ---- ----  Wait for Horizontal Blank
 RSYNC   >   $03     ;W ---- ----  Reset Horizontal Sync Counter
-NUSIZ0  >   $04     ;W 00xx 0xxx  Number-Size player/missle 0
-NUSIZ1  >   $05     ;W 00xx 0xxx  Number-Size player/missle 1
+NUSIZ0  >   $04     ;W 00xx 0xxx  Number-Size player/missile 0
+NUSIZ1  >   $05     ;W 00xx 0xxx  Number-Size player/missile 1
 COLUP0  >   $06     ;W xxxx xxx0  Color-Luminance Player 0
 COLUP1  >   $07     ;W xxxx xxx0  Color-Luminance Player 1
 COLUPF  >   $08     ;W xxxx xxx0  Color-Luminance Playfield
@@ -46,8 +46,8 @@ PF1     >   $0e     ;W xxxx xxxx  Playfield Register Byte 1
 PF2     >   $0f     ;W xxxx xxxx  Playfield Register Byte 2
 RESP0   >   $10     ;W ---- ----  Reset Player 0
 RESP1   >   $11     ;W ---- ----  Reset Player 1
-RESM0   >   $12     ;W ---- ----  Reset Missle 0
-RESM1   >   $13     ;W ---- ----  Reset Missle 1
+RESM0   >   $12     ;W ---- ----  Reset Missile 0
+RESM1   >   $13     ;W ---- ----  Reset Missile 1
 RESBL   >   $14     ;W ---- ----  Reset Ball
 AUDC0   >   $15     ;W 0000 xxxx  Audio Control 0
 AUDC1   >   $16     ;W 0000 xxxx  Audio Control 1
@@ -57,19 +57,19 @@ AUDV0   >   $19     ;W 0000 xxxx  Audio Volume 0
 AUDV1   >   $1a     ;W 0000 xxxx  Audio Volume 1
 GRP0    >   $1b     ;W xxxx xxxx  Graphics Register Player 0
 GRP1    >   $1c     ;W xxxx xxxx  Graphics Register Player 1
-ENAM0   >   $1d     ;W 0000 00x0  Graphics Enable Missle 0
-ENAM1   >   $1e     ;W 0000 00x0  Graphics Enable Missle 1
+ENAM0   >   $1d     ;W 0000 00x0  Graphics Enable Missile 0
+ENAM1   >   $1e     ;W 0000 00x0  Graphics Enable Missile 1
 ENABL   >   $1f     ;W 0000 00x0  Graphics Enable Ball
 HMP0    >   $20     ;W xxxx 0000  Horizontal Motion Player 0
 HMP1    >   $21     ;W xxxx 0000  Horizontal Motion Player 1
-HMM0    >   $22     ;W xxxx 0000  Horizontal Motion Missle 0
-HMM1    >   $23     ;W xxxx 0000  Horizontal Motion Missle 1
+HMM0    >   $22     ;W xxxx 0000  Horizontal Motion Missile 0
+HMM1    >   $23     ;W xxxx 0000  Horizontal Motion Missile 1
 HMBL    >   $24     ;W xxxx 0000  Horizontal Motion Ball
 VDELP0  >   $25     ;W 0000 000x  Vertical Delay Player 0
 VDELP1  >   $26     ;W 0000 000x  Vertical Delay Player 1
 VDELBL  >   $27     ;W 0000 000x  Vertical Delay Ball
-RESMP0  >   $28     ;W 0000 00x0  Reset Missle 0 to Player 0
-RESMP1  >   $29     ;W 0000 00x0  Reset Missle 1 to Player 1
+RESMP0  >   $28     ;W 0000 00x0  Reset Missile 0 to Player 0
+RESMP1  >   $29     ;W 0000 00x0  Reset Missile 1 to Player 1
 HMOVE   >   $2a     ;W ---- ----  Apply Horizontal Motion
 HMCLR   >   $2b     ;W ---- ----  Clear Horizontal Move Registers
 CXCLR   >   $2c     ;W ---- ----  Clear Collision Latches

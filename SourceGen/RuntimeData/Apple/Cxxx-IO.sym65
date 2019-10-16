@@ -9,8 +9,8 @@
 ; There's a lot here that you wouldn't find on an Apple ][+, but since
 ; this is for a disassembler it's okay to have extra stuff so long as it
 ; doesn't conflict.
-KBD             @ $C000     ;R last key pressed + 128
-CLR80COL        = $c000     ;W use $C002-C005 for aux mem (80STOREOFF)
+KBD             < $C000     ;R last key pressed + 128
+CLR80COL        > $C000     ;W use $C002-C005 for aux mem (80STOREOFF)
 SET80COL        @ $C001     ;W use PAGE2 for aux mem (80STOREON)
 RDMAINRAM       @ $C002     ;W if 80STORE off: read main mem $0200-BFFF
 RDCARDRAM       @ $C003     ;W if 80STORE off: read aux mem $0200-BFFF
@@ -100,8 +100,8 @@ SETAN2          @ $C05C     ;RW annunciator 2 off
 CLRAN2          @ $C05D     ;RW annunciator 2 on
 SETAN3          @ $C05E     ;RW annunciator 3 off
 CLRAN3          @ $C05F     ;RW annunciator 3 on
-TAPEIN          = $C060     ;R read cassette input
-BUTN3           @ $C060     ;R switch input 3
+TAPEIN          @ $C060     ;R read cassette input
+BUTN3           = $C060     ;R switch input 3
 BUTN0           @ $C061     ;R switch input 0 / open-apple
 BUTN1           @ $C062     ;R switch input 1 / closed-apple
 BUTN2           @ $C063     ;R switch input 2 / shift key
@@ -172,4 +172,13 @@ ROM_XFER        @ $C314
 ; system, e.g. DOS puts the slot number of the peripheral card from
 ; which it was booted into $5F8.
 ;
-ACTV_PERIP_SLOT @ $07F8     ;slot num ($Cn) of active peripheral card
+SCRNHOLE0       @   $0478 8 ;text page 1 screen holes
+SCRNHOLE1       @   $04F8 8 ;text page 1 screen holes
+SCRNHOLE2       @   $0578 8 ;text page 1 screen holes
+SCRNHOLE3       @   $05F8 8 ;text page 1 screen holes
+SCRNHOLE4       @   $0678 8 ;text page 1 screen holes
+SCRNHOLE5       @   $06F8 8 ;text page 1 screen holes
+SCRNHOLE6       @   $0778 8 ;text page 1 screen holes
+SCRNHOLE7       @   $07F8 8 ;text page 1 screen holes
+
+ACTV_PERIP_SLOT @   $07F8   ;slot num ($Cn) of active peripheral card

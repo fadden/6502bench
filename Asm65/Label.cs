@@ -24,7 +24,7 @@ namespace Asm65 {
     /// encapsulated here.  All code should be case-preserving, but the comparison method
     /// and "normal form" are defined here.
     /// </summary>
-    public class Label {
+    public static class Label {
         // Arbitrary choice for SourceGen. Different assemblers have different limits.
         public const int MAX_LABEL_LEN = 32;
 

@@ -55,7 +55,7 @@ namespace Asm65 {
         /// of bytes required by the instruction.
         /// </summary>
         public enum AddressMode : byte {
-            Unknown = 0,
+            Unknown = 0,        // format           bytes (example)
             Abs,                // OP addr          3
             AbsInd,             // OP (addr)        3 (JMP)
             AbsIndLong,         // OP [addr]        3 (JML)
@@ -78,7 +78,7 @@ namespace Asm65 {
             ImmLongA,           // OP #const8/16    2 or 3, depending on 'm' flag
             ImmLongXY,          // OP #const8/16    2 or 3, depending on 'x' flag
             Implied,            // OP               1
-            PCRel,              // OP label         2 (branch instructions)
+            PCRel,              // OP label         2 (BCC, BNE, ...)
             PCRelLong,          // OP label         3 (BRL)
             StackAbs,           // OP addr          3 (PEA)
             StackDPInd,         // OP (dp)          2 (PEI)
@@ -3393,6 +3393,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.NOP,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.None,
             AddrMode = AddressMode.Implied,
             CycDef = 1
         };
@@ -3402,6 +3403,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.LDD,
             Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.Read,
             AddrMode = AddressMode.Implied
         };
         public static readonly OpDef OpLDD_Absolute = new OpDef(OpLDD) {

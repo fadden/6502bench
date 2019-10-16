@@ -329,6 +329,7 @@ namespace SourceGen {
             public string Direction { get; set; }
             public SerMultiMask MultiMask { get; set; }
             // Tag not relevant, Xrefs not recorded
+            // MultiMask currently not set for project symbols, but we support it anyway.
 
             public SerDefSymbol() { }
             public SerDefSymbol(DefSymbol defSym) : base(defSym) {

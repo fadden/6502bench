@@ -800,6 +800,7 @@ namespace SourceGen {
 
             debugLog.LogI("Analysis complete");
             //Problems.DebugDump();
+            Debug.WriteLine(SymbolTable.ToString());
         }
 
         /// <summary>
@@ -1216,7 +1217,7 @@ namespace SourceGen {
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
                     accType = op.MemEffect;
                     address = attr.OperandAddress;
-                    sym = SymbolTable.FindNonVariableByAddress(address);
+                    sym = SymbolTable.FindNonVariableByAddress(address, accType);
                 } else if ((attr.IsDataStart || attr.IsInlineDataStart) &&
                         attr.DataDescriptor != null && attr.DataDescriptor.IsNumeric &&
                         attr.DataDescriptor.FormatSubType == FormatDescriptor.SubType.Address) {
@@ -1232,7 +1233,7 @@ namespace SourceGen {
                         attr.DataDescriptor.FormatType == FormatDescriptor.Type.NumericBE);
                     if (AddrMap.AddressToOffset(offset, address) < 0) {
                         accType = OpDef.MemoryEffect.ReadModifyWrite;   // guess
-                        sym = SymbolTable.FindNonVariableByAddress(address);
+                        sym = SymbolTable.FindNonVariableByAddress(address, accType);
                     } else {
                         Debug.WriteLine("Found unhandled internal data addr ref at +" +
                             offset.ToString("x6"));
@@ -1251,7 +1252,7 @@ namespace SourceGen {
                     // finding a label reference rather than project/platform symbol; only
                     // works if the location already has a label.
                     if (sym == null && (address & 0xffff) < 0xffff && checkNearby) {
-                        sym = SymbolTable.FindNonVariableByAddress(address + 1);
+                        sym = SymbolTable.FindNonVariableByAddress(address + 1, accType);
                         if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
                                 sym.SymbolSource != Symbol.Source.Platform) {
                             Debug.WriteLine("Applying non-platform in GeneratePlatform: " + sym);
