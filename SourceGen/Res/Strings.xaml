@@ -61,9 +61,14 @@ limitations under the License.
     <system:String x:Key="str_ErrFileNotFoundFmt">File not found: {0}</system:String>
     <system:String x:Key="str_ErrFileReadFailedFmt">Failed reading {0}: {1}.</system:String>
     <system:String x:Key="str_ErrFileReadOnlyFmt">Cannot write to read-only file {0}.</system:String>
+    <system:String x:Key="str_ErrInvalidAddressMask">Invalid MULTI_MASK AddressMask</system:String>
+    <system:String x:Key="str_ErrInvalidCmpAddrOverlap">MULTI_MASK CompareMask and AddressMask overlap</system:String>
+    <system:String x:Key="str_ErrInvalidCmpExtraBits">MULTI_MASK CompareValue has bits not in CompareMask</system:String>
+    <system:String x:Key="str_ErrInvalidCompareMask">Invalid MULTI_MASK CompareMask</system:String>
+    <system:String x:Key="str_ErrInvalidCompareValue">Invalid MULTI_MASK CompareValue</system:String>
     <system:String x:Key="str_ErrInvalidIntValue">Could not convert value to integer</system:String>
     <system:String x:Key="str_ErrInvalidKeyValue">Key value is out of range</system:String>
-    <system:String x:Key="str_ErrInvalidMask">Invalid mask value</system:String>
+    <system:String x:Key="str_ErrInvalidMultiMask">Invalid MULTI_MASK line</system:String>
     <system:String x:Key="str_ErrInvalidWidth">Invalid width value</system:String>
     <system:String x:Key="str_ErrInvalidSysdef" xml:space="preserve"> - INVALID DEFINITION</system:String>
     <system:String x:Key="str_ErrLoadConfigFile">Unable to load config file</system:String>
@@ -72,7 +77,7 @@ limitations under the License.
     <system:String x:Key="str_ErrProjectLoadFail">Unable to load project file</system:String>
     <system:String x:Key="str_ErrProjectSaveFail">Unable to save project file</system:String>
     <system:String x:Key="str_ErrTooLargeForPreview">[File was too large for preview window]</system:String>
-    <system:String x:Key="str_ErrValueIncompatibleWithMask">Symbol value is incompatible with multi-mask</system:String>
+    <system:String x:Key="str_ErrValueIncompatibleWithMask">Symbol value is incompatible with current multi-mask</system:String>
     <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
     <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
     <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>

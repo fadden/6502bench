@@ -27,12 +27,14 @@ matters.</p>
 
 <p>Platform symbol files consist of comments, commands, and symbols.
 Blank lines, and lines that begin with a semicolon (';'), are ignored.  Lines
-that begin with an asterisk ('*') are commands.  Two are currently
+that begin with an asterisk ('*') are commands.  Three are currently
 defined:</p>
 <ul>
   <li><code>*SYNOPSIS</code> - a short summary of the file contents.</li>
   <li><code>*TAG</code> - a tag string to apply to all symbols that follow
     in this file.</li>
+  <li><code>*MULTI_MASK</code> - specify a mask for symbols that appear
+    at multiple addresses.</li>
 </ul>
 
 <p>Tags can be used by extension scripts to identify a subset of symbols.
@@ -44,29 +46,69 @@ are treated as untagged.</p>
 
 <p>All other lines are symbols, which have the form:</p>
 <pre>
-  label {=|@} value [width] [;comment]
+  LABEL {=|@|&lt;|&gt;} VALUE [WIDTH] [;COMMENT]
 </pre>
 
-<p>Labels must be at least two characters long, begin with a letter or
+<p>The LABEL must be at least two characters long, begin with a letter or
 underscore, and consist entirely of alphanumeric ASCII characters
 (A-Z, a-z, 0-9) and the underscore ('_').  (This is the same format
 required for line labels in SourceGen.)</p>
-<p>Use '@' for address values, and '=' for constants.  The only important
-difference between them is that address values will be applied automatically
-to operands that reference addresses outside the scope of the file.
-Constants are never applied automatically.</p>
+<p>The next token can be one of:</p>
+<ul>
+  <li>@: general addresses</li>
+  <li>&lt;: read-only addresses</li>
+  <li>&gt;: write-only addresses</li>
+  <li>=: constants</li>
+</ul>
+<p>If an instruction references an address, and that address is outside
+the bounds of the file, the list of address symbols (i.e. everything
+that's not a constant) will be scanned for a match.
+If found, the symbol is applied automatically.  You normally want to
+use '@', but can use '&lt;' and '&gt;' for memory-mapped I/O locations
+that have different behavior depending on whether they are read or
+written.</p>
 
-<p>The value is a number in decimal, hexadecimal (with a leading '$'), or
+<p>The VALUE is a number in decimal, hexadecimal (with a leading '$'), or
 binary (with a leading '%').  The numeric base will be recorded and used when
 formatting the symbol in generated output, so use whichever form is most
 appropriate.  Values are unsigned 24-bit numbers.</p>
 
-<p>The width is optional, and ignored for constants.  It must be a
+<p>The WIDTH is optional, and ignored for constants.  It must be a
 decimal or hexadecimal value between 1 and 65536, inclusive.  If omitted,
 the default width is 1.</p>
 
-<p>The comment is optional.  If present, it will be saved and used as the
+<p>The COMMENT is optional.  If present, it will be saved and used as the
 end-of-line comment on the .EQ directive if the symbol is used.</p>
+
+<h4>Using MULTI_MASK</h4>
+
+<p>The multi-address mask is used for systems like the Atari 2600, where
+RAM, ROM, and I/O registers appear at multiple addresses.  The hardware
+looks for certain address lines to be set or clear, and if the pattern
+matches, another set of bits is examined to determine which register or
+RAM address is being accessed.</p>
+
+<p>For example, suppose the access pattern for a set of registers is
+<code>???0 ??1? 1??x xxxx</code> (where '?' can be any value, 0/1 must
+be that value, and 'x' means the bit is used to determine the register).
+So any value between $0280-029f matches, as does $23c0-23df, but
+$0480 and $1280 don't.  The register number is found in the low five bits.</p>
+<p>The corresponding MULTI_MASK line, with values specifed in binary,
+would be:</p>
+<pre>*MULTI_MASK %0001001010000000 %0000001010000000 %0000000000011111</pre>
+<p>The values are CompareMask, CompareValue, and AddressMask.  To
+determine if an address is in the register set, we check to see if
+<code>(address &amp; CompareMask) == CompareValue</code>.  If so, we can
+extract the register number with <code>(address &amp; AddressMask)</code>.</p>
+
+<p>We don't want to have a huge collection of equates at the top of the
+file, so whatever value is used in the symbol declaration is considered
+the "canonical" value.  All other matching values are expressed as an
+offset.</p>
+<p>All values must fall between 0 and $00FFFFFF.  The set bits in
+CompareMask and AddressMask must not overlap, and CompareValue must not
+have any bits set that aren't also set in CompareMask.</p>
+
 
 <h3>Creating a Project-Specific Symbol File</h3>
 

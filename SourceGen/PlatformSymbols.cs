@@ -144,9 +144,9 @@ namespace SourceGen {
                     if (line.StartsWith(TAG_CMD)) {
                         tag = ParseTag(line);
                     } else if (line.StartsWith(MULTI_MASK_CMD)) {
-                        if (!ParseMask(line, out multiMask)) {
+                        if (!ParseMask(line, out multiMask, out string badMaskMsg)) {
                             report.Add(lineNum, FileLoadItem.NO_COLUMN, FileLoadItem.Type.Warning,
-                                Res.Strings.ERR_INVALID_MASK);
+                                badMaskMsg);
                         }
                         //Debug.WriteLine("Mask is now " + mask.ToString("x6"));
                     } else {
@@ -268,12 +268,15 @@ namespace SourceGen {
         /// <param name="line">Line to parse.</param>
         /// <param name="multiMask">Parsed mask value, or null if the line was empty.</param>
         /// <returns>True if the mask was parsed successfully.</returns>
-        private bool ParseMask(string line, out DefSymbol.MultiAddressMask multiMask) {
+        private bool ParseMask(string line, out DefSymbol.MultiAddressMask multiMask,
+                out string badMaskMsg) {
             Debug.Assert(line.StartsWith(MULTI_MASK_CMD));
             const int MIN = 0;
             const int MAX = 0x00ffff;
 
+            badMaskMsg = Res.Strings.ERR_INVALID_MULTI_MASK;
             multiMask = null;
+
             string maskStr = line.Substring(MULTI_MASK_CMD.Length).Trim();
             if (string.IsNullOrEmpty(maskStr)) {
                 // empty line, disable mask
@@ -293,16 +296,34 @@ namespace SourceGen {
             if (!Asm65.Number.TryParseInt(cmpMaskStr, out cmpMask, out ignoredBase) ||
                     cmpMask < MIN || cmpMask > MAX) {
                 Debug.WriteLine("Bad cmpMask: " + cmpMaskStr);
+                badMaskMsg = Res.Strings.ERR_INVALID_COMPARE_MASK;
                 return false;
             }
             if (!Asm65.Number.TryParseInt(cmpValueStr, out cmpValue, out ignoredBase) ||
                     cmpValue < MIN || cmpValue > MAX) {
                 Debug.WriteLine("Bad cmpValue: " + cmpValueStr);
+                badMaskMsg = Res.Strings.ERR_INVALID_COMPARE_VALUE;
                 return false;
             }
             if (!Asm65.Number.TryParseInt(addrMaskStr, out addrMask, out ignoredBase) ||
                     addrMask < MIN || addrMask > MAX) {
                 Debug.WriteLine("Bad addrMask: " + addrMaskStr);
+                badMaskMsg = Res.Strings.ERR_INVALID_ADDRESS_MASK;
+                return false;
+            }
+
+            // The two masks should not overlap: one represents bits that must be in a
+            // specific state for a match to exist, the other indicates which bits are used
+            // to select a specific register.  This should be a warning.
+            if ((cmpMask & ~addrMask) != cmpMask) {
+                Debug.WriteLine("Warning: cmpMask/addrMask overlap");
+                badMaskMsg = Res.Strings.ERR_INVALID_CMP_ADDR_OVERLAP;
+                return false;
+            }
+            // If cmpValue has bits set that aren't in cmpMask, we will never find a match.
+            if ((cmpValue & ~cmpMask) != 0) {
+                Debug.WriteLine("cmpValue has unexpected bits set");
+                badMaskMsg = Res.Strings.ERR_INVALID_CMP_EXTRA_BITS;
                 return false;
             }
 

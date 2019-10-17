@@ -11,3 +11,31 @@ SameValB_A  @   $2110
 SameValC_B  @   $2120
 
 SepOver1    @   $3100   4       ;$3100-3103, inclusive
+
+; I/O direction test -- replace part of the write-only range
+WriteOnly2  >   $5002
+
+;
+; MULTI_MASK tests.
+;
+
+; This overlaps with an earlier declaration, but *only* for address $c010,
+; not for all occurrences.
+NonMultiOver    @   $c010       ;winner
+
+
+*MULTI_MASK $ff00 $c100 $000f   ;$c100-c10f, repeats $c110-c11f, etc. to $c1ff
+
+; Symbol in previous file overlaps with this.
+; Test: C100, C110, C120
+MoreMultiZero   @   $c100
+
+
+;
+; More erroneous masks.  These are in a separate file mostly to test how
+; errors in multiple files are reported.
+;
+*MULTI_MASK $fff0 $000f $000f   ;CompareValue has bits not in CompareMask
+*MULTI_MASK $fff0 $fff0 $00ff   ;AddressMask and CompareMask overlap
+
+*MULTI_MASK

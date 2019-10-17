@@ -295,6 +295,11 @@ to the note in the code list and in the "Notes" window.</p>
 
 <h2><a name="project-symbol">Edit Project Symbol</a></h2>
 <p>This is used to edit the properties of a project symbol.</p>
+<p>Symbols marked as "address" will be applied automatically when an
+operand references an address outside the scope of the data file.  They
+will not be applied to addresses inside the data file.  Symbols
+marked as "constant" are not applied automatically, and must be
+explicitly specified as an operand.</p>
 <p>The label must meet the criteria for symbols (see
 <a href="intro.html#about-symbols">All About Symbols</a>), and must
 not have the same name as another project symbol.  It can overlap
@@ -302,19 +307,17 @@ with platform symbols and user labels.</p>
 <p>The value may be entered in decimal, hexadecimal, or binary.  The numeric
 base you choose will be remembered, so that the value will be displayed
 the same way when used in a .EQ directive.</p>
-<p>You can optionally provide a width.  For example, if the address is
-of a two-byte pointer or a 64-byte buffer, you would set the width field
-to cause all references to any location in that range to be set to the
-symbol.  Widths may be entered in hex or decimal.  If the field
-is left blank, a width of 1 is assumed.  Overlapping symbols are allowed.
-The width is ignored for constants.</p>
+<p>You can optionally provide a width for address symbols.  For example,
+if the address is of a two-byte pointer or a 64-byte buffer, you would
+set the width field to cause all references to any location in that range
+to be set to the symbol.  Widths may be entered in hex or decimal.  If
+the field is left blank, a width of 1 is assumed.  Overlapping symbols
+are allowed.  The width is ignored for constants.</p>
 <p>If you enter a comment, it will be placed at the end of the line of
 the .EQ directive.</p>
-<p>Symbols marked as "address" will be applied automatically when an
-operand references an address outside the scope of the data file.  They
-will not be applied to addresses inside the data file.  Symbols
-marked as "constant" are not applied automatically, and must be
-explicitly specified as an operand.</p>
+<p>For address symbols that represent a memory-mapped I/O location, it
+can be useful to have different symbols for reads and writes.  Use
+the Read/Write checkboxes to specify the desired behavior.</p>
 
 
 <h2><a name="lvtable">Create/Edit Local Variable Table</a></h2>

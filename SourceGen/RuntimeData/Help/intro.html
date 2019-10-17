@@ -144,6 +144,15 @@ instructions.  If you don't know what state the flags are in, you can't
 know whether <code>LDA #value</code> is two bytes or three, and the
 disassembly of the instruction stream will come out wrong.</p>
 
+<p>Some addresses correspond to memory-mapped I/O, rather than RAM or ROM.
+Accessing the address can have side effects, like changing between text
+and graphics modes.  Sometimes reading and writing have different effects.
+For example, on later models of the Apple II, reading from
+$C000 returns the most recently hit key, while writing to $C000 disables
+80 columns.</p>
+<p>On a few systems, such as the Atari 2600, RAM, ROM, and registers can
+appear at multiple locations, "mirrored" across the address space.</p>
+
 <h3><a name="charenc">Character Encoding</a></h3>
 
 <p>The American Standard Code for Information Interchange (ASCII) was
@@ -458,6 +467,12 @@ symbols defined closer to the target address take priority, so if you put
 a 4-byte symbol in the middle of a 256-byte symbol, the 4-byte symbol will
 be visible because the start point is closer to the addresses it covers
 than the start of the 256-byte range.</p>
+
+<p>Platform symbols can be designated for reading, writing, or both.
+Normally you'd want both, but if an address is a memory-mapped I/O
+location that has different behavior for reads and writes, you'd want
+to define two different symbols, and have the correct one applied
+based on the access type.</p>
 
 <p><b>Project symbols</b> behave like platform symbols, but they are
 defined in the project file itself.  The editor will prevent you from

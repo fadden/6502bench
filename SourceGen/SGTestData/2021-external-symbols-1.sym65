@@ -53,3 +53,53 @@ BankWrap    @   $fff0   $20
 
 ; Width specifiers on constants should be ignored.
 FatConst    =   $4000   8
+
+; I/O direction test
+ReadOnly    <   $5000 2         ;R
+WriteOnly   >   $5001 2         ;W
+
+
+;
+; MULTI_MASK tests.
+;
+; The behavior of overlapping masks is not currently defined, so we don't test
+; that scenario.
+;
+
+; overlaps with multi range in second symbol file
+AlsoMoreMultiZero @ $c110       ;winner
+
+*MULTI_MASK $ff00 $c000 $000f   ;$c000-c00f, repeats $c010-c01f, etc. to $c0ff
+MultiZero       @   $c000
+AlsoMultiZero   @   $c010       ;wins (alphabetically)
+MultiOne        @   $c021
+; Test: C000, C010, C020, C0F0
+; Test: C001, C011, C021
+; Test: C002, C012, C022
+
+MultiRead       <   $c004 3     ;$c004/5/6, read-only
+MultiWrite      >   $c005 3     ;$c005/6/7, write-only
+; Test: read C003 C004 C005 C006 C007
+; Test: write C004 C005 C006 C007 C008
+
+
+;
+; Invalid values.  These cause a warning at load time, and the symbol will
+; be ignored.
+;
+
+; Not in range.
+MultiInvalid    @   $1234
+
+; Not all covered addresses are inside the masked range.
+TooLong         @   $c0f8   $a
+
+;
+; Badly-formed MULTI_MASK entries.  These cause a warning at load time, and
+; the directive will be ignored.
+;
+*MULTI_MASK $fffff $ffff $ffff  ;range
+*MULTI_MASK $ffff $fffff $ffff  ;range
+*MULTI_MASK $ffff $ffff $fffff  ;range
+
+*MULTI_MASK

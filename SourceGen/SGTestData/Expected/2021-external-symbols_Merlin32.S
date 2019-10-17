@@ -17,15 +17,25 @@ Over2a   equ   $3006      ;$3006
 Over3    equ   $3006      ;$3006-300c
 SepOver1 equ   $3100      ;$3100-3103, inclusive
 SepOver2 equ   $3102      ;$3102-3105, inclusive
+ReadOnly equ   $5000      ;R
+WriteOnly equ  $5001      ;W
+WriteOnly2 equ $5002
+MultiRead equ  $c004      ;$c004/5/6, read-only
+MultiWrite equ $c005      ;$c005/6/7, write-only
+AlsoMultiZero equ $c010   ;wins (alphabetically)
+NonMultiOver equ $c010    ;winner
+MultiOne equ   $c021
+MoreMultiZero equ $c100
+AlsoMoreMultiZero equ $c110 ;winner
 BankWrap equ   $fff0
 
          org   $1000
 L1000    lda   CodeWrap+255
          ldx   L1000
          ldy   L1000+1
-         lda   L10DD
-         lda   CodeWrap+478
-         lda   CodeWrap+485
+         lda   L1148
+         lda   CodeWrap+585
+         lda   CodeWrap+592
          nop
          lda   $1ffe
          lda   SameName1-1
@@ -102,5 +112,46 @@ L1000    lda   CodeWrap+255
          lda   $4001
          lda   BankWrap+8
          lda   <BankWrap-65512
-L10DD    rts
+         nop
+         lda   ReadOnly
+         lda   ReadOnly+1
+         ldx   $5002
+         ldy   $5003
+         sta   WriteOnly-1
+         sta   WriteOnly
+         stx   WriteOnly2
+         sty   $5003
+         nop
+         bit   AlsoMultiZero-16
+         bit   NonMultiOver
+         bit   AlsoMultiZero+16
+         bit   AlsoMultiZero+224
+         nop
+         bit   MultiOne-32
+         bit   MultiOne-16
+         bit   MultiOne
+         nop
+         bit   $c002
+         bit   $c012
+         bit   $c022
+         nop
+         lda   MultiRead-1
+         lda   MultiRead
+         lda   MultiRead+1
+         lda   MultiRead+2
+         lda   $c007
+         sta   MultiWrite-1
+         sta   MultiWrite
+         sta   MultiWrite+1
+         sta   MultiWrite+2
+         sta   $c008
+         nop
+         jsr   MultiRead+1
+         nop
+         bit   MoreMultiZero
+         bit   AlsoMoreMultiZero
+         bit   MoreMultiZero+32
+         bit   MoreMultiZero+240
+         nop
+L1148    rts
 

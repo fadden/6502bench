@@ -103,12 +103,22 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrFileReadFailedFmt");
         public static string ERR_FILE_READ_ONLY_FMT =
             (string)Application.Current.FindResource("str_ErrFileReadOnlyFmt");
+        public static string ERR_INVALID_ADDRESS_MASK =
+            (string)Application.Current.FindResource("str_ErrInvalidAddressMask");
+        public static string ERR_INVALID_CMP_ADDR_OVERLAP =
+            (string)Application.Current.FindResource("str_ErrInvalidCmpAddrOverlap");
+        public static string ERR_INVALID_CMP_EXTRA_BITS =
+            (string)Application.Current.FindResource("str_ErrInvalidCmpExtraBits");
+        public static string ERR_INVALID_COMPARE_MASK =
+            (string)Application.Current.FindResource("str_ErrInvalidCompareMask");
+        public static string ERR_INVALID_COMPARE_VALUE =
+            (string)Application.Current.FindResource("str_ErrInvalidCompareValue");
         public static string ERR_INVALID_INT_VALUE =
             (string)Application.Current.FindResource("str_ErrInvalidIntValue");
         public static string ERR_INVALID_KEY_VALUE =
             (string)Application.Current.FindResource("str_ErrInvalidKeyValue");
-        public static string ERR_INVALID_MASK =
-            (string)Application.Current.FindResource("str_ErrInvalidMask");
+        public static string ERR_INVALID_MULTI_MASK =
+            (string)Application.Current.FindResource("str_ErrInvalidMultiMask");
         public static string ERR_INVALID_WIDTH =
             (string)Application.Current.FindResource("str_ErrInvalidWidth");
         public static string ERR_INVALID_SYSDEF =

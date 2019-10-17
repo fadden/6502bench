@@ -117,4 +117,53 @@ Start   lda     Start-1     ;CodeWrap+255
         lda     $fff8       ;should be BankWrap+8
         lda     $08         ;should be BankWrap+24 or <BankWrap-232
 
+        nop
+
+; test I/O direction
+Dir     equ     $5000
+        lda     Dir
+        lda     Dir+1
+        ldx     Dir+2
+        ldy     Dir+3
+        sta     Dir
+        sta     Dir+1
+        stx     Dir+2
+        sty     Dir+3
+
+        nop
+
+; test MULTI_MASK stuff
+        bit     $c000       ;should all be AlsoMultiZero
+        bit     $c010       ;<-- except this NonMultiOver
+        bit     $c020
+        bit     $c0f0
+        nop
+        bit     $c001       ;should all be MultiOne
+        bit     $c011
+        bit     $c021
+        nop
+        bit     $c002       ;should all be hex
+        bit     $c012
+        bit     $c022
+        nop
+        lda     $c003
+        lda     $c004       ;MultiRead
+        lda     $c005       ;MultiRead+1
+        lda     $c006       ;MultiRead+2
+        lda     $c007
+        sta     $c004
+        sta     $c005       ;MultiWrite
+        sta     $c006       ;MultiWrite+1
+        sta     $c007       ;MultiWrite+2
+        sta     $c008
+        nop
+        jsr     $c005       ;MultiRead+1
+        nop
+        bit     $c100       ;should all be MoreMultiZero
+        bit     $c110       ;<-- except this AlsoMoreMultiZero
+        bit     $c120
+        bit     $c1f0
+
+        nop
+
 END     rts
