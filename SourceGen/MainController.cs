@@ -2191,13 +2191,7 @@ namespace SourceGen {
                 if (matchPos >= 0) {
                     //Debug.WriteLine("Match " + index + ": " + searchStr);
                     mMainWin.CodeListView_EnsureVisible(index);
-                    mMainWin.CodeListView_DeselectAll();
                     mMainWin.CodeListView_SelectRange(index, 1);
-                    // TODO(someday): I think we need to do something with the ListView
-                    // keyboard nav state here.  Otherwise Shift+F3 is regarded as selection
-                    // movement with shift held down, and it does a range select.  Currently
-                    // working around this by using Ctrl+F3 instead.  See also maybe the
-                    // ItemContainerGenerator stuff in MainWindow.
                     return;
                 }
 
@@ -2460,7 +2454,6 @@ namespace SourceGen {
             mMainWin.CodeListView_EnsureVisible(topLineIndex);
 
             // Update the selection.
-            mMainWin.CodeListView_DeselectAll();
             mMainWin.CodeListView_SelectRange(topLineIndex, lastLineIndex - topLineIndex);
 
             if (doPush) {
@@ -2512,7 +2505,6 @@ namespace SourceGen {
                         mMainWin.CodeListView_EnsureVisible(lineIndex);
 
                         // Update the selection.
-                        mMainWin.CodeListView_DeselectAll();
                         mMainWin.CodeListView_SelectRange(lineIndex, 1);
 
                         if (doPush) {

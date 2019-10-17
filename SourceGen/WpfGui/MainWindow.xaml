@@ -103,8 +103,7 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="FindPreviousCmd" Text="Find Previous">
                 <RoutedUICommand.InputGestures>
-                    <!-- should be Shift+F3, but that causes ListView to do range selection -->
-                    <KeyGesture>Ctrl+F3</KeyGesture>
+                    <KeyGesture>Shift+F3</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="FormatAsWordCmd" Text="Format As Word">

@@ -758,7 +758,7 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Selects a range of values.  Does not clear the previous selection.
+        /// Selects a range of values.  Clears the previous selection.
         /// </summary>
         /// <param name="start">First line to select.</param>
         /// <param name="count">Number of lines to select.</param>
@@ -766,8 +766,20 @@ namespace SourceGen.WpfGui {
             Debug.Assert(start >= 0 && start < CodeDisplayList.Count);
             Debug.Assert(count > 0 && start + count <= CodeDisplayList.Count);
 
+            CodeListView_DeselectAll();
+
             if (count == 1) {
-                codeListView.SelectedItems.Add(CodeDisplayList[start]);
+                //codeListView.SelectedItems.Add(CodeDisplayList[start]);
+
+                // Special handling for single-item selection, for the benefit of Shift+F3.  If
+                // we're in multi-select mode, and we select an item while the shift key is
+                // down, the control will do a range select instead (as if you shift-clicked).
+                // We work around this by temporarily switching to single-select mode.
+                //
+                // This could cause problems if we wanted to select multiple single lines.
+                codeListView.SelectionMode = SelectionMode.Single;
+                codeListView.SelectedItem = CodeDisplayList[start];
+                codeListView.SelectionMode = SelectionMode.Extended;
                 return;
             }
 
