@@ -178,10 +178,11 @@ namespace RuntimeData.Apple {
             return false;
         }
 
-        public void CheckJsr(int offset, out bool noContinue) {
+        public void CheckJsr(int offset, int operand, out bool noContinue) {
+            const int MLI_ENTRY = 0xbf00;
+
             noContinue = false;
-            if (offset + 6 < mFileData.Length &&
-                    mFileData[offset + 1] == 0x00 && mFileData[offset + 2] == 0xbf) {
+            if (offset + 6 < mFileData.Length && operand == MLI_ENTRY) {
                 // match!
 
                 byte req = mFileData[offset + 3];

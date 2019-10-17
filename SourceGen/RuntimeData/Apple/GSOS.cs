@@ -65,10 +65,11 @@ namespace RuntimeData.Apple {
             return false;
         }
 
-        public void CheckJsl(int offset, out bool noContinue) {
+        public void CheckJsl(int offset, int operand, out bool noContinue) {
+            const int INLINE_ENTRY = 0xe100a8;
+
             noContinue = false;
-            if (offset + 7 < mFileData.Length && mFileData[offset + 1] == 0xa8 &&
-                    mFileData[offset + 2] == 0x00 && mFileData[offset + 3] == 0xe1) {
+            if (offset + 7 < mFileData.Length && operand == INLINE_ENTRY) {
                 // match!
 
                 int req = Util.GetWord(mFileData, offset + 4, 2, false);

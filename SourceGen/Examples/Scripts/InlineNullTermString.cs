@@ -47,10 +47,9 @@ namespace ExtensionScriptSample {
             return beforeLabel.StartsWith(LABEL_PREFIX) || afterLabel.StartsWith(LABEL_PREFIX);
         }
 
-        public void CheckJsr(int offset, out bool noContinue) {
+        public void CheckJsr(int offset, int operand, out bool noContinue) {
             noContinue = false;
-            int target = Util.GetWord(mFileData, offset + 1, 2, false);
-            if (!mNullStringAddrs.ContainsKey(target)) {
+            if (!mNullStringAddrs.ContainsKey(operand)) {
                 return;
             }
 

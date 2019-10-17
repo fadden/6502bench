@@ -61,10 +61,9 @@ namespace RuntimeData.Test2022 {
             return (beforeLabel.StartsWith(PREFIX) || afterLabel.StartsWith(PREFIX));
         }
 
-        public void CheckJsr(int offset, out bool noContinue) {
+        public void CheckJsr(int offset, int operand, out bool noContinue) {
             noContinue = false;
-            int target = Util.GetWord(mFileData, offset + 1, 2, false);
-            if (target == mInline8StringAddr) {
+            if (operand == mInline8StringAddr) {
                 if (offset + 3 + 8 > mFileData.Length) {
                     mAppRef.DebugLog("8string ran off end at +" +
                         (offset + 3).ToString("x6"));
@@ -72,7 +71,7 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 3, 8,
                    DataType.StringGeneric, DataSubType.Ascii, null);
-            } else if (target == mInlineRev8StringAddr) {
+            } else if (operand == mInlineRev8StringAddr) {
                 if (offset + 3 + 8 > mFileData.Length) {
                     mAppRef.DebugLog("rev8string ran off end at +" +
                         (offset + 3).ToString("x6"));
@@ -80,7 +79,7 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 3, 8,
                    DataType.StringReverse, DataSubType.Ascii, null);
-            } else if (target == mInlineNullStringAddr) {
+            } else if (operand == mInlineNullStringAddr) {
                 // look for the terminating null byte
                 int nullOff = offset + 3;
                 while (nullOff < mFileData.Length) {
@@ -99,10 +98,9 @@ namespace RuntimeData.Test2022 {
             }
         }
 
-        public void CheckJsl(int offset, out bool noContinue) {
+        public void CheckJsl(int offset, int operand, out bool noContinue) {
             noContinue = false;
-            int target = Util.GetWord(mFileData, offset + 1, 3, false);
-            if (target == mInlineL1StringAddr) {
+            if (operand == mInlineL1StringAddr) {
                 //  0  1  2  3   4   5
                 // 22 00 10 01  01  66
                 if (offset + 4 >= mFileData.Length) {
@@ -117,7 +115,7 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 4, len + 1,
                     DataType.StringL8, DataSubType.Ascii, null);
-            } else if (target == mInlineL2StringAddr) {
+            } else if (operand == mInlineL2StringAddr) {
                 if (offset + 5 >= mFileData.Length) {
                     return;     // length word is off end
                 }
@@ -130,7 +128,7 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 4, len + 2,
                     DataType.StringL16, DataSubType.Ascii, null);
-            } else if (target == mInlineDciStringAddr) {
+            } else if (operand == mInlineDciStringAddr) {
                 // look for the first byte whose high bit doesn't match the first byte's bit
                 //  0  1  2  3   4  5
                 // 22 00 30 01  66 c1

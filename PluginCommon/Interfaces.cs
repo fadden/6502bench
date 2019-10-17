@@ -88,8 +88,9 @@ namespace PluginCommon {
         /// The file data is guaranteed to hold all bytes of the JSR (offset + 2).
         /// </summary>
         /// <param name="offset">Offset of the JSR instruction.</param>
+        /// <param name="operand">16-bit JSR operand.</param>
         /// <param name="noContinue">Set to true if the JSR doesn't actually return.</param>
-        void CheckJsr(int offset, out bool noContinue);
+        void CheckJsr(int offset, int operand, out bool noContinue);
     }
 
     /// <summary>
@@ -102,8 +103,9 @@ namespace PluginCommon {
         /// The file data is guaranteed to hold all bytes of the JSL (offset + 3).
         /// </summary>
         /// <param name="offset">Offset of the JSL instruction.</param>
+        /// <param name="operand">24-bit JSL operand.</param>
         /// <param name="noContinue">Set to true if the JSL doesn't actually return.</param>
-        void CheckJsl(int offset, out bool noContinue);
+        void CheckJsl(int offset, int operand, out bool noContinue);
     }
 
     /// <summary>

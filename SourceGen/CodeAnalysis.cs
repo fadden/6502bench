@@ -938,6 +938,7 @@ namespace SourceGen {
         /// <param name="noContinue">Set if any plugin declares the call to be no-continue.</param>
         /// <returns>Updated value for noContinue.</returns>
         private bool CheckForInlineCall(OpDef op, int offset, bool noContinue) {
+            int operand = op.GetOperand(mFileData, offset, mAnattribs[offset].StatusFlags);
             for (int i = 0; i < mScriptArray.Length; i++) {
                 try {
                     IPlugin script = mScriptArray[i];
@@ -946,10 +947,10 @@ namespace SourceGen {
                     // interface was implemented but a bit slow when it wasn't.  For performance
                     // we query the capability flags instead.
                     if (op == OpDef.OpJSR_Abs && (mPluginCaps[i] & PluginCap.JSR) != 0) {
-                        ((IPlugin_InlineJsr)script).CheckJsr(offset, out bool noCont);
+                        ((IPlugin_InlineJsr)script).CheckJsr(offset, operand, out bool noCont);
                         noContinue |= noCont;
                     } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
-                        ((IPlugin_InlineJsl)script).CheckJsl(offset, out bool noCont);
+                        ((IPlugin_InlineJsl)script).CheckJsl(offset, operand, out bool noCont);
                         noContinue |= noCont;
                     } else if ((op == OpDef.OpBRK_Implied || op == OpDef.OpBRK_StackInt) &&
                             (mPluginCaps[i] & PluginCap.BRK) != 0) {

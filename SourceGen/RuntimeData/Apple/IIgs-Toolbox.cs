@@ -19,11 +19,10 @@ using System.Collections.Generic;
 using PluginCommon;
 
 /*
-# toolbox equ $e10000
 #  pea ...
 #  pea ...
 #  ldx #function
-#  jsl toolbox
+#  jsl $e10000
 */
 
 namespace RuntimeData.Apple {
@@ -56,15 +55,16 @@ namespace RuntimeData.Apple {
             return false;
         }
 
-        public void CheckJsl(int offset, out bool noContinue) {
+        public void CheckJsl(int offset, int operand, out bool noContinue) {
+            const int TOOLBOX = 0xe10000;
+
             noContinue = false;
             if (offset < 3) {
                 return;
             }
             // This only works if the LDX with the function comes right before the JSL.
             // Fortunately, the assembler macros all work that way.
-            if (mFileData[offset + 1] == 0x00 && mFileData[offset + 2] == 0x00 &&
-                    mFileData[offset + 3] == 0xe1 && mFileData[offset - 3] == 0xa2 /*LDX imm*/) {
+            if (operand == TOOLBOX && mFileData[offset - 3] == 0xa2 /*LDX imm*/) {
                 // match!
 
                 int func = Util.GetWord(mFileData, offset - 2, 2, false);

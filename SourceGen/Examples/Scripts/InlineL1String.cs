@@ -49,10 +49,9 @@ namespace ExtensionScriptSample {
             return beforeLabel == CALL_LABEL || afterLabel == CALL_LABEL;
         }
 
-        public void CheckJsr(int offset, out bool noContinue) {
+        public void CheckJsr(int offset, int operand, out bool noContinue) {
             noContinue = false;
-            int target = Util.GetWord(mFileData, offset + 1, 2, false);
-            if (target != mInlineL1StringAddr) {
+            if (operand != mInlineL1StringAddr) {
                 return;
             }
             if (offset + 3 >= mFileData.Length) {

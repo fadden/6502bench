@@ -24,10 +24,11 @@ namespace RuntimeData.Test2011 {
             mAppRef.DebugLog("Test2011(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
-        public void CheckJsr(int offset, out bool noContinue) {
+        public void CheckJsr(int offset, int operand, out bool noContinue) {
+            int ADDR = 0x2456;
+
             noContinue = false;
-            if (offset + 7 < mFileData.Length &&
-                    mFileData[offset + 1] == 0x56 && mFileData[offset + 2] == 0x24) {
+            if (offset + 7 < mFileData.Length && operand == ADDR) {
                 mAppRef.SetInlineDataFormat(offset + 3, 4, DataType.NumericLE,
                     DataSubType.None, null);
             }

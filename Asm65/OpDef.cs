@@ -541,8 +541,8 @@ namespace Asm65 {
         /// </summary>
         /// <param name="data">65xx code.</param>
         /// <param name="offset">Offset of opcode.</param>
-        /// <param name="flags">Current status flags.</param>
-        /// <returns>Operand value.</returns>
+        /// <param name="flags">Current status flags (need M/X).</param>
+        /// <returns>Operand value, or -1 if the instruction doesn't have an operand.</returns>
         public int GetOperand(byte[] data, int offset, StatusFlags flags) {
             switch (GetLength(flags)) {
                 case 1:
