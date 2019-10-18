@@ -235,7 +235,10 @@ namespace SourceGen {
             Debug.Assert(((int)direction & ~(int)DirectionFlags.ReadWrite) == 0);
             Direction = direction;
 
-            MultiMask = multiMask;
+            // constants don't have masks
+            if (type != Type.Constant) {
+                MultiMask = multiMask;
+            }
 
             Tag = tag;
         }

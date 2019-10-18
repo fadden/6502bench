@@ -87,27 +87,43 @@ RAM, ROM, and I/O registers appear at multiple addresses.  The hardware
 looks for certain address lines to be set or clear, and if the pattern
 matches, another set of bits is examined to determine which register or
 RAM address is being accessed.</p>
+<p>This is expressed in symbol files with the MULTI_MASK statement.
+Address symbol declarations that follow have the mask set applied.  Symbols
+whose addresses don't fit the pattern cause a warning and will be
+ignored.  Constants are not affected.</p>
 
-<p>For example, suppose the access pattern for a set of registers is
-<code>???0 ??1? 1??x xxxx</code> (where '?' can be any value, 0/1 must
-be that value, and 'x' means the bit is used to determine the register).
-So any value between $0280-029f matches, as does $23c0-23df, but
+<p>The mask set is best explained with an example.  Suppose the address
+pattern for a set of registers is <code>???0 ??1? 1??x xxxx</code>
+(where '?' can be any value, 0/1 must be that value, and 'x' means the bit
+is used to determine the register).
+So any address between $0280-029F matches, as does $23C0-23DF, but
 $0480 and $1280 don't.  The register number is found in the low five bits.</p>
 <p>The corresponding MULTI_MASK line, with values specifed in binary,
 would be:</p>
-<pre>*MULTI_MASK %0001001010000000 %0000001010000000 %0000000000011111</pre>
+<pre>  *MULTI_MASK %0001001010000000 %0000001010000000 %0000000000011111</pre>
 <p>The values are CompareMask, CompareValue, and AddressMask.  To
 determine if an address is in the register set, we check to see if
 <code>(address &amp; CompareMask) == CompareValue</code>.  If so, we can
 extract the register number with <code>(address &amp; AddressMask)</code>.</p>
 
 <p>We don't want to have a huge collection of equates at the top of the
-file, so whatever value is used in the symbol declaration is considered
-the "canonical" value.  All other matching values are expressed as an
-offset.</p>
-<p>All values must fall between 0 and $00FFFFFF.  The set bits in
+generated source file, so whatever value is used in the symbol declaration
+is considered the "canonical" value.  All other matching values are output
+with an offset.</p>
+<p>All mask values must fall between 0 and $00FFFFFF.  The set bits in
 CompareMask and AddressMask must not overlap, and CompareValue must not
 have any bits set that aren't also set in CompareMask.</p>
+<p>If an address can be mapped to a masked value and an unmasked value,
+the unmasked value takes precedence for exact matches.  In the example
+above, if you declare <code>REG1 @ $0281</code> outside the MULTI_MASK
+declaration, the disassembler will use <code>REG1</code> for all operands
+that reference $0281.  If other code accesses the same register as $23C1,
+the symbol established for the masked value will be used instead.</p>
+<p>If there are multiple masked values for a given address, the precedence
+is undefined.</p>
+<p>To disable the MULTI_MASK and resume normal declarations, write the
+tag without arguments:
+<pre>  *MULTI_MASK</pre></p>
 
 
 <h3>Creating a Project-Specific Symbol File</h3>
@@ -119,13 +135,14 @@ Make sure you create it in the same directory where your project file
 (the file that ends with ".dis65") lives.  Add a <code>*SYNOPSIS</code>,
 then add the desired symbols.</p>
 <p>Finally, add it to your project.  Select Edit &gt; Project Properties,
-switch to the Symbol Files tab, click Add Symbol Files, and select your
-symbol file.  It should appear in the list with a "PROJ:" prefix.</p>
+switch to the Symbol Files tab, click Add Symbol Files from Project, and
+select your symbol file.  It should appear in the list with a
+"PROJ:" prefix.</p>
 
 <p>If an example helps, the A2-Amper-fdraw project in the Examples
 directory has a project-local symbol file, called "fdraw-exports".
-(Amper-fdraw provides an Applesoft BASIC interface to the machine-language
-fdraw library.)</p>
+(fdraw-exports is a list of exported symbols from the fdraw library,
+for which Amper-fdraw provides an Applesoft BASIC interface.)
 
 <p>NOTE: in the current version of SourceGen, changes to .sym65 files are
 not detected automatically.  Closing and re-opening the project

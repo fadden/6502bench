@@ -198,7 +198,7 @@ namespace SourceGen {
                             }
                         }
 
-                        if (parseOk && multiMask != null) {
+                        if (parseOk && multiMask != null && !isConst) {
                             // We need to ensure that all possible values fit within the mask.
                             // We don't test AddressValue here, because it's okay for the
                             // canonical value to be outside the masked range.

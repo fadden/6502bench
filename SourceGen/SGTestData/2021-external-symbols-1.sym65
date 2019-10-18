@@ -82,6 +82,9 @@ MultiWrite      >   $c005 3     ;$c005/6/7, write-only
 ; Test: read C003 C004 C005 C006 C007
 ; Test: write C004 C005 C006 C007 C008
 
+; try a non-matching constant; should be accepted without complaint
+MultiConst      =   $4567
+
 
 ;
 ; Invalid values.  These cause a warning at load time, and the symbol will
