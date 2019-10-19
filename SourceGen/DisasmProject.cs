@@ -607,7 +607,8 @@ namespace SourceGen {
         /// </summary>
         public void Validate() {
             // Confirm that we can walk through the file, stepping directly from the start
-            // of one thing to the start of the next.
+            // of one thing to the start of the next.  We won't normally do this, because
+            // we need to watch for embedded instructions.
             int offset = 0;
             while (offset < mFileData.Length) {
                 Anattrib attr = mAnattribs[offset];
@@ -619,6 +620,9 @@ namespace SourceGen {
                 // Sometimes embedded instructions continue past the "outer" instruction,
                 // usually because we're misinterpreting the code.  We need to deal with
                 // that here.
+                //
+                // One fun way to cause this is to have inline data from a plugin that got
+                // overwritten by the code analyzer.  See test 2022 for an example.
                 int extraInstrBytes = 0;
                 while (offset < mFileData.Length && mAnattribs[offset].IsInstruction &&
                         !mAnattribs[offset].IsInstructionStart) {

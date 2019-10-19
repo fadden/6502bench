@@ -309,7 +309,19 @@ namespace SourceGen.AsmGen {
                     return;
                 }
 
-                offset += attr.Length;
+                if (attr.IsInstructionStart) {
+                    // look for embedded instructions, which might have formatted char data
+                    int len;
+                    for (len = 1; len < attr.Length; len++) {
+                        if (Project.GetAnattrib(offset + len).IsInstructionStart) {
+                            break;
+                        }
+                    }
+                    offset += len;
+                } else {
+                    // data items
+                    offset += attr.Length;
+                }
             }
         }
 

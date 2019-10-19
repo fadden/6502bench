@@ -25,13 +25,20 @@ PrintInlineDciString = $013000
         .text   $14,$00,"string with length/2"
         jsl     PrintInlineDciString
         .shift  "DCI string"
-        jsr     L10AB
+        jsr     L10B5
         jsr     L110F
         jsr     L1108
         brk     #$01
         .word   data01
         brk     #$02
         .word   data02
+        nop
+        jsr     L1085
+        .byte   $24
+L1085   .byte   $a9
+        .byte   $00
+        sta     $ff
+        .byte   $ea
         rts
 
 PrintInline8String rts
@@ -62,8 +69,8 @@ data02  .word   data03
         .enc    sg_hiascii
 data03  .text   "AllEight"
 
-L10AB   jsr     PrintInlineNullString
-        per     $8023
+L10B5   jsr     PrintInlineNullString ;split across address change
+        per     $802d
         rtl
 
         .byte   $65

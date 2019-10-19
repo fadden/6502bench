@@ -534,9 +534,11 @@ namespace SourceGen {
                     if (mAnattribs[i].IsData) {
                         LogW(i, "Stripping mid-instruction data flag");
                         mAnattribs[i].IsData = false;
+                        mAnattribs[i].DataDescriptor = null;
                     } else if (mAnattribs[i].IsInlineData) {
                         LogW(i, "Stripping mid-instruction inline-data flag");
                         mAnattribs[i].IsInlineData = false;
+                        mAnattribs[i].DataDescriptor = null;
                     }
                     mAnattribs[i].IsInstruction = true;
                 }

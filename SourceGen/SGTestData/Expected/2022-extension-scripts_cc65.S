@@ -22,13 +22,20 @@ PrintInlineDciString = $013000
          .byte   $14,$00,"string with length/2"
          jsl     PrintInlineDciString
          .byte   "DCI strin",$e7
-         jsr     L10AB
+         jsr     L10B5
          jsr     L110F
          jsr     L1108
-         .byte   $00,$01
+         brk     $01
          .word   data01
-         .byte   $00,$02
+         brk     $02
          .word   data02
+         nop
+         jsr     L1085
+         .byte   $24
+L1085:   .byte   $a9
+         .byte   $00
+         sta     $ff
+         .byte   $ea
          rts
 
 PrintInline8String: rts
@@ -63,8 +70,8 @@ data02:  .word   data03
 .endmacro
 data03:  HiAscii "AllEight"
 
-L10AB:   jsr     PrintInlineNullString
-         per     $8023
+L10B5:   jsr     PrintInlineNullString ;split across address change
+         per     $802d
          rtl
 
          .byte   $65
@@ -79,7 +86,7 @@ L10AB:   jsr     PrintInlineNullString
 
 L1108:   jsl     PrintInlineL2String
          asl     A
-         .byte   $00,$60
+         brk     $60
 
 L110F:   jsr     PrintInlineNullString
          adc     $6e

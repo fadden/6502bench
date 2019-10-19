@@ -23,10 +23,11 @@ namespace SourceGen {
     /// <summary>
     /// Analyzer attribute holder.  Contains the output of the instruction and data analyzers.
     /// Every byte in the input file has one of these associated with it.
-    /// 
+    /// </summary>
+    /// <remarks>
     /// (Yes, it's a mutable struct.  Yes, that fact has bitten me a few times.  The array
     /// of these may have millions of elements, so the reduction in overhead seems worthwhile.)
-    /// </summary>
+    /// </remarks>
     public struct Anattrib {
         [FlagsAttribute]
         private enum AttribFlags {
@@ -349,6 +350,23 @@ namespace SourceGen {
             sb.Append(DoesNotBranch ? '!' : blank);
             sb.Append(DoesNotContinue ? '#' : blank);
             sb.Append(IsBranchTarget ? '>' : blank);
+            return sb.ToString();
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+            if (IsInstruction) {
+                sb.Append("Inst");
+            } else if (IsData) {
+                sb.Append("Data");
+            } else if (IsInlineData) {
+                sb.Append("Inli");
+            }
+            if (IsStart) {
+                sb.Append("Start");
+            }
+            sb.Append(" len=");
+            sb.Append(Length);
             return sb.ToString();
         }
     }

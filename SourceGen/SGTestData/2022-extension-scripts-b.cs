@@ -34,7 +34,7 @@ namespace RuntimeData.Test2022 {
                 return;
             }
             byte func = mFileData[offset + 1];
-            if (func < 0x01 || func > 0x02) {
+            if (func != 0x85 && (func < 0x01 || func > 0x02)) {
                 return;
             }
 
@@ -90,6 +90,9 @@ namespace RuntimeData.Test2022 {
                     }
                     mAppRef.SetInlineDataFormat(nextOff, 8, DataType.StringGeneric,
                         DataSubType.HighAscii, null);
+                    break;
+                case 0x85:
+                    // do nothing further
                     break;
             }
         }

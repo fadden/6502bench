@@ -43,6 +43,29 @@ PrintInlineDciString equ $013000        ;EDIT: add to project symbols
         brk     $02
         dw      data02
 
+; Handle an edge case where the inline formatting gets thrown out.
+; Two paths: BIT $A9 / BRK $85 / inline $FF/EA goes first, then
+; LDA $00 / STA $FF / NOP goes.  When we get to the STA we notice
+; that it's marked as inline data, so we remove it from $85 $ff
+; but not from $ea.
+;
+; If we try to walk through the file, advancing offset by the anattrib
+; length, we will traverse the first path, which (with 2-byte BRKs)
+; runs into the $FF, which is marked as an instruction but not an
+; instruction start.
+;
+; Switching to 1-byte BRKs makes the $85 an inline data item rather
+; than an instruction.  When we come back through, we LDA $00 and
+; then skip over the next 3 bytes.  No conflict.
+        nop
+        jsr     edge1                   ;alt path, evaluated later
+        dfb     $24                     ;1: BIT dp
+edge1   dfb     $a9                     ;2: LDA imm
+        brk                             ;1: BRK <op>
+        dfb     $85                     ;2: STA imm
+        dfb     $ff                     ;1: address $eaff
+        nop                             ;2:
+
         rts
 
 PrintInline8String    rts               ;EDIT: set label

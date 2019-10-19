@@ -326,11 +326,20 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
-            if (op == OpDef.OpBRK_StackInt || (op == OpDef.OpWDM_WDM && mAsmVersion < V2_18)) {
-                // cc65 v2.17 doesn't support WDM, and assembles BRK <arg> to opcode $05.
-                // cc65 v2.18 only supports two-byte BRK on 65816 code.
+            if (op == OpDef.OpBRK_StackInt) {
+                if (mAsmVersion < V2_18) {
+                    // cc65 v2.17 assembles BRK <arg> to opcode $05
+                    // https://github.com/cc65/cc65/issues/716
+                    return null;
+                } else if (Project.CpuDef.Type != CpuDef.CpuType.Cpu65816) {
+                    // cc65 v2.18 only supports BRK <arg> on 65816 (?!)
+                    return null;
+                } else {
+                    return string.Empty;
+                }
+            } else if (op == OpDef.OpWDM_WDM && mAsmVersion < V2_18) {
+                // cc65 v2.17 doesn't support WDM
                 // https://github.com/cc65/cc65/issues/715
-                // https://github.com/cc65/cc65/issues/716
                 return null;
             } else if (op.IsUndocumented) {
                 if (sUndocMap.TryGetValue(op.Mnemonic, out string newValue)) {
