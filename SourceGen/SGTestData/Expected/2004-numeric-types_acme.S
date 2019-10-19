@@ -1,4 +1,5 @@
-;Project file was edited to get all big-endian data types.
+;Project file was edited to get all big-endian data types, and to have an
+;incorrect .junk alignment directive.
         !cpu    6502
 *       =       $1000
         rts
@@ -29,3 +30,14 @@
 LABEL   !hex    00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ;comment
         !hex    00112233445566778899aabbccddeeffffeeddccbbaa99887766554433221100
         !byte   $80
+        !align  255,0,$aa
+        !byte   $81
+        !align  63,0,$00
+        !byte   $81
+        !align  31,0,$ab
+        !hex    0000000000000001
+        !byte   $81
+        !hex    1000000000000000
+        !byte   $81
+        !fill   2,$dd      ;incorrect alignment
+        !align  255,0,$00

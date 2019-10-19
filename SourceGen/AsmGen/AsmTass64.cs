@@ -132,6 +132,8 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", ".fill" },
                 //Dense                     // no equivalent, use .byte with comma-separated args
+                //Junk
+                { "Align", ".align" },
                 { "StrGeneric", ".text" },
                 //StrReverse
                 { "StrNullTerm", ".null" },
@@ -462,6 +464,25 @@ namespace SourceGen.AsmGen {
                     multiLine = true;
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
+                    break;
+                case FormatDescriptor.Type.Junk:
+                    int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
+                    if (fillVal >= 0 && GenCommon.CheckJunkAlign(offset, dfd, Project.AddrMap)) {
+                        // .align <expression>[, <fill>]
+                        opcodeStr = sDataOpNames.Align;
+                        int alignVal = 1 << FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
+                        operandStr = alignVal.ToString() +
+                            "," + formatter.FormatHexValue(fillVal, 2);
+                    } else if (fillVal >= 0) {
+                        // treat same as Fill
+                        opcodeStr = sDataOpNames.Fill;
+                        operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
+                    } else {
+                        // treat same as Dense
+                        multiLine = true;
+                        opcodeStr = operandStr = null;
+                        OutputDenseHex(offset, length, labelStr, commentStr);
+                    }
                     break;
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:

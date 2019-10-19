@@ -174,7 +174,12 @@ the data file, each address will be assigned a label.</p>
 
 <p>The "Bulk Data" items can represent large chunks of data compactly.
 The "fill" option is only available if all selected bytes have the
-same value.</p>
+same value.
+If a region of bytes is irrelevant, perhaps used only as padding, you
+can mark it as "junk".  If it appears to be adding bytes to reach a
+power-of-two address boundary, you can designate it as an alignment
+directive.  If you have multiple regions selected, only options that
+work for all regions will be shown.</p>
 
 <p>The "String" items are enabled or disabled depending on whether the
 data you have selected is in the appropriate format.  For example,

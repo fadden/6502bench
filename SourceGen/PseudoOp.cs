@@ -78,6 +78,8 @@ namespace SourceGen {
             public string DefineBigData4 { get; private set; }
             public string Fill { get; private set; }
             public string Dense { get; private set; }
+            public string Junk { get; private set; }
+            public string Align { get; private set; }
             public string StrGeneric { get; private set; }
             public string StrReverse { get; private set; }
             public string StrLen8 { get; private set; }
@@ -125,6 +127,8 @@ namespace SourceGen {
                     a.DefineBigData4 == b.DefineBigData4 &&
                     a.Fill == b.Fill &&
                     a.Dense == b.Dense &&
+                    a.Junk == b.Junk &&
+                    a.Align == b.Align &&
                     a.StrGeneric == b.StrGeneric &&
                     a.StrReverse == b.StrReverse &&
                     a.StrLen8 == b.StrLen8 &&
@@ -234,6 +238,8 @@ namespace SourceGen {
                 { "DefineBigData4", ".dbd4" },
                 { "Fill", ".fill" },
                 { "Dense", ".bulk" },
+                { "Junk", ".junk" },
+                { "Align", ".align" },
 
                 { "StrGeneric", ".str" },
                 { "StrReverse", ".rstr" },
@@ -265,6 +271,7 @@ namespace SourceGen {
                 case FormatDescriptor.Type.NumericLE:
                 case FormatDescriptor.Type.NumericBE:
                 case FormatDescriptor.Type.Fill:
+                case FormatDescriptor.Type.Junk:
                     return 1;
                 case FormatDescriptor.Type.Dense: {
                         // no delimiter, two output bytes per input byte
@@ -344,6 +351,17 @@ namespace SourceGen {
                     case FormatDescriptor.Type.Fill:
                         po.Opcode = opNames.Fill;
                         po.Operand = length + "," + formatter.FormatHexValue(data[offset], 2);
+                        break;
+                    case FormatDescriptor.Type.Junk:
+                        if (dfd.FormatSubType != FormatDescriptor.SubType.None) {
+                            po.Opcode = opNames.Align;
+                            int alignPow = FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
+                            po.Operand = formatter.FormatHexValue(1 << alignPow, 2) +
+                                " (" + length.ToString() + " bytes)";
+                        } else {
+                            po.Opcode = opNames.Junk;
+                            po.Operand = length.ToString();
+                        }
                         break;
                     case FormatDescriptor.Type.Dense: {
                             int maxPerLine = MAX_OPERAND_LEN / 2;

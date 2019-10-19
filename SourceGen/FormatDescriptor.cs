@@ -60,7 +60,8 @@ namespace SourceGen {
             StringDci,          // string terminated by flipped high bit (Dextral Char Inverted)
 
             Dense,              // raw data, represented as compactly as possible
-            Fill                // fill memory with a value
+            Fill,               // fill memory with a value
+            Junk                // contents of memory are not interesting
         }
 
         /// <summary>
@@ -88,8 +89,26 @@ namespace SourceGen {
 
             // Dense; no sub-types
 
-            // Fill; default is non-ignore
-            Ignore              // TODO(someday): use this for "don't care" sections
+            // Fill; no sub-types
+
+            // Junk; data may exist for alignment purposes.  Sub-type indicates boundary.
+            // (SubType=None indicates no alignment)
+            Align2,             // must be consecutive ascending powers of 2
+            Align4,
+            Align8,
+            Align16,
+            Align32,
+            Align64,
+            Align128,
+            Align256,
+            Align512,
+            Align1024,
+            Align2048,
+            Align4096,
+            Align8192,
+            Align16384,
+            Align32768,
+            Align65536
         }
 
         // Maximum length of a NumericLE/BE item (32-bit value or 4-byte instruction).
@@ -169,6 +188,7 @@ namespace SourceGen {
             Debug.Assert(length > 0);
             Debug.Assert(length <= MAX_NUMERIC_LEN || !IsNumeric);
             Debug.Assert(fmt != Type.Default || length == 1);
+            Debug.Assert(subFmt == SubType.None || (fmt != Type.Junk) ^ IsJunkSubType(subFmt));
 
             Length = length;
             FormatType = fmt;
@@ -200,8 +220,12 @@ namespace SourceGen {
         /// <param name="length">Length, in bytes.</param>
         /// <param name="fmt">Format type.</param>
         /// <param name="subFmt">Format sub-type.</param>
-        /// <returns>New or pre-allocated descriptor.</returns>
+        /// <returns>New or pre-allocated descriptor, or null if the arguments are
+        ///   invalid.</returns>
         public static FormatDescriptor Create(int length, Type fmt, SubType subFmt) {
+            if (subFmt != SubType.None && !((fmt != Type.Junk) ^ IsJunkSubType(subFmt))) {
+                return null;
+            }
             DebugCreateCount++;
             DebugPrefabCount++;
             if (length == 1) {
@@ -365,6 +389,41 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Returns true if the sub-type is exclusively for use with the Junk type.  Notably,
+        /// returns false for SubType.None.
+        /// </summary>
+        private static bool IsJunkSubType(SubType subType) {
+            return ((int)subType >= (int)SubType.Align2 &&
+                    (int)subType <= (int)SubType.Align65536);
+        }
+
+        /// <summary>
+        /// Converts a power of 2 value to the corresponding alignment sub-type.
+        /// </summary>
+        /// <param name="pwr">Power of 2.</param>
+        /// <returns>The matching sub-type, or None if nothing matches.</returns>
+        public static SubType PowerToAlignment(int pwr) {
+            if (pwr < 1 || pwr > 16) {
+                return SubType.None;
+            }
+            // pwr==1 --> 2^1 --> Align2
+            return (SubType)((int)SubType.Align2 - 1 + pwr);
+        }
+
+        /// <summary>
+        /// Converts an alignment sub-type to the corresponding power of 2.
+        /// </summary>
+        /// <param name="align">Alignment value.</param>
+        /// <returns>The matching power of 2, or -1 if the sub-type isn't valid.</returns>
+        public static int AlignmentToPower(SubType align) {
+            Debug.Assert(IsJunkSubType(align));
+            if ((int)align < (int)SubType.Align2 || (int)align > (int)SubType.Align65536) {
+                return -1;
+            }
+            return (int)align - (int)SubType.Align2 + 1;
+        }
+
+        /// <summary>
         /// Generates a string describing the format, suitable for use in the UI.
         /// </summary>
         public string ToUiString() {
@@ -432,6 +491,9 @@ namespace SourceGen {
                         case Type.Fill:
                             retstr += "Fill";
                             break;
+                        case Type.Junk:
+                            retstr += "Unaligned junk";
+                            break;
                         default:
                             // strings handled earlier
                             retstr += "???";
@@ -468,6 +530,24 @@ namespace SourceGen {
                     break;
                 case SubType.C64Screen:
                     retstr += "Numeric, C64 Screen";
+                    break;
+                case SubType.Align2:
+                case SubType.Align4:
+                case SubType.Align8:
+                case SubType.Align16:
+                case SubType.Align32:
+                case SubType.Align64:
+                case SubType.Align128:
+                case SubType.Align256:
+                case SubType.Align512:
+                case SubType.Align1024:
+                case SubType.Align2048:
+                case SubType.Align4096:
+                case SubType.Align8192:
+                case SubType.Align16384:
+                case SubType.Align32768:
+                case SubType.Align65536:
+                    retstr += "Alignment to " + (1 << AlignmentToPower(FormatSubType));
                     break;
 
                 default:

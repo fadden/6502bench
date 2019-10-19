@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"FileDataLength":631,"FileDataCrc32":-1812792607,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":13566159,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4},
+"_ContentVersion":2,"FileDataLength":1024,"FileDataCrc32":-1387500320,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":13566159,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":false,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
 "AddressMap":[{
@@ -10,10 +10,10 @@
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
-"566":"comment"},
+"566":"comment","882":"incorrect alignment"},
 "LongComments":{
 "-2147483647":{
-"Text":"Project file was edited to get all big-endian data types.","BoxMode":false,"MaxWidth":80}},
+"Text":"Project file was edited to get all big-endian data types, and to have an incorrect .junk alignment directive.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
 },
 "UserLabels":{
@@ -53,4 +53,20 @@
 "555":{
 "Length":10,"Format":"Dense","SubFormat":"None","SymbolRef":null},
 "566":{
-"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null}}}
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"631":{
+"Length":137,"Format":"Junk","SubFormat":"Align256","SymbolRef":null},
+"769":{
+"Length":63,"Format":"Junk","SubFormat":"Align64","SymbolRef":null},
+"833":{
+"Length":31,"Format":"Junk","SubFormat":"Align32","SymbolRef":null},
+"864":{
+"Length":8,"Format":"Junk","SubFormat":"None","SymbolRef":null},
+"873":{
+"Length":8,"Format":"Junk","SubFormat":"None","SymbolRef":null},
+"882":{
+"Length":2,"Format":"Junk","SubFormat":"Align128","SymbolRef":null},
+"884":{
+"Length":140,"Format":"Junk","SubFormat":"Align256","SymbolRef":null}},
+"LvTables":{
+}}

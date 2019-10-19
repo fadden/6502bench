@@ -1988,10 +1988,9 @@ namespace SourceGen {
             TypedRangeSet.Tuple firstOffset = iter.Current;
             mProject.OperandFormats.TryGetValue(firstOffset.Value, out FormatDescriptor dfd);
 
-            EditDataOperand dlg = new EditDataOperand(mMainWin, mProject.FileData,
-                mProject.SymbolTable, mOutputFormatter, trs, dfd);
-            dlg.ShowDialog();
-            if (dlg.DialogResult == true) {
+            EditDataOperand dlg =
+                new EditDataOperand(mMainWin, mProject, mOutputFormatter, trs, dfd);
+            if (dlg.ShowDialog() == true) {
                 // Merge the changes into the OperandFormats list.  We need to remove all
                 // FormatDescriptors that overlap the selected region.  We don't need to
                 // pass the selection set in, because the dlg.Results list spans the exact

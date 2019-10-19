@@ -680,6 +680,8 @@ namespace SourceGen {
 
                 if (!CreateFormatDescriptor(kvp.Value, spf._ContentVersion, report,
                         out FormatDescriptor dfd)) {
+                    report.Add(FileLoadItem.Type.Warning,
+                        string.Format(Res.Strings.ERR_BAD_FD_FMT, intKey));
                     continue;
                 }
                 // Extra validation: make sure dfd doesn't run off end.
@@ -827,7 +829,7 @@ namespace SourceGen {
                 }
                 Debug.WriteLine("Found v1 string, fmt=" + format + ", sub=" + subFormat);
                 dfd = FormatDescriptor.Create(sfd.Length, format, subFormat);
-                return true;
+                return dfd != null;
             }
 
             try {
@@ -842,7 +844,6 @@ namespace SourceGen {
                     subFormat = (FormatDescriptor.SubType)Enum.Parse(
                         typeof(FormatDescriptor.SubType), sfd.SubFormat);
                 }
-
             } catch (ArgumentException) {
                 report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_FD_FORMAT +
                     ": " + sfd.Format + "/" + sfd.SubFormat);
@@ -865,7 +866,7 @@ namespace SourceGen {
                     new WeakSymbolRef(sfd.SymbolRef.Label, part),
                     format == FormatDescriptor.Type.NumericBE);
             }
-            return true;
+            return dfd != null;
         }
 
         /// <summary>

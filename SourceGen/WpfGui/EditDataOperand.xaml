@@ -39,6 +39,9 @@ limitations under the License.
         <system:String x:Key="str_StringLen8">Strings prefixed with 8-bit length ({0})</system:String>
         <system:String x:Key="str_StringLen16">Strings prefixed with 16-bit length ({0})</system:String>
         <system:String x:Key="str_StringDci">Dextral character inverted ({0})</system:String>
+
+        <system:String x:Key="str_AlignmentNone">arbitrary boundary</system:String>
+        <system:String x:Key="str_AlignmentItemFmt">{0}-byte boundary ({1})</system:String>
     </Window.Resources>
 
     <StackPanel Margin="8">
@@ -125,8 +128,14 @@ limitations under the License.
         <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2"/>
         <RadioButton Name="radioDenseHex" GroupName="Main" Content="Densely-_packed bytes" Margin="0,4,0,0"
                              Checked="MainGroup_CheckedChanged"/>
-        <RadioButton Name="radioFill" GroupName="Main" Content="_Fill with value" Margin="0,4,0,0"
+        <RadioButton Name="radioFill" GroupName="Main" Content="Area _filled with value" Margin="0,4,0,0"
                              Checked="MainGroup_CheckedChanged"/>
+        <StackPanel Orientation="Horizontal">
+            <RadioButton Name="radioJunk" GroupName="Main" Content="_Junk bytes, end aligned to" Margin="0,4,0,0"
+                                 Checked="MainGroup_CheckedChanged"/>
+            <ComboBox Name="junkAlignComboBox" Margin="8,-1,0,0" Width="200"
+                      ItemsSource="{Binding JunkAlignmentItems}" DisplayMemberPath="Description"/>
+        </StackPanel>
 
         <TextBlock Text="String" Margin="0,12,0,0"/>
         <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2"/>

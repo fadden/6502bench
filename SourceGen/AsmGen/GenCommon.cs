@@ -422,5 +422,32 @@ namespace SourceGen.AsmGen {
 
             // Ditto for the local variable prefix.
         }
+
+        /// <summary>
+        /// Checks to see if the junk alignment directive is compatible with the actual
+        /// address.  This is used to screen out alignment values that no longer match up
+        /// with the actual addresses.
+        /// </summary>
+        /// <param name="offset">File offset of directive.</param>
+        /// <param name="dfd">Format descriptor.</param>
+        /// <param name="addrMap">Offset to address map.</param>
+        /// <returns>True if the .junk alignment directive is correct.</returns>
+        public static bool CheckJunkAlign(int offset, FormatDescriptor dfd,
+                CommonUtil.AddressMap addrMap) {
+            Debug.Assert(dfd.FormatType == FormatDescriptor.Type.Junk);
+            if (dfd.FormatSubType == FormatDescriptor.SubType.None) {
+                return true;
+            }
+
+            // Just check the address.  Shouldn't need to check the length.
+            int lastOffset = offset + dfd.Length - 1;
+            int alignToAddr = addrMap.OffsetToAddress(lastOffset) + 1;
+            int alignPwr = FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
+            int alignMask = alignPwr - 1;
+            bool result = (alignToAddr & alignMask) == 0;
+            //Debug.WriteLine(dfd.FormatSubType + " at +" + offset.ToString("x6") +
+            //    "(" + alignToAddr.ToString("x4") + "): " + result);
+            return result;
+        }
     }
 }

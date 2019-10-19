@@ -808,7 +808,13 @@ absolute long load, and because it can make 65816 code easier to read.</p>
 
 <h2><a name="pseudo-ops">Data and Directive Pseudo-Opcodes</a></h2>
 
-<p>There are only four assembler directives that appear in the code list:</p>
+<p>The on-screen code list shows assembler directives that are similar
+to what the various cross-assemblers provide.  The actual directives
+generated for a given assembler may match exactly or be totally different.
+The idea is to represent the concept behind the directive, then let the
+code generator figure out the implementation details.</p>
+
+<p>There are six assembler directives that appear in the code list:</p>
 <ul>
   <li>.EQ - defines a symbol's value.  These are generated automatically
     when an operand that matches a platform or project symbol is found.</li>
@@ -818,6 +824,14 @@ absolute long load, and because it can make 65816 code easier to read.</p>
   <li>.RWID - specifies the width of the accumulator and index registers
     (65816 only).  Note this doesn't change the actual width, just tells
     the assembler that the width has changed.</li>
+  <li>.JUNK - indicates that the data in a range of bytes is irrelevant.
+    (When generating sources, this will become .FILL or .BULK
+    depending on the contents of the memory region and the assembler's
+    capabilities.)</li>
+  <li>.ALIGN - a special case of .JUNK that indicates the irrelevant
+    bytes exist to force alignment to a memory boundary (usually a
+    256-byte page).  Depending on the memory contents, it may be possible
+    to output this as an assembler-specific alignment directive.</li>
 </ul>
 
 <p>Every data item is represented by a pseudo-op.  Some of them may
@@ -826,7 +840,9 @@ represent hundreds of bytes and span multiple lines.</p>
   <li>.DD1, .DD2, .DD3, .DD4 - basic "define data" op.  A 1-4 byte
     little-endian value.</li>
   <li>.DBD2, .DBD3, .DBD4 - "define big-endian data".  2-4 bytes of
-    big-endian data.</li>
+    big-endian data.  (The 3- and 4-byte versions are not currently
+    available in the UI, since they're very unusual and few assemblers
+    support them.)</li>
   <li>.BULK - data packed in as compact a form as the assembler allows.
     Useful for chunks of graphics data.</li>
   <li>.FILL - a series of identical bytes.  The operand

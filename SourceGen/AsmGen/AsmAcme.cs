@@ -118,6 +118,8 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", "!fill" },
                 { "Dense", "!hex" },
+                //Junk
+                { "Align", "!align" },
                 { "StrGeneric", "!text" },       // can use !xor for high ASCII
                 //StrReverse
                 //StrNullTerm
@@ -405,6 +407,25 @@ namespace SourceGen.AsmGen {
                     multiLine = true;
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
+                    break;
+                case FormatDescriptor.Type.Junk:
+                    int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
+                    if (fillVal >= 0 && GenCommon.CheckJunkAlign(offset, dfd, Project.AddrMap)) {
+                        // !align ANDVALUE, EQUALVALUE [, FILLVALUE]
+                        opcodeStr = sDataOpNames.Align;
+                        int alignVal = 1 << FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
+                        operandStr = (alignVal - 1).ToString() +
+                            ",0," + formatter.FormatHexValue(fillVal, 2);
+                    } else if (fillVal >= 0) {
+                        // treat same as Fill
+                        opcodeStr = sDataOpNames.Fill;
+                        operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
+                    } else {
+                        // treat same as Dense
+                        multiLine = true;
+                        opcodeStr = operandStr = null;
+                        OutputDenseHex(offset, length, labelStr, commentStr);
+                    }
                     break;
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:

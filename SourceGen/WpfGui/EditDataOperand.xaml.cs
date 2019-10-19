@@ -75,6 +75,11 @@ namespace SourceGen.WpfGui {
         private SymbolTable mSymbolTable;
 
         /// <summary>
+        /// Map of offsets to addresses.
+        /// </summary>
+        private AddressMap mAddrMap;
+
+        /// <summary>
         /// Formatter to use when displaying addresses and hex values.
         /// </summary>
         private Asm65.Formatter mFormatter;
@@ -100,6 +105,17 @@ namespace SourceGen.WpfGui {
         }
         public StringEncodingItem[] StringEncodingItems { get; private set; }
 
+        public class JunkAlignmentItem {
+            public string Description { get; private set; }
+            public FormatDescriptor.SubType FormatSubType { get; private set; }
+
+            public JunkAlignmentItem(string descr, FormatDescriptor.SubType subFmt) {
+                Description = descr;
+                FormatSubType = subFmt;
+            }
+        }
+        public List<JunkAlignmentItem> JunkAlignmentItems { get; private set; }
+
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
@@ -107,14 +123,15 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public EditDataOperand(Window owner, byte[] fileData, SymbolTable symbolTable,
+        public EditDataOperand(Window owner, DisasmProject project,
                 Asm65.Formatter formatter, TypedRangeSet trs, FormatDescriptor firstDesc) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
-            mFileData = fileData;
-            mSymbolTable = symbolTable;
+            mFileData = project.FileData;
+            mSymbolTable = project.SymbolTable;
+            mAddrMap = project.AddrMap;
             mFormatter = formatter;
             mSelection = trs;
             mFirstFormatDescriptor = firstDesc;
@@ -129,6 +146,40 @@ namespace SourceGen.WpfGui {
                 new StringEncodingItem(Res.Strings.SCAN_C64_SCREEN_CODE,
                     TextScanMode.C64ScreenCode),
             };
+
+            GetMinMaxAlignment(out FormatDescriptor.SubType min, out FormatDescriptor.SubType max);
+            //Debug.WriteLine("ALIGN: min=" + min + " max=" + max);
+            Debug.Assert(min == FormatDescriptor.SubType.None ^     // both or neither are None
+                         max != FormatDescriptor.SubType.None);
+
+            int junkSel = 0;
+            string noAlign = (string)FindResource("str_AlignmentNone");
+            string alignFmt = (string)FindResource("str_AlignmentItemFmt");
+            JunkAlignmentItems = new List<JunkAlignmentItem>();
+            JunkAlignmentItems.Add(new JunkAlignmentItem(noAlign, FormatDescriptor.SubType.None));
+            if (min != FormatDescriptor.SubType.None) {
+                int index = 1;
+                // We assume the enum values are consecutive and ascending.
+                FormatDescriptor.SubType end = (FormatDescriptor.SubType)(((int)max) + 1);
+                while (min != end) {
+                    int pwr = FormatDescriptor.AlignmentToPower(min);
+                    string endStr = mFormatter.FormatHexValue(1 << pwr, 4);
+                    JunkAlignmentItems.Add(new JunkAlignmentItem(
+                        string.Format(alignFmt, 1 << pwr, endStr), min));
+
+                    // See if this matches previous value.
+                    if (mFirstFormatDescriptor != null &&
+                            mFirstFormatDescriptor.FormatType == FormatDescriptor.Type.Junk &&
+                            mFirstFormatDescriptor.FormatSubType == min) {
+                        junkSel = index;
+                    }
+
+                    // Advance.
+                    min = (FormatDescriptor.SubType)(((int)min) + 1);
+                    index++;
+                }
+            }
+            junkAlignComboBox.SelectedIndex = junkSel;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -212,7 +263,8 @@ namespace SourceGen.WpfGui {
             stringEncodingComboBox.SelectedItem = choice;
         }
 
-        private void StringEncodingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void StringEncodingComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
             if (!IsLoaded) {
                 return;
             }
@@ -287,6 +339,9 @@ namespace SourceGen.WpfGui {
                 symbolEntryTextBox.Focus();
             }
 
+            // Disable the alignment pop-up unless Junk is selected.
+            junkAlignComboBox.IsEnabled = (radioJunk.IsChecked == true);
+
             bool isOk = true;
             if (radioSimpleDataSymbolic.IsChecked == true) {
                 // Just check for correct format.  References to non-existent labels are allowed.
@@ -301,6 +356,71 @@ namespace SourceGen.WpfGui {
         }
 
         #region Setup
+
+        /// <summary>
+        /// Determines the minimum and maximum alignment values, based on the sizes of the
+        /// regions and the address they end on.
+        /// </summary>
+        /// <param name="min">Minimum allowed format, or None.</param>
+        /// <param name="max">Maximum allowed format, or None.</param>
+        private void GetMinMaxAlignment(out FormatDescriptor.SubType min,
+                out FormatDescriptor.SubType max) {
+            min = max = FormatDescriptor.SubType.None;
+
+            int maxLenPow = -1;
+            int minAlignPow = 65535;
+
+            IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
+            while (iter.MoveNext()) {
+                TypedRangeSet.TypedRange rng = iter.Current;
+                int length = rng.High - rng.Low + 1;
+                Debug.Assert(length > 0);
+
+                // The goal is to find an instruction that fills an entire region with zeroes
+                // or junk bytes for the sole purpose of ending at a specific boundary.
+                //
+                // If we have a 100-byte region that ends at address $103f (inclusive), it
+                // can't be the result of an assembler alignment directive.  "align $40" would
+                // have stopped at $1000, "align $80" would have continued on to $107f.
+                //
+                // Alignment of junk whose last byte $103f could be due to Align2, Align4 (1-3
+                // bytes at $103d/e/f), Align8 (1-7 bytes at $1039-f), and so on, up to Align64.
+                // The size of the buffer determines the minimum value, the end address
+                // determines the maximum.
+                //
+                // Bear in mind that assembler alignment directives will do nothing if the
+                // address is already aligned: Align256 at $1000 generates no output.  So we
+                // cannot use Align8 on a buffer of length 8.
+
+                // Count the trailing 1 bits in the address.  This gets us the power of 2
+                // alignment value.  Note alignPow will be zero if the last byte is stored at
+                // an even address.
+                int endAddress = mAddrMap.OffsetToAddress(rng.High) & 0x0000ffff;
+                int alignPow = BitTwiddle.CountTrailingZeroes(~endAddress);
+
+                // Round length up to next highest power of 2, and compute Log2().  Unfortunately
+                // .NET Standard 2.0 doesn't have Math.Log2().  Note we want the next-highest
+                // even if it's already a power of 2.
+                int lenRound = BitTwiddle.NextHighestPowerOf2(length);
+                int lenPow = BitTwiddle.CountTrailingZeroes(lenRound);
+                Debug.Assert(lenPow > 0);   // length==1 -> lenRound=2 --> lenPow=1
+
+                // Want the biggest minimum value and the smallest maximum value.
+                if (maxLenPow < lenPow) {
+                    maxLenPow = lenPow;
+                }
+                if (minAlignPow > alignPow) {
+                    minAlignPow = alignPow;
+                }
+
+                if (maxLenPow > minAlignPow) {
+                    return;
+                }
+            }
+
+            min = FormatDescriptor.PowerToAlignment(maxLenPow);
+            max = FormatDescriptor.PowerToAlignment(minAlignPow);
+        }
 
         /// <summary>
         /// Analyzes the selection to see which data formatting options are suitable.
@@ -733,6 +853,9 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.Type.Fill:
                     preferredFormat = radioFill;
                     break;
+                case FormatDescriptor.Type.Junk:
+                    preferredFormat = radioJunk;
+                    break;
                 default:
                     // Should not be here.
                     Debug.Assert(false);
@@ -875,6 +998,10 @@ namespace SourceGen.WpfGui {
                 type = FormatDescriptor.Type.Dense;
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
+            } else if (radioJunk.IsChecked == true) {
+                type = FormatDescriptor.Type.Junk;
+                JunkAlignmentItem comboItem = (JunkAlignmentItem)junkAlignComboBox.SelectedItem;
+                subType = comboItem.FormatSubType;
             } else if (radioStringMixed.IsChecked == true) {
                 type = FormatDescriptor.Type.StringGeneric;
                 subType = charSubType;

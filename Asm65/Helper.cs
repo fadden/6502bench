@@ -52,5 +52,29 @@ namespace Asm65 {
             target |= addr & 0x7fff0000;
             return target;
         }
+
+        /// <summary>
+        /// Determines whether a range of bytes is composed of a single value.  If so, the
+        /// value is returned.
+        /// </summary>
+        /// <param name="data">Bytes to examine.</param>
+        /// <param name="offset">Start offset.</param>
+        /// <param name="length">Number of bytes.  Must be greater than zero.</param>
+        /// <returns>The value found, or -1 if multiple values were found.</returns>
+        public static int CheckRangeHoldsSingleValue(byte[] data, int offset, int length) {
+            Debug.Assert(data != null);
+            Debug.Assert(offset >= 0 && offset < data.Length);
+            Debug.Assert(length >= 0 && offset + length <= data.Length);
+            if (length < 0) {
+                return -1;
+            }
+            byte testVal = data[offset++];
+            while (--length > 0) {
+                if (data[offset++] != testVal) {
+                    return -1;
+                }
+            }
+            return testVal;
+        }
     }
 }

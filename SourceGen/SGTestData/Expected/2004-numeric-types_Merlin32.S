@@ -1,4 +1,5 @@
-;Project file was edited to get all big-endian data types.
+;Project file was edited to get all big-endian data types, and to have an
+;incorrect .junk alignment directive.
          org   $1000
          rts
 
@@ -28,3 +29,14 @@
 LABEL    hex   00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ;comment
          hex   00112233445566778899aabbccddeeffffeeddccbbaa99887766554433221100
          dfb   $80
+         ds    \,$aa
+         dfb   $81
+         ds    63,$00
+         dfb   $81
+         ds    31,$ab
+         hex   0000000000000001
+         dfb   $81
+         hex   1000000000000000
+         dfb   $81
+         ds    2,$dd      ;incorrect alignment
+         ds    \,$00

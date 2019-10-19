@@ -115,6 +115,7 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", ".res" },
                 //Dense                     // no equivalent, use .byte with comma-separated args
+                //Junk
                 { "StrGeneric", ".byte" },
                 //StrReverse
                 { "StrNullTerm", ".asciiz" },
@@ -433,6 +434,22 @@ namespace SourceGen.AsmGen {
                     multiLine = true;
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
+                    break;
+                case FormatDescriptor.Type.Junk:
+                    // The ca65 .align directive has a dependency on the alignment of the
+                    // segment as a whole.  We're not currently declaring multiple segments,
+                    // so we can't use .align without generating complaints.
+                    int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
+                    if (fillVal >= 0) {
+                        // treat same as Fill
+                        opcodeStr = sDataOpNames.Fill;
+                        operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
+                    } else {
+                        // treat same as Dense
+                        multiLine = true;
+                        opcodeStr = operandStr = null;
+                        OutputDenseHex(offset, length, labelStr, commentStr);
+                    }
                     break;
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:
