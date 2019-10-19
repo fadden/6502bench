@@ -1,0 +1,87 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS ZipChip GS register definitions
+
+;
+; I got this from David Empson, who got it from Zip Technologies.
+;
+
+; ZipChip GS Special Registers       Ex ZIP Technology, 12 October 1990
+;
+; Registers must be unlocked before they can be accessed (see $C05A).
+; Locking them will re-enable the annunciators.
+;
+; Writing to any I/O location $C058-$C05F (whether registers are locked or
+; unlocked) will reset delay in progress.
+;
+; $C058 R   No operation
+;
+; $C058 W   Write any value to force poweron/reset bit to COLD (forces next
+; reset to restore ZIP registers to defaults/switch settings).
+;
+; $C059 R/W 76543210
+;           *.......  Bank Switch Language Card cache disable=1/enable=0?
+;           .*......  Paddle delay (5 ms) disable=0/enable=1  $C070/$C020
+;           ..*.....  External delay (5 ms) disable=0/enable=1
+;           ...*....  Counter delay (5 ms) disable=0/enable=1 $C02E/$C07E
+;           ....*...  CPS follow disable=0/enable=1
+;           .....*..  Last Reset warm?              READ ONLY
+;           ......*.  Hardware DMA                  READ ONLY
+;           .......*  non-GS (0)/GS (1)             READ ONLY
+;
+; $C05A R   76543210
+;           ****....  Current ZIP Speed, 0=100%, F=6.25%, in 6.25% increments
+;           ....1111
+;
+; $C05A W   Write values as follows:
+;           $5x       Unlock ZIP registers (must write 4 times)
+;           $Ax       Lock ZIP registers
+;           other     Force ZIP to follow system clock (i.e. disable card)
+;
+; $C05B R   76543210
+;           *.......  1msclk - clock with 1 ms period
+;           .*......  cshupd - Tag data at $C05F updated (read $C05F to reset)
+;           ..*.....  Bank Switch Language Card cache (0), don't (1)
+;           ...*....  Board disable - 0=enabled, 1=disabled
+;           ....*...  delay in effect (0=ZIP, 1=Slow)
+;           .....*..  rombank (0/1) - not in development version
+;           ......**  Cache RAM size (00=8k, 01=16k, 10=32k, 11=64k)
+;
+; $C05B W   Write any value to force ZIP to current speed (i.e. enable card)
+;
+; $C05C R/W 76543210
+;           *******.  Slot 7-1 delay enable (all slots 52-54 ms)
+;           .......*  Speaker delay enable (5 ms)
+;
+; $C05D R   Current 65816 bank
+;
+; $C05D W   76543210
+;           ****....  Set ZIP speed, 0=100%, F=6.25%, in 6.25% increments
+;           ....****  Don't care
+;
+; $C05E R   Read last Tag data written and force the next write to
+; create a trash tag value.
+;
+; $C05E W   No operation
+;
+; $C05F R   Read last Tag data written and reset cshupd.  Note: apparently
+; any write to a ZIP register (unlocked) will clear cshupd, but cshupd says
+; that this location must be read.
+;
+; $C05F W   No operation
+
+ZIP_Reset       >   $c058   ;W write any value to force poweron/reset bit to COLD
+ZIP_Options     @   $c059   ;RW bit flags: paddle delay, CPS follow, etc.
+ZIP_Speed       <   $c05a   ;R current ZIP speed in 6.25% increments
+ZIP_Lock        >   $c05a   ;W $5* unlock (write 4x), $A* lock, other=disable
+ZIP_Status      <   $c05b   ;R bit flags: status values
+ZIP_Enable      >   $c05b   ;W write any value to enable card
+ZIP_SlotEnable  @   $c05c   ;RW bit flags: enable delay on slots and speaker
+ZIP_Bank        <   $c05d   ;R current 65816 bank
+ZIP_SetSpeed    >   $c05d   ;W set ZIP speed in 6.25% increments
+ZIP_Tag1        <   $c05e   ;R read last Tag written and force trash tag
+ZIP_Nop1        >   $c05e   ;W no-op with side-effects
+ZIP_Tag2        <   $c05f   ;R read last tag written and reset cshupd
+ZIP_Nop2        >   $c05f   ;W no-op with side-effects
+

@@ -4,7 +4,7 @@ These are some sample projects you can play with.  The binaries are
 accompanied by the original source code, so you can compare the SourceGen
 project to the original.
 
- * Tutorial: simples project, intended for use with the tutorial in
+ * Tutorial: simple projects, intended for use with the tutorial in
    the manual.
  * Scripts: extension script samples.
  * A2-lz4fh: two functions for unpacking a simplified form of LZ4 compression.
@@ -13,7 +13,8 @@ project to the original.
  * A2-Amper-fdraw: 6502 code that provides an Applesoft BASIC interface
    to a machine-language graphics library.  The public interface of the
    graphics library is defined in a .sym65 file.  This example has multiple
-   entry points in a jump table, and requires a bit more effort.
+   entry points in a jump table, and is used to demonstrate address table
+   formatting in the advanced tutorial.
    [(Full project)](https://github.com/fadden/fdraw)
  * A2-Zippy: a program for controlling an Apple IIgs CPU accelerator card.
    65816 sources, with a little bit of ProDOS 8 and IIgs toolbox usage.
