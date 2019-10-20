@@ -106,12 +106,12 @@ row of buttons.  Make sure "Auto" and "Addr" are selected.  You should see
 three labels in the window (L1002, L1014, L1017).  Double-click on L1014.  The
 selection jumps to the appropriate line.</p>
 
-<p>Select Edit &gt; Find.  Type "hello", and hit Enter.  The selection will
+<p>Select Navigate &gt; Find.  Type "hello", and hit Enter.  The selection will
 move to address $100E, which is a string that says "hello!".  You can use
-Edit &gt; Find Next to try to find the next occurrence (there isn't one).  You
+Navigate &gt; Find Next to try to find the next occurrence (there isn't one).  You
 can search for any text that appears in the rightmost columns (label, opcode,
 operand, comment).</p>
-<p>Select Edit &gt; Go To.  You can enter a label, address, or file offset.
+<p>Select Navigate &gt; Go To.  You can enter a label, address, or file offset.
 Enter "100b" to set the selection to $100B.</p>
 
 <p>Near the top-left of the SourceGen window is a set of toolbar icons.
@@ -174,7 +174,7 @@ to $2000, then jumping to $2000.  It appears to be relocating the next
 part of the code before
 executing it.  We want to let the disassembler know what's going on, so
 select the line at address $1017 and then
-Edit &gt; Set Address.  (Or double-click the "1017" in the Addr column.)
+Actions &gt; Set Address.  (Or double-click the "1017" in the Addr column.)
 In the Set Address dialog, type "2000", and hit Enter.)</p>
 
 <p>Note the way the code list has changed.  When you changed the address,
@@ -363,7 +363,7 @@ that looks for strings and .FILL regions, so now each uncategorized byte is
 on its own line.</p>
 <p>You could select the first two lines and use Actions &gt; Edit Operand
 to format them as a 16-bit little-endian hex value, but there's a shortcut:
-select only the first line of code, then Edit &gt; Format As Word (Ctrl+W).  It
+select only the first line of code, then Actions &gt; Format As Word (Ctrl+W).  It
 automatically grabbed the following byte and combined them.  Since we believe
 $2000 is the load address for everything that follows, click on the line
 with address $1002, select Actions &gt; Set Address, and enter "2000".  With

@@ -321,12 +321,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource RedoCmd}"/>
                 <Separator/>
                 <MenuItem Command="Copy"/>
-                <Separator/>
                 <MenuItem Command="{StaticResource SelectAllCmd}"/>
-                <MenuItem Command="Find"/>
-                <MenuItem Command="{StaticResource FindNextCmd}"/>
-                <MenuItem Command="{StaticResource FindPreviousCmd}"/>
-                <MenuItem Command="{StaticResource GotoCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>
                 <MenuItem Command="Properties" Header="Project Properties..."/>
@@ -335,6 +330,15 @@ limitations under the License.
                           Command="{StaticResource ToggleDataScanCmd}" IsCheckable="True"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource EditAppSettingsCmd}"/>
+            </MenuItem>
+            <MenuItem Header="_Navigate">
+                <MenuItem Command="{StaticResource NavigateForwardCmd}"/>
+                <MenuItem Command="{StaticResource NavigateBackwardCmd}"/>
+                <MenuItem Command="{StaticResource GotoCmd}"/>
+                <Separator/>
+                <MenuItem Command="Find"/>
+                <MenuItem Command="{StaticResource FindNextCmd}"/>
+                <MenuItem Command="{StaticResource FindPreviousCmd}"/>
             </MenuItem>
             <MenuItem Name="actionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
