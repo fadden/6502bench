@@ -78,7 +78,7 @@
     <Compile Include="Exporter.cs" />
     <Compile Include="FormattedOperandCache.cs" />
     <Compile Include="LocalVariableLookup.cs" />
-    <Compile Include="ProblemList.cs" />
+    <Compile Include="MessageList.cs" />
     <Compile Include="Tests\GenTest.cs" />
     <Compile Include="Tests\ProgressMessage.cs" />
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
@@ -87,9 +87,6 @@
     <Compile Include="Tools\VirtualHexDump.cs" />
     <Compile Include="Tools\WpfGui\AsciiChart.xaml.cs">
       <DependentUpon>AsciiChart.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\WpfGui\ProblemListViewer.xaml.cs">
-      <DependentUpon>ProblemListViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\WpfGui\ShowText.xaml.cs">
       <DependentUpon>ShowText.xaml</DependentUpon>
@@ -250,10 +247,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\WpfGui\AsciiChart.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Tools\WpfGui\ProblemListViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

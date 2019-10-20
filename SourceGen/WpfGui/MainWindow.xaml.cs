@@ -84,69 +84,6 @@ namespace SourceGen.WpfGui {
         }
         bool mShowDebugMenu;
 
-        //
-        // Symbols list filter options.
-        //
-        public bool SymFilterUserLabels {
-            get { return mSymFilterUserLabels; }
-            set {
-                mSymFilterUserLabels = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_USER, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterUserLabels;
-        public bool SymFilterProjectSymbols {
-            get { return mSymFilterProjectSymbols; }
-            set {
-                mSymFilterProjectSymbols = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterProjectSymbols;
-        public bool SymFilterPlatformSymbols {
-            get { return mSymFilterPlatformSymbols; }
-            set {
-                mSymFilterPlatformSymbols = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterPlatformSymbols;
-        public bool SymFilterAutoLabels {
-            get { return mSymFilterAutoLabels; }
-            set {
-                mSymFilterAutoLabels = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_AUTO, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterAutoLabels;
-        public bool SymFilterAddresses {
-            get { return mSymFilterAddresses; }
-            set {
-                mSymFilterAddresses = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_ADDR, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterAddresses;
-        public bool SymFilterConstants {
-            get { return mSymFilterConstants; }
-            set {
-                mSymFilterConstants = value;
-                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_CONST, value);
-                SymbolsListFilterChanged();
-                OnPropertyChanged();
-            }
-        }
-        private bool mSymFilterConstants;
 
 
         /// <summary>
@@ -330,9 +267,7 @@ namespace SourceGen.WpfGui {
         /// Which panel are we showing, launchPanel or codeListView?
         /// </summary>
         public bool ShowCodeListView {
-            get {
-                return mShowCodeListView;
-            }
+            get { return mShowCodeListView; }
             set {
                 mShowCodeListView = value;
                 OnPropertyChanged("LaunchPanelVisibility");
@@ -1349,10 +1284,6 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ShowAnalyzerOutput();
         }
 
-        private void Debug_ShowProblemListCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.Debug_ShowProblemList();
-        }
-
         private void Debug_ShowUndoRedoHistoryCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ShowUndoRedoHistory();
@@ -1459,7 +1390,6 @@ namespace SourceGen.WpfGui {
             debugKeepAliveHackMenuItem.IsChecked = Sandbox.ScriptManager.UseKeepAliveHack;
             debugAnalysisTimersMenuItem.IsChecked = mMainCtrl.IsDebugAnalysisTimersOpen;
             debugAnalyzerOutputMenuItem.IsChecked = mMainCtrl.IsDebugAnalyzerOutputOpen;
-            debugProblemListMenuItem.IsChecked = mMainCtrl.IsDebugProblemListOpen;
             debugUndoRedoHistoryMenuItem.IsChecked = mMainCtrl.IsDebugUndoRedoHistoryOpen;
         }
 
@@ -1506,7 +1436,6 @@ namespace SourceGen.WpfGui {
 
         #endregion References panel
 
-
         #region Notes panel
 
         public class NotesListItem {
@@ -1551,9 +1480,75 @@ namespace SourceGen.WpfGui {
 
         #endregion Notes panel
 
-
         #region Symbols panel
 
+        //
+        // Symbols list filter options.
+        //
+        public bool SymFilterUserLabels {
+            get { return mSymFilterUserLabels; }
+            set {
+                mSymFilterUserLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_USER, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterUserLabels;
+        public bool SymFilterProjectSymbols {
+            get { return mSymFilterProjectSymbols; }
+            set {
+                mSymFilterProjectSymbols = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterProjectSymbols;
+        public bool SymFilterPlatformSymbols {
+            get { return mSymFilterPlatformSymbols; }
+            set {
+                mSymFilterPlatformSymbols = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterPlatformSymbols;
+        public bool SymFilterAutoLabels {
+            get { return mSymFilterAutoLabels; }
+            set {
+                mSymFilterAutoLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_AUTO, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterAutoLabels;
+        public bool SymFilterAddresses {
+            get { return mSymFilterAddresses; }
+            set {
+                mSymFilterAddresses = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_ADDR, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterAddresses;
+        public bool SymFilterConstants {
+            get { return mSymFilterConstants; }
+            set {
+                mSymFilterConstants = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_CONST, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterConstants;
+
+        /// <summary>
+        /// Symbols list DataGrid item.
+        /// </summary>
         public class SymbolsListItem {
             public Symbol Sym { get; private set; }
             public string Type { get; private set; }
@@ -1682,7 +1677,6 @@ namespace SourceGen.WpfGui {
 
         #endregion Symbols panel
 
-
         #region Info panel
 
         /// <summary>
@@ -1700,5 +1694,48 @@ namespace SourceGen.WpfGui {
         private string mInfoBoxContents;
 
         #endregion Info panel
+
+        #region Message list panel
+
+        public class MessageListItem {
+            public string Severity { get; private set; }
+            public string Offset { get; private set; }
+            public string Type { get; private set; }
+            public string Context { get; private set; }
+            public string Resolution { get; private set; }
+
+            public MessageListItem(string severity, string offset, string type, string context,
+                    string resolution) {
+                Severity = severity;
+                Offset = offset;
+                Type = type;
+                Context = context;
+                Resolution = resolution;
+            }
+        }
+
+        /// <summary>
+        /// ItemsSource for DataGrid.
+        /// </summary>
+        public ObservableCollection<MessageListItem> FormattedMessages { get; private set; } =
+            new ObservableCollection<MessageListItem>();
+
+        public void UpdateMessageList(List<MessageListItem> list) {
+            FormattedMessages.Clear();
+            foreach (MessageListItem item in list) {
+                FormattedMessages.Add(item);
+            }
+
+            OnPropertyChanged("MessageListVisibility");
+        }
+
+        public Visibility MessageListVisibility {
+            get {
+                bool visible = FormattedMessages.Count > 0;
+                return visible ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        #endregion Message list panel
     }
 }

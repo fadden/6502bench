@@ -168,8 +168,8 @@ namespace SourceGen {
         // Project and platform symbols that are being referenced from code.
         public List<DefSymbol> ActiveDefSymbolList { get; private set; }
 
-        // List of problems detected during analysis.
-        public ProblemList Problems { get; private set; }
+        // List of messages, mostly problems detected during analysis.
+        public MessageList Messages { get; private set; }
 
 #if DATA_PRESCAN
         // Data scan results.
@@ -233,7 +233,7 @@ namespace SourceGen {
             PlatformSyms = new List<PlatformSymbols>();
             ActiveDefSymbolList = new List<DefSymbol>();
 
-            Problems = new ProblemList();
+            Messages = new MessageList();
 
             // Default to 65816.  This will be replaced with value from project file or
             // system definition.
@@ -672,7 +672,7 @@ namespace SourceGen {
             // to the user, and discarded.
             //
             // We do want to collect the failures so we can present them to the user.
-            Problems.Clear();
+            Messages.Clear();
 
             Debug.Assert(reanalysisRequired != UndoableChange.ReanalysisScope.None);
             reanalysisTimer.StartTask("DisasmProject.Analyze()");
@@ -694,6 +694,8 @@ namespace SourceGen {
             if (reanalysisRequired == UndoableChange.ReanalysisScope.CodeAndData) {
                 // Always want to start with a blank array.  Going to be lazy and let the
                 // system allocator handle that for us.
+                // NOTE: don't generate any Messages during code analysis -- we clear the
+                // list at the start of each pass, and we don't always analyze code.
                 mAnattribs = new Anattrib[mFileData.Length];
 
                 reanalysisTimer.StartTask("CodeAnalysis.Analyze");
@@ -863,12 +865,12 @@ namespace SourceGen {
                 if (offset < 0 || offset >= mFileData.Length) {
                     string msg = "invalid offset (desc=" + kvp.Value + ")";
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
-                    Problems.Add(new ProblemList.ProblemEntry(
-                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Error,
                         offset,
-                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        MessageList.MessageEntry.MessageType.InvalidOffsetOrLength,
                         msg,
-                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                        MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
                     continue;
                 }
@@ -878,12 +880,12 @@ namespace SourceGen {
                     string msg = "invalid offset+len: len=" + kvp.Value.Length +
                         " file=" + mFileData.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
-                    Problems.Add(new ProblemList.ProblemEntry(
-                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Error,
                         offset,
-                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        MessageList.MessageEntry.MessageType.InvalidOffsetOrLength,
                         msg,
-                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                        MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                     Debug.Assert(false);
                     continue;
                 }
@@ -891,12 +893,12 @@ namespace SourceGen {
                 if (!AddrMap.IsContiguous(offset, kvp.Value.Length)) {
                     string msg = "descriptor straddles address change; len=" + kvp.Value.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
-                    Problems.Add(new ProblemList.ProblemEntry(
-                        ProblemList.ProblemEntry.SeverityLevel.Error,
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Error,
                         offset,
-                        ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                        MessageList.MessageEntry.MessageType.InvalidOffsetOrLength,
                         msg,
-                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                        MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                     continue;
                 }
 
@@ -908,47 +910,47 @@ namespace SourceGen {
                         string msg = "unexpected length on instr format descriptor (" +
                             kvp.Value.Length + " vs " + mAnattribs[offset].Length + ")";
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
-                        Problems.Add(new ProblemList.ProblemEntry(
-                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                        Messages.Add(new MessageList.MessageEntry(
+                            MessageList.MessageEntry.SeverityLevel.Warning,
                             offset,
-                            ProblemList.ProblemEntry.ProblemType.InvalidOffsetOrLength,
+                            MessageList.MessageEntry.MessageType.InvalidOffsetOrLength,
                             msg,
-                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                            MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;
                     }
                     if (kvp.Value.Length == 1) {
                         // No operand to format!
                         string msg = "unexpected format descriptor on single-byte op";
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
-                        Problems.Add(new ProblemList.ProblemEntry(
-                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                        Messages.Add(new MessageList.MessageEntry(
+                            MessageList.MessageEntry.SeverityLevel.Warning,
                             offset,
-                            ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                            MessageList.MessageEntry.MessageType.InvalidDescriptor,
                             msg,
-                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                            MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;
                     }
                     if (!kvp.Value.IsValidForInstruction) {
                         string msg = "descriptor not valid for instruction: " + kvp.Value;
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
-                        Problems.Add(new ProblemList.ProblemEntry(
-                            ProblemList.ProblemEntry.SeverityLevel.Warning,
+                        Messages.Add(new MessageList.MessageEntry(
+                            MessageList.MessageEntry.SeverityLevel.Warning,
                             offset,
-                            ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                            MessageList.MessageEntry.MessageType.InvalidDescriptor,
                             msg,
-                            ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                            MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;
                     }
                 } else if (mAnattribs[offset].IsInstruction) {
                     // Mid-instruction format.
                     string msg = "unexpected mid-instruction format descriptor";
                     genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
-                    Problems.Add(new ProblemList.ProblemEntry(
-                        ProblemList.ProblemEntry.SeverityLevel.Warning,
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Warning,
                         offset,
-                        ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                        MessageList.MessageEntry.MessageType.InvalidDescriptor,
                         msg,
-                        ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                        MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                     continue;
                 } else {
                     // Data or inline data.  The data analyzer hasn't run yet.  We want to
@@ -969,12 +971,12 @@ namespace SourceGen {
                             string msg =
                                 "data format descriptor overlaps code at +" + i.ToString("x6");
                             genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
-                            Problems.Add(new ProblemList.ProblemEntry(
-                                ProblemList.ProblemEntry.SeverityLevel.Warning,
+                            Messages.Add(new MessageList.MessageEntry(
+                                MessageList.MessageEntry.SeverityLevel.Warning,
                                 offset,
-                                ProblemList.ProblemEntry.ProblemType.InvalidDescriptor,
+                                MessageList.MessageEntry.MessageType.InvalidDescriptor,
                                 msg,
-                                ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                                MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                             overlap = true;
                             break;
                         }
@@ -1094,12 +1096,12 @@ namespace SourceGen {
                     Debug.WriteLine("Stripping hidden label '" + kvp.Value.Label + "'");
                     SymbolTable.Remove(kvp.Value);
 
-                    Problems.Add(new ProblemList.ProblemEntry(
-                        ProblemList.ProblemEntry.SeverityLevel.Warning,
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Warning,
                         offset,
-                        ProblemList.ProblemEntry.ProblemType.HiddenLabel,
+                        MessageList.MessageEntry.MessageType.HiddenLabel,
                         kvp.Value.Label,
-                        ProblemList.ProblemEntry.ProblemResolution.LabelIgnored));
+                        MessageList.MessageEntry.ProblemResolution.LabelIgnored));
                 }
             }
         }
@@ -1417,12 +1419,12 @@ namespace SourceGen {
                             }
                         } else {
                             // Reference to non-existent symbol.
-                            Problems.Add(new ProblemList.ProblemEntry(
-                                ProblemList.ProblemEntry.SeverityLevel.Info,
+                            Messages.Add(new MessageList.MessageEntry(
+                                MessageList.MessageEntry.SeverityLevel.Info,
                                 offset,
-                                ProblemList.ProblemEntry.ProblemType.UnresolvedWeakRef,
+                                MessageList.MessageEntry.MessageType.UnresolvedWeakRef,
                                 dfd.SymbolRef.Label,
-                                ProblemList.ProblemEntry.ProblemResolution.FormatDescriptorIgnored));
+                                MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         }
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.Address) {
                         // not expecting this format on an instruction operand

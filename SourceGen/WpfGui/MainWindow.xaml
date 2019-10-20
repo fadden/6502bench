@@ -20,6 +20,7 @@ limitations under the License.
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="6502bench SourceGen"
         Icon="/SourceGen;component/Res/SourceGenIcon.ico"
@@ -169,7 +170,6 @@ limitations under the License.
             <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
             <RoutedUICommand x:Key="Debug_ShowAnalysisTimersCmd" Text="Show Analysis Timers"/>
             <RoutedUICommand x:Key="Debug_ShowAnalyzerOutputCmd" Text="Show Analyzer Output"/>
-            <RoutedUICommand x:Key="Debug_ShowProblemListCmd" Text="Show Problem List Viewer"/>
             <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
             <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
@@ -287,8 +287,6 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="Debug_ShowAnalysisTimersCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowAnalyzerOutputCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ShowAnalyzerOutputCmd_Executed"/>
-        <CommandBinding Command="{StaticResource Debug_ShowProblemListCmd}"
-                        CanExecute="IsProjectOpen" Executed="Debug_ShowProblemListCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ShowUndoRedoHistoryCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ToggleCommentRulersCmd}"
@@ -376,8 +374,6 @@ limitations under the License.
             <MenuItem Header="_DEBUG" Name="DebugMenu" SubmenuOpened="DebugMenu_SubmenuOpened"
                       Visibility="{Binding ShowDebugMenu, Converter={StaticResource BoolToVis}}">
                 <MenuItem Command="Refresh" Header="Re-analyze"/>
-                <MenuItem Name="debugProblemListMenuItem"
-                          Command="{StaticResource Debug_ShowProblemListCmd}" IsCheckable="True"/>
                 <MenuItem Name ="debugUndoRedoHistoryMenuItem"
                           Command="{StaticResource Debug_ShowUndoRedoHistoryCmd}" IsCheckable="True"/>
                 <MenuItem Name="debugAnalyzerOutputMenuItem"
@@ -511,6 +507,7 @@ limitations under the License.
                               HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
             </Grid>
 
+            <!-- Launch panel.  Either this or the code list panel will be visible. -->
             <Grid Name="launchPanel" Grid.Column="2"
                   Visibility="{Binding Path=LaunchPanelVisibility}" d:IsHidden="True">
                 <Grid.RowDefinitions>
@@ -561,49 +558,95 @@ limitations under the License.
                 </StackPanel>
             </Grid>
 
-            <ListView Name="codeListView" Grid.Column="2"
-                      Style="{StaticResource codeListStyle}"
-                      FontFamily="{StaticResource GeneralMonoFont}"
-                      Visibility="{Binding Path=CodeListVisibility}"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      ItemContainerStyle="{StaticResource codeListItemStyle}"
-                      SelectionChanged="CodeListView_SelectionChanged"
-                      MouseDoubleClick="CodeListView_MouseDoubleClick">
-                <ListView.Resources>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                        <!-- <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" /> -->
-                    </Style>
-                </ListView.Resources>
-                <ListView.View>
-                    <GridView AllowsColumnReorder="False">
-                        <GridViewColumn Header="Offset" Width="60"
-                                        DisplayMemberBinding="{Binding Offset}"/>
-                        <GridViewColumn Header="Addr" Width="60"
-                                        CellTemplate="{StaticResource addrHighlightTemplate}"/>
-                        <GridViewColumn Header="Bytes" Width="93"
-                                        DisplayMemberBinding="{Binding Bytes}"/>
-                        <GridViewColumn Header="Flags" Width="80"
-                                        CellTemplate="{StaticResource flagsHighlightTemplate}"/>
-                        <GridViewColumn Header="Attr" Width="54"
-                                        DisplayMemberBinding="{Binding Attr}"/>
-                        <GridViewColumn Header="Label" Width="73"
-                                        CellTemplate="{StaticResource labelHighlightTemplate}"/>
-                        <GridViewColumn Header="Opcode" Width="60"
-                                        DisplayMemberBinding="{Binding Opcode}"/>
-                        <GridViewColumn Header="Operand" Width="100"
-                                        DisplayMemberBinding="{Binding Operand}"/>
-                        <GridViewColumn Header="Comment" Width="344"
-                                        DisplayMemberBinding="{Binding Comment}"/>
-                    </GridView>
-                </ListView.View>
+            <!-- Code list panel.  Either this or the Launch panel will be visible. -->
+            <Grid Grid.Column="2" Name="codeListGrid" Visibility="{Binding Path=CodeListVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <ListView.ContextMenu>
-                    <!-- this is populated as a clone of the Actions menu during init -->
-                    <ContextMenu/>
-                </ListView.ContextMenu>
+                <ListView Name="codeListView" Grid.Column="2"
+                          Style="{StaticResource codeListStyle}"
+                          FontFamily="{StaticResource GeneralMonoFont}"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ItemContainerStyle="{StaticResource codeListItemStyle}"
+                          SelectionChanged="CodeListView_SelectionChanged"
+                          MouseDoubleClick="CodeListView_MouseDoubleClick">
+                    <ListView.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            <!-- <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" /> -->
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="False">
+                            <GridViewColumn Header="Offset" Width="60"
+                                            DisplayMemberBinding="{Binding Offset}"/>
+                            <GridViewColumn Header="Addr" Width="60"
+                                            CellTemplate="{StaticResource addrHighlightTemplate}"/>
+                            <GridViewColumn Header="Bytes" Width="93"
+                                            DisplayMemberBinding="{Binding Bytes}"/>
+                            <GridViewColumn Header="Flags" Width="80"
+                                            CellTemplate="{StaticResource flagsHighlightTemplate}"/>
+                            <GridViewColumn Header="Attr" Width="54"
+                                            DisplayMemberBinding="{Binding Attr}"/>
+                            <GridViewColumn Header="Label" Width="73"
+                                            CellTemplate="{StaticResource labelHighlightTemplate}"/>
+                            <GridViewColumn Header="Opcode" Width="60"
+                                            DisplayMemberBinding="{Binding Opcode}"/>
+                            <GridViewColumn Header="Operand" Width="100"
+                                            DisplayMemberBinding="{Binding Operand}"/>
+                            <GridViewColumn Header="Comment" Width="344"
+                                            DisplayMemberBinding="{Binding Comment}"/>
+                        </GridView>
+                    </ListView.View>
 
-            </ListView>
+                    <ListView.ContextMenu>
+                        <!-- this is populated as a clone of the Actions menu during init -->
+                        <ContextMenu/>
+                    </ListView.ContextMenu>
+                </ListView>
+
+                <!-- A GridSplitter would be nice to make the height adjustable, but I had
+                trouble making everything disappear cleanly, particularly w.r.t. the splitter
+                working correctly after hide + re-show.  See
+                https://stackoverflow.com/q/2502178/294248 for suggestions. -->
+                <!--<GridSplitter Name="messageLogSplitter" Grid.Row="1" Height="4"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                              Visibility="{Binding MessageListVisibility}"/>-->
+
+                <DockPanel Grid.Row="1" Visibility="{Binding MessageListVisibility}">
+                    <Button DockPanel.Dock="Left" Content="Hide" Width="50" Margin="4,0,4,0"
+                            VerticalAlignment="Bottom">
+                        <Button.LayoutTransform>
+                            <RotateTransform Angle="270"/>
+                        </Button.LayoutTransform>
+                    </Button>
+
+                    <DataGrid DockPanel.Dock="Top" Name="messageGrid"
+                              Height="100"
+                              IsReadOnly="True"
+                              ItemsSource="{Binding FormattedMessages}"
+                              FontFamily="{StaticResource GeneralMonoFont}"
+                              SnapsToDevicePixels="True"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="#FF7F7F7F"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              SelectionMode="Single"
+                              VerticalScrollBarVisibility="Visible">
+                        <!-- should probably add ellipsis: https://stackoverflow.com/a/12880111/294248 -->
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Severity" Width="64" Binding="{Binding Severity}"/>
+                            <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
+                            <DataGridTextColumn Header="Type" Width="160" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Context" Width="380" Binding="{Binding Context}"/>
+                            <DataGridTextColumn Header="Resolution" Width="250" Binding="{Binding Resolution}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Grid>
 
             <Grid Name="rightPanel" Grid.Column="4">
                 <Grid.RowDefinitions>

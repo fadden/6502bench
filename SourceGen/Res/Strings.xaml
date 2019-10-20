@@ -106,6 +106,12 @@ limitations under the License.
     <system:String x:Key="str_InvalidFormatWordSelUnevenFmt">Unable to format as word: each selected region must have an even number of bytes ({0} region(s) are selected).</system:String>
     <system:String x:Key="str_LocalVariableTableClear">• Clear variables</system:String>
     <system:String x:Key="str_LocalVariableTableEmpty">• Empty variable table</system:String>
+    <system:String x:Key="str_MsgFormatDescriptorIgnored">Format ignored</system:String>
+    <system:String x:Key="str_MsgHiddenLabel">Hidden label</system:String>
+    <system:String x:Key="str_MsgInvalidDescriptor">Invalid format desc</system:String>
+    <system:String x:Key="str_MsgInvalidOffsetOrLength">Invalid offset or len</system:String>
+    <system:String x:Key="str_MsgLabelIgnored">Label ignored</system:String>
+    <system:String x:Key="str_MsgUnresolvedWeakRef">Ref'd symbol not found</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_NoExportedSymbolsFound">No exported symbols found.</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
