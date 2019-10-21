@@ -171,6 +171,7 @@ namespace Asm65 {
                     cpuDef = Cpu65C02;
                     break;
                 default:
+                    // 6502, 6502B, 6502C, 6507, 6510, 8502, 2A03
                     cpuDef = Cpu6502;
                     break;
             }
@@ -235,12 +236,18 @@ namespace Asm65 {
 
 
         /// <summary>
-        /// Returns an entry from the OpDef array for the specified opcode, 0-255.  (We could
-        /// probably just make this the class indexer.)
+        /// Returns an entry from the OpDef array for the specified opcode, 0-255.
         /// </summary>
         /// <param name="op">Instruction opcode number (0-255).</param>
         /// <returns>Instruction definition.</returns>
         public OpDef GetOpDef(int op) { return mOpDefs[op]; }
+
+        /// <summary>
+        /// Indexer.  Returns the definition of opcode N.
+        /// </summary>
+        public OpDef this[int op] {
+            get { return mOpDefs[op]; }
+        }
 
         /// <summary>
         /// Returns the number of cycles required to execute the instruction.  If the value

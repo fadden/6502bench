@@ -147,6 +147,7 @@ namespace Asm65 {
             { OpName.INC, "Increment Accumulator" },
             { OpName.INX, "Increment Index X" },
             { OpName.INY, "Increment Index Y" },
+            { OpName.JML, "Jump Long" },
             { OpName.JMP, "Jump" },
             { OpName.JSL, "Jump to Subroutine Long" },
             { OpName.JSR, "Jump to Subroutine" },

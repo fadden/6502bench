@@ -152,7 +152,7 @@ namespace SourceGen {
 
 
         /// <summary>
-        /// Dirty flag, set to true by every "set" call.
+        /// Dirty flag, set to true by every "set" call that changes a value.
         /// </summary>
         public bool Dirty { get; set; }
 
@@ -228,8 +228,11 @@ namespace SourceGen {
         /// <param name="name">Setting name.</param>
         /// <param name="value">Setting value.</param>
         public void SetInt(string name, int value) {
-            mSettings[name] = value.ToString();
-            Dirty = true;
+            string newVal = value.ToString();
+            if (!mSettings.TryGetValue(name, out string oldValue) || oldValue != newVal) {
+                mSettings[name] = newVal;
+                Dirty = true;
+            }
         }
 
         /// <summary>
@@ -256,8 +259,11 @@ namespace SourceGen {
         /// <param name="name">Setting name.</param>
         /// <param name="value">Setting value.</param>
         public void SetBool(string name, bool value) {
-            mSettings[name] = value.ToString();
-            Dirty = true;
+            string newVal = value.ToString();
+            if (!mSettings.TryGetValue(name, out string oldValue) || oldValue != newVal) {
+                mSettings[name] = newVal;
+                Dirty = true;
+            }
         }
 
         /// <summary>
@@ -290,8 +296,11 @@ namespace SourceGen {
         /// <param name="enumType">Enum type.</param>
         /// <param name="value">Setting value (integer enum index).</param>
         public void SetEnum(string name, Type enumType, int value) {
-            mSettings[name] = Enum.GetName(enumType, value);
-            Dirty = true;
+            string newVal = Enum.GetName(enumType, value);
+            if (!mSettings.TryGetValue(name, out string oldValue) || oldValue != newVal) {
+                mSettings[name] = newVal;
+                Dirty = true;
+            }
         }
 
         /// <summary>
@@ -317,10 +326,13 @@ namespace SourceGen {
         public void SetString(string name, string value) {
             if (value == null) {
                 mSettings.Remove(name);
+                Dirty = true;
             } else {
-                mSettings[name] = value;
+                if (!mSettings.TryGetValue(name, out string oldValue) || oldValue != value) {
+                    mSettings[name] = value;
+                    Dirty = true;
+                }
             }
-            Dirty = true;
         }
 
         /// <summary>

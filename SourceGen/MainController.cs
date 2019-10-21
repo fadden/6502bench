@@ -95,6 +95,16 @@ namespace SourceGen {
         public bool IsAsciiChartOpen { get { return mAsciiChartDialog != null; } }
 
         /// <summary>
+        /// Instruction chart reference window.  Not tied to the project.
+        /// </summary>
+        private Tools.WpfGui.InstructionChart mInstructionChartDialog;
+
+        /// <summary>
+        /// Returns true if the instruction chart window is currently open.
+        /// </summary>
+        public bool IsInstructionChartOpen { get { return mInstructionChartDialog != null; } }
+
+        /// <summary>
         /// List of recently-opened projects.
         /// </summary>
         public List<string> RecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
@@ -1238,6 +1248,7 @@ namespace SourceGen {
             // WPF won't exit until all windows are closed, so any unowned windows need
             // to be cleaned up here.
             mAsciiChartDialog?.Close();
+            mInstructionChartDialog?.Close();
             mHexDumpDialog?.Close();
             mShowAnalysisTimersDialog?.Close();
             mShowAnalyzerOutputDialog?.Close();
@@ -3028,6 +3039,20 @@ namespace SourceGen {
                 mAsciiChartDialog.Show();
             } else {
                 mAsciiChartDialog.Close();
+            }
+        }
+
+        public void ToggleInstructionChart() {
+            if (mInstructionChartDialog == null) {
+                // Create without owner so it doesn't have to be in front of main window.
+                mInstructionChartDialog = new Tools.WpfGui.InstructionChart(null,mOutputFormatter);
+                mInstructionChartDialog.Closing += (sender, e) => {
+                    Debug.WriteLine("Instruction chart closed");
+                    mInstructionChartDialog = null;
+                };
+                mInstructionChartDialog.Show();
+            } else {
+                mInstructionChartDialog.Close();
             }
         }
 

@@ -162,6 +162,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+D</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ToggleInstructionChartCmd" Text="Instruction Chart"/>
             <RoutedUICommand x:Key="ToggleSingleByteFormatCmd" Text="Toggle Single-Byte Format">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+B</KeyGesture>
@@ -276,6 +277,8 @@ limitations under the License.
                         Executed="ToggleAsciiChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
                         CanExecute="IsProjectOpen" Executed="ToggleDataScanCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleInstructionChartCmd}"
+                        Executed="ToggleInstructionChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleSingleByteFormatCmd}"
                         CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
@@ -372,6 +375,8 @@ limitations under the License.
                 <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
                 <MenuItem Name="toggleAsciiChartMenuItem"
                           Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
+                <MenuItem Name="toggleInstructionChartMenuItem"
+                          Command="{StaticResource ToggleInstructionChartCmd}" IsCheckable="True"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>

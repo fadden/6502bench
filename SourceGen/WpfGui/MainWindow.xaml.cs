@@ -1258,6 +1258,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.ToggleDataScan();
         }
 
+        private void ToggleInstructionChartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ToggleInstructionChart();
+        }
+
         private void ToggleSingleByteFormatCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ToggleSingleByteFormat();
         }
@@ -1384,6 +1388,7 @@ namespace SourceGen.WpfGui {
         }
         private void ToolsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             toggleAsciiChartMenuItem.IsChecked = mMainCtrl.IsAsciiChartOpen;
+            toggleInstructionChartMenuItem.IsChecked = mMainCtrl.IsInstructionChartOpen;
         }
         private void DebugMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             debugCommentRulersMenuItem.IsChecked = MultiLineComment.DebugShowRuler;

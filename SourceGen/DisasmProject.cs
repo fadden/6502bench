@@ -894,7 +894,7 @@ namespace SourceGen {
                     string msg = "descriptor straddles address change; len=" + kvp.Value.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(
-                        MessageList.MessageEntry.SeverityLevel.Error,
+                        MessageList.MessageEntry.SeverityLevel.Warning,
                         offset,
                         MessageList.MessageEntry.MessageType.InvalidOffsetOrLength,
                         msg,

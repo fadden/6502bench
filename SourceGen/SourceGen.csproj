@@ -85,6 +85,9 @@
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\VirtualHexDump.cs" />
+    <Compile Include="Tools\WpfGui\InstructionChart.xaml.cs">
+      <DependentUpon>InstructionChart.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\WpfGui\AsciiChart.xaml.cs">
       <DependentUpon>AsciiChart.xaml</DependentUpon>
     </Compile>
@@ -245,6 +248,10 @@
     <Page Include="Tests\WpfGui\GenTestRunner.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\InstructionChart.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Tools\WpfGui\AsciiChart.xaml">
       <SubType>Designer</SubType>
