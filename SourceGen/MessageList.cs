@@ -88,7 +88,8 @@ namespace SourceGen {
 
         /// <summary>
         /// List of messages.  This is not kept in sorted order, because the DataGrid used to
-        /// display it will do the sorting for us.
+        /// display it will do the sorting for us.  Call the Sort() function to establish an
+        /// initial sort.
         /// </summary>
         private List<MessageEntry> mList;
 
@@ -121,6 +122,18 @@ namespace SourceGen {
 
         public void Clear() {
             mList.Clear();
+        }
+
+        /// <summary>
+        /// Sorts the list, by severity then offset.
+        /// </summary>
+        public void Sort() {
+            mList.Sort(delegate (MessageEntry a, MessageEntry b) {
+                if (a.Severity != b.Severity) {
+                    return (int)b.Severity - (int)a.Severity;
+                }
+                return a.Offset - b.Offset;
+            });
         }
 
         /// <summary>
@@ -168,7 +181,8 @@ namespace SourceGen {
                     break;
             }
 
-            return new MainWindow.MessageListItem(severity, offset, problem, context, resolution);
+            return new MainWindow.MessageListItem(severity, entry.Offset, offset, problem,
+                context, resolution);
         }
 
         public void DebugDump() {

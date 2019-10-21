@@ -42,6 +42,7 @@ namespace SourceGen {
         public const string MAIN_RIGHT_PANEL_WIDTH = "main-right-panel-width";
         public const string MAIN_REFERENCES_HEIGHT = "main-references-height";
         public const string MAIN_SYMBOLS_HEIGHT = "main-symbols-height";
+        public const string MAIN_HIDE_MESSAGE_WINDOW = "main-hide-message-window";
 
         // New project dialog.
         public const string NEWP_SELECTED_SYSTEM = "newp-selected-system";

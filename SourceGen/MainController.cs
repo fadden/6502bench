@@ -933,21 +933,13 @@ namespace SourceGen {
                 mReanalysisTimer.EndTask("Call DisasmProject.Analyze()");
 
                 mReanalysisTimer.StartTask("Update message list");
-                UpdateMessageList();
+                mMainWin.UpdateMessageList(mProject.Messages, mOutputFormatter);
                 mReanalysisTimer.EndTask("Update message list");
             }
 
             mReanalysisTimer.StartTask("Generate DisplayList");
             CodeLineList.GenerateAll();
             mReanalysisTimer.EndTask("Generate DisplayList");
-        }
-
-        private void UpdateMessageList() {
-            List<MainWindow.MessageListItem> items = new List<MainWindow.MessageListItem>();
-            foreach (MessageList.MessageEntry entry in mProject.Messages) {
-                items.Add(MessageList.FormatMessage(entry, mOutputFormatter));
-            }
-            mMainWin.UpdateMessageList(items);
         }
 
         #endregion Project management

@@ -321,6 +321,37 @@ brief description of what the instruction does.  The latter can be
 especially handy for undocumented instructions.</p>
 
 
+<h3><a name="messages">Messages Window</a></h3>
+
+<p>Sometimes a change will invalidate an earlier change.  For example,
+suppose you hint an area as data, and format it as a string.
+Later on you hint it as code.  You now have a block of code with a
+string format record sitting in the middle of it.  SourceGen tries very
+hard not to throw away anything you've done, but it will ignore anything
+invalid.</p>
+<p>If a problem like this is encountered, an entry is added to a list
+of messages displayed at the bottom of the window.  Each entry identifies
+the nature of the problem, the severity of the problem, the offset where
+it occurred, and what was done to resolve it.  The problem categories
+include:</p>
+<ul>
+  <li>Hidden label: a label placed on code or data is now stuck in the
+    middle of a multi-byte instruction or data item.</li>
+  <li>Unresolved weak ref: a reference to a non-existent symbol was found.</li>
+  <li>Invalid offset or length: the offset or length in a format object
+    had an invalid value.</li>
+  <li>Invalid descriptor: the format is inappropriate, e.g. formatting
+    an instruction as a string.</li>
+</ul>
+<p>The "context" column will provide additional detail about the problem.
+In most cases, the offending item will be ignored.</p>
+<p>Double-clicking on an entry will jump to that offset.</p>
+<p>The message list will not appear if there are no messages.  You can
+hide the list by clicking on the "Hide" button to the left of the messages.
+Un-hide the list by clicking on the "N messages" button at the bottom-right
+corner of the application window.</p>
+
+
 <h3><a name="navigation">Navigation</a></h3>
 
 <p>The simplest way to move through the code list is with the scroll wheel

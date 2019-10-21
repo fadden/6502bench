@@ -42,6 +42,12 @@ limitations under the License.
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+            <!-- strings for message button -->
+            <system:String x:Key="str_MessageSingularFmt">{0} message</system:String>
+            <system:String x:Key="str_MessageSingularWarningFmt">{0} message ({1} warning/error)</system:String>
+            <system:String x:Key="str_MessagePluralFmt">{0} messages</system:String>
+            <system:String x:Key="str_MessagePluralWarningFmt">{0} messages ({1} warning/error)</system:String>
+
             <!-- don't center the ListView(GridView) column headers
             https://stackoverflow.com/q/44119146/294248
             (style without ID applies to all instances of that type)
@@ -423,7 +429,15 @@ limitations under the License.
         </ToolBarTray>
 
         <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
-            <TextBlock Text="{Binding StatusBarText, FallbackValue=Ready}"/>
+            <DockPanel LastChildFill="False"
+                       Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor,
+                            AncestorType={x:Type StatusBar}}}">
+                <TextBlock DockPanel.Dock="Left" Text="{Binding StatusBarText, FallbackValue=Ready}"/>
+                <Button DockPanel.Dock="Right" Margin="4,0,6,0" Padding="4,0,4,0"
+                        Content="{Binding MessageStatusText, FallbackValue=3 messages (1 warning/error)}"
+                        Visibility="{Binding Path=CodeListVisibility}"
+                        Click="MessageStatusButton_Click"/>
+            </DockPanel>
         </StatusBar>
 
         <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes
@@ -617,7 +631,8 @@ limitations under the License.
 
                 <DockPanel Grid.Row="1" Visibility="{Binding MessageListVisibility}">
                     <Button DockPanel.Dock="Left" Content="Hide" Width="50" Margin="4,0,4,0"
-                            VerticalAlignment="Bottom">
+                            VerticalAlignment="Bottom"
+                            Click="HideMessageList_Click">
                         <Button.LayoutTransform>
                             <RotateTransform Angle="270"/>
                         </Button.LayoutTransform>
@@ -635,7 +650,8 @@ limitations under the License.
                               HeadersVisibility="Column"
                               CanUserReorderColumns="False"
                               SelectionMode="Single"
-                              VerticalScrollBarVisibility="Visible">
+                              VerticalScrollBarVisibility="Visible"
+                              MouseDoubleClick="MessageGrid_MouseDoubleClick">
                         <!-- should probably add ellipsis: https://stackoverflow.com/a/12880111/294248 -->
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Severity" Width="64" Binding="{Binding Severity}"/>

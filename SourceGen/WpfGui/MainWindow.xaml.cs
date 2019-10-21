@@ -1704,14 +1704,38 @@ namespace SourceGen.WpfGui {
             public string Context { get; private set; }
             public string Resolution { get; private set; }
 
-            public MessageListItem(string severity, string offset, string type, string context,
-                    string resolution) {
+            public int OffsetValue { get; private set; }
+
+            public MessageListItem(string severity, int offsetValue, string offset, string type,
+                    string context, string resolution) {
                 Severity = severity;
+                OffsetValue = offsetValue;
                 Offset = offset;
                 Type = type;
                 Context = context;
                 Resolution = resolution;
             }
+        }
+
+        public Visibility MessageListVisibility {
+            get {
+                bool visible = !HideMessageList && FormattedMessages.Count > 0;
+                return visible ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private bool HideMessageList {
+            get { return AppSettings.Global.GetBool(AppSettings.MAIN_HIDE_MESSAGE_WINDOW, false); }
+            set {
+                AppSettings.Global.SetBool(AppSettings.MAIN_HIDE_MESSAGE_WINDOW, value);
+                OnPropertyChanged("MessageListVisibility");
+            }
+        }
+
+        private string mMessageStatusText;
+        public string MessageStatusText {
+            get { return mMessageStatusText; }
+            set { mMessageStatusText = value; OnPropertyChanged(); }
         }
 
         /// <summary>
@@ -1720,20 +1744,64 @@ namespace SourceGen.WpfGui {
         public ObservableCollection<MessageListItem> FormattedMessages { get; private set; } =
             new ObservableCollection<MessageListItem>();
 
-        public void UpdateMessageList(List<MessageListItem> list) {
+        private void MessageStatusButton_Click(object sender, RoutedEventArgs e) {
+            HideMessageList = false;
+        }
+
+        private void HideMessageList_Click(object sender, RoutedEventArgs e) {
+            HideMessageList = true;
+        }
+
+        private void MessageGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            if (!messageGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
+                    out object item)) {
+                // Header or empty area; ignore.
+                return;
+            }
+            MessageListItem mli = (MessageListItem)item;
+
+            // Jump to the offset, then shift the focus back to the code list.
+            mMainCtrl.GoToLocation(new NavStack.Location(mli.OffsetValue, 0, false),
+                MainController.GoToMode.JumpToCodeData, true);
+            codeListView.Focus();
+        }
+
+        /// <summary>
+        /// Regenerates the contents of the message list.
+        /// </summary>
+        /// <param name="list">Message list.</param>
+        /// <param name="formatter">Format object.</param>
+        public void UpdateMessageList(MessageList list, Asm65.Formatter formatter) {
             FormattedMessages.Clear();
-            foreach (MessageListItem item in list) {
-                FormattedMessages.Add(item);
+            list.Sort();
+
+            int warnErrCount = 0;
+            foreach (MessageList.MessageEntry entry in list) {
+                FormattedMessages.Add(MessageList.FormatMessage(entry, formatter));
+                if (entry.Severity != MessageList.MessageEntry.SeverityLevel.Info) {
+                    warnErrCount++;
+                }
+            }
+
+            if (warnErrCount == 0) {
+                if (FormattedMessages.Count == 1) {
+                    string fmt = (string)FindResource("str_MessageSingularFmt");
+                    MessageStatusText = string.Format(fmt, FormattedMessages.Count);
+                } else {
+                    string fmt = (string)FindResource("str_MessagePluralFmt");
+                    MessageStatusText = string.Format(fmt, FormattedMessages.Count);
+                }
+            } else {
+                if (FormattedMessages.Count == 1) {
+                    string fmt = (string)FindResource("str_MessageSingularWarningFmt");
+                    MessageStatusText = string.Format(fmt, FormattedMessages.Count, warnErrCount);
+                } else {
+                    string fmt = (string)FindResource("str_MessagePluralWarningFmt");
+                    MessageStatusText = string.Format(fmt, FormattedMessages.Count, warnErrCount);
+                }
             }
 
             OnPropertyChanged("MessageListVisibility");
-        }
-
-        public Visibility MessageListVisibility {
-            get {
-                bool visible = FormattedMessages.Count > 0;
-                return visible ? Visibility.Visible : Visibility.Collapsed;
-            }
         }
 
         #endregion Message list panel

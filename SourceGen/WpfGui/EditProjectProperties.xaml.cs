@@ -466,6 +466,12 @@ namespace SourceGen.WpfGui {
                 typeStr = Res.Strings.ABBREV_CONSTANT;
             } else {
                 typeStr = Res.Strings.ABBREV_ADDRESS;
+
+                if (defSym.Direction == DefSymbol.DirectionFlags.Read) {
+                    typeStr += "<";
+                } else if (defSym.Direction == DefSymbol.DirectionFlags.Write) {
+                    typeStr += ">";
+                }
             }
 
             FormattedSymbol fsym = new FormattedSymbol(
