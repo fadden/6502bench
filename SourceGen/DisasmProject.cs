@@ -306,8 +306,11 @@ namespace SourceGen {
                 // picked up as an address for something else.  So we set it to the same
                 // address as the start of the file.  The overlapping-address code should do
                 // the right thing with it.
+                //
+                // Updated after adding the "load address" report to the address edit dialog.
+                // We don't want the two-byte offset.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                AddrMap.Set(0, loadAddr);
+                AddrMap.Set(0, loadAddr - 2);
                 AddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);

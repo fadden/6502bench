@@ -1614,7 +1614,13 @@ namespace SourceGen {
             int offset = CodeLineList[selIndex].FileOffset;
             Anattrib attr = mProject.GetAnattrib(offset);
 
-            EditAddress dlg = new EditAddress(mMainWin, attr.Address, mProject.CpuDef.MaxAddressValue);
+            // Compute load address, i.e. where the byte would have been placed if the entire
+            // file were loaded at the address of the first address map entry.  We assume
+            // offsets wrap at the bank boundary.
+            int firstAddr = mProject.AddrMap.OffsetToAddress(0);
+            int loadAddr = ((firstAddr + offset) & 0xffff) | (firstAddr & 0xff0000);
+            EditAddress dlg = new EditAddress(mMainWin, attr.Address, loadAddr,
+                mProject.CpuDef.MaxAddressValue, mOutputFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }

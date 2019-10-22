@@ -20,6 +20,8 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
+using Asm65;
+
 namespace SourceGen.WpfGui {
     /// <summary>
     /// Edit Address dialog.
@@ -37,6 +39,16 @@ namespace SourceGen.WpfGui {
         private int mMaxAddressValue;
 
         /// <summary>
+        /// What the address would be if there were no addresses set after the initial one.
+        /// </summary>
+        private int mBaseAddr;
+
+        /// <summary>
+        /// Text formatter.
+        /// </summary>
+        private Formatter mFormatter;
+
+        /// <summary>
         /// Bound two-way property.
         /// </summary>
         public string AddressText { get; set; }
@@ -46,12 +58,20 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public bool IsValid {
             get { return mIsValid; }
-            set {
-                mIsValid = value;
-                OnPropertyChanged();
-            }
+            set { mIsValid = value; OnPropertyChanged(); }
         }
         private bool mIsValid;
+
+        public Visibility LoadAddressVis {
+            get { return mLoadAddressVis; }
+            set { mLoadAddressVis = value; OnPropertyChanged(); }
+        }
+        public Visibility mLoadAddressVis = Visibility.Collapsed;
+        public string LoadAddressText {
+            get { return mLoadAddressText; }
+            set { mLoadAddressText = value; OnPropertyChanged(); }
+        }
+        public string mLoadAddressText = string.Empty;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -60,12 +80,21 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public EditAddress(Window owner, int initialAddr, int maxAddressValue) {
+        public EditAddress(Window owner, int initialAddr, int loadAddr, int maxAddressValue,
+                Formatter formatter) {
             // Set the property before initializing the window -- we don't have a property
             // change notifier.
             Address = -2;
             mMaxAddressValue = maxAddressValue;
+            mBaseAddr = loadAddr;
+            mFormatter = formatter;
+
             AddressText = Asm65.Address.AddressToString(initialAddr, false);
+
+            if (initialAddr != loadAddr) {
+                LoadAddressVis = Visibility.Visible;
+                LoadAddressText = mFormatter.FormatAddress(loadAddr, loadAddr > 0xffff);
+            }
 
             InitializeComponent();
             Owner = owner;
