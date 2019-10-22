@@ -243,6 +243,14 @@ namespace Asm65 {
         public OpDef GetOpDef(int op) { return mOpDefs[op]; }
 
         /// <summary>
+        /// Returns the set of cycle mods for the given instruction that are in effect
+        /// for the current CPU.
+        /// </summary>
+        /// <param name="op">Instruction opcode number (0-255).</param>
+        /// <returns>Reduced cycle mod set.</returns>
+        public OpDef.CycleMod GetOpCycleMod(int op) { return mCycleMods[op]; }
+
+        /// <summary>
         /// Indexer.  Returns the definition of opcode N.
         /// </summary>
         public OpDef this[int op] {

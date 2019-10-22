@@ -3608,6 +3608,10 @@ namespace SourceGen {
 
                 sb.Append("\u2022Cycles: ");
                 int cycles = op.Cycles;
+                // TODO: diff GetOpCycleMod vs. op.CycleMods to show which bits apply to
+                //   current CPU vs. other CPUs
+                //Asm65.OpDef.CycleMod cycMods =
+                //    mProject.CpuDef.GetOpCycleMod(mProject.FileData[line.FileOffset]);
                 Asm65.OpDef.CycleMod cycMods = op.CycleMods;
                 sb.Append(cycles.ToString());
                 if (cycMods != 0) {

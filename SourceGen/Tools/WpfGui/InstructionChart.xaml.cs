@@ -141,8 +141,8 @@ namespace SourceGen.Tools.WpfGui {
             // Populate the items source.
             InstructionItems.Clear();
             CpuDef cpuDef = CpuDef.GetBestMatch(item.Type, true, false);
-            for (int i = 0; i < 256; i++) {
-                OpDef op = cpuDef[i];
+            for (int opc = 0; opc < 256; opc++) {
+                OpDef op = cpuDef[opc];
 
                 int opLen = op.GetLength(StatusFlags.AllIndeterminate);
                 string sampleValue = "$12";
@@ -169,11 +169,12 @@ namespace SourceGen.Tools.WpfGui {
                 }
 
                 string cycles = op.Cycles.ToString();
-                if (op.CycleMods != 0) {
+                OpDef.CycleMod mods = cpuDef.GetOpCycleMod(opc);
+                if (mods != 0) {
                     cycles += '+';
                 }
 
-                InstructionItems.Add(new InstructionItem(mFormatter.FormatHexValue(i, 2),
+                InstructionItems.Add(new InstructionItem(mFormatter.FormatHexValue(opc, 2),
                     instrSample, flags.ToString(), cycles,
                     mOpDesc.GetShortDescription(op.Mnemonic),
                     mOpDesc.GetAddressModeDescription(op.AddrMode),

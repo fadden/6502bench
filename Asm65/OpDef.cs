@@ -196,6 +196,10 @@ namespace Asm65 {
         /// Cycles required.  The low 8 bits hold the base cycle count, the remaining bits
         /// are defined by the CycleMod enum.
         /// </summary>
+        /// <remaks>
+        /// This always returns the full set of possible cycle mods.  In most cases you want
+        /// the set that has irrelevant mods masked out.  See CpuDef.GetOpCycleMod().
+        /// </remaks>
         private int CycDef { get; set; }
         public int Cycles { get { return CycDef & 0xff; } }
         public CycleMod CycleMods { get { return (CycleMod)(CycDef & ~0xff); } }
@@ -301,8 +305,14 @@ namespace Asm65 {
             new StatusFlags() { Z = 1 };
         private static StatusFlags FlagsAffected_C =
             new StatusFlags() { C = 1 };
+        private static StatusFlags FlagsAffected_MXCE =
+            new StatusFlags() { M = 1, X = 1, C = 1, E = 1 };
+        private static StatusFlags FlagsAffected_DI =
+            new StatusFlags() { D = 1, I = 1 };
         private static StatusFlags FlagsAffected_NZ =
             new StatusFlags() { N = 1, Z = 1 };
+        private static StatusFlags FlagsAffected_NVZ =
+            new StatusFlags() { N = 1, V = 1, Z = 1 };
         private static StatusFlags FlagsAffected_NZC =
             new StatusFlags() { N = 1, Z = 1, C = 1 };
         private static StatusFlags FlagsAffected_NVZC =
@@ -626,6 +636,11 @@ namespace Asm65 {
             flags.Z = flags.N = TriState16.INDETERMINATE;
             return flags;
         }
+        private static StatusFlags FlagUpdater_NVZ(StatusFlags flags, int immVal,
+                ref StatusFlags condBranchTakenFlags) {
+            flags.Z = flags.V = flags.N = TriState16.INDETERMINATE;
+            return flags;
+        }
         private static StatusFlags FlagUpdater_NZC(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
             flags.C = flags.Z = flags.N = TriState16.INDETERMINATE;
@@ -879,8 +894,8 @@ namespace Asm65 {
             Mnemonic = OpName.BIT,
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.None,
-            FlagsAffected = FlagsAffected_NZC,  // special handling for imm
-            StatusFlagUpdater = FlagUpdater_NZC // special handling for imm
+            FlagsAffected = FlagsAffected_NVZ,  // special handling for imm
+            StatusFlagUpdater = FlagUpdater_NVZ // special handling for imm
         };
         private static OpDef OpBMI = new OpDef() {
             Mnemonic = OpName.BMI,
@@ -923,7 +938,14 @@ namespace Asm65 {
         private static OpDef OpBRK = new OpDef() {
             Mnemonic = OpName.BRK,
             Effect = FlowEffect.NoCont,
-            BaseMemEffect = MemoryEffect.None
+            BaseMemEffect = MemoryEffect.None,
+            // On 6502/65C02 this also affects the 'B' flag, which overlaps with X.  Nobody
+            // really cares though.  On 6502 this doesn't clear the 'D' flag.
+            //
+            // We don't set a StatusFlagUpdater because the flags are only changed for the
+            // software break handler function.  If we could actually track this into that,
+            // we'd need to configure the flags appropriately based on CPU type.
+            FlagsAffected = FlagsAffected_DI
         };
         private static OpDef OpBRL = new OpDef() {
             Mnemonic = OpName.BRL,
@@ -1006,7 +1028,8 @@ namespace Asm65 {
         private static OpDef OpCOP = new OpDef() {
             Mnemonic = OpName.COP,
             Effect = FlowEffect.Cont,
-            BaseMemEffect = MemoryEffect.None
+            BaseMemEffect = MemoryEffect.None,
+            FlagsAffected = FlagsAffected_DI
         };
         private static OpDef OpCPX = new OpDef() {
             Mnemonic = OpName.CPX,
@@ -1264,6 +1287,7 @@ namespace Asm65 {
             Mnemonic = OpName.RTI,
             Effect = FlowEffect.NoCont,
             BaseMemEffect = MemoryEffect.None,
+            FlagsAffected = FlagsAffected_All
         };
         private static OpDef OpRTL = new OpDef() {
             Mnemonic = OpName.RTL,
@@ -1462,7 +1486,7 @@ namespace Asm65 {
             Mnemonic = OpName.XCE,
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.None,
-            FlagsAffected = FlagsAffected_C,
+            FlagsAffected = FlagsAffected_MXCE,
             StatusFlagUpdater = FlagUpdater_XCE
         };
 
@@ -2880,7 +2904,9 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.ANE,
             Effect = FlowEffect.Cont,
-            BaseMemEffect = MemoryEffect.None
+            BaseMemEffect = MemoryEffect.None,
+            FlagsAffected = FlagsAffected_NZ,
+            StatusFlagUpdater = FlagUpdater_NZ
         };
         private static OpDef OpALR = new OpDef() {
             IsUndocumented = true,
@@ -2903,8 +2929,8 @@ namespace Asm65 {
             Mnemonic = OpName.DCP,
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.ReadModifyWrite,
-            FlagsAffected = FlagsAffected_C,
-            StatusFlagUpdater = FlagUpdater_C
+            FlagsAffected = FlagsAffected_NZC,
+            StatusFlagUpdater = FlagUpdater_NZC
         };
         private static OpDef OpDOP = new OpDef() {      // double-byte NOP
             IsUndocumented = true,
@@ -2962,9 +2988,7 @@ namespace Asm65 {
             IsUndocumented = true,
             Mnemonic = OpName.SAX,
             Effect = FlowEffect.Cont,
-            BaseMemEffect = MemoryEffect.Write,
-            FlagsAffected = FlagsAffected_NZ,
-            StatusFlagUpdater = FlagUpdater_NZ
+            BaseMemEffect = MemoryEffect.Write
         };
         private static OpDef OpSBX = new OpDef() {
             IsUndocumented = true,
