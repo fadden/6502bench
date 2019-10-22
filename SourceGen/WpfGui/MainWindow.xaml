@@ -721,7 +721,7 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Info">
-                    <TextBox Text="{Binding InfoPanelContents}"
+                    <TextBox Text="{Binding InfoPanelContents}" IsReadOnly="True"
                              FontFamily="{StaticResource GeneralMonoFont}"
                              TextWrapping="Wrap"/>
                 </GroupBox>

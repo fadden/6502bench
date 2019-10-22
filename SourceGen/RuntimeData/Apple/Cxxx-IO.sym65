@@ -1,8 +1,9 @@
 ; Copyright 2018 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
-; Adapted from NiftyList, by Dave Lyons, and Apple II reference materials
-; found online.
+; Sources:
+;   NiftyList, by Dave Lyons
+;   Various Apple II reference materials found online
 
 *SYNOPSIS Symbols from the Cxxx I/O area, common to most Apple II models.
 
@@ -16,32 +17,32 @@ RDMAINRAM       @ $C002     ;W if 80STORE off: read main mem $0200-BFFF
 RDCARDRAM       @ $C003     ;W if 80STORE off: read aux mem $0200-BFFF
 WRMAINRAM       @ $C004     ;W if 80STORE off: write main mem $0200-BFFF
 WRCARDRAM       @ $C005     ;W if 80STORE off: write aux mem $0200-BFFF
-SETSLOTCXROM    @ $C006     ;W peripheral ROM ($C100-CFFF)
-SETINTCXROM     @ $C007     ;W internal ROM ($C100-CFFF)
-SETSTDZP        @ $C008     ;W main stack and zero page
-SETALTZP        @ $C009     ;W aux stack and zero page
-SETINTC3ROM     @ $C00A     ;W ROM in slot 3
-SETSLOTC3ROM    @ $C00B     ;W ROM in aux slot
-CLR80VID        @ $C00C     ;W 40 columns
-SET80VID        @ $C00D     ;W 80 columns
-CLRALTCHAR      @ $C00E     ;W primary char set
-SETALTCHAR      @ $C00F     ;W alternate char set
+SETSLOTCXROM    @ $C006     ;W use peripheral ROM ($C100-CFFF)
+SETINTCXROM     @ $C007     ;W use internal ROM ($C100-CFFF)
+SETSTDZP        @ $C008     ;W use main stack and zero page
+SETALTZP        @ $C009     ;W use aux stack and zero page
+SETINTC3ROM     @ $C00A     ;W use internal slot 3 ROM
+SETSLOTC3ROM    @ $C00B     ;W use external slot 3 ROM
+CLR80VID        @ $C00C     ;W disable 80-column display mode
+SET80VID        @ $C00D     ;W enable 80-column display mode
+CLRALTCHAR      @ $C00E     ;W use primary char set
+SETALTCHAR      @ $C00F     ;W use alternate char set
 KBDSTRB         @ $C010     ;RW keyboard strobe
-RDLCBNK2        @ $C011     ;R status of selected $Dx bank
-RDLCRAM         @ $C012     ;R status of $Dx ROM / $Dx RAM
-RDRAMRD         @ $C013     ;R status of main/aux RAM reading
-RDRAMWRT        @ $C014     ;R status of main/aux RAM writing
-RDCXROM         @ $C015     ;R status of periph/ROM access
-RDALTZP         @ $C016     ;R status of main/aux stack and zero page
-RDC3ROM         @ $C017     ;R status of slot 3 / aux slot ROM
-RD80COL         @ $C018     ;R status of $C002-C005/PAGE2 for aux mem
-RDVBLBAR        @ $C019     ;R vertical blanking state
-RDTEXT          @ $C01A     ;R status of text/graphics
-RDMIX           @ $C01B     ;R status of full screen / mixed graphics
-RDPAGE2         @ $C01C     ;R status of page 1 / page 2
-RDHIRES         @ $C01D     ;R status of lo-res / hi-res
-ALTCHARSET      @ $C01E     ;R status of primary / alternate char set
-RD80VID         @ $C01F     ;R status of 40/80 columns
+RDLCBNK2        @ $C011     ;R bit 7: reading from LC bank 2 ($Dx)?
+RDLCRAM         @ $C012     ;R bit 7: reading from LC RAM?
+RDRAMRD         @ $C013     ;R bit 7: reading from aux/alt 48K?
+RDRAMWRT        @ $C014     ;R bit 7: writing to aux/alt 48K?
+RDCXROM         @ $C015     ;R bit 7: using internal slot ROM?
+RDALTZP         @ $C016     ;R bit 7: using alt zero page, stack, & LC?
+RDC3ROM         @ $C017     ;R bit 7: using external (slot 3) ROM?
+RD80COL         @ $C018     ;R bit 7: 80STORE is on?
+RDVBLBAR        @ $C019     ;R bit 7: not VBL (VBL signal is low)?
+RDTEXT          @ $C01A     ;R bit 7: using text mode?
+RDMIX           @ $C01B     ;R bit 7: using mixed mode?
+RDPAGE2         @ $C01C     ;R bit 7: using page 2?
+RDHIRES         @ $C01D     ;R bit 7: using hi-res graphics?
+ALTCHARSET      @ $C01E     ;R bit 7: using alt char set?
+RD80VID         @ $C01F     ;R bit 7: using 80 columns?
 TAPEOUT         @ $C020     ;RW toggle caseette tape output
 MONOCOLOR       @ $C021     ;W color/mono
 TBCOLOR         @ $C022     ;RW screen color (low is BG, high is FG)
@@ -99,7 +100,9 @@ CLRAN1          @ $C05B     ;RW annunciator 1 on
 SETAN2          @ $C05C     ;RW annunciator 2 off
 CLRAN2          @ $C05D     ;RW annunciator 2 on
 SETAN3          @ $C05E     ;RW annunciator 3 off
+SETDHIRES       = $C05E     ;W if IOUDIS set, turn on double hi-res
 CLRAN3          @ $C05F     ;RW annunciator 3 on
+CLRDHIRES       = $C05F     ;W if IOUDIS set, turn off double hi-res
 TAPEIN          @ $C060     ;R read cassette input
 BUTN3           = $C060     ;R switch input 3
 BUTN0           @ $C061     ;R switch input 0 / open-apple
@@ -116,16 +119,23 @@ CLTRM           @ $C06E     ;clear test mode
 ENTM            @ $C06F     ;enable test mode
 PTRIG           @ $C070     ;RW analog input reset
 
-;                 $C080     ;RW read RAM, write off, bank 2
-ROMIN           @ $C081     ;RW read ROM, write on, bank 2
-ROMIN_RO        @ $C082     ;RW read ROM, write off, bank 2
-LCBANK2         @ $C083     ;RW read RAM, write on, bank 2
-;                 $C088     ;RW read RAM, write off, bank 1
-;                 $C089     ;RW read ROM, write on, bank 1
-;                 $C08A     ;RW read ROM, write off, bank 1
-LCBANK1         @ $C08B     ;RW read RAM, write on, bank 1
+RDIOUDIS        < $C07E     ;R status of IOU disabling
+SETIOUDIS       > $C07E     ;W disable IOU
+RDDHIRES        < $C07F     ;R status of double hi-res
+CLRIOUDIS       > $C07F     ;W enable IOU
 
-CLRROM          @ $CFFF
+;                 $C080     ;RW read RAM bank 2, write off
+ROMIN           @ $C081     ;RWx2 read ROM, write RAM bank 2
+ROMIN_RO        @ $C082     ;RW read ROM, no write
+LCBANK2         @ $C083     ;RWx2 read/write RAM bank 2
+; C084-C087 repeats
+;                 $C088     ;RW read RAM bank 1, write off
+;                 $C089     ;RW read ROM, write RAM bank 1
+;                 $C08A     ;RW read ROM, no write
+LCBANK1         @ $C08B     ;RWx2 read/write RAM bank 1
+; C08C-C08F repeats
+
+CLRROM          @ $CFFF     ;disable slot C8 ROM
 
 ;IWM:PH0 off @ C0E0
 ;IWM:PH0 on @ C0E1

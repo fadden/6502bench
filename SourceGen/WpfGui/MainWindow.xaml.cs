@@ -352,6 +352,10 @@ namespace SourceGen.WpfGui {
             // Clear this to release the memory.
             CodeDisplayList.Clear();
 
+            // Clear these so we're not still showing them after the project closes.
+            SymbolsList.Clear();
+            NotesList.Clear();
+
             InfoPanelContents = string.Empty;
 
             // If you open a new project while one is already open, the ListView apparently
