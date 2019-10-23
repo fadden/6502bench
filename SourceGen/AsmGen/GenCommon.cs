@@ -445,12 +445,13 @@ namespace SourceGen.AsmGen {
             if (dfd.FormatSubType == FormatDescriptor.SubType.None) {
                 return true;
             }
+            Debug.Assert(dfd.IsAlignedJunk);
 
             // Just check the address.  Shouldn't need to check the length.
             int lastOffset = offset + dfd.Length - 1;
             int alignToAddr = addrMap.OffsetToAddress(lastOffset) + 1;
             int alignPwr = FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
-            int alignMask = alignPwr - 1;
+            int alignMask = (1 << alignPwr) - 1;
             bool result = (alignToAddr & alignMask) == 0;
             //Debug.WriteLine(dfd.FormatSubType + " at +" + offset.ToString("x6") +
             //    "(" + alignToAddr.ToString("x4") + "): " + result);

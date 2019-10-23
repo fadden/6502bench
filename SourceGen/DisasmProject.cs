@@ -441,6 +441,7 @@ namespace SourceGen {
 
         /// <summary>
         /// Walks the list of format descriptors, fixing places where the data doesn't match.
+        /// This is run once, after the file is loaded.
         /// </summary>
         private void FixAndValidate(ref FileLoadReport report) {
             // Can't modify a list while we're iterating through it, so gather changes here.
@@ -863,10 +864,11 @@ namespace SourceGen {
 
             foreach (KeyValuePair<int, FormatDescriptor> kvp in OperandFormats) {
                 int offset = kvp.Key;
+                FormatDescriptor dfd = kvp.Value;
 
                 // Check offset.
                 if (offset < 0 || offset >= mFileData.Length) {
-                    string msg = "invalid offset (desc=" + kvp.Value + ")";
+                    string msg = "invalid offset (desc=" + dfd + ")";
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(
                         MessageList.MessageEntry.SeverityLevel.Error,
@@ -879,8 +881,8 @@ namespace SourceGen {
                 }
 
                 // Make sure it doesn't run off the end
-                if (offset + kvp.Value.Length > mFileData.Length) {
-                    string msg = "invalid offset+len: len=" + kvp.Value.Length +
+                if (offset + dfd.Length > mFileData.Length) {
+                    string msg = "invalid offset+len: len=" + dfd.Length +
                         " file=" + mFileData.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(
@@ -893,8 +895,8 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (!AddrMap.IsContiguous(offset, kvp.Value.Length)) {
-                    string msg = "descriptor straddles address change; len=" + kvp.Value.Length;
+                if (!AddrMap.IsContiguous(offset, dfd.Length)) {
+                    string msg = "descriptor straddles address change; len=" + dfd.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(
                         MessageList.MessageEntry.SeverityLevel.Warning,
@@ -909,9 +911,9 @@ namespace SourceGen {
                     // Check length for instruction formatters.  This can happen if you format
                     // a bunch of bytes as single-byte data items and then add a code entry
                     // point.
-                    if (kvp.Value.Length != mAnattribs[offset].Length) {
+                    if (dfd.Length != mAnattribs[offset].Length) {
                         string msg = "unexpected length on instr format descriptor (" +
-                            kvp.Value.Length + " vs " + mAnattribs[offset].Length + ")";
+                            dfd.Length + " vs " + mAnattribs[offset].Length + ")";
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
                         Messages.Add(new MessageList.MessageEntry(
                             MessageList.MessageEntry.SeverityLevel.Warning,
@@ -921,7 +923,7 @@ namespace SourceGen {
                             MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;
                     }
-                    if (kvp.Value.Length == 1) {
+                    if (dfd.Length == 1) {
                         // No operand to format!
                         string msg = "unexpected format descriptor on single-byte op";
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
@@ -933,8 +935,8 @@ namespace SourceGen {
                             MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         continue;
                     }
-                    if (!kvp.Value.IsValidForInstruction) {
-                        string msg = "descriptor not valid for instruction: " + kvp.Value;
+                    if (!dfd.IsValidForInstruction) {
+                        string msg = "descriptor not valid for instruction: " + dfd;
                         genLog.LogW("+" + offset.ToString("x6") + ": " + msg);
                         Messages.Add(new MessageList.MessageEntry(
                             MessageList.MessageEntry.SeverityLevel.Warning,
@@ -969,7 +971,7 @@ namespace SourceGen {
                     // All instruction bytes have been marked, so we just need to confirm that
                     // none of the bytes spanned by this descriptor are instructions.
                     bool overlap = false;
-                    for (int i = offset; i < offset + kvp.Value.Length; i++) {
+                    for (int i = offset; i < offset + dfd.Length; i++) {
                         if (mAnattribs[i].IsInstruction) {
                             string msg =
                                 "data format descriptor overlaps code at +" + i.ToString("x6");
@@ -987,10 +989,31 @@ namespace SourceGen {
                     if (overlap) {
                         continue;
                     }
+
+#if false
+                    // Check junk+align directive.  We don't outright reject the descriptor,
+                    // because it still works as junk+unalign, but we want to add a warning
+                    // message.
+                    //
+                    // NOTE: currently disabled because some relevant changes, such as editing
+                    // a format descriptor sub-type, don't cause data re-analysis.  I don't think
+                    // this is important enough to special-case or implement elsewhere.
+                    if (dfd.IsAlignedJunk) {
+                        if (!AsmGen.GenCommon.CheckJunkAlign(offset, dfd, AddrMap)) {
+                            string msg = "junk alignment not valid";
+                            Messages.Add(new MessageList.MessageEntry(
+                                MessageList.MessageEntry.SeverityLevel.Info,
+                                offset,
+                                MessageList.MessageEntry.MessageType.InvalidDescriptor,
+                                msg,
+                                MessageList.MessageEntry.ProblemResolution.None));
+                        }
+                    }
+#endif
                 }
 
                 // All tests passed.  Apply the descriptor.
-                mAnattribs[offset].DataDescriptor = kvp.Value;
+                mAnattribs[offset].DataDescriptor = dfd;
             }
         }
 

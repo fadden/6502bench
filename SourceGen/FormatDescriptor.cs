@@ -392,6 +392,9 @@ namespace SourceGen {
         /// Returns true if the sub-type is exclusively for use with the Junk type.  Notably,
         /// returns false for SubType.None.
         /// </summary>
+        public bool IsAlignedJunk {
+            get { return IsJunkSubType(FormatSubType); }
+        }
         private static bool IsJunkSubType(SubType subType) {
             return ((int)subType >= (int)SubType.Align2 &&
                     (int)subType <= (int)SubType.Align65536);
