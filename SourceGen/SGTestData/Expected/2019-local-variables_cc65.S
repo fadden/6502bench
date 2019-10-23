@@ -1,6 +1,7 @@
 ;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
          .setcpu "65816"
 CONST_ZERO =     $f0        ;project const
+
 PROJ_ZERO =      $00        ;project addr
 PROJ_ONE =       $01        ;project addr
 

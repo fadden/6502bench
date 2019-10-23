@@ -13,7 +13,7 @@ L0003    lda   L0000
          dfb   $d0,$ba
          dfb   $30,$b8
          dfb   $62,$b5,$ff
-         bcc   L0016
+         bvs   L0016
          brl   L0080
 
 lodat    dfb   $00

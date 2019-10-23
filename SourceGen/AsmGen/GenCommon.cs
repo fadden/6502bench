@@ -148,12 +148,19 @@ namespace SourceGen.AsmGen {
             gen.OutputAsmConfig();
 
             // Format symbols.
+            bool prevConst = false;
             foreach (DefSymbol defSym in proj.ActiveDefSymbolList) {
+                if (prevConst && !defSym.IsConstant) {
+                    // Output a blank line between the constants and the address equates.
+                    gen.OutputLine(string.Empty);
+                }
                 // Use an operand length of 1 so values are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                     gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
                 gen.OutputEquDirective(defSym.Label, valueStr, defSym.Comment);
+
+                prevConst = defSym.IsConstant;
             }
 
             // If there was at least one symbol, output a blank line.

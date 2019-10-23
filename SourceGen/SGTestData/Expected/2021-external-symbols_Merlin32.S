@@ -1,4 +1,5 @@
 FatConst equ   $4000
+
 OverVar  equ   $40
 CodeWrap equ   $0f00      ;encases program
 SameName1 equ  $2000

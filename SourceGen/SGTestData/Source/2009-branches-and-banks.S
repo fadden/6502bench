@@ -28,7 +28,7 @@ low:    lda     zero
         bne     low-$40                 ;reference symbol
         bmi     low-$40                 ;EDIT: format as hex
         per     low-$40
-        bcc     more
+        bvs     more
         brl     more1
 lodat:  .byte   $00,$01,$02             ;EDIT: set label
 more:   lda     more-2

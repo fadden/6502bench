@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":119,"FileDataCrc32":934960724,"ProjectProps":{
-"CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":119,"FileDataCrc32":-1095650494,"ProjectProps":{
+"CpuName":"65816","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":33489103,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":["PROJ:2009-branches-and-banks.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
 "AddressMap":[{
@@ -54,4 +54,6 @@
 "Label":"j2","Part":"Low"}},
 "111":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"j2","Part":"Low"}}}}
+"Label":"j2","Part":"Low"}}},
+"LvTables":{
+}}

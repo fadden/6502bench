@@ -1,5 +1,6 @@
 ;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
 CONST_ZERO equ $f0        ;project const
+
 PROJ_ZERO equ  $00        ;project addr
 PROJ_ONE equ   $01        ;project addr
 

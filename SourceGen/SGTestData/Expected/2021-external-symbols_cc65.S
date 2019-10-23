@@ -1,5 +1,6 @@
          .setcpu "6502"
 FatConst =       $4000
+
 OverVar  =       $40
 CodeWrap =       $0f00      ;encases program
 SameName1 =      $2000

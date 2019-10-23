@@ -16,7 +16,7 @@ L0003   lda     L0000
         bne     LFFC3
         bmi     $ffc3
         per     LFFC3
-        bcc     L0016
+        bvs     L0016
         brl     L0080
 
 lodat   .byte   $00

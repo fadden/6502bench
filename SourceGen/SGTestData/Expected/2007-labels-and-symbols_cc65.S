@@ -6,6 +6,7 @@ absl     =       $1029
 absh     =       $feed
 biggie   =       $123456
 thirty2  =       $12345678  ;32-bit constant test
+
 plataddr =       $3000      ;address only in platform file
 projalsa =       $3200      ;same val as projalso
 

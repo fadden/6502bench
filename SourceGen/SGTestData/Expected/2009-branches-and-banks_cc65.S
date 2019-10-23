@@ -18,7 +18,7 @@ L0003:   lda     L0000
          .byte   $d0,$ba
          .byte   $30,$b8
          .byte   $62,$b5,$ff
-         bcc     L0016
+         bvs     L0016
          brl     L0080
 
 lodat:   .byte   $00

@@ -5,6 +5,7 @@ absl     equ   $1029
 absh     equ   $feed
 biggie   equ   $123456
 thirty2  equ   $12345678  ;32-bit constant test
+
 plataddr equ   $3000      ;address only in platform file
 projalsa equ   $3200      ;same val as projalso
 
