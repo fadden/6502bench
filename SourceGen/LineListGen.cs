@@ -22,6 +22,7 @@ using System.Text;
 using Asm65;
 using CommonUtil;
 using FormattedParts = SourceGen.DisplayList.FormattedParts;
+using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode;
 
 namespace SourceGen {
     /// <summary>
@@ -79,6 +80,12 @@ namespace SourceGen {
         /// Local variable table data extractor.
         /// </summary>
         private LocalVariableLookup mLvLookup;
+
+        /// <summary>
+        /// Character test, for display of character data next to default data items.
+        /// </summary>
+        private CharEncoding.InclusionTest mCharTest;
+        private CharEncoding.Convert mCharConv;
 
 
         /// <summary>
@@ -629,7 +636,11 @@ namespace SourceGen {
         /// Generates Lines for the entire project.
         /// </summary>
         public void GenerateAll() {
+            // Do this now in case the project properties have changed.
+            ConfigureCharacterEncoding();
+
             mLineList.Clear();
+
             List<Line> headerLines = GenerateHeaderLines(mProject, mFormatter, mPseudoOpNames);
             mLineList.InsertRange(0, headerLines);
 
@@ -638,6 +649,33 @@ namespace SourceGen {
             mDisplayList.ResetList(mLineList.Count);
 
             Debug.Assert(ValidateLineList(), "Display list failed validation");
+        }
+
+        private void ConfigureCharacterEncoding() {
+            TextScanMode textMode = mProject.ProjectProps.AnalysisParams.DefaultTextScanMode;
+            switch (textMode) {
+                case TextScanMode.LowAscii:
+                    mCharTest = CharEncoding.IsPrintableAscii;
+                    mCharConv = CharEncoding.ConvertAscii;
+                    break;
+                case TextScanMode.LowHighAscii:
+                    mCharTest = CharEncoding.IsPrintableLowOrHighAscii;
+                    mCharConv = CharEncoding.ConvertLowAndHighAscii;
+                    break;
+                case TextScanMode.C64Petscii:
+                    mCharTest = CharEncoding.IsPrintableC64Petscii;
+                    mCharConv = CharEncoding.ConvertC64Petscii;
+                    break;
+                case TextScanMode.C64ScreenCode:
+                    mCharTest = CharEncoding.IsPrintableC64ScreenCode;
+                    mCharConv = CharEncoding.ConvertC64ScreenCode;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    mCharTest = CharEncoding.IsPrintableAscii;
+                    mCharConv = CharEncoding.ConvertAscii;
+                    break;
+            }
         }
 
         /// <summary>
@@ -1291,6 +1329,22 @@ namespace SourceGen {
             }
 
             operandStr = pout.Operand;
+
+            // This seems less useful in practice than in theory, unless you have a lot of
+            // character data separated by unprintable values.  Text generally gets found by
+            // the data scanner, and having character values next to things that aren't
+            // actually meant to be character data is more distracting than useful.  If
+            // there's a good use case we could make it an option, and have mCharTest set
+            // to null if it's switched off.
+            if (false && attr.DataDescriptor.FormatType == FormatDescriptor.Type.Default) {
+                FormatDescriptor dfd = attr.DataDescriptor;
+                Debug.Assert(dfd.Length == 1);
+                int operand = RawData.GetWord(mProject.FileData, offset, dfd.Length, false);
+
+                if (mCharTest((byte)operand)) {
+                    operandStr += "  '" + mCharConv((byte)operand) + "'";
+                }
+            }
 
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
                 flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);

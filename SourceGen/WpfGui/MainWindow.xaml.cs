@@ -737,6 +737,10 @@ namespace SourceGen.WpfGui {
             //   50K: 10 seconds, 20K: 1.6 sec, 10K: 0.6 sec, 5K: 0.2 sec
             const int MAX_SEL_COUNT = 5000;
 
+            // In the current implementation, a large (500K) list can take a couple of
+            // seconds to restore a single-line selection if the selected item is near
+            // the bottom of the list.
+
             TaskTimer timer = new TaskTimer();
             timer.StartTask("TOTAL");
 
