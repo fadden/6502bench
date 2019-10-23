@@ -281,7 +281,7 @@ namespace SourceGen.WpfGui {
         /// (Intended for use from XAML.)
         /// </summary>
         public Visibility LaunchPanelVisibility {
-            get { return mShowCodeListView ? Visibility.Hidden : Visibility.Visible; }
+            get { return mShowCodeListView ? Visibility.Collapsed : Visibility.Visible; }
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace SourceGen.WpfGui {
         /// (Intended for use from XAML.)
         /// </summary>
         public Visibility CodeListVisibility {
-            get { return mShowCodeListView ? Visibility.Visible : Visibility.Hidden; }
+            get { return mShowCodeListView ? Visibility.Visible : Visibility.Collapsed; }
         }
 
         public FontFamily CodeListFontFamily {

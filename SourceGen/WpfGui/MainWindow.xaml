@@ -527,8 +527,8 @@ limitations under the License.
             </Grid>
 
             <!-- Launch panel.  Either this or the code list panel will be visible. -->
-            <Grid Name="launchPanel" Grid.Column="2"
-                  Visibility="{Binding Path=LaunchPanelVisibility}" d:IsHidden="True">
+            <Grid Grid.Column="2" Name="launchPanel" Visibility="{Binding Path=LaunchPanelVisibility}"
+                  d:IsHidden="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -628,8 +628,8 @@ limitations under the License.
 
                 <!-- A GridSplitter would be nice to make the height adjustable, but I had
                 trouble making everything disappear cleanly, particularly w.r.t. the splitter
-                working correctly after hide + re-show.  (This might have been due to a more
-                general issue... should revisit this someday.)  See
+                working correctly after hide + re-show.  (This might have been due to issue #52...
+                should revisit this someday.)  See
                 https://stackoverflow.com/q/2502178/294248 for suggestions. -->
                 <!--<GridSplitter Name="messageLogSplitter" Grid.Row="1" Height="4"
                               HorizontalAlignment="Stretch" VerticalAlignment="Center"
