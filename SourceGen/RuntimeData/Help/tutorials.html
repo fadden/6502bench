@@ -22,6 +22,7 @@ manual is recommended.</p>
   <li><a href="#basic-features">#1: Basic Features</a></li>
   <li><a href="#advanced-features">#2: Advanced Features</a></li>
   <li><a href="#address-table">#2a: Address Table Formatting</a></li>
+  <li><a href="#extension-scripts">#2b: Extension Scripts</a></li>
 </ul>
 
 
@@ -410,9 +411,9 @@ went well, the operands should now read <code>LDA #&lt;XDATA</code>
 and <code>LDA #&gt;XDATA</code>.</p>
 <p>Let's give the pointer a name.  Select line $203d, and use
 Actions &gt; Create Local Variable Table to create an empty table.
-Click "New Symbol" on the right side.  Set the Label field to "PTR1",
-the Value field to $02, and the width to 2 (it's a 2-byte pointer).  Leave
-the Address button selected.  Click "OK" to create the entry, and then
+Click "New Symbol" on the right side.  Leave the Address button selected.
+Set the Label field to "PTR1", the Value field to $02, and the width
+to 2 (it's a 2-byte pointer).  Click "OK" to create the entry, and then
 "OK" to update the table.</p>
 <p>There's now a ".var" statement (similar to a .equ) above line $203d,
 and the stores to $02/$03 have changed to "PTR1" and "PTR1+1".</p>
@@ -460,18 +461,42 @@ means the zero-flag is clear.)</p>
 you add an end-of-line comment, it appears after the cycle count.</p>
 <p>Hit Ctrl+S to save your project.  Make that a habit.</p>
 
+<h4>Inline Data</h4>
+
+<p>Consider the code at address $206B.  It's a JSR followed by some
+ASCII text, then a $00 byte, and then what might be code.  Double-click
+on the JSR opcode to jump to $20AB to see the function.  It pulls the
+call address off the stack, and uses it as a pointer.  When it encounters
+a zero byte, it breaks out of the loop, pushes the adjusted pointer
+value back onto the stack, and returns.</p>
+<p>This is an example of "inline data", where a function uses the return
+address to get a pointer to data.  The return address is adjusted to
+point past the inline data before returning (technically, it points at
+the very last byte of the inline data, because RTS jumps to address + 1).</p>
+<p>To format the data, we first need to tell SourceGen that there's data
+in line with the code.  Select the line at address $206E, then
+shift-click the line at address $2077.  Use Actions > Hint as Inline Data.</p>
+<p>The data turns to single-byte values, and we now see the code
+continuing at address $2078.  We can format the data as string by
+using Actions > Edit Operand, setting the Character Encoding to "Low or
+High ASCII", and choosing "null-terminated strings".</p>
+
+<p>That's pretty straightforward, but this could quickly become tedious if
+there were a lot of these.  SourceGen allows you to define scripts to
+automate common formatting tasks.  This is covered in a later tutorial.</p>
+
 <h4>Odds &amp; Ends</h4>
 
 <p>The rest of the code isn't really intended to do anything useful.  It
 just exists to illustrate some odd situations.</p>
-<p>Look at the code starting at $206b.  It ends with a BRK at $2074, which
+<p>Look at the code starting at $2078.  It ends with a BRK at $2081, which
 as noted earlier is a bad sign.  If you look two lines above the BRK,
 you'll see that it's loading the accumulator with zero, then doing a BNE,
 which should never be taken (note the cycle count for the BNE is 2).  The
 trick is in the two lines before that, which use self-modifying code to
 change the LDA immediate operand from $00 to $ff.  The BNE is actually
 a branch-always.</p>
-<p>We can fix this by correcting the status flags.  Select line $2072,
+<p>We can fix this by correcting the status flags.  Select line $207F,
 and then Actions &gt; Override Status Flags.  This lets us specify what
 the flags should be before the instruction is executed.  For each flag,
 we can override the default behavior and specify that the flag is
@@ -481,13 +506,13 @@ in the "Z" column click on the button in the "Zero" row.  Click "OK".  The
 BNE is now an always-taken branch, and the code list rearranges itself
 appropriately (and the cycle count is now 3).</p>
 
-<p>Continuing on, the code at $2079 touches a few consecutive locations.  Edit
-the label on line $2074, setting it to "STUFF".  Notice how the references
-to $2074 through $2077 have changed from auto-generated labels to
+<p>Continuing on, the code at $2086 touches a few consecutive locations.  Edit
+the label on line $2081, setting it to "STUFF".  Notice how the references
+to $2081 through $2084 have changed from auto-generated labels to
 references to STUFF.  For some projects this may be undesirable.  Use
 Edit &gt; Project Properties, then in the Analysis Parameters box
 un-check "Seek nearby targets", and click "OK".  You'll notice that the
-references to $2075 and later have switched back to auto labels.  If
+references to $2081 and later have switched back to auto labels.  If
 you scroll up, you'll see that the references to PTR1+1 and PTR2+1 were
 not affected, because local variables use explicit widths rather
 than the "nearby" logic.</p>
@@ -495,7 +520,7 @@ than the "nearby" logic.</p>
 avoid explicitly labeling every part of a multi-byte data item.  For now,
 use Edit &gt; Undo to switch it back on.</p>
 
-<p>The code at $2085 looks a bit strange.  <code>LDX</code>, then a
+<p>The code at $2092 looks a bit strange.  <code>LDX</code>, then a
 <code>BIT</code> with a weird symbol, then another <code>LDX</code>.  If
 you look at the "bytes" column, you'll notice that the three-byte
 <code>BIT</code> instruction has only one byte on its line.  The
@@ -503,7 +528,7 @@ trick here is that the <code>LDX #$01</code> is embedded inside the
 <code>BIT</code> instruction.  When the code runs through here, X is set
 to $00, then the <code>BIT</code> instruction sets some flags, then the
 <code>STA</code> runs.  Several lines down there's a <code>BNE</code>
-to $2088, which is in the middle of the <code>BIT</code> instruction.
+to $2095, which is in the middle of the <code>BIT</code> instruction.
 It loads X with $01, then also continues to the <code>STA</code>.</p>
 <p>Embedded instructions are unusual but not unheard-of.  (This trick is
 used extensively in Microsoft BASICs, such as Applesoft.)  When you see the
@@ -513,9 +538,7 @@ on.</p>
 
 <h2><a name="address-table">Tutorial #2a: Address Table Formatting</a></h2>
 
-<p>This tutorial covers one specific feature.</p>
-
-<h3>Formatting a Split-Address Table</h3>
+<p><i>This tutorial covers one specific feature.</i></p>
 
 <p>Start a new project.  Select the Apple //e platform, click Select File
 and navigate to the Examples directory.  In A2-Amper-fdraw, select
@@ -586,6 +609,59 @@ code entry point hint -- but did several of them at once.</p>
 
 <p>We don't want to save this project, so select File &gt; Close.  When
 SourceGen asks for confirmation, click Discard & Continue.</p>
+
+
+<h2><a name="extension-scripts">Tutorial #2b: Extension Scripts</a></h2>
+
+<p><i>This tutorial covers one specific feature.</i></p>
+
+<p>Some repetitive formatting tasks can be handled with automatic scripts.
+This is especially useful for inline data, which confuses the disassembler
+because code is expected.</p>
+<p>An earlier tutorial demonstrated how to manually mark bytes as
+inline data.  We're going to do it a faster way.  For this tutorial,
+start a new project with "Generic 6502", and in the SourceGen
+installation directory find the Examples directory, open the Scripts
+subdirectory, and select "Sample".</p>
+<p>We'll need to load scripts from the project directory, so we have to
+save the project.  File > Save, call it the default name (Sample.dis65).</p>
+
+<p>Take a look at the disassembly listing.  The file starts with a JSR
+followed by a string that begins with a small number.  This appears to be
+a string with a leading length byte.  We want to load a script that
+can handle that, so use Edit > Project Properties, select the
+Extension Scripts tab, click "Add Scripts from Project", and then
+the file "InlineL1String.cs".  Click OK.</p>
+<p>Nothing happened.  If you look at the script (and you know some C#),
+you'll see that it's looking for a JSR to a function called
+"PrintInlineL1String".  So let's give it one.</p>
+<p>Double-click the JSR operand ("L1026"), click "Create Label", and
+enter "PrintInlineL1String".  Remember that labels are case-sensitive;
+you must enter it exactly as shown.  Hit OK to accept the label, and OK
+to close the operand editor.  If all went well, address $1003 should now be
+an L1 string "How long?", and adress $100D should be another JSR.</p>
+
+<p>The next JSR appears to be followed by a null-terminated string, so
+we'll need something that handles that.  Go back into Project Properties
+and add the script "InlineNullTermString.cs".</p>
+<p>This script is slightly different, in that it handles any JSR to a label
+that starts with "PrintInlineNullString".  So let's give it a couple of
+those.</p>
+<p>Double-click the operand on line $100D ("L1027"), click Create Label,
+and set the label to "PrintInlineNullStringOne".  Hit OK twice.  That
+formatted the first one and got us to the next JSR.  Repeat the process
+on line $1019 ("L1028"), setting the label to "PrintInlineNullStringTwo".</p>
+
+<p>The entire project is now nicely formatted.  In a real project the
+"Print Inline" locations would be actual print functions, not just RTS
+instructions, and there would be multiple JSRs to a single function.
+So labeling a single print function could format dozens of inline strings
+and clean up the disassembly automatically.</p>
+
+<p>Extension scripts can make your life much easier, but they do require
+some programming experience.  See the
+<a href="advanced.html#extension-scripts">manual</a> for more details.</p>
+
 
 
 <h2>End of Tutorials</h2>

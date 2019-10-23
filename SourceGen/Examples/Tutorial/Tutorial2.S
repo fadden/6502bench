@@ -53,7 +53,10 @@ stringtab
         dw      string3
 
 copydone
-        lda     #$ff
+        jsr     PrintInlineZString
+        asc     'Embedded!',00
+
+        lda     #$ff            ;self-modifying code example
         sta     _mod+1
 _mod    lda     #$00
         bne     skipbrk
@@ -62,12 +65,12 @@ middat  ds      4
 outdat  ds      1
 
 skipbrk
-        lda     middat
+        lda     middat          ;nearby-label example
         ora     middat+1
         and     middat+2
         eor     middat+3
 
-        ldx     #$00
+        ldx     #$00            ;embedded instruction example
         dfb     $2c
 rebr    ldx     #$01
         sta     outdat
@@ -83,5 +86,29 @@ rebr    ldx     #$01
 
 thing
         lda     INPUT
+        rts
+
+PrintInlineZString
+        pla
+        sta     PTR1
+        pla
+        sta     PTR1+1
+        ldy     #$01
+:loop   lda     (PTR1),Y
+        beq     strend
+        ora     #$80
+        jsr     $FDED
+        iny
+        bne     :loop
+
+strend  tya
+        clc
+        adc     PTR1
+        sta     PTR1
+        lda     PTR1+1
+        adc     #$00
+        pha
+        lda     PTR1
+        pha
         rts
 
