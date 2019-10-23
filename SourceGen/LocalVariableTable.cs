@@ -187,8 +187,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="newSym">Symbol to add.</param>
         public void AddOrReplace(DefSymbol newSym) {
-            if (newSym.SymbolType != Symbol.Type.Constant &&
-                    newSym.SymbolType != Symbol.Type.ExternalAddr) {
+            if (!newSym.IsConstant && newSym.SymbolType != Symbol.Type.ExternalAddr) {
                 Debug.Assert(false, "Unexpected symbol type " + newSym.SymbolType);
                 return;
             }

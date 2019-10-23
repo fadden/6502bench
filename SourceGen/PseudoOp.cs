@@ -399,7 +399,7 @@ namespace SourceGen {
         public static string AnnotateEquDirective(Formatter formatter, string operand,
                 DefSymbol defSym) {
             string typeStr;
-            if (defSym.SymbolType == Symbol.Type.Constant) {
+            if (defSym.IsConstant) {
                 if (defSym.SymbolSource == Symbol.Source.Variable) {
                     typeStr = Res.Strings.EQU_STACK_RELATIVE;
                 } else {
@@ -412,7 +412,7 @@ namespace SourceGen {
             string msgStr = null;
             if (defSym.HasWidth) {
                 msgStr = typeStr + "/" + defSym.DataDescriptor.Length;
-            } else if (defSym.SymbolType == Symbol.Type.Constant) {
+            } else if (defSym.IsConstant) {
                 // not entirely convinced we want this, but there's currently no other way
                 // to tell the difference between an address and a constant from the code list
                 msgStr = typeStr;

@@ -45,8 +45,6 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
         public static string DEFAULT_HEADER_COMMENT_FMT =
             (string)Application.Current.FindResource("str_DefaultHeaderCommentFmt");
-        public static string DEFAULT_VALUE =
-            (string)Application.Current.FindResource("str_DefaultValue");
         public static string DEFAULT_ASCII_DELIM_PAT =
             (string)Application.Current.FindResource("str_DefaultAsciiDelimPat");
         public static string DEFAULT_HIGH_ASCII_DELIM_PAT =
@@ -167,8 +165,12 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_GeneratedForVersion");
         public static string HIDE_COL =
             (string)Application.Current.FindResource("str_HideCol");
-        public static string INFO_FD_SUM_FMT =
-            (string)Application.Current.FindResource("str_InfoFdSumFmt");
+        public static string INFO_AUTO_FORMAT =
+            (string)Application.Current.FindResource("str_InfoAutoFormat");
+        public static string INFO_CUSTOM_FORMAT =
+            (string)Application.Current.FindResource("str_InfoCustomFormat");
+        public static string INFO_DEFAULT_FORMAT =
+            (string)Application.Current.FindResource("str_InfoDefaultFormat");
         public static string INFO_LINE_SUM_NON_FMT =
             (string)Application.Current.FindResource("str_InfoLineSumNonFmt");
         public static string INFO_LINE_SUM_PLURAL_FMT =

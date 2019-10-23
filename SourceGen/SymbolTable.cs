@@ -349,7 +349,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="sym">Symbol to add.</param>
         private void AddAddressTableEntry(Symbol sym) {
-            if (sym.SymbolType == Symbol.Type.Constant) {
+            if (sym.IsConstant) {
                 return;
             }
             if (sym.SymbolSource == Symbol.Source.Variable) {
@@ -461,7 +461,7 @@ namespace SourceGen {
         private void RemoveAddressTableEntry(Symbol sym) {
             // Easiest thing to do is just regenerate the table.  Since we don't track
             // constants or variables, we can just ignore those.
-            if (sym.SymbolType == Symbol.Type.Constant) {
+            if (sym.IsConstant) {
                 return;
             }
             if (sym.SymbolSource == Symbol.Source.Variable) {

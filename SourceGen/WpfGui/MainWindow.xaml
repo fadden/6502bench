@@ -450,11 +450,11 @@ limitations under the License.
         DockPanel, so that LastChildFill will expand this to fill all available space. -->
         <Grid Name="triptychGrid" DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="256" MinWidth="100"/>
+                <ColumnDefinition Width="*" MinWidth="100"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*" MinWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="256" MinWidth="100"/>
+                <ColumnDefinition Width="*" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             
 
@@ -584,7 +584,7 @@ limitations under the License.
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ListView Name="codeListView" Grid.Column="2"
+                <ListView Name="codeListView"
                           Style="{StaticResource codeListStyle}"
                           FontFamily="{StaticResource GeneralMonoFont}"
                           VirtualizingStackPanel.VirtualizationMode="Recycling"
@@ -628,7 +628,8 @@ limitations under the License.
 
                 <!-- A GridSplitter would be nice to make the height adjustable, but I had
                 trouble making everything disappear cleanly, particularly w.r.t. the splitter
-                working correctly after hide + re-show.  See
+                working correctly after hide + re-show.  (This might have been due to a more
+                general issue... should revisit this someday.)  See
                 https://stackoverflow.com/q/2502178/294248 for suggestions. -->
                 <!--<GridSplitter Name="messageLogSplitter" Grid.Row="1" Height="4"
                               HorizontalAlignment="Stretch" VerticalAlignment="Center"
@@ -673,7 +674,7 @@ limitations under the License.
                 <Grid.RowDefinitions>
                     <RowDefinition Height="2*" MinHeight="100"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*" MinHeight="100"/>
+                    <RowDefinition Height="*" MinHeight="50"/>
                 </Grid.RowDefinitions>
 
                 <GroupBox Grid.Row="0" Header="Symbols">
@@ -721,9 +722,55 @@ limitations under the License.
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Info">
-                    <TextBox Text="{Binding InfoPanelContents}" IsReadOnly="True"
-                             FontFamily="{StaticResource GeneralMonoFont}"
-                             TextWrapping="Wrap"/>
+                    <ScrollViewer>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" TextWrapping="Wrap"
+                                       Text="{Binding InfoLineDescrText, FallbackValue=Line #1234: N bytes of data}"/>
+                            <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="DarkGray"
+                                       Text="{Binding InfoOffsetText, FallbackValue=[offset: +123456]}"/>
+
+                            <StackPanel Grid.Row="2"
+                                        Visibility="{Binding InfoFormatShowDashes, Converter={StaticResource BoolToVis}}">
+                                <!-- For some reason putting the Visibility on the Border causes the
+                                border to disappear even when it's supposed to be Visible.  So I'm
+                                using a panel to contain it. -->
+                                <Border BorderThickness="1" Padding="1" Margin="0,2">
+                                    <!-- https://stackoverflow.com/a/47300149/294248 -->
+                                    <Border.BorderBrush>
+                                        <VisualBrush>
+                                            <VisualBrush.Visual>
+                                                <Rectangle StrokeDashArray="4 2" Stroke="{Binding InfoFormatBoxBrush}" StrokeThickness="1"
+                                                  Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
+                                                  Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Border.BorderBrush>
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="{Binding InfoFormatText, FallbackValue=Format: good stuff}"/>
+                                </Border>
+                            </StackPanel>
+                            <Border Grid.Row="2" BorderThickness="1" Padding="1" Margin="0,2"
+                                    BorderBrush="{Binding InfoFormatBoxBrush}"
+                                    Visibility="{Binding InfoFormatShowSolid, Converter={StaticResource BoolToVis}}">
+                                <TextBlock TextWrapping="Wrap" Text="{Binding InfoFormatText}"/>
+                            </Border>
+
+                            <TextBox Grid.Row="3" Text="{Binding InfoPanelDetail1}" IsReadOnly="True"
+                                     TextWrapping="Wrap" BorderThickness="0"/>
+
+                            <!--<TextBox Grid.Row="4" Text="{Binding InfoPanelMonoContents}" IsReadOnly="True"
+                                     FontFamily="{StaticResource GeneralMonoFont}"
+                                     TextWrapping="Wrap" BorderThickness="0"/>-->
+                        </Grid>
+                    </ScrollViewer>
                 </GroupBox>
                 
                 <GridSplitter Height="4" Grid.Row="1"

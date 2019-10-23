@@ -55,18 +55,18 @@ namespace SourceGen {
         /// for external addresses (including variables) and constants.
         /// </summary>
         public bool IsInternalLabel {
-            get {
-                return SymbolSource == Source.User || SymbolSource == Source.Auto;
-            }
+            get { return SymbolSource == Source.User || SymbolSource == Source.Auto; }
         }
 
         /// <summary>
         ///  True if the symbol is a local variable.
         /// </summary>
         public bool IsVariable {
-            get {
-                return SymbolSource == Source.Variable;
-            }
+            get { return SymbolSource == Source.Variable; }
+        }
+
+        public bool IsConstant {
+            get { return SymbolType == Type.Constant; }
         }
 
 

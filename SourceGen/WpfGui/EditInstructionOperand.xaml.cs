@@ -879,8 +879,7 @@ namespace SourceGen.WpfGui {
                 Symbol firstPlatform = null;
                 Symbol firstProject = null;
                 foreach (Symbol sym in mProject.SymbolTable) {
-                    if (sym.Value == attr.OperandAddress &&
-                            sym.SymbolType != Symbol.Type.Constant) {
+                    if (sym.Value == attr.OperandAddress && !sym.IsConstant) {
                         if (firstPlatform == null && sym.SymbolSource == Symbol.Source.Platform) {
                             firstPlatform = sym;
                         } else if (firstProject == null &&

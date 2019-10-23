@@ -426,10 +426,13 @@ namespace SourceGen {
         /// <summary>
         /// Generates a string describing the format, suitable for use in the UI.
         /// </summary>
-        public string ToUiString() {
+        public string ToUiString(bool showBytes = true) {
             // NOTE: this should be made easier to localize
 
-            string retstr = Length + "-byte ";
+            string retstr = string.Empty;
+            if (showBytes) {
+                retstr = Length + "-byte ";
+            }
 
             if (IsString) {
                 switch (FormatSubType) {
@@ -480,19 +483,19 @@ namespace SourceGen {
                     switch (FormatType) {
                         case Type.Default:
                         case Type.NumericLE:
-                            retstr += "Numeric (little-endian)";
+                            retstr += "numeric (little-endian)";
                             break;
                         case Type.NumericBE:
-                            retstr += "Numeric (big-endian)";
+                            retstr += "numeric (big-endian)";
                             break;
                         case Type.Dense:
-                            retstr += "Dense";
+                            retstr += "dense";
                             break;
                         case Type.Fill:
-                            retstr += "Fill";
+                            retstr += "fill";
                             break;
                         case Type.Junk:
-                            retstr += "Unaligned junk";
+                            retstr += "unaligned junk";
                             break;
                         default:
                             // strings handled earlier
@@ -501,35 +504,35 @@ namespace SourceGen {
                     }
                     break;
                 case SubType.Hex:
-                    retstr += "Numeric, Hex";
+                    retstr += "numeric, Hex";
                     break;
                 case SubType.Decimal:
-                    retstr += "Numeric, Decimal";
+                    retstr += "numeric, Decimal";
                     break;
                 case SubType.Binary:
-                    retstr += "Numeric, Binary";
+                    retstr += "numeric, Binary";
                     break;
                 case SubType.Address:
-                    retstr += "Address";
+                    retstr += "address";
                     break;
                 case SubType.Symbol:
                     if (SymbolRef.IsVariable) {
-                        retstr += "Local var \"" + SymbolRef.Label + "\"";
+                        retstr += "local var \"" + SymbolRef.Label + "\"";
                     } else {
-                        retstr += "Symbol \"" + SymbolRef.Label + "\"";
+                        retstr += "symbol \"" + SymbolRef.Label + "\"";
                     }
                     break;
                 case SubType.Ascii:
-                    retstr += "Numeric, ASCII";
+                    retstr += "numeric, ASCII";
                     break;
                 case SubType.HighAscii:
-                    retstr += "Numeric, ASCII (high)";
+                    retstr += "numeric, ASCII (high)";
                     break;
                 case SubType.C64Petscii:
-                    retstr += "Numeric, C64 PETSCII";
+                    retstr += "numeric, C64 PETSCII";
                     break;
                 case SubType.C64Screen:
-                    retstr += "Numeric, C64 Screen";
+                    retstr += "numeric, C64 Screen";
                     break;
                 case SubType.Align2:
                 case SubType.Align4:
@@ -547,7 +550,7 @@ namespace SourceGen {
                 case SubType.Align16384:
                 case SubType.Align32768:
                 case SubType.Align65536:
-                    retstr += "Alignment to " + (1 << AlignmentToPower(FormatSubType));
+                    retstr += "alignment to " + (1 << AlignmentToPower(FormatSubType));
                     break;
 
                 default:

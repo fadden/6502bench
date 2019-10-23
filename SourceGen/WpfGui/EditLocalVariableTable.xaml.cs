@@ -168,7 +168,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private FormattedSymbol CreateFormattedSymbol(DefSymbol defSym) {
             string typeStr;
-            if (defSym.SymbolType == Symbol.Type.Constant) {
+            if (defSym.IsConstant) {
                 typeStr = Res.Strings.ABBREV_STACK_RELATIVE;
             } else {
                 typeStr = Res.Strings.ABBREV_ADDRESS;

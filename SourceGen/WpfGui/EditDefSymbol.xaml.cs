@@ -216,7 +216,7 @@ namespace SourceGen.WpfGui {
                 }
                 Comment = mOldSym.Comment;
 
-                if (mOldSym.SymbolType == Symbol.Type.Constant) {
+                if (mOldSym.IsConstant) {
                     IsConstant = true;
                 } else {
                     IsAddress = true;

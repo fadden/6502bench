@@ -35,7 +35,6 @@ limitations under the License.
     <system:String x:Key="str_ClipformatAssemblerSource">Assembler Source</system:String>
     <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>
     <system:String x:Key="str_DefaultHeaderCommentFmt">6502bench SourceGen v{0}</system:String>
-    <system:String x:Key="str_DefaultValue">Default</system:String>
     <system:String x:Key="str_DefaultAsciiDelimPat">&#x2018;#&#x2019;</system:String>
     <system:String x:Key="str_DefaultHighAsciiDelimPat">&#x201c;#&#x201d;</system:String>
     <system:String x:Key="str_DefaultC64PetsciiDelimPat">pet:&#x201c;#&#x201d;</system:String>
@@ -93,7 +92,9 @@ limitations under the License.
     <system:String x:Key="str_FontDescriptorFmt">{0}-point {1}</system:String>
     <system:String x:Key="str_GeneratedForVersion">Target assembler: {0} v{1} [{2}]</system:String>
     <system:String x:Key="str_HideCol">Hide</system:String>
-    <system:String x:Key="str_InfoFdSumFmt">•Operand format is {0}</system:String>
+    <system:String x:Key="str_InfoAutoFormat">Format (auto):</system:String>
+    <system:String x:Key="str_InfoCustomFormat">Format:</system:String>
+    <system:String x:Key="str_InfoDefaultFormat">Format: default</system:String>
     <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
     <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
     <system:String x:Key="str_InfoLineSumSingularFmt">Line {0}: {1} byte of {2}</system:String>

@@ -355,8 +355,7 @@ namespace SourceGen.WpfGui {
             // Clear these so we're not still showing them after the project closes.
             SymbolsList.Clear();
             NotesList.Clear();
-
-            InfoPanelContents = string.Empty;
+            ClearInfoPanel();
 
             // If you open a new project while one is already open, the ListView apparently
             // doesn't reset certain state, possibly because it's never asked to draw after
@@ -424,7 +423,7 @@ namespace SourceGen.WpfGui {
             AppSettings.Global.Dirty = true;
         }
         private void GridSizeChanged(object sender, EventArgs e) {
-            //Debug.WriteLine("Splitter size change");
+            //Debug.WriteLine("Grid size change: " + sender);
             AppSettings.Global.Dirty = true;
         }
         private void ColumnWidthChanged(object sender, EventArgs e) {
@@ -1602,8 +1601,8 @@ namespace SourceGen.WpfGui {
                 (SymFilterProjectSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
                 (SymFilterPlatformSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
                 (SymFilterAutoLabels != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
-                (SymFilterAddresses != true && sli.Sym.SymbolType != Symbol.Type.Constant) ||
-                (SymFilterConstants != true && sli.Sym.SymbolType == Symbol.Type.Constant) ||
+                (SymFilterAddresses != true && !sli.Sym.IsConstant) ||
+                (SymFilterConstants != true && sli.Sym.IsConstant) ||
                 sli.Sym.IsVariable)
             {
                 e.Accepted = false;
@@ -1689,18 +1688,64 @@ namespace SourceGen.WpfGui {
         #region Info panel
 
         /// <summary>
-        /// Text to display in the Info panel.  This is a simple TextBox.
+        /// Text for the line number / description section.
         /// </summary>
-        public string InfoPanelContents {
-            get {
-                return mInfoBoxContents;
-            }
-            set {
-                mInfoBoxContents = value;
-                OnPropertyChanged();
-            }
+        public string InfoLineDescrText {
+            get { return mInfoLineDescrText; }
+            set { mInfoLineDescrText = value; OnPropertyChanged(); }
         }
-        private string mInfoBoxContents;
+        private string mInfoLineDescrText;
+
+        /// <summary>
+        /// Text for the offset, shown only in debug builds.
+        /// </summary>
+        public string InfoOffsetText {
+            get { return mInfoOffsetText; }
+            set { mInfoOffsetText = value; OnPropertyChanged(); }
+        }
+        private string mInfoOffsetText;
+
+        public SolidColorBrush InfoFormatBoxBrush {
+            get { return mInfoFormatBoxBrush; }
+            set { mInfoFormatBoxBrush = value; OnPropertyChanged(); }
+        }
+        private SolidColorBrush mInfoFormatBoxBrush = Brushes.Green;
+
+        public bool InfoFormatShowDashes {
+            get { return mInfoFormatShowDashes; }
+            set { mInfoFormatShowDashes = value; OnPropertyChanged(); }
+        }
+        private bool mInfoFormatShowDashes;
+
+        public bool InfoFormatShowSolid {
+            get { return mInfoFormatShowSolid; }
+            set { mInfoFormatShowSolid = value; OnPropertyChanged(); }
+        }
+        private bool mInfoFormatShowSolid;
+
+        public string InfoFormatText {
+            get { return mInfoFormatText; }
+            set { mInfoFormatText = value; OnPropertyChanged(); }
+        }
+        private string mInfoFormatText;
+
+        public string InfoPanelDetail1 {
+            get { return mInfoPanelDetail1; }
+            set { mInfoPanelDetail1 = value; OnPropertyChanged(); }
+        }
+        private string mInfoPanelDetail1;
+
+        //public string InfoPanelMonoContents {
+        //    get { return mInfoPanelMonoContents; }
+        //    set { mInfoPanelMonoContents = value; OnPropertyChanged(); }
+        //}
+        //private string mInfoPanelMonoContents;
+
+
+        public void ClearInfoPanel() {
+            InfoLineDescrText = InfoOffsetText = InfoFormatText  = InfoPanelDetail1 = string.Empty;
+            InfoFormatShowDashes = InfoFormatShowSolid = false;
+        }
 
         #endregion Info panel
 

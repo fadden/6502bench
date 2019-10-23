@@ -28,6 +28,7 @@ using CommonUtil;
 using CommonWPF;
 using SourceGen.Sandbox;
 using SourceGen.WpfGui;
+using System.Windows.Media;
 
 namespace SourceGen {
     /// <summary>
@@ -3421,29 +3422,19 @@ namespace SourceGen {
         #region Info panel
 
         private void UpdateInfoPanel() {
+            mMainWin.ClearInfoPanel();
             if (mMainWin.CodeListView_GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
-                mMainWin.InfoPanelContents = string.Empty;
                 return;
             }
             int lineIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             LineListGen.Line line = CodeLineList[lineIndex];
-            StringBuilder sb = new StringBuilder(250);
 
             // TODO(someday): this should be made easier to localize
-            string lineTypeStr;
-            string extraStr = string.Empty;
+            string lineTypeStr = null;
+            bool isSimple = true;
+            DefSymbol defSym = null;
             switch (line.LineType) {
-                case LineListGen.Line.Type.Code:
-                    lineTypeStr = "code";
-                    break;
-                case LineListGen.Line.Type.Data:
-                    if (mProject.GetAnattrib(line.FileOffset).IsInlineData) {
-                        lineTypeStr = "inline data";
-                    } else {
-                        lineTypeStr = "data";
-                    }
-                    break;
                 case LineListGen.Line.Type.LongComment:
                     lineTypeStr = "comment";
                     break;
@@ -3452,8 +3443,6 @@ namespace SourceGen {
                     break;
                 case LineListGen.Line.Type.Blank:
                     lineTypeStr = "blank line";
-                    //lineTypeStr = "blank line (+" +
-                    //    mOutputFormatter.FormatOffset24(line.FileOffset) + ")";
                     break;
                 case LineListGen.Line.Type.OrgDirective:
                     lineTypeStr = "address directive";
@@ -3461,36 +3450,33 @@ namespace SourceGen {
                 case LineListGen.Line.Type.RegWidthDirective:
                     lineTypeStr = "register width directive";
                     break;
-                case LineListGen.Line.Type.EquDirective: {
-                        lineTypeStr = "equate";
-                        int symIndex = LineListGen.DefSymIndexFromOffset(line.FileOffset);
-                        DefSymbol defSym = mProject.ActiveDefSymbolList[symIndex];
-                        string sourceStr;
-                        if (defSym.SymbolSource == Symbol.Source.Project) {
-                            sourceStr = "project symbol definition";
-                        } else if (defSym.SymbolSource == Symbol.Source.Platform) {
-                            sourceStr = "platform symbol file (#" + defSym.LoadOrdinal +
-                                ":" + defSym.FileIdentifier + ")";
-                            if (!string.IsNullOrEmpty(defSym.Tag)) {
-                                sourceStr += ", tag=" + defSym.Tag;
-                            }
-                        } else {
-                            sourceStr = "???";
-                        }
-                        extraStr = "Source: " + sourceStr;
-                        if (defSym.SymbolType == Symbol.Type.Constant) {
-                            extraStr += " (constant)";
-                        } else {
-                            extraStr += " (address)";
-                        }
+
+                case LineListGen.Line.Type.LocalVariableTable:
+                    isSimple = false;
+                    lineTypeStr = "variable table";
+                    break;
+                case LineListGen.Line.Type.Code:
+                    isSimple = false;
+                    lineTypeStr = "code";
+                    break;
+                case LineListGen.Line.Type.Data:
+                    isSimple = false;
+                    if (mProject.GetAnattrib(line.FileOffset).IsInlineData) {
+                        lineTypeStr = "inline data";
+                    } else {
+                        lineTypeStr = "data";
                     }
                     break;
-                case LineListGen.Line.Type.LocalVariableTable:
-                    lineTypeStr = "variable table";
-                    if (mProject.LvTables.TryGetValue(line.FileOffset,
-                            out LocalVariableTable lvt)) {
-                        extraStr = string.Format("{0} entries, clear-previous={1}",
-                            lvt.Count, lvt.ClearPrevious);
+                case LineListGen.Line.Type.EquDirective:
+                    isSimple = false;
+                    int defSymIndex = LineListGen.DefSymIndexFromOffset(line.FileOffset);
+                    defSym = mProject.ActiveDefSymbolList[defSymIndex];
+                    if (defSym.SymbolSource == Symbol.Source.Project) {
+                        lineTypeStr = "project symbol equate";
+                    } else if (defSym.SymbolSource == Symbol.Source.Platform) {
+                        lineTypeStr = "platform symbol equate";
+                    } else {
+                        lineTypeStr = "???";
                     }
                     break;
                 default:
@@ -3498,63 +3484,137 @@ namespace SourceGen {
                     break;
             }
 
-            // For anything that isn't code or data, show something simple and bail.
-            if (line.OffsetSpan == 0) {
-                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_NON_FMT,
-                    lineIndex, lineTypeStr);
-#if DEBUG
-                sb.Append(" [offset=+" + line.FileOffset.ToString("x6") + "]");
-#endif
-                if (!string.IsNullOrEmpty(extraStr)) {
-                    sb.Append("\r\n\r\n");
-                    sb.Append(extraStr);
+            if (line.IsCodeOrData) {
+                // Show number of bytes of code/data.
+                if (line.OffsetSpan == 1) {
+                    mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_SINGULAR_FMT,
+                        lineIndex, line.OffsetSpan, lineTypeStr);
+                } else {
+                    mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_PLURAL_FMT,
+                        lineIndex, line.OffsetSpan, lineTypeStr);
                 }
-                mMainWin.InfoPanelContents = sb.ToString();
+            } else {
+                mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_NON_FMT,
+                    lineIndex, lineTypeStr);
+            }
+
+#if DEBUG
+            mMainWin.InfoOffsetText = ("[offset=+" + line.FileOffset.ToString("x6") + "]");
+#endif
+            if (isSimple) {
                 return;
             }
-            Debug.Assert(line.IsCodeOrData);
 
-            Anattrib attr = mProject.GetAnattrib(line.FileOffset);
-
-            // Show number of bytes of code/data.
-            if (line.OffsetSpan == 1) {
-                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_SINGULAR_FMT,
-                    lineIndex, line.OffsetSpan, lineTypeStr);
-            } else {
-                sb.AppendFormat(Res.Strings.INFO_LINE_SUM_PLURAL_FMT,
-                    lineIndex, line.OffsetSpan, lineTypeStr);
+            if (line.LineType == LineListGen.Line.Type.LocalVariableTable) {
+                string str = string.Empty;
+                if (mProject.LvTables.TryGetValue(line.FileOffset,
+                        out LocalVariableTable lvt)) {
+                    str = lvt.Count + " entries";
+                    if (lvt.ClearPrevious) {
+                        str += "; clear previous";
+                    }
+                }
+                mMainWin.InfoPanelDetail1 = str;
+                return;
             }
-            sb.Append("\r\n");
+
+            if (line.LineType == LineListGen.Line.Type.EquDirective) {
+                StringBuilder esb = new StringBuilder();
+                //esb.Append("\u25b6 ");
+                esb.Append("\u2022 ");
+                if (defSym.IsConstant) {
+                    esb.Append("Constant");
+                } else {
+                    esb.Append("External address");
+                    if (defSym.HasWidth) {
+                        esb.Append(", width=");
+                        esb.Append(defSym.DataDescriptor.Length);
+                    }
+                }
+                if (defSym.Direction != DefSymbol.DirectionFlags.ReadWrite) {
+                    esb.Append("\r\nI/O direction: ");
+                    esb.Append(defSym.Direction);
+                }
+                if (defSym.MultiMask != null) {
+                    esb.Append("\r\nMulti-mask:");
+                    int i = 23;
+                    if ((defSym.MultiMask.AddressMask | defSym.MultiMask.CompareMask |
+                            defSym.MultiMask.CompareValue) < 0x10000) {
+                        i = 15;
+                    }
+                    for ( ; i >= 0; i--) {
+                        if ((i & 3) == 3) {
+                            esb.Append(' ');
+                        }
+                        int bit = 1 << i;
+                        if ((defSym.MultiMask.AddressMask & bit) != 0) {
+                            esb.Append('x');
+                        } else if ((defSym.MultiMask.CompareMask & bit) != 0) {
+                            if ((defSym.MultiMask.CompareValue & bit) != 0) {
+                                esb.Append('1');
+                            } else {
+                                esb.Append('0');
+                            }
+                        } else {
+                            esb.Append('?');
+                        }
+                    }
+                }
+                if (defSym.SymbolSource == Symbol.Source.Platform) {
+                    esb.Append("\r\n\r\nSource file # ");
+                    esb.Append(defSym.LoadOrdinal);
+                    esb.Append(": ");
+                    esb.Append(defSym.FileIdentifier);
+
+                    if (!string.IsNullOrEmpty(defSym.Tag)) {
+                        esb.Append(", tag=");
+                        esb.Append(defSym.Tag);
+                    }
+                }
+                mMainWin.InfoPanelDetail1 = esb.ToString();
+                return;
+            }
+
+
+            //
+            // Handle code/data items.  In particular, the format descriptor.
+            //
+            Debug.Assert(line.IsCodeOrData);
+            bool isCode = (line.LineType == LineListGen.Line.Type.Code);
+
+            StringBuilder sb = new StringBuilder(250);
+            Anattrib attr = mProject.GetAnattrib(line.FileOffset);
 
             if (!mProject.OperandFormats.TryGetValue(line.FileOffset, out FormatDescriptor dfd)) {
                 // No user-specified format, but there may be a generated format.
-                sb.AppendFormat(Res.Strings.INFO_FD_SUM_FMT, Res.Strings.DEFAULT_VALUE);
+                mMainWin.InfoFormatBoxBrush = Brushes.Blue;
                 if (attr.DataDescriptor != null) {
-                    sb.Append(" [");
-                    sb.Append(attr.DataDescriptor.ToUiString());
-                    sb.Append("]");
+                    mMainWin.InfoFormatShowSolid = true;
+                    sb.Append(Res.Strings.INFO_AUTO_FORMAT);
+                    sb.Append(' ');
+                    sb.Append(attr.DataDescriptor.ToUiString(!isCode));
+                } else {
+                    mMainWin.InfoFormatShowDashes = true;
+                    sb.AppendFormat(Res.Strings.INFO_DEFAULT_FORMAT);
                 }
             } else {
                 // User-specified operand format.
-                // If the descriptor has a weak reference to an unknown symbol, should we
-                // call that out here?
-                sb.AppendFormat(Res.Strings.INFO_FD_SUM_FMT, dfd.ToUiString());
-
-                // If the format descriptor for an instruction has the wrong length, it will
-                // be ignored.  Call that out.
-                if (attr.IsInstructionStart && attr.Length != dfd.Length) {
-                    sb.AppendFormat(" [incorrect format length]");
-                }
+                mMainWin.InfoFormatBoxBrush = Brushes.Green;
+                mMainWin.InfoFormatShowSolid = true;
+                sb.Append(Res.Strings.INFO_CUSTOM_FORMAT);
+                sb.Append(' ');
+                sb.Append(dfd.ToUiString(!isCode));
             }
-            sb.Append("\r\n");
+            mMainWin.InfoFormatText = sb.ToString();
+
+            sb.Clear();
 
             // Debug only
             //sb.Append("DEBUG: opAddr=" + attr.OperandAddress.ToString("x4") +
             //    " opOff=" + attr.OperandOffset.ToString("x4") + "\r\n");
 
-            sb.Append("\u2022Attributes:");
             if (attr.IsHinted) {
-                sb.Append(" Hinted(");
+                sb.Append("\u2022 Hints: ");
                 for (int i = 0; i < line.OffsetSpan; i++) {
                     switch (mProject.TypeHints[line.FileOffset + i]) {
                         case CodeAnalysis.TypeHint.Code:
@@ -3574,26 +3634,12 @@ namespace SourceGen {
                         break;
                     }
                 }
-                sb.Append(')');
+                sb.Append("\r\n");
             }
-            if (attr.IsEntryPoint) {
-                sb.Append(" EntryPoint");
-            }
-            if (attr.IsBranchTarget) {
-                sb.Append(" BranchTarget");
-            }
-            if (attr.DoesNotContinue) {
-                sb.Append(" NoContinue");
-            }
-            if (attr.DoesNotBranch) {
-                sb.Append(" NoBranch");
-            }
-            if (mProject.StatusFlagOverrides[line.FileOffset].AsInt != 0) {
-                sb.Append(" StatusFlags");
-            }
-            sb.Append("\r\n\r\n");
 
             if (attr.IsInstruction) {
+                sb.Append("\r\n");
+
                 Asm65.OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[line.FileOffset]);
 
                 string shortDesc = mOpDesc.GetShortDescription(op.Mnemonic);
@@ -3614,27 +3660,44 @@ namespace SourceGen {
 
                 sb.Append("\u2022Cycles: ");
                 int cycles = op.Cycles;
-                // TODO: diff GetOpCycleMod vs. op.CycleMods to show which bits apply to
-                //   current CPU vs. other CPUs
-                //Asm65.OpDef.CycleMod cycMods =
-                //    mProject.CpuDef.GetOpCycleMod(mProject.FileData[line.FileOffset]);
-                Asm65.OpDef.CycleMod cycMods = op.CycleMods;
                 sb.Append(cycles.ToString());
-                if (cycMods != 0) {
-                    sb.Append(" (");
-                    int workBits = (int)cycMods;
+
+                OpDef.CycleMod allMods = op.CycleMods;
+                OpDef.CycleMod nowMods =
+                    mProject.CpuDef.GetOpCycleMod(mProject.FileData[line.FileOffset]);
+                if (allMods != 0) {
+                    StringBuilder nowSb = new StringBuilder();
+                    StringBuilder otherSb = new StringBuilder();
+                    int workBits = (int)allMods;
                     while (workBits != 0) {
                         // Isolate rightmost bit.
                         int firstBit = (~workBits + 1) & workBits;
-                        sb.Append(mOpDesc.GetCycleModDescription((OpDef.CycleMod)firstBit));
+
+                        string desc = mOpDesc.GetCycleModDescription((OpDef.CycleMod)firstBit);
+                        if (((int)nowMods & firstBit) != 0) {
+                            if (nowSb.Length != 0) {
+                                nowSb.Append(", ");
+                            }
+                            nowSb.Append(desc);
+                        } else {
+                            if (otherSb.Length != 0) {
+                                otherSb.Append(", ");
+                            }
+                            otherSb.Append(desc);
+                        }
                         // Remove from set.
                         workBits &= ~firstBit;
-                        if (workBits != 0) {
-                            // more to come
-                            sb.Append(", ");
-                        }
                     }
-                    sb.Append(")");
+                    if (nowSb.Length != 0) {
+                        sb.Append(" (");
+                        sb.Append(nowSb);
+                        sb.Append(")");
+                    }
+                    if (otherSb.Length != 0) {
+                        sb.Append(" [");
+                        sb.Append(otherSb);
+                        sb.Append("]");
+                    }
                 }
                 sb.Append("\r\n");
 
@@ -3655,15 +3718,11 @@ namespace SourceGen {
                 if (!string.IsNullOrEmpty(longDesc)) {
                     sb.Append("\r\n");
                     sb.Append(longDesc);
-                    sb.Append("\r\n");
                 }
-            } else {
-                // do we want descriptions of the pseudo-ops?
             }
 
-
             // Publish
-            mMainWin.InfoPanelContents = sb.ToString();
+            mMainWin.InfoPanelDetail1 = sb.ToString();
         }
 
         #endregion Info panel

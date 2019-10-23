@@ -1541,8 +1541,8 @@ namespace SourceGen {
             // - ascending label
             ActiveDefSymbolList.Sort(delegate (DefSymbol a, DefSymbol b) {
                 // Put constants first.
-                int ca = (a.SymbolType == Symbol.Type.Constant) ? 1 : 0;
-                int cb = (b.SymbolType == Symbol.Type.Constant) ? 1 : 0;
+                int ca = (a.IsConstant) ? 1 : 0;
+                int cb = (b.IsConstant) ? 1 : 0;
                 if (ca != cb) {
                     return cb - ca;
                 }
