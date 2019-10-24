@@ -84,6 +84,7 @@
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\ApplesoftToHtml.cs" />
     <Compile Include="Tools\VirtualHexDump.cs" />
     <Compile Include="Tools\WpfGui\InstructionChart.xaml.cs">
       <DependentUpon>InstructionChart.xaml</DependentUpon>

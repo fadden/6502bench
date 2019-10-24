@@ -3813,6 +3813,33 @@ namespace SourceGen {
             ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
         }
 
+        public void Debug_ApplesoftToHtml() {
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+
+            byte[] data;
+            string basPathName = Path.GetFullPath(fileDlg.FileName);
+            try {
+                data = File.ReadAllBytes(basPathName);
+            } catch (Exception ex) {
+                // not expecting this to happen
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+            Tools.ApplesoftToHtml conv = new Tools.ApplesoftToHtml();
+            string html = conv.Convert(data);
+
+            Tools.WpfGui.ShowText showTextDlg = new Tools.WpfGui.ShowText(mMainWin, html);
+            showTextDlg.Title = "Applesoft to HTML";
+            showTextDlg.ShowDialog();
+        }
+
         #endregion Debug features
     }
 }

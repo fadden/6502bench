@@ -1277,7 +1277,12 @@ namespace SourceGen.WpfGui {
             mMainCtrl.UndoChanges();
         }
 
-        private void Debug_ExtensionScriptInfoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+        private void Debug_ApplesoftToHtmlCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ApplesoftToHtml();
+        }
+
+        private void Debug_ExtensionScriptInfoCmd_Executed(object sender,
+            ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ExtensionScriptInfo();
         }
 
