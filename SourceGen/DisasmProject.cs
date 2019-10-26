@@ -121,6 +121,11 @@ namespace SourceGen {
         public CpuDef CpuDef { get; private set; }
 
         /// <summary>
+        /// If set, changes are ignored.
+        /// </summary>
+        public bool IsReadOnly { get; set; }
+
+        /// <summary>
         /// If true, plugins will execute in the main application's AppDomain instead of
         /// the sandbox.  Must be set before calling Initialize().
         /// </summary>
@@ -1785,6 +1790,9 @@ namespace SourceGen {
         /// </summary>
         /// <param name="changeSet">Set to push.</param>
         public void PushChangeSet(ChangeSet changeSet) {
+            if (IsReadOnly) {
+                return;
+            }
             Debug.WriteLine("PushChangeSet: adding " + changeSet);
 
             // Remove all of the "redo" entries from the current position to the end.
@@ -1850,6 +1858,9 @@ namespace SourceGen {
         public UndoableChange.ReanalysisScope ApplyChanges(ChangeSet cs, bool backward,
                 out RangeSet affectedOffsets) {
             affectedOffsets = new RangeSet();
+            if (IsReadOnly) {
+                return UndoableChange.ReanalysisScope.None;
+            }
 
             UndoableChange.ReanalysisScope needReanalysis = UndoableChange.ReanalysisScope.None;
 

@@ -934,7 +934,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         /// <returns></returns>
         private bool IsProjectOpen() {
-            return mMainCtrl != null && mMainCtrl.IsProjectOpen();
+            return mMainCtrl != null && mMainCtrl.IsProjectOpen;
         }
 
         /// <summary>
@@ -1031,6 +1031,11 @@ namespace SourceGen.WpfGui {
             MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
+        }
+
+        private void CanSaveProject(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = mMainCtrl != null && mMainCtrl.IsProjectOpen &&
+                !mMainCtrl.IsProjectReadOnly;
         }
 
         private void CanToggleSingleByteFormat(object sender, CanExecuteRoutedEventArgs e) {

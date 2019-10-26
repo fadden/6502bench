@@ -626,9 +626,7 @@ namespace SourceGen {
         private void UpdateTitle() {
             // Update main window title.
             StringBuilder sb = new StringBuilder();
-            sb.Append(Res.Strings.TITLE_BASE);
             if (mProject != null) {
-                sb.Append(" - ");
                 if (string.IsNullOrEmpty(mProjectPathName)) {
                     sb.Append(Res.Strings.TITLE_NEW_PROJECT);
                 } else {
@@ -639,7 +637,14 @@ namespace SourceGen {
                     sb.Append(" ");
                     sb.Append(Res.Strings.TITLE_MODIFIED);
                 }
+
+                if (mProject.IsReadOnly) {
+                    sb.Append(" ");
+                    sb.Append(Res.Strings.TITLE_READ_ONLY);
+                }
+                sb.Append(" - ");
             }
+            sb.Append(Res.Strings.TITLE_BASE);
             mMainWin.Title = sb.ToString();
         }
 
@@ -1082,6 +1087,8 @@ namespace SourceGen {
                 if (ok != true) {
                     return;
                 }
+
+                newProject.IsReadOnly = dlg.WantReadOnly;
             }
 
             mProject = newProject;
@@ -1175,6 +1182,7 @@ namespace SourceGen {
         /// </summary>
         /// <returns>True on success, false if the save attempt failed or was canceled.</returns>
         public bool SaveProjectAs() {
+            Debug.Assert(!mProject.IsReadOnly);
             SaveFileDialog fileDlg = new SaveFileDialog() {
                 Filter = ProjectFile.FILENAME_FILTER + "|" + Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 1,
@@ -1205,6 +1213,7 @@ namespace SourceGen {
         /// </summary>
         /// <returns>True on success, false if the save attempt failed.</returns>
         public bool SaveProject() {
+            Debug.Assert(!mProject.IsReadOnly);
             if (string.IsNullOrEmpty(mProjectPathName)) {
                 return SaveProjectAs();
             }
@@ -1317,8 +1326,11 @@ namespace SourceGen {
             return true;
         }
 
-        public bool IsProjectOpen() {
-            return mProject != null;
+        public bool IsProjectOpen {
+            get { return mProject != null; }
+        }
+        public bool IsProjectReadOnly {
+            get { return mProject != null && mProject.IsReadOnly; }
         }
 
         public void AssembleProject() {

@@ -25,14 +25,23 @@ limitations under the License.
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="ProjectLoadIssues_Loaded">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
     <DockPanel LastChildFill="False" Margin="8">
         <TextBlock DockPanel.Dock="Top">Problems were detected while loading the project file:</TextBlock>
         <TextBox Name="messageTextBox" DockPanel.Dock="Top" Margin="0,8,0,0"
                  Width="540" Height="110" IsReadOnly="True" TextWrapping="Wrap" Text=""
                  VerticalScrollBarVisibility="Auto"/>
-        <TextBlock Name="invalidDiscardLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Foreground="Red">
+        <TextBlock Name="invalidDiscardLabel" DockPanel.Dock="Top" Margin="0,8,0,0" Foreground="Red"
+                   Visibility="{Binding ShowItemWarning, Converter={StaticResource BoolToVis}}">
             Invalid data items will be discarded when you save the project.
         </TextBlock>
+        <CheckBox Content="Open project in read-only mode" DockPanel.Dock="Top" Margin="0,4,0,0"
+                  IsChecked="{Binding WantReadOnly}"
+                  Visibility="{Binding ShowSaveWarning, Converter={StaticResource BoolToVis}}"/>
         <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0"
                     Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="okButton" Width="70" Content="Continue" IsDefault="True" Click="OkButton_Click"/>

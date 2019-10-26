@@ -264,9 +264,9 @@ limitations under the License.
         <CommandBinding Command="{StaticResource RedoCmd}"
                         CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
         <CommandBinding Command="Save"
-                        CanExecute="IsProjectOpen" Executed="SaveCmd_Executed"/>
+                        CanExecute="CanSaveProject" Executed="SaveCmd_Executed"/>
         <CommandBinding Command="SaveAs"
-                        CanExecute="IsProjectOpen" Executed="SaveAsCmd_Executed"/>
+                        CanExecute="CanSaveProject" Executed="SaveAsCmd_Executed"/>
         <!-- ListView has a built-in Ctrl+A handler; this only fires when codeListView is not in focus -->
         <CommandBinding Command="{StaticResource SelectAllCmd}"
                         CanExecute="IsProjectOpen" Executed="SelectAllCmd_Executed"/>

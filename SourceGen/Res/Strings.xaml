@@ -53,7 +53,7 @@ limitations under the License.
     <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
     <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
     <system:String x:Key="str_ErrBadTypeHint">Type hint not recognized</system:String>
-    <system:String x:Key="str_ErrDuplicateLabelFmt">Removing duplicate label '{0}' (offset +{1:x6})</system:String>
+    <system:String x:Key="str_ErrDuplicateLabelFmt">Removed duplicate label '{0}' (offset +{1:x6})</system:String>
     <system:String x:Key="str_ErrFileCopyFailedFmt">Failed copying {0} to {1}: {2}.</system:String>
     <system:String x:Key="str_ErrFileExistsNotDirFmt">The file {0} exists, but is not a directory.</system:String>
     <system:String x:Key="str_ErrFileGenericCaption">File Error</system:String>
@@ -164,5 +164,6 @@ limitations under the License.
     <system:String x:Key="str_TitleBase">6502bench SourceGen</system:String>
     <system:String x:Key="str_TitleModified">(save needed)</system:String>
     <system:String x:Key="str_TitleNewProject">[new project]</system:String>
+    <system:String x:Key="str_TitleReadOnly">*READ-ONLY*</system:String>
     <system:String x:Key="str_Unset">[unset]</system:String>
 </ResourceDictionary>

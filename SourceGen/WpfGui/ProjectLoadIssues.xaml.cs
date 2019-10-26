@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace SourceGen.WpfGui {
     /// <summary>
     /// Display errors and warnings generated while attempting to open a project.
     /// </summary>
-    public partial class ProjectLoadIssues : Window {
+    public partial class ProjectLoadIssues : Window, INotifyPropertyChanged {
+        public bool WantReadOnly {
+            get { return mWantReadOnly; }
+            set { mWantReadOnly = value; OnPropertyChanged(); }
+        }
+        private bool mWantReadOnly;
+
+        public bool ShowSaveWarning {
+            get { return mShowItemWarning; }
+            set { mShowItemWarning = value; OnPropertyChanged(); }
+        }
+        private bool mShowItemWarning;
+
         /// <summary>
         /// Multi-line message for text box.
         /// </summary>
@@ -35,10 +50,17 @@ namespace SourceGen.WpfGui {
             Unknown = 0, Continue, Cancel, ContinueOrCancel
         }
 
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         public ProjectLoadIssues(Window owner, string msgs, Buttons allowedButtons) {
             InitializeComponent();
             Owner = owner;
+            DataContext = this;
 
             mMessages = msgs;
             mAllowedButtons = allowedButtons;
@@ -52,14 +74,18 @@ namespace SourceGen.WpfGui {
                 okButton.IsEnabled = false;
 
                 // No point warning them about invalid data if they can't continue.
-                invalidDiscardLabel.Visibility = Visibility.Hidden;
-            }
-            if (mAllowedButtons == Buttons.Continue) {
+                ShowSaveWarning = false;
+            } else if (mAllowedButtons == Buttons.Continue) {
                 // Cancel not allowed.
                 cancelButton.IsEnabled = false;
 
-                // They're stuck with the problem.
-                invalidDiscardLabel.Visibility = Visibility.Hidden;
+                // Problem is outside the scope of the project (e.g. bad platform symbol file),
+                // so saving the project won't change anything.
+                ShowSaveWarning = false;
+            } else {
+                Debug.Assert(mAllowedButtons == Buttons.ContinueOrCancel);
+                ShowSaveWarning = true;
+                WantReadOnly = true;
             }
         }
 

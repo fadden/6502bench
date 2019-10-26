@@ -309,6 +309,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_TitleModified");
         public static string TITLE_NEW_PROJECT =
             (string)Application.Current.FindResource("str_TitleNewProject");
+        public static string TITLE_READ_ONLY =
+            (string)Application.Current.FindResource("str_TitleReadOnly");
         public static string UNSET =
             (string)Application.Current.FindResource("str_Unset");
     }
