@@ -98,6 +98,20 @@
       }
     },
     {
+      "Name" : "Apple-1",
+      "GroupName" : "Apple",
+      "Cpu" : "6502",
+      "Speed" : "1",
+      "Description" : "Apple-1 system.",
+      "SymbolFiles" : [
+        "RT:Apple/Apple1.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
       "Name" : "Atari 800",
       "GroupName" : "Atari",
       "Cpu" : "6502B",

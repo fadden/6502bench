@@ -1,0 +1,103 @@
+; Copyright 2019 Frank Milliron.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Symbols for the Apple-1
+
+; System Symbols
+
+XAML             @ $24         ;Last "opened" location Low
+XAMH             @ $25         ;Last "opened" location High
+STL              @ $26         ;Store address Low
+STH              @ $27         ;Store address High
+L                @ $28         ;Hex value parsing Low
+H                @ $29         ;Hex value parsing High
+YSAV             @ $2A         ;Used to see if hex value is given
+MODE             @ $2B         ;$00=XAM, $7F=STOR, $AE=BLOCK XAM
+
+IN               @ $0200 128   ;Input buffer
+
+USER             = $0280       ;Start of user RAM (to $0FFF or $1FFF)
+
+KBD              @ $D010       ;PIA.A keyboard input
+KBDCR            @ $D011       ;PIA.A keyboard control register
+DSP              @ $D012       ;PIA.B display output register
+DSPCR            @ $D013       ;PIA.B display control register
+
+
+; WOZACI (Woz's Apple Cassette Interface) Symbols
+
+HEX1L            @ $24         ;End address of dump block
+HEX1H            @ $25
+HEX2L            @ $26         ;Begin address of dump block
+HEX2H            @ $27
+SAVEINDEX        @ $28         ;Save index in input buffer
+LASTSTATE        @ $29         ;Last input state
+
+FLIP             @ $C000       ;Output flip-flop
+TAPEIN           @ $C081       ;Tape input
+
+WOZACI           @ $C100       ;Apple Cassette Interface Entry
+NEXTCHAR         @ $C10C
+KBDWAIT          @ $C10D
+NEXTCMD          @ $C125       ;Start parsing first or a new tape command
+NEXTCHR          @ $C12F
+DIG              @ $C153
+HEXSHIFT         @ $C159
+GOESC            @ $C163       ;Return to monitor (ESCAPE), prints \ first
+SEP              @ $C166       ;Separating period found. Copy HEX1 to HEX2
+WRITE            @ $C170       ;Write a block of memory to tape
+WRNEXT           @ $C175
+WBITLOOP         @ $C17C
+RESTIDX          @ $C189
+READ             @ $C18D       ;Read from tape
+NOTSTART         @ $C198
+RDBYTE           @ $C1A4
+RDBIT            @ $C1A6
+FULLCYCLE        @ $C1BC
+CMPLEVEL         @ $C1BF
+WHEADER          @ $C1CC       ;Write header to tape
+HCOUNT           @ $C1CE
+WRITEBIT         @ $C1DB       ;Write a full bit cycle
+WDELAY           @ $C1E0
+WDELAY0          @ $C1E7
+WRITE1           @ $C1EA
+INCADDR          @ $C1F1       ;Increment current address and compare with last
+NOCARRY          @ $C1FF       ;RTS
+
+
+; Apple-1 Cassette BASIC
+
+BASIC            @ $E000       ;Cold start location
+WARMSTART        @ $E2B3       ;Warm start location
+
+
+; Apple-1 ROM
+
+RESET            @ $FF00       ;ROM cold start location
+NOTCR            @ $FF0F
+ESCAPE           @ $FF1A       ;Escape back to monitor
+GETLINE          @ $FF1F
+BACKSPACE        @ $FF26
+NEXTCHAR         @ $FF29
+SETSTOR          @ $FF40
+SETMODE          @ $FF41
+BLSKIP           @ $FF43
+NEXTITEM         @ $FF44
+NEXTHEX          @ $FF5F       ;trying to parse a new hex value
+DIG              @ $FF6E
+HEXSHIFT         @ $FF74
+NOTHEX           @ $FF7F
+TONEXTITEM       @ $FF91
+RUN              @ $FF94       ;RUN user's program from last opened location
+NOTSTOR          @ $FF97       ;We're not in Store mode
+SETADR           @ $FF9B
+NXTPRNT          @ $FFA4       ;Print address and data from this address
+PRDATA           @ $FFBA
+XAMNEXT          @ $FFC4
+MOD8CHK          @ $FFD6
+PRBYTE           @ $FFDC       ;Subroutine to print a byte in A in hex form (destructive)
+PRHEX            @ $FFE5       ;Subroutine to print a hexadecimal digit
+ECHO             @ $FFEF       ;Subroutine to print a character to the terminal
+NMI_VEC          @ $FFFA       ;NMI vector   ($0F00)
+RESET_VEC        @ $FFFC       ;RESET vector ($FF00)
+IRQ_VEC          @ $FFFE       ;IRQ vector   ($0000)
