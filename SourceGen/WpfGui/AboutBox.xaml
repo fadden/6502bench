@@ -45,7 +45,11 @@ limitations under the License.
             <TextBlock FontSize="24"
                        Text="{Binding ProgramVersionString, StringFormat={}Version {0},
                            FallbackValue=Version X.Y.Z-alpha1}"/>
-            <TextBlock Text="Copyright 2019 faddenSoft" Margin="0,30,0,0"/>
+            <Button Content="https://6502bench.com/" Margin="0,30,0,0"
+                    BorderThickness="0" HorizontalAlignment="Left"
+                    Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                    Click="WebSiteButton_Click"/>
+            <TextBlock Text="Copyright 2019 faddenSoft" Margin="0,0,0,0"/>
             <TextBlock Text="Created by Andy McFadden"/>
         </StackPanel>
 

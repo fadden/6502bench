@@ -70,5 +70,9 @@ namespace SourceGen.WpfGui {
 
             legalStuffTextBox.Text = text;
         }
+
+        private void WebSiteButton_Click(object sender, RoutedEventArgs e) {
+            CommonUtil.ShellCommand.OpenUrl("https://6502bench.com/");
+        }
     }
 }
