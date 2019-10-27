@@ -17,7 +17,7 @@ MON_GBASL       @ $26       ;base address for lo-res drawing (lo)
 MON_GBASH       @ $27       ;base address for lo-res drawing (hi)
 MON_H2          @ $2C       ;right end of horizontal line drawn by HLINE
 MON_V2          @ $2D       ;bottom of vertical line drawn by VLINE
-MON_COLOR       = $30       ;lo-res graphics color
+MON_COLOR       @ $30       ;lo-res graphics color
 MON_INVFLAG     @ $32       ;text mask (255=normal, 127=flash, 63=inv)
 MON_PROMPT      @ $33       ;prompt character
 MON_CSWL        @ $36       ;character output hook (lo)
@@ -38,8 +38,6 @@ MON_A5L         @ $44       ;general purpose
 MON_A5H         @ $45       ;general purpose
 MON_RNDL        @ $4E       ;low byte of KEYIN "random" value
 MON_RNDH        @ $4F       ;high byte of KEYIN "random" value
-
-MON_SPDBYT      @ $F1       ;text output speed limiter
 
 MON_BRKV        @ $03F0  2  ;address of BRK handler
 MON_SOFTEVEC    @ $03F2  2  ;address of RESET handler

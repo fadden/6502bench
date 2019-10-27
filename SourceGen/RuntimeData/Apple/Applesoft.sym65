@@ -58,6 +58,7 @@ BAS_HPAG        @ $E6       ;hi-res page to draw on ($20 or $40)
 BAS_SCALE       @ $E7       ;hi-res graphics scale factor
 BAS_HSHAPE      @ $E8 2     ;hi-res shape table pointer (2b)
 BAS_FIRST       @ $F0       ;used for lo-res plot coordinates
+BAS_SPEEDZ      @ $F1       ;controls text output speed
 BAS_ORMASK      @ $F3       ;mask for output control
 BAS_REMSTK      @ $F8       ;stack pointer saved before each statement
 
