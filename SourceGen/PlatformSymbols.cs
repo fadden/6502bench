@@ -173,7 +173,8 @@ namespace SourceGen {
                         bool parseOk;
                         string valueStr = matches[0].Groups[GROUP_VALUE].Value;
                         if (isConst) {
-                            // Allow various numeric options, and preserve the value.
+                            // Allow various numeric options, and preserve the value.  We
+                            // don't limit the value range.
                             parseOk = Asm65.Number.TryParseInt(valueStr, out value, out numBase);
                             badParseMsg =
                                 CommonUtil.Properties.Resources.ERR_INVALID_NUMERIC_CONSTANT;

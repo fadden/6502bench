@@ -190,7 +190,7 @@ namespace SourceGen.WpfGui {
 
             Label = Value = VarWidth = Comment = string.Empty;
 
-            int maxWidth;
+            int maxWidth, maxAddr;
             if (isVariable) {
                 ConstantLabel = (string)FindResource("str_VariableConstant");
                 maxWidth = 256;
@@ -302,6 +302,16 @@ namespace SourceGen.WpfGui {
                 if (thisValue < 0 || thisValue + thisWidth > 256) {
                     valueRangeValid = false;
                 }
+            } else if (IsAddress && valueValid) {
+                // limit to positive 24-bit integers; use a long for value+width so we
+                // don't get fooled by overflow
+                long lvalue = thisValue;
+                if (thisWidth > 0) {
+                    lvalue += thisWidth - 1;
+                }
+                if (thisValue < 0 || lvalue > 0x00ffffff) {
+                    valueRangeValid = false;
+                }
             }
 
             Symbol.Type symbolType = IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr;
@@ -328,6 +338,7 @@ namespace SourceGen.WpfGui {
             labelUniqueLabel.Foreground = projectLabelUniqueLabel.Foreground =
                 labelUnique ? mDefaultLabelColor : Brushes.Red;
             valueNotesLabel.Foreground = valueValid ? mDefaultLabelColor : Brushes.Red;
+            addrValueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
             varValueRangeLabel.Foreground = valueRangeValid ? mDefaultLabelColor : Brushes.Red;
             varValueUniqueLabel.Foreground = valueUniqueValid ? mDefaultLabelColor : Brushes.Red;
             widthNotesLabel.Foreground = widthValid ? mDefaultLabelColor : Brushes.Red;

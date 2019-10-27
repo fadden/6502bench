@@ -483,8 +483,8 @@ value, the one whose label comes first alphabetically is used.</p>
 
 <p>Project symbols always have precedence over platform symbols, allowing
 you to redefine symbols within a project.  (You can "hide" a platform
-symbol by creating a project symbol with the same name and an unused
-value, such as $ffffffff.)</p>
+symbol by creating a project symbol constant with the same name.  Use a
+value like $ffffffff or $deadbeef so you'll know why it's there.)</p>
 
 <p><b>Local variables</b> are redefinable symbols that are organized
 into tables.  They're used to specify labels for zero-page and 65816
