@@ -632,19 +632,19 @@ namespace SourceGen {
                 } else {
                     sb.Append(Path.GetFileName(mProjectPathName));
                 }
-
-                if (mProject.IsDirty) {
-                    sb.Append(" ");
-                    sb.Append(Res.Strings.TITLE_MODIFIED);
-                }
-
                 if (mProject.IsReadOnly) {
                     sb.Append(" ");
                     sb.Append(Res.Strings.TITLE_READ_ONLY);
                 }
                 sb.Append(" - ");
             }
+
             sb.Append(Res.Strings.TITLE_BASE);
+
+            if (mProject != null && mProject.IsDirty) {
+                sb.Append(" - ");
+                sb.Append(Res.Strings.TITLE_MODIFIED);
+            }
             mMainWin.Title = sb.ToString();
         }
 
@@ -1642,7 +1642,7 @@ namespace SourceGen {
                 // Not allowed.  The AddressMap will just put it back, which confuses
                 // the undo operation.
                 Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
-            } else if (attr.Address != dlg.Address) {
+            } else if (true || attr.Address != dlg.Address) {
                 Debug.WriteLine("EditAddress: changing addr at offset +" + offset.ToString("x6") +
                     " to " + dlg.Address);
 
@@ -2954,7 +2954,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Handles the four Actions - edit hint commands.
+        /// Handles the four Actions &gt; edit hint commands.
         /// </summary>
         /// <param name="hint">Type of hint to apply.</param>
         /// <param name="firstByteOnly">If set, only the first byte on each line is hinted.</param>

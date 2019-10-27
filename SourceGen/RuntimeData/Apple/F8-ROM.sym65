@@ -30,6 +30,12 @@ MON_A1L         @ $3C       ;general purpose
 MON_A1H         @ $3D       ;general purpose
 MON_A2L         @ $3E       ;general purpose
 MON_A2H         @ $3F       ;general purpose
+MON_A3L         @ $40       ;general purpose
+MON_A3H         @ $41       ;general purpose
+MON_A4L         @ $42       ;general purpose
+MON_A4H         @ $43       ;general purpose
+MON_A5L         @ $44       ;general purpose
+MON_A5H         @ $45       ;general purpose
 MON_RNDL        @ $4E       ;low byte of KEYIN "random" value
 MON_RNDH        @ $4F       ;high byte of KEYIN "random" value
 
@@ -105,8 +111,8 @@ MON_SCROLL      @ $FC70     ;scroll up one line
 MON_CLREOL      @ $FC9C     ;clear to end of line
 MON_CLREOLZ     @ $FC9E
 MON_WAIT        @ $FCA8     ;delay for (26 + 27*Acc + 5*(Acc*Acc))/2 cycles
-MON_NXTA4       @ $FCB4     ;increment A4
-MON_NXTA1       @ $FCBA     ;increment A1
+MON_NXTA4       @ $FCB4     ;increment A4, fall through into NXTA1
+MON_NXTA1       @ $FCBA     ;increment A1; set carry if A1 >= A2 before inc
 MON_HEADR       @ $FCC9     ;write cassette sync
 MON_WRTAPE      @ $FCE5     ;casssette write
 MON_RD2BIT      @ $FCFA     ;cassette read
@@ -128,7 +134,7 @@ MON_COUT        @ $FDED     ;print Acc to output device
 MON_COUT1       @ $FDF0
 MON_COUTZ       @ $FDF6
 MON_IDROUTINE   @ $FE1F
-MON_MOVE        @ $FE2C     ;memory move A1/A2 to A4
+MON_MOVE        @ $FE2C     ;move bytes from A1 to A4 until A1=A2
 MON_LIST        @ $FE5E     ;disassemble 20 instructions (not on GS)
 MON_SETINV      @ $FE80     ;set video mode to inverse
 MON_SETNORM     @ $FE84     ;set video mode to normal
