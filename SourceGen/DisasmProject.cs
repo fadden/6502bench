@@ -1037,7 +1037,15 @@ namespace SourceGen {
             // order, so we can just overwrite earlier symbols with matching labels.
             foreach (PlatformSymbols ps in PlatformSyms) {
                 foreach (Symbol sym in ps) {
-                    SymbolTable[sym.Label] = sym;
+                    if (sym.Value == PlatformSymbols.ERASE_VALUE) {
+                        // "erase" value
+                        if (SymbolTable.TryGetValue(sym.Label, out Symbol found)) {
+                            SymbolTable.Remove(found);
+                        }
+                    } else {
+                        // overwrite
+                        SymbolTable[sym.Label] = sym;
+                    }
                 }
             }
 

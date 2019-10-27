@@ -1,0 +1,45 @@
+; Copyright 2019 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+;
+; Sometimes code uses the ROM entry points but redefines the zero-page
+; addresses for its own purposes.  Having the MON_* symbols is distracting.
+; This erases them from the symbol table.
+;
+; To use: include this file, and ensure it comes after F8-ROM.sym65 in
+; the platform symbol file list.
+;
+
+*SYNOPSIS Remove monitor ROM zero-page symbols
+
+MON_WNDLEFT     @ erase
+MON_WNDWDTH     @ erase
+MON_WNDTOP      @ erase
+MON_WNDBTM      @ erase
+MON_CH          @ erase
+MON_CV          @ erase
+MON_GBASL       @ erase
+MON_GBASH       @ erase
+MON_H2          @ erase
+MON_V2          @ erase
+MON_COLOR       @ erase
+MON_INVFLAG     @ erase
+MON_PROMPT      @ erase
+MON_CSWL        @ erase
+MON_CSWH        @ erase
+MON_KSWL        @ erase
+MON_KSWH        @ erase
+MON_PCL         @ erase
+MON_PCH         @ erase
+MON_A1L         @ erase
+MON_A1H         @ erase
+MON_A2L         @ erase
+MON_A2H         @ erase
+MON_A3L         @ erase
+MON_A3H         @ erase
+MON_A4L         @ erase
+MON_A4H         @ erase
+MON_A5L         @ erase
+MON_A5H         @ erase
+MON_RNDL        @ erase
+MON_RNDH        @ erase

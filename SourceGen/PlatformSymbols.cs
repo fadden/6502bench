@@ -28,6 +28,8 @@ namespace SourceGen {
     /// </summary>
     public class PlatformSymbols : IEnumerable<Symbol> {
         public const string FILENAME_EXT = ".sym65";
+        private const string ERASE_VALUE_STR = "ERASE";
+        public const int ERASE_VALUE = -1;
         public static readonly string FILENAME_FILTER = Res.Strings.FILE_FILTER_SYM65;
 
         /// <summary>
@@ -165,20 +167,28 @@ namespace SourceGen {
                         } else if (typeAndDir == '>') {
                             direction = DefSymbol.DirectionFlags.Write;
                         }
+
                         string badParseMsg;
                         int value, numBase;
                         bool parseOk;
+                        string valueStr = matches[0].Groups[GROUP_VALUE].Value;
                         if (isConst) {
                             // Allow various numeric options, and preserve the value.
-                            parseOk = Asm65.Number.TryParseInt(matches[0].Groups[GROUP_VALUE].Value,
-                                out value, out numBase);
+                            parseOk = Asm65.Number.TryParseInt(valueStr, out value, out numBase);
                             badParseMsg =
                                 CommonUtil.Properties.Resources.ERR_INVALID_NUMERIC_CONSTANT;
+                        } else if (valueStr.ToUpperInvariant().Equals(ERASE_VALUE_STR)) {
+                            parseOk = true;
+                            value = ERASE_VALUE;
+                            numBase = 10;
+                            badParseMsg = CommonUtil.Properties.Resources.ERR_INVALID_ADDRESS;
                         } else {
                             // Allow things like "05/1000".  Always hex.
                             numBase = 16;
-                            parseOk = Asm65.Address.ParseAddress(matches[0].Groups[GROUP_VALUE].Value,
-                                (1 << 24) - 1, out value);
+                            parseOk = Asm65.Address.ParseAddress(valueStr, (1 << 24) - 1,
+                                out value);
+                            // limit to positive 24-bit values
+                            parseOk &= (value >= 0 && value < 0x01000000);
                             badParseMsg = CommonUtil.Properties.Resources.ERR_INVALID_ADDRESS;
                         }
 
