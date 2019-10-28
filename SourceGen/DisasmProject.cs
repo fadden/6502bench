@@ -1191,6 +1191,14 @@ namespace SourceGen {
                             Debug.Assert(false);
                         }
                     }
+                } else if (LvTables.TryGetValue(offset, out LocalVariableTable unused)) {
+                    // table was ignored
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Warning,
+                        offset,
+                        MessageList.MessageEntry.MessageType.HiddenLocalVariableTable,
+                        string.Empty,
+                        MessageList.MessageEntry.ProblemResolution.LocalVariableTableIgnored));
                 }
 
                 Anattrib attr = mAnattribs[offset];

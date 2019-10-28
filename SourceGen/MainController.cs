@@ -1778,14 +1778,10 @@ namespace SourceGen {
         public void EditLocalVariableTable() {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
-            // Find the offset of the nearest table that's earlier in the file.
-            int bestOffset = -1;
-            foreach (KeyValuePair<int,LocalVariableTable> kvp in mProject.LvTables) {
-                if (kvp.Key > offset) {
-                    break;      // too far
-                }
-                bestOffset = kvp.Key;
-            }
+
+            LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables,
+                mProject, false);
+            int bestOffset = lvLookup.GetNearestTableOffset(offset);
             Debug.Assert(bestOffset >= 0);
             CreateOrEditLocalVariableTable(bestOffset);
         }

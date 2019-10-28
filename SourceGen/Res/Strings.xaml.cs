@@ -199,12 +199,16 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_MsgFormatDescriptorIgnored");
         public static string MSG_HIDDEN_LABEL =
             (string)Application.Current.FindResource("str_MsgHiddenLabel");
+        public static string MSG_HIDDEN_LOCAL_VARIABLE_TABLE =
+            (string)Application.Current.FindResource("str_MsgHiddenLocalVariableTable");
         public static string MSG_INVALID_DESCRIPTOR =
             (string)Application.Current.FindResource("str_MsgInvalidDescriptor");
         public static string MSG_INVALID_OFFSET_OR_LENGTH =
             (string)Application.Current.FindResource("str_MsgInvalidOffsetOrLength");
         public static string MSG_LABEL_IGNORED =
             (string)Application.Current.FindResource("str_MsgLabelIgnored");
+        public static string MSG_LOCAL_VARIABLE_TABLE_IGNORED =
+            (string)Application.Current.FindResource("str_MsgLocalVariableTableIgnored");
         public static string MSG_UNRESOLVED_WEAK_REF =
             (string)Application.Current.FindResource("str_MsgUnresolvedWeakRef");
         public static string NO_FILES_AVAILABLE =

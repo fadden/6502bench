@@ -256,13 +256,16 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Finds the closest table that is defined at or before the specified offset.
+        /// Finds the closest table that is defined at or before the specified offset.  Will
+        /// attempt to only return un-hidden tables, but will return a hidden table if no
+        /// others are available.
         /// </summary>
         /// <param name="offset">Target offset.</param>
         /// <returns>The table's definition offset, or -1 if no tables were defined before this
         ///   point.</returns>
         public int GetNearestTableOffset(int offset) {
             int nearest = -1;
+            int nearestUnhidden = -1;
 
             // Could do a smarter search, but I'm expecting the set to be small.
             foreach (KeyValuePair<int, LocalVariableTable> kvp in mLvTables) {
@@ -270,8 +273,15 @@ namespace SourceGen {
                     break;
                 }
                 nearest = kvp.Key;
+                if (mProject.GetAnattrib(nearest).IsStart) {
+                    nearestUnhidden = nearest;
+                }
             }
-            return nearest;
+            if (nearestUnhidden >= 0) {
+                return nearestUnhidden;
+            } else {
+                return nearest;
+            }
         }
 
         /// <summary>
@@ -379,6 +389,10 @@ namespace SourceGen {
                 testLabel = baseLabel + "_DUP" + counter;   // make it ugly and obvious
             } while (mSymbolTable.TryGetNonVariableValue(testLabel, out Symbol unused));
             return testLabel;
+        }
+
+        public static bool IsTableHidden(int offset, DisasmProject project) {
+            return !project.GetAnattrib(offset).IsStart;
         }
     }
 }

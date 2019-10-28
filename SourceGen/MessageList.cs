@@ -48,6 +48,7 @@ namespace SourceGen {
             public enum MessageType {
                 Unknown = 0,
                 HiddenLabel,
+                HiddenLocalVariableTable,
                 UnresolvedWeakRef,
                 InvalidOffsetOrLength,
                 InvalidDescriptor,
@@ -61,6 +62,7 @@ namespace SourceGen {
                 Unknown = 0,
                 None,
                 LabelIgnored,
+                LocalVariableTableIgnored,
                 FormatDescriptorIgnored,
             }
             public ProblemResolution Resolution { get; private set; }
@@ -149,6 +151,9 @@ namespace SourceGen {
                 case MessageEntry.MessageType.HiddenLabel:
                     problem = Res.Strings.MSG_HIDDEN_LABEL;
                     break;
+                case MessageEntry.MessageType.HiddenLocalVariableTable:
+                    problem = Res.Strings.MSG_HIDDEN_LOCAL_VARIABLE_TABLE;
+                    break;
                 case MessageEntry.MessageType.UnresolvedWeakRef:
                     problem = Res.Strings.MSG_UNRESOLVED_WEAK_REF;
                     break;
@@ -172,6 +177,9 @@ namespace SourceGen {
                     break;
                 case MessageEntry.ProblemResolution.LabelIgnored:
                     resolution = Res.Strings.MSG_LABEL_IGNORED;
+                    break;
+                case MessageEntry.ProblemResolution.LocalVariableTableIgnored:
+                    resolution = Res.Strings.MSG_LOCAL_VARIABLE_TABLE_IGNORED;
                     break;
                 case MessageEntry.ProblemResolution.FormatDescriptorIgnored:
                     resolution = Res.Strings.MSG_FORMAT_DESCRIPTOR_IGNORED;
