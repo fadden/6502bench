@@ -206,13 +206,16 @@ comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 give it a name.  With the line at $2000 selected, use Actions &gt; Edit Operand,
 or double-click on "$3000".  Select the "Symbol" radio button, then type
 "INPUT" in the text box.  Click "OK".</p>
-<p>Disappointed?  Nothing seems to have happened.  The problem is that we
-updated the operand to reference a symbol that doesn't exist.  Open the
+<p>Disappointed?  The instruction is unchanged.  The problem is that we
+updated the operand to reference a symbol that doesn't exist.  This fact
+is noted in a message that appeared at the bottom of the screen.  Open the
 operand editor again, but this time click on "Create Project Symbol" at
 the bottom left.  Enter "INPUT" in the Label field, and click "OK", then
 click "OK" in the operand editor.</p>
-<p>That's better.  If you scroll up to the top of the project, you'll see
-that there's now a ".EQ" line for the symbol.</p>
+<p>That's better.  The instruction looks the way we wanted it to, and the
+message at the bottom of the window disappeared.  If you scroll up to the
+top of the project, you'll see that there's now a ".EQ" line for
+the symbol.</p>
 <p>Operands that refer to in-file locations behave similarly.  Select the
 line two down, at address $2005, and Actions &gt; Edit Operand.  Enter the
 symbol "IS_OK".  (Note you don't actually have to click Symbol first -- if
