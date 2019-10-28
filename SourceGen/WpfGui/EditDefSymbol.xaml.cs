@@ -190,7 +190,7 @@ namespace SourceGen.WpfGui {
 
             Label = Value = VarWidth = Comment = string.Empty;
 
-            int maxWidth, maxAddr;
+            int maxWidth;
             if (isVariable) {
                 ConstantLabel = (string)FindResource("str_VariableConstant");
                 maxWidth = 256;

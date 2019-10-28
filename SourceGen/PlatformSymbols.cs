@@ -38,7 +38,7 @@ namespace SourceGen {
         /// Alphanumeric ASCII + underscore for label, which must start at beginning of line.
         /// Value is somewhat arbitrary, but ends if we see a comment delimiter (semicolon) or
         /// whitespace.  Spaces are allowed between tokens, but not required.  Value, width,
-        /// and mask may be hex, decimal, or binary.
+        /// and mask may be hex, decimal, or binary; these are simply tokenized by regex.
         ///
         /// Looks like:
         ///   NAME {@,=,<,>} VALUE [& MASK] [WIDTH] [;COMMENT]

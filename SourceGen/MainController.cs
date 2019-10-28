@@ -1643,6 +1643,9 @@ namespace SourceGen {
                 // the undo operation.
                 Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
             } else if (true || attr.Address != dlg.Address) {
+                // NOTE: we used to prevent creation of an apparently redundant address change,
+                // but it's really helpful to put one on code that isn't moving before you
+                // start moving other stuff around.
                 Debug.WriteLine("EditAddress: changing addr at offset +" + offset.ToString("x6") +
                     " to " + dlg.Address);
 
