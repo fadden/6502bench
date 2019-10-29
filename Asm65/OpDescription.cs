@@ -286,7 +286,12 @@ namespace Asm65 {
             { OpName.BRK,
                 "Pushes state onto the stack, and jumps to the software break vector at " +
                 "$fffe-ffff.  While this is technically a single-byte instruction, the " +
-                "program counter pushed onto the stack is incremented by two."
+                "program counter pushed onto the stack is incremented by two.  The interrupt " +
+                "flag is set, and on 65C02/65816 the D flag is cleared. " +
+                "On 6502, 65C02, and 65816 in emulation mode, the status flags pushed onto " +
+                "the stack will have the 'B' flag (which overlaps the 'X' flag) set so the " +
+                "interrupt handler can tell the difference between hardware and software " +
+                "interrupts."
             },
             { OpName.BRL,
                 "Branches to a long relative address."

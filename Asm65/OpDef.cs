@@ -939,8 +939,12 @@ namespace Asm65 {
             Mnemonic = OpName.BRK,
             Effect = FlowEffect.NoCont,
             BaseMemEffect = MemoryEffect.None,
-            // On 6502/65C02 this also affects the 'B' flag, which overlaps with X.  Nobody
-            // really cares though.  On 6502 this doesn't clear the 'D' flag.
+            // On 6502 this doesn't clear the 'D' flag.  Easier to explain that in text than
+            // create a separate definition.
+            //
+            // The processor status flags have the 'B' flag set on 6502/65C02/65816 emu mode
+            // when pushed onto the stack, but it doesn't affect the actual processor status
+            // flag in the code executed next.
             //
             // We don't set a StatusFlagUpdater because the flags are only changed for the
             // software break handler function.  If we could actually track this into that,
