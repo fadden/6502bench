@@ -21,8 +21,8 @@ manual is recommended.</p>
 <ul>
   <li><a href="#basic-features">#1: Basic Features</a></li>
   <li><a href="#advanced-features">#2: Advanced Features</a></li>
-  <li><a href="#address-table">#2a: Address Table Formatting</a></li>
-  <li><a href="#extension-scripts">#2b: Extension Scripts</a></li>
+  <li><a href="#address-tables">#3: Address Table Formatting</a></li>
+  <li><a href="#extension-scripts">#4: Extension Scripts</a></li>
 </ul>
 
 
@@ -539,7 +539,7 @@ extra symbol in the opcode field, you need to look closely at what's going
 on.</p>
 
 
-<h2><a name="address-table">Tutorial #2a: Address Table Formatting</a></h2>
+<h2><a name="address-tables">Tutorial #3: Address Table Formatting</a></h2>
 
 <p><i>This tutorial covers one specific feature.</i></p>
 
@@ -591,6 +591,11 @@ You could repeat these steps for the remaining items, but there's a faster
 way.  Click on the line at address $1d97, then shift-click the line at
 address $1da9 (which should be <code>.FILL 12,$1e</code>).  Select
 Actions &gt; Format Address Table.</p>
+<p>Contrary to first impressions, this imposing dialog does not allow you
+to launch objects into orbit.  There are a variety of common ways to
+structure an address table, all of which are handled here.  You can
+configure the various parameters and see the effects as you make
+each change.</p>
 <p>The message at the top should indicate that there are 30 bytes
 selected.  In Address Characteristics, click the "Parts are split across
 sub-tables" checkbox and the "adjusted for RTS/RTL"
@@ -614,7 +619,7 @@ code entry point hint -- but did several of them at once.</p>
 SourceGen asks for confirmation, click Discard & Continue.</p>
 
 
-<h2><a name="extension-scripts">Tutorial #2b: Extension Scripts</a></h2>
+<h2><a name="extension-scripts">Tutorial #4: Extension Scripts</a></h2>
 
 <p><i>This tutorial covers one specific feature.</i></p>
 
@@ -624,10 +629,9 @@ because code is expected.</p>
 <p>An earlier tutorial demonstrated how to manually mark bytes as
 inline data.  We're going to do it a faster way.  For this tutorial,
 start a new project with "Generic 6502", and in the SourceGen
-installation directory find the Examples directory, open the Scripts
-subdirectory, and select "Sample".</p>
+Tutorial directory select "Tutorial4".</p>
 <p>We'll need to load scripts from the project directory, so we have to
-save the project.  File > Save, call it the default name (Sample.dis65).</p>
+save the project.  File > Save, use the default name ("Tutorial4.dis65").</p>
 
 <p>Take a look at the disassembly listing.  The file starts with a JSR
 followed by a string that begins with a small number.  This appears to be
@@ -657,9 +661,9 @@ on line $1019 ("L1028"), setting the label to "PrintInlineNullStringTwo".</p>
 
 <p>The entire project is now nicely formatted.  In a real project the
 "Print Inline" locations would be actual print functions, not just RTS
-instructions, and there would be multiple JSRs to a single function.
-So labeling a single print function could format dozens of inline strings
-and clean up the disassembly automatically.</p>
+instructions.  There would likely be multiple JSRs to the print function,
+so labeling a single function entry point could format dozens of inline
+strings and clean up the disassembly automatically.</p>
 
 <p>Extension scripts can make your life much easier, but they do require
 some programming experience.  See the

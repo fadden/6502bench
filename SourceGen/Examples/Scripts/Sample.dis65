@@ -10,7 +10,7 @@
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
-},
+"0":"requires exact name match","13":"requires name prefix match"},
 "LongComments":{
 },
 "Notes":{
