@@ -715,6 +715,16 @@ namespace SourceGen.WpfGui {
                 // We work around this by temporarily switching to single-select mode.
                 //
                 // This could cause problems if we wanted to select multiple single lines.
+                //
+                // NOTE: this causes a selection-changed event, which can cause problems
+                // if something tries to fiddle with SelectedItems (you can only do that
+                // when in multi-select mode) instead of SelectedItem.  I tried to mitigate this
+                // by setting the selection twice, once in multi-select mode, so that the
+                // selection is unlikely to change, but that restored the Shift+F3 problem.
+                //
+                // (To repro problem: double-clicking a line in the message log about
+                // a reference to a non-existent symbol associated with a self-referential line
+                // blows things up... see test 2010.)
                 codeListView.SelectionMode = SelectionMode.Single;
                 codeListView.SelectedItem = CodeDisplayList[start];
                 codeListView.SelectionMode = SelectionMode.Extended;
@@ -908,12 +918,21 @@ namespace SourceGen.WpfGui {
         /// <param name="newParts">Replacement parts.</param>
         private void CodeListView_ReplaceEntry(int index, DisplayList.FormattedParts newParts) {
             bool isSelected = CodeDisplayList.SelectedIndices[index];
-            if (isSelected) {
-                codeListView.SelectedItems.Remove(CodeDisplayList[index]);
+            if (isSelected && codeListView.SelectionMode != SelectionMode.Single) {
+                if (codeListView.SelectionMode != SelectionMode.Single) {
+                    Debug.WriteLine("HEY: hit unhappy single-select case");
+                    codeListView.SelectedIndex = -1;
+                } else {
+                    codeListView.SelectedItems.Remove(CodeDisplayList[index]);
+                }
             }
             CodeDisplayList[index] = newParts;
             if (isSelected) {
-                codeListView.SelectedItems.Add(newParts);
+                if (codeListView.SelectionMode == SelectionMode.Single) {
+                    codeListView.SelectedIndex = index;
+                } else {
+                    codeListView.SelectedItems.Add(newParts);
+                }
             }
         }
 
