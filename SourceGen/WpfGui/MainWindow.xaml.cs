@@ -1768,6 +1768,16 @@ namespace SourceGen.WpfGui {
         }
         private string mInfoPanelDetail1;
 
+        public bool InfoShowDebug {
+            get {
+#if DEBUG
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         //public string InfoPanelMonoContents {
         //    get { return mInfoPanelMonoContents; }
         //    set { mInfoPanelMonoContents = value; OnPropertyChanged(); }

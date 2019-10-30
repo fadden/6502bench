@@ -740,7 +740,8 @@ limitations under the License.
                             <TextBlock Grid.Row="0" TextWrapping="Wrap"
                                        Text="{Binding InfoLineDescrText, FallbackValue=Line #1234: N bytes of data}"/>
                             <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="DarkGray"
-                                       Text="{Binding InfoOffsetText, FallbackValue=[offset: +123456]}"/>
+                                       Text="{Binding InfoOffsetText, FallbackValue=[offset: +123456]}"
+                                       Visibility="{Binding InfoShowDebug, Converter={StaticResource BoolToVis}}"/>
 
                             <StackPanel Grid.Row="2"
                                         Visibility="{Binding InfoFormatShowDashes, Converter={StaticResource BoolToVis}}">
