@@ -381,24 +381,57 @@ namespace SourceGen {
                 // We want to use user-defined labels whenever possible.  If they're accessing
                 // memory within a few bytes, use that.  We don't want to do this for
                 // code references, though, or our branches will get all weird.
-                // TODO(someday): make MAX user-configurable?  Seek forward as well as backward?
-                const int MAX = 4;
-                for (int probeOffset = targetOffset - 1;
-                        probeOffset >= 0 && probeOffset != targetOffset - MAX; probeOffset--) {
+                //
+                // We look a few back and one forward.  Stuff backward (which turns into
+                // LABEL+N) has priority over forward (which becomes LABEL-N).
+                //
+                // TODO(someday): make parameters user-configurable?
+                const int MAX_FWD = 1;
+                const int MAX_BACK = 3;
+                int probeOffset = targetOffset;
+                bool back = true;
+                while (true) {
+                    if (back) {
+                        // moving backward
+                        probeOffset--;
+                        if (probeOffset < 0 || probeOffset < targetOffset - MAX_BACK) {
+                            // too far back, reverse direction
+                            probeOffset = targetOffset;
+                            back = false;
+                        }
+                    }
+                    if (!back) {
+                        // moving forward
+                        probeOffset++;
+                        if (probeOffset >= mAnattribs.Length ||
+                                probeOffset > targetOffset + MAX_FWD) {
+                            break;  // done
+                        }
+                    }
+
                     Symbol sym = mAnattribs[probeOffset].Symbol;
                     if (sym != null && sym.SymbolSource == Symbol.Source.User) {
                         // Found a nearby user label.  Make sure it's actually nearby.
                         int addrDiff = mAnattribs[targetOffset].Address -
-                            mAnattribs[probeOffset].Address;
+                                mAnattribs[probeOffset].Address;
                         if (addrDiff == targetOffset - probeOffset) {
                             targetOffset = probeOffset;
+                            break;
                         } else {
                             Debug.WriteLine("NOT probing past address boundary change (src=+" +
                                 srcOffset.ToString("x6") +
                                 " targ=+" + targetOffset.ToString("x6") +
                                 " probe=+" + probeOffset.ToString("x6") + ")");
+
+                            // No point in continuing to search this direction, but we might
+                            // need to look the other way.
+                            if (back) {
+                                probeOffset = targetOffset;
+                                back = false;
+                            } else {
+                                break;
+                            }
                         }
-                        break;
                     }
                 }
                 return targetOffset;

@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":145,"FileDataCrc32":-56227824,"ProjectProps":{
-"CpuName":"65816","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":191,"FileDataCrc32":1554487300,"ProjectProps":{
+"CpuName":"65816","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":33489103,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
 "AddressMap":[{
@@ -12,7 +12,7 @@
 "Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
 },
 "Comments":{
-},
+"125":"self-ref; operand format refs nonexistent symbol"},
 "LongComments":{
 },
 "Notes":{
@@ -29,7 +29,9 @@
 "49":{
 "Label":"fill0","Value":4145,"Source":"User","Type":"LocalOrGlobalAddr"},
 "132":{
-"Label":"dat81","Value":4228,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"Label":"dat81","Value":4228,"Source":"User","Type":"LocalOrGlobalAddr"},
+"150":{
+"Label":"nearby","Value":8209,"Source":"User","Type":"LocalOrGlobalAddr"}},
 "OperandFormats":{
 "10":{
 "Length":2,"Format":"NumericLE","SubFormat":"Hex","SymbolRef":null},
@@ -60,4 +62,6 @@
 "Label":"fill0","Part":"Low"}},
 "125":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"nonexistent","Part":"Low"}}}}
+"Label":"nonexistent","Part":"Low"}}},
+"LvTables":{
+}}

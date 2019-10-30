@@ -90,14 +90,14 @@ ulabel  !byte   $00
         !byte   $01
         } ;!pseudopc
         !pseudopc $3100 {
-L3100   !byte   $02
+        !byte   $02
 
 fwd     bit     fwd
         lda     ulabel
         lda     ulabel+1
         lda     $300e
         lda     $300f
-        lda     L3100
+        lda     fwd-1
         beq     L3182
         !byte   $ea
         !byte   $ea

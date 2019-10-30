@@ -43,7 +43,7 @@ L1069   pea     L1069-1
         lda     #$ea
 L1077   sta     L1077
 L107A   sta     L107A+1
-        sta     $107f
+        sta     $107f      ;self-ref; operand format refs nonexistent symbol
         brl     L2002
 
         !byte   $80
@@ -55,6 +55,31 @@ L2000   !byte   $82
 L2002   bit     L2002
         lda     dat81
         lda     L2000
+        bra     L2018
+
+L200D   !byte   $7c
+L200E   !byte   $7d
+L200F   !byte   $7e
+        !byte   $7f
+nearby  !byte   $80
+        !byte   $81
+        !byte   $82
+        !byte   $83
+L2015   !byte   $84
+L2016   !byte   $85
+L2017   !byte   $86
+
+L2018   lda     L200D
+        lda     L200E
+        lda     L200F
+        lda     nearby-1
+        lda     nearby
+        lda     nearby+1
+        lda     nearby+2
+        lda     nearby+3
+        lda     L2015
+        lda     L2016
+        lda     L2017
         rts
 
         } ;!pseudopc

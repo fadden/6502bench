@@ -77,14 +77,14 @@ L3000    bit   L3000
 ulabel   dfb   $00
          dfb   $01
          org   $3100
-L3100    dfb   $02
+         dfb   $02
 
 fwd      bit   fwd
          lda   ulabel
          lda   ulabel+1
          lda   $300e
          lda   $300f
-         lda   L3100
+         lda   fwd-1
          beq   L3182
          dfb   $ea
          dfb   $ea

@@ -72,4 +72,34 @@ skipdat1
         bit     skipdat1
         lda     dat81
         lda     dat82                   ;this should NOT use dat81
+
+;
+; Test the precise extent to which we associate a label with nearby elements.
+;
+        bra     skipmore
+
+        dfb     $7c
+        dfb     $7d
+        dfb     $7e
+        dfb     $7f
+nearby  dfb     $80                     ;EDIT: label this
+        dfb     $81
+        dfb     $82
+        dfb     $83
+        dfb     $84
+        dfb     $85
+        dfb     $86
+
+skipmore
+        lda     nearby-4
+        lda     nearby-3
+        lda     nearby-2
+        lda     nearby-1
+        lda     nearby
+        lda     nearby+1
+        lda     nearby+2
+        lda     nearby+3
+        lda     nearby+4
+        lda     nearby+5
+        lda     nearby+6
         rts
