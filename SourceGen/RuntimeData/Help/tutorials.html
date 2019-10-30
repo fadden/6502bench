@@ -201,6 +201,12 @@ comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
 <h3>Editing Instruction Operands</h3>
 
+<p>Select the line with address $2003 ("CMP #$04"), then
+Actions &gt; Edit Operand.  This allows you to pick how you want the
+operand to look.  It's currently set to Default, which for an 8-bit
+immediate argument means it's shown as a hexadecimal value.  Click
+Binary, then OK.  It now appears as a binary value.</p>
+
 <p>The operand in the LDA instruction at line $2000 refers to an address
 ($3000) that isn't part of the file.  We want to create an equate directive to
 give it a name.  With the line at $2000 selected, use Actions &gt; Edit Operand,
@@ -229,12 +235,14 @@ label.  However, you changed the code at $2005 to have a <i>symbolic</i>
 reference to a symbol called "IS_OK", and there were no other numeric
 references to $2009, so the auto-label was no longer
 needed.  Because IS_OK doesn't exist, the operand at $2005 is just formatted
-as a hexadecimal value.</p>
+as a hexadecimal value.  (There's also now a message at the bottom of the
+window telling us this.)</p>
 <p>Let's fix this.  Select the line at address $2009, then
 Actions &gt; Edit Label.  Enter "IS_OK", and hit Enter.  (NOTE: labels are
 case-sensitive, so it needs to match the operand at $2005 exactly.)  You'll
 see the new label appear, and the operand at line $2005 will use it.</p>
-<p>There's an easier way.  Select Edit &gt; Undo twice, to get back to the
+
+<!--<p>There's an easier way.  Select Edit &gt; Undo twice, to get back to the
 state where line $2005 says "BCC L2009", and line $2009 has the label
 L2009.  Now double-click on the "BCC" opcode (not operand) at address
 $2005.  This moves the selection to $2009.  Double-click on the label field,
@@ -243,20 +251,22 @@ and enter "IS_OK".  Hit "OK".</p>
 $2009 have changed to IS_OK, accomplishing what we wanted to do in a
 single step.  The key difference is that we haven't explicitly set a
 format for the BCC operand -- we just defined a label, and SourceGen
-used it automatically.</p>
-<p>There's another way to do the same thing that is sometimes
-more convenient.  Double-click the "IS_OK" label on line $2009, hit
-the Delete key to erase it, and click "OK".  This removes the label,
-so SourceGen generates L2009 again.  Double-click on the operand on
-line $2005 ("L2009") to open the operand editor, then in the bottom left
-panel click "Create Label".  Type "IS_OK", then click "OK".  Make sure the
-radio buttons are still set to Default format, and click "OK".</p>
-<p>You should again have the IS_OK label at line $2009, just like it did
-when you created the label on line $2009, because you did exactly the
-same thing.  You just opened the label editor from the Edit Operand dialog
-instead of the code list.  In many cases, particularly when operand's
-target address is far off screen, it's more convenient to work through the
-operand editor.</p>
+used it automatically.</p>-->
+
+<p>There's another way to set a label that is simpler and more convenient.
+Select Edit &gt; Undo twice, to get back to the state where line $2005
+says "BCC L2009", and line $2009 has the label L2009.
+Double-click on the operand on line $2005 ("L2009") to open the operand
+editor, then in the bottom left panel click "Create Label".  Type "IS_OK",
+then click "OK".  Make sure the operand format is still set to Default,
+then click "OK".</p>
+<p>This puts the label IS_OK at line $2009, and we can see the BCC
+instruction has it as well.  We didn't have to manually type the symbol
+for the BCC instruction because the numeric reference to $2009 was
+automatically resolved to the IS_OK label.  You could do the same thing
+by editing the label on line $2009 directly, but in many cases --
+particularly when the operand's target address is far off screen --
+it's more convenient to work through the operand editor.</p>
 
 
 <h3>Editing Data Operands</h3>
@@ -281,9 +291,10 @@ label to "STR1".  Move up a bit and select address $2030, then scroll to
 the bottom and shift-click address $2070.  Select Actions &gt; Edit Operand.
 At the top it should now say, "65 bytes selected in 2 groups".
 There are two groups because the presence of a label split the data into
-two separate regions.  From the "Character encoding" pop-up select
-"Low or High ASCII" encoding, select the
-"mixed character and non-character" string type, then click "OK".</p>
+two separate regions.  From the "Character encoding" pop-up down in the
+"String" section, make sure "Low or High ASCII" encoding is selected,
+then select the "mixed character and non-character" string type and
+click "OK".</p>
 <p>We now have two ".STR" lines, one for "string zero  ", and one with the
 STR1 label and the rest of the string data.  This is okay, but it's not
 really what we want.  The code at $200B appears to be loading a 16-bit
@@ -550,9 +561,10 @@ and navigate to the Examples directory.  In A2-Amper-fdraw, select
 This particular program interfaces with Applesoft BASIC, so we can make it
 a bit more meaningful by loading an additional platform
 symbol file.  Select Edit &gt; Project Properties, then the Symbol Files
-tab.  Click Add Symbol Files.  The file browser starts in the RuntimeData
-directory.  In the Apple folder, select <code>Applesoft.sym65</code>, and
-click "Open".  Click "OK" to close the project properties window.</p>
+tab.  Click Add Symbol Files from Runtime.  The file browser starts in
+the RuntimeData directory.  Open the Apple folder, then select
+<code>Applesoft.sym65</code>, and click "Open".  Click "OK" to close
+the project properties window.</p>
 <p>The <code>STA</code> instructions now reference <code>BAS_AMPERV</code>,
 which is noted as a code vector.  We can see the code setting up a jump
 (opcode $4c) to $1d70.  As it happens, the start address of the code
@@ -637,8 +649,9 @@ save the project.  File > Save, use the default name ("Tutorial4.dis65").</p>
 followed by a string that begins with a small number.  This appears to be
 a string with a leading length byte.  We want to load a script that
 can handle that, so use Edit > Project Properties, select the
-Extension Scripts tab, click "Add Scripts from Project", and then
-the file "InlineL1String.cs".  Click OK.</p>
+Extension Scripts tab, and click "Add Scripts from Project".  The file
+browser opens in the project directory.  Select the file
+"InlineL1String.cs", click Open, then OK.</p>
 <p>Nothing happened.  If you look at the script (and you know some C#),
 you'll see that it's looking for a JSR to a function called
 "PrintInlineL1String".  So let's give it one.</p>
