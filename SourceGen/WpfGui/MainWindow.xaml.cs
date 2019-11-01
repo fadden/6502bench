@@ -832,8 +832,24 @@ namespace SourceGen.WpfGui {
         /// control rather than an item.  The same fix seems to apply for this issue as well.
         ///
         /// From http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
+        ///
+        /// Unfortunately, grabbing focus like this causes problems with the GridSplitters.  As
+        /// soon as the splitter start to move, the ListView grabs focus and prevents them from
+        /// moving more than a few pixels.  The workaround is to do nothing while the
+        /// splitters are being moved.  This doesn't solve the problem completely, e.g. you
+        /// can't move the splitters with the arrow keys by more than one step because the
+        /// ListView gets a StatusChanged event and steals focus away, but at least the
+        /// mouse works.
+        ///
+        /// Ideally we'd do something smarter with the StatusChanged event, or maybe find some
+        /// way to deal with the selection-jump problem that doesn't involve the StatusChanged
+        /// event, but short of a custom replacement control I don't know what that would be.
+        /// https://stackoverflow.com/q/58652064/294248
         /// </remarks>
         private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e) {
+            if (mIsSplitterBeingDragged) {
+                return;
+            }
             if (codeListView.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated) {
                 int index = codeListView.SelectedIndex;
 
@@ -846,6 +862,15 @@ namespace SourceGen.WpfGui {
                     }
                 }
             }
+        }
+
+        private bool mIsSplitterBeingDragged = false;
+        private void ColSplitter_OnDragStarted(object sender, DragStartedEventArgs e) {
+            mIsSplitterBeingDragged = true;
+        }
+
+        private void ColSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e) {
+            mIsSplitterBeingDragged = false;
         }
 
         /// <summary>
