@@ -206,6 +206,7 @@ namespace SourceGen {
         /// <returns>Change record.</returns>
         public static UndoableChange CreateTypeHintChange(TypedRangeSet undoSet,
                 TypedRangeSet newSet) {
+            Debug.Assert(undoSet != null && newSet != null);
             if (newSet.Count == 0) {
                 Debug.WriteLine("Empty hint change?");
             }

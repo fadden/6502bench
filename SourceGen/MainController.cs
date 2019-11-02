@@ -2570,6 +2570,58 @@ namespace SourceGen {
             return new NavStack.Location(offset, lineDelta, isNote);
         }
 
+        public void GotoLastChange() {
+            ChangeSet cs = mProject.GetTopChange();
+            Debug.Assert(cs.Count > 0);
+
+            // Get the offset from the first change in the set.  Ignore the rest.
+            UndoableChange uc = cs[0];
+            int offset;
+            bool isNote = false;
+            if (uc.HasOffset) {
+                offset = uc.Offset;
+
+                // If we altered a Note, and didn't remove it, jump to the note instead of
+                // the nearby code/data.
+                //
+                // TODO(someday): we can do similar things for comment edits, e.g. if it's
+                // SetLongComment we can find the line on which the comment starts and
+                // pass that as a line delta.
+                if (uc.Type == UndoableChange.ChangeType.SetNote &&
+                        uc.NewValue != null) {
+                    isNote = true;
+                }
+            } else if (uc.Type == UndoableChange.ChangeType.SetProjectProperties) {
+                // some chance it modified the EQU statements... jump there
+                offset = 0;
+            } else if (uc.Type == UndoableChange.ChangeType.SetTypeHint) {
+                TypedRangeSet newSet = (TypedRangeSet)uc.NewValue;
+                if (newSet.Count == 0) {
+                    // unexpected
+                    Debug.Assert(false);
+                    return;
+                }
+
+                // Get the offset of the first entry.
+                IEnumerator<TypedRangeSet.Tuple> iter =
+                    (IEnumerator<TypedRangeSet.Tuple>)newSet.GetEnumerator();
+                iter.MoveNext();
+                TypedRangeSet.Tuple firstOffset = iter.Current;
+                offset = firstOffset.Value;
+            } else {
+                Debug.Assert(false);
+                return;
+            }
+
+            if (isNote) {
+                GoToLocation(new NavStack.Location(offset, 0, true),
+                    GoToMode.JumpToNote, true);
+            } else {
+                GoToLocation(new NavStack.Location(offset, 0, false),
+                    GoToMode.JumpToCodeData, true);
+            }
+        }
+
         public bool CanNavigateBackward() {
             return mNavStack.HasBackward;
         }

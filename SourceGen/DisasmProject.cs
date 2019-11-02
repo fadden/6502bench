@@ -1830,6 +1830,20 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Returns the change at the top of the list, i.e. the one that would be popped off
+        /// if we hit "undo".
+        /// </summary>
+        /// <returns>The change set.  The caller must not modify it.</returns>
+        public ChangeSet GetTopChange() {
+            Debug.Assert(mUndoList.Count > 0);
+            Debug.Assert(mUndoTop > 0);
+            return mUndoList[mUndoTop - 1];
+        }
+
+        /// <summary>
+        /// Generate undo/redo history, for the debug window.
+        /// </summary>
         public string DebugGetUndoRedoHistory() {
             StringBuilder sb = new StringBuilder();
             sb.Append("Bracketed change will be overwritten by next action\r\n\r\n");

@@ -1211,6 +1211,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Goto();
         }
 
+        private void GotoLastChangeCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.GotoLastChange();
+        }
+
         private void HelpCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ShowHelp();
         }

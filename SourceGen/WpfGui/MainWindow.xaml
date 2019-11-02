@@ -124,6 +124,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+G</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="GotoLastChangeCmd" Text="Go to Last Change"/>
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
@@ -239,6 +240,8 @@ limitations under the License.
                         CanExecute="CanFormatAddressTable" Executed="FormatAddressTableCmd_Executed"/>
         <CommandBinding Command="{StaticResource GotoCmd}"
                         CanExecute="IsProjectOpen" Executed="GotoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource GotoLastChangeCmd}"
+                        CanExecute="CanUndo" Executed="GotoLastChangeCmd_Executed"/>
         <CommandBinding Command="Help"
                         Executed="HelpCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
@@ -345,6 +348,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource NavigateForwardCmd}"/>
                 <MenuItem Command="{StaticResource NavigateBackwardCmd}"/>
                 <MenuItem Command="{StaticResource GotoCmd}"/>
+                <MenuItem Command="{StaticResource GotoLastChangeCmd}"/>
                 <Separator/>
                 <MenuItem Command="Find"/>
                 <MenuItem Command="{StaticResource FindNextCmd}"/>

@@ -372,11 +372,23 @@ with a '+'.  If you have a label that is also a valid hexadecimal
 address, like "FEED", the label takes precedence.  To jump to the address
 write "$FEED" instead.</p>
 
-<p>When you jump around, by double-clicking on an opcode or an entry
-in one of the side windows, the currently-selected line is added to
-a navigation stack.  You can use the arrows on the toolbar to navigate
-forward or backward, or Navigate &gt; Nav Forward and
-Navigate &gt; Nav Backward.  (You can use Alt+Left/Right Arrow, or
+<p>When you edit something, lines throughout the listing can change.  This
+is different from a source code editor, where editing a line just changes
+that line.  To allow you to watch the effects changes have, the undo/redo
+commands try to keep the listing in the same position.
+If you want to go to the place where the last change (i.e. the change
+that will be undone by the next Undo operation) was made,
+Navigate &gt; Go to Last Change will jump to the first offset
+associated with the most recent change.
+If the last change was to the project properties, it will jump to the
+first offset in the file.</p>
+
+<p>When you jump around, e.g. by double-clicking on an opcode or an entry
+in one of the side windows, the previously-selected line is added to
+a navigation stack.  You can use Navigate &gt; Nav Forward and
+Navigate &gt; Nav Backward to move forward and backward through the
+stack.  (The curly arrows on the left side of the toolbar may be more
+convenient.  You can use Alt+Left/Right Arrow, or
 Ctrl+- / Ctrl+Shift+-, as keyboard shortcuts.)</p>
 
 
