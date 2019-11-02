@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":1,"FileDataLength":98,"FileDataCrc32":-80207687,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AnalysisParams":{
-"AnalyzeUncategorizedData":true,"MinCharsForString":4,"SeekNearbyTargets":true},
+"_ContentVersion":2,"FileDataLength":98,"FileDataCrc32":-80207687,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":["RT:TestData/TestSyms.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
 "AddressMap":[{
@@ -29,7 +29,9 @@
 "12":{
 "Text":"\r\nChoppy\r\n\r\nbox\r\n\r\ncomment\r\n\r\n64 cols\r\n\r\n","BoxMode":true,"MaxWidth":64,"BackgroundColor":0},
 "14":{
-"Text":"Some non-ASCII stuff:\r\n†•�␇","BoxMode":true,"MaxWidth":30,"BackgroundColor":0}},
+"Text":"Some non-ASCII stuff:\r\n†•�␇\r\n(right side of box looks pushed over on-screen because font isn\u0027t fully mono)","BoxMode":true,"MaxWidth":64,"BackgroundColor":0},
+"16":{
+"Text":"Specific line break case at end  of.  Sentence.\r\nAlternate version for semicolon zz.  Output.\r\n\r\nSame thing but with three spaces zz.   Three!\r\nAgain with the three spces between.   Things.\r\n\r\nTry to make it the very last thing..  ","BoxMode":true,"MaxWidth":40,"BackgroundColor":0}},
 "Notes":{
 "0":{
 "Text":"And now, a note.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-7278960},
@@ -46,4 +48,6 @@
 "Label":"bytes","Value":4130,"Source":"User","Type":"LocalOrGlobalAddr"}},
 "OperandFormats":{
 "34":{
-"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null}}}
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
+"LvTables":{
+}}

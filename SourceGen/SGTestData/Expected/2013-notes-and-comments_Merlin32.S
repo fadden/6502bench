@@ -15,7 +15,7 @@
 plataddr equ   $3000      ;address only in platform file
 
 ;Short, unboxed comment here!!
-; Two spaces after.  More hyp-
+;Two spaces after.  More hyp-
 ;hens?
          org   $1000
          lda   #$01       ;Comment!
@@ -50,11 +50,26 @@ plataddr equ   $3000      ;address only in platform file
 *                                                              *
 ****************************************************************
          lda   #$07
-******************************
-* Some non-ASCII stuff:      *
-* †•�␇                       *
-******************************
+****************************************************************
+* Some non-ASCII stuff:                                        *
+* †•�␇                                                         *
+* (right side of box looks pushed over on-screen because font  *
+* isn't fully mono)                                            *
+****************************************************************
          lda   #$08
+****************************************
+* Specific line break case at end  of. *
+* Sentence.                            *
+* Alternate version for semicolon zz.  *
+* Output.                              *
+*                                      *
+* Same thing but with three spaces zz. *
+*  Three!                              *
+* Again with the three spces between.  *
+* Things.                              *
+*                                      *
+* Try to make it the very last thing.. *
+****************************************
          lda   #$09
          lda   #$0a
          lda   #$0b

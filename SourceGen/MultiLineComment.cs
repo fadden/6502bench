@@ -216,6 +216,13 @@ namespace SourceGen {
                         }
                         lines.Add(str);
                         startIndex = breakIndex + 1;
+                        if (adj == 0 && startIndex < workString.Length &&
+                                workString[startIndex] == ' ') {
+                            // We broke on a space, and are now starting a line on a space,
+                            // which looks weird (and happens commonly at the end of a
+                            // sentence).  Eat one more space.
+                            startIndex++;
+                        }
                         breakIndex = -1;
                     }
                 }

@@ -57,10 +57,10 @@ limitations under the License.
                  AcceptsReturn="True" TextWrapping="Wrap"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,0">
-            <TextBlock Text="Maximum line width:"/>
+            <TextBlock Text="Maximum line width:" Margin="0,3,0,0"/>
             <ComboBox Name="maxWidthComboBox" Width="75" Margin="8,0,0,0"
                       ItemsSource="{Binding LineWidthItems}" SelectionChanged="MaxWidthComboBox_SelectionChanged"/>
-            <CheckBox Content="Render in _box" Margin="40,1,0,0" IsChecked="{Binding RenderInBox}"/>
+            <CheckBox Content="Render in _box" Margin="40,4,0,0" IsChecked="{Binding RenderInBox}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="3" Text="Expected output:" Margin="0,20,0,0"/>
