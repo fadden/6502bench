@@ -221,6 +221,8 @@ namespace SourceGen.AsmGen {
 
             mLocalizer = new LabelLocalizer(Project);
             if (!Settings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false)) {
+                // While '.' labels are limited to the current zone, '@' labels are visible
+                // between global labels.  (This is poorly documented.)
                 mLocalizer.LocalPrefix = "@";
                 mLocalizer.Analyze();
             }
@@ -503,6 +505,10 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public void OutputLocalVariableTable(int offset, List<DefSymbol> newDefs,
                 LocalVariableTable allDefs) {
+            // We can do better here, but it requires knowing whether anything in "newDefs"
+            // overwrote a previous entry.  If everything is new, we don't need to start
+            // a new zone, and can just output newDefs.  (We don't need to start a new zone
+            // on a "clear previous".)
             OutputLine(string.Empty, "!zone", "Z" + offset.ToString("x6"), string.Empty);
             for (int i = 0; i < allDefs.Count; i++) {
                 DefSymbol defSym = allDefs[i];

@@ -421,6 +421,10 @@ limitations under the License.
                         ToolTip="Navigate forward (Alt+Right or Ctrl+Shift+Minus)">
                     <ContentControl Template="{StaticResource icon_StepForward}"/>
                 </Button>
+                <Button Command="{StaticResource GotoLastChangeCmd}"
+                        ToolTip="Go to Last Change">
+                    <ContentControl Template="{StaticResource icon_DebugHistorySeekToFrame}"/>
+                </Button>
                 <Separator/>
                 <Button Command="{StaticResource NewProjectCmd}" ToolTip="Create new project">
                     <ContentControl Template="{StaticResource icon_NewFile}"/>

@@ -38,8 +38,7 @@ namespace SourceGen {
 
         /// <summary>
         /// Local internal label, global internal label, or reference to an
-        /// external address?  Constants get a separate type in case we need to
-        /// distinguish them from addresses.
+        /// external address?  Constants get a separate type.
         /// </summary>
         public enum Type {
             Unknown = 0,
@@ -59,7 +58,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        ///  True if the symbol is a local variable.
+        /// True if the symbol is a local variable.
         /// </summary>
         public bool IsVariable {
             get { return SymbolSource == Source.Variable; }
