@@ -195,6 +195,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_LocalVariableTableClear");
         public static string LOCAL_VARIABLE_TABLE_EMPTY =
             (string)Application.Current.FindResource("str_LocalVariableTableEmpty");
+        public static string MSG_BANK_OVERRUN =
+            (string)Application.Current.FindResource("str_MsgBankOverrun");
+        public static string MSG_BANK_OVERRUN_DETAIL_FMT =
+            (string)Application.Current.FindResource("str_MsgBankOverrunDetailFmt");
         public static string MSG_FORMAT_DESCRIPTOR_IGNORED =
             (string)Application.Current.FindResource("str_MsgFormatDescriptorIgnored");
         public static string MSG_HIDDEN_LABEL =

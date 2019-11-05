@@ -664,6 +664,22 @@ namespace SourceGen {
             }
         }
 
+        private void ValidateAddressMap() {
+            foreach (AddressMap.AddressMapEntry entry in AddrMap) {
+                if ((entry.Addr & 0xff0000) != ((entry.Addr + entry.Length - 1) & 0xff0000)) {
+                    string fmt = Res.Strings.MSG_BANK_OVERRUN_DETAIL_FMT;
+                    int firstNext = (entry.Addr & 0xff0000) + 0x010000;
+                    int badOffset = entry.Offset + (firstNext - entry.Addr);
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Error,
+                        entry.Offset,
+                        MessageList.MessageEntry.MessageType.BankOverrun,
+                        string.Format(fmt, "+" + badOffset.ToString("x6")),
+                        MessageList.MessageEntry.ProblemResolution.None));
+                }
+            }
+        }
+
         #region Analysis
 
         /// <summary>
@@ -809,6 +825,7 @@ namespace SourceGen {
             Validate();
             reanalysisTimer.EndTask("Validate");
 #endif
+            ValidateAddressMap();
 
             reanalysisTimer.EndTask("DisasmProject.Analyze()");
             //reanalysisTimer.DumpTimes("DisasmProject timers:", debugLog);

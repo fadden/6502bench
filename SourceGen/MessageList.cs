@@ -52,6 +52,7 @@ namespace SourceGen {
                 UnresolvedWeakRef,
                 InvalidOffsetOrLength,
                 InvalidDescriptor,
+                BankOverrun,
             }
             public MessageType MsgType { get; private set; }
 
@@ -162,6 +163,9 @@ namespace SourceGen {
                     break;
                 case MessageEntry.MessageType.InvalidDescriptor:
                     problem = Res.Strings.MSG_INVALID_DESCRIPTOR;
+                    break;
+                case MessageEntry.MessageType.BankOverrun:
+                    problem = Res.Strings.MSG_BANK_OVERRUN;
                     break;
                 default:
                     problem = "???";
