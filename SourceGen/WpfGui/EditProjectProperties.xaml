@@ -25,13 +25,16 @@ limitations under the License.
         Title="Edit Project Properties"
         Width="640" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded" Closing="Window_Closing">
 
     <Window.Resources>
         <!-- don't center the column headers -->
         <Style TargetType="{x:Type GridViewColumnHeader}">
             <Setter Property="HorizontalContentAlignment" Value="Left" />
         </Style>
+
+        <system:String x:Key="str_ConfirmDiscardChanges">Some changes have not been applied.  Discard them?</system:String>
+        <system:String x:Key="str_ConfirmDiscardChangesCaption">Discard Changes?</system:String>
 
         <!-- strings for combo boxes -->
         <system:String x:Key="str_6502">MOS 6502</system:String>

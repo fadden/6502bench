@@ -341,7 +341,6 @@ namespace SourceGen.WpfGui {
             }
             if (!mMainCtrl.WindowClosing()) {
                 e.Cancel = true;
-                return;
             }
         }
 

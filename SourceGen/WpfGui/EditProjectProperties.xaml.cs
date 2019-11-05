@@ -149,6 +149,18 @@ namespace SourceGen.WpfGui {
             UpdateControls();
         }
 
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            if (IsDirty) {
+                string msg = (string)FindResource("str_ConfirmDiscardChanges");
+                string caption = (string)FindResource("str_ConfirmDiscardChangesCaption");
+                MessageBoxResult result = MessageBox.Show(msg, caption, MessageBoxButton.OKCancel,
+                    MessageBoxImage.Question);
+                if (result == MessageBoxResult.Cancel) {
+                    e.Cancel = true;
+                }
+            }
+        }
+
         private void ApplyButton_Click(object sender, RoutedEventArgs e) {
             NewProps = new ProjectProperties(mWorkProps);
             IsDirty = false;
@@ -160,6 +172,7 @@ namespace SourceGen.WpfGui {
             // insufficient.  Might be best to just let the UndoableChange stuff figure out
             // that nothing changed.
             NewProps = new ProjectProperties(mWorkProps);
+            IsDirty = false;
             DialogResult = true;
 
             //GridView view = (GridView)projectSymbolsListView.View;
