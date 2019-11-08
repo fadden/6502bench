@@ -5,16 +5,22 @@
 
 *SYNOPSIS Nintendo Entertainment System registers
 
-; PPU registers ($2000-2007, repeating every 8 bytes)
+; PPU registers ($2000-2007, repeating every 8 bytes to $3FFF)
 ; (see https://wiki.nesdev.com/w/index.php/PPU_registers)
-PPUCTRL     @   $2000   ;VPHB SINN  various
-PPUMASK     @   $2001   ;BGRs bMmG  various
-PPUSTATUS   @   $2002   ;VSO- ----  various
-OAMADDR     @   $2003   ;OAM read/write address
-OAMDATA     @   $2004   ;OAM data read/write
-PPUSCROLL   @   $2005   ;fine scroll position (two writes: X,Y)
-PPUADDR     @   $2006   ;PPU read/write address (two writes: MSB, LSB)
-PPUDATA     @   $2007   ;PPU data read/write
+;
+; pattern: 001? ???? ???? ?xxx
+*MULTI_MASK %0010000000000000 %0010000000000000 %0000000000000111
+
+PPUCTRL     @   $2000   ;W VPHB SINN  various
+PPUMASK     @   $2001   ;W BGRs bMmG  various
+PPUSTATUS   @   $2002   ;R VSO- ----  various; read resets $2005/2006
+OAMADDR     @   $2003   ;W OAM read/write address
+OAMDATA     @   $2004   ;RW OAM data read/write
+PPUSCROLL   @   $2005   ;WW fine scroll position (two writes: X,Y)
+PPUADDR     @   $2006   ;WW PPU read/write address (two writes: MSB, LSB)
+PPUDATA     @   $2007   ;RW PPU data read/write
+
+*MULTI_MASK
 
 ; APU and I/O registers
 ; (see https://wiki.nesdev.com/w/index.php/2A03)
@@ -38,7 +44,10 @@ DMC_FREQ    @   $4010   ;IL-- RRRR
 DMC_RAW     @   $4011   ;-DDD DDDD
 DMC_START   @   $4012   ;AAAA AAAA
 DMC_LEN     @   $4013   ;LLLL LLLL
-OAMDMA      @   $4014
+OAMDMA      @   $4014   ;AAAA AAAA  OAM DMA high address
 SND_CHN     @   $4015   ;W:---D NT21 R:IF-D NT21
 JOY1        @   $4016   ;joystick 1 data (R) and joystick strobe (W)
 JOY2        @   $4017   ;joystick 2 data (R) and frame counter (W)
+
+; $4018-401F normally disabled, but used in test mode
+; (see http://wiki.nesdev.com/w/index.php/CPU_Test_Mode)
