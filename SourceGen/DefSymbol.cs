@@ -170,8 +170,9 @@ namespace SourceGen {
         /// <summary>
         /// Internal base-object (Symbol) constructor, called by other constructors.
         /// </summary>
-        private DefSymbol(string label, int value, Source source, Type type)
-                : base(label, value, source, type) {
+        private DefSymbol(string label, int value, Source source, Type type,
+                LabelAnnotation labelAnno)
+                : base(label, value, source, type, labelAnno) {
             Debug.Assert(source == Source.Platform || source == Source.Project ||
                 source == Source.Variable);
             Debug.Assert(type == Type.ExternalAddr || type == Type.Constant);
@@ -191,7 +192,7 @@ namespace SourceGen {
         ///   user wants the value to be displayed.</param>
         public DefSymbol(string label, int value, Source source, Type type,
                 FormatDescriptor.SubType formatSubType)
-                : this(label, value, source, type, formatSubType, -1, false,
+                : this(label, value, source, type, LabelAnnotation.None, formatSubType, -1, false,
                        string.Empty, DirectionFlags.ReadWrite, null, string.Empty) { }
 
         /// <summary>
@@ -211,9 +212,10 @@ namespace SourceGen {
         /// <param name="tag">Symbol tag, used for grouping platform symbols.</param>
         ///   false, the value of the "width" argument is ignored.</param>
         public DefSymbol(string label, int value, Source source, Type type,
-                FormatDescriptor.SubType formatSubType, int width, bool widthSpecified,
-                string comment, DirectionFlags direction, MultiAddressMask multiMask, string tag)
-                : this(label, value, source, type) {
+                LabelAnnotation labelAnno, FormatDescriptor.SubType formatSubType,
+                int width, bool widthSpecified, string comment,
+                DirectionFlags direction, MultiAddressMask multiMask, string tag)
+                : this(label, value, source, type, labelAnno) {
             Debug.Assert(comment != null);
             Debug.Assert(tag != null);
 
@@ -254,8 +256,8 @@ namespace SourceGen {
                 FormatDescriptor.SubType formatSubType, int width, bool widthSpecified,
                 string comment, DirectionFlags direction, MultiAddressMask multiMask, string tag,
                 int loadOrdinal, string fileIdent)
-                : this(label, value, source, type, formatSubType, width, widthSpecified,
-                      comment, direction, multiMask, tag) {
+                : this(label, value, source, type, LabelAnnotation.None, formatSubType,
+                      width, widthSpecified, comment, direction, multiMask, tag) {
             LoadOrdinal = loadOrdinal;
             FileIdentifier = fileIdent;
         }
@@ -281,7 +283,8 @@ namespace SourceGen {
             }
             Debug.Assert(dfd.FormatType == FormatDescriptor.Type.NumericLE);
             return new DefSymbol(sym.Label, sym.Value, sym.SymbolSource, sym.SymbolType,
-                dfd.FormatSubType, width, widthSpecified, comment, direction, multiMask, string.Empty);
+                sym.LabelAnno, dfd.FormatSubType, width, widthSpecified,
+                comment, direction, multiMask, string.Empty);
         }
 
         /// <summary>
@@ -296,8 +299,9 @@ namespace SourceGen {
         /// <param name="label">Label to use.</param>
         public DefSymbol(DefSymbol defSym, string label)
             : this(label, defSym.Value, defSym.SymbolSource, defSym.SymbolType,
-                  defSym.DataDescriptor.FormatSubType, defSym.DataDescriptor.Length,
-                  defSym.HasWidth, defSym.Comment, defSym.Direction, defSym.MultiMask, defSym.Tag)
+                  defSym.LabelAnno, defSym.DataDescriptor.FormatSubType,
+                  defSym.DataDescriptor.Length, defSym.HasWidth, defSym.Comment,
+                  defSym.Direction, defSym.MultiMask, defSym.Tag)
             { }
 
         /// <summary>

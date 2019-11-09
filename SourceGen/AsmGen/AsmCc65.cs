@@ -421,7 +421,7 @@ namespace SourceGen.AsmGen {
                     operand = RawData.GetWord(data, offset, length, false);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                         mLocalizer.LabelMap, dfd, operand, length,
-                        PseudoOp.FormatNumericOpFlags.None);
+                        PseudoOp.FormatNumericOpFlags.StripAnnotation);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
@@ -432,7 +432,7 @@ namespace SourceGen.AsmGen {
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                             mLocalizer.LabelMap, dfd, operand, length,
-                            PseudoOp.FormatNumericOpFlags.None);
+                            PseudoOp.FormatNumericOpFlags.StripAnnotation);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:
@@ -547,7 +547,7 @@ namespace SourceGen.AsmGen {
                 // Use an operand length of 1 so values are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
                     Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
-                    PseudoOp.FormatNumericOpFlags.None);
+                    PseudoOp.FormatNumericOpFlags.StripAnnotation);
                 OutputLine(SourceFormatter.FormatVariableLabel(defSym.Label),
                     SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
                     valueStr, SourceFormatter.FormatEolComment(defSym.Comment));

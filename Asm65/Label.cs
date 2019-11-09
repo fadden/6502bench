@@ -59,11 +59,38 @@ namespace Asm65 {
         /// <param name="label">Label to validate.</param>
         /// <returns>True if the label is correctly formed.</returns>
         public static bool ValidateLabel(string label) {
-            if (label.Length > MAX_LABEL_LEN) {
+            if (label == null || label.Length > MAX_LABEL_LEN) {
                 return false;
             }
             MatchCollection matches = sValidLabelCharRegex.Matches(label);
             return matches.Count == 1;
+        }
+
+        /// <summary>
+        /// Performs a detailed validation of a symbol label, breaking out different failure
+        /// causes for the benefit of code that reports errors to the user.
+        /// </summary>
+        /// <param name="label">Label to examine.</param>
+        /// <param name="isLenValid">True if the label has a valid length.</param>
+        /// <param name="isFirstCharValid">True if the first character is valid.</param>
+        /// <returns>True if the label is valid.</returns>
+        public static bool ValidateLabelDetail(string label, out bool isLenValid,
+                out bool isFirstCharValid) {
+            bool isValid = ValidateLabel(label);
+            if (isValid) {
+                isLenValid = isFirstCharValid = true;
+                return true;
+            }
+
+            // Something is wrong.  Check length.
+            isLenValid = (label.Length >= 2 && label.Length <= MAX_LABEL_LEN);
+
+            // Check first char for alphanumeric or underscore.
+            isFirstCharValid = label.Length > 0 &&
+                ((label[0] >= 'A' && label[0] <= 'Z') || (label[0] >= 'a' && label[0] <= 'z') ||
+                    label[0] == '_');
+
+            return isValid;
         }
 
         /// <summary>

@@ -416,13 +416,16 @@ values into direct page address $02/03.  This appears to be setting up a
 pointer to $2063, which is a data area inside the file.  So let's make it
 official.</p>
 <p>Select the line at address $2063, and use Actions &gt; Edit Label to
-give it the label "XDATA".  Now edit the operand on line $203d, and set it
-to the symbol "XDATA", with the part "low".  Edit the operand on line $2041,
-and set it to "XDATA" with the part "high".  (Note the symbol text box
+give it the label "XDATA?".  The question mark on the end is there to
+remind us that we're not entirely sure what this is.  Now edit the
+operand on line $203d, and set it to the symbol "XDATA", with the part
+"low".  The question mark isn't really part of the label, so you don't
+need to type it here.  Edit the operand on line $2041,
+and set it to "XDATA" with the part "high".  (The symbol text box
 gets focus immediately, so you can start typing the symbol name as soon
 as the dialog opens; you don't need to click around first.)  If all
-went well, the operands should now read <code>LDA #&lt;XDATA</code>
-and <code>LDA #&gt;XDATA</code>.</p>
+went well, the operands should now read <code>LDA #&lt;XDATA?</code>
+and <code>LDA #&gt;XDATA?</code>.</p>
 <p>Let's give the pointer a name.  Select line $203d, and use
 Actions &gt; Create Local Variable Table to create an empty table.
 Click "New Symbol" on the right side.  Leave the Address button selected.

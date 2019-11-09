@@ -52,7 +52,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 2;
+        public const int CONTENT_VERSION = 3;
 
         private static readonly bool ADD_CRLF = true;
 
@@ -275,6 +275,7 @@ namespace SourceGen {
             public int Value { get; set; }
             public string Source { get; set; }
             public string Type { get; set; }
+            public string LabelAnno { get; set; }
 
             public SerSymbol() { }
             public SerSymbol(Symbol sym) {
@@ -282,6 +283,7 @@ namespace SourceGen {
                 Value = sym.Value;
                 Source = sym.SymbolSource.ToString();
                 Type = sym.SymbolType.ToString();
+                LabelAnno = sym.LabelAnno.ToString();
             }
         }
         public class SerFormatDescriptor {
@@ -640,17 +642,12 @@ namespace SourceGen {
                     continue;
                 }
 
-                Symbol.Source source;
-                Symbol.Type type;
-                try {
-                    source = (Symbol.Source)Enum.Parse(typeof(Symbol.Source), kvp.Value.Source);
-                    type = (Symbol.Type)Enum.Parse(typeof(Symbol.Type), kvp.Value.Type);
-                    if (source != Symbol.Source.User) {
-                        // User labels are always source=user.  I don't think it really matters,
-                        // but best to keep junk out.
-                        throw new Exception("wrong source for user label");
-                    }
-                } catch (ArgumentException) {
+                if (!CreateSymbol(kvp.Value, report, out Symbol newSym)) {
+                    continue;
+                }
+                if (newSym.SymbolSource != Symbol.Source.User) {
+                    // User labels are always source=user.  I don't think it really matters,
+                    // but best to keep junk out.
                     report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_SYMBOL_ST +
                         ": " + kvp.Value.Source + "/" + kvp.Value.Type);
                     continue;
@@ -667,8 +664,7 @@ namespace SourceGen {
                 }
                 labelDupCheck.Add(kvp.Value.Label, string.Empty);
 
-                proj.UserLabels[intKey] = new Symbol(kvp.Value.Label, kvp.Value.Value,
-                    source, type);
+                proj.UserLabels[intKey] = newSym;
             }
 
             // Deserialize operand format descriptors.
@@ -720,7 +716,8 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Creates a Symbol from a SerSymbol.
+        /// Creates a Symbol from a SerSymbol.  If it fails to parse correctly, an entry
+        /// is generated in the FileLoadReport.
         /// </summary>
         /// <param name="ssym">Deserialized data.</param>
         /// <param name="report">Error report object.</param>
@@ -731,15 +728,20 @@ namespace SourceGen {
             outSym = null;
             Symbol.Source source;
             Symbol.Type type;
+            Symbol.LabelAnnotation labelAnno = Symbol.LabelAnnotation.None;
             try {
                 source = (Symbol.Source)Enum.Parse(typeof(Symbol.Source), ssym.Source);
                 type = (Symbol.Type)Enum.Parse(typeof(Symbol.Type), ssym.Type);
+                if (!string.IsNullOrEmpty(ssym.LabelAnno)) {
+                    labelAnno = (Symbol.LabelAnnotation)Enum.Parse(
+                        typeof(Symbol.LabelAnnotation), ssym.LabelAnno);
+                }
             } catch (ArgumentException) {
                 report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_SYMBOL_ST +
                     ": " + ssym.Source + "/" + ssym.Type);
                 return false;
             }
-            outSym = new Symbol(ssym.Label, ssym.Value, source, type/*, ssym.IsExport*/);
+            outSym = new Symbol(ssym.Label, ssym.Value, source, type, labelAnno);
             return true;
         }
 

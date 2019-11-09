@@ -613,7 +613,8 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Formats a local variable label, prepending a prefix if needed.
+        /// Formats a local variable label, prepending an identifying prefix if one has been
+        /// specified.
         /// </summary>
         public string FormatVariableLabel(string label) {
             if (!string.IsNullOrEmpty(mFormatConfig.mLocalVariableLablePrefix)) {

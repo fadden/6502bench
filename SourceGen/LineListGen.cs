@@ -871,7 +871,7 @@ namespace SourceGen {
                     PseudoOp.FormatNumericOpFlags.None);
                 valueStr = PseudoOp.AnnotateEquDirective(formatter, valueStr, defSym);
                 string comment = formatter.FormatEolComment(defSym.Comment);
-                FormattedParts parts = FormattedParts.CreateEquDirective(defSym.Label,
+                FormattedParts parts = FormattedParts.CreateEquDirective(defSym.AnnotatedLabel,
                     formatter.FormatPseudoOp(opNames.EquDirective),
                     valueStr, comment);
                 line.Parts = parts;
@@ -1183,7 +1183,7 @@ namespace SourceGen {
 
             string labelStr = string.Empty;
             if (attr.Symbol != null) {
-                labelStr = attr.Symbol.Label;
+                labelStr = attr.Symbol.AnnotatedLabel;
             }
 
             OpDef op = mProject.CpuDef.GetOpDef(data[offset]);
@@ -1316,7 +1316,7 @@ namespace SourceGen {
 
                 addrStr = mFormatter.FormatAddress(attr.Address, !mProject.CpuDef.HasAddr16);
                 if (attr.Symbol != null) {
-                    labelStr = attr.Symbol.Label;
+                    labelStr = attr.Symbol.AnnotatedLabel;
                 }
 
                 bytesStr = mFormatter.FormatBytes(data, offset, attr.Length);
@@ -1394,7 +1394,7 @@ namespace SourceGen {
                 addrStr = PseudoOp.AnnotateEquDirective(mFormatter, addrStr, defSym);
                 string comment = mFormatter.FormatEolComment(defSym.Comment);
                 return FormattedParts.CreateEquDirective(
-                    mFormatter.FormatVariableLabel(defSym.Label),
+                    mFormatter.FormatVariableLabel(defSym.AnnotatedLabel),
                     mFormatter.FormatPseudoOp(mPseudoOpNames.VarDirective),
                     addrStr, comment);
             }
@@ -1436,7 +1436,7 @@ namespace SourceGen {
 
                     addrStr = mFormatter.FormatAddress(attr.Address, !mProject.CpuDef.HasAddr16);
                     if (attr.Symbol != null) {
-                        labelStr = attr.Symbol.Label;
+                        labelStr = attr.Symbol.AnnotatedLabel;
                     } else {
                         labelStr = string.Empty;
                     }

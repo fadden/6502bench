@@ -81,12 +81,13 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// A pairing of an offset with a label string.  (Essentially mAnattribs[n].Symbol
         /// with all the fluff trimmed away.)
-        /// 
+        /// </summary>
+        /// <remarks>
         /// The label string isn't actually all that useful, since we can pull it back out
         /// of anattrib, but it makes life a little easier during debugging.  These get
         /// put into a List, so switching to a plain int offset doesn't necessarily help us
         /// much because the ints get boxed.
-        /// </summary>
+        /// </remarks>
         private class OffsetLabel {
             public int Offset { get; private set; }
             public string Label { get; private set; }
@@ -345,7 +346,8 @@ namespace SourceGen.AsmGen {
                 LabelMap = new Dictionary<string, string>();
             }
 
-            // Throw out the original local label generation.
+            // Throw out the original local label generation.  We're going to redo the
+            // label map generation step.
             LabelMap.Clear();
 
             // Use this to test for uniqueness.  We add all labels here as we go, not just the
@@ -436,7 +438,7 @@ namespace SourceGen.AsmGen {
             // remapped, we add the remapped entry.
             // (All tested assemblers that failed on opcode names only did so for names
             // in their non-localized form.  While "LSR" failed, "@LSR", "_LSR", ".LSR", etc.
-            // were accepted.  So if it  was remapped by the localizer, we don't need to
+            // were accepted.  So if it was remapped by the localizer, we don't need to
             // worry about it.)
             SortedList<string, string> allLabels = new SortedList<string, string>();
             for (int i = 0; i < mProject.FileDataLength; i++) {

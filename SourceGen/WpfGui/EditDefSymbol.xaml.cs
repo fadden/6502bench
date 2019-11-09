@@ -208,7 +208,7 @@ namespace SourceGen.WpfGui {
             mDefaultLabelColor = labelNotesLabel.Foreground;
 
             if (mOldSym != null) {
-                Label = mOldSym.Label;
+                Label = mOldSym.AnnotatedLabel;
                 Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
                     mOldSym.DataDescriptor.NumBase);
                 if (mOldSym.HasWidth) {
@@ -251,11 +251,12 @@ namespace SourceGen.WpfGui {
 
             // Label must be valid and not already exist in the table we're editing.  (For project
             // symbols, it's okay if an identical label exists elsewhere.)
-            bool labelValid = Asm65.Label.ValidateLabel(Label);
+            string trimLabel = Symbol.TrimAndValidateLabel(Label, out bool labelValid,
+                out bool unused1, out bool unused2, out Symbol.LabelAnnotation unused3);
             bool labelUnique;
 
             // NOTE: should be using Asm65.Label.LABEL_COMPARER?
-            if (mDefSymbolList.TryGetValue(Label, out DefSymbol existing)) {
+            if (mDefSymbolList.TryGetValue(trimLabel, out DefSymbol existing)) {
                 // It's okay if it's the same object.
                 labelUnique = (existing == mOldSym);
             } else {
@@ -264,7 +265,7 @@ namespace SourceGen.WpfGui {
 
             // For local variables, do a secondary uniqueness check across the full symbol table.
             if (labelUnique && mSymbolTable != null) {
-                labelUnique = !mSymbolTable.TryGetValue(Label, out Symbol sym);
+                labelUnique = !mSymbolTable.TryGetValue(trimLabel, out Symbol sym);
 
                 // It's okay if this and the other are both variables.
                 if (!labelUnique && IsVariable && sym.IsVariable) {
@@ -275,7 +276,7 @@ namespace SourceGen.WpfGui {
             // Value must be blank, meaning "erase any earlier definition", or valid value.
             // (Hmm... don't currently have a way to specify "no symbol" in DefSymbol.)
             //if (!string.IsNullOrEmpty(valueTextBox.Text)) {
-            bool valueValid = ParseValue(out int thisValue, out int unused2);
+            bool valueValid = ParseValue(out int thisValue, out int unused4);
             //} else {
             //    valueValid = true;
             //}
@@ -382,9 +383,12 @@ namespace SourceGen.WpfGui {
                 direction = DefSymbol.DirectionFlags.None;
             }
 
-            NewSym = new DefSymbol(Label, value,
+            // Parse and strip the annotation.
+            string trimLabel = Symbol.TrimAndValidateLabel(Label, out bool unused1,
+                out bool unused2, out bool unused3, out Symbol.LabelAnnotation anno);
+            NewSym = new DefSymbol(trimLabel, value,
                 IsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
-                IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr,
+                IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr, anno,
                 subType, width, width > 0, Comment, direction, null, string.Empty);
 
             DialogResult = true;

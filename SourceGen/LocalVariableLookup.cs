@@ -22,6 +22,14 @@ namespace SourceGen {
     /// Given a list of LocalVariableTables, this determines the mapping of values to symbols
     /// at a specific offset.
     /// </summary>
+    /// <remarks>
+    /// We guarantee that the label will be unique within its scope.  This happens at two
+    /// different levels:
+    ///   (1) If the local variable label is present in the main symbol table, we use the
+    ///       "de-duplication" table to remap it.  We try not to let this happen, but it can.
+    ///   (2) If the assembler doesn't define a way to re-use variable names, we make them
+    ///       globally unique.  [currently unused]
+    /// </remarks>
     public class LocalVariableLookup {
         /// <summary>
         /// List of tables.  The table's file offset is used as the key.

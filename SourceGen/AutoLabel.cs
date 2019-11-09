@@ -70,7 +70,7 @@ namespace SourceGen {
                 }
             }
             Symbol sym = new Symbol(label, addr, Symbol.Source.Auto,
-                Symbol.Type.LocalOrGlobalAddr);
+                Symbol.Type.LocalOrGlobalAddr, Symbol.LabelAnnotation.None);
             return sym;
         }
 

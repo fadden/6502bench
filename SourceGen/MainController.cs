@@ -3233,8 +3233,17 @@ namespace SourceGen {
                 if (expectedAddr == -1) {
                     expectedAddr = attr.Address;
                 }
-                // Check for user labels.
-                if (mProject.UserLabels.ContainsKey(offset)) {
+                // Check for things that start a new group.
+                if (attr.Address != expectedAddr) {
+                    // For a contiguous selection, this should only happen if there's a .ORG
+                    // address change.  For non-contiguous selection this is expected.  In the
+                    // latter case, incrementing the group number is unnecessary but harmless.
+                    Debug.WriteLine("Address break: " + attr.Address + " vs. " + expectedAddr);
+                    //Debug.Assert(mProject.AddrMap.Get(offset) >= 0);
+
+                    expectedAddr = attr.Address;
+                    groupNum++;
+                } else  if (mProject.UserLabels.ContainsKey(offset)) {
                     //if (mProject.GetAnattrib(offset).Symbol != null) {
                     // We consider auto labels when splitting regions for the data analysis,
                     // but I don't think we want to take them into account here.  The specific
@@ -3246,15 +3255,6 @@ namespace SourceGen {
                     groupNum++;
                 } else if (mProject.HasCommentOrNote(offset)) {
                     // Don't carry across a long comment or note.
-                    groupNum++;
-                } else if (attr.Address != expectedAddr) {
-                    // For a contiguous selection, this should only happen if there's a .ORG
-                    // address change.  For non-contiguous selection this is expected.  In the
-                    // latter case, incrementing the group number is unnecessary but harmless.
-                    Debug.WriteLine("Address break: " + attr.Address + " vs. " + expectedAddr);
-                    //Debug.Assert(mProject.AddrMap.Get(offset) >= 0);
-
-                    expectedAddr = attr.Address;
                     groupNum++;
                 }
 
@@ -3475,7 +3475,7 @@ namespace SourceGen {
                 }
 
                 MainWindow.SymbolsListItem sli = new MainWindow.SymbolsListItem(sym,
-                    sourceTypeStr, valueStr, sym.Label);
+                    sourceTypeStr, valueStr, sym.AnnotatedLabel);
                 mMainWin.SymbolsList.Add(sli);
             }
         }

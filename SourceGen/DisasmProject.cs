@@ -1100,10 +1100,10 @@ namespace SourceGen {
         /// </summary>
         private void UpdateAndMergeUserLabels() {
             // We store symbols as label+value, but for a user label the actual value is
-            // the address of the offset the label is associated with.  It's convenient
-            // to store labels as Symbols because we also want the Type value, and it avoids
-            // having to create Symbol objects on the fly.  If the value in the UserLabel
-            // is wrong, we fix it here.
+            // the address of the offset the label is associated with, which can change if
+            // the user updates the address map.  It's convenient to store labels as Symbols
+            // because we also want the Type value, and it avoids having to create Symbol
+            // objects on the fly.  If the value in the user label is wrong, we fix it here.
 
             Dictionary<int, Symbol> changes = new Dictionary<int, Symbol>();
 
@@ -1113,8 +1113,8 @@ namespace SourceGen {
                 int expectedAddr = AddrMap.OffsetToAddress(offset);
                 if (sym.Value != expectedAddr) {
                     Symbol newSym = new Symbol(sym.Label, expectedAddr, sym.SymbolSource,
-                        sym.SymbolType);
-                    Debug.WriteLine("Replacing label sym: " + sym + " --> " + newSym);
+                        sym.SymbolType, sym.LabelAnno);
+                    Debug.WriteLine("Updating label value: " + sym + " --> " + newSym);
                     changes[offset] = newSym;
                     sym = newSym;
                 }

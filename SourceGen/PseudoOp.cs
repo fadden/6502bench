@@ -547,10 +547,12 @@ namespace SourceGen {
         /// <summary>
         /// Special formatting flags for the FormatNumericOperand() method.
         /// </summary>
+        [Flags]
         public enum FormatNumericOpFlags {
-            None = 0,
-            IsPcRel,            // opcode is PC relative, e.g. branch or PER
-            HasHashPrefix,      // operand has a leading '#', avoiding ambiguity in some cases
+            None            = 0,
+            IsPcRel         = 1,        // opcode is PC relative, e.g. branch or PER
+            HasHashPrefix   = 1 << 1,   // operand has a leading '#', avoiding ambiguity sometimes
+            StripAnnotation = 1 << 2,   // don't show annotation character
         }
 
         /// <summary>
@@ -595,7 +597,8 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Format a numeric operand value according to the specified sub-format.
+        /// Format a numeric operand value according to the specified sub-format.  This
+        /// version takes additional arguments to support local variables.
         /// </summary>
         /// <param name="formatter">Text formatter.</param>
         /// <param name="symbolTable">Full table of project symbols.</param>
@@ -638,6 +641,8 @@ namespace SourceGen {
                         Debug.Assert(operandLen == 1);      // only doing 8-bit stuff
                         DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
                         if (defSym != null) {
+                            // For local variables we're doing trivial add/subtract and don't
+                            // wrap, so the "common" format works for everybody.
                             StringBuilder sb = new StringBuilder();
                             FormatNumericSymbolCommon(formatter, defSym, null,
                                 dfd, operandValue, operandLen, flags, sb);
@@ -701,6 +706,10 @@ namespace SourceGen {
             if (sym.IsVariable) {
                 symLabel = formatter.FormatVariableLabel(symLabel);
             }
+            // TODO(xyzzy): non-unique prefix
+            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
+                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
+            }
 
             if (operandLen == 1) {
                 // Use the byte-selection operator to get the right piece.  In 64tass the
@@ -756,7 +765,7 @@ namespace SourceGen {
                     rightShift = 0;
                 }
 
-                if (flags == FormatNumericOpFlags.IsPcRel) {
+                if ((flags & FormatNumericOpFlags.IsPcRel) != 0) {
                     // PC-relative operands are funny, because an 8- or 16-bit value is always
                     // expanded to 24 bits.  We output a 16-bit value that the assembler will
                     // convert back to 8-bit or 16-bit.  In any event, the bank byte is never
@@ -781,7 +790,7 @@ namespace SourceGen {
                 //  ((label >> rightShift) & mask) [+ adj]
 
                 if (rightShift != 0 || needMask) {
-                    if (flags != FormatNumericOpFlags.HasHashPrefix) {
+                    if ((flags & FormatNumericOpFlags.HasHashPrefix) == 0) {
                         sb.Append("0+");
                     }
                     if (rightShift != 0 && needMask) {
@@ -836,6 +845,10 @@ namespace SourceGen {
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
             }
+            // TODO(xyzzy): non-unique prefix
+            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
+                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
+            }
 
             if (operandLen == 1) {
                 // Use the byte-selection operator to get the right piece.
@@ -872,7 +885,7 @@ namespace SourceGen {
                     shOp = "";
                 }
 
-                if (flags == FormatNumericOpFlags.IsPcRel) {
+                if ((flags & FormatNumericOpFlags.IsPcRel) != 0) {
                     // PC-relative operands are funny, because an 8- or 16-bit value is always
                     // expanded to 24 bits.  We output a 16-bit value that the assembler will
                     // convert back to 8-bit or 16-bit.  In any event, the bank byte is never
@@ -928,6 +941,10 @@ namespace SourceGen {
             string symLabel = sym.Label;
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
+            }
+            // TODO(xyzzy): non-unique prefix
+            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
+                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
             }
 
             int adjustment;

@@ -66,7 +66,7 @@ rest of the documentation assumes you've read and understood this.</p>
 instruction set and assembly-language programming, but disassembling
 other programs is actually a pretty good way to learn how to code in
 assembly.  You will need to be familiar with hexadecimal numbers and
-general programming concepts to make sense of anything, however.</p>
+general programming concepts to make sense of this, however.</p>
 
 <h2><a name="begin">About 6502 Code</a></h2>
 
@@ -407,7 +407,7 @@ by splitting formatted data into sub-regions at label boundaries.</p>
 <h2><a name="about-symbols">All About Symbols</a></h2>
 
 <p>A symbol has two basic parts, a label and a value.  The label is a short
-ASCII string; the value may be an 8-to-24-bit address or a numeric
+ASCII string; the value may be an 8-to-24-bit address or a 32-bit numeric
 constant.  Symbols can be defined in different ways, and applied in
 different ways.</p>
 
@@ -420,6 +420,11 @@ with most assemblers:</p>
 </ul>
 <p>Label comparisons are case-sensitive, as is customary for programming
 languages.</p>
+<p>Sometimes the purpose of a subroutine or variable isn't immediately
+clear, but you can take a reasonable guess.  You can document your
+uncertainty by adding a question mark ('?') to the end of the label.
+This isn't really part of the label, so it won't appear in the assembled
+output, and you don't have to include it when searching for a symbol.</p>
 <p>Some assemblers restrict the set of valid labels further.  For example,
 64tass uses a leading underscore to indicate a local label, and reserves
 a double leading underscore (e.g. <code>__label</code>) for its own
@@ -437,7 +442,46 @@ MYSTRING .STR    "hello"
 </pre>
 <p>See <a href="#symbol-parts">Parts and Adjustments</a> for more details.</p>
 
-<h4><a name="symbol-types">Symbol Types</a></h4>
+<p>Symbols that represent a memory address within a project are treated
+differently from those outside a project.  We refer to these as internal
+and external addresses, respectively.</p>
+
+
+<h3><a name="internal-address-symbols">Internal Address Symbols</a></h3>
+
+<p>Symbols that represent an address inside the file being disassembled
+are referred to as <i>internal</i>.  They come in two varieties.</p>
+
+<p><b>User labels</b> are labels added to instructions or data by the user.
+The editor will try to prevent you from creating a label that has the same
+name as another symbol, but if you manage to do so, the user label takes
+precedence over symbols from other sources.  User labels may be tagged
+as local, global, or global and exported.  Local vs. global is important
+for the label localizer, while exported symbols can be pulled directly
+into other projects.</p>
+
+<p><b>Auto labels</b> are automatically generated labels placed on
+instructions or data offsets that are the target of operands.  They're
+formed by appending the hexadecimal address to the letter "L", with
+additional characters added if some other symbol has already defined
+that label.  Options can be set that change the "L" to a character or
+characters based on how the label is referenced, e.g. "B" for branch targets.
+Auto labels are only added where they are needed, and are removed when
+no longer necessary.  Because auto labels may be renamed or vanish, the
+editor will try to prevent you from referring to them explicitly when
+editing operands.</p>
+
+
+<h3><a name="external-address-symbols">External Address Symbols</a></h3>
+
+<p>Symbols that represent an address outside the file being disassembled
+are referred to as <i>external</i>.  These may be ROM entry points,
+data buffers, zero-page variables, or a number of other things.  Because
+the memory address they appear at aren't within the bounds of the file,
+we can't simply put an address label on them.  Three different mechanisms
+exist for defining them.  If an instruction or data operand refers to
+an address outside the file bounds, SourceGen looks for a symbol with
+a matching address value.</p>
 
 <p><b>Platform symbols</b> are defined in platform symbol files.  These
 are named with a ".sym65" extension, and have a fairly straightforward
@@ -445,12 +489,9 @@ name/value syntax.  Several files for popular platforms come with SourceGen
 and live in the <code>RuntimeData</code> directory.  You can also create your
 own, but they have to live in the same directory as the project file.</p>
 
-<p>Platform symbols can be addresses or constants.  If an instruction
-or data operand references an address outside the scope of the data
-file, SourceGen looks for a symbol with a matching address value.  If
-it finds one, it automatically uses that symbol.  Symbolic constants
-can be used the same way, but are not matched automatically.  This makes
-them useful for things like operating system function numbers.</p>
+<p>Platform symbols can be addresses or constants.  Addresses are
+limited to 24-bit values, and are matched automatically.  Constants may
+be 32-bit values, but must be specified manually.</p>
 
 <p>If two platform symbols have the same label, only the most recently read
 one is kept.  If two platform symbols have different labels but the
@@ -477,9 +518,10 @@ to define two different symbols, and have the correct one applied
 based on the access type.</p>
 
 <p><b>Project symbols</b> behave like platform symbols, but they are
-defined in the project file itself.  The editor will prevent you from
-creating two symbols with the same name.  If two symbols have the same
-value, the one whose label comes first alphabetically is used.</p>
+defined in the project file itself, through the Project Properties editor.
+The editor will try to prevent you from creating two symbols with the same
+name.  If two symbols have the same value, the one whose label comes
+first alphabetically is used.</p>
 
 <p>Project symbols always have precedence over platform symbols, allowing
 you to redefine symbols within a project.  (You can "hide" a platform
@@ -487,29 +529,12 @@ symbol by creating a project symbol constant with the same name.  Use a
 value like $ffffffff or $deadbeef so you'll know why it's there.)</p>
 
 <p><b>Local variables</b> are redefinable symbols that are organized
-into tables.  They're used to specify labels for zero-page and 65816
-stack-relative instructions.</p>
-
-<p><b>User labels</b> are labels added to instructions or data by the user.
-The editor won't allow you to add a label that conflicts, but if you
-manage to do so, the user label takes precedence over project and platform
-symbols.  User labels may be tagged as local, global, or global and
-exported.  Local vs. global is important for the label localizer, while
-exported symbols can be pulled directly into other projects.</p>
-
-<p><b>Auto labels</b> are automatically generated labels placed on
-instructions or data offsets that are the target of operands.  They're
-formed by appending the hexadecimal address to the letter "L", with
-additional characters added if some other symbol has already defined
-that label.  Options can be set that change the "L" to a character or
-characters based on how the label is referenced, e.g. "B" for branch targets.
-Auto labels are only added where they are needed, and are removed when
-no longer necessary.  Because auto labels may be renamed or vanish, the
-editor will try to prevent you from referring to them when editing
-operands.</p>
+into tables.  They're used to specify labels for zero-page addresses
+and 65816 stack-relative instructions.  These are explained in more
+detail in the next section.</p>
 
 
-<h3><a name="local-vars">Local Variables</a></h3>
+<h4><a name="local-vars">How Local Variables Work</a></h4>
 
 <p>Local variables are applied to instructions that have zero
 page operands (<code>op ZP</code>, <code>op (ZP),Y</code>, etc.), or
@@ -524,7 +549,7 @@ example:</p>
 <pre>
          LDA     ($00),Y
          INC     $02
-         ... later ...
+         ... elsewhere ...
          DEC     $00
          STA     ($01),Y
 </pre>

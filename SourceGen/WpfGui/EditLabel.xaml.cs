@@ -93,8 +93,11 @@ namespace SourceGen.WpfGui {
                 LabelText = string.Empty;
                 radioButtonLocal.IsChecked = true;
             } else {
-                LabelText = LabelSym.Label;
+                LabelText = LabelSym.AnnotatedLabel;
                 switch (LabelSym.SymbolType) {
+                    case Symbol.Type.NonUniqueLocalAddr:
+                        Debug.Assert(false);    // TODO(xyzzy)
+                        break;
                     case Symbol.Type.LocalOrGlobalAddr:
                         radioButtonLocal.IsChecked = true;
                         break;
@@ -118,6 +121,7 @@ namespace SourceGen.WpfGui {
         }
 
         private void LabelTextBox_TextChanged() {
+#if false
             string str = LabelText;
             bool valid = true;
 
@@ -153,6 +157,28 @@ namespace SourceGen.WpfGui {
             } else {
                 firstLetterLabel.Foreground = mDefaultLabelColor;
             }
+#endif
+            bool isBlank = (LabelText.Length == 0);
+
+            string trimLabel = Symbol.TrimAndValidateLabel(LabelText, out bool isValid,
+                out bool isLenValid, out bool isFirstCharValid, out Symbol.LabelAnnotation anno);
+            if (isBlank || isLenValid) {
+                maxLengthLabel.Foreground = mDefaultLabelColor;
+            } else {
+                maxLengthLabel.Foreground = Brushes.Red;
+            }
+            if (isBlank || isFirstCharValid) {
+                firstLetterLabel.Foreground = mDefaultLabelColor;
+            } else {
+                firstLetterLabel.Foreground = Brushes.Red;
+            }
+            if (isBlank || isValid) {
+                // TODO(maybe): if the problem is that the label starts with a number, we
+                //   shouldn't light up this (which is the "valid chars are" label) as well.
+                validCharsLabel.Foreground = mDefaultLabelColor;
+            } else {
+                validCharsLabel.Foreground = Brushes.Red;
+            }
 
             // Refuse to continue if the label already exists.  The only exception is if
             // it's the same symbol, and it's user-defined.  (If they're trying to edit an
@@ -162,15 +188,15 @@ namespace SourceGen.WpfGui {
             // where a label is being renamed from "FOO" to "Foo".  We should be able to
             // test for object equality on the Symbol to determine if we're renaming a
             // symbol to itself.
-            if (valid && mSymbolTable.TryGetValue(str, out Symbol sym) &&
+            if (isValid && mSymbolTable.TryGetValue(trimLabel, out Symbol sym) &&
                     (sym != LabelSym || LabelSym.SymbolSource != Symbol.Source.User)) {
-                valid = false;
+                isValid = false;
                 notDuplicateLabel.Foreground = Brushes.Red;
             } else {
                 notDuplicateLabel.Foreground = mDefaultLabelColor;
             }
 
-            IsValid = valid;
+            IsValid = isBlank || isValid;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
@@ -178,6 +204,7 @@ namespace SourceGen.WpfGui {
                 LabelSym = null;
             } else {
                 Symbol.Type symbolType;
+                // TODO(xyzzy): non-local
                 if (radioButtonLocal.IsChecked == true) {
                     symbolType = Symbol.Type.LocalOrGlobalAddr;
                 } else if (radioButtonGlobal.IsChecked == true) {
@@ -188,7 +215,12 @@ namespace SourceGen.WpfGui {
                     Debug.Assert(false);        // WTF
                     symbolType = Symbol.Type.LocalOrGlobalAddr;
                 }
-                LabelSym = new Symbol(LabelText, mAddress, Symbol.Source.User, symbolType);
+
+                // Parse and strip the annotation.
+                string trimLabel = Symbol.TrimAndValidateLabel(LabelText, out bool unused1,
+                    out bool unused2, out bool unused3, out Symbol.LabelAnnotation anno);
+
+                LabelSym = new Symbol(trimLabel, mAddress, Symbol.Source.User, symbolType, anno);
             }
             DialogResult = true;
         }

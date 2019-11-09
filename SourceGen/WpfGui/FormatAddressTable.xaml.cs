@@ -500,7 +500,7 @@ namespace SourceGen.WpfGui {
                             mProject.SymbolTable, "T");
                         // tmpSym was returned as an auto-label, make it a user label instead
                         tmpSym = new Symbol(tmpSym.Label, tmpSym.Value, Symbol.Source.User,
-                            Symbol.Type.LocalOrGlobalAddr);
+                            Symbol.Type.LocalOrGlobalAddr, Symbol.LabelAnnotation.Generated);
                         newLabels[targetOffset] = tmpSym;       // overwrites previous
                         targetLabel = tmpSym.Label;
                         AddPreviewItem(addr, targetOffset, "(+) " + targetLabel);

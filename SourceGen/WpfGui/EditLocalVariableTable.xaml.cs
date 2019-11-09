@@ -51,18 +51,17 @@ namespace SourceGen.WpfGui {
             public int Width { get; private set; }
             public string Comment { get; private set; }
 
-            // Numeric form of Value, used so we can sort hex/dec/binary correctly.
-            public int NumericValue { get; private set; }
+            public DefSymbol DefSym;
 
-            public FormattedSymbol(string label, int numericValue, string value, string type,
-                    int width, string comment) {
+            public FormattedSymbol(DefSymbol defSym, string label, string value,
+                    string type, int width, string comment) {
                 Label = label;
                 Value = value;
                 Type = type;
                 Width = width;
                 Comment = comment;
 
-                NumericValue = numericValue;
+                DefSym = defSym;
             }
         }
 
@@ -175,8 +174,8 @@ namespace SourceGen.WpfGui {
             }
 
             FormattedSymbol fsym = new FormattedSymbol(
-                defSym.Label,
-                defSym.Value,
+                defSym,
+                defSym.AnnotatedLabel,
                 mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
                 typeStr,
                 defSym.DataDescriptor.Length,
@@ -236,7 +235,7 @@ namespace SourceGen.WpfGui {
                         cmp = string.Compare(fsym1.Label, fsym2.Label);
                         break;
                     case SortField.Value:
-                        cmp = fsym1.NumericValue - fsym2.NumericValue;
+                        cmp = fsym1.DefSym.Value - fsym2.DefSym.Value;
                         break;
                     case SortField.Type:
                         cmp = string.Compare(fsym1.Type, fsym2.Type);
@@ -303,8 +302,7 @@ namespace SourceGen.WpfGui {
                 return;
             }
             FormattedSymbol item = (FormattedSymbol)objItem;
-            DefSymbol defSym = mWorkTable.GetByLabel(item.Label);
-            DoEditSymbol(defSym);
+            DoEditSymbol(item.DefSym);
         }
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
@@ -329,9 +327,7 @@ namespace SourceGen.WpfGui {
             // Single-select list view, button dimmed when no selection.
             Debug.Assert(symbolsList.SelectedItems.Count == 1);
             FormattedSymbol item = (FormattedSymbol)symbolsList.SelectedItems[0];
-            DefSymbol defSym = mWorkTable.GetByLabel(item.Label);
-            Debug.Assert(defSym != null);
-            DoEditSymbol(defSym);
+            DoEditSymbol(item.DefSym);
         }
 
         private void DoEditSymbol(DefSymbol defSym) {
@@ -345,7 +341,7 @@ namespace SourceGen.WpfGui {
 
                 // Replace entry in items source.
                 for (int i = 0; i < Variables.Count; i++) {
-                    if (Variables[i].Label.Equals(defSym.Label)) {
+                    if (Variables[i].DefSym == defSym) {
                         Variables[i] = CreateFormattedSymbol(dlg.NewSym);
                         break;
                     }
@@ -361,9 +357,10 @@ namespace SourceGen.WpfGui {
 
             int selectionIndex = symbolsList.SelectedIndex;
             FormattedSymbol item = (FormattedSymbol)symbolsList.SelectedItems[0];
-            mWorkTable.RemoveByLabel(item.Label);
+            DefSymbol defSym = item.DefSym;
+            mWorkTable.RemoveByLabel(defSym.Label);
             for (int i = 0; i < Variables.Count; i++) {
-                if (Variables[i].Label.Equals(item.Label)) {
+                if (Variables[i].DefSym == defSym) {
                     Variables.RemoveAt(i);
                     break;
                 }

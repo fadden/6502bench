@@ -1144,9 +1144,9 @@ namespace SourceGen.WpfGui {
                 // an empty name.  We don't really need to create something unique since the
                 // dialog will handle it.
                 initialVar = new DefSymbol("VAR", mOperandValue,
-                    Symbol.Source.Variable, symType, FormatDescriptor.SubType.None,
-                    1, true, string.Empty, DefSymbol.DirectionFlags.ReadWrite,
-                    null, string.Empty);
+                    Symbol.Source.Variable, symType, Symbol.LabelAnnotation.None,
+                    FormatDescriptor.SubType.None, 1, true, string.Empty,
+                    DefSymbol.DirectionFlags.ReadWrite, null, string.Empty);
             }
 
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,

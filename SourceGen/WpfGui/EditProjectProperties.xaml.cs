@@ -431,20 +431,16 @@ namespace SourceGen.WpfGui {
             public string Width { get; private set; }
             public string Comment { get; private set; }
 
-            // Numeric form of Value, used so we can sort hex/dec/binary correctly.
-            public int NumericValue { get; private set; }
-            public int NumericWidth { get; private set; }
+            public DefSymbol DefSym { get; private set; }
 
-            public FormattedSymbol(string label, int numericValue, string value, string type,
-                    int numericWidth, string width, string comment) {
+            public FormattedSymbol(DefSymbol defSym, string label, string value,
+                    string type, string width, string comment) {
+                DefSym = defSym;
                 Label = label;
                 Value = value;
                 Type = type;
                 Width = width;
                 Comment = comment;
-
-                NumericValue = numericValue;
-                NumericWidth = numericWidth;
             }
         }
         public ObservableCollection<FormattedSymbol> ProjectSymbols { get; private set; } =
@@ -488,11 +484,10 @@ namespace SourceGen.WpfGui {
             }
 
             FormattedSymbol fsym = new FormattedSymbol(
-                defSym.Label,
-                defSym.Value,
+                defSym,
+                defSym.AnnotatedLabel,
                 mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
                 typeStr,
-                defSym.DataDescriptor.Length,
                 defSym.HasWidth ? defSym.DataDescriptor.Length.ToString() : NO_WIDTH_STR,
                 defSym.Comment);
             return fsym;
@@ -546,7 +541,7 @@ namespace SourceGen.WpfGui {
                         cmp = string.Compare(fsym1.Label, fsym2.Label);
                         break;
                     case SortField.Value:
-                        cmp = fsym1.NumericValue - fsym2.NumericValue;
+                        cmp = fsym1.DefSym.Value - fsym2.DefSym.Value;
                         break;
                     case SortField.Type:
                         cmp = string.Compare(fsym1.Type, fsym2.Type);
@@ -561,7 +556,8 @@ namespace SourceGen.WpfGui {
                         } else if (fsym2.Width == NO_WIDTH_STR) {
                             cmp = 1;
                         } else {
-                            cmp = fsym1.NumericWidth - fsym2.NumericWidth;
+                            cmp = fsym1.DefSym.DataDescriptor.Length -
+                                  fsym2.DefSym.DataDescriptor.Length;
                         }
                         break;
                     case SortField.Comment:
@@ -605,8 +601,7 @@ namespace SourceGen.WpfGui {
             // Single-select list view, button dimmed when no selection.
             Debug.Assert(projectSymbolsList.SelectedItems.Count == 1);
             FormattedSymbol item = (FormattedSymbol)projectSymbolsList.SelectedItems[0];
-            DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
-            DoEditSymbol(defSym);
+            DoEditSymbol(item.DefSym);
         }
 
         private void ProjectSymbolsList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
@@ -616,8 +611,7 @@ namespace SourceGen.WpfGui {
                 return;
             }
             FormattedSymbol item = (FormattedSymbol)objItem;
-            DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
-            DoEditSymbol(defSym);
+            DoEditSymbol(item.DefSym);
         }
 
         private void DoEditSymbol(DefSymbol defSym) {
@@ -631,12 +625,14 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
 
                 // Replace entry in items source.
-                for (int i = 0; i < ProjectSymbols.Count; i++) {
-                    if (ProjectSymbols[i].Label.Equals(defSym.Label)) {
+                int i;
+                for (i = 0; i < ProjectSymbols.Count; i++) {
+                    if (ProjectSymbols[i].DefSym == defSym) {
                         ProjectSymbols[i] = CreateFormattedSymbol(dlg.NewSym);
                         break;
                     }
                 }
+                Debug.Assert(i != ProjectSymbols.Count);
 
                 UpdateControls();
                 okButton.Focus();
@@ -649,12 +645,12 @@ namespace SourceGen.WpfGui {
 
             int selectionIndex = projectSymbolsList.SelectedIndex;
             FormattedSymbol item = (FormattedSymbol)projectSymbolsList.SelectedItems[0];
-            DefSymbol defSym = mWorkProps.ProjectSyms[item.Label];
+            DefSymbol defSym = item.DefSym;
             mWorkProps.ProjectSyms.Remove(defSym.Label);
             IsDirty = true;
 
             for (int i = 0; i < ProjectSymbols.Count; i++) {
-                if (ProjectSymbols[i].Label.Equals(item.Label)) {
+                if (ProjectSymbols[i].DefSym == defSym) {
                     ProjectSymbols.RemoveAt(i);
                     break;
                 }
