@@ -504,7 +504,8 @@ limitations under the License.
                     <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
                               IsChecked="{Binding AddIdentComment}"/>
                     <CheckBox Content="Disable label localization" Margin="4,8,0,0"
-                              IsChecked="{Binding DisableLabelLocalization}"/>
+                              IsChecked="{Binding DisableLabelLocalization}"
+                              Visibility="Collapsed"/>
                 </StackPanel>
             </TabItem>
 
@@ -571,6 +572,14 @@ limitations under the License.
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
+                        <TextBlock Text="Non-unique label prefix:"/>
+                        <TextBox Width="14" MaxLength="1" Margin="8,1,0,0"
+                                 Text="{Binding NonUniqueLabelPrefix, UpdateSourceTrigger=PropertyChanged,
+                                    FallbackValue=@}"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,4,0,0">
                         <TextBlock Text="Local variable prefix:"/>
                         <TextBox Width="66" MaxLength="8" Margin="8,1,0,0"
                                  Text="{Binding LocalVarPrefix, UpdateSourceTrigger=PropertyChanged,

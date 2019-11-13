@@ -1098,6 +1098,10 @@ namespace SourceGen {
         /// Merges symbols from UserLabels into SymbolTable.  Existing entries with matching
         /// labels will be replaced.
         /// </summary>
+        /// <remarks>
+        /// It might make sense to exclude non-unique labels, but that's probably better done
+        /// with a UI filter option.
+        /// </remarks>
         private void UpdateAndMergeUserLabels() {
             // We store symbols as label+value, but for a user label the actual value is
             // the address of the offset the label is associated with, which can change if

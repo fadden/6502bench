@@ -37,9 +37,9 @@ namespace Asm65 {
     /// because it guarantees that a given Formatter object will produce the same number of
     /// lines of output.
     ///
-    /// NOTE: if the CpuDef changes, the cached values in the Formatter will become invalid.
-    /// Discard the Formatter and create a new one.  (This could be fixed by keying off of
-    /// the OpDef instead of OpDef.Opcode, but that's less convenient.)
+    /// NOTE: if the CpuDef changes, the cached values in the Formatter will become invalid
+    /// (e.g. mOpcodeStrings).  Discard the Formatter and create a new one.  (This could be
+    /// fixed by keying off of the OpDef instead of OpDef.Opcode, but that's less convenient.)
     /// </summary>
     public class Formatter {
         /// <summary>
@@ -54,12 +54,13 @@ namespace Asm65 {
             public bool mUpperOperandA;         // display acc operand in upper case?
             public bool mUpperOperandS;         // display stack operand in upper case?
             public bool mUpperOperandXY;        // display index register operand in upper case?
-            public bool mBankSelectBackQuote;   // use '`' rather than '^' for bank select?
+
             public bool mAddSpaceLongComment;   // insert space after delimiter for long comments?
 
             // functional changes to assembly output
             public bool mSuppressHexNotation;       // omit '$' before hex digits
             public bool mSuppressImpliedAcc;        // emit just "LSR" rather than "LSR A"?
+            public bool mBankSelectBackQuote;       // use '`' rather than '^' for bank selector?
 
             public string mForceDirectOperandPrefix;    // these may be null or empty
             public string mForceAbsOpcodeSuffix;
@@ -68,7 +69,8 @@ namespace Asm65 {
             public string mForceLongOpcodeSuffix;
             public string mForceLongOperandPrefix;
 
-            public string mLocalVariableLablePrefix;    // Merlin 32 puts ']' before var names
+            public string mLocalVariableLabelPrefix;    // e.g. Merlin 32 puts ']' before var names
+            public string mNonUniqueLabelPrefix;        // e.g. ':' or '@' before local label
 
             public string mEndOfLineCommentDelimiter;   // usually ';'
             public string mFullLineCommentDelimiterBase; // usually ';' or '*', WITHOUT extra space
@@ -291,7 +293,7 @@ namespace Asm65 {
         /// </summary>
         public FormatConfig Config { get { return mFormatConfig; } }
 
-        // Bits and pieces.
+        // Cached bits and pieces.
         char mHexFmtChar;
         string mHexPrefix;
         string mAccChar;
@@ -366,6 +368,13 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// Prefix for non-unique address labels.
+        /// </summary>
+        public string NonUniqueLabelPrefix {
+            get { return mFormatConfig.mNonUniqueLabelPrefix; }
+        }
+
+        /// <summary>
         /// When formatting a symbol with an offset, if this flag is set, generate code that
         /// assumes the assembler applies the adjustment, then shifts the result.  If not,
         /// assume the assembler shifts the operand before applying the adjustment.
@@ -389,6 +398,10 @@ namespace Asm65 {
             }
             if (mFormatConfig.mBoxLineCommentDelimiter == null) {
                 mFormatConfig.mBoxLineCommentDelimiter = string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(mFormatConfig.mNonUniqueLabelPrefix)) {
+                mFormatConfig.mNonUniqueLabelPrefix = "@";
             }
 
             if (mFormatConfig.mAddSpaceLongComment) {
@@ -617,8 +630,8 @@ namespace Asm65 {
         /// specified.
         /// </summary>
         public string FormatVariableLabel(string label) {
-            if (!string.IsNullOrEmpty(mFormatConfig.mLocalVariableLablePrefix)) {
-                return mFormatConfig.mLocalVariableLablePrefix + label;
+            if (!string.IsNullOrEmpty(mFormatConfig.mLocalVariableLabelPrefix)) {
+                return mFormatConfig.mLocalVariableLabelPrefix + label;
             } else {
                 return label;
             }

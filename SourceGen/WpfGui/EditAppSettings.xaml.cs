@@ -858,6 +858,31 @@ namespace SourceGen.WpfGui {
                 }
             }
         }
+        private string mNonUniqueLabelPrefix;
+        public string NonUniqueLabelPrefix {
+            get { return mNonUniqueLabelPrefix; }
+            set {
+                if (mNonUniqueLabelPrefix != value) {
+                    mNonUniqueLabelPrefix = value;
+                    OnPropertyChanged();
+                    bool doSave = true;
+                    if (value.Length > 0) {
+                        char ch = value[0];
+                        doSave = !((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+                            ch == '_');
+                    }
+                    if (doSave) {
+                        mSettings.SetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, value);
+                    } else {
+                        // TODO(someday): add a validation rule
+                        Debug.WriteLine("NOTE: quietly rejecting non-unique prefix '" +
+                            value + "'");
+                    }
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
         private string mLocalVarPrefix;
         public string LocalVarPrefix {
             get { return mLocalVarPrefix; }
@@ -915,18 +940,20 @@ namespace SourceGen.WpfGui {
             public string OpcodeSuffixLong { get; private set; }
             public string OperandPrefixAbs { get; private set; }
             public string OperandPrefixLong { get; private set; }
+            public string NonUniqueLabelPrefix { get; private set; }
             public string LocalVarPrefix { get; private set; }
             public ExpressionMode ExpressionStyle { get; private set; }
 
             public DisplayFormatPreset(int id, string name, string opcSuffixAbs,
                     string opcSuffixLong, string operPrefixAbs, string operPrefixLong,
-                    string localVarPrefix, ExpressionMode expStyle) {
+                    string nonUniqueLabelPrefix, string localVarPrefix, ExpressionMode expStyle) {
                 Ident = id;
                 Name = name;
                 OpcodeSuffixAbs = opcSuffixAbs;
                 OpcodeSuffixLong = opcSuffixLong;
                 OperandPrefixAbs = operPrefixAbs;
                 OperandPrefixLong = operPrefixLong;
+                NonUniqueLabelPrefix = nonUniqueLabelPrefix;
                 LocalVarPrefix = localVarPrefix;
                 ExpressionStyle = expStyle;
             }
@@ -938,10 +965,10 @@ namespace SourceGen.WpfGui {
             DisplayPresets = new DisplayFormatPreset[AssemblerList.Count + 2];
             DisplayPresets[0] = new DisplayFormatPreset(DisplayFormatPreset.ID_CUSTOM,
                 (string)FindResource("str_PresetCustom"), string.Empty, string.Empty,
-                string.Empty, string.Empty, string.Empty, ExpressionMode.Unknown);
+                string.Empty, string.Empty, string.Empty, string.Empty, ExpressionMode.Unknown);
             DisplayPresets[1] = new DisplayFormatPreset(DisplayFormatPreset.ID_DEFAULT,
                 (string)FindResource("str_PresetDefault"), string.Empty, "l", "a:", "f:",
-                string.Empty, ExpressionMode.Common);
+                string.Empty, string.Empty, ExpressionMode.Common);
             for (int i = 0; i < AssemblerList.Count; i++) {
                 AssemblerInfo asmInfo = AssemblerList[i];
                 AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
@@ -952,8 +979,8 @@ namespace SourceGen.WpfGui {
                 DisplayPresets[i + 2] = new DisplayFormatPreset((int)asmInfo.AssemblerId,
                     asmInfo.Name, formatConfig.mForceAbsOpcodeSuffix,
                     formatConfig.mForceLongOpcodeSuffix, formatConfig.mForceAbsOperandPrefix,
-                    formatConfig.mForceLongOperandPrefix, formatConfig.mLocalVariableLablePrefix,
-                    formatConfig.mExpressionMode);
+                    formatConfig.mForceLongOperandPrefix, formatConfig.mNonUniqueLabelPrefix,
+                    formatConfig.mLocalVariableLabelPrefix, formatConfig.mExpressionMode);
             }
         }
 
@@ -972,6 +999,8 @@ namespace SourceGen.WpfGui {
                 mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_ABS, string.Empty);
             OperandPrefixLong =
                 mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG, string.Empty);
+            NonUniqueLabelPrefix =
+                mSettings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
             LocalVarPrefix =
                 mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
 
@@ -1029,6 +1058,7 @@ namespace SourceGen.WpfGui {
             OpcodeSuffixLong = preset.OpcodeSuffixLong;
             OperandPrefixAbs = preset.OperandPrefixAbs;
             OperandPrefixLong = preset.OperandPrefixLong;
+            NonUniqueLabelPrefix = preset.NonUniqueLabelPrefix;
             LocalVarPrefix = preset.LocalVarPrefix;
 
             SelectExpressionStyle(preset.ExpressionStyle);
@@ -1053,6 +1083,7 @@ namespace SourceGen.WpfGui {
                         OpcodeSuffixLong == preset.OpcodeSuffixLong &&
                         OperandPrefixAbs == preset.OperandPrefixAbs &&
                         OperandPrefixLong == preset.OperandPrefixLong &&
+                        NonUniqueLabelPrefix == preset.NonUniqueLabelPrefix &&
                         LocalVarPrefix == preset.LocalVarPrefix &&
                         expMode == preset.ExpressionStyle) {
                     // match

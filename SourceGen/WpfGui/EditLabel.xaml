@@ -19,6 +19,7 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Label"
@@ -26,6 +27,11 @@ limitations under the License.
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         ContentRendered="Window_ContentRendered">
+
+    <Window.Resources>
+        <system:String x:Key="str_NonUniqueLocalFmt">_Non-unique local ('{0}')</system:String>
+    </Window.Resources>
+
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -47,18 +53,24 @@ limitations under the License.
             <TextBlock Name="notDuplicateLabel" Text="• Must not be a duplicate of an existing label"/>
         </StackPanel>
 
-        <GroupBox Grid.Column="0" Grid.Row="1" Header="Label Type" Margin="0,12,0,0">
+        <GroupBox Grid.Column="0" Grid.Row="1" Header="Label Type" Padding="2,4" Margin="0,12,0,0">
             <StackPanel>
-                <RadioButton Name="radioButtonLocal" Content="_Local (if possible)" Margin="0,4,0,0"/>
-                <RadioButton Name="radioButtonGlobal" Content="_Global" Margin="0,4,0,0"/>
-                <RadioButton Name="radioButtonExport" Content="Global and _exported" Margin="0,4,0,0"/>
+                <RadioButton Content="{Binding NonUniqueButtonLabel, FallbackValue=_Non-unique local (\'!\')}"
+                             IsChecked="{Binding IsNonUniqueChecked}" IsEnabled="{Binding IsNonUniqueEnabled}"/>
+                <RadioButton Content="_Local (if possible)" Margin="0,4,0,0"
+                             IsChecked="{Binding IsLocalChecked}" IsEnabled="{Binding IsLocalEnabled}"/>
+                <RadioButton Content="_Global" Margin="0,4,0,0"
+                             IsChecked="{Binding IsGlobalChecked}" IsEnabled="{Binding IsGlobalEnabled}"/>
+                <RadioButton Content="Global and marked for _export" Margin="0,4,0,0"
+                             IsChecked="{Binding IsExportedChecked}" IsEnabled="{Binding IsExportedEnabled}"/>
             </StackPanel>
         </GroupBox>
 
         <DockPanel Grid.Column="1" Grid.Row="1" LastChildFill="False">
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="OK" Width="70" IsDefault="True" IsEnabled="{Binding IsValid}"
-                        Click="OkButton_Click"/>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
+                        Margin="0,0,0,1">
+                <Button Content="OK" Width="70" IsDefault="True" Margin="8,0,0,0"
+                        IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
                 <Button Content="Cancel" Width="70" IsCancel="True" Margin="4,0,0,0"/>
             </StackPanel>
         </DockPanel>

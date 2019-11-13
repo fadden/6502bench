@@ -208,7 +208,7 @@ namespace SourceGen.WpfGui {
             mDefaultLabelColor = labelNotesLabel.Foreground;
 
             if (mOldSym != null) {
-                Label = mOldSym.AnnotatedLabel;
+                Label = mOldSym.GenerateDisplayLabel(mNumFormatter);
                 Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
                     mOldSym.DataDescriptor.NumBase);
                 if (mOldSym.HasWidth) {
@@ -251,8 +251,9 @@ namespace SourceGen.WpfGui {
 
             // Label must be valid and not already exist in the table we're editing.  (For project
             // symbols, it's okay if an identical label exists elsewhere.)
-            string trimLabel = Symbol.TrimAndValidateLabel(Label, out bool labelValid,
-                out bool unused1, out bool unused2, out Symbol.LabelAnnotation unused3);
+            string trimLabel = Symbol.TrimAndValidateLabel(Label, string.Empty,
+                out bool labelValid, out bool unused1, out bool unused2, out bool unused3,
+                out Symbol.LabelAnnotation unused4);
             bool labelUnique;
 
             // NOTE: should be using Asm65.Label.LABEL_COMPARER?
@@ -276,7 +277,7 @@ namespace SourceGen.WpfGui {
             // Value must be blank, meaning "erase any earlier definition", or valid value.
             // (Hmm... don't currently have a way to specify "no symbol" in DefSymbol.)
             //if (!string.IsNullOrEmpty(valueTextBox.Text)) {
-            bool valueValid = ParseValue(out int thisValue, out int unused4);
+            bool valueValid = ParseValue(out int thisValue, out int unused5);
             //} else {
             //    valueValid = true;
             //}
@@ -384,8 +385,9 @@ namespace SourceGen.WpfGui {
             }
 
             // Parse and strip the annotation.
-            string trimLabel = Symbol.TrimAndValidateLabel(Label, out bool unused1,
-                out bool unused2, out bool unused3, out Symbol.LabelAnnotation anno);
+            string trimLabel = Symbol.TrimAndValidateLabel(Label, string.Empty, out bool unused1,
+                out bool unused2, out bool unused3, out bool unused4,
+                out Symbol.LabelAnnotation anno);
             NewSym = new DefSymbol(trimLabel, value,
                 IsVariable ? Symbol.Source.Variable : Symbol.Source.Project,
                 IsConstant ? Symbol.Type.Constant : Symbol.Type.ExternalAddr, anno,

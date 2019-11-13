@@ -224,6 +224,9 @@ namespace SourceGen.Sandbox {
                 }
                 PlSymbol.Type plsType;
                 switch (sym.SymbolType) {
+                    case Symbol.Type.NonUniqueLocalAddr:
+                        // don't forward these to plugins
+                        continue;
                     case Symbol.Type.LocalOrGlobalAddr:
                     case Symbol.Type.GlobalAddr:
                     case Symbol.Type.GlobalAddrExport:

@@ -197,6 +197,7 @@ namespace SourceGen.AsmGen {
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
+            config.mNonUniqueLabelPrefix = "";      // should be '_', but that's a valid label char
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
         }
 
@@ -453,7 +454,7 @@ namespace SourceGen.AsmGen {
                     UpdateCharacterEncoding(dfd);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                         mLocalizer.LabelMap, dfd, operand, length,
-                        PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                        PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
@@ -465,7 +466,7 @@ namespace SourceGen.AsmGen {
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                             mLocalizer.LabelMap, dfd, operand, length,
-                            PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                            PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:
@@ -582,7 +583,7 @@ namespace SourceGen.AsmGen {
             foreach (DefSymbol defSym in newDefs) {
                 string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
                     Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
-                    PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                    PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                 OutputLine(SourceFormatter.FormatVariableLabel(defSym.Label),
                     SourceFormatter.FormatPseudoOp(sDataOpNames.VarDirective),
                     valueStr, SourceFormatter.FormatEolComment(defSym.Comment));

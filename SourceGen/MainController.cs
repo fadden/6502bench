@@ -466,7 +466,9 @@ namespace SourceGen {
             mFormatterConfig.mFullLineCommentDelimiterBase = ";";
             mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
 
-            mFormatterConfig.mLocalVariableLablePrefix =
+            mFormatterConfig.mNonUniqueLabelPrefix =
+                settings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
+            mFormatterConfig.mLocalVariableLabelPrefix =
                 settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
@@ -1709,8 +1711,8 @@ namespace SourceGen {
             int offset = CodeLineList[selIndex].FileOffset;
 
             Anattrib attr = mProject.GetAnattrib(offset);
-            EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, attr.Address,
-                mProject.SymbolTable);
+            EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, attr.Address, offset,
+                mProject.SymbolTable, mOutputFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -3456,6 +3458,10 @@ namespace SourceGen {
 
         #region Symbols panel
 
+        /// <summary>
+        /// Populates the ItemsSource for the Symbols window.  Each entry in the project
+        /// symbol table is added.
+        /// </summary>
         private void PopulateSymbolsList() {
             mMainWin.SymbolsList.Clear();
             foreach (Symbol sym in mProject.SymbolTable) {
@@ -3475,7 +3481,7 @@ namespace SourceGen {
                 }
 
                 MainWindow.SymbolsListItem sli = new MainWindow.SymbolsListItem(sym,
-                    sourceTypeStr, valueStr, sym.AnnotatedLabel);
+                    sourceTypeStr, valueStr, sym.GenerateDisplayLabel(mOutputFormatter));
                 mMainWin.SymbolsList.Add(sli);
             }
         }

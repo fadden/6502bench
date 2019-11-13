@@ -15,6 +15,7 @@
  */
 using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace SourceGen {
     /// <summary>
@@ -22,6 +23,9 @@ namespace SourceGen {
     /// </summary>
     public class Symbol {
         public const char UNCERTAIN_CHAR = '?';
+        private const char NO_ANNO_CHAR = '\ufffd';     // REPLACEMENT CHARACTER '�'
+        private const char UNIQUE_TAG_CHAR = '\u00a7';  // SECTION SIGN
+        private const int NON_UNIQUE_LEN = 7;           // NON_UNIQUE_CHAR + 6 hex digits
 
         /// <summary>
         /// How was the symbol defined?
@@ -42,6 +46,16 @@ namespace SourceGen {
         /// Unique or non-unique address label?  Is it required to be global or exported?
         /// Constants get a separate type.
         /// </summary>
+        /// <remarks>
+        /// There's really just three types: unique address symbol, non-unique address symbol,
+        /// and constant.  There's also a set of boolean flags indicating whether the symbol
+        /// should be forced to be global, whether it should be included in the export table,
+        /// and whether it's internal or external.
+        ///
+        /// It turns out that many combinations of type and flag don't actually make sense,
+        /// e.g. I don't know what a non-unique exported external constant is, so we just
+        /// enumerate the combinations that make sense.
+        /// </remarks>
         public enum Type {
             Unknown = 0,
 
@@ -103,11 +117,6 @@ namespace SourceGen {
         /// </summary>
         public string SourceTypeString { get; private set; }
 
-        /// <summary>
-        /// Label with annotations.  Generated from Label and LabelAnno.
-        /// </summary>
-        public string AnnotatedLabel { get; private set; }
-
 
         /// <summary>
         /// True if the symbol's type is an internal label (auto or user).  Will be false
@@ -122,6 +131,13 @@ namespace SourceGen {
         /// </summary>
         public bool IsVariable {
             get { return SymbolSource == Source.Variable; }
+        }
+
+        /// <summary>
+        /// True if the symbol is a non-unique local.
+        /// </summary>
+        public bool IsNonUnique {
+            get { return SymbolType == Type.NonUniqueLocalAddr; }
         }
 
         /// <summary>
@@ -142,10 +158,11 @@ namespace SourceGen {
         /// <param name="value">Symbol value.</param>
         /// <param name="source">User-defined, auto-generated, ?</param>
         /// <param name="type">Type of symbol this is.</param>
+        /// <param name="labelAnno">Optional annotation.</param>
         public Symbol(string label, int value, Source source, Type type,
                 LabelAnnotation labelAnno) {
             Debug.Assert(Asm65.Label.ValidateLabel(label));
-            Debug.Assert(type != Type.NonUniqueLocalAddr);
+            Debug.Assert(type != Type.NonUniqueLocalAddr || value == 0xdead); // use other ctor
             Label = label;
             Value = value;
             SymbolType = type;
@@ -172,24 +189,80 @@ namespace SourceGen {
                 default:                        tc = '?';   break;
             }
             SourceTypeString = "" + sc + tc;
-
-            // Generate AnnotatedLabel.
-            AnnotatedLabel = AppendAnnotation(Label, LabelAnno);
         }
 
         /// <summary>
         /// Constructor for non-unique labels.
         /// </summary>
-        /// <param name="label"></param>
-        /// <param name="value"></param>
-        /// <param name="source"></param>
-        /// <param name="type"></param>
-        /// <param name="labelAnno"></param>
-        /// <param name="offset"></param>
-        public Symbol(string label, int value, Source source, Type type,
-                LabelAnnotation labelAnno, int offset)
-                : this(label, value, source, type, labelAnno) {
-            Debug.Assert(false);        // TODO(xyzzy)
+        /// <param name="label">Label string.  Syntax assumed valid.</param>
+        /// <param name="value">Symbol value.</param>
+        /// <param name="labelAnno">Optional annotation.</param>
+        /// <param name="uniqueTag">Tag that makes a non-unique label unique, e.g. the
+        ///   offset for which a user label has been created.</param>
+        public Symbol(string label, int value, LabelAnnotation labelAnno, int uniqueTag)
+                : this(label, 0xdead, Source.User, Type.NonUniqueLocalAddr, labelAnno) {
+            Debug.Assert(uniqueTag >= 0 && uniqueTag < 0x01000000); // fit in 6 hex digits
+            Debug.Assert(label.IndexOf(UNIQUE_TAG_CHAR) < 0);       // already extended?
+
+            Value = value;      // passed a bogus value earlier for assert
+
+            // Add tag to label to make it unique.
+            Label = label + UNIQUE_TAG_CHAR + uniqueTag.ToString("x6");
+        }
+
+        /// <summary>
+        /// Generates a displayable form of the label.  This will have the non-unique label
+        /// prefix and annotation suffix, and will have the non-unique tag removed.
+        /// </summary>
+        /// <param name="formatter">Formatter object.</param>
+        /// <returns>Label suitable for display.</returns>
+        public string GenerateDisplayLabel(Asm65.Formatter formatter) {
+            return ConvertLabelForDisplay(Label, LabelAnno, IsNonUnique, formatter);
+        }
+
+        /// <summary>
+        /// Returns the annotation suffix character, or NO_ANNO_CHAR if nothing appropriate.
+        /// </summary>
+        private static char GetLabelAnnoChar(LabelAnnotation anno) {
+            char ch = NO_ANNO_CHAR;
+            if (anno == LabelAnnotation.Uncertain) {
+                ch = UNCERTAIN_CHAR;
+            } else if (anno == LabelAnnotation.Generated) {
+                //ch = '\u00a4';   // CURRENCY SIGN '¤'
+            }
+            return ch;
+        }
+
+        /// <summary>
+        /// Converts a label to displayable form by stripping the uniquification tag (if any)
+        /// and appending the optional annotation.  This is needed for display of WeakSymbolRefs.
+        /// </summary>
+        /// <param name="label">Base label string.  Has the uniquification tag, but no
+        ///   annotation char or non-unique prefix.</param>
+        /// <param name="anno">Annotation; may be None.</param>
+        /// <returns>Formatted label.</returns>
+        public static string ConvertLabelForDisplay(string label, LabelAnnotation anno,
+                bool isNonUnique, Asm65.Formatter formatter) {
+            StringBuilder sb = new StringBuilder(label.Length + 2);
+
+            if (isNonUnique) {
+                sb.Append(formatter.NonUniqueLabelPrefix);
+            }
+
+            // NOTE: could make this a length check + label[Length - NON_UNIQUE_LEN]
+            int nbrk = label.IndexOf(UNIQUE_TAG_CHAR);
+            if (nbrk >= 0) {
+                Debug.Assert(nbrk == label.Length - NON_UNIQUE_LEN);
+                sb.Append(label.Substring(0, nbrk));
+            } else {
+                sb.Append(label);
+            }
+
+            char annoChar = GetLabelAnnoChar(anno);
+            if (annoChar != NO_ANNO_CHAR) {
+                sb.Append(annoChar);
+            }
+            return sb.ToString();
         }
 
         /// <summary>
@@ -199,14 +272,20 @@ namespace SourceGen {
         /// trimmed version of the string is returned.
         /// </summary>
         /// <param name="label">Label to examine.</param>
+        /// <param name="nonUniquePrefix">For address symbols, the prefix string for
+        ///   non-unique labels.  May be null if not validating a user label.</param>
         /// <param name="isValid">True if the entire label is valid.</param>
         /// <param name="isLenValid">True if the label has a valid length.</param>
         /// <param name="isFirstCharValid">True if the first character is valid.</param>
+        /// <param name="hasNonUniquePrefix">True if the first character indicates that this is
+        ///   a non-unique label.</param>
         /// <param name="anno">Annotation found, or None if none found.</param>
         /// <returns>Trimmed version of the string.</returns>
-        public static string TrimAndValidateLabel(string label, out bool isValid,
-                out bool isLenValid, out bool isFirstCharValid, out LabelAnnotation anno) {
+        public static string TrimAndValidateLabel(string label, string nonUniquePrefix,
+                out bool isValid, out bool isLenValid, out bool isFirstCharValid,
+                out bool hasNonUniquePrefix, out LabelAnnotation anno) {
             anno = LabelAnnotation.None;
+            hasNonUniquePrefix = false;
 
             // Do we have at least one char?
             if (string.IsNullOrEmpty(label)) {
@@ -221,28 +300,20 @@ namespace SourceGen {
                 trimLabel = trimLabel.Substring(0, trimLabel.Length - 1);
             }
 
+            // Check for leading non-unique ident char.
+            if (trimLabel.Length > 0 && !string.IsNullOrEmpty(nonUniquePrefix)) {
+                if (trimLabel[0] == nonUniquePrefix[0]) {
+                    hasNonUniquePrefix = true;
+                    trimLabel = trimLabel.Substring(1);
+                }
+            }
+
             // Now that we're down to the base string, do the full validation test.  If it
             // passes, we don't need to dig any deeper.
             isValid = Asm65.Label.ValidateLabelDetail(trimLabel, out isLenValid,
                 out isFirstCharValid);
 
             return trimLabel;
-        }
-
-        /// <summary>
-        /// Augments a label string with an annotation identifier.
-        /// </summary>
-        /// <param name="label">String to augment.</param>
-        /// <param name="anno">Annotation; may be None.</param>
-        /// <returns>Original or updated string.</returns>
-        public static string AppendAnnotation(string label, LabelAnnotation anno) {
-            if (anno == LabelAnnotation.Uncertain) {
-                return label + UNCERTAIN_CHAR;
-            //} else if (anno == LabelAnnotation.Generated) {
-            //    return label + '\u00a4';  // CURRENCY_SIGN '¤'
-            } else {
-                return label;
-            }
         }
 
 

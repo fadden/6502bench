@@ -322,6 +322,9 @@ namespace SourceGen {
 
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
+            // TODO(performance): this causes the ListView to format the entire listing, despite
+            //   being virtual.  So we're regenerating the entire list after something trivial,
+            //   like renaming a label.  Need to figure this out.
             OnCollectionReset();
         }
 

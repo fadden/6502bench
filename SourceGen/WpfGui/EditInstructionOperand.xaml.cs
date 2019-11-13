@@ -927,7 +927,7 @@ namespace SourceGen.WpfGui {
 
         private void EditLabel_Click(object sender, RoutedEventArgs e) {
             EditLabel dlg = new EditLabel(this, mEditedLabel, mLabelTargetAddress,
-                mProject.SymbolTable);
+                mEditedLabelOffset, mProject.SymbolTable, mFormatter);
             if (dlg.ShowDialog() != true || mEditedLabel == dlg.LabelSym) {
                 Debug.WriteLine("No change to label, ignoring edit");
                 return;

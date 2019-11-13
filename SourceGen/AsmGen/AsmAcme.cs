@@ -190,10 +190,11 @@ namespace SourceGen.AsmGen {
             config.mForceDirectOperandPrefix = string.Empty;
             config.mForceAbsOperandPrefix = string.Empty;
             config.mForceLongOperandPrefix = string.Empty;
-            config.mLocalVariableLablePrefix = ".";
+            config.mLocalVariableLabelPrefix = ".";
             config.mEndOfLineCommentDelimiter = ";";
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
+            config.mNonUniqueLabelPrefix = "@";
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
 
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
@@ -387,7 +388,7 @@ namespace SourceGen.AsmGen {
                     operand = RawData.GetWord(data, offset, length, false);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                         mLocalizer.LabelMap, dfd, operand, length,
-                        PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                        PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
@@ -398,7 +399,7 @@ namespace SourceGen.AsmGen {
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                             mLocalizer.LabelMap, dfd, operand, length,
-                            PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                            PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:
@@ -515,7 +516,7 @@ namespace SourceGen.AsmGen {
 
                 string valueStr = PseudoOp.FormatNumericOperand(SourceFormatter,
                     Project.SymbolTable, null, defSym.DataDescriptor, defSym.Value, 1,
-                    PseudoOp.FormatNumericOpFlags.StripAnnotation);
+                    PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
                 OutputEquDirective(SourceFormatter.FormatVariableLabel(defSym.Label),
                     valueStr, defSym.Comment);
             }

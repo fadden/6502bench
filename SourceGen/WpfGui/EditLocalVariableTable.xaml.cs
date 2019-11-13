@@ -175,7 +175,7 @@ namespace SourceGen.WpfGui {
 
             FormattedSymbol fsym = new FormattedSymbol(
                 defSym,
-                defSym.AnnotatedLabel,
+                defSym.GenerateDisplayLabel(mFormatter),
                 mFormatter.FormatValueInBase(defSym.Value, defSym.DataDescriptor.NumBase),
                 typeStr,
                 defSym.DataDescriptor.Length,

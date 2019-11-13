@@ -20,6 +20,8 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 
+using Asm65;
+
 namespace SourceGen.WpfGui {
     /// <summary>
     /// Edit a label.
@@ -32,6 +34,11 @@ namespace SourceGen.WpfGui {
         public Symbol LabelSym { get; private set; }
 
         /// <summary>
+        /// Unique tag, for non-unique label creation.  (Currently using offset.)
+        /// </summary>
+        private int mUniqueTag;
+
+        /// <summary>
         /// Address we are editing the label for.
         /// </summary>
         private int mAddress;
@@ -41,18 +48,27 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private SymbolTable mSymbolTable;
 
+        /// <summary>
+        /// Label formatter.
+        /// </summary>
+        private Formatter mFormatter;
+
         // Dialog label text color, saved off at dialog load time.
         private Brush mDefaultLabelColor;
+
+        /// <summary>
+        /// Recursion guard.
+        /// </summary>
+        private bool mInUpdateControls;
+
+        public string NonUniqueButtonLabel { get; private set; }
 
         /// <summary>
         /// Set to true when input is valid.  Controls whether the OK button is enabled.
         /// </summary>
         public bool IsValid {
             get { return mIsValid; }
-            set {
-                mIsValid = value;
-                OnPropertyChanged();
-            }
+            set { mIsValid = value; OnPropertyChanged(); }
         }
         private bool mIsValid;
 
@@ -61,13 +77,50 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public string LabelText {
             get { return mLabelText; }
-            set {
-                mLabelText = value;
-                LabelTextBox_TextChanged();
-                OnPropertyChanged();
-            }
+            set { mLabelText = value; OnPropertyChanged(); UpdateControls(); }
         }
         string mLabelText;
+
+        // Radio buttons.
+        public bool mIsNonUniqueChecked, mIsNonUniqueEnabled;
+        public bool IsNonUniqueChecked {
+            get { return mIsNonUniqueChecked; }
+            set { mIsNonUniqueChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        public bool IsNonUniqueEnabled {
+            get { return mIsNonUniqueEnabled; }
+            set { mIsNonUniqueEnabled = value; OnPropertyChanged(); }
+        }
+
+        public bool mIsLocalChecked, mIsLocalEnabled;
+        public bool IsLocalChecked {
+            get { return mIsLocalChecked; }
+            set { mIsLocalChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        public bool IsLocalEnabled {
+            get { return mIsLocalEnabled; }
+            set { mIsLocalEnabled = value; OnPropertyChanged(); }
+        }
+
+        public bool mIsGlobalChecked, mIsGlobalEnabled;
+        public bool IsGlobalChecked {
+            get { return mIsGlobalChecked; }
+            set { mIsGlobalChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        public bool IsGlobalEnabled {
+            get { return mIsGlobalEnabled; }
+            set { mIsGlobalEnabled = value; OnPropertyChanged(); }
+        }
+
+        public bool mIsExportedChecked, mIsExportedEnabled;
+        public bool IsExportedChecked {
+            get { return mIsExportedChecked; }
+            set { mIsExportedChecked = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        public bool IsExportedEnabled {
+            get { return mIsExportedEnabled; }
+            set { mIsExportedEnabled = value; OnPropertyChanged(); }
+        }
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -76,43 +129,53 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public EditLabel(Window owner, Symbol origSym, int address, SymbolTable symbolTable) {
+        public EditLabel(Window owner, Symbol origSym, int address, int uniqueTag,
+                SymbolTable symbolTable, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             LabelSym = origSym;
             mAddress = address;
+            mUniqueTag = uniqueTag;
             mSymbolTable = symbolTable;
+            mFormatter = formatter;
+
+            string fmt = (string)FindResource("str_NonUniqueLocalFmt");
+            NonUniqueButtonLabel = string.Format(fmt, mFormatter.NonUniqueLabelPrefix);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mDefaultLabelColor = maxLengthLabel.Foreground;
 
+            IsNonUniqueEnabled = IsLocalEnabled = IsGlobalEnabled = IsExportedEnabled = true;
+
             if (LabelSym == null) {
                 LabelText = string.Empty;
-                radioButtonLocal.IsChecked = true;
+                IsGlobalChecked = true;
             } else {
-                LabelText = LabelSym.AnnotatedLabel;
+                LabelText = LabelSym.GenerateDisplayLabel(mFormatter);
                 switch (LabelSym.SymbolType) {
                     case Symbol.Type.NonUniqueLocalAddr:
-                        Debug.Assert(false);    // TODO(xyzzy)
+                        IsNonUniqueChecked = true;
                         break;
                     case Symbol.Type.LocalOrGlobalAddr:
-                        radioButtonLocal.IsChecked = true;
+                        IsLocalChecked = true;
                         break;
                     case Symbol.Type.GlobalAddr:
-                        radioButtonGlobal.IsChecked = true;
+                        IsGlobalChecked = true;
                         break;
                     case Symbol.Type.GlobalAddrExport:
-                        radioButtonExport.IsChecked = true;
+                        IsExportedChecked = true;
                         break;
                     default:
                         Debug.Assert(false);    // WTF
-                        radioButtonLocal.IsChecked = true;
+                        IsGlobalChecked = true;
                         break;
                 }
             }
+
+            UpdateControls();
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
@@ -120,48 +183,39 @@ namespace SourceGen.WpfGui {
             labelTextBox.Focus();
         }
 
-        private void LabelTextBox_TextChanged() {
-#if false
-            string str = LabelText;
-            bool valid = true;
-
-            if (str.Length == 1 || str.Length > Asm65.Label.MAX_LABEL_LEN) {
-                valid = false;
-                maxLengthLabel.Foreground = Brushes.Red;
-            } else {
-                maxLengthLabel.Foreground = mDefaultLabelColor;
+        private void UpdateControls() {
+            if (mInUpdateControls) {
+                return;
             }
+            mInUpdateControls = true;
 
-            // Regex never matches on strings of length 0 or 1, but we don't want
-            // to complain about that since we're already doing that above.
-            // TODO(maybe): Ideally this wouldn't light up if the only problem was a
-            //   non-alpha first character, since the next test will call that out.
-            if (str.Length > 1) {
-                if (!Asm65.Label.ValidateLabel(str)) {
-                    valid = false;
-                    validCharsLabel.Foreground = Brushes.Red;
-                } else {
-                    validCharsLabel.Foreground = mDefaultLabelColor;
-                }
-            } else {
-                validCharsLabel.Foreground = mDefaultLabelColor;
-            }
+            LabelTextChanged();
 
-            if (str.Length > 0 &&
-                    !((str[0] >= 'A' && str[0] <= 'Z') || (str[0] >= 'a' && str[0] <= 'z') ||
-                      str[0] == '_')) {
-                // This should have been caught by the regex.  We just want to set the
-                // color on the "first character must be" instruction text.
-                Debug.Assert(!valid);
-                firstLetterLabel.Foreground = Brushes.Red;
-            } else {
-                firstLetterLabel.Foreground = mDefaultLabelColor;
-            }
-#endif
+            mInUpdateControls = false;
+        }
+
+        private bool mHadNonUniquePrefix = false;
+
+        private void LabelTextChanged() {
             bool isBlank = (LabelText.Length == 0);
 
-            string trimLabel = Symbol.TrimAndValidateLabel(LabelText, out bool isValid,
-                out bool isLenValid, out bool isFirstCharValid, out Symbol.LabelAnnotation anno);
+            // Strip leading non-unique prefix and the trailing annotation.
+            string trimLabel = Symbol.TrimAndValidateLabel(LabelText,
+                mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool isLenValid,
+                out bool isFirstCharValid, out bool hasNonUniquePrefix,
+                out Symbol.LabelAnnotation anno);
+
+            // If they type '@'/':'/'.' at the start of the label, switch the radio button.
+            // Alternatively, if they choose a different radio button, remove the prefix.
+            // We only want to do this on the first event so we don't wedge the control.
+            if (hasNonUniquePrefix && !mHadNonUniquePrefix && !IsNonUniqueChecked) {
+                IsNonUniqueChecked = true;
+            } else if (hasNonUniquePrefix && mHadNonUniquePrefix && !IsNonUniqueChecked) {
+                LabelText = LabelText.Substring(1);
+                hasNonUniquePrefix = false;
+            }
+            mHadNonUniquePrefix = hasNonUniquePrefix;
+
             if (isBlank || isLenValid) {
                 maxLengthLabel.Foreground = mDefaultLabelColor;
             } else {
@@ -180,18 +234,30 @@ namespace SourceGen.WpfGui {
                 validCharsLabel.Foreground = Brushes.Red;
             }
 
-            // Refuse to continue if the label already exists.  The only exception is if
-            // it's the same symbol, and it's user-defined.  (If they're trying to edit an
-            // auto label, we want to force them to change the name.)
+#if false
+            if (hasNonUniqueTag) {
+                IsNonUniqueChecked = true;
+                IsLocalEnabled = IsGlobalEnabled = IsExportedEnabled = false;
+            } else {
+                IsNonUniqueEnabled = IsLocalEnabled = IsGlobalEnabled = IsExportedEnabled = true;
+            }
+#endif
+
+            // Refuse to continue if the label already exists and this isn't a non-unique label.
+            // The only exception is if it's the same symbol, and it's user-defined.  (If
+            // they're trying to edit an auto label, we want to force them to change the name.)
             //
             // NOTE: if label matching is case-insensitive, we want to allow a situation
             // where a label is being renamed from "FOO" to "Foo".  We should be able to
             // test for object equality on the Symbol to determine if we're renaming a
             // symbol to itself.
-            if (isValid && mSymbolTable.TryGetValue(trimLabel, out Symbol sym) &&
+            if (!IsNonUniqueChecked && isValid &&
+                    mSymbolTable.TryGetValue(trimLabel, out Symbol sym) &&
                     (sym != LabelSym || LabelSym.SymbolSource != Symbol.Source.User)) {
                 isValid = false;
                 notDuplicateLabel.Foreground = Brushes.Red;
+            } else if (IsNonUniqueChecked) {
+                notDuplicateLabel.Foreground = Brushes.Gray;
             } else {
                 notDuplicateLabel.Foreground = mDefaultLabelColor;
             }
@@ -204,23 +270,32 @@ namespace SourceGen.WpfGui {
                 LabelSym = null;
             } else {
                 Symbol.Type symbolType;
-                // TODO(xyzzy): non-local
-                if (radioButtonLocal.IsChecked == true) {
+                if (IsNonUniqueChecked) {
+                    symbolType = Symbol.Type.NonUniqueLocalAddr;
+                } else if (IsLocalChecked == true) {
                     symbolType = Symbol.Type.LocalOrGlobalAddr;
-                } else if (radioButtonGlobal.IsChecked == true) {
+                } else if (IsGlobalChecked == true) {
                     symbolType = Symbol.Type.GlobalAddr;
-                } else if (radioButtonExport.IsChecked == true) {
+                } else if (IsExportedChecked == true) {
                     symbolType = Symbol.Type.GlobalAddrExport;
                 } else {
                     Debug.Assert(false);        // WTF
-                    symbolType = Symbol.Type.LocalOrGlobalAddr;
+                    symbolType = Symbol.Type.GlobalAddr;
                 }
 
-                // Parse and strip the annotation.
-                string trimLabel = Symbol.TrimAndValidateLabel(LabelText, out bool unused1,
-                    out bool unused2, out bool unused3, out Symbol.LabelAnnotation anno);
+                // Parse and strip the annotation and optional non-unique tag.
+                string trimLabel = Symbol.TrimAndValidateLabel(LabelText,
+                    mFormatter.NonUniqueLabelPrefix, out bool unused1, out bool unused2,
+                    out bool unused3, out bool hasNonUniquePrefix,
+                    out Symbol.LabelAnnotation anno);
 
-                LabelSym = new Symbol(trimLabel, mAddress, Symbol.Source.User, symbolType, anno);
+                if (IsNonUniqueChecked) {
+                    LabelSym = new Symbol(trimLabel, mAddress, anno, mUniqueTag);
+                } else {
+                    Debug.Assert(!hasNonUniquePrefix);
+                    LabelSym = new Symbol(trimLabel, mAddress, Symbol.Source.User, symbolType,
+                        anno);
+                }
             }
             DialogResult = true;
         }

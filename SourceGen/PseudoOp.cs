@@ -549,10 +549,10 @@ namespace SourceGen {
         /// </summary>
         [Flags]
         public enum FormatNumericOpFlags {
-            None            = 0,
-            IsPcRel         = 1,        // opcode is PC relative, e.g. branch or PER
-            HasHashPrefix   = 1 << 1,   // operand has a leading '#', avoiding ambiguity sometimes
-            StripAnnotation = 1 << 2,   // don't show annotation character
+            None                    = 0,
+            IsPcRel                 = 1,        // opcode is PC relative, e.g. branch or PER
+            HasHashPrefix           = 1 << 1,   // operand has a leading '#', reducing ambiguity
+            StripLabelPrefixSuffix  = 1 << 2,   // don't show annotation char or non-unique prefix
         }
 
         /// <summary>
@@ -641,7 +641,7 @@ namespace SourceGen {
                         Debug.Assert(operandLen == 1);      // only doing 8-bit stuff
                         DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
                         if (defSym != null) {
-                            // For local variables we're doing trivial add/subtract and don't
+                            // For local variables we're doing a trivial add and don't
                             // wrap, so the "common" format works for everybody.
                             StringBuilder sb = new StringBuilder();
                             FormatNumericSymbolCommon(formatter, defSym, null,
@@ -699,6 +699,8 @@ namespace SourceGen {
 
             int adjustment, symbolValue;
 
+            // Start by remapping the label, if necessary.  The remapped label may have a
+            // local-variable prefix character.
             string symLabel = sym.Label;
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
@@ -706,9 +708,16 @@ namespace SourceGen {
             if (sym.IsVariable) {
                 symLabel = formatter.FormatVariableLabel(symLabel);
             }
-            // TODO(xyzzy): non-unique prefix
-            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
-                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
+
+            // Now put the prefix/suffix back on if desired.  We don't want to mess with it
+            // if it's from the assembler.
+            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
+                    sym.IsNonUnique, formatter);
+            } else {
+                // TODO(xyzzy): remapper will handle this
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
+                    false, formatter);
             }
 
             if (operandLen == 1) {
@@ -845,9 +854,13 @@ namespace SourceGen {
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
             }
-            // TODO(xyzzy): non-unique prefix
-            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
-                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
+            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
+                    sym.IsNonUnique, formatter);
+            } else {
+                // TODO(xyzzy): remapper will handle this
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
+                    false, formatter);
             }
 
             if (operandLen == 1) {
@@ -942,9 +955,13 @@ namespace SourceGen {
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
             }
-            // TODO(xyzzy): non-unique prefix
-            if ((flags & FormatNumericOpFlags.StripAnnotation) == 0) {
-                symLabel = Symbol.AppendAnnotation(symLabel, sym.LabelAnno);
+            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
+                    sym.IsNonUnique, formatter);
+            } else {
+                // TODO(xyzzy): remapper will handle this
+                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
+                    false, formatter);
             }
 
             int adjustment;
