@@ -409,20 +409,27 @@ namespace SourceGen {
                 typeStr = Res.Strings.EQU_ADDRESS;
             }
 
-            string msgStr = null;
-            if (defSym.HasWidth) {
-                msgStr = typeStr + "/" + defSym.DataDescriptor.Length;
-            } else if (defSym.IsConstant) {
-                // not entirely convinced we want this, but there's currently no other way
-                // to tell the difference between an address and a constant from the code list
-                msgStr = typeStr;
+            if (!defSym.HasWidth && !defSym.IsConstant) {
+                // It's an address without an explicit width, do not annotate.
+                return operand;
             }
 
-            if (msgStr == null) {
-                return operand;
-            } else {
-                return operand + "  {" + msgStr + "}";
+            StringBuilder sb = new StringBuilder(operand.Length + typeStr.Length + 16);
+            sb.Append(operand);
+
+            int spacesNeeded = 7 - operand.Length;
+            do {    // always output at least one space
+                sb.Append(' ');
+            } while (--spacesNeeded > 0);
+
+            sb.Append("{");
+            sb.Append(typeStr);
+            if (defSym.HasWidth) {
+                sb.Append('/');
+                sb.Append(defSym.DataDescriptor.Length);
             }
+            sb.Append("}");
+            return sb.ToString();
         }
 
         /// <summary>
@@ -552,7 +559,7 @@ namespace SourceGen {
             None                    = 0,
             IsPcRel                 = 1,        // opcode is PC relative, e.g. branch or PER
             HasHashPrefix           = 1 << 1,   // operand has a leading '#', reducing ambiguity
-            StripLabelPrefixSuffix  = 1 << 2,   // don't show annotation char or non-unique prefix
+            OmitLabelPrefixSuffix   = 1 << 2,   // don't show annotation char or non-unique prefix
         }
 
         /// <summary>
@@ -711,7 +718,7 @@ namespace SourceGen {
 
             // Now put the prefix/suffix back on if desired.  We don't want to mess with it
             // if it's from the assembler.
-            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+            if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     sym.IsNonUnique, formatter);
             } else {
@@ -854,7 +861,7 @@ namespace SourceGen {
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
             }
-            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+            if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     sym.IsNonUnique, formatter);
             } else {
@@ -955,7 +962,7 @@ namespace SourceGen {
             if (labelMap != null && labelMap.TryGetValue(symLabel, out string newLabel)) {
                 symLabel = newLabel;
             }
-            if ((flags & FormatNumericOpFlags.StripLabelPrefixSuffix) == 0) {
+            if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     sym.IsNonUnique, formatter);
             } else {
@@ -1005,11 +1012,14 @@ namespace SourceGen {
                 // testing the value for DP range, this would behave correctly.  Unfortunately
                 // there is no "force DP" modifier, so we either need to add an explicit mask
                 // or just punt and use the original adjustment.
+                //
+                // Note DP is only relevant for bank zero.
+                //
                 // TODO(someday): we only need to do this for ambiguous DP.  If the instruction
                 // is imm or doesn't have an abs equivalent, or it's a fixed-width data item
                 // like .DD1, we can still use the nicer-looking adjustment.  We don't currently
                 // pass the OpDef in here.
-                if ((sym.Value & 0xff0000) != ((sym.Value + adjustment) & 0xff0000)) {
+                if ((sym.Value & 0xff0000) == 0 && ((sym.Value + adjustment) & 0xff0000) != 0) {
                     adjustment = origAdjust;
                 }
             } else if (keepLen == 2) {

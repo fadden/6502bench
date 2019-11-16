@@ -157,7 +157,7 @@ namespace SourceGen.AsmGen {
                 // Use an operand length of 1 so values are shown as concisely as possible.
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                     gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1,
-                    PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
+                    PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
                 gen.OutputEquDirective(defSym.Label, valueStr, defSym.Comment);
 
                 prevConst = defSym.IsConstant;
@@ -204,7 +204,7 @@ namespace SourceGen.AsmGen {
 
             string formattedOperand = null;
             int operandLen = instrLen - 1;
-            PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix;
+            PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix;
             bool isPcRelBankWrap = false;
 
             // Tweak branch instructions.  We want to show the absolute address rather
@@ -245,10 +245,10 @@ namespace SourceGen.AsmGen {
                     // Special handling for the double-operand block move.
                     string opstr1 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         gen.Localizer.LabelMap, dfd, operand >> 8, 1,
-                        PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
+                        PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
                     string opstr2 = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         gen.Localizer.LabelMap, dfd, operand & 0xff, 1,
-                        PseudoOp.FormatNumericOpFlags.StripLabelPrefixSuffix);
+                        PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
                     if (gen.Quirks.BlockMoveArgsReversed) {
                         string tmp = opstr1;
                         opstr1 = opstr2;
