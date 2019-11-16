@@ -119,6 +119,19 @@ namespace SourceGen {
 
 
         /// <summary>
+        /// Label without the non-unique tag.
+        /// </summary>
+        public string LabelForSerialization {
+            get {
+                if (SymbolType != Type.NonUniqueLocalAddr) {
+                    return Label;
+                } else {
+                    return Label.Substring(0, Label.Length - NON_UNIQUE_LEN);
+                }
+            }
+        }
+
+        /// <summary>
         /// True if the symbol's type is an internal label (auto or user).  Will be false
         /// for external addresses (including variables) and constants.
         /// </summary>
@@ -234,26 +247,41 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Converts a label to displayable form by stripping the uniquification tag (if any)
-        /// and appending the optional annotation.  This is needed for display of WeakSymbolRefs.
+        /// Converts a label to displayable form by stripping the uniquification tag (if any),
+        /// inserting the non-unique label prefix if appropriate, and appending the optional
+        /// annotation character.
         /// </summary>
+        /// <remarks>
+        /// There's generally two ways to display a label:
+        ///  (1) When displaying labels on-screen, we get a label with the uniquification tag,
+        ///      and we want to show the non-unique label prefix ('@' or ':') and annotation.
+        ///  (2) When generating assembly source, we get a remapped label with no uniquification
+        ///      tag, and we don't want to show the prefix or annotation.
+        /// For case #2, there's no reason to call here.  (We're currently doing so because
+        /// remapping isn't happening yet, but that should change soon.  When that happens, we
+        /// should be able to eliminate the showNonUnique arg.)
+        /// </remarks>
         /// <param name="label">Base label string.  Has the uniquification tag, but no
         ///   annotation char or non-unique prefix.</param>
         /// <param name="anno">Annotation; may be None.</param>
+        /// <param name="showNonUnique">Set true if the returned label should show the
+        ///   non-unique label prefix.</param>
+        /// <param name="formatter">Format object that holds the non-unique label prefix
+        ///   string.</param>
         /// <returns>Formatted label.</returns>
         public static string ConvertLabelForDisplay(string label, LabelAnnotation anno,
-                bool isNonUnique, Asm65.Formatter formatter) {
+                bool showNonUnique, Asm65.Formatter formatter) {
             StringBuilder sb = new StringBuilder(label.Length + 2);
 
-            if (isNonUnique) {
+            if (showNonUnique) {
                 sb.Append(formatter.NonUniqueLabelPrefix);
             }
 
-            // NOTE: could make this a length check + label[Length - NON_UNIQUE_LEN]
-            int nbrk = label.IndexOf(UNIQUE_TAG_CHAR);
-            if (nbrk >= 0) {
-                Debug.Assert(nbrk == label.Length - NON_UNIQUE_LEN);
-                sb.Append(label.Substring(0, nbrk));
+            if (label.Length > NON_UNIQUE_LEN &&
+                    label[label.Length - NON_UNIQUE_LEN] == UNIQUE_TAG_CHAR) {
+                // showNonUnique may be false if generating assembly code (but by this
+                // point the unique tag should be remapped away)
+                sb.Append(label.Substring(0, label.Length - NON_UNIQUE_LEN));
             } else {
                 sb.Append(label);
             }
@@ -273,7 +301,8 @@ namespace SourceGen {
         /// </summary>
         /// <param name="label">Label to examine.</param>
         /// <param name="nonUniquePrefix">For address symbols, the prefix string for
-        ///   non-unique labels.  May be null if not validating a user label.</param>
+        ///   non-unique labels (e.g. '@' or ':').  May be null if not validating a user
+        ///   label.</param>
         /// <param name="isValid">True if the entire label is valid.</param>
         /// <param name="isLenValid">True if the label has a valid length.</param>
         /// <param name="isFirstCharValid">True if the first character is valid.</param>

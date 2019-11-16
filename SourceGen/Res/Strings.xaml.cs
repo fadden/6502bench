@@ -81,6 +81,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadLvTableFmt");
         public static string ERR_BAD_RANGE =
             (string)Application.Current.FindResource("str_ErrBadRange");
+        public static string ERR_BAD_SYMBOL_LABEL =
+            (string)Application.Current.FindResource("str_ErrBadSymbolLabel");
         public static string ERR_BAD_SYMBOL_ST =
             (string)Application.Current.FindResource("str_ErrBadSymbolSt");
         public static string ERR_BAD_SYMREF_PART =

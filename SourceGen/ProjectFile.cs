@@ -279,7 +279,7 @@ namespace SourceGen {
 
             public SerSymbol() { }
             public SerSymbol(Symbol sym) {
-                Label = sym.Label;
+                Label = sym.LabelForSerialization;      // use bare label here
                 Value = sym.Value;
                 Source = sym.SymbolSource.ToString();
                 Type = sym.SymbolType.ToString();
@@ -308,7 +308,7 @@ namespace SourceGen {
 
             public SerWeakSymbolRef() { }
             public SerWeakSymbolRef(WeakSymbolRef weakSym) {
-                Label = weakSym.Label;
+                Label = weakSym.Label;              // retain non-unique tag in weak refs
                 Part = weakSym.ValuePart.ToString();
             }
         }
@@ -642,7 +642,7 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (!CreateSymbol(kvp.Value, report, out Symbol newSym)) {
+                if (!CreateSymbol(kvp.Value, intKey, report, out Symbol newSym)) {
                     continue;
                 }
                 if (newSym.SymbolSource != Symbol.Source.User) {
@@ -656,13 +656,15 @@ namespace SourceGen {
                 // Check for duplicate labels.  We only want to compare label strings, so we
                 // can't test UserLabels.ContainsValue (which might be a linear search anyway).
                 // Dump the labels into a sorted list.
-                if (labelDupCheck.ContainsKey(kvp.Value.Label)) {
+                //
+                // We want to use newSym.Label rather than kvp.Value.Label, because the latter
+                // won't have the non-unique local tag.
+                if (labelDupCheck.ContainsKey(newSym.Label)) {
                     report.Add(FileLoadItem.Type.Warning,
-                        string.Format(Res.Strings.ERR_DUPLICATE_LABEL_FMT,
-                            kvp.Value.Label, intKey));
+                        string.Format(Res.Strings.ERR_DUPLICATE_LABEL_FMT, newSym.Label, intKey));
                     continue;
                 }
-                labelDupCheck.Add(kvp.Value.Label, string.Empty);
+                labelDupCheck.Add(newSym.Label, string.Empty);
 
                 proj.UserLabels[intKey] = newSym;
             }
@@ -720,11 +722,13 @@ namespace SourceGen {
         /// is generated in the FileLoadReport.
         /// </summary>
         /// <param name="ssym">Deserialized data.</param>
+        /// <param name="userLabelOffset">If the symbol is a user label, this is the file offset.
+        ///   If not, pass -1.  Used for non-unique locals.</param>
         /// <param name="report">Error report object.</param>
         /// <param name="outSym">Created symbol.</param>
         /// <returns>True on success.</returns>
-        private static bool CreateSymbol(SerSymbol ssym, FileLoadReport report,
-                out Symbol outSym) {
+        private static bool CreateSymbol(SerSymbol ssym, int userLabelOffset,
+                FileLoadReport report, out Symbol outSym) {
             outSym = null;
             Symbol.Source source;
             Symbol.Type type;
@@ -736,12 +740,27 @@ namespace SourceGen {
                     labelAnno = (Symbol.LabelAnnotation)Enum.Parse(
                         typeof(Symbol.LabelAnnotation), ssym.LabelAnno);
                 }
+                if (type == Symbol.Type.NonUniqueLocalAddr && source != Symbol.Source.User) {
+                    throw new ArgumentException("unexpected source for non-unique local");
+                }
             } catch (ArgumentException) {
                 report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_SYMBOL_ST +
                     ": " + ssym.Source + "/" + ssym.Type);
                 return false;
             }
-            outSym = new Symbol(ssym.Label, ssym.Value, source, type, labelAnno);
+
+            if (!Asm65.Label.ValidateLabel(ssym.Label)) {
+                report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_SYMBOL_LABEL +
+                    ": " + ssym.Label);
+                return false;
+            }
+
+            if (type == Symbol.Type.NonUniqueLocalAddr) {
+                outSym = new Symbol(ssym.Label, ssym.Value, labelAnno, userLabelOffset);
+            } else {
+                outSym = new Symbol(ssym.Label, ssym.Value, source, type, labelAnno);
+            }
+
             return true;
         }
 
@@ -757,7 +776,7 @@ namespace SourceGen {
                 FileLoadReport report, out DefSymbol outDefSym) {
             outDefSym = null;
 
-            if (!CreateSymbol(serDefSym, report, out Symbol sym)) {
+            if (!CreateSymbol(serDefSym, -1, report, out Symbol sym)) {
                 return false;
             }
             if (!CreateFormatDescriptor(serDefSym.DataDescriptor, contentVersion, report,

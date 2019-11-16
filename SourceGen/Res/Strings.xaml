@@ -50,6 +50,7 @@ limitations under the License.
     <system:String x:Key="str_ErrBadLocalVariableFmt">Bad local variable {0}</system:String>
     <system:String x:Key="str_ErrBadLvTableFmt">Invalid local variable table at +{0:x6}</system:String>
     <system:String x:Key="str_ErrBadRange">Bad range</system:String>
+    <system:String x:Key="str_ErrBadSymbolLabel">Malformed label in symbol</system:String>
     <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
     <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
     <system:String x:Key="str_ErrBadTypeHint">Type hint not recognized</system:String>

@@ -1554,6 +1554,8 @@ namespace SourceGen.WpfGui {
         //
         // Symbols list filter options.
         //
+
+        private bool mSymFilterUserLabels;
         public bool SymFilterUserLabels {
             get { return mSymFilterUserLabels; }
             set {
@@ -1563,7 +1565,17 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterUserLabels;
+        private bool mSymFilterNonUniqueLabels;
+        public bool SymFilterNonUniqueLabels {
+            get { return mSymFilterNonUniqueLabels; }
+            set {
+                mSymFilterNonUniqueLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_NON_UNIQUE, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
+        private bool mSymFilterProjectSymbols;
         public bool SymFilterProjectSymbols {
             get { return mSymFilterProjectSymbols; }
             set {
@@ -1573,7 +1585,7 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterProjectSymbols;
+        private bool mSymFilterPlatformSymbols;
         public bool SymFilterPlatformSymbols {
             get { return mSymFilterPlatformSymbols; }
             set {
@@ -1583,7 +1595,7 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterPlatformSymbols;
+        private bool mSymFilterAutoLabels;
         public bool SymFilterAutoLabels {
             get { return mSymFilterAutoLabels; }
             set {
@@ -1593,7 +1605,7 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterAutoLabels;
+        private bool mSymFilterAddresses;
         public bool SymFilterAddresses {
             get { return mSymFilterAddresses; }
             set {
@@ -1603,7 +1615,7 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterAddresses;
+        private bool mSymFilterConstants;
         public bool SymFilterConstants {
             get { return mSymFilterConstants; }
             set {
@@ -1613,7 +1625,6 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
-        private bool mSymFilterConstants;
 
         /// <summary>
         /// Symbols list DataGrid item.
@@ -1659,6 +1670,7 @@ namespace SourceGen.WpfGui {
                 return;
             }
             if ((SymFilterUserLabels != true && sli.Sym.SymbolSource == Symbol.Source.User) ||
+                (SymFilterNonUniqueLabels != true && sli.Sym.IsNonUnique) ||
                 (SymFilterProjectSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
                 (SymFilterPlatformSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
                 (SymFilterAutoLabels != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||

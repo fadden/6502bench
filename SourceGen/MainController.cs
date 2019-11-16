@@ -308,11 +308,12 @@ namespace SourceGen {
             // actually used is expected to do something reasonable by default.
 
             settings.SetBool(AppSettings.SYMWIN_SHOW_USER, true);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_NON_UNIQUE, false);
             settings.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
             settings.SetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
-            settings.SetBool(AppSettings.SYMWIN_SHOW_CONST, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_ADDR, true);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_CONST, true);
             settings.SetBool(AppSettings.SYMWIN_SORT_ASCENDING, true);
             settings.SetInt(AppSettings.SYMWIN_SORT_COL, (int)Symbol.SymbolSortField.Name);
 
@@ -502,6 +503,8 @@ namespace SourceGen {
             // Configure the Symbols window.
             mMainWin.SymFilterUserLabels =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_USER, false);
+            mMainWin.SymFilterNonUniqueLabels =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_NON_UNIQUE, false);
             mMainWin.SymFilterAutoLabels =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
             mMainWin.SymFilterProjectSymbols =

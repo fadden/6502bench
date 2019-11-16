@@ -702,6 +702,8 @@ limitations under the License.
                         <WrapPanel Grid.Row="0">
                             <ToggleButton Content="User" Width="40" Margin="2,2"
                                           IsChecked="{Binding SymFilterUserLabels}"/>
+                            <ToggleButton Content="NonU" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterNonUniqueLabels}"/>
                             <ToggleButton Content="Proj" Width="40" Margin="2,2"
                                           IsChecked="{Binding SymFilterProjectSymbols}"/>
                             <ToggleButton Content="Plat" Width="40" Margin="2,2"

@@ -77,6 +77,7 @@ namespace SourceGen {
 
         // Symbol-list window options.
         public const string SYMWIN_SHOW_USER = "symwin-show-user";
+        public const string SYMWIN_SHOW_NON_UNIQUE = "symwin-show-non-unique";
         public const string SYMWIN_SHOW_AUTO = "symwin-show-auto";
         public const string SYMWIN_SHOW_PROJECT = "symwin-show-project";
         public const string SYMWIN_SHOW_PLATFORM = "symwin-show-platform";
