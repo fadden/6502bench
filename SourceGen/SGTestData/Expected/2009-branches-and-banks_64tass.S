@@ -11,66 +11,66 @@ longsym =       $123456
 
         .logical $0000
 L0000   bit     @wL0000
-L0003   lda     L0000
-        lda     L0003
-        bne     LFFC3
+_L0003  lda     L0000
+        lda     _L0003
+        bne     _LFFC3
         bmi     $ffc3
-        per     LFFC3
-        bvs     L0016
-        brl     L0080
+        per     _LFFC3
+        bvs     _L0016
+        brl     _L0080
 
-lodat   .byte   $00
+_lodat  .byte   $00
         .byte   $01
         .byte   $02
 
-L0016   lda     lodat+1
-        brl     LFFC0
+_L0016  lda     _lodat+1
+        brl     _LFFC0
 
         .here
         .logical $0080
-L0080   bit     @wL0080
-        jml     L440000
+_L0080  bit     @w_L0080
+        jml     _L440000
 
         .here
         .logical $ffc0
-LFFC0   bit     LFFC0
-LFFC3   brl     L0003
+_LFFC0  bit     _LFFC0
+_LFFC3  brl     _L0003
 
         .here
         .logical $440000
-L440000 cmp     L440000
-L440004 lda     L440000
-        lda     @w0+(L440000 & $ffff)
+_L440000 cmp    _L440000
+_L440004 lda    _L440000
+        lda     @w0+(_L440000 & $ffff)
         lda     L0000
-        bmi     L440004
-        per     high44
-        bne     high44
-        brl     L44FFC0
+        bmi     _L440004
+        per     _high44
+        bne     _high44
+        brl     _L44FFC0
 
-dat44   .word   0+(dat44 & $ffff)
-        .long   dat44
+_dat44  .word   0+(_dat44 & $ffff)
+        .long   _dat44
 
         .here
         .logical $44ffc0
-L44FFC0 cmp     L44FFC0
-high44  beq     L44FFCB
-        bmi     L440004
-        brl     L440004
+_L44FFC0 cmp    _L44FFC0
+_high44 beq     _L44FFCB
+        bmi     _L440004
+        brl     _L440004
 
-L44FFCB jml     L2000
+_L44FFCB jml    _L2000
 
         .here
         .logical $2000
-L2000   bit     L2000
-        pea     0+(dat44 & $ffff)
-        pea     0+(dat44 >> 16)
-        bne     L200E
-        jml     [lodat]
+_L2000  bit     _L2000
+        pea     0+(_dat44 & $ffff)
+        pea     0+(_dat44 >> 16)
+        bne     _L200E
+        jml     [_lodat]
 
-L200E   nop
-        jsr     j2
-j2      jsr     j2+3
-        jsr     j2-3
+_L200E  nop
+        jsr     _j2
+_j2     jsr     _j2+3
+        jsr     _j2-3
         jsl     longsym
         rts
 

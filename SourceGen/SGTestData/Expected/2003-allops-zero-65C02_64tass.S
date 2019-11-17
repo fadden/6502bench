@@ -27,8 +27,8 @@ L1014   ora     ($00,x)
         ora     @w$0000
         asl     @w$0000
         .byte   $0f
-        bpl     L1031
-L1031   ora     ($00),y
+        bpl     _L1031
+_L1031  ora     ($00),y
         ora     ($00)
         .byte   $13
         trb     $00
@@ -59,8 +59,8 @@ L1031   ora     ($00),y
         and     @w$0000
         rol     @w$0000
         .byte   $2f
-        bmi     L106D
-L106D   and     ($00),y
+        bmi     _L106D
+_L106D  and     ($00),y
         and     ($00)
         .byte   $33
         bit     $00,x
@@ -88,13 +88,13 @@ L108A   eor     ($00,x)
         eor     #$00
         lsr     a
         .byte   $4b
-        jmp     L109E
+        jmp     _L109E
 
-L109E   eor     @w$0000
+_L109E  eor     @w$0000
         lsr     @w$0000
         .byte   $4f
-        bvc     L10A7
-L10A7   eor     ($00),y
+        bvc     _L10A7
+_L10A7  eor     ($00),y
         eor     ($00)
         .byte   $53
         .byte   $54,$00
@@ -127,8 +127,8 @@ L10C4   adc     ($00,x)
 L10D8   adc     @w$0000
         ror     @w$0000
         .byte   $6f
-        bvs     L10E1
-L10E1   adc     ($00),y
+        bvs     _L10E1
+_L10E1  adc     ($00),y
         adc     ($00)
         .byte   $73
         stz     $00,x
@@ -144,9 +144,9 @@ L10E1   adc     ($00),y
 L10F6   adc     @w$0000,x
         ror     @w$0000,x
         .byte   $7f
-        bra     L10FF
+        bra     _L10FF
 
-L10FF   sta     ($00,x)
+_L10FF  sta     ($00,x)
         .byte   $82,$00
         .byte   $83
         sty     $00
@@ -161,8 +161,8 @@ L10FF   sta     ($00,x)
         sta     @w$0000
         stx     @w$0000
         .byte   $8f
-        bcc     L111C
-L111C   sta     ($00),y
+        bcc     _L111C
+_L111C  sta     ($00),y
         sta     ($00)
         .byte   $93
         sty     $00,x
@@ -193,8 +193,8 @@ L111C   sta     ($00),y
         lda     @w$0000
         ldx     @w$0000
         .byte   $af
-        bcs     L1157
-L1157   lda     ($00),y
+        bcs     _L1157
+_L1157  lda     ($00),y
         lda     ($00)
         .byte   $b3
         ldy     $00,x
@@ -225,8 +225,8 @@ L1157   lda     ($00),y
         cmp     @w$0000
         dec     @w$0000
         .byte   $cf
-        bne     L1192
-L1192   cmp     ($00),y
+        bne     _L1192
+_L1192  cmp     ($00),y
         cmp     ($00)
         .byte   $d3
         .byte   $d4,$00
@@ -257,8 +257,8 @@ L1192   cmp     ($00),y
         sbc     @w$0000
         inc     @w$0000
         .byte   $ef
-        beq     L11CD
-L11CD   sbc     ($00),y
+        beq     _L11CD
+_L11CD  sbc     ($00),y
         sbc     ($00)
         .byte   $f3
         .byte   $f4,$00

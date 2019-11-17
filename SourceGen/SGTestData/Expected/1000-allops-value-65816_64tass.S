@@ -34,8 +34,8 @@ L101F   ora     ($ff,x)
         ora     $feff
         asl     $feff
         ora     $fdfeff
-        bpl     L1041
-L1041   ora     ($ff),y
+        bpl     _L1041
+_L1041  ora     ($ff),y
         ora     ($ff)
         ora     ($ff,s),y
         trb     $ff
@@ -66,8 +66,8 @@ L1041   ora     ($ff),y
         and     $feff
         rol     $feff
         and     $fdfeff
-        bmi     L1089
-L1089   and     ($ff),y
+        bmi     _L1089
+_L1089  and     ($ff),y
         and     ($ff)
         and     ($ff,s),y
         bit     $ff,x
@@ -95,13 +95,13 @@ L10AB   eor     ($ff,x)
         eor     #$ff
         lsr     a
         phk
-        jmp     L10C2
+        jmp     _L10C2
 
-L10C2   eor     $feff
+_L10C2  eor     $feff
         lsr     $feff
         eor     $fdfeff
-        bvc     L10CE
-L10CE   eor     ($ff),y
+        bvc     _L10CE
+_L10CE  eor     ($ff),y
         eor     ($ff)
         eor     ($ff,s),y
         mvn     #$fe,#$ff
@@ -112,9 +112,9 @@ L10CE   eor     ($ff),y
         eor     $feff,y
         phy
         tcd
-        jml     L10E7
+        jml     _L10E7
 
-L10E7   eor     $feff,x
+_L10E7  eor     $feff,x
         lsr     $feff,x
         eor     $fdfeff,x
         rts
@@ -136,8 +136,8 @@ L1106   jmp     ($feff)
 L1109   adc     $feff
         ror     $feff
         adc     $fdfeff
-        bvs     L1115
-L1115   adc     ($ff),y
+        bvs     _L1115
+_L1115  adc     ($ff),y
         adc     ($ff)
         adc     ($ff,s),y
         stz     $ff,x
@@ -153,12 +153,12 @@ L1115   adc     ($ff),y
 L112C   adc     $feff,x
         ror     $feff,x
         adc     $fdfeff,x
-        bra     L1138
+        bra     _L1138
 
-L1138   sta     ($ff,x)
-        brl     L113D
+_L1138  sta     ($ff,x)
+        brl     _L113D
 
-L113D   sta     $ff,s
+_L113D  sta     $ff,s
         sty     $ff
         sta     $ff
         stx     $ff
@@ -171,8 +171,8 @@ L113D   sta     $ff,s
         sta     $feff
         stx     $feff
         sta     $fdfeff
-        bcc     L115B
-L115B   sta     ($ff),y
+        bcc     _L115B
+_L115B  sta     ($ff),y
         sta     ($ff)
         sta     ($ff,s),y
         sty     $ff,x
@@ -203,8 +203,8 @@ L115B   sta     ($ff),y
         lda     $feff
         ldx     $feff
         lda     $fdfeff
-        bcs     L11A0
-L11A0   lda     ($ff),y
+        bcs     _L11A0
+_L11A0  lda     ($ff),y
         lda     ($ff)
         lda     ($ff,s),y
         ldy     $ff,x
@@ -235,8 +235,8 @@ L11A0   lda     ($ff),y
         cmp     $feff
         dec     $feff
         cmp     $fdfeff
-        bne     L11E5
-L11E5   cmp     ($ff),y
+        bne     _L11E5
+_L11E5  cmp     ($ff),y
         cmp     ($ff)
         cmp     ($ff,s),y
         pei     ($ff)
@@ -269,8 +269,8 @@ L11FC   cmp     $feff,x
         sbc     $feff
         inc     $feff
         sbc     $fdfeff
-        beq     L122A
-L122A   sbc     ($ff),y
+        beq     _L122A
+_L122A  sbc     ($ff),y
         sbc     ($ff)
         sbc     ($ff,s),y
         pea     $feff

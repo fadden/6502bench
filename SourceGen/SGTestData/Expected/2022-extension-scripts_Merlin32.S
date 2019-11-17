@@ -57,9 +57,9 @@ data01   dw    4386
          adr   PrintInlineL2String
          dw    data02
          dfb   $80
-data02   dw    data03
+data02   dw    :data03
          dfb   $80
-data03   asc   "AllEight"
+:data03  asc   "AllEight"
 
 L10B5    jsr   PrintInlineNullString ;split across address change
          per   $802d

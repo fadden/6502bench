@@ -32,8 +32,8 @@ L101F    dfb   $01,$80
          ora:  L0086
          asl:  L0086
          oral  L0089
-         bpl   L1041
-L1041    ora   (L0080),y
+         bpl   :L1041
+:L1041   ora   (L0080),y
          dfb   $12,$80
          ora   ($80,S),y
          trb   L0080
@@ -64,8 +64,8 @@ L1041    ora   (L0080),y
          and:  L0086
          rol:  L0086
          andl  L0089
-         bmi   L1089
-L1089    and   (L0080),y
+         bmi   :L1089
+:L1089   and   (L0080),y
          dfb   $32,$80
          and   ($80,S),y
          bit   L0080,x
@@ -93,13 +93,13 @@ L10AB    dfb   $41,$80
          eor   #$80
          lsr   A
          phk
-         jmp   L10C2
+         jmp   :L10C2
 
-L10C2    eor:  L0086
+:L10C2   eor:  L0086
          lsr:  L0086
          eorl  L0089
-         bvc   L10CE
-L10CE    eor   (L0080),y
+         bvc   :L10CE
+:L10CE   eor   (L0080),y
          dfb   $52,$80
          eor   ($80,S),y
          mvn   #$84,#$83
@@ -110,9 +110,9 @@ L10CE    eor   (L0080),y
          eor   L0086,y
          phy
          tcd
-         jml   L10E7
+         jml   :L10E7
 
-L10E7    eor:  L0086,x
+:L10E7   eor:  L0086,x
          lsr:  L0086,x
          eorl  L0089,x
          rts
@@ -134,8 +134,8 @@ L1106    jmp   (L0086)
 L1109    adc:  L0086
          ror:  L0086
          adcl  L0089
-         bvs   L1115
-L1115    adc   (L0080),y
+         bvs   :L1115
+:L1115   adc   (L0080),y
          dfb   $72,$80
          adc   ($80,S),y
          stz   L0080,x
@@ -151,12 +151,12 @@ L1115    adc   (L0080),y
 L112C    adc:  L0086,x
          ror:  L0086,x
          adcl  L0089,x
-         bra   L1138
+         bra   :L1138
 
-L1138    dfb   $81,$80
-         brl   L113D
+:L1138   dfb   $81,$80
+         brl   :L113D
 
-L113D    sta   $80,S
+:L113D   sta   $80,S
          sty   L0080
          sta   L0080
          stx   L0080
@@ -169,8 +169,8 @@ L113D    sta   $80,S
          sta:  L0086
          stx:  L0086
          stal  L0089
-         bcc   L115B
-L115B    sta   (L0080),y
+         bcc   :L115B
+:L115B   sta   (L0080),y
          dfb   $92,$80
          sta   ($80,S),y
          dfb   $94,$80
@@ -201,8 +201,8 @@ L115B    sta   (L0080),y
          lda:  L0086
          ldx:  L0086
          ldal  L0089
-         bcs   L11A0
-L11A0    lda   (L0080),y
+         bcs   :L11A0
+:L11A0   lda   (L0080),y
          dfb   $b2,$80
          lda   ($80,S),y
          ldy   L0080,x
@@ -233,8 +233,8 @@ L11A0    lda   (L0080),y
          cmp:  L0086
          dec:  L0086
          cmpl  L0089
-         bne   L11E5
-L11E5    cmp   (L0080),y
+         bne   :L11E5
+:L11E5   cmp   (L0080),y
          dfb   $d2,$80
          cmp   ($80,S),y
          dfb   $d4,$80
@@ -267,8 +267,8 @@ L11FC    cmp:  L0086,x
          sbc:  L0086
          inc:  L0086
          sbcl  L0089
-         beq   L122A
-L122A    sbc   (L0080),y
+         beq   :L122A
+:L122A   sbc   (L0080),y
          dfb   $f2,$80
          sbc   ($80,S),y
          pea   L0086
@@ -284,8 +284,8 @@ L122A    sbc   (L0080),y
          inc:  L0086,x
          sbcl  L0089,x
          org   $0080
-L0080    bit   L0082
-L0082    bit   L0082
-         bit   L0082
+L0080    bit   :L0082
+:L0082   bit   :L0082
+         bit   :L0082
 L0086    bit:  L0086
 L0089    ldal  L0089

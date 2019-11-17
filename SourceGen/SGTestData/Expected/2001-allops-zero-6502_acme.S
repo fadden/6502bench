@@ -39,8 +39,8 @@ L1038   slo     ($00,x)
         ora+2   $0000
         asl+2   $0000
         slo+2   $0000
-        bpl     L1056
-L1056   ora     ($00),y
+        bpl     @L1056
+@L1056  ora     ($00),y
         !byte   $12
 
 L1059   slo     ($00),y
@@ -73,8 +73,8 @@ L107D   rla     ($00,x)
         and+2   $0000
         rol+2   $0000
         rla+2   $0000
-        bmi     L109B
-L109B   and     ($00),y
+        bmi     @L109B
+@L109B  and     ($00),y
         !byte   $32
 
 L109E   rla     ($00),y
@@ -104,13 +104,13 @@ L10C0   sre     ($00,x)
         eor     #$00
         lsr
         asr     #$00
-        jmp     L10D3
+        jmp     @L10D3
 
-L10D3   eor+2   $0000
+@L10D3  eor+2   $0000
         lsr+2   $0000
         sre+2   $0000
-        bvc     L10DE
-L10DE   eor     ($00),y
+        bvc     @L10DE
+@L10DE  eor     ($00),y
         !byte   $52
 
 L10E1   sre     ($00),y
@@ -145,8 +145,8 @@ L1103   rra     ($00,x)
 L1116   adc+2   $0000
         ror+2   $0000
         rra+2   $0000
-        bvs     L1121
-L1121   adc     ($00),y
+        bvs     @L1121
+@L1121  adc     ($00),y
         !byte   $72
 
 L1124   rra     ($00),y
@@ -178,8 +178,8 @@ L1124   rra     ($00),y
         sta+2   $0000
         stx+2   $0000
         sax+2   $0000
-        bcc     L1166
-L1166   sta     ($00),y
+        bcc     @L1166
+@L1166  sta     ($00),y
         !byte   $92
 
 L1169   sha     ($00),y
@@ -211,8 +211,8 @@ L1169   sha     ($00),y
         lda+2   $0000
         ldx+2   $0000
         lax+2   $0000
-        bcs     L11AB
-L11AB   lda     ($00),y
+        bcs     @L11AB
+@L11AB  lda     ($00),y
         !byte   $b2
 
 L11AE   lax     ($00),y
@@ -244,8 +244,8 @@ L11AE   lax     ($00),y
         cmp+2   $0000
         dec+2   $0000
         dcp+2   $0000
-        bne     L11F0
-L11F0   cmp     ($00),y
+        bne     @L11F0
+@L11F0  cmp     ($00),y
         !byte   $d2
 
 L11F3   dcp     ($00),y
@@ -277,8 +277,8 @@ L11F3   dcp     ($00),y
         sbc+2   $0000
         inc+2   $0000
         isc+2   $0000
-        beq     L1235
-L1235   sbc     ($00),y
+        beq     @L1235
+@L1235  sbc     ($00),y
         !byte   $f2
 
 L1238   isc     ($00),y

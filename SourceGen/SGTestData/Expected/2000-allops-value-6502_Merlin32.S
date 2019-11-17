@@ -38,8 +38,8 @@ L1038    dfb   $03,$ff
          ora   $feff
          asl   $feff
          dfb   $0f,$ff,$fe
-         bpl   L1056
-L1056    ora   ($ff),y
+         bpl   :L1056
+:L1056   ora   ($ff),y
          dfb   $12
 
 L1059    dfb   $13,$ff
@@ -72,8 +72,8 @@ L107D    dfb   $23,$ff
          and   $feff
          rol   $feff
          dfb   $2f,$ff,$fe
-         bmi   L109B
-L109B    and   ($ff),y
+         bmi   :L109B
+:L109B   and   ($ff),y
          dfb   $32
 
 L109E    dfb   $33,$ff
@@ -103,13 +103,13 @@ L10C0    dfb   $43,$ff
          eor   #$ff
          lsr   A
          dfb   $4b,$ff
-         jmp   L10D3
+         jmp   :L10D3
 
-L10D3    eor   $feff
+:L10D3   eor   $feff
          lsr   $feff
          dfb   $4f,$ff,$fe
-         bvc   L10DE
-L10DE    eor   ($ff),y
+         bvc   :L10DE
+:L10DE   eor   ($ff),y
          dfb   $52
 
 L10E1    dfb   $53,$ff
@@ -144,8 +144,8 @@ L1103    dfb   $63,$ff
 L1116    adc   $feff
          ror   $feff
          dfb   $6f,$ff,$fe
-         bvs   L1121
-L1121    adc   ($ff),y
+         bvs   :L1121
+:L1121   adc   ($ff),y
          dfb   $72
 
 L1124    dfb   $73,$ff
@@ -177,8 +177,8 @@ L1124    dfb   $73,$ff
          sta   $feff
          stx   $feff
          dfb   $8f,$ff,$fe
-         bcc   L1166
-L1166    sta   ($ff),y
+         bcc   :L1166
+:L1166   sta   ($ff),y
          dfb   $92
 
 L1169    dfb   $93,$ff
@@ -210,8 +210,8 @@ L1169    dfb   $93,$ff
          lda   $feff
          ldx   $feff
          dfb   $af,$ff,$fe
-         bcs   L11AB
-L11AB    lda   ($ff),y
+         bcs   :L11AB
+:L11AB   lda   ($ff),y
          dfb   $b2
 
 L11AE    dfb   $b3,$ff
@@ -243,8 +243,8 @@ L11AE    dfb   $b3,$ff
          cmp   $feff
          dec   $feff
          dfb   $cf,$ff,$fe
-         bne   L11F0
-L11F0    cmp   ($ff),y
+         bne   :L11F0
+:L11F0   cmp   ($ff),y
          dfb   $d2
 
 L11F3    dfb   $d3,$ff
@@ -276,8 +276,8 @@ L11F3    dfb   $d3,$ff
          sbc   $feff
          inc   $feff
          dfb   $ef,$ff,$fe
-         beq   L1235
-L1235    sbc   ($ff),y
+         beq   :L1235
+:L1235   sbc   ($ff),y
          dfb   $f2
 
 L1238    dfb   $f3,$ff

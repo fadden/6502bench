@@ -503,9 +503,6 @@ limitations under the License.
                               IsChecked="{Binding LongLabelNewLine}"/>
                     <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
                               IsChecked="{Binding AddIdentComment}"/>
-                    <CheckBox Content="Disable label localization" Margin="4,8,0,0"
-                              IsChecked="{Binding DisableLabelLocalization}"
-                              Visibility="Collapsed"/>
                 </StackPanel>
             </TabItem>
 

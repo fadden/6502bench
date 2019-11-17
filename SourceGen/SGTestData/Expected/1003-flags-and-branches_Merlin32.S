@@ -66,197 +66,197 @@
          dfb   $00
 
 L105F    sep   #$80
-         bpl   L1065
-         bmi   L1067
+         bpl   :L1065
+         bmi   :L1067
 
-L1065    dfb   $00
+:L1065   dfb   $00
          dfb   $00
 
-L1067    rep   #$40
-         bvc   L106D
-
-         dfb   $00
-         dfb   $00
-
-L106D    sep   #$40
-         bvs   L1073
+:L1067   rep   #$40
+         bvc   :L106D
 
          dfb   $00
          dfb   $00
 
-L1073    rep   #$01
-         bcc   L1079
+:L106D   sep   #$40
+         bvs   :L1073
 
          dfb   $00
          dfb   $00
 
-L1079    sep   #$01
-         bcs   L107F
+:L1073   rep   #$01
+         bcc   :L1079
 
          dfb   $00
          dfb   $00
 
-L107F    rep   #$02
-         bne   L1085
+:L1079   sep   #$01
+         bcs   :L107F
 
          dfb   $00
          dfb   $00
 
-L1085    sep   #$02
-         beq   L108B
+:L107F   rep   #$02
+         bne   :L1085
 
          dfb   $00
          dfb   $00
 
-L108B    sep   #$ff
+:L1085   sep   #$02
+         beq   :L108B
+
+         dfb   $00
+         dfb   $00
+
+:L108B   sep   #$ff
          lda   #$01
-         bne   L1093
+         bne   :L1093
 
          dfb   $00
          dfb   $db
 
-L1093    lda   #$00
-         beq   L1099
+:L1093   lda   #$00
+         beq   :L1099
 
          dfb   $00
          dfb   $db
 
-L1099    bpl   L109D
+:L1099   bpl   :L109D
 
          dfb   $00
          dfb   $db
 
-L109D    lda   #$80
-         bmi   L10A3
+:L109D   lda   #$80
+         bmi   :L10A3
 
          dfb   $00
          dfb   $db
 
-L10A3    lda   #$ff
+:L10A3   lda   #$ff
          and   #$00
-         beq   L10AB
+         beq   :L10AB
 
          dfb   $00
          dfb   $db
 
-L10AB    lda   #$00
+:L10AB   lda   #$00
          and   #$ff
-         beq   L10B3
+         beq   :L10B3
 
          dfb   $00
          dfb   $db
 
-L10B3    lda   #$ff
+:L10B3   lda   #$ff
          and   #$7f
-         bne   L10BB
+         bne   :L10BB
 
          dfb   $00
          dfb   $db
 
-L10BB    bpl   L10BF
+:L10BB   bpl   :L10BF
 
          dfb   $00
          dfb   $db
 
-L10BF    lda   #$ff
+:L10BF   lda   #$ff
          and   #$80
-         bmi   L10C7
+         bmi   :L10C7
 
          dfb   $00
          dfb   $db
 
-L10C7    lda   #$00
+:L10C7   lda   #$00
          ora   #$00
-         beq   L10CF
+         beq   :L10CF
 
          dfb   $00
          dfb   $db
 
-L10CF    ora   #$01
-         bne   L10D5
+:L10CF   ora   #$01
+         bne   :L10D5
 
          dfb   $00
          dfb   $db
 
-L10D5    lda   #$00
+:L10D5   lda   #$00
          ora   #$7f
-         bpl   L10DD
+         bpl   :L10DD
 
          dfb   $00
          dfb   $db
 
-L10DD    ora   #$80
-         bmi   L10E3
+:L10DD   ora   #$80
+         bmi   :L10E3
 
          dfb   $00
          dfb   $db
 
-L10E3    lda   L10E3
+:L10E3   lda   :L10E3
          sec
          ror   A
-         bmi   L10EC
+         bmi   :L10EC
 
          dfb   $00
          dfb   $dc
 
-L10EC    clc
+:L10EC   clc
          ror   A
-         bpl   L10F2
+         bpl   :L10F2
 
          dfb   $00
          dfb   $dc
 
-L10F2    lda   #$00
+:L10F2   lda   #$00
          sec
          rol   A
-         bne   L10FA
+         bne   :L10FA
 
          dfb   $00
          dfb   $dc
 
-L10FA    clc
+:L10FA   clc
          php
          sec
          plp
-         bcc   L1102
+         bcc   :L1102
 
          dfb   $00
          dfb   $00
 
-L1102    sec
-         bcs   L1106
+:L1102   sec
+         bcs   :L1106
 
-L1105    clc
-L1106    lda   $33
-         beq   L1105
-         bcs   L110E
+:L1105   clc
+:L1106   lda   $33
+         beq   :L1105
+         bcs   :L110E
          lda   $44
-L110E    nop
+:L110E   nop
          rep   #$20
          mx    %01
          sep   #$10
-         jsr   L112A
+         jsr   :L112A
          rep   #$30
          mx    %00
-         jsr   L1130
+         jsr   :L1130
          sep   #$30
          mx    %11
-         jsr   L1130
+         jsr   :L1130
          rep   #$20
          mx    %01
          sep   #$10
-         jsr   L112A
+         jsr   :L112A
          sep   #$30
          mx    %11
          rts
 
          mx    %01
-L112A    lda   #$1234
+:L112A   lda   #$1234
          ldx   #$ff
          rts
 
          mx    %11
-L1130    lda   #$ff
+:L1130   lda   #$ff
          ldx   #$ee
          ldy   #$dd
          rts

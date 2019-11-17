@@ -35,8 +35,8 @@ L101F   ora     (L0080,x)
         ora     @wL0086
         asl     @wL0086
         ora     @lL0089
-        bpl     L1041
-L1041   ora     (L0080),y
+        bpl     _L1041
+_L1041  ora     (L0080),y
         ora     (L0080)
         ora     ($80,s),y
         trb     L0080
@@ -67,8 +67,8 @@ L1041   ora     (L0080),y
         and     @wL0086
         rol     @wL0086
         and     @lL0089
-        bmi     L1089
-L1089   and     (L0080),y
+        bmi     _L1089
+_L1089  and     (L0080),y
         and     (L0080)
         and     ($80,s),y
         bit     L0080,x
@@ -96,13 +96,13 @@ L10AB   eor     (L0080,x)
         eor     #$80
         lsr     a
         phk
-        jmp     L10C2
+        jmp     _L10C2
 
-L10C2   eor     @wL0086
+_L10C2  eor     @wL0086
         lsr     @wL0086
         eor     @lL0089
-        bvc     L10CE
-L10CE   eor     (L0080),y
+        bvc     _L10CE
+_L10CE  eor     (L0080),y
         eor     (L0080)
         eor     ($80,s),y
         mvn     #$84,#$83
@@ -113,9 +113,9 @@ L10CE   eor     (L0080),y
         eor     L0086,y
         phy
         tcd
-        jml     L10E7
+        jml     _L10E7
 
-L10E7   eor     @wL0086,x
+_L10E7  eor     @wL0086,x
         lsr     @wL0086,x
         eor     @lL0089,x
         rts
@@ -137,8 +137,8 @@ L1106   jmp     (L0086)
 L1109   adc     @wL0086
         ror     @wL0086
         adc     @lL0089
-        bvs     L1115
-L1115   adc     (L0080),y
+        bvs     _L1115
+_L1115  adc     (L0080),y
         adc     (L0080)
         adc     ($80,s),y
         stz     L0080,x
@@ -154,12 +154,12 @@ L1115   adc     (L0080),y
 L112C   adc     @wL0086,x
         ror     @wL0086,x
         adc     @lL0089,x
-        bra     L1138
+        bra     _L1138
 
-L1138   sta     (L0080,x)
-        brl     L113D
+_L1138  sta     (L0080,x)
+        brl     _L113D
 
-L113D   sta     $80,s
+_L113D  sta     $80,s
         sty     L0080
         sta     L0080
         stx     L0080
@@ -172,8 +172,8 @@ L113D   sta     $80,s
         sta     @wL0086
         stx     @wL0086
         sta     @lL0089
-        bcc     L115B
-L115B   sta     (L0080),y
+        bcc     _L115B
+_L115B  sta     (L0080),y
         sta     (L0080)
         sta     ($80,s),y
         sty     L0080,x
@@ -204,8 +204,8 @@ L115B   sta     (L0080),y
         lda     @wL0086
         ldx     @wL0086
         lda     @lL0089
-        bcs     L11A0
-L11A0   lda     (L0080),y
+        bcs     _L11A0
+_L11A0  lda     (L0080),y
         lda     (L0080)
         lda     ($80,s),y
         ldy     L0080,x
@@ -236,8 +236,8 @@ L11A0   lda     (L0080),y
         cmp     @wL0086
         dec     @wL0086
         cmp     @lL0089
-        bne     L11E5
-L11E5   cmp     (L0080),y
+        bne     _L11E5
+_L11E5  cmp     (L0080),y
         cmp     (L0080)
         cmp     ($80,s),y
         pei     (L0080)
@@ -270,8 +270,8 @@ L11FC   cmp     @wL0086,x
         sbc     @wL0086
         inc     @wL0086
         sbc     @lL0089
-        beq     L122A
-L122A   sbc     (L0080),y
+        beq     _L122A
+_L122A  sbc     (L0080),y
         sbc     (L0080)
         sbc     ($80,s),y
         pea     L0086
@@ -287,9 +287,9 @@ L122A   sbc     (L0080),y
         inc     @wL0086,x
         sbc     @lL0089,x
         .logical $0080
-L0080   bit     L0082
-L0082   bit     L0082
-        bit     L0082
+L0080   bit     _L0082
+_L0082  bit     _L0082
+        bit     _L0082
 L0086   bit     @wL0086
 L0089   lda     @lL0089
         .here

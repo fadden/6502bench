@@ -60,10 +60,10 @@ data01  !word   4386
         !24     PrintInlineL2String
         !word   data02
         !byte   $80
-data02  !word   data03
+data02  !word   @data03
         !byte   $80
         !xor    $80 {
-data03  !text   "AllEight"
+@data03 !text   "AllEight"
         }
 
 L10B5   jsr     PrintInlineNullString ;split across address change

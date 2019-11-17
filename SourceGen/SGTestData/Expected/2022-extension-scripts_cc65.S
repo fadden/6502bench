@@ -61,14 +61,14 @@ data01:  .word   4386
          .faraddr PrintInlineL2String
          .word   data02
          .byte   $80
-data02:  .word   data03
+data02:  .word   @data03
          .byte   $80
 .macro   HiAscii Arg
          .repeat .strlen(Arg), I
          .byte   .strat(Arg, I) | $80
          .endrep
 .endmacro
-data03:  HiAscii "AllEight"
+@data03: HiAscii "AllEight"
 
 L10B5:   jsr     PrintInlineNullString ;split across address change
          per     $802d

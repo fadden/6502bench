@@ -389,11 +389,6 @@ namespace SourceGen.Tests {
             // This could be on or off.  Off seems less distracting.
             settings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
-            // Disable label localization.  We want to be able to play with this a bit
-            // without disrupting all the other tests.  Use a test-only feature to enable
-            // it for the localization test.
-            settings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, true);
-
             IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
             while (iter.MoveNext()) {
                 AssemblerInfo.Id asmId = iter.Current.AssemblerId;
@@ -420,13 +415,9 @@ namespace SourceGen.Tests {
             // We could probably make this a more general mechanism, but that would strain
             // things a bit, since we need to know the settings name, bool/int/string, and
             // desired value.  Easier to just have a set of named features.
-            const string ENABLE_LABEL_LOCALIZATION = "__ENABLE_LABEL_LOCALIZATION";
             const string ENABLE_LABEL_NEWLINE = "__ENABLE_LABEL_NEWLINE";
             const string ENABLE_CYCLE_COUNTS = "__ENABLE_CYCLE_COUNTS";
 
-            if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_LABEL_LOCALIZATION)) {
-                settings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false);
-            }
             if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_LABEL_NEWLINE)) {
                 settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, true);
             }

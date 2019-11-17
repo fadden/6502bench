@@ -647,14 +647,6 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
             }
         }
-        public bool DisableLabelLocalization {
-            get { return mSettings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false); }
-            set {
-                mSettings.SetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
 
         private void Loaded_AsmConfig() {
             asmConfigComboBox.SelectedItem = AssemblerInfo.GetAssemblerInfo(mInitialAsmId);
@@ -669,8 +661,6 @@ namespace SourceGen.WpfGui {
                 mSettings.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
             AddIdentComment =
                 mSettings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false);
-            DisableLabelLocalization =
-                mSettings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false);
         }
 
         /// <summary>

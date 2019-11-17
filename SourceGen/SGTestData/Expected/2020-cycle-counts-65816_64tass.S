@@ -4,26 +4,26 @@
         .xs
 L10F0   sec                ;2
         xce                ;2
-        bra     L1108      ;4  crosses page boundary
+        bra     _L1108     ;4  crosses page boundary
 
         .fill   20,$00
 
-L1108   bra     L110A      ;3
+_L1108  bra     _L110A     ;3
 
-L110A   lda     #$00       ;2
-        beq     L1110      ;3  branch always
+_L110A  lda     #$00       ;2
+        beq     _L1110     ;3  branch always
 
         .byte   $00
         .byte   $00
 
-L1110   bne     L1110      ;2  branch never
+_L1110  bne     _L1110     ;2  branch never
         lda     $1234      ;4
-        beq     L1119      ;2+ branch maybe
+        beq     _L1119     ;2+ branch maybe
         brk                ;7  BRK with E=1
 
         .byte   $01
 
-L1119   lda     $22,s      ;4
+_L1119  lda     $22,s      ;4
         trb     $02        ;5+
         asl     $03,x      ;6+
         clc                ;2
@@ -36,16 +36,16 @@ L1119   lda     $22,s      ;4
         trb     $04        ;7+
         asl     $05,x      ;8+
         ldx     $1235      ;5
-        beq     L1134      ;2+
+        beq     _L1134     ;2+
         brk                ;8  BRK with E=0
 
         .byte   $02
 
-L1134   lda     $33,s      ;5
-        beq     L113A      ;2+
+_L1134  lda     $33,s      ;5
+        beq     _L113A     ;2+
         bra     L10F0      ;3
 
-L113A   rep     #$20       ;3
+_L113A  rep     #$20       ;3
         sep     #$10       ;3
         .xs
         sta     $10        ;4+

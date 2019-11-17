@@ -221,12 +221,10 @@ namespace SourceGen.AsmGen {
             worker.ReportProgress(0, msg);
 
             mLocalizer = new LabelLocalizer(Project);
-            if (!Settings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false)) {
-                // While '.' labels are limited to the current zone, '@' labels are visible
-                // between global labels.  (This is poorly documented.)
-                mLocalizer.LocalPrefix = "@";
-                mLocalizer.Analyze();
-            }
+            // While '.' labels are limited to the current zone, '@' labels are visible
+            // between global labels.  (This is poorly documented.)
+            mLocalizer.LocalPrefix = "@";
+            mLocalizer.Analyze();
             mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.

@@ -64,10 +64,10 @@ data01  .word   4386
         .long   PrintInlineL2String
         .word   data02
         .byte   $80
-data02  .word   data03
+data02  .word   _data03
         .byte   $80
         .enc    sg_hiascii
-data03  .text   "AllEight"
+_data03 .text   "AllEight"
 
 L10B5   jsr     PrintInlineNullString ;split across address change
         per     $802d

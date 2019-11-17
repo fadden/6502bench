@@ -56,15 +56,15 @@ skipdata: lda    #'h'
          lda     #$6868
          rts
 
-more_ascii: .byte 'h'
+@more_ascii: .byte 'h'
          .byte   $80
          .word   $6868
          .byte   $80
          .word   skipdata
          .faraddr skipdata
          .dbyt   skipdata
-         .byte   <more_ascii
-         .byte   >more_ascii
-         .word   more_ascii
-         .faraddr more_ascii
-         .dbyt   more_ascii
+         .byte   <@more_ascii
+         .byte   >@more_ascii
+         .word   @more_ascii
+         .faraddr @more_ascii
+         .dbyt   @more_ascii

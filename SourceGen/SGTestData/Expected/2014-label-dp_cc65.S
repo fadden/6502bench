@@ -36,8 +36,8 @@ L101F:   ora     (L0080,x)
          ora     a:L0086
          asl     a:L0086
          ora     f:L0089
-         bpl     L1041
-L1041:   ora     (L0080),y
+         bpl     @L1041
+@L1041:  ora     (L0080),y
          ora     (L0080)
          ora     ($80,S),y
          trb     z:L0080
@@ -68,8 +68,8 @@ L1041:   ora     (L0080),y
          and     a:L0086
          rol     a:L0086
          and     f:L0089
-         bmi     L1089
-L1089:   and     (L0080),y
+         bmi     @L1089
+@L1089:  and     (L0080),y
          and     (L0080)
          and     ($80,S),y
          bit     z:L0080,x
@@ -97,13 +97,13 @@ L10AB:   eor     (L0080,x)
          eor     #$80
          lsr     A
          phk
-         jmp     L10C2
+         jmp     @L10C2
 
-L10C2:   eor     a:L0086
+@L10C2:  eor     a:L0086
          lsr     a:L0086
          eor     f:L0089
-         bvc     L10CE
-L10CE:   eor     (L0080),y
+         bvc     @L10CE
+@L10CE:  eor     (L0080),y
          eor     (L0080)
          eor     ($80,S),y
          mvn     #$84,#$83
@@ -114,9 +114,9 @@ L10CE:   eor     (L0080),y
          eor     L0086,y
          phy
          tcd
-         jml     L10E7
+         jml     @L10E7
 
-L10E7:   eor     a:L0086,x
+@L10E7:  eor     a:L0086,x
          lsr     a:L0086,x
          eor     f:L0089,x
          rts
@@ -138,8 +138,8 @@ L1106:   jmp     (L0086)
 L1109:   adc     a:L0086
          ror     a:L0086
          adc     f:L0089
-         bvs     L1115
-L1115:   adc     (L0080),y
+         bvs     @L1115
+@L1115:  adc     (L0080),y
          adc     (L0080)
          adc     ($80,S),y
          stz     z:L0080,x
@@ -155,12 +155,12 @@ L1115:   adc     (L0080),y
 L112C:   adc     a:L0086,x
          ror     a:L0086,x
          adc     f:L0089,x
-         bra     L1138
+         bra     @L1138
 
-L1138:   sta     (L0080,x)
-         brl     L113D
+@L1138:  sta     (L0080,x)
+         brl     @L113D
 
-L113D:   sta     $80,S
+@L113D:  sta     $80,S
          sty     z:L0080
          sta     z:L0080
          stx     z:L0080
@@ -173,8 +173,8 @@ L113D:   sta     $80,S
          sta     a:L0086
          stx     a:L0086
          sta     f:L0089
-         bcc     L115B
-L115B:   sta     (L0080),y
+         bcc     @L115B
+@L115B:  sta     (L0080),y
          sta     (L0080)
          sta     ($80,S),y
          sty     z:L0080,x
@@ -205,8 +205,8 @@ L115B:   sta     (L0080),y
          lda     a:L0086
          ldx     a:L0086
          lda     f:L0089
-         bcs     L11A0
-L11A0:   lda     (L0080),y
+         bcs     @L11A0
+@L11A0:  lda     (L0080),y
          lda     (L0080)
          lda     ($80,S),y
          ldy     z:L0080,x
@@ -237,8 +237,8 @@ L11A0:   lda     (L0080),y
          cmp     a:L0086
          dec     a:L0086
          cmp     f:L0089
-         bne     L11E5
-L11E5:   cmp     (L0080),y
+         bne     @L11E5
+@L11E5:  cmp     (L0080),y
          cmp     (L0080)
          cmp     ($80,S),y
          pei     (L0080)
@@ -271,8 +271,8 @@ L11FC:   cmp     a:L0086,x
          sbc     a:L0086
          inc     a:L0086
          sbc     f:L0089
-         beq     L122A
-L122A:   sbc     (L0080),y
+         beq     @L122A
+@L122A:  sbc     (L0080),y
          sbc     (L0080)
          sbc     ($80,S),y
          pea     L0086
@@ -289,8 +289,8 @@ L122A:   sbc     (L0080),y
          sbc     f:L0089,x
 ;         .segment "SEG001"
          .org    $0080
-L0080:   bit     z:L0082
-L0082:   bit     L0082
-         bit     L0082
+L0080:   bit     z:@L0082
+@L0082:  bit     @L0082
+         bit     @L0082
 L0086:   bit     a:L0086
 L0089:   lda     f:L0089

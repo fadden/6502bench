@@ -35,7 +35,7 @@ BankWrap =      $fff0
 L1000   lda     CodeWrap+255
         ldx     L1000
         ldy     L1000+1
-        lda     L1148
+        lda     _L1148
         lda     CodeWrap+585
         lda     CodeWrap+592
         nop
@@ -155,5 +155,5 @@ LocalVar .var   $41
         bit     MoreMultiZero+32
         bit     MoreMultiZero+240
         nop
-L1148   rts
+_L1148  rts
 

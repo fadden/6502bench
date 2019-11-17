@@ -51,15 +51,15 @@ skipdata lda   #'h'
          lda   #$6868
          rts
 
-more_ascii dfb 'h'
+:more_ascii dfb 'h'
          dfb   $80
          dw    $6868
          dfb   $80
          dw    skipdata
          adr   skipdata
          ddb   skipdata
-         dfb   <more_ascii
-         dfb   >more_ascii
-         dw    more_ascii
-         adr   more_ascii
-         ddb   more_ascii
+         dfb   <:more_ascii
+         dfb   >:more_ascii
+         dw    :more_ascii
+         adr   :more_ascii
+         ddb   :more_ascii

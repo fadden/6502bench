@@ -26,8 +26,8 @@ L1014    ora   ($ff,x)
          ora   $feff
          asl   $feff
          dfb   $0f
-         bpl   L1031
-L1031    ora   ($ff),y
+         bpl   :L1031
+:L1031   ora   ($ff),y
          ora   ($ff)
          dfb   $13
          trb   $ff
@@ -58,8 +58,8 @@ L1031    ora   ($ff),y
          and   $feff
          rol   $feff
          dfb   $2f
-         bmi   L106D
-L106D    and   ($ff),y
+         bmi   :L106D
+:L106D   and   ($ff),y
          and   ($ff)
          dfb   $33
          bit   $ff,x
@@ -87,13 +87,13 @@ L108A    eor   ($ff,x)
          eor   #$ff
          lsr   A
          dfb   $4b
-         jmp   L109E
+         jmp   :L109E
 
-L109E    eor   $feff
+:L109E   eor   $feff
          lsr   $feff
          dfb   $4f
-         bvc   L10A7
-L10A7    eor   ($ff),y
+         bvc   :L10A7
+:L10A7   eor   ($ff),y
          eor   ($ff)
          dfb   $53
          dfb   $54,$ff
@@ -126,8 +126,8 @@ L10C4    adc   ($ff,x)
 L10D8    adc   $feff
          ror   $feff
          dfb   $6f
-         bvs   L10E1
-L10E1    adc   ($ff),y
+         bvs   :L10E1
+:L10E1   adc   ($ff),y
          adc   ($ff)
          dfb   $73
          stz   $ff,x
@@ -143,9 +143,9 @@ L10E1    adc   ($ff),y
 L10F6    adc   $feff,x
          ror   $feff,x
          dfb   $7f
-         bra   L10FF
+         bra   :L10FF
 
-L10FF    sta   ($ff,x)
+:L10FF   sta   ($ff,x)
          dfb   $82,$ff
          dfb   $83
          sty   $ff
@@ -160,8 +160,8 @@ L10FF    sta   ($ff,x)
          sta   $feff
          stx   $feff
          dfb   $8f
-         bcc   L111C
-L111C    sta   ($ff),y
+         bcc   :L111C
+:L111C   sta   ($ff),y
          sta   ($ff)
          dfb   $93
          sty   $ff,x
@@ -192,8 +192,8 @@ L111C    sta   ($ff),y
          lda   $feff
          ldx   $feff
          dfb   $af
-         bcs   L1157
-L1157    lda   ($ff),y
+         bcs   :L1157
+:L1157   lda   ($ff),y
          lda   ($ff)
          dfb   $b3
          ldy   $ff,x
@@ -224,8 +224,8 @@ L1157    lda   ($ff),y
          cmp   $feff
          dec   $feff
          dfb   $cf
-         bne   L1192
-L1192    cmp   ($ff),y
+         bne   :L1192
+:L1192   cmp   ($ff),y
          cmp   ($ff)
          dfb   $d3
          dfb   $d4,$ff
@@ -256,8 +256,8 @@ L1192    cmp   ($ff),y
          sbc   $feff
          inc   $feff
          dfb   $ef
-         beq   L11CD
-L11CD    sbc   ($ff),y
+         beq   :L11CD
+:L11CD   sbc   ($ff),y
          sbc   ($ff)
          dfb   $f3
          dfb   $f4,$ff

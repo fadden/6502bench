@@ -39,8 +39,8 @@ L1038   slo     ($ff,x)
         ora     $feff
         asl     $feff
         slo     $feff
-        bpl     L1056
-L1056   ora     ($ff),y
+        bpl     _L1056
+_L1056  ora     ($ff),y
         .byte   $12
 
 L1059   slo     ($ff),y
@@ -73,8 +73,8 @@ L107D   rla     ($ff,x)
         and     $feff
         rol     $feff
         rla     $feff
-        bmi     L109B
-L109B   and     ($ff),y
+        bmi     _L109B
+_L109B  and     ($ff),y
         .byte   $32
 
 L109E   rla     ($ff),y
@@ -104,13 +104,13 @@ L10C0   sre     ($ff,x)
         eor     #$ff
         lsr     a
         alr     #$ff
-        jmp     L10D3
+        jmp     _L10D3
 
-L10D3   eor     $feff
+_L10D3  eor     $feff
         lsr     $feff
         sre     $feff
-        bvc     L10DE
-L10DE   eor     ($ff),y
+        bvc     _L10DE
+_L10DE  eor     ($ff),y
         .byte   $52
 
 L10E1   sre     ($ff),y
@@ -145,8 +145,8 @@ L1103   rra     ($ff,x)
 L1116   adc     $feff
         ror     $feff
         rra     $feff
-        bvs     L1121
-L1121   adc     ($ff),y
+        bvs     _L1121
+_L1121  adc     ($ff),y
         .byte   $72
 
 L1124   rra     ($ff),y
@@ -178,8 +178,8 @@ L1124   rra     ($ff),y
         sta     $feff
         stx     $feff
         sax     $feff
-        bcc     L1166
-L1166   sta     ($ff),y
+        bcc     _L1166
+_L1166  sta     ($ff),y
         .byte   $92
 
 L1169   .byte   $93,$ff
@@ -211,8 +211,8 @@ L1169   .byte   $93,$ff
         lda     $feff
         ldx     $feff
         lax     $feff
-        bcs     L11AB
-L11AB   lda     ($ff),y
+        bcs     _L11AB
+_L11AB  lda     ($ff),y
         .byte   $b2
 
 L11AE   lax     ($ff),y
@@ -244,8 +244,8 @@ L11AE   lax     ($ff),y
         cmp     $feff
         dec     $feff
         dcp     $feff
-        bne     L11F0
-L11F0   cmp     ($ff),y
+        bne     _L11F0
+_L11F0  cmp     ($ff),y
         .byte   $d2
 
 L11F3   dcp     ($ff),y
@@ -277,8 +277,8 @@ L11F3   dcp     ($ff),y
         sbc     $feff
         inc     $feff
         isc     $feff
-        beq     L1235
-L1235   sbc     ($ff),y
+        beq     _L1235
+_L1235  sbc     ($ff),y
         .byte   $f2
 
 L1238   isc     ($ff),y

@@ -5,83 +5,83 @@
         .as
         .xs
 load11  lda     #$11
-L1002   ldx     #$22
-load33  ldy     #$33
-L1006   lda     #$44
-predat  bra     L1042
+_L1002  ldx     #$22
+_load33 ldy     #$33
+_L1006  lda     #$44
+_predat bra     _L1042
 
         .word   $0123
-dat1    .word   $4567
+_dat1   .word   $4567
         .word   $89ab
-L1010   .word   $cdef
-L1012   .word   $0011
-L1014   .word   $2233
+_L1010  .word   $cdef
+_L1012  .word   $0011
+_L1014  .word   $2233
         .byte   $80
         .text   "The quick brown fox"
         .byte   $80
-        .word   L1042
-        .word   L1041
-        .word   L1042+1
-fill0   .fill   16,$00
-L1041   .byte   $80
+        .word   _L1042
+        .word   _L1041
+        .word   _L1042+1
+_fill0  .fill   16,$00
+_L1041  .byte   $80
 
-L1042   lda     predat+2
-        lda     L1041
-        asl     dat1
-        rol     dat1+2
-        ror     L1010
-        and     L1012
-        ora     L1014
-        lda     fill0
-        sta     fill0+4
-        lda     fill0+8
-        sta     fill0+12
-        jsr     L1002
-        lda     L1006
-L1069   pea     L1069-1
-        per     L1069-1
-        lda     L1069+1
-        lda     L1069+2
+_L1042  lda     _predat+2
+        lda     _L1041
+        asl     _dat1
+        rol     _dat1+2
+        ror     _L1010
+        and     _L1012
+        ora     _L1014
+        lda     _fill0
+        sta     _fill0+4
+        lda     _fill0+8
+        sta     _fill0+12
+        jsr     _L1002
+        lda     _L1006
+_L1069  pea     _L1069-1
+        per     _L1069-1
+        lda     _L1069+1
+        lda     _L1069+2
         lda     #$ea
-L1077   sta     L1077
-L107A   sta     L107A+1
+_L1077  sta     _L1077
+_L107A  sta     _L107A+1
         sta     $107f      ;self-ref; operand format refs nonexistent symbol
-        brl     L2002
+        brl     _L2002
 
         .byte   $80
-dat81   .byte   $81
+_dat81  .byte   $81
         .logical $2000
-L2000   .byte   $82
+_L2000  .byte   $82
         .byte   $83
 
-L2002   bit     L2002
-        lda     dat81
-        lda     L2000
-        bra     L2018
+_L2002  bit     _L2002
+        lda     _dat81
+        lda     _L2000
+        bra     _L2018
 
-L200D   .byte   $7c
-L200E   .byte   $7d
-L200F   .byte   $7e
+_L200D  .byte   $7c
+_L200E  .byte   $7d
+_L200F  .byte   $7e
         .byte   $7f
-nearby  .byte   $80
+_nearby .byte   $80
         .byte   $81
         .byte   $82
         .byte   $83
-L2015   .byte   $84
-L2016   .byte   $85
-L2017   .byte   $86
+_L2015  .byte   $84
+_L2016  .byte   $85
+_L2017  .byte   $86
 
-L2018   lda     L200D
-        lda     L200E
-        lda     L200F
-        lda     nearby-1
-        lda     nearby
-        lda     nearby+1
-        lda     nearby+2
-        lda     nearby+3
-        lda     L2015
-        lda     L2016
-        lda     L2017
+_L2018  lda     _L200D
+        lda     _L200E
+        lda     _L200F
+        lda     _nearby-1
+        lda     _nearby
+        lda     _nearby+1
+        lda     _nearby+2
+        lda     _nearby+3
+        lda     _L2015
+        lda     _L2016
+        lda     _L2017
         rts
 
         .here

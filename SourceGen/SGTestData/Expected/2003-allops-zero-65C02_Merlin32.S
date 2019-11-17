@@ -26,8 +26,8 @@ L1014    ora   ($00,x)
          ora:  $0000
          asl:  $0000
          dfb   $0f
-         bpl   L1031
-L1031    ora   ($00),y
+         bpl   :L1031
+:L1031   ora   ($00),y
          ora   ($00)
          dfb   $13
          trb   $00
@@ -58,8 +58,8 @@ L1031    ora   ($00),y
          and:  $0000
          rol:  $0000
          dfb   $2f
-         bmi   L106D
-L106D    and   ($00),y
+         bmi   :L106D
+:L106D   and   ($00),y
          and   ($00)
          dfb   $33
          bit   $00,x
@@ -87,13 +87,13 @@ L108A    eor   ($00,x)
          eor   #$00
          lsr   A
          dfb   $4b
-         jmp   L109E
+         jmp   :L109E
 
-L109E    eor:  $0000
+:L109E   eor:  $0000
          lsr:  $0000
          dfb   $4f
-         bvc   L10A7
-L10A7    eor   ($00),y
+         bvc   :L10A7
+:L10A7   eor   ($00),y
          eor   ($00)
          dfb   $53
          dfb   $54,$00
@@ -126,8 +126,8 @@ L10C4    adc   ($00,x)
 L10D8    adc:  $0000
          ror:  $0000
          dfb   $6f
-         bvs   L10E1
-L10E1    adc   ($00),y
+         bvs   :L10E1
+:L10E1   adc   ($00),y
          adc   ($00)
          dfb   $73
          stz   $00,x
@@ -143,9 +143,9 @@ L10E1    adc   ($00),y
 L10F6    adc:  $0000,x
          ror:  $0000,x
          dfb   $7f
-         bra   L10FF
+         bra   :L10FF
 
-L10FF    sta   ($00,x)
+:L10FF   sta   ($00,x)
          dfb   $82,$00
          dfb   $83
          sty   $00
@@ -160,8 +160,8 @@ L10FF    sta   ($00,x)
          sta:  $0000
          stx:  $0000
          dfb   $8f
-         bcc   L111C
-L111C    sta   ($00),y
+         bcc   :L111C
+:L111C   sta   ($00),y
          sta   ($00)
          dfb   $93
          sty   $00,x
@@ -192,8 +192,8 @@ L111C    sta   ($00),y
          lda:  $0000
          ldx:  $0000
          dfb   $af
-         bcs   L1157
-L1157    lda   ($00),y
+         bcs   :L1157
+:L1157   lda   ($00),y
          lda   ($00)
          dfb   $b3
          ldy   $00,x
@@ -224,8 +224,8 @@ L1157    lda   ($00),y
          cmp:  $0000
          dec:  $0000
          dfb   $cf
-         bne   L1192
-L1192    cmp   ($00),y
+         bne   :L1192
+:L1192   cmp   ($00),y
          cmp   ($00)
          dfb   $d3
          dfb   $d4,$00
@@ -256,8 +256,8 @@ L1192    cmp   ($00),y
          sbc:  $0000
          inc:  $0000
          dfb   $ef
-         beq   L11CD
-L11CD    sbc   ($00),y
+         beq   :L11CD
+:L11CD   sbc   ($00),y
          sbc   ($00)
          dfb   $f3
          dfb   $f4,$00

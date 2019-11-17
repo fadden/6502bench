@@ -34,8 +34,8 @@ L101F   ora     ($00,x)
         ora     @w$0000
         asl     @w$0000
         ora     @l$000000
-        bpl     L1041
-L1041   ora     ($00),y
+        bpl     _L1041
+_L1041  ora     ($00),y
         ora     ($00)
         ora     ($00,s),y
         trb     $00
@@ -66,8 +66,8 @@ L1041   ora     ($00),y
         and     @w$0000
         rol     @w$0000
         and     @l$000000
-        bmi     L1089
-L1089   and     ($00),y
+        bmi     _L1089
+_L1089  and     ($00),y
         and     ($00)
         and     ($00,s),y
         bit     $00,x
@@ -95,13 +95,13 @@ L10AB   eor     ($00,x)
         eor     #$00
         lsr     a
         phk
-        jmp     L10C2
+        jmp     _L10C2
 
-L10C2   eor     @w$0000
+_L10C2  eor     @w$0000
         lsr     @w$0000
         eor     @l$000000
-        bvc     L10CE
-L10CE   eor     ($00),y
+        bvc     _L10CE
+_L10CE  eor     ($00),y
         eor     ($00)
         eor     ($00,s),y
         mvn     #$00,#$00
@@ -112,9 +112,9 @@ L10CE   eor     ($00),y
         eor     $0000,y
         phy
         tcd
-        jml     L10E7
+        jml     _L10E7
 
-L10E7   eor     @w$0000,x
+_L10E7  eor     @w$0000,x
         lsr     @w$0000,x
         eor     @l$000000,x
         rts
@@ -136,8 +136,8 @@ L1106   jmp     ($0000)
 L1109   adc     @w$0000
         ror     @w$0000
         adc     @l$000000
-        bvs     L1115
-L1115   adc     ($00),y
+        bvs     _L1115
+_L1115  adc     ($00),y
         adc     ($00)
         adc     ($00,s),y
         stz     $00,x
@@ -153,12 +153,12 @@ L1115   adc     ($00),y
 L112C   adc     @w$0000,x
         ror     @w$0000,x
         adc     @l$000000,x
-        bra     L1138
+        bra     _L1138
 
-L1138   sta     ($00,x)
-        brl     L113D
+_L1138  sta     ($00,x)
+        brl     _L113D
 
-L113D   sta     $00,s
+_L113D  sta     $00,s
         sty     $00
         sta     $00
         stx     $00
@@ -171,8 +171,8 @@ L113D   sta     $00,s
         sta     @w$0000
         stx     @w$0000
         sta     @l$000000
-        bcc     L115B
-L115B   sta     ($00),y
+        bcc     _L115B
+_L115B  sta     ($00),y
         sta     ($00)
         sta     ($00,s),y
         sty     $00,x
@@ -203,8 +203,8 @@ L115B   sta     ($00),y
         lda     @w$0000
         ldx     @w$0000
         lda     @l$000000
-        bcs     L11A0
-L11A0   lda     ($00),y
+        bcs     _L11A0
+_L11A0  lda     ($00),y
         lda     ($00)
         lda     ($00,s),y
         ldy     $00,x
@@ -235,8 +235,8 @@ L11A0   lda     ($00),y
         cmp     @w$0000
         dec     @w$0000
         cmp     @l$000000
-        bne     L11E5
-L11E5   cmp     ($00),y
+        bne     _L11E5
+_L11E5  cmp     ($00),y
         cmp     ($00)
         cmp     ($00,s),y
         pei     ($00)
@@ -269,8 +269,8 @@ L11FC   cmp     @w$0000,x
         sbc     @w$0000
         inc     @w$0000
         sbc     @l$000000
-        beq     L122A
-L122A   sbc     ($00),y
+        beq     _L122A
+_L122A  sbc     ($00),y
         sbc     ($00)
         sbc     ($00,s),y
         pea     $0000

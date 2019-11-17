@@ -55,15 +55,15 @@ skipdata lda    #'h'
         lda     #$6868
         rts
 
-more_ascii !byte 'h'
+@more_ascii !byte 'h'
         !byte   $80
         !word   $6868
         !byte   $80
         !word   skipdata
         !24     skipdata
         !byte   $10,$3f
-        !byte   <more_ascii
-        !byte   >more_ascii
-        !word   more_ascii
-        !24     more_ascii
+        !byte   <@more_ascii
+        !byte   >@more_ascii
+        !word   @more_ascii
+        !24     @more_ascii
         !byte   $10,$70

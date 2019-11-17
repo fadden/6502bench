@@ -229,10 +229,8 @@ namespace SourceGen.AsmGen {
             worker.ReportProgress(0, msg);
 
             mLocalizer = new LabelLocalizer(Project);
-            if (!Settings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false)) {
-                mLocalizer.LocalPrefix = "_";
-                mLocalizer.Analyze();
-            }
+            mLocalizer.LocalPrefix = "_";
+            mLocalizer.Analyze();
             mLocalizer.MaskLeadingUnderscores();
             mLocalizer.FixOpcodeLabels();
 

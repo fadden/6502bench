@@ -217,11 +217,9 @@ namespace SourceGen.AsmGen {
             worker.ReportProgress(0, msg);
 
             mLocalizer = new LabelLocalizer(Project);
-            if (!Settings.GetBool(AppSettings.SRCGEN_DISABLE_LABEL_LOCALIZATION, false)) {
-                mLocalizer.LocalPrefix = "@";
-                mLocalizer.QuirkVariablesEndScope = true;
-                mLocalizer.Analyze();
-            }
+            mLocalizer.LocalPrefix = "@";
+            mLocalizer.QuirkVariablesEndScope = true;
+            mLocalizer.Analyze();
             mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.

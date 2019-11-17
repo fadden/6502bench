@@ -8,29 +8,29 @@ L1002   bit     L1002
         lda     #$11
         nop
         .byte   $2c
-L100A   ldx     #$ff
+_L100A  ldx     #$ff
         nop
-        jsr     L100A
+        jsr     _L100A
         nop
         .byte   $2c
-L1012   ldx     #$ff
+_L1012  ldx     #$ff
         nop
-        jsr     L1012
+        jsr     _L1012
         jsr     $2456
-L101B   .dword  $22a211a9
-        jsr     L101B
-        jsr     L1028
+_L101B  .dword  $22a211a9
+        jsr     _L101B
+        jsr     _L1028
         jsr     $2456
-L1028   .dword  $44a233a9
-        jsr     L103A
-        jsr     L103D
+_L1028  .dword  $44a233a9
+        jsr     _L103A
+        jsr     _L103D
         nop
         lda     $2456
-        jsr     L1045
+        jsr     _L1045
         rts
 
-L103A   jsr     $2456
-L103D   lda     #$55
+_L103A  jsr     $2456
+_L103D  lda     #$55
         ldx     #$66
         rts
 
@@ -38,6 +38,6 @@ L103D   lda     #$55
         .byte   $82
         .byte   $83
 
-L1045   lda     #$99
+_L1045  lda     #$99
         rts
 

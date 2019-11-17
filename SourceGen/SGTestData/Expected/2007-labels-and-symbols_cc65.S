@@ -78,7 +78,7 @@ start:   clc
          lda     #biggie & $ffff
          lda     #biggie >> 8
          lda     #biggie >> 16
-         bra     skipdata
+         bra     @skipdata
 
          .byte   zip
          .byte   <absh
@@ -115,90 +115,90 @@ start:   clc
          .dword  start >> 8
          .dword  start >> 16
 
-skipdata: lda    #biggie >> 16 -1
+@skipdata: lda   #biggie >> 16 -1
          mvn     #^biggie,#^biggie-17
          mvp     #^start,#^start+17
          mvn     #18,#1
          mvp     #%00000001,#%00010010
-         per     skipdata
-         brl     nextchunk
+         per     @skipdata
+         brl     @nextchunk
 
-nextchunk: jml   L1000_1
+@nextchunk: jml  @L1000_1
 
 ;         .segment "SEG001"
          .org    $1000
-L1000_1: nop
-L1000:   nop
-L1000_0: nop
-l1000:   sep     #$30
+@L1000_1: nop
+@L1000:  nop
+@L1000_0: nop
+@l1000:  sep     #$30
          .a8
          .i8
          lda     plataddr
          lda     $3100
          lda     projalsa
          lda     $3300
-         bra     calls
+         bra     @calls
 
          nop
-targ:    nop
+@targ:   nop
          nop
-L1016:   per     targ-1
-         per     targ
-         per     targ+1
-         jsr     targ-1
-         jsr     targ
-         jsr     targ+1
-L1028:   bra     targ-1
+@L1016:  per     @targ-1
+         per     @targ
+         per     @targ+1
+         jsr     @targ-1
+         jsr     @targ
+         jsr     @targ+1
+@L1028:  bra     @targ-1
 
-L102A:   bra     targ
+@L102A:  bra     @targ
 
-L102C:   bra     targ+1
+@L102C:  bra     @targ+1
 
-L102E:   brl     targ-1
+@L102E:  brl     @targ-1
 
-L1031:   brl     targ
+@L1031:  brl     @targ
 
-L1034:   brl     targ+1
+@L1034:  brl     @targ+1
 
-L1037:   jmp     targ-1
+@L1037:  jmp     @targ-1
 
-L103A:   jmp     targ
+@L103A:  jmp     @targ
 
-L103D:   jmp     targ+1
+@L103D:  jmp     @targ+1
 
-L1040:   jml     targ-1
+@L1040:  jml     @targ-1
 
-         jml     targ
+         jml     @targ
 
-         jml     targ+1
+         jml     @targ+1
 
-calls:   jsr     L1016
-         jsr     L1028
-         jsr     L102A
-         jsr     L102C
-         jsr     L102E
-         jsr     L1031
-         jsr     L1034
-         jsr     L1037
-         jsr     L103A
-         jsr     L103D
-         jsr     L1040
+@calls:  jsr     @L1016
+         jsr     @L1028
+         jsr     @L102A
+         jsr     @L102C
+         jsr     @L102E
+         jsr     @L1031
+         jsr     @L1034
+         jsr     @L1037
+         jsr     @L103A
+         jsr     @L103D
+         jsr     @L1040
          jsr     $1044
          jsr     $1048
-         brl     L118E
+         brl     @L118E
 
-bulk:    .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f ;bulky
+@bulk:   .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f ;bulky
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
          .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f
-string:  .byte   "This is a long string. Put a label and comment on it to confir" ;stringy
+@string: .byte   "This is a long string. Put a label and comment on it to confir" ;stringy
          .byte   "m that the label and comment only appear on the first line.  T"
          .byte   "he quick brown fox jumps over the lazy dogs."
 
-L118E:   lda     #<thirty2+2
+@L118E:  lda     #<thirty2+2
          lda     #>thirty2+3
          lda     #^thirty2
          rep     #$30

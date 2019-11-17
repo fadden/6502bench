@@ -112,7 +112,6 @@ namespace SourceGen {
         // Source generation settings.
         public const string SRCGEN_DEFAULT_ASM = "srcgen-default-asm";
         public const string SRCGEN_ADD_IDENT_COMMENT = "srcgen-add-ident-comment";
-        public const string SRCGEN_DISABLE_LABEL_LOCALIZATION = "srcgen-disable-label-localization";
         public const string SRCGEN_LONG_LABEL_NEW_LINE = "srcgen-long-label-new-line";
         public const string SRCGEN_SHOW_CYCLE_COUNTS = "srcgen-show-cycle-counts";
 
