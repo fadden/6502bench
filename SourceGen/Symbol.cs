@@ -119,9 +119,9 @@ namespace SourceGen {
 
 
         /// <summary>
-        /// Label without the non-unique tag.
+        /// Label without the non-unique tag.  Used for serialization.
         /// </summary>
-        public string LabelForSerialization {
+        public string LabelWithoutTag {
             get {
                 if (SymbolType != Type.NonUniqueLocalAddr) {
                     return Label;
@@ -217,7 +217,7 @@ namespace SourceGen {
             Debug.Assert(uniqueTag >= 0 && uniqueTag < 0x01000000); // fit in 6 hex digits
             Debug.Assert(label.IndexOf(UNIQUE_TAG_CHAR) < 0);       // already extended?
 
-            Value = value;      // passed a bogus value earlier for assert
+            Value = value;      // passed a bogus value to base ctor for assert
 
             // Add tag to label to make it unique.
             Label = label + UNIQUE_TAG_CHAR + uniqueTag.ToString("x6");
@@ -230,7 +230,7 @@ namespace SourceGen {
         /// <param name="formatter">Formatter object.</param>
         /// <returns>Label suitable for display.</returns>
         public string GenerateDisplayLabel(Asm65.Formatter formatter) {
-            return ConvertLabelForDisplay(Label, LabelAnno, IsNonUnique, formatter);
+            return ConvertLabelForDisplay(Label, LabelAnno, true, formatter);
         }
 
         /// <summary>
@@ -273,14 +273,13 @@ namespace SourceGen {
                 bool showNonUnique, Asm65.Formatter formatter) {
             StringBuilder sb = new StringBuilder(label.Length + 2);
 
-            if (showNonUnique) {
-                sb.Append(formatter.NonUniqueLabelPrefix);
-            }
-
             if (label.Length > NON_UNIQUE_LEN &&
                     label[label.Length - NON_UNIQUE_LEN] == UNIQUE_TAG_CHAR) {
                 // showNonUnique may be false if generating assembly code (but by this
                 // point the unique tag should be remapped away)
+                if (showNonUnique) {
+                    sb.Append(formatter.NonUniqueLabelPrefix);
+                }
                 sb.Append(label.Substring(0, label.Length - NON_UNIQUE_LEN));
             } else {
                 sb.Append(label);

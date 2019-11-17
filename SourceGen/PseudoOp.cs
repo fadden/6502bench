@@ -720,7 +720,7 @@ namespace SourceGen {
             // if it's from the assembler.
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
-                    sym.IsNonUnique, formatter);
+                    true, formatter);
             } else {
                 // TODO(xyzzy): remapper will handle this
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
@@ -863,7 +863,7 @@ namespace SourceGen {
             }
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
-                    sym.IsNonUnique, formatter);
+                    true, formatter);
             } else {
                 // TODO(xyzzy): remapper will handle this
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
@@ -964,7 +964,7 @@ namespace SourceGen {
             }
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
-                    sym.IsNonUnique, formatter);
+                    true, formatter);
             } else {
                 // TODO(xyzzy): remapper will handle this
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,

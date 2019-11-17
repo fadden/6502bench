@@ -30,7 +30,7 @@ global1 nop                 ;EDIT
         bne     :loop2
         dex
         bne     :loop1
-        jmp     btarg   
+        jmp     btarg
 
 global2 nop                 ;EDIT
 
@@ -53,16 +53,34 @@ global4 nop                 ;EDIT
 gloop   dex                 ;EDIT: local, name "loop"
 global5 nop
         bne     gloop
-        
+
         nop
 
 ; Test symbolic references.
-
 global6 nop
 :spin1  jsr     :spin2      ;EDIT: local, name "spin1", operand ref to ":spin2"
 :spin2  jsr     :spin1      ;EDIT: local, name "spin2", operand ref to ":spin1"
         nop
 :spin3  lda     :spin3      ;EDIT: local, name "spin1", operand ref to ":spin1"
+        beq     :spin3      ;EDIT: operand ref to ":spin1"
+
+        lda     #<:spin1
+        ldx     #<:spin2
+        lda     #>:spin1
+        ldx     #>:spin2
+        bne     :skip
+
+        dw      :spin1      ;EDIT: local, name "spin1"
+        dw      :spin2      ;EDIT: local, name "spin1" (will be offset)
+        dw      :spin3      ;EDIT: local, name "spin1"
+
+        dfb     <:spin1     ;EDIT: local, name "spin1" (may need to do as
+        dfb     <:spin2     ;EDIT: local, name "spin1"  unique names and then
+        dfb     >:spin1     ;EDIT: local, name "spin1"  rename afterward)
+        dfb     >:spin2     ;EDIT: local, name "spin1"
+
+:skip   nop                 ;EDIT: local
+
 
 ; Semi-related: test labels that are nothing but underscores.
 global_ nop

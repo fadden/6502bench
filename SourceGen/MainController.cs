@@ -2402,7 +2402,13 @@ namespace SourceGen {
         }
 
         public void Goto() {
-            GotoBox dlg = new GotoBox(mMainWin, mProject, mOutputFormatter);
+            int index = mMainWin.CodeListView_GetFirstSelectedIndex();
+            if (index < 0) {
+                index = mMainWin.CodeListView_GetTopIndex();    // nothing selected
+            }
+            int offset = CodeLineList[index].FileOffset;
+
+            GotoBox dlg = new GotoBox(mMainWin, mProject, offset, mOutputFormatter);
             if (dlg.ShowDialog() == true) {
                 GoToLocation(new NavStack.Location(dlg.TargetOffset, 0, false),
                     GoToMode.JumpToCodeData, true);

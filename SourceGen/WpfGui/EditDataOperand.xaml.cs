@@ -65,6 +65,11 @@ namespace SourceGen.WpfGui {
         public FormatDescriptor mFirstFormatDescriptor;
 
         /// <summary>
+        /// Project reference.
+        /// </summary>
+        private DisasmProject mProject;
+
+        /// <summary>
         /// Raw file data.
         /// </summary>
         private byte[] mFileData;
@@ -129,6 +134,7 @@ namespace SourceGen.WpfGui {
             Owner = owner;
             DataContext = this;
 
+            mProject = project;
             mFileData = project.FileData;
             mSymbolTable = project.SymbolTable;
             mAddrMap = project.AddrMap;
@@ -345,11 +351,14 @@ namespace SourceGen.WpfGui {
             bool isOk = true;
             if (radioSimpleDataSymbolic.IsChecked == true) {
                 // Just check for correct format.  References to non-existent labels are allowed.
-                isOk = Asm65.Label.ValidateLabel(symbolEntryTextBox.Text);
+                Symbol.TrimAndValidateLabel(symbolEntryTextBox.Text,
+                    mFormatter.NonUniqueLabelPrefix, out isOk, out bool unused1,
+                    out bool unused2, out bool unused3, out Symbol.LabelAnnotation unused4);
 
-                // Actually, let's discourage references to auto-labels.
+                // Actually, let's discourage references to auto-labels and variables.
                 if (isOk && mSymbolTable.TryGetValue(symbolEntryTextBox.Text, out Symbol sym)) {
-                    isOk = sym.SymbolSource != Symbol.Source.Auto;
+                    isOk = sym.SymbolSource != Symbol.Source.Auto &&
+                           sym.SymbolSource != Symbol.Source.Variable;
                 }
             }
             IsValid = isOk;
@@ -819,7 +828,9 @@ namespace SourceGen.WpfGui {
                                         break;
                                 }
                                 Debug.Assert(dfd.HasSymbol);
-                                symbolEntryTextBox.Text = dfd.SymbolRef.Label;
+                                symbolEntryTextBox.Text = Symbol.ConvertLabelForDisplay(
+                                    dfd.SymbolRef.Label, Symbol.LabelAnnotation.None,
+                                    true, mFormatter);
                                 break;
                             default:
                                 Debug.Assert(false);
@@ -965,7 +976,35 @@ namespace SourceGen.WpfGui {
                         part = WeakSymbolRef.Part.Low;
                     }
                     subType = FormatDescriptor.SubType.Symbol;
-                    symbolRef = new WeakSymbolRef(symbolEntryTextBox.Text, part);
+
+                    string weakLabel = symbolEntryTextBox.Text;
+                    // Deal with non-unique labels.  If the label refers to an existing
+                    // symbol, use its label, which will have the tag.  If the label doesn't
+                    // have a match, discard it -- we don't support weak refs to ambiguous
+                    // non-unique symbols.
+                    string trimLabel = Symbol.TrimAndValidateLabel(weakLabel,
+                        mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                        out bool unused2, out bool hasNonUniquePrefix,
+                        out Symbol.LabelAnnotation unused3);
+                    if (isValid && hasNonUniquePrefix) {
+                        // We want to find the match that's closest to the thing we're
+                        // referencing, but that's awkward when there's multiple ranges and
+                        // multiple ways of interpreting the data.  So as a simple measure
+                        // we just grab the lowest offset in the first range.
+                        IEnumerator<TypedRangeSet.TypedRange> oiter = mSelection.RangeListIterator;
+                        oiter.MoveNext();
+                        TypedRangeSet.TypedRange rng = oiter.Current;
+                        int matchOffset = rng.Low;
+
+                        Symbol osym = mProject.FindBestNonUniqueLabel(trimLabel, matchOffset);
+                        if (osym != null) {
+                            weakLabel = osym.Label;
+                        } else {
+                            Debug.WriteLine("Attempt to create ref to nonexistant non-unique sym");
+                            subType = FormatDescriptor.SubType.Hex;
+                        }
+                    }
+                    symbolRef = new WeakSymbolRef(weakLabel, part);
                 } else {
                     Debug.Assert(false);
                 }

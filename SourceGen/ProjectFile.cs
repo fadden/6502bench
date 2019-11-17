@@ -279,7 +279,7 @@ namespace SourceGen {
 
             public SerSymbol() { }
             public SerSymbol(Symbol sym) {
-                Label = sym.LabelForSerialization;      // use bare label here
+                Label = sym.LabelWithoutTag;      // use bare label here
                 Value = sym.Value;
                 Source = sym.SymbolSource.ToString();
                 Type = sym.SymbolType.ToString();

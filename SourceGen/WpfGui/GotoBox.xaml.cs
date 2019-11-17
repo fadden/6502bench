@@ -38,6 +38,11 @@ namespace SourceGen.WpfGui {
         private DisasmProject mProject;
 
         /// <summary>
+        /// Initial offset, used for finding the best match among non-unique labels.
+        /// </summary>
+        private int mInitialOffset;
+
+        /// <summary>
         /// Reference to formatter.  This determines how values are displayed.
         /// </summary>
         private Formatter mFormatter;
@@ -88,12 +93,13 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public GotoBox(Window owner, DisasmProject proj, Formatter formatter) {
+        public GotoBox(Window owner, DisasmProject proj, int initialOffset, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mProject = proj;
+            mInitialOffset = initialOffset;
             mFormatter = formatter;
             TargetOffset = -1;
         }
@@ -138,7 +144,23 @@ namespace SourceGen.WpfGui {
 
             // Try it as a label.  If they give the label a hex name (e.g. "A001") they
             // can prefix it with '$' to disambiguate the address.
-            int labelOffset = mProject.FindLabelOffsetByName(input);
+            int labelOffset = -1;
+            string trimLabel = Symbol.TrimAndValidateLabel(input,
+                mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                out bool unused2, out bool hasNonUniquePrefix,
+                out Symbol.LabelAnnotation unused3);
+            if (isValid) {
+                // Could be a label.  See if there's a match.
+                if (hasNonUniquePrefix) {
+                    Symbol sym = mProject.FindBestNonUniqueLabel(trimLabel, mInitialOffset);
+                    if (sym != null) {
+                        labelOffset = mProject.FindLabelOffsetByName(sym.Label);
+                    }
+                } else {
+                    labelOffset = mProject.FindLabelOffsetByName(trimLabel);
+                }
+            }
+
             if (labelOffset >= 0) {
                 TargetOffset = labelOffset;
             } else if (Address.ParseAddress(input, 1 << 24, out int addr)) {
@@ -158,10 +180,10 @@ namespace SourceGen.WpfGui {
             if (TargetOffset >= 0) {
                 offsetStr = mFormatter.FormatOffset24(TargetOffset);
                 int addr = mProject.GetAnattrib(TargetOffset).Address;
-                addressStr = mFormatter.FormatAddress(addr, addr > 0xffff);
+                addressStr = "$" + mFormatter.FormatAddress(addr, addr > 0xffff);
                 Symbol sym = mProject.GetAnattrib(TargetOffset).Symbol;
                 if (sym != null) {
-                    labelStr = sym.Label;
+                    labelStr = sym.GenerateDisplayLabel(mFormatter);
                 }
             }
 

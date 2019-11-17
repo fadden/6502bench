@@ -225,13 +225,30 @@ namespace SourceGen.WpfGui {
         /// Looks up the symbol in the symbol table.  If not found there, it checks for a
         /// match against the existing or edited project symbol.
         /// </summary>
-        private bool LookupSymbol(string label, out Symbol sym) {
-            if (mProject.SymbolTable.TryGetValue(label, out sym)) {
-                return true;
-            }
-            if (mEditedProjectSymbol != null && label.Equals(mEditedProjectSymbol.Label)) {
-                sym = mEditedProjectSymbol;
-                return true;
+        private bool LookupSymbol(string label, bool isNonUnique, out Symbol sym) {
+            if (isNonUnique) {
+                // Only applies to labels, so no need to check mEditedProjectSymbol.  We
+                // could check mEditedLabel, but there's no reason to add a symbolic reference
+                // on top of the numeric reference.
+                int targetOffset;
+                Anattrib attr = mProject.GetAnattrib(mOffset);
+                if (attr.OperandOffset >= 0) {
+                    targetOffset = attr.OperandOffset;
+                } else {
+                    targetOffset = mOffset;
+                }
+                sym = mProject.FindBestNonUniqueLabel(label, targetOffset);
+                if (sym != null) {
+                    return true;
+                }
+            } else {
+                if (mProject.SymbolTable.TryGetValue(label, out sym)) {
+                    return true;
+                }
+                if (mEditedProjectSymbol != null && label.Equals(mEditedProjectSymbol.Label)) {
+                    sym = mEditedProjectSymbol;
+                    return true;
+                }
             }
             return false;
         }
@@ -253,10 +270,15 @@ namespace SourceGen.WpfGui {
             if (FormatSymbol) {
                 IsPartPanelEnabled = mOpDef.IsExtendedImmediate;
 
-                if (!Asm65.Label.ValidateLabel(SymbolLabel)) {
+                string trimLabel = Symbol.TrimAndValidateLabel(SymbolLabel,
+                    mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                    out bool unused2, out bool hasNonUniquePrefix,
+                    out Symbol.LabelAnnotation unused3);
+
+                if (!isValid) {
                     SymbolValueHex = SYMBOL_INVALID;
                     IsValid = false;
-                } else if (LookupSymbol(SymbolLabel, out Symbol sym)) {
+                } else if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
                     if (sym.SymbolSource == Symbol.Source.Auto) {
                         // We try to block references to auto labels, but it's possible to get
                         // around it because FormatDescriptors are weak references (replace auto
@@ -278,7 +300,8 @@ namespace SourceGen.WpfGui {
                     SymbolValueHex = mFormatter.FormatHexValue(sym.Value, 4);
                     SymbolValueDecimal = mFormatter.FormatDecimalValue(sym.Value);
                 } else {
-                    // Valid but unknown symbol.  This is fine -- symbols don't have to exist.
+                    // Valid but unknown symbol.  This is fine -- symbols don't have to exist --
+                    // but it's a little weird for non-unique symbols.
                     SymbolValueHex = SYMBOL_UNKNOWN;
                 }
             } else {
@@ -365,7 +388,11 @@ namespace SourceGen.WpfGui {
                     sb.Append(mFormatter.FormatCharacterValue(operandValue, enc));
                     break;
                 case FormatDescriptor.SubType.Symbol:
-                    if (LookupSymbol(dfd.SymbolRef.Label, out Symbol sym)) {
+                    string trimLabel = Symbol.TrimAndValidateLabel(SymbolLabel,
+                        mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                        out bool unused2, out bool hasNonUniquePrefix,
+                        out Symbol.LabelAnnotation unused3);
+                    if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
                         // Block move is a little weird.  "MVN label1,label2" is supposed to use
                         // the bank byte, while "MVN #const1,#const2" uses the entire symbol.
                         // The easiest thing to do is require the user to specify the "bank"
@@ -500,8 +527,10 @@ namespace SourceGen.WpfGui {
                 // Set the radio button when the user starts typing.
                 if (mLoadDone) {
                     FormatSymbol = true;
+                    // this calls UpdateControls; don't do it twice
+                } else {
+                    UpdateControls();
                 }
-                UpdateControls();
             }
         }
         private string mSymbolLabel;
@@ -634,7 +663,8 @@ namespace SourceGen.WpfGui {
                                     Debug.Assert(false);
                                     break;
                             }
-                            SymbolLabel = dfd.SymbolRef.Label;
+                            SymbolLabel = Symbol.ConvertLabelForDisplay(dfd.SymbolRef.Label,
+                                Symbol.LabelAnnotation.None, true, mFormatter);
                             break;
                         case FormatDescriptor.SubType.None:
                         default:
@@ -685,8 +715,28 @@ namespace SourceGen.WpfGui {
                     Debug.Assert(false);
                     part = WeakSymbolRef.Part.Low;
                 }
+
+                string weakLabel = SymbolLabel;
+
+                // Deal with non-unique labels.  If the label refers to an existing
+                // symbol, use its label, which will have the tag.  If the label doesn't
+                // have a match, discard it -- we don't support weak refs to ambiguous
+                // non-unique symbols.
+                string trimLabel = Symbol.TrimAndValidateLabel(SymbolLabel,
+                    mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                    out bool unused2, out bool hasNonUniquePrefix,
+                    out Symbol.LabelAnnotation unused3);
+                if (isValid && hasNonUniquePrefix) {
+                    if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
+                        weakLabel = sym.Label;
+                    } else {
+                        Debug.WriteLine("Attempt to create ref to non-existant non-unique sym");
+                        return null;
+                    }
+                }
+
                 return FormatDescriptor.Create(instructionLength,
-                    new WeakSymbolRef(SymbolLabel, part), false);
+                    new WeakSymbolRef(weakLabel, part), false);
             }
 
             FormatDescriptor.SubType subType;
@@ -863,7 +913,7 @@ namespace SourceGen.WpfGui {
                     } else {
                         NarLabelOffsetText = CURRENT_LABEL;
                     }
-                    NarTargetLabel = sym.Label;
+                    NarTargetLabel = sym.GenerateDisplayLabel(mFormatter);
                     mEditedLabel = sym;
                     CreateEditLabelText = EDIT_LABEL;
                 } else {
@@ -943,7 +993,7 @@ namespace SourceGen.WpfGui {
             } else {
                 ShowNarCurrentLabel = true;
                 CreateEditLabelText = EDIT_LABEL;
-                NarTargetLabel = mEditedLabel.Label;
+                NarTargetLabel = mEditedLabel.GenerateDisplayLabel(mFormatter);
             }
 
             // Sort of nice to just hit return twice after entering a label, so move the focus

@@ -2354,6 +2354,43 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Finds a user label by name, searching only non-unique local address labels.
+        /// </summary>
+        /// <param name="label">Label to search for.  Must not have the uniquifier tag (if
+        ///   it had one, you wouldn't be here).</param>
+        /// <param name="targetOffset">If multiple labels are found, we want the one that is
+        ///   closest to this offset.</param>
+        /// <returns>The symbol found, or null if no match.</returns>
+        public Symbol FindBestNonUniqueLabel(string label, int targetOffset) {
+            Symbol bestSym = null;
+            int bestDelta = int.MaxValue;
+
+            // Simple linear search.  Right now we're only doing this in a few specific
+            // UI-driven situations (edit operand, goto label), so performance isn't crucial.
+            foreach (KeyValuePair<int, Symbol> kvp in UserLabels) {
+                Symbol sym = kvp.Value;
+                if (sym.SymbolType != Symbol.Type.NonUniqueLocalAddr) {
+                    continue;
+                }
+                if (sym.LabelWithoutTag == label) {
+                    // found a match; is it the best one?
+                    int delta = Math.Abs(kvp.Key - targetOffset);
+                    if (delta < bestDelta) {
+                        //Debug.WriteLine("FindBest: " + sym.Label + "/" + delta + " better than " +
+                        //    (bestSym != null ? bestSym.Label : "-") + "/" + bestDelta);
+                        bestSym = sym;
+                        bestDelta = delta;
+                    } else {
+                        //Debug.WriteLine("FindBest: " + sym.Label + "/" + delta + " not better than " +
+                        //    (bestSym != null ? bestSym.Label : "-") + "/" + bestDelta);
+                    }
+                }
+            }
+
+            return bestSym;
+        }
+
+        /// <summary>
         /// For debugging purposes, get some information about the currently loaded
         /// extension scripts.
         /// </summary>
