@@ -40,7 +40,7 @@ but this would cause an error:
 because the local symbol table is cleared when a global symbol is encountered.
 
 Another common form allows backward references to labels that don't go out of scope until
-they're re-used.  This is useful for short loops.
+they're re-used.  This is useful for short loops.  (We use this for variables.)
 
 As a further limitation, assemblers seem to want the first label encountered in a program
 to be global.
@@ -78,6 +78,10 @@ name.  This must be applied to both labels and operands.
 
 namespace SourceGen.AsmGen {
     public class LabelLocalizer {
+        // Prefix string to use for labels that start with '_' when generating code for
+        // assemblers that assign a special meaning to leading underscores.
+        private const string NO_UNDER_PFX = "X";
+
         /// <summary>
         /// A pairing of an offset with a label string.  (Essentially mAnattribs[n].Symbol
         /// with all the fluff trimmed away.)
@@ -85,8 +89,8 @@ namespace SourceGen.AsmGen {
         /// <remarks>
         /// The label string isn't actually all that useful, since we can pull it back out
         /// of anattrib, but it makes life a little easier during debugging.  These get
-        /// put into a List, so switching to a plain int offset doesn't necessarily help us
-        /// much because the ints get boxed.
+        /// put into a List, so simply storing a plain int offset it's much better (in terms
+        /// of memory and allocations) because the ints get boxed.
         /// </remarks>
         private class OffsetLabel {
             public int Offset { get; private set; }
@@ -137,6 +141,12 @@ namespace SourceGen.AsmGen {
         public bool QuirkVariablesEndScope { get; set; }
 
         /// <summary>
+        /// Set this if global variables are not allowed to have the same name as an opcode
+        /// mnemonic.
+        /// </summary>
+        public bool QuirkNoOpcodeMnemonics { get; set; }
+
+        /// <summary>
         /// Project reference.
         /// </summary>
         private DisasmProject mProject;
@@ -175,6 +185,8 @@ namespace SourceGen.AsmGen {
         public void Analyze() {
             Debug.Assert(LocalPrefix.Length > 0);
 
+            // Init global flags list.  An entry is set if the associated offset has a global
+            // label.  It will be false if the entry has a local label, or no label.
             mGlobalFlags.SetAll(false);
 
             // Currently we only support the "local labels have scope that ends at a global
@@ -191,34 +203,142 @@ namespace SourceGen.AsmGen {
             //
             // The current algorithm uses a straightforward O(n^2) approach.
 
+            //
             // Step 1: generate source/target pairs and global label list
+            //
             GenerateLists();
 
+            //
             // Step 2: walk through the list of global symbols, identifying source/target
             // pairs that cross them.  If a pair matches, the target label is added to the
-            // mGlobalLabels list, and removed from the pair list.
+            // end of the mGlobalLabels list, and removed from the pair list.
+            //
+            // When we're done, mGlobalFlags[] will identify the offsets with global labels.
+            //
             for (int index = 0; index < mGlobalLabels.Count; index++) {
                 FindIntersectingPairs(mGlobalLabels[index]);
             }
 
-            // Step 3: for each local label, add an entry to the map with the appropriate
-            // local-label syntax.
+            // We're done with these.  Take out the trash.
+            mGlobalLabels.Clear();
+            mOffsetPairs.Clear();
+
+            //
+            // Step 3: remap global labels.  There are three reasons we might need to do this:
+            //  (1) It has a leading underscore AND LocalPrefix is '_'.
+            //  (2) The label matches an opcode mnemonic (case-insensitive) AND NoOpcodeMnemonics
+            //      is set.
+            //  (3) It's a non-unique local that got promoted to global.
+            //
+            // In each case we need to modify the label to meet the assembler requirements, and
+            // then modify the label until it's unique.
+            //
             LabelMap = new Dictionary<string, string>();
+            Dictionary<string, string> allGlobalLabels = new Dictionary<string, string>();
+            bool remapUnders = (LocalPrefix == "_");
+
+            Dictionary<string, Asm65.OpDef> opNames = null;
+            if (QuirkNoOpcodeMnemonics) {
+                // Create a searchable list of opcode names using the current CPU definition.
+                // (All tested assemblers that failed on opcode names only did so for names
+                // that were part of the current definition, e.g. "TSB" was accepted as a label
+                // when the CPU was set to 6502.)
+                opNames = new Dictionary<string, Asm65.OpDef>();
+                Asm65.CpuDef cpuDef = mProject.CpuDef;
+                for (int i = 0; i < 256; i++) {
+                    Asm65.OpDef op = cpuDef.GetOpDef(i);
+                    // There may be multiple entries with the same name (e.g. "NOP").  That's fine.
+                    opNames[op.Mnemonic.ToUpperInvariant()] = op;
+                }
+            }
+
             for (int i = 0; i < mProject.FileDataLength; i++) {
-                if (mGlobalFlags[i]) {
+                if (!mGlobalFlags[i]) {
                     continue;
                 }
                 Symbol sym = mProject.GetAnattrib(i).Symbol;
                 if (sym == null) {
+                    // Should only happen when we insert a dummy global label for the
+                    // "variables end scope" quirk.
                     continue;
                 }
 
-                LabelMap[sym.Label] = LocalPrefix + sym.Label;
+                string newLabel = sym.LabelWithoutTag;
+                if (remapUnders && newLabel[0] == '_') {
+                    newLabel = NO_UNDER_PFX + newLabel;
+                    // This could cause a conflict with an existing label.  It's rare but
+                    // possible.
+                    if (allGlobalLabels.ContainsKey(newLabel)) {
+                        newLabel = MakeUnique(newLabel, allGlobalLabels);
+                    }
+                }
+                if (opNames != null && opNames.ContainsKey(newLabel.ToUpperInvariant())) {
+                    // Clashed with mnemonic.  Uniquify it.
+                    newLabel = MakeUnique(newLabel, allGlobalLabels);
+                }
+
+                // We might have remapped something earlier and it happens to match this label.
+                // If so, we can either remap the current label, or remap the previous label
+                // a little harder.  The easiest thing to do is remap the current label.
+                if (allGlobalLabels.ContainsKey(newLabel)) {
+                    newLabel = MakeUnique(newLabel, allGlobalLabels);
+                }
+
+                // If we've changed it, add it to the map.
+                if (newLabel != sym.Label) {
+                    LabelMap[sym.Label] = newLabel;
+                }
+
+                allGlobalLabels.Add(newLabel, newLabel);
             }
 
-            // Take out the trash.
-            mGlobalLabels.Clear();
-            mOffsetPairs.Clear();
+            //
+            // Step 4: remap local labels.  There are two operations here.
+            //
+            // For each pair of global labels that have locals between them, we need to walk
+            // through the locals and confirm that they don't clash with each other.  If they
+            // do, we need to uniquify them within the local scope.  (This is only an issue
+            // for non-unique locals.)
+            //
+            // Once a unique name has been found, we add an entry to LabelMap that has the
+            // label with the LocalPrefix and without the non-unique tag.
+            //
+            // We also need to deal with symbols with a leading underscore when
+            // LocalPrefix is '_'.
+            //
+            int startGlobal = -1;
+            int numLocals = 0;
+
+            // Allocate a Dictionary here and pass it through so we don't have to allocate
+            // a new one each time.
+            Dictionary<string, string> scopedLocals = new Dictionary<string, string>();
+            for (int i = 0; i < mProject.FileDataLength; i++) {
+                if (mGlobalFlags[i]) {
+                    if (startGlobal < 0) {
+                        // very first one
+                        startGlobal = i;
+                        continue;
+                    } else if (numLocals > 0) {
+                        // There were locals following the previous global.  Process them.
+                        ProcessLocals(startGlobal, i, scopedLocals);
+                        startGlobal = i;
+                        numLocals = 0;
+                    } else {
+                        // Two adjacent globals.
+                        startGlobal = i;
+                    }
+                } else {
+                    // Not a global.  Is there a local symbol here?
+                    Symbol sym = mProject.GetAnattrib(i).Symbol;
+                    if (sym != null) {
+                        numLocals++;
+                    }
+                }
+            }
+            if (numLocals != 0) {
+                // do the last bit
+                ProcessLocals(startGlobal, mProject.FileDataLength, scopedLocals);
+            }
         }
 
         /// <summary>
@@ -237,10 +357,11 @@ namespace SourceGen.AsmGen {
             bool first = true;
 
             for (int offset = 0; offset < mProject.FileDataLength; offset++) {
+                // Find all user labels and auto labels.
                 Symbol sym = mProject.GetAnattrib(offset).Symbol;
 
                 // In cc65, variable declarations end the local label scope.  We insert a
-                // fake global symbol if we counter a table with a nonzero number of entries.
+                // fake global symbol if we encounter a table with a nonzero number of entries.
                 if (QuirkVariablesEndScope &&
                         mProject.LvTables.TryGetValue(offset, out LocalVariableTable value) &&
                         value.Count > 0) {
@@ -253,7 +374,7 @@ namespace SourceGen.AsmGen {
                     continue;
                 }
 
-                if (first || sym.SymbolType != Symbol.Type.LocalOrGlobalAddr) {
+                if (first || !sym.CanBeLocal) {
                     first = false;
                     mGlobalFlags[offset] = true;
                     mGlobalLabels.Add(new OffsetLabel(offset, sym.Label));
@@ -285,12 +406,11 @@ namespace SourceGen.AsmGen {
         private void FindIntersectingPairs(OffsetLabel glabel) {
             Debug.Assert(mGlobalFlags[glabel.Offset]);
 
-            int globOffset = glabel.Offset;
+            int glabOffset = glabel.Offset;
             for (int i = 0; i < mOffsetPairs.Count; i++) {
                 OffsetPair pair = mOffsetPairs[i];
 
-                // If the destination was marked global earlier, remove and ignore this entry.
-                // Note this also means that pair.DstOffset != label.Offset.
+                // If the destination was marked global earlier, remove the entry and move on.
                 if (mGlobalFlags[pair.DstOffset]) {
                     mOffsetPairs.RemoveAt(i);
                     i--;
@@ -301,15 +421,16 @@ namespace SourceGen.AsmGen {
                 // offsets.
                 //
                 // If the reference source is itself a global label, it can reference local
-                // labels forward, but not backward.  We need to take that into account for
-                // the case where label.Offset==pair.SrcOffset.
+                // labels forward, but not backward (i.e. if it crosses itself, the destination
+                // must be made global).  We need to take that into account for the case where
+                // label.Offset==pair.SrcOffset.
                 bool intersect;
                 if (pair.SrcOffset < pair.DstOffset) {
-                    // Forward reference.  src==glob is ok
-                    intersect = pair.SrcOffset < globOffset && pair.DstOffset >= globOffset;
+                    // Forward reference.  src==glab is ok
+                    intersect = pair.SrcOffset < glabOffset && pair.DstOffset >= glabOffset;
                 } else {
-                    // Backward reference.  src==glob is bad
-                    intersect = pair.SrcOffset >= globOffset && pair.DstOffset <= globOffset;
+                    // Backward reference.  src==glab is bad
+                    intersect = pair.SrcOffset >= glabOffset && pair.DstOffset <= glabOffset;
                 }
 
                 if (intersect) {
@@ -329,163 +450,67 @@ namespace SourceGen.AsmGen {
         }
 
         /// <summary>
-        /// Adjusts the label map so that only local variables start with an underscore ('_').
-        /// This is necessary for assemblers like 64tass that use a leading underscore to
-        /// indicate that a label should be local.
-        /// 
-        /// Only call this if underscores are used to indicate local labels.
+        /// Generates map entries for local labels defined between the two globals.
         /// </summary>
-        /// <remarks>
-        /// This may be called even if label localization is disabled.  In that case we just
-        /// create an empty label map and populate as needed.
-        /// </remarks>
-        public void MaskLeadingUnderscores() {
-            bool allGlobal = false;
-            if (LabelMap == null) {
-                allGlobal = true;
-                LabelMap = new Dictionary<string, string>();
-            }
+        /// <param name="startGlobal">Offset of first global.</param>
+        /// <param name="endGlobal">Offset of second global.  If this range is at the end of the
+        ///   file, this offset may be one past the end.</param>
+        /// <param name="scopedLocals">Work object (minor alloc optimization).</param>
+        private void ProcessLocals(int startGlobal, int endGlobal,
+                Dictionary<string, string> scopedLocals) {
+            //Debug.WriteLine("ProcessLocals: +" + startGlobal.ToString("x6") +
+            //    " - +" + endGlobal.ToString("x6"));
+            scopedLocals.Clear();
+            bool remapUnders = (LocalPrefix == "_");
 
-            // Throw out the original local label generation.  We're going to redo the
-            // label map generation step.
-            LabelMap.Clear();
-
-            // Use this to test for uniqueness.  We add all labels here as we go, not just the
-            // ones being remapped.  For each label we either add the original or the localized
-            // form.
-            SortedList<string, string> allLabels = new SortedList<string, string>();
-
-            for (int i = 0; i < mProject.FileDataLength; i++) {
+            for (int i = startGlobal + 1; i < endGlobal; i++) {
+                Debug.Assert(!mGlobalFlags[i]);
                 Symbol sym = mProject.GetAnattrib(i).Symbol;
                 if (sym == null) {
-                    // No label at this offset.
-                    continue;
+                    continue;       // no label here
                 }
 
-                string newLabel;
-                if (allGlobal || mGlobalFlags[i]) {
-                    // Global symbol.  Don't let it start with '_'.
-                    if (sym.Label.StartsWith("_")) {
-                        // There's an underscore here that was added by the user.  Stick some
-                        // other character in front.
-                        newLabel = "X" + sym.Label;
-                    } else {
-                        // No change needed.
-                        newLabel = sym.Label;
-                    }
+                string newLabel = sym.LabelWithoutTag;
+                if (remapUnders && newLabel[0] == '_') {
+                    newLabel = LocalPrefix + NO_UNDER_PFX + newLabel;
                 } else {
-                    // Local symbol.
-                    if (sym.Label.StartsWith("_")) {
-                        // The original starts with one or more underscores.  Adding another
-                        // will create a "__" label, which is reserved in 64tass.
-                        newLabel = "_X" + sym.Label;
-                    } else {
-                        newLabel = "_" + sym.Label;
-                    }
+                    newLabel = LocalPrefix + newLabel;
                 }
 
-                // Make sure it's unique.
-                string uniqueLabel = newLabel;
-                int uval = 0;
-                while (allLabels.ContainsKey(uniqueLabel)) {
-                    uval++;
-                    uniqueLabel = newLabel + uval.ToString();
+                if (scopedLocals.ContainsKey(newLabel)) {
+                    newLabel = MakeUnique(newLabel, scopedLocals);
                 }
-                allLabels.Add(uniqueLabel, uniqueLabel);
 
-                // If it's different, add it to the label map.
-                if (sym.Label != uniqueLabel) {
-                    LabelMap.Add(sym.Label, uniqueLabel);
-                }
+                // Map from the original symbol label to the local form.  This works for
+                // unique and non-unique locals.
+                LabelMap[sym.Label] = newLabel;
+
+                scopedLocals.Add(newLabel, newLabel);
             }
-
-            Debug.WriteLine("UMAP: allcount=" + allLabels.Count + " mapcount=" + LabelMap.Count);
         }
 
         /// <summary>
-        /// Remaps labels that match opcode names.  Updated names will be added to LabelMap.
-        /// This should be run after localization and underscore concealment have finished.
+        /// Alters a label to make it unique.  This may be called with a label that is unique
+        /// but illegal (e.g. an instruction mnemonic), so we guarantee that the label returned
+        /// is different from the argument.
         /// </summary>
         /// <remarks>
-        /// Most assemblers don't like it if you create a label with the same name as an
-        /// opcode, e.g. "jmp LSR" doesn't work.  We can use the label map to work around
-        /// the issue.
-        ///
-        /// Most assemblers regard mnemonics as case-insensitive, even if labels are
-        /// case-sensitive, so we want to remap both "lsr" and "LSR".
-        ///
-        /// This doesn't really have anything to do with label localization other than that
-        /// we're updating the label remap table.
+        /// We can't put a '_' at the front or an 'L' at the end (LDAL), since that could run
+        /// afoul of the things we're trying to work around.  We don't want to mess with the
+        /// start of the string since it may or may not have the LocalPrefix on it.
         /// </remarks>
-        public void FixOpcodeLabels() {
-            if (LabelMap == null) {
-                LabelMap = new Dictionary<string, string>();
-            }
+        /// <param name="label">Label to uniquify.</param>
+        /// <param name="allLabels">Dictionary to uniquify against.</param>
+        /// <returns>Modified label</returns>
+        private static string MakeUnique(string label, Dictionary<string, string> allLabels) {
+            int uval = 0;
+            string uniqueLabel;
+            do {
+                uval++;
+                uniqueLabel = label + uval.ToString();
+            } while (allLabels.ContainsKey(uniqueLabel));
 
-            // Create a searchable list of opcode names using the current CPU definition.
-            // (All tested assemblers that failed on opcode names only did so for names
-            // that were part of the current definition, e.g. "TSB" was accepted as a label
-            // when the CPU was set to 6502.)
-            Dictionary<string, Asm65.OpDef> opnames = new Dictionary<string, Asm65.OpDef>();
-            Asm65.CpuDef cpuDef = mProject.CpuDef;
-            for (int i = 0; i < 256; i++) {
-                Asm65.OpDef op = cpuDef.GetOpDef(i);
-                // There may be multiple entries with the same name (e.g. "NOP").  That's fine.
-                opnames[op.Mnemonic.ToUpperInvariant()] = op;
-            }
-
-            // Create a list of all labels, for uniqueness testing.  If a label has been
-            // remapped, we add the remapped entry.
-            // (All tested assemblers that failed on opcode names only did so for names
-            // in their non-localized form.  While "LSR" failed, "@LSR", "_LSR", ".LSR", etc.
-            // were accepted.  So if it was remapped by the localizer, we don't need to
-            // worry about it.)
-            SortedList<string, string> allLabels = new SortedList<string, string>();
-            for (int i = 0; i < mProject.FileDataLength; i++) {
-                Symbol sym = mProject.GetAnattrib(i).Symbol;
-                if (sym == null) {
-                    continue;
-                }
-                LabelMap.TryGetValue(sym.Label, out string mapLabel);
-                if (mapLabel != null) {
-                    allLabels.Add(mapLabel, mapLabel);
-                } else {
-                    allLabels.Add(sym.Label, sym.Label);
-                }
-            }
-
-            // Now run through the list of labels, looking for any that match opcode
-            // mnemonics.
-            for (int i = 0; i < mProject.FileDataLength; i++) {
-                Symbol sym = mProject.GetAnattrib(i).Symbol;
-                if (sym == null) {
-                    // No label at this offset.
-                    continue;
-                }
-                string cmpLabel = sym.Label;
-                if (LabelMap.TryGetValue(sym.Label, out string mapLabel)) {
-                    cmpLabel = mapLabel;
-                }
-
-                if (opnames.ContainsKey(cmpLabel.ToUpperInvariant())) {
-                    //Debug.WriteLine("Remapping label (op mnemonic): " + sym.Label);
-
-                    int uval = 0;
-                    string uniqueLabel;
-                    do {
-                        uval++;
-                        uniqueLabel = cmpLabel + "_" + uval.ToString();
-                    } while (allLabels.ContainsKey(uniqueLabel));
-
-                    allLabels.Add(uniqueLabel, uniqueLabel);
-                    LabelMap.Add(sym.Label, uniqueLabel);
-                }
-            }
-
-            if (LabelMap.Count == 0) {
-                // didn't do anything, lose the table
-                LabelMap = null;
-            }
+            return uniqueLabel;
         }
     }
 }

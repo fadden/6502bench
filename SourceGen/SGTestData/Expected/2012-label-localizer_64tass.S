@@ -64,9 +64,9 @@ _X_uname2
         nop
         lda     #$00
 _AND    bne     _AND       ;local
-JMP_1   bne     JMP_1      ;global
-jmp_1   bne     jmp_1
-TSB_1   bne     TSB_1
+JMP1    bne     JMP1       ;global
+jmp1    bne     jmp1
+TSB1    bne     TSB1
 XCE     bne     XCE
         rts
 

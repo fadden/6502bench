@@ -224,8 +224,8 @@ namespace SourceGen.AsmGen {
             // While '.' labels are limited to the current zone, '@' labels are visible
             // between global labels.  (This is poorly documented.)
             mLocalizer.LocalPrefix = "@";
+            mLocalizer.QuirkNoOpcodeMnemonics = true;
             mLocalizer.Analyze();
-            mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {

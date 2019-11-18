@@ -230,9 +230,8 @@ namespace SourceGen.AsmGen {
 
             mLocalizer = new LabelLocalizer(Project);
             mLocalizer.LocalPrefix = "_";
+            mLocalizer.QuirkNoOpcodeMnemonics = true;
             mLocalizer.Analyze();
-            mLocalizer.MaskLeadingUnderscores();
-            mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {

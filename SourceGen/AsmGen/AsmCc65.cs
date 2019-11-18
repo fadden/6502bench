@@ -218,9 +218,9 @@ namespace SourceGen.AsmGen {
 
             mLocalizer = new LabelLocalizer(Project);
             mLocalizer.LocalPrefix = "@";
-            mLocalizer.QuirkVariablesEndScope = true;
+            mLocalizer.QuirkVariablesEndScope = true;   // https://github.com/cc65/cc65/issues/938
+            mLocalizer.QuirkNoOpcodeMnemonics = true;
             mLocalizer.Analyze();
-            mLocalizer.FixOpcodeLabels();
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(cfgName, false, new UTF8Encoding(false))) {

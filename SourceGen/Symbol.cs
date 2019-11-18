@@ -153,6 +153,11 @@ namespace SourceGen {
             get { return SymbolType == Type.NonUniqueLocalAddr; }
         }
 
+        public bool CanBeLocal {
+            get { return SymbolType == Type.LocalOrGlobalAddr ||
+                         SymbolType == Type.NonUniqueLocalAddr; }
+        }
+
         /// <summary>
         /// True if the symbol represents a constant value.
         /// </summary>
