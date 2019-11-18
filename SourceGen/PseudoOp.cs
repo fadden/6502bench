@@ -721,10 +721,6 @@ namespace SourceGen {
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     true, formatter);
-            } else {
-                // TODO(xyzzy): remapper will handle this
-                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
-                    false, formatter);
             }
 
             if (operandLen == 1) {
@@ -864,10 +860,6 @@ namespace SourceGen {
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     true, formatter);
-            } else {
-                // TODO(xyzzy): remapper will handle this
-                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
-                    false, formatter);
             }
 
             if (operandLen == 1) {
@@ -965,10 +957,6 @@ namespace SourceGen {
             if ((flags & FormatNumericOpFlags.OmitLabelPrefixSuffix) == 0) {
                 symLabel = Symbol.ConvertLabelForDisplay(symLabel, sym.LabelAnno,
                     true, formatter);
-            } else {
-                // TODO(xyzzy): remapper will handle this
-                symLabel = Symbol.ConvertLabelForDisplay(symLabel, Symbol.LabelAnnotation.None,
-                    false, formatter);
             }
 
             int adjustment;

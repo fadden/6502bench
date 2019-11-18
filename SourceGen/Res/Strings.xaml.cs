@@ -173,6 +173,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_InfoCustomFormat");
         public static string INFO_DEFAULT_FORMAT =
             (string)Application.Current.FindResource("str_InfoDefaultFormat");
+        public static string INFO_LABEL_DESCR_FMT =
+            (string)Application.Current.FindResource("str_InfoLabelDescrFmt");
         public static string INFO_LINE_SUM_NON_FMT =
             (string)Application.Current.FindResource("str_InfoLineSumNonFmt");
         public static string INFO_LINE_SUM_PLURAL_FMT =

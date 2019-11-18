@@ -68,12 +68,12 @@ X___    ldx     #$41
 _X__    dex
         bne     _X__
         nop
-_anno   lda     #$42
-_T106B  lda     _anno
+anno    lda     #$42
+T106B   lda     anno
         clc
         bcc     _skip
 
-        .word   _T106B
+        .word   T106B
 
 _skip   nop
 JMP1    lda     JMP1
@@ -91,5 +91,21 @@ LDAL    .byte   $af
         .byte   $95
         .byte   $10
         .byte   $00
+        nop
+plain_1 .var    $11
+X_under1_1 .var $12
+X__dub1 .var    $13
+        lda     plain_1
+        lda     X_under1_1
+        lda     X__dub1
+_plain  lda     _plain
+plain   lda     plain
+global8 dex
+        bne     plain
+X_under1 lda    X_under1
+_X__dub1 lda    _X__dub1
+X_under1_1 .var $22
+        lda     plain_1
+        lda     X_under1_1
         rts
 

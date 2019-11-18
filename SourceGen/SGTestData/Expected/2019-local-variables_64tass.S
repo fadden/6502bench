@@ -28,14 +28,14 @@ CONST_ZERO_VAR .var $f0
         sta     $f1,s
         eor     0
         ora     240,s
-PROJ_ZERO_DUP1 .var $10    ;clash with project symbol
-DPCODE_DUP1 .var $80       ;clash with user label
+PROJ_ZERO_1 .var $10       ;clash with project symbol
+DPCODE_1 .var   $80        ;clash with user label
         lda     VAR_ZERO
         lda     VAR_ZERO+1
         lda     VAR_TWO
         lda     VAR_THREE
         lda     $04
-        lda     PROJ_ZERO_DUP1
+        lda     PROJ_ZERO_1
         lda     $11
         lda     DPCODE
         ldx     PROJ_ZERO

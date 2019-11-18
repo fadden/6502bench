@@ -163,6 +163,7 @@ namespace SourceGen.AsmGen {
             Project = project;
             Quirks = new AssemblerQuirks();
             Quirks.StackIntOperandIsImmediate = true;
+            Quirks.LeadingUnderscoreSpecial = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;

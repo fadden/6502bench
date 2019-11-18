@@ -43,7 +43,8 @@ Another common form allows backward references to labels that don't go out of sc
 they're re-used.  This is useful for short loops.  (We use this for variables.)
 
 As a further limitation, assemblers seem to want the first label encountered in a program
-to be global.
+to be global.  On the plus side, all tested assemblers treat local labels as existing in
+a separate namespace, so you can have both "loop" and ":loop".
 
 The Symbol.SymbolType enum allows a label to be defined as "local or global".  We can output
 these with the local-symbol syntax, potentially rewriting them to have non-unique names like
@@ -80,7 +81,7 @@ namespace SourceGen.AsmGen {
     public class LabelLocalizer {
         // Prefix string to use for labels that start with '_' when generating code for
         // assemblers that assign a special meaning to leading underscores.
-        private const string NO_UNDER_PFX = "X";
+        public const string NO_UNDER_PFX = "X";
 
         /// <summary>
         /// A pairing of an offset with a label string.  (Essentially mAnattribs[n].Symbol

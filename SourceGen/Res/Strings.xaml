@@ -96,6 +96,7 @@ limitations under the License.
     <system:String x:Key="str_InfoAutoFormat">Format (auto):</system:String>
     <system:String x:Key="str_InfoCustomFormat">Format:</system:String>
     <system:String x:Key="str_InfoDefaultFormat">Format: default</system:String>
+    <system:String x:Key="str_InfoLabelDescrFmt">Label type: {0}</system:String>
     <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
     <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
     <system:String x:Key="str_InfoLineSumSingularFmt">Line {0}: {1} byte of {2}</system:String>

@@ -609,8 +609,10 @@ namespace SourceGen.Tests {
                 if (!FileUtil.CompareTextFiles(path, compareName, out int firstDiffLine,
                         out string line1, out string line2)) {
                     ReportErrMsg("file '" + fileName + "' differs on line " + firstDiffLine);
-                    Debug.WriteLine("File #1: " + line1);
-                    Debug.WriteLine("File #2: " + line2);
+
+                    Debug.WriteLine("Difference on line " + firstDiffLine);
+                    Debug.WriteLine(" generated: " + line1);
+                    Debug.WriteLine(" expected : " + line2);
                     return false;
                 }
             }

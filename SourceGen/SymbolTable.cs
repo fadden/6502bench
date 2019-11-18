@@ -272,10 +272,10 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Returns the number of symbols in the table.
+        /// The number of symbols in the table.
         /// </summary>
-        public int Count() {
-            return mSymbols.Count;
+        public int Count {
+            get { return mSymbols.Count; }
         }
 
         /// <summary>

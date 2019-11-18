@@ -1784,8 +1784,8 @@ namespace SourceGen {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
 
-            LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables,
-                mProject, false);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables, mProject,
+                null, false, false);
             int bestOffset = lvLookup.GetNearestTableOffset(offset);
             Debug.Assert(bestOffset >= 0);
             CreateOrEditLocalVariableTable(bestOffset);
@@ -2507,7 +2507,7 @@ namespace SourceGen {
             Debug.Assert(symRef.IsVariable);
 
             LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables, mProject,
-                false);
+                null, false, false);
             int varOffset = lvLookup.GetDefiningTableOffset(offset, symRef);
             if (varOffset <= 0) {
                 Debug.WriteLine("Local variable not found; offset=" + offset + " ref=" + symRef);
@@ -3565,11 +3565,13 @@ namespace SourceGen {
             if (line.IsCodeOrData) {
                 // Show number of bytes of code/data.
                 if (line.OffsetSpan == 1) {
-                    mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_SINGULAR_FMT,
-                        lineIndex, line.OffsetSpan, lineTypeStr);
+                    mMainWin.InfoLineDescrText =
+                        string.Format(Res.Strings.INFO_LINE_SUM_SINGULAR_FMT,
+                            lineIndex, line.OffsetSpan, lineTypeStr);
                 } else {
-                    mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_PLURAL_FMT,
-                        lineIndex, line.OffsetSpan, lineTypeStr);
+                    mMainWin.InfoLineDescrText =
+                        string.Format(Res.Strings.INFO_LINE_SUM_PLURAL_FMT,
+                            lineIndex, line.OffsetSpan, lineTypeStr);
                 }
             } else {
                 mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_LINE_SUM_NON_FMT,
@@ -3587,7 +3589,11 @@ namespace SourceGen {
                 string str = string.Empty;
                 if (mProject.LvTables.TryGetValue(line.FileOffset,
                         out LocalVariableTable lvt)) {
-                    str = lvt.Count + " entries";
+                    if (lvt.Count == 1) {
+                        str = "1 entry";
+                    } else {
+                        str = lvt.Count + " entries";
+                    }
                     if (lvt.ClearPrevious) {
                         str += "; clear previous";
                     }
@@ -3662,6 +3668,34 @@ namespace SourceGen {
 
             StringBuilder sb = new StringBuilder(250);
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+
+            if (attr.Symbol != null) {
+                string descr;
+                switch (attr.Symbol.SymbolType) {
+                    case Symbol.Type.NonUniqueLocalAddr:
+                        descr = "non-unique local";
+                        break;
+                    case Symbol.Type.LocalOrGlobalAddr:
+                        descr = "unique local";
+                        break;
+                    case Symbol.Type.GlobalAddr:
+                        descr = "unique global";
+                        break;
+                    case Symbol.Type.GlobalAddrExport:
+                        descr = "global + marked for export";
+                        break;
+                    default:
+                        descr = "???";
+                        break;
+                }
+                if (attr.Symbol.SymbolSource == Symbol.Source.Auto) {
+                    descr += ", auto-generated";
+                } else if (attr.Symbol.LabelAnno == Symbol.LabelAnnotation.Generated) {
+                    descr += " [gen]";
+                }
+                mMainWin.InfoLabelDescrText =
+                    string.Format(Res.Strings.INFO_LABEL_DESCR_FMT, descr);
+            }
 
             if (!mProject.OperandFormats.TryGetValue(line.FileOffset, out FormatDescriptor dfd)) {
                 // No user-specified format, but there may be a generated format.

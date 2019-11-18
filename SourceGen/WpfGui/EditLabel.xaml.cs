@@ -160,7 +160,14 @@ namespace SourceGen.WpfGui {
                         IsNonUniqueChecked = true;
                         break;
                     case Symbol.Type.LocalOrGlobalAddr:
-                        IsLocalChecked = true;
+                        if (LabelSym.SymbolSource == Symbol.Source.Auto ||
+                                LabelSym.LabelAnno == Symbol.LabelAnnotation.Generated) {
+                            // Default to global, otherwise you get different behavior when
+                            // adding a new label vs. replacing an auto or generated label.
+                            IsGlobalChecked = true;
+                        } else {
+                            IsLocalChecked = true;
+                        }
                         break;
                     case Symbol.Type.GlobalAddr:
                         IsGlobalChecked = true;

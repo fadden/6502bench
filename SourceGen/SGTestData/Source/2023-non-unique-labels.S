@@ -109,17 +109,40 @@ anno1   lda     anno        ;NOTE: do not label, let table gen do it
 ; Semi-related: test opcode name labels (which are illegal for assemblers
 ; other than Merlin 32).  We're configured for plain 6502, so it should
 ; remap some but not others.
-JMP     lda     JMP         ;EDIT set label (should be remapped)
+JMP     lda     JMP         ;EDIT set label (becomes JMP1 on non-Merlin)
 JMP0    lda     JMP0        ;EDIT set label
-JMP1    lda     JMP1        ;EDIT set label
+JMP1    lda     JMP1        ;EDIT set label (becomes JMP11 on non-Merlin)
 :JMP    lda     :JMP        ;EDIT set label
 :JMP0   lda     :JMP0       ;EDIT set label
 :JMP1   lda     :JMP1       ;EDIT set label
-:JMP_   lda     :JMP_       ;EDIT set label :JMP
+:JMP_   lda     :JMP_       ;EDIT set label :JMP (should become :JMP2)
 jmp     lda     jmp         ;EDIT set label
 Jmp     lda     Jmp         ;EDIT set label
 BRA     lda     BRA         ;EDIT set label (should NOT be remapped)
 brl     lda     brl         ;EDIT set label (should NOT be remapped)
 LDAL    ldal    LDAL        ;EDIT set label (should NOT be remapped)
+
+; Test local-variable interaction.  The goal here is to try to trick the
+; code generator into creating duplicate labels.
+global7 nop
+]plain  equ     $11         ;EDIT create local var table
+]_under1 equ    $12
+]__dub1 equ     $13
+        lda     ]plain
+        lda     ]_under1
+        lda     ]__dub1
+
+:plain0 lda     :plain0     ;EDIT: set label :plain
+plain1  lda     plain1      ;EDIT: set label :plain (should uniquify to plain)
+global8 dex                 ;  (which will then clash with the local var)
+        bne     plain1
+
+X_under1 lda    X_under1    ;EDIT: set label (global) (trying to clash on 64tass)
+
+:X__dub1 lda    :X__dub1    ;EDIT: set label
+
+]_under1 equ    $22         ;EDIT: create local var table (don't clear)
+        lda     ]plain
+        lda     ]_under1
 
         rts

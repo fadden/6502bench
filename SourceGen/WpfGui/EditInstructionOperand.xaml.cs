@@ -1127,7 +1127,7 @@ namespace SourceGen.WpfGui {
                 LV_MATCH_FOUND_ADDRESS : LV_MATCH_FOUND_CONSTANT;
 
             LocalVariableLookup lvLookup =
-                new LocalVariableLookup(mProject.LvTables, mProject, false);
+                new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
 
             // If the operand is already a local variable, use whichever one the
             // analyzer found.

@@ -67,12 +67,12 @@ ___      ldx   #$41
 :__      dex
          bne   :__
          nop
-:anno    lda   #$42
-:T106B   lda   :anno
+anno     lda   #$42
+T106B    lda   anno
          clc
          bcc   :skip
 
-         dw    :T106B
+         dw    T106B
 
 :skip    nop
 JMP      lda   JMP
@@ -90,5 +90,21 @@ LDAL     dfb   $af
          dfb   $95
          dfb   $10
          dfb   $00
+         nop
+]plain_1 equ   $11
+]_under1 equ   $12
+]__dub1  equ   $13
+         lda   ]plain_1
+         lda   ]_under1
+         lda   ]__dub1
+:plain   lda   :plain
+plain    lda   plain
+global8  dex
+         bne   plain
+X_under1 lda   X_under1
+:X__dub1 lda   :X__dub1
+]_under1 equ   $22
+         lda   ]plain_1
+         lda   ]_under1
          rts
 

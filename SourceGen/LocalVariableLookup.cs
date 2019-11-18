@@ -27,8 +27,9 @@ namespace SourceGen {
     /// different levels:
     ///   (1) If the local variable label is present in the main symbol table, we use the
     ///       "de-duplication" table to remap it.  We try not to let this happen, but it can.
+    ///       The symbol table is latched when the object is constructed.
     ///   (2) If the assembler doesn't define a way to re-use variable names, we make them
-    ///       globally unique.  [currently unused]
+    ///       globally unique.  [currently not needed]
     /// </remarks>
     public class LocalVariableLookup {
         /// <summary>
@@ -37,20 +38,28 @@ namespace SourceGen {
         private SortedList<int, LocalVariableTable> mLvTables;
 
         /// <summary>
-        /// Table of symbols, used to ensure that symbols are globally unique.
-        /// </summary>
-        private SymbolTable mSymbolTable;
-
-        /// <summary>
         /// Reference to project, so we can query the Anattrib array to identify "hidden" tables.
         /// </summary>
         private DisasmProject mProject;
+
+        /// <summary>
+        /// Set to true when generating symbols for assemblers like 64tass, which assign a
+        /// special meaning to labels with leading underscores.
+        /// </summary>
+        private bool mMaskLeadingUnderscores;
 
         /// <summary>
         /// Set to true if we want all variables to be globally unique (because the assembler
         /// can't redefine them).
         /// </summary>
         private bool mDoUniquify;
+
+        /// <summary>
+        /// List of all non-variable symbols, for uniquification.  This is generated from the
+        /// project symbol table.  When generating assembly sources, the labels are transformed
+        /// through the label map.
+        /// </summary>
+        private Dictionary<string, Symbol> mAllNvSymbols;
 
         /// <summary>
         /// Label uniquification helper.
@@ -86,7 +95,7 @@ namespace SourceGen {
             /// re-defined.
             /// </summary>
             /// <param name="symbolTable">Symbol table, for uniqueness check.</param>
-            public void MakeUnique(SymbolTable symbolTable) {
+            public void MakeUnique(Dictionary<string, Symbol> allNvSymbols) {
                 // The main symbol table might have user-supplied labels like "ptr_2", so we
                 // need to keep testing against that.  However, it should not be possible for
                 // us to clash with other uniquified variables.  So we don't need to check
@@ -98,7 +107,7 @@ namespace SourceGen {
                 do {
                     Counter++;
                     testLabel = BaseLabel + "_" + Counter;
-                } while (symbolTable.TryGetValue(testLabel, out Symbol sym));
+                } while (allNvSymbols.TryGetValue(testLabel, out Symbol unused));
                 Label = testLabel;
             }
         }
@@ -141,15 +150,18 @@ namespace SourceGen {
         /// Constructor.
         /// </summary>
         /// <param name="lvTables">List of tables from the DisasmProject.</param>
-        /// <param name="symbolTable">Full SymbolTable from the DisasmProject.  Used to
-        ///   generate globally unique symbol names.</param>
         /// <param name="project">Project reference.</param>
+        /// <param name="labelMap">Label map dictionary, used to rename the labels in
+        ///   the project symbol table.  May be null.</param>
+        /// <param name="maskLeadingUnderscores">If true, labels with leading underscores
+        ///   will be prefixed.</param>
         /// <param name="uniquify">Set to true if variable names cannot be redefined.</param>
         public LocalVariableLookup(SortedList<int, LocalVariableTable> lvTables,
-                DisasmProject project, bool uniquify) {
+                DisasmProject project, Dictionary<string, string> labelMap,
+                bool maskLeadingUnderscores, bool uniquify) {
             mLvTables = lvTables;
-            mSymbolTable = project.SymbolTable;
             mProject = project;
+            mMaskLeadingUnderscores = maskLeadingUnderscores;
             mDoUniquify = uniquify;
 
             mCurrentTable = new LocalVariableTable();
@@ -157,7 +169,27 @@ namespace SourceGen {
             if (uniquify) {
                 mUniqueLabels = new Dictionary<string, UniqueLabel>();
             }
+            CreateAllSymbolsDict(labelMap);
             Reset();
+        }
+
+        private void CreateAllSymbolsDict(Dictionary<string, string> labelMap) {
+            SymbolTable symTab = mProject.SymbolTable;
+            mAllNvSymbols = new Dictionary<string, Symbol>(symTab.Count);
+            foreach (Symbol sym in symTab) {
+                if (sym.SymbolSource == Symbol.Source.Variable) {
+                    continue;
+                }
+                if (labelMap != null && labelMap.TryGetValue(sym.Label, out string newLabel)) {
+                    // Non-unique labels may map multiple entries to a single entry.  That's
+                    // fine; our goal here is just to avoid duplication.  Besides, any symbols
+                    // being output as locals will have the local prefix character and won't
+                    // be a match.
+                    mAllNvSymbols[newLabel] = sym;
+                } else {
+                    mAllNvSymbols[sym.Label] = sym;
+                }
+            }
         }
 
         public void Reset() {
@@ -344,15 +376,26 @@ namespace SourceGen {
                     // discards entries that clash by name or value.
                     for (int i = 0; i < lvt.Count; i++) {
                         DefSymbol defSym = lvt[i];
+                        string newLabel = defSym.Label;
+
+                        if (mMaskLeadingUnderscores && newLabel[0] == '_') {
+                            newLabel = AsmGen.LabelLocalizer.NO_UNDER_PFX + newLabel;
+                        }
 
                         // Look for non-variable symbols with the same label.  Ordinarily the
                         // editor prevents this from happening, but there are ways to trick
-                        // the system (e.g. add a symbol while the LvTable is hidden).  We
-                        // deal with it here.
-                        if (mSymbolTable.TryGetNonVariableValue(defSym.Label, out Symbol unused)) {
-                            Debug.WriteLine("Detected duplicate non-var label " + defSym.Label +
+                        // the system (e.g. add a symbol while the LvTable is hidden, or have
+                        // a non-unique local promoted to global).  We deal with it here.
+                        //
+                        // TODO(someday): this is not necessary for assemblers like Merlin 32
+                        // that put variables in a separate namespace.
+                        if (mAllNvSymbols.TryGetValue(newLabel, out Symbol unused)) {
+                            Debug.WriteLine("Detected duplicate non-var label " + newLabel +
                                 " at +" + mNextLvtOffset.ToString("x6"));
-                            string newLabel = DeDupLabel(defSym.Label);
+                            newLabel = DeDupLabel(newLabel);
+                        }
+
+                        if (newLabel != defSym.Label) {
                             mDupRemap[defSym.Label] = newLabel;
                             defSym = new DefSymbol(defSym, newLabel);
                         }
@@ -361,7 +404,7 @@ namespace SourceGen {
                             if (mUniqueLabels.TryGetValue(defSym.Label, out UniqueLabel ulab)) {
                                 // We've seen this label before; generate a unique version by
                                 // increasing the appended number.
-                                ulab.MakeUnique(mSymbolTable);
+                                ulab.MakeUnique(mAllNvSymbols);
                                 defSym = new DefSymbol(defSym, ulab.Label);
                             } else {
                                 // Haven't seen this before.  Add it to the unique-labels table.
@@ -394,8 +437,8 @@ namespace SourceGen {
             int counter = 0;
             do {
                 counter++;
-                testLabel = baseLabel + "_DUP" + counter;   // make it ugly and obvious
-            } while (mSymbolTable.TryGetNonVariableValue(testLabel, out Symbol unused));
+                testLabel = baseLabel + "_" + counter;
+            } while (mAllNvSymbols.TryGetValue(testLabel, out Symbol unused));
             return testLabel;
         }
 

@@ -692,6 +692,7 @@ limitations under the License.
                     <RowDefinition Height="*" MinHeight="50"/>
                 </Grid.RowDefinitions>
 
+                <!-- symbols panel -->
                 <GroupBox Grid.Row="0" Header="Symbols">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -738,10 +739,12 @@ limitations under the License.
                     </Grid>
                 </GroupBox>
 
+                <!-- info panel -->
                 <GroupBox Grid.Row="2" Header="Info">
                     <ScrollViewer>
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -754,8 +757,10 @@ limitations under the License.
                             <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="DarkGray"
                                        Text="{Binding InfoOffsetText, FallbackValue=[offset: +123456]}"
                                        Visibility="{Binding InfoShowDebug, Converter={StaticResource BoolToVis}}"/>
+                            <TextBlock Grid.Row="2" TextWrapping="Wrap"
+                                       Text="{Binding InfoLabelDescrText, FallbackValue=Label FUBAR (local)}"/>
 
-                            <StackPanel Grid.Row="2"
+                            <StackPanel Grid.Row="3"
                                         Visibility="{Binding InfoFormatShowDashes, Converter={StaticResource BoolToVis}}">
                                 <!-- For some reason putting the Visibility on the Border causes the
                                 border to disappear even when it's supposed to be Visible.  So I'm
@@ -775,16 +780,16 @@ limitations under the License.
                                                Text="{Binding InfoFormatText, FallbackValue=Format: good stuff}"/>
                                 </Border>
                             </StackPanel>
-                            <Border Grid.Row="2" BorderThickness="1" Padding="1" Margin="0,2"
+                            <Border Grid.Row="3" BorderThickness="1" Padding="1" Margin="0,2"
                                     BorderBrush="{Binding InfoFormatBoxBrush}"
                                     Visibility="{Binding InfoFormatShowSolid, Converter={StaticResource BoolToVis}}">
                                 <TextBlock TextWrapping="Wrap" Text="{Binding InfoFormatText}"/>
                             </Border>
 
-                            <TextBox Grid.Row="3" Text="{Binding InfoPanelDetail1}" IsReadOnly="True"
+                            <TextBox Grid.Row="4" Text="{Binding InfoPanelDetail1}" IsReadOnly="True"
                                      TextWrapping="Wrap" BorderThickness="0"/>
 
-                            <!--<TextBox Grid.Row="4" Text="{Binding InfoPanelMonoContents}" IsReadOnly="True"
+                            <!--<TextBox Grid.Row="5" Text="{Binding InfoPanelMonoContents}" IsReadOnly="True"
                                      FontFamily="{StaticResource GeneralMonoFont}"
                                      TextWrapping="Wrap" BorderThickness="0"/>-->
                         </Grid>

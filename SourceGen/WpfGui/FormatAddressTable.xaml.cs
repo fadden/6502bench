@@ -499,8 +499,9 @@ namespace SourceGen.WpfGui {
                         Symbol tmpSym = AutoLabel.GenerateUniqueForAddress(addr,
                             mProject.SymbolTable, "T");
                         // tmpSym was returned as an auto-label, make it a user label instead
+                        // (with global scope)
                         tmpSym = new Symbol(tmpSym.Label, tmpSym.Value, Symbol.Source.User,
-                            Symbol.Type.LocalOrGlobalAddr, Symbol.LabelAnnotation.Generated);
+                            Symbol.Type.GlobalAddr, Symbol.LabelAnnotation.Generated);
                         newLabels[targetOffset] = tmpSym;       // overwrites previous
                         targetLabel = tmpSym.Label;
                         AddPreviewItem(addr, targetOffset, "(+) " + targetLabel);

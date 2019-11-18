@@ -1778,6 +1778,15 @@ namespace SourceGen.WpfGui {
         }
         private string mInfoOffsetText;
 
+        /// <summary>
+        /// Text for the label description.
+        /// </summary>
+        public string InfoLabelDescrText {
+            get { return mInfoLabelDescrText; }
+            set { mInfoLabelDescrText = value; OnPropertyChanged(); }
+        }
+        private string mInfoLabelDescrText;
+
         public SolidColorBrush InfoFormatBoxBrush {
             get { return mInfoFormatBoxBrush; }
             set { mInfoFormatBoxBrush = value; OnPropertyChanged(); }
@@ -1825,8 +1834,13 @@ namespace SourceGen.WpfGui {
         //private string mInfoPanelMonoContents;
 
 
+        /// <summary>
+        /// Clears the contents of the info panel.  Call this whenever the contents have
+        /// been updated.
+        /// </summary>
         public void ClearInfoPanel() {
-            InfoLineDescrText = InfoOffsetText = InfoFormatText  = InfoPanelDetail1 = string.Empty;
+            InfoLineDescrText = InfoOffsetText = InfoLabelDescrText = InfoFormatText =
+                InfoPanelDetail1 = string.Empty;
             InfoFormatShowDashes = InfoFormatShowSolid = false;
         }
 

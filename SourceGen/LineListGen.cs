@@ -437,7 +437,7 @@ namespace SourceGen {
             mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
                 false);
-            mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject, false);
+            mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
 
             mDisplayList.ListGen = this;
         }

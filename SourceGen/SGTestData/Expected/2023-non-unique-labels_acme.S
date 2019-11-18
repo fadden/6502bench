@@ -68,12 +68,12 @@ ___     ldx     #$41
 @__     dex
         bne     @__
         nop
-@anno   lda     #$42
-@T106B  lda     @anno
+anno    lda     #$42
+T106B   lda     anno
         clc
         bcc     @skip
 
-        !word   @T106B
+        !word   T106B
 
 @skip   nop
 JMP1    lda     JMP1
@@ -91,5 +91,25 @@ LDAL    !byte   $af
         !byte   $95
         !byte   $10
         !byte   $00
+        nop
+        !zone   Z00009a
+.plain_1 =      $11
+._under1 =      $12
+.__dub1 =       $13
+        lda     .plain_1
+        lda     ._under1
+        lda     .__dub1
+@plain  lda     @plain
+plain   lda     plain
+global8 dex
+        bne     plain
+X_under1 lda    X_under1
+@X__dub1 lda    @X__dub1
+        !zone   Z0000af
+.plain_1 =      $11
+.__dub1 =       $13
+._under1 =      $22
+        lda     .plain_1
+        lda     ._under1
         rts
 

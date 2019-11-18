@@ -1179,7 +1179,8 @@ namespace SourceGen {
         /// for the benefit of future uniqueness checks.
         /// </summary>
         private void GenerateVariableRefs() {
-            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this, false);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this,
+                null, false, false);
 
             for (int offset = 0; offset < FileData.Length; ) {
                 // Was a table defined at this offset?
@@ -1408,7 +1409,8 @@ namespace SourceGen {
                 }
             }
 
-            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this, false);
+            LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this,
+                null, false, false);
 
             // Walk through the Anattrib array, adding xref entries to things referenced
             // by the entity at the current offset.

@@ -202,6 +202,11 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class AssemblerQuirks {
         /// <summary>
+        /// Does a leading underscore in a label have a special meaning?  (e.g. 64tass)
+        /// </summary>
+        public bool LeadingUnderscoreSpecial { get; set; }
+
+        /// <summary>
         /// Are 8-bit constant args to MVN/MVP output without a leading '#'?
         /// </summary>
         public bool BlockMoveArgsNoHash { get; set; }
