@@ -3952,6 +3952,49 @@ namespace SourceGen {
             showTextDlg.ShowDialog();
         }
 
+        public void Debug_ApplyPlatformSymbols() {
+            ChangeSet cs = new ChangeSet(1);
+
+            foreach (Symbol sym in mProject.SymbolTable) {
+                if (sym.SymbolSource != Symbol.Source.Platform) {
+                    continue;
+                }
+                DefSymbol defSym = (DefSymbol)sym;
+                if (defSym.MultiMask != null) {
+                    // These would require additional work... probably.
+                    continue;
+                }
+
+                int offset = mProject.AddrMap.AddressToOffset(0, sym.Value);
+                if (offset < 0) {
+                    continue;
+                }
+
+                // Make sure this is the start of an instruction or data item.  (If you
+                // haven't finished hinting code, it's best to disable the string/fill finder.)
+                Anattrib attr = mProject.GetAnattrib(offset);
+                if (!attr.IsStart) {
+                    Debug.WriteLine("Found match at non-start +" + offset.ToString("x6") +
+                        ": " + defSym);
+                    continue;
+                }
+
+                // Check for user label.  Okay to overwrite auto label.
+                if (mProject.UserLabels.ContainsKey(offset)) {
+                    Debug.WriteLine("User label already exists at +" + offset.ToString("x6"));
+                    continue;
+                }
+
+                // Create a new user label symbol.
+                Symbol newSym = new Symbol(sym.Label, sym.Value, Symbol.Source.User,
+                    Symbol.Type.GlobalAddr, Symbol.LabelAnnotation.None);
+                UndoableChange uc = UndoableChange.CreateLabelChange(offset, null, newSym);
+                cs.Add(uc);
+            }
+
+            ApplyUndoableChanges(cs);
+        }
+
         #endregion Debug features
     }
 }

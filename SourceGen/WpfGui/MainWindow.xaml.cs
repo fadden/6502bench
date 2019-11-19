@@ -1333,6 +1333,11 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ApplesoftToHtml();
         }
 
+        private void Debug_ApplyPlatformSymbolsCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ApplyPlatformSymbols();
+        }
+
         private void Debug_ExtensionScriptInfoCmd_Executed(object sender,
             ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ExtensionScriptInfo();

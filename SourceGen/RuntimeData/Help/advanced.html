@@ -306,10 +306,10 @@ not help you debug 6502 projects.</p>
 <ul>
   <li>Re-analyze (F5).  Causes a full re-analysis.  Useful if you think
     the display is out of sync.</li>
-  <li>Show Problem List Viewer.  Opens a floating window that shows some
-    of the problems encountered during the last analysis pass.</li>
-  <li>Show Undo/Redo History.  Opens a floating window that lets you
-    watch the contents of the undo buffer while you work.</li>
+  <li>Source Generation Tests.  Opens the regression test harness.  See
+    <code>README.md</code> in the SGTestData directory for more information.
+    If the regression tests weren't included in the SourceGen distribution,
+    this will have nothing to do.</li>
   <li>Show Analyzer Output.  Opens a floating window with a text log from
     the most recent analysis pass.  The exact contents will vary depending
     on how the verbosity level is configured internally.  Debug messages
@@ -318,9 +318,11 @@ not help you debug 6502 projects.</p>
     timer results from the most recent analysis pass.  Times for individual
     stages are noted, as are times for groups of functions.  This
     provides a crude sense of where time is being spent.</li>
+  <li>Show Undo/Redo History.  Opens a floating window that lets you
+    watch the contents of the undo buffer while you work.</li>
   <li>Extension Script Info.  Shows a bit about the currently-loaded
     extension scripts.</li>
-  <li>Toggle Comment Rulers.  Adds a string of digits above every
+  <li>Show Comment Rulers.  Adds a string of digits above every
     multi-line comment (long comment, note).  Useful for confirming that
     the width limitation is being obeyed.  These are added exactly
     as shown, without comment delimiters, into generated assembly output,
@@ -329,10 +331,18 @@ not help you debug 6502 projects.</p>
     script sandbox every 60 seconds.  This seems to be required to avoid
     an infrequently-encountered Windows bug.  (See code for notes and
     stackoverflow.com links.)</li>
-  <li>Source Generation Tests.  Opens the regression test harness.  See
-    the README.md in the SGTestData directory for more information.  If
-    the regression tests weren't included in the SourceGen distribution,
-    this will have nothing to do.</li>
+  <li>Applesoft to HTML.  An experimental feature that formats an
+    Applesoft program as HTML.</li>
+  <li>Apply Platform Symbols.  An experimental feature for turning platform
+    symbols into address labels.  This will run through the list of all
+    symbols loaded from .sym65 files and find addresses that fall within
+    the bounds of the file.  If it finds an address that is the start
+    of a code/data line and doesn't already have a user-supplied label,
+    the platform symbol's label will be applied.  Useful for
+    disassembling ROM images or other code with an established set of
+    public entry points.
+    (Tip: disable "analyze uncategorized data" from the project
+    properties editor first.)</li>
 </ul>
 
 
