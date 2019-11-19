@@ -46,10 +46,16 @@ the
 <a href="intro.html#about-symbols">proper form</a>, and not have the same
 name as another symbol.  If you edit an auto-generated label you will
 be required to change the name.</p>
-<p>The label may be marked as local, global, or global and exported.
-Local labels may be modified by the assembly code generator to have a more
-convenient form, such as a local loop identifier.  Global labels are
-always output as-is.  Exported labels are added to a table that may
+<p>The label may be marked as non-unique local, unique local, global,
+or global and exported.  The default is Global.  If you start typing
+a label with the non-unique label prefix character (usually '@',
+configurable in application settings), the selection will automatically
+switch to non-unique local.</p>
+<p>Local labels may be "promoted" to global if the assembler requires it.
+Most assemblers define local scope as starting clean after each global
+label, but there are exceptions.  If a label's name conflicts or is
+incompatible with the assembler, it will be renamed.</p>
+<p>Exported labels are added to a table that may
 be imported by other projects (see
 <a href="advanced.html#multi-bin">Working With Multiple Binaries</a>).</p>
 
@@ -77,7 +83,11 @@ applied automatically.</p>
 <p>The editor will try to prevent you from using auto-generated
 labels and local variables in the symbol field.  These types of symbols
 can be freely renamed by SourceGen, and thus cannot be reliably
-referenced by name.</p>
+referenced by name.
+You can reference a non-unique local by writing it with the non-unique
+label prefix character (default '@').  Ambiguous non-unique references
+are not allowed, so if the symbol can't be found the label will
+be discarded.</p>
 <p>When you select a non-default format option, a "preview" of the
 formatted operand will be shown.</p>
 <p>The <code>MVN</code> and <code>MVP</code> instructions on the 65816

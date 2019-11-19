@@ -27,8 +27,8 @@ cross-reference generation and color-highlighted bookmarks help
 navigate the code while trying to figure out what it does.  A
 disassembler should help you understand the code, not just dump the
 instructions to a text file.</p>
-<p>The computer I built in 2014 has a 4GHz CPU and 8GB of RAM.
-I figured we should put that kind of power to good use.</p>
+<p>The computer I built back in 2014 has a 4GHz CPU and 8GB of RAM.  I
+figured we should put the power of modern computing hardware to good use.</p>
 
 <p>The second purpose is to facilitate sharing and collaboration.  Most
 disassemblers generate output for a specific assembler, or in a way that's
@@ -456,9 +456,9 @@ are referred to as <i>internal</i>.  They come in two varieties.</p>
 The editor will try to prevent you from creating a label that has the same
 name as another symbol, but if you manage to do so, the user label takes
 precedence over symbols from other sources.  User labels may be tagged
-as local, global, or global and exported.  Local vs. global is important
-for the label localizer, while exported symbols can be pulled directly
-into other projects.</p>
+as non-unique local, unique local, global, or global and exported.  Local
+vs. global is important for the label localizer, while exported symbols
+can be pulled directly into other projects.</p>
 
 <p><b>Auto labels</b> are automatically generated labels placed on
 instructions or data offsets that are the target of operands.  They're
@@ -604,11 +604,51 @@ of <code>PTR</code> becomes <code>PTR_1</code>), and variables will have
 global scope.</p>
 
 
-<h3><a name="weak-refs">Weak References</a></h3>
+<h3><a name="unique-local-global">Unique vs. Non-Unique and Local vs. Global</a></h3>
+
+<p>Most assemblers have a notion of "local" labels, which have a scope
+that is book-ended by global labels.  These are handy for generic branch
+target names like "loop" or "notzero" that you might want to use in
+multiple places.  The exact definition of local variable scope varies
+between assemblers, so labels that you want to be local might have to
+be promoted to global (and probably renamed).</p>
+<p>SourceGen has a similar concept with a slight twist: they're called
+non-unique labels, because the goal is to be able to use the same
+label in more than one place.  Whether or not they actually turn out
+to be local is a decision deferred to assembly source generation time.
+(You can also declare a label to be a unique local if you like; the
+auto-generated labels like "L1234" do this.)</p>
+<p>When you're writing code for an assembler, it has to be unambiguous,
+because the assembler can't guess at what the output should be.  For a
+disassembler, the output is known, so a greater degree of ambiguity is
+tolerable.  Instead of throwing errors and refusing to continue, the
+source generator can modify the output until it works.  For example:<p>
+<pre>
+@LOOP    LDX     #$02
+@LOOP    DEX
+         BNE     @LOOP
+         DEY
+         BNE     @LOOP
+</pre>
+<p>This would confuse an assembler.  SourceGen already knows which @LOOP
+is being branched to, so it can just rename one of them to "@LOOP1".</p>
+<p>One situation where non-unique labels cause difficulty is with
+weak symbolic references (see next section).  For example, suppose
+the above code then did this:</p>
+<pre>
+         LDA     #&lt;@LOOP
+</pre>
+<p>While it's possible to make an educated guess at which @LOOP was
+meant, it's easy to get wrong.  In situations like this, it's best to
+give the labels different names.</p>
+
+
+<h3><a name="weak-refs">Weak Symbolic References</a></h3>
 
 <p>Symbolic references in operands are "weak references".  If the named
 symbol exists, the reference is used.  If the symbol can't be found, the
-operand is formatted in hex instead.</p>
+operand is formatted in hex instead.  They're called "weak" because
+failing to resolve the reference isn't considered an error.</p>
 
 <p>It's important to know this when editing a project.  Consider the
 following trivial chunk of code:</p>

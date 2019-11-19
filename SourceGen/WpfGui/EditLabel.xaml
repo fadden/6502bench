@@ -57,11 +57,11 @@ limitations under the License.
             <StackPanel>
                 <RadioButton Content="{Binding NonUniqueButtonLabel, FallbackValue=_Non-unique local (\'!\')}"
                              IsChecked="{Binding IsNonUniqueChecked}" IsEnabled="{Binding IsNonUniqueEnabled}"/>
-                <RadioButton Content="_Local (if possible)" Margin="0,4,0,0"
+                <RadioButton Content="Unique _local" Margin="0,4,0,0"
                              IsChecked="{Binding IsLocalChecked}" IsEnabled="{Binding IsLocalEnabled}"/>
                 <RadioButton Content="_Global" Margin="0,4,0,0"
                              IsChecked="{Binding IsGlobalChecked}" IsEnabled="{Binding IsGlobalEnabled}"/>
-                <RadioButton Content="Global and marked for _export" Margin="0,4,0,0"
+                <RadioButton Content="Global, marked for _export" Margin="0,4,0,0"
                              IsChecked="{Binding IsExportedChecked}" IsEnabled="{Binding IsExportedEnabled}"/>
             </StackPanel>
         </GroupBox>

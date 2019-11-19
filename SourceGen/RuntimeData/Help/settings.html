@@ -149,9 +149,6 @@ file is sent to other people, since it may not otherwise be obvious from
 the source file what the intended target assembler is, or what options
 are required to process the file correctly.</p>
 
-<p>"Disable label localization" turns off the
-<a href="codegen.html#localizer">label localizer</a>.</p>
-
 
 <h3><a name="appset-displayformat">Display Format</a></h3>
 
@@ -168,8 +165,14 @@ Sometimes the rules allow expressions to be written simply, other times
 explicit grouping with parenthesis is required.  Select whichever style
 you are most comfortable with.</p>
 
+<p>Non-unique labels are identified with a prefix character, typically
+'@' or ':'.  The default is '@', but you can configure it to any character
+that isn't valid for the start of a label.  (64tass uses '_' for locals,
+but that's a valid label start character, and so isn't allowed here.)
+The setting affects label entry as well as display.</p>
+
 <p>If you would like your local variables to be shown with a prefix
-character, you can set one here.</p>
+character, you can set it in the "local variable prefix" box.</p>
 
 <p>The "quick set" pop-up configures the fields on this tab to match
 the conventions of the specified assembler.  Select your preferred assembler

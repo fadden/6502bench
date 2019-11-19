@@ -268,6 +268,27 @@ by editing the label on line $2009 directly, but in many cases --
 particularly when the operand's target address is far off screen --
 it's more convenient to work through the operand editor.</p>
 
+<h3>Unique vs. Non-Unique Labels</h3>
+
+<p>Most assemblers have a notion of "local" labels, which go out of
+scope when a non-local (global) label is encountered.  The actual
+definition of "local" is assembler-specific, but SourceGen allows you
+to create labels that serve the same purpose.</p>
+<p>By default, newly-created labels have global scope and must be
+unique.  You can change that by editing the label.  Up near the top of
+the file, at address $1002, double-click on the label ("L1002").
+Change the label to "LOOP" and click the "non-unique local" button.
+Click OK.</p>
+<p>The label at line $1002 should now be "@LOOP".  By default, '@' is
+used to indicate non-unique labels, though you can change it to a
+different character in the application settings.</p>
+<p>At address $2019, double-click to edit the label ("L2019").  If
+you type "MAIN" or "IS_OK" you'll get an error, but if you type "@LOOP"
+it will be accepted.  Note the "non-unique local" button is selected
+automatically if you start a label with '@'.  Click OK.</p>
+<p>You now have two lines with the same label, separated by global
+labels.  The assembly source generator may "promote" them to globals or
+rename them if your chosen assembler requires it.</p>
 
 <h3>Editing Data Operands</h3>
 
