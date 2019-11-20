@@ -451,15 +451,21 @@ limitations under the License.
         </ToolBarTray>
 
         <StatusBar Name="mainStatusBar" DockPanel.Dock="Bottom">
-            <DockPanel LastChildFill="False"
-                       Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor,
-                            AncestorType={x:Type StatusBar}}}">
-                <TextBlock DockPanel.Dock="Left" Text="{Binding StatusBarText, FallbackValue=Ready}"/>
-                <Button DockPanel.Dock="Right" Margin="4,0,6,0" Padding="4,0,4,0"
+            <Grid Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type StatusBar}}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding StatusBarText, FallbackValue=Ready}"/>
+                <TextBlock Grid.Column="1" HorizontalAlignment="Center"
+                           Text="{Binding ByteCountText, FallbackValue=30% code; 60% data; 10% junk}"/>
+                <Button Grid.Column="2" Margin="4,0,6,0" Padding="4,0,4,0"
                         Content="{Binding MessageStatusText, FallbackValue=3 messages (1 warning/error)}"
                         Visibility="{Binding Path=CodeListVisibility}"
                         Click="MessageStatusButton_Click"/>
-            </DockPanel>
+            </Grid>
         </StatusBar>
 
         <!-- Main part of the window.  Three side-by-side panels, only the middle of which changes

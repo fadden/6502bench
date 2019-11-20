@@ -156,6 +156,7 @@ limitations under the License.
     <system:String x:Key="str_ScanC64ScreenCode">C64 Screen Code</system:String>
     <system:String x:Key="str_SetupSystemSummaryFmt">{1} CPU @ {2} MHz</system:String>
     <system:String x:Key="str_ShowCol">Show</system:String>
+    <system:String x:Key="str_StatusByteCountFmt">{0:F1}% code, {1:F1}% data, {2:F1}% junk</system:String>
     <system:String x:Key="str_StatusReady">Ready</system:String>
     <system:String x:Key="str_StrVfyDciMixedData">DCI string has mixed data</system:String>
     <system:String x:Key="str_StrVfyDciNotTerminated">DCI string not terminated</system:String>

@@ -176,6 +176,17 @@ namespace SourceGen {
         // List of messages, mostly problems detected during analysis.
         public MessageList Messages { get; private set; }
 
+        public class CodeDataCounts {
+            public int CodeByteCount { get; set; }
+            public int DataByteCount { get; set; }
+            public int JunkByteCount { get; set; }
+
+            public void Reset() {
+                CodeByteCount = DataByteCount = JunkByteCount = 0;
+            }
+        }
+        public CodeDataCounts ByteCounts { get; private set; } = new CodeDataCounts();
+
 #if DATA_PRESCAN
         // Data scan results.
         public TypedRangeSet RepeatedBytes { get; private set; }
@@ -1409,6 +1420,9 @@ namespace SourceGen {
                 }
             }
 
+            // No particular reason to do this here, but it's convenient.
+            ByteCounts.Reset();
+
             LocalVariableLookup lvLookup = new LocalVariableLookup(LvTables, this,
                 null, false, false);
 
@@ -1518,9 +1532,18 @@ namespace SourceGen {
                 if (attr.IsDataStart) {
                     // There shouldn't be data items inside of other data items.
                     offset += attr.Length;
+
+                    if (attr.DataDescriptor != null &&
+                            attr.DataDescriptor.FormatType == FormatDescriptor.Type.Junk) {
+                        ByteCounts.JunkByteCount += attr.Length;
+                    } else {
+                        ByteCounts.DataByteCount += attr.Length;
+                    }
                 } else {
                     // Advance by one, not attr.Length, so we don't miss embedded instructions.
                     offset++;
+
+                    ByteCounts.CodeByteCount++;
                 }
             }
         }
@@ -1553,6 +1576,7 @@ namespace SourceGen {
             AutoLabel.Style style = ProjectProps.AutoLabelStyle;
             Debug.Assert(style != AutoLabel.Style.Simple);
 
+            // We don't have a list of auto labels, so just pick them out of anattribs.
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 Anattrib attr = mAnattribs[offset];
                 if (attr.Symbol != null && attr.Symbol.SymbolSource == Symbol.Source.Auto) {

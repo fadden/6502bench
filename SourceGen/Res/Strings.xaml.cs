@@ -293,6 +293,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_SetupSystemSummaryFmt");
         public static string SHOW_COL =
             (string)Application.Current.FindResource("str_ShowCol");
+        public static string STATUS_BYTE_COUNT_FMT =
+            (string)Application.Current.FindResource("str_StatusByteCountFmt");
         public static string STATUS_READY =
             (string)Application.Current.FindResource("str_StatusReady");
         public static string STR_VFY_DCI_MIXED_DATA =

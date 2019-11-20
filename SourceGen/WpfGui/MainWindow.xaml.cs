@@ -59,6 +59,15 @@ namespace SourceGen.WpfGui {
         private string mStatusBarText;
 
         /// <summary>
+        /// Text for code/data breakdown string.
+        /// </summary>
+        public string ByteCountText {
+            get { return mByteCountText; }
+            set { mByteCountText = value; OnPropertyChanged(); }
+        }
+        private string mByteCountText;
+
+        /// <summary>
         /// Width of long comment fields.
         /// </summary>
         /// <remarks>

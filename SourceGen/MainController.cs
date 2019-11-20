@@ -651,6 +651,28 @@ namespace SourceGen {
                 sb.Append(Res.Strings.TITLE_MODIFIED);
             }
             mMainWin.Title = sb.ToString();
+
+            UpdateByteCounts();
+        }
+
+        /// <summary>
+        /// Updates the code/data/junk percentages in the status bar.
+        /// </summary>
+        private void UpdateByteCounts() {
+            if (mProject == null) {
+                mMainWin.ByteCountText = string.Empty;
+                return;
+            }
+
+            Debug.Assert(mProject.ByteCounts.CodeByteCount + mProject.ByteCounts.DataByteCount +
+                mProject.ByteCounts.JunkByteCount == mProject.FileData.Length);
+
+            int total = mProject.FileData.Length;
+            float codePerc = (mProject.ByteCounts.CodeByteCount * 100.0f) / total;
+            float dataPerc = (mProject.ByteCounts.DataByteCount * 100.0f) / total;
+            float junkPerc = (mProject.ByteCounts.JunkByteCount * 100.0f) / total;
+            mMainWin.ByteCountText = string.Format(Res.Strings.STATUS_BYTE_COUNT_FMT,
+                codePerc, dataPerc, junkPerc);
         }
 
         #endregion Init and settings
