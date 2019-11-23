@@ -105,6 +105,9 @@ namespace SourceGen {
 
             // Adds, updates, or removes a local variable table.
             SetLocalVariableTable,
+
+            // Adds, updates, or removes a visualization set.
+            SetVisualizationSet,
         }
 
         /// <summary>
@@ -475,6 +478,28 @@ namespace SourceGen {
             uc.OldValue = oldLvTable;
             uc.NewValue = newLvTable;
             uc.ReanalysisRequired = ReanalysisScope.DataOnly;   // update dfds in Anattribs
+            return uc;
+        }
+
+        /// <summary>
+        /// Creates an UndoableChange for a visualization set update.
+        /// </summary>
+        /// <param name="offset">Affected offset.</param>
+        /// <param name="oldVisSet">Old visualization set.</param>
+        /// <param name="newVisSet">New visualization set.</param>
+        /// <returns>Change record.</returns>
+        public static UndoableChange CreateVisualizationSetChange(int offset,
+                VisualizationSet oldVisSet, VisualizationSet newVisSet) {
+            if (oldVisSet == newVisSet) {
+                Debug.WriteLine("No-op visualization set change");
+            }
+
+            UndoableChange uc = new UndoableChange();
+            uc.Type = ChangeType.SetVisualizationSet;
+            uc.Offset = offset;
+            uc.OldValue = oldVisSet;
+            uc.NewValue = newVisSet;
+            uc.ReanalysisRequired = ReanalysisScope.DisplayOnly;    // no change to code/data
             return uc;
         }
 

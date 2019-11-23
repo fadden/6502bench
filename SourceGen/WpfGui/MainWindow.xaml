@@ -101,6 +101,7 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="EditProjectSymbolCmd" Text="Edit Project Symbol..."/>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
+            <RoutedUICommand x:Key="EditVisualizationSetCmd" Text="Create/Edit Visualization Set..."/>
             <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
             <RoutedUICommand x:Key="ExportCmd" Text="Export..."/>
             <RoutedUICommand x:Key="FindNextCmd" Text="Find Next">
@@ -225,6 +226,8 @@ limitations under the License.
                         CanExecute="CanEditProjectSymbol" Executed="EditProjectSymbolCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
                         CanExecute="CanEditStatusFlags" Executed="EditStatusFlagsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditVisualizationSetCmd}"
+                        CanExecute="CanEditVisualizationSet" Executed="EditVisualizationSetCmd_Executed"/>
         <CommandBinding Command="{StaticResource ExitCmd}"
                         Executed="ExitCmd_Executed"/>
         <CommandBinding Command="{StaticResource ExportCmd}"
@@ -368,6 +371,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditProjectSymbolCmd}"/>
                 <MenuItem Command="{StaticResource CreateLocalVariableTableCmd}"/>
                 <MenuItem Command="{StaticResource EditLocalVariableTableCmd}"/>
+                <MenuItem Command="{StaticResource EditVisualizationSetCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource HintAsCodeEntryPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>
                 <MenuItem Command="{StaticResource HintAsDataStartCmd}" InputGestureText="Ctrl+H, Ctrl+D"/>

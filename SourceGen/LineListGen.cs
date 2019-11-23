@@ -30,7 +30,7 @@ namespace SourceGen {
     /// </summary>
     public class LineListGen {
         /// <summary>
-        /// Color multiplier for Notes.
+        /// Color multiplier for Notes.  Used for "dark" mode.
         /// </summary>
         public float NoteColorMultiplier { get; set; } = 1.0f;
 
@@ -122,6 +122,7 @@ namespace SourceGen {
 
                 // Additional metadata.
                 LocalVariableTable      = 1 << 8,
+                VisualizationSet        = 1 << 9,
             }
 
             /// <summary>
@@ -503,6 +504,13 @@ namespace SourceGen {
                         break;
                     case Line.Type.LocalVariableTable:
                         parts = GenerateLvTableLine(line.FileOffset, line.SubLineIndex);
+                        break;
+                    case Line.Type.VisualizationSet:
+                        // TODO(xyzzy)
+                        mProject.VisualizationSets.TryGetValue(line.FileOffset,
+                            out VisualizationSet visSet);
+                        parts = FormattedParts.CreateLongComment("!VISUALIZATION SET! " +
+                            (visSet != null ? visSet.PlaceHolder : "???"));
                         break;
                     case Line.Type.Blank:
                         // Nothing to do.
@@ -970,6 +978,9 @@ namespace SourceGen {
                     List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
                     StringListToLines(formatted, offset, Line.Type.LongComment,
                         longComment.BackgroundColor, NoteColorMultiplier, lines);
+                }
+                if (mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet visSet)) {
+                    lines.Add(new Line(offset, 0, Line.Type.VisualizationSet));
                 }
 
                 // Local variable tables come next.  Defer rendering.

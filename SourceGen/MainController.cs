@@ -1491,6 +1491,11 @@ namespace SourceGen {
                         EditLocalVariableTable();
                     }
                     break;
+                case LineListGen.Line.Type.VisualizationSet:
+                    if (CanEditVisualizationSet()) {
+                        EditVisualizationSet();
+                    }
+                    break;
 
                 case LineListGen.Line.Type.Code:
                 case LineListGen.Line.Type.Data:
@@ -2058,6 +2063,25 @@ namespace SourceGen {
             }
         }
 
+        public void EditProjectProperties() {
+            string projectDir = string.Empty;
+            if (!string.IsNullOrEmpty(mProjectPathName)) {
+                projectDir = Path.GetDirectoryName(mProjectPathName);
+            }
+            EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
+                projectDir, mOutputFormatter);
+            dlg.ShowDialog();
+            ProjectProperties newProps = dlg.NewProps;
+
+            // The dialog result doesn't matter, because the user might have hit "apply"
+            // before hitting "cancel".
+            if (newProps != null) {
+                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
+                    mProject.ProjectProps, newProps);
+                ApplyUndoableChanges(new ChangeSet(uc));
+            }
+        }
+
         public bool CanEditProjectSymbol() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
@@ -2119,22 +2143,37 @@ namespace SourceGen {
             }
         }
 
-        public void EditProjectProperties() {
-            string projectDir = string.Empty;
-            if (!string.IsNullOrEmpty(mProjectPathName)) {
-                projectDir = Path.GetDirectoryName(mProjectPathName);
+        public bool CanEditVisualizationSet() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
             }
-            EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
-                projectDir, mOutputFormatter);
-            dlg.ShowDialog();
-            ProjectProperties newProps = dlg.NewProps;
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            // Single line, must be a visualization set.
+            LineListGen.Line.Type lineType = SelectionAnalysis.mLineType;
+            return (lineType == LineListGen.Line.Type.VisualizationSet ||
+                    lineType == LineListGen.Line.Type.Code ||
+                    lineType == LineListGen.Line.Type.Data);
+        }
 
-            // The dialog result doesn't matter, because the user might have hit "apply"
-            // before hitting "cancel".
-            if (newProps != null) {
-                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
-                    mProject.ProjectProps, newProps);
-                ApplyUndoableChanges(new ChangeSet(uc));
+        public void EditVisualizationSet() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet curVisSet);
+
+            EditVisualizationSet dlg = new EditVisualizationSet(mMainWin,
+                curVisSet);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+            if (curVisSet != dlg.NewVisSet) {
+                // New table, edited in place, or deleted.
+                UndoableChange uc = UndoableChange.CreateVisualizationSetChange(offset,
+                    curVisSet, dlg.NewVisSet);
+                Debug.WriteLine("Change " + curVisSet + " to " + dlg.NewVisSet);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
+            } else {
+                Debug.WriteLine("No change to VisualizationSet");
             }
         }
 
@@ -3579,6 +3618,10 @@ namespace SourceGen {
                         lineTypeStr = "???";
                     }
                     break;
+                case LineListGen.Line.Type.VisualizationSet:
+                    // TODO(xyzzy)
+                    lineTypeStr = "visualization set";
+                    break;
                 default:
                     lineTypeStr = "???";
                     break;
@@ -4007,7 +4050,9 @@ namespace SourceGen {
                     continue;
                 }
 
-                // Create a new user label symbol.
+                // Create a new user label symbol.  We should not be creating a duplicate name,
+                // because user labels have priority over platform symbols when populating
+                // the symbol table.
                 Symbol newSym = new Symbol(sym.Label, sym.Value, Symbol.Source.User,
                     Symbol.Type.GlobalAddr, Symbol.LabelAnnotation.None);
                 UndoableChange uc = UndoableChange.CreateLabelChange(offset, null, newSym);

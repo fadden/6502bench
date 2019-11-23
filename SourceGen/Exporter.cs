@@ -314,6 +314,8 @@ namespace SourceGen {
                 case LineListGen.Line.Type.Note:
                     TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Label]);
                     break;
+                case LineListGen.Line.Type.VisualizationSet:
+                    break;      // TODO(xyzzy)
                 case LineListGen.Line.Type.Blank:
                     break;
                 default:
@@ -617,6 +619,8 @@ namespace SourceGen {
                     colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Label], cstr,
                         parts.Comment.Length);
                     break;
+                case LineListGen.Line.Type.VisualizationSet:
+                    break;      // TODO(xyzzy)
                 case LineListGen.Line.Type.Blank:
                     break;
                 default:

@@ -1040,6 +1040,10 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditStatusFlags();
         }
 
+        private void CanEditVisualizationSet(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditVisualizationSet();
+        }
+
         private void CanFormatAsWord(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatAsWord();
         }
@@ -1185,6 +1189,10 @@ namespace SourceGen.WpfGui {
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditStatusFlags();
+        }
+
+        private void EditVisualizationSetCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditVisualizationSet();
         }
 
         private void ExitCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

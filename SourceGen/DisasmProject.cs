@@ -91,14 +91,19 @@ namespace SourceGen {
         public Dictionary<int, Symbol> UserLabels { get; private set; }
 
         /// <summary>
-        /// Local variable tables.
+        /// Local variable tables.  Uses file offset as key.
         /// </summary>
         public SortedList<int, LocalVariableTable> LvTables { get; private set; }
 
         /// <summary>
-        /// Format descriptors for operands and data items; uses file offset as key.
+        /// Format descriptors for operands and data items.  Uses file offset as key.
         /// </summary>
         public SortedList<int, FormatDescriptor> OperandFormats { get; private set; }
+
+        /// <summary>
+        /// Visualization sets.  Uses file offset as key.
+        /// </summary>
+        public SortedList<int, VisualizationSet> VisualizationSets { get; private set; }
 
         /// <summary>
         /// Project properties.  Includes CPU type, platform symbol file names, project
@@ -243,6 +248,7 @@ namespace SourceGen {
             UserLabels = new Dictionary<int, Symbol>();
             OperandFormats = new SortedList<int, FormatDescriptor>();
             LvTables = new SortedList<int, LocalVariableTable>();
+            VisualizationSets = new SortedList<int, VisualizationSet>();
             ProjectProps = new ProjectProperties();
 
             SymbolTable = new SymbolTable();
@@ -2246,6 +2252,22 @@ namespace SourceGen {
                             // ignore affectedOffsets
                             Debug.Assert(uc.ReanalysisRequired ==
                                 UndoableChange.ReanalysisScope.DataOnly);
+                        }
+                        break;
+                    case UndoableChange.ChangeType.SetVisualizationSet: {
+                            VisualizationSets.TryGetValue(offset, out VisualizationSet current);
+                            if (current != (VisualizationSet)oldValue) {
+                                Debug.WriteLine("GLITCH: old visSet value mismatch: current=" +
+                                    current + " old=" + (VisualizationSet)oldValue);
+                                Debug.Assert(false);
+                            }
+                            if (newValue == null) {
+                                VisualizationSets.Remove(offset);
+                            } else {
+                                VisualizationSets[offset] = (VisualizationSet)newValue;
+                            }
+                            Debug.Assert(uc.ReanalysisRequired ==
+                                UndoableChange.ReanalysisScope.DisplayOnly);
                         }
                         break;
                     default:
