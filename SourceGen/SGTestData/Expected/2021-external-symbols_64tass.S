@@ -102,7 +102,7 @@ L1000   lda     CodeWrap+255
         nop
 LocalVar .var   $41
         ldx     $3e
-        ldx     OverVar-1
+        ldx     $3f
         ldx     OverVar
         ldx     LocalVar
         ldx     LocalVar+1

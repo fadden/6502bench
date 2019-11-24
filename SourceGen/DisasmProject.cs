@@ -1343,7 +1343,12 @@ namespace SourceGen {
                     // when addr is the very start of a segment, which means we're actually
                     // finding a label reference rather than project/platform symbol; only
                     // works if the location already has a label.
-                    if (sym == null && (address & 0xffff) < 0xffff && checkNearby) {
+                    //
+                    // Don't do this for zero-page locations, because those are usually
+                    // individual variables that aren't accessed via addr-1.  There are
+                    // exceptions, but more often than not it's just distracting.
+                    if (sym == null && checkNearby && (address & 0xffff) < 0xffff &&
+                            address > 0x0000ff) {
                         sym = SymbolTable.FindNonVariableByAddress(address + 1, accType);
                         if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
                                 sym.SymbolSource != Symbol.Source.Platform) {
