@@ -124,6 +124,55 @@ namespace PluginCommon {
     }
 
     /// <summary>
+    /// Extension scripts that want to generate 2D visualizations must implement this interface.
+    /// </summary>
+    public interface IPlugin_Visualizer2d {
+        string[] GetVisGenNames();
+
+        List<VisParamDescr> GetVisGenParams(string name);
+
+        IVisualization2d ExecuteVisGen(string name, Dictionary<string, object> parms);
+    }
+
+    /// <summary>
+    /// Visualization parameter descriptor.
+    /// </summary>
+    [Serializable]
+    public class VisParamDescr {
+        public enum SpecialMode {
+            None = 0, Offset
+        }
+
+        public string UiLabel { get; private set; }
+        public string Name { get; private set; }
+        public Type CsType { get; private set; }
+        public object Min { get; private set; }
+        public object Max { get; private set; }
+        public SpecialMode Special { get; private set; }
+        public object DefaultValue { get; private set; }
+
+        public VisParamDescr(string uiLabel, string name, Type csType, object min, object max,
+                SpecialMode special, object defVal) {
+            UiLabel = uiLabel;
+            Name = name;
+            CsType = csType;
+            Min = min;
+            Max = max;
+            Special = special;
+            DefaultValue = defVal;
+        }
+    }
+
+    /// <summary>
+    /// Rendered 2D visualization object.
+    /// </summary>
+    public interface IVisualization2d {
+        int GetWidth();
+        int GetHeight();
+        int GetPixel(int x, int y);     // returns ARGB value
+    }
+
+    /// <summary>
     /// Interfaces provided by the application for use by plugins.  An IApplication instance
     /// is passed to the plugin as an argument Prepare().
     /// </summary>

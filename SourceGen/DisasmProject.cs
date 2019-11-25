@@ -2443,6 +2443,11 @@ namespace SourceGen {
             return bestSym;
         }
 
+        public PluginCommon.IPlugin GetMatchingScript(ScriptManager.CheckMatch check) {
+            return mScriptManager.GetMatchingScript(check);
+        }
+
+
         /// <summary>
         /// For debugging purposes, get some information about the currently loaded
         /// extension scripts.

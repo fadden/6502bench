@@ -2160,8 +2160,8 @@ namespace SourceGen {
             int offset = CodeLineList[selIndex].FileOffset;
             mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet curVisSet);
 
-            EditVisualizationSet dlg = new EditVisualizationSet(mMainWin,
-                curVisSet);
+            EditVisualizationSet dlg = new EditVisualizationSet(mMainWin, mProject,
+                mOutputFormatter, curVisSet);
             if (dlg.ShowDialog() != true) {
                 return;
             }

@@ -96,6 +96,7 @@
       <DependentUpon>ShowText.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalVariableTable.cs" />
+    <Compile Include="Visualization.cs" />
     <Compile Include="VisualizationSet.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
@@ -132,6 +133,9 @@
     </Compile>
     <Compile Include="WpfGui\EditProjectProperties.xaml.cs">
       <DependentUpon>EditProjectProperties.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditVisualization.xaml.cs">
+      <DependentUpon>EditVisualization.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\EditVisualizationSet.xaml.cs">
       <DependentUpon>EditVisualizationSet.xaml</DependentUpon>
@@ -311,6 +315,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditProjectProperties.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditVisualization.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

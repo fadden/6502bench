@@ -156,9 +156,7 @@ namespace RuntimeData.Apple {
         private AddressTranslate mAddrTrans;
 
         public string Identifier {
-            get {
-                return "Apple II ProDOS 8 MLI call handler";
-            }
+            get { return "Apple II ProDOS 8 MLI call handler"; }
         }
 
         public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {

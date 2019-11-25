@@ -510,7 +510,7 @@ namespace SourceGen {
                         mProject.VisualizationSets.TryGetValue(line.FileOffset,
                             out VisualizationSet visSet);
                         parts = FormattedParts.CreateLongComment("!VISUALIZATION SET! " +
-                            (visSet != null ? visSet.PlaceHolder : "???"));
+                            (visSet != null ? "VS:" + visSet.Count : "???"));
                         break;
                     case Line.Type.Blank:
                         // Nothing to do.

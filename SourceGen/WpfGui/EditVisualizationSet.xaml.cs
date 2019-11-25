@@ -15,11 +15,19 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
+using Asm65;
+using PluginCommon;
+using SourceGen.Sandbox;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -28,11 +36,11 @@ namespace SourceGen.WpfGui {
     public partial class EditVisualizationSet : Window, INotifyPropertyChanged {
         public VisualizationSet NewVisSet { get; private set; }
 
-        public string PlaceHolder {
-            get { return mPlaceHolder; }
-            set { mPlaceHolder = value; OnPropertyChanged(); }
-        }
-        private string mPlaceHolder;
+        private DisasmProject mProject;
+        private Formatter mFormatter;
+
+        public ObservableCollection<Visualization> VisualizationList { get; private set; } =
+            new ObservableCollection<Visualization>();
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -40,29 +48,72 @@ namespace SourceGen.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public EditVisualizationSet(Window owner, VisualizationSet curSet) {
+        public EditVisualizationSet(Window owner, DisasmProject project, Formatter formatter,
+                VisualizationSet curSet) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
+            mProject = project;
+            mFormatter = formatter;
+
             if (curSet != null) {
-                PlaceHolder = curSet.PlaceHolder;
-            } else {
-                PlaceHolder = "New!";
+                foreach (Visualization vis in curSet) {
+                    VisualizationList.Add(vis);
+                }
             }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrEmpty(PlaceHolder)) {
+            if (VisualizationList.Count == 0) {
                 NewVisSet = null;
             } else {
-                NewVisSet = new VisualizationSet(PlaceHolder);
+                NewVisSet = new VisualizationSet(VisualizationList.Count);
+                foreach (Visualization vis in VisualizationList) {
+                    NewVisSet.Add(vis);
+                }
             }
             DialogResult = true;
+        }
+
+        private void VisualizationList_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
+            Debug.WriteLine("SEL CHANGE");
+        }
+
+        private void VisualizationList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            Debug.WriteLine("DBL CLICK");
+        }
+
+        private void NewButton_Click(object sender, RoutedEventArgs e) {
+            VisualizationList.Add(new Visualization("VIS #" + VisualizationList.Count,
+                "apple2-hi-res-bitmap", new Dictionary<string, object>()));
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e) {
+            Dictionary<string, object> testDict = new Dictionary<string, object>();
+            testDict.Add("offset", 0x1234);
+            testDict.Add("height", 57);
+            EditVisualization dlg = new EditVisualization(this, mProject, mFormatter,
+                new Visualization("arbitrary tag", "apple2-hi-res-bitmap", testDict));
+            if (dlg.ShowDialog() == true) {
+                // TODO
+            }
+        }
+
+        private void RemoveButton_Click(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void UpButton_Click(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void DownButton_Click(object sender, RoutedEventArgs e) {
+
         }
     }
 }

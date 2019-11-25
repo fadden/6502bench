@@ -22,18 +22,62 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Visualization Set"
-        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        Width="460" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">
 
     <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding PlaceHolder, UpdateSourceTrigger=PropertyChanged}"/>
+        <DataGrid Name="visualizationList" Grid.Column="0" Grid.Row="0" Margin="4,4,4,0"
+                  ItemsSource="{Binding VisualizationList}"
+                  IsReadOnly="True"
+                  FontFamily="{StaticResource GeneralMonoFont}"
+                  SnapsToDevicePixels="True"
+                  GridLinesVisibility="Vertical"
+                  VerticalGridLinesBrush="#FF7F7F7F"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  CanUserSortColumns="False"
+                  CanUserReorderColumns="False"
+                  SelectionMode="Single"
+                  SelectionChanged="VisualizationList_SelectionChanged"
+                  MouseDoubleClick="VisualizationList_MouseDoubleClick">
+            <DataGrid.Resources>
+                <!-- make the no-focus color the same as the in-focus color -->
+                <!-- thanks: https://stackoverflow.com/a/13053511/294248 -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightColor}"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                                 Color="{x:Static SystemColors.HighlightTextColor}"/>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tag" Width="155" Binding="{Binding Tag}"/>
+                <DataGridTextColumn Header="Visualization Generator" Width="180" Binding="{Binding VisGenName}"/>
+            </DataGrid.Columns>
+        </DataGrid>
         
+        <StackPanel Grid.Column="1" Grid.Row="0">
+            <Button Width="75" Margin="4" Content="_New..."
+                    Click="NewButton_Click"/>
+            <Button Width="75" Margin="4" Content="_Edit"
+                    Click="EditButton_Click"/>
+            <Button Width="75" Margin="4" Content="_Remove"
+                    Click="RemoveButton_Click"/>
+
+            <Button Width="75" Margin="4,20,4,4" Content="_Up"
+                    Click="UpButton_Click"/>
+            <Button Width="75" Margin="4,4" Content="_Down"
+                    Click="DownButton_Click"/>
+        </StackPanel>
+
         <DockPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"

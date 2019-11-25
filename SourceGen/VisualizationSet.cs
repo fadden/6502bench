@@ -14,23 +14,50 @@
  * limitations under the License.
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SourceGen {
-    public class VisualizationSet {
-        // TODO(xyzzy)
-        public string PlaceHolder { get; private set; }
+    public class VisualizationSet : IEnumerable<Visualization> {
+        /// <summary>
+        /// Ordered list of visualization objects.
+        /// </summary>
+        private List<Visualization> mList;
 
-        public VisualizationSet(string placeHolder) {
-            PlaceHolder = placeHolder;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="cap">Initial capacity.</param>
+        public VisualizationSet(int cap = 1) {
+            mList = new List<Visualization>(cap);
+        }
+
+        // IEnumerable
+        public IEnumerator<Visualization> GetEnumerator() {
+            return mList.GetEnumerator();
+        }
+
+        // IEnumerable
+        IEnumerator IEnumerable.GetEnumerator() {
+            return mList.GetEnumerator();
+        }
+
+        /// <summary>
+        /// The number of entries in the table.
+        /// </summary>
+        public int Count {
+            get { return mList.Count; }
+        }
+
+        public void Add(Visualization vis) {
+            mList.Add(vis);
         }
 
 
         public override string ToString() {
-            return "[VS: " + PlaceHolder + "]";
+            return "[VS: " + mList.Count + " items]";
         }
 
         public static bool operator ==(VisualizationSet a, VisualizationSet b) {
@@ -41,7 +68,16 @@ namespace SourceGen {
                 return false;   // one is null
             }
             // All fields must be equal.
-            return a.PlaceHolder == b.PlaceHolder;
+            if (a.mList.Count != b.mList.Count) {
+                return false;
+            }
+            // Order matters.
+            for (int i = 0; i < a.mList.Count; i++) {
+                if (a.mList[i] != b.mList[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
         public static bool operator !=(VisualizationSet a, VisualizationSet b) {
             return !(a == b);
@@ -50,7 +86,11 @@ namespace SourceGen {
             return obj is VisualizationSet && this == (VisualizationSet)obj;
         }
         public override int GetHashCode() {
-            return PlaceHolder.GetHashCode();
+            int hashCode = 0;
+            foreach (Visualization vis in mList) {
+                hashCode ^= vis.GetHashCode();
+            }
+            return hashCode;
         }
     }
 }

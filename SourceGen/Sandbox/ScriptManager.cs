@@ -256,6 +256,25 @@ namespace SourceGen.Sandbox {
             return plSymbols;
         }
 
+        public delegate bool CheckMatch(IPlugin plugin);
+        public IPlugin GetMatchingScript(CheckMatch check) {
+            if (DomainMgr == null) {
+                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                    if (check(kvp.Value)) {
+                        return kvp.Value;
+                    }
+                }
+            } else {
+                List<IPlugin> plugins = DomainMgr.PluginMgr.GetActivePlugins();
+                foreach (IPlugin plugin in plugins) {
+                    if (check(plugin)) {
+                        return plugin;
+                    }
+                }
+            }
+            return null;
+        }
+
         /// <summary>
         /// For debugging purposes, get some information about the currently loaded
         /// extension scripts.
@@ -289,7 +308,7 @@ namespace SourceGen.Sandbox {
 
             // The plugin is actually a MarshalByRefObject, so we can't use reflection
             // to gather the list of interfaces.
-            // TODO(maybe): add a call that does the query on the remote site
+            // TODO(maybe): add a call that does a reflection query on the remote side
             if (plugin is PluginCommon.IPlugin_SymbolList) {
                 sb.Append(" SymbolList");
             }
@@ -301,6 +320,9 @@ namespace SourceGen.Sandbox {
             }
             if (plugin is PluginCommon.IPlugin_InlineBrk) {
                 sb.Append(" InlineBrk");
+            }
+            if (plugin is PluginCommon.IPlugin_Visualizer2d) {
+                sb.Append(" Visualizer2d");
             }
             sb.Append("\r\n");
         }
