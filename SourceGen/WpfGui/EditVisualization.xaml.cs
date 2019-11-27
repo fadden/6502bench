@@ -16,6 +16,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -33,20 +34,56 @@ namespace SourceGen.WpfGui {
     /// Visualization editor.
     /// </summary>
     public partial class EditVisualization : Window, INotifyPropertyChanged {
+        private const int MIN_TRIMMED_TAG_LEN = 2;
+
+        /// <summary>
+        /// Dialog result.
+        /// </summary>
+        public Visualization NewVis { get; private set; }
+
         private DisasmProject mProject;
         private Formatter mFormatter;
         private Visualization mOrigVis;
 
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
+        private Brush mErrorLabelColor = Brushes.Red;
+
+
+        /// <summary>
+        /// True if all properties are in valid ranges.  Determines whether the OK button
+        /// is enabled.
+        /// </summary>
+        public bool IsValid {
+            get { return mIsValid; }
+            set { mIsValid = value; OnPropertyChanged(); }
+        }
+        private bool mIsValid;
+
+        /// <summary>
+        /// Visualization tag.
+        /// </summary>
         public string TagString {
             get { return mTagString; }
             set { mTagString = value; OnPropertyChanged(); }
         }
         private string mTagString;
 
-        public IList<ParameterValue> ParameterList {
-            get { return mParameterList; }
+        public Brush TagLabelBrush {
+            get { return mTagLabelBrush; }
+            set { mTagLabelBrush = value; OnPropertyChanged(); }
         }
-        private List<ParameterValue> mParameterList;
+        private Brush mTagLabelBrush;
+
+        /// <summary>
+        /// ItemsSource for the ItemsControl with the generated parameter controls.
+        /// </summary>
+        public ObservableCollection<ParameterValue> ParameterList { get; private set; } =
+            new ObservableCollection<ParameterValue>();
+
+        /// <summary>
+        /// List of visualizers, for combo box.
+        /// </summary>
+        public List<VisDescr> VisualizationList { get; private set; }
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -54,6 +91,14 @@ namespace SourceGen.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="owner">Owner window.</param>
+        /// <param name="proj">Project reference.</param>
+        /// <param name="formatter">Text formatter.</param>
+        /// <param name="vis">Visualization to edit, or null if this is new.</param>
         public EditVisualization(Window owner, DisasmProject proj, Formatter formatter,
                 Visualization vis) {
             InitializeComponent();
@@ -64,12 +109,28 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mOrigVis = vis;
 
-            // TODO: configure ComboBox from vis arg if non-null, then use current
-            //   combo box selection, updating in selchange event
-            string visGenName = "apple2-hi-res-bitmap";
+            if (vis != null) {
+                TagString = vis.Tag;
+            }
 
-            mParameterList = new List<ParameterValue>();
-            GenerateParamControls(visGenName);
+            int visSelection = 0;
+            VisualizationList = new List<VisDescr>();
+            List<IPlugin> plugins = proj.GetActivePlugins();
+            foreach (IPlugin chkPlug in plugins) {
+                if (!(chkPlug is IPlugin_Visualizer)) {
+                    continue;
+                }
+                IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
+                foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
+                    if (vis != null && vis.VisGenIdent == descr.Ident) {
+                        visSelection = VisualizationList.Count;
+                    }
+                    VisualizationList.Add(descr);
+                }
+            }
+
+            // Set the selection.  This should cause the sel change event to fire.
+            visComboBox.SelectedIndex = visSelection;
         }
 
         /// <summary>
@@ -81,13 +142,11 @@ namespace SourceGen.WpfGui {
         /// If we don't find a corresponding entry in the Visualization, we use the
         /// default value.
         /// </remarks>
-        private void GenerateParamControls(string visGenName) {
-            IPlugin_Visualizer2d plugin =
-                Visualization.FindPluginByVisGenName(mProject, visGenName);
-            List<VisParamDescr> descrs = plugin.GetVisGenParams(visGenName);
+        private void GenerateParamControls(VisDescr descr) {
+            VisParamDescr[] paramDescrs = descr.VisParamDescrs;
 
-            mParameterList.Clear();
-            foreach (VisParamDescr vpd in descrs) {
+            ParameterList.Clear();
+            foreach (VisParamDescr vpd in paramDescrs) {
                 string rangeStr = string.Empty;
                 object defaultVal = vpd.DefaultValue;
                 if (mOrigVis.VisGenParams.TryGetValue(vpd.Name, out object val)) {
@@ -95,20 +154,25 @@ namespace SourceGen.WpfGui {
                     defaultVal = val;
                 }
 
+                // Set up rangeStr, if appropriate.
+                VisParamDescr altVpd = vpd;
                 if (vpd.CsType == typeof(int) || vpd.CsType == typeof(float)) {
                     if (vpd.Special == VisParamDescr.SpecialMode.Offset) {
                         defaultVal = mFormatter.FormatOffset24((int)defaultVal);
                         rangeStr = "[" + mFormatter.FormatOffset24(0) + "," +
                             mFormatter.FormatOffset24(mProject.FileDataLength - 1) + "]";
+
+                        // Replace the vpd to provide a different min/max.
+                        altVpd = new VisParamDescr(vpd.UiLabel, vpd.Name, vpd.CsType,
+                            0, mProject.FileDataLength - 1, vpd.Special, vpd.DefaultValue);
                     } else {
                         rangeStr = "[" + vpd.Min + "," + vpd.Max + "]";
                     }
                 }
 
-                ParameterValue pv = new ParameterValue(vpd.UiLabel, vpd.Name, vpd.CsType,
-                    defaultVal, rangeStr);
+                ParameterValue pv = new ParameterValue(altVpd, defaultVal, rangeStr);
 
-                mParameterList.Add(pv);
+                ParameterList.Add(pv);
             }
         }
 
@@ -116,18 +180,140 @@ namespace SourceGen.WpfGui {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            Debug.WriteLine("PARAMS:");
-            foreach (ParameterValue val in mParameterList) {
-                Debug.WriteLine("  " + val.Name + ": " + val.Value +
-                    " (" + val.Value.GetType() + ")");
+            // Generate value dictionary.
+            Dictionary<string, object> valueDict =
+                new Dictionary<string, object>(ParameterList.Count);
+            foreach (ParameterValue pv in ParameterList) {
+                if (pv.Descr.CsType == typeof(bool)) {
+                    Debug.Assert(pv.Value is bool);
+                    valueDict.Add(pv.Descr.Name, (bool)pv.Value);
+                } else if (pv.Descr.CsType == typeof(int)) {
+                    int intVal;
+                    if (pv.Value is int) {
+                        intVal = (int)pv.Value;
+                    } else {
+                        bool ok = ParseInt((string)pv.Value, pv.Descr.Special, out intVal);
+                        Debug.Assert(ok);
+                    }
+                    valueDict.Add(pv.Descr.Name, intVal);
+                } else if (pv.Descr.CsType == typeof(float)) {
+                    float floatVal;
+                    if (pv.Value is float || pv.Value is double) {
+                        floatVal = (float)pv.Value;
+                    } else {
+                        bool ok = float.TryParse((string)pv.Value, out floatVal);
+                        Debug.Assert(ok);
+                    }
+                    valueDict.Add(pv.Descr.Name, floatVal);
+                } else {
+                    // skip it
+                    Debug.Assert(false);
+                }
             }
-            DialogResult = false;       // TODO
+
+            VisDescr item = (VisDescr)visComboBox.SelectedItem;
+            Debug.Assert(item != null);
+
+            NewVis = new Visualization(TagString, item.Ident, valueDict);
+            DialogResult = true;
+        }
+
+        private bool ParseInt(string str, VisParamDescr.SpecialMode special, out int intVal) {
+            int numBase = (special == VisParamDescr.SpecialMode.Offset) ? 16 : 10;
+
+            string trimStr = str.Trim();
+            if (trimStr.Length >= 1 && trimStr[0] == '+') {
+                // May be present for an offset.  Just ignore it.  Don't use it as a radix char.
+                trimStr = trimStr.Remove(0, 1);
+            } else if (trimStr.Length >= 1 && trimStr[0] == '$') {
+                numBase = 16;
+                trimStr = trimStr.Remove(0, 1);
+            } else if (trimStr.Length >= 2 && trimStr[0] == '0' &&
+                    (trimStr[1] == 'x' || trimStr[1] == 'X')) {
+                numBase = 16;
+                trimStr = trimStr.Remove(0, 2);
+            }
+            if (trimStr.Length == 0) {
+                intVal = -1;
+                return false;
+            }
+
+            try {
+                intVal = Convert.ToInt32(trimStr, numBase);
+                return true;
+            } catch (Exception) {
+                intVal = -1;
+                return false;
+            }
+        }
+
+        private void CheckValid() {
+            IsValid = true;
+
+            string trimTag = TagString.Trim();
+            if (trimTag.Length < MIN_TRIMMED_TAG_LEN) {
+                IsValid = false;
+                TagLabelBrush = mErrorLabelColor;
+            } else {
+                TagLabelBrush = mDefaultLabelColor;
+            }
+            // TODO: verify tag is unique
+
+            foreach (ParameterValue pv in ParameterList) {
+                pv.ForegroundBrush = mDefaultLabelColor;
+                if (pv.Descr.CsType == typeof(bool)) {
+                    // always fine
+                    continue;
+                } else if (pv.Descr.CsType == typeof(int)) {
+                    // integer, possibly Offset special
+                    bool ok = true;
+                    int intVal;
+                    if (pv.Value is int) {
+                        // happens initially, before the TextBox can futz with it
+                        intVal = (int)pv.Value;
+                    } else if (!ParseInt((string)pv.Value, pv.Descr.Special, out intVal)) {
+                        ok = false;
+                    }
+                    if (ok && (intVal < (int)pv.Descr.Min || intVal > (int)pv.Descr.Max)) {
+                        // TODO(someday): make the range text red instead of the label
+                        ok = false;
+                    }
+                    if (!ok) {
+                        pv.ForegroundBrush = mErrorLabelColor;
+                        IsValid = false;
+                    }
+                } else if (pv.Descr.CsType == typeof(float)) {
+                    // float
+                } else {
+                    // unexpected
+                    Debug.Assert(false);
+                }
+            }
+        }
+
+        private void VisComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            VisDescr item = (VisDescr)visComboBox.SelectedItem;
+            if (item == null) {
+                Debug.Assert(false);    // not expected
+                return;
+            }
+            Debug.WriteLine("VisComboBox sel change: " + item.Ident);
+            GenerateParamControls(item);
+            CheckValid();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
             TextBox src = (TextBox)sender;
             ParameterValue pv = (ParameterValue)src.DataContext;
-            Debug.WriteLine("TEXT CHANGE " + pv + ": " + src.Text);
+            //Debug.WriteLine("TEXT CHANGE " + pv + ": " + src.Text);
+            CheckValid();
+        }
+
+        private void CheckBox_Changed(object sender, RoutedEventArgs e) {
+            CheckBox src = (CheckBox)sender;
+            ParameterValue pv = (ParameterValue)src.DataContext;
+            //Debug.WriteLine("CHECK CHANGE" + pv);
+            CheckValid();
         }
     }
 
@@ -135,26 +321,44 @@ namespace SourceGen.WpfGui {
     /// Describes a parameter and holds its value while being edited by WPF.
     /// </summary>
     /// <remarks>
-    /// We use an explicit type so that we can format the initial value as hex or whatever.
+    /// We currently detect updates with change events.  We could also tweak the Value setter
+    /// to fire an event back to the window class when things change.  I don't know that there's
+    /// an advantage to doing so.
     /// </remarks>
-    public class ParameterValue {
-        public string UiName { get; private set; }
-        public string Name { get; private set; }
-        public Type CsType { get; private set; }
-        public object Value { get; set; }
+    public class ParameterValue : INotifyPropertyChanged {
+        public VisParamDescr Descr { get; private set; }
+        public string UiString { get; private set; }
         public string RangeText { get; private set; }
 
-        public ParameterValue(string uiName, string name, Type csType, object val,
-                string rangeText) {
-            UiName = uiName;
-            Name = name;
-            CsType = csType;
+        private object mValue;
+        public object Value {
+            get { return mValue; }
+            set { mValue = value; OnPropertyChanged(); }
+        }
+
+        private Brush mForegroundBrush;
+        public Brush ForegroundBrush {
+            get { return mForegroundBrush; }
+            set { mForegroundBrush = value; OnPropertyChanged(); }
+        }
+
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public ParameterValue(VisParamDescr vpd, object val, string rangeText) {
+            Descr = vpd;
             Value = val;
             RangeText = rangeText;
+
+            char labelSuffix = (vpd.CsType == typeof(bool)) ? '?' : ':';
+            UiString = vpd.UiLabel + labelSuffix;
         }
 
         public override string ToString() {
-            return "[PV: " + Name + "=" + Value + "]";
+            return "[PV: " + Descr.Name + "=" + Value + "]";
         }
     }
 
@@ -178,11 +382,11 @@ namespace SourceGen.WpfGui {
         public override DataTemplate SelectTemplate(object item, DependencyObject container) {
             if (item is ParameterValue) {
                 ParameterValue parm = (ParameterValue)item;
-                if (parm.CsType == typeof(bool)) {
+                if (parm.Descr.CsType == typeof(bool)) {
                     return BoolTemplate;
-                } else if (parm.CsType == typeof(int)) {
+                } else if (parm.Descr.CsType == typeof(int)) {
                     return IntTemplate;
-                } else if (parm.CsType == typeof(float)) {
+                } else if (parm.Descr.CsType == typeof(float)) {
                     return FloatTemplate;
                 } else {
                     Debug.WriteLine("WHA?" + parm.Value.GetType());

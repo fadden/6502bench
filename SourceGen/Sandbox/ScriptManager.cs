@@ -276,6 +276,22 @@ namespace SourceGen.Sandbox {
         }
 
         /// <summary>
+        /// Returns a list of loaded plugins.  Callers should not retain this list, as the
+        /// set can change due to user activity.
+        /// </summary>
+        public List<IPlugin> GetActivePlugins() {
+            if (DomainMgr == null) {
+                List<IPlugin> plist = new List<IPlugin>();
+                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                    plist.Add(kvp.Value);
+                }
+                return plist;
+            } else {
+                return DomainMgr.PluginMgr.GetActivePlugins();
+            }
+        }
+
+        /// <summary>
         /// For debugging purposes, get some information about the currently loaded
         /// extension scripts.
         /// </summary>
@@ -321,8 +337,8 @@ namespace SourceGen.Sandbox {
             if (plugin is PluginCommon.IPlugin_InlineBrk) {
                 sb.Append(" InlineBrk");
             }
-            if (plugin is PluginCommon.IPlugin_Visualizer2d) {
-                sb.Append(" Visualizer2d");
+            if (plugin is PluginCommon.IPlugin_Visualizer) {
+                sb.Append(" Visualizer");
             }
             sb.Append("\r\n");
         }

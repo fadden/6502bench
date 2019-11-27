@@ -19,9 +19,12 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SourceGen {
+    /// <summary>
+    /// Ordered list of visualization objects.
+    /// </summary>
     public class VisualizationSet : IEnumerable<Visualization> {
         /// <summary>
-        /// Ordered list of visualization objects.
+        /// Object list.
         /// </summary>
         private List<Visualization> mList;
 

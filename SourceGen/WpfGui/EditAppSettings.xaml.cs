@@ -89,6 +89,9 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private AssemblerInfo.Id mInitialAsmId;
 
+        /// <summary>
+        /// List of assemblers, for combo boxes.
+        /// </summary>
         public List<AssemblerInfo> AssemblerList { get; private set; }
 
 

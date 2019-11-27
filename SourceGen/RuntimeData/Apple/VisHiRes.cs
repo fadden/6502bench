@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018 faddenSoft
+ * Copyright 2019 faddenSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,54 @@ using System.Text;
 using PluginCommon;
 
 namespace RuntimeData.Apple {
-    public class VisHiRes : MarshalByRefObject, IPlugin, IPlugin_Visualizer2d {
-        // Visualization identifiers; DO NOT change.
-        private const string VIS_GEN_BITMAP = "apple2-hi-res-bitmap";
-
+    public class VisHiRes : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
         public string Identifier {
             get { return "Apple II Hi-Res Graphic Visualizer"; }
         }
-
         private IApplication mAppRef;
         private byte[] mFileData;
         private AddressTranslate mAddrTrans;
+
+        // Visualization identifiers; DO NOT change or projects will break.
+        private const string VIS_GEN_BITMAP = "apple2-hi-res-bitmap";
+        private const string VIS_GEN_MULTI_MAP = "apple2-hi-res-multi-map";
+
+        // Visualization descriptors.
+        private VisDescr[] mDescriptors = new VisDescr[] {
+            new VisDescr(VIS_GEN_BITMAP, "Apple II Hi-Res Bitmap", VisDescr.VisType.Bitmap,
+                new VisParamDescr[] {
+                    new VisParamDescr("File offset (hex)",
+                        "offset", typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset,
+                        0x2000),
+                    new VisParamDescr("Width (in bytes)",
+                        "byteWidth", typeof(int), 1, 40, 0, 1),
+                    new VisParamDescr("Height",
+                        "height", typeof(int), 1, 192, 0, 1),
+                    new VisParamDescr("Column stride (bytes)",
+                        "colStride", typeof(int), 0, 256, 0, 0),
+                    new VisParamDescr("Row stride (bytes)",
+                        "rowStride", typeof(int), 0, 256, 0, 0),
+                    new VisParamDescr("Color",
+                        "color", typeof(bool), 0, 0, 0, true),
+                    new VisParamDescr("First byte odd",
+                        "firstOdd", typeof(bool), 0, 0, 0, false),
+                    new VisParamDescr("Test Float",
+                        "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
+                }),
+            new VisDescr(VIS_GEN_MULTI_MAP, "Apple II Hi-Res Multi-Map", VisDescr.VisType.Bitmap,
+                new VisParamDescr[] {
+                    new VisParamDescr("File offset (hex)",
+                        "offset", typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset,
+                        0x1000),
+                    new VisParamDescr("Item width (in bytes)",
+                        "itemByteWidth", typeof(int), 1, 40, 0, 1),
+                    new VisParamDescr("Item height",
+                        "itemHeight", typeof(int), 8, 192, 0, 1),
+                    new VisParamDescr("Number of items",
+                        "count", typeof(int), 1, 256, 0, 1),
+                }),
+        };
+
 
         public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
@@ -38,38 +75,14 @@ namespace RuntimeData.Apple {
             mAddrTrans = addrTrans;
         }
 
-        public string[] GetVisGenNames() {
-            return new string[] {
-                VIS_GEN_BITMAP,
-            };
+        // IPlugin_Visualizer
+        public VisDescr[] GetVisGenDescrs() {
+            return mDescriptors;
         }
 
-        public List<VisParamDescr> GetVisGenParams(string name) {
-            List<VisParamDescr> parms = new List<VisParamDescr>();
-
-            switch (name) {
-                case VIS_GEN_BITMAP:
-                    parms.Add(new VisParamDescr("File Offset",
-                        "offset", typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset,
-                        0x2000));
-                    parms.Add(new VisParamDescr("Width (bytes)",
-                        "byteWidth", typeof(int), 1, 40, 0, 1));
-                    parms.Add(new VisParamDescr("Height",
-                        "height", typeof(int), 1, 192, 0, 1));
-                    parms.Add(new VisParamDescr("Color",
-                        "color", typeof(bool), 0, 0, 0, true));
-                    parms.Add(new VisParamDescr("Test Float",
-                        "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f));
-                    break;
-                default:
-                    parms = null;
-                    break;
-            }
-
-            return parms;
-        }
-
-        public IVisualization2d ExecuteVisGen(string name, Dictionary<string, object> parms) {
+        // IPlugin_Visualizer
+        public IVisualization2d Generate2d(VisDescr descr,
+                Dictionary<string, object> parms) {
             throw new NotImplementedException();
         }
     }

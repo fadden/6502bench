@@ -47,8 +47,8 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private int mCurrentOffset;
 
-        // Dialog label text color, saved off at dialog load time.
-        private Brush mDefaultLabelColor = Brushes.Black;
+        // Dialog label text color.
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
         private Brush mErrorLabelColor = Brushes.Red;
 
         public string OffsetStr {

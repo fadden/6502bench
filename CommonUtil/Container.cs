@@ -36,5 +36,44 @@ namespace CommonUtil {
             }
             return Enumerable.SequenceEqual<string>(l1, l2, comparer);
         }
+
+        /// <summary>
+        /// Compares two Dictionaries to see if their contents are equal.  Key and value types
+        /// must have correctly-implemented equality checks.
+        /// </summary>
+        /// <remarks>
+        /// https://stackoverflow.com/q/3804367/294248
+        /// </remarks>
+        /// <typeparam name="TKey">Dictionary key type.</typeparam>
+        /// <typeparam name="TValue">Dictionary value type.</typeparam>
+        /// <param name="dict1">Dictionary #1.</param>
+        /// <param name="dict2">Dictionary #2.</param>
+        /// <returns>True if equal, false if not.</returns>
+        public static bool CompareDicts<TKey, TValue>(
+                Dictionary<TKey, TValue> dict1, Dictionary<TKey, TValue> dict2) {
+            if (dict1 == dict2) {
+                return true;
+            }
+            if (dict1 == null || dict2 == null) {
+                return false;
+            }
+            if (dict1.Count != dict2.Count) {
+                return false;
+            }
+
+#if false
+            var valueComparer = EqualityComparer<TValue>.Default;
+
+            foreach (var kvp in dict1) {
+                TValue value2;
+                if (!dict2.TryGetValue(kvp.Key, out value2)) return false;
+                if (!valueComparer.Equals(kvp.Value, value2)) return false;
+            }
+            return true;
+#else
+            // Check to see if there are any elements in the first that are not in the second.
+            return !dict1.Except(dict2).Any();
+#endif
+        }
     }
 }

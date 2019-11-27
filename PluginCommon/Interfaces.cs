@@ -124,14 +124,58 @@ namespace PluginCommon {
     }
 
     /// <summary>
-    /// Extension scripts that want to generate 2D visualizations must implement this interface.
+    /// Extension scripts that want to generate visualizations must implement this interface.
     /// </summary>
-    public interface IPlugin_Visualizer2d {
-        string[] GetVisGenNames();
+    public interface IPlugin_Visualizer {
+        /// <summary>
+        /// Retrieves a list of descriptors for visualization generators implemented by this
+        /// plugin.  The caller must not modify the contents.
+        /// </summary>
+        VisDescr[] GetVisGenDescrs();
 
-        List<VisParamDescr> GetVisGenParams(string name);
+        /// <summary>
+        /// Executes the specified visualization generator with the supplied parameters.
+        /// </summary>
+        /// <param name="descr">VisGen identifier.</param>
+        /// <param name="parms">Parameter set.</param>
+        /// <returns>2D visualization object reference.</returns>
+        IVisualization2d Generate2d(VisDescr descr, Dictionary<string, object> parms);
+    }
 
-        IVisualization2d ExecuteVisGen(string name, Dictionary<string, object> parms);
+    [Serializable]
+    public class VisDescr {
+        /// <summary>
+        /// Unique identifier.  This is stored in the project file.
+        /// </summary>
+        public string Ident { get; private set; }
+
+        /// <summary>
+        /// Human-readable string describing the visualizer.  Used for combo boxes and
+        /// other UI elements.
+        /// </summary>
+        public string UiName { get; private set; }
+
+        public enum VisType {
+            Unknown = 0,
+            Bitmap,             // 2D bitmap
+        }
+
+        /// <summary>
+        /// Visualization type.
+        /// </summary>
+        public VisType VisualizationType { get; private set; }
+
+        /// <summary>
+        /// Visualization parameter descriptors.
+        /// </summary>
+        public VisParamDescr[] VisParamDescrs { get; private set; }
+
+        public VisDescr(string ident, string uiName, VisType type, VisParamDescr[] descrs) {
+            Ident = ident;
+            UiName = uiName;
+            VisualizationType = type;
+            VisParamDescrs = descrs;
+        }
     }
 
     /// <summary>
@@ -146,6 +190,10 @@ namespace PluginCommon {
         public string UiLabel { get; private set; }
         public string Name { get; private set; }
         public Type CsType { get; private set; }
+
+        // Min/Max values for ints and floats.  Could also be length for strings.
+        // NOTE: ideally we'd provide a "verify" function that tested individual fields and
+        // could also see other fields, e.g. to confirm that Stride >= Width.
         public object Min { get; private set; }
         public object Max { get; private set; }
         public SpecialMode Special { get; private set; }
@@ -164,12 +212,15 @@ namespace PluginCommon {
     }
 
     /// <summary>
-    /// Rendered 2D visualization object.
+    /// Rendered 2D visualization.  The object represents the "raw" form of the data,
+    /// without scaling or filtering.
     /// </summary>
     public interface IVisualization2d {
         int GetWidth();
         int GetHeight();
         int GetPixel(int x, int y);     // returns ARGB value
+
+        // TODO(maybe): pixel aspect ratio
     }
 
     /// <summary>

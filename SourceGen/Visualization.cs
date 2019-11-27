@@ -17,19 +17,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using CommonUtil;
 using PluginCommon;
 
 namespace SourceGen {
     public class Visualization {
         /// <summary>
-        /// Unique tag.  Contents are arbitrary, but may not be empty.
+        /// Unique user-specified tag.  Contents are arbitrary, but may not be empty.
         /// </summary>
         public string Tag { get; private set; }
 
         /// <summary>
         /// Name of visualization generator (extension script function).
         /// </summary>
-        public string VisGenName { get; private set; }
+        public string VisGenIdent { get; private set; }
 
         /// <summary>
         /// Parameters passed to the visualization generator.
@@ -43,12 +44,12 @@ namespace SourceGen {
         /// Constructor.
         /// </summary>
         /// <param name="tag"></param>
-        /// <param name="visGenName"></param>
+        /// <param name="visGenIdent"></param>
         /// <param name="visGenParams"></param>
-        public Visualization(string tag, string visGenName,
+        public Visualization(string tag, string visGenIdent,
                 Dictionary<string, object> visGenParams) {
             Tag = tag;
-            VisGenName = visGenName;
+            VisGenIdent = visGenIdent;
             VisGenParams = visGenParams;
         }
 
@@ -57,29 +58,30 @@ namespace SourceGen {
         /// Finds a plugin that provides the named visualization generator.
         /// </summary>
         /// <param name="proj">Project with script manager.</param>
-        /// <param name="visGenName">Visualization generator name.</param>
+        /// <param name="visGenIdent">Visualization generator identifier.</param>
         /// <returns>A plugin that matches, or null if none found.</returns>
-        public static IPlugin_Visualizer2d FindPluginByVisGenName(DisasmProject proj,
-                string visGenName) {
-            Sandbox.ScriptManager.CheckMatch check = (chkPlug) => {
-                if (!(chkPlug is IPlugin_Visualizer2d)) {
-                    return false;
+        public static IPlugin_Visualizer FindPluginByVisGenIdent(DisasmProject proj,
+                string visGenIdent, out VisDescr visDescr) {
+            List<IPlugin> plugins = proj.GetActivePlugins();
+            foreach (IPlugin chkPlug in plugins) {
+                if (!(chkPlug is IPlugin_Visualizer)) {
+                    continue;
                 }
-                IPlugin_Visualizer2d vplug = (IPlugin_Visualizer2d)chkPlug;
-                string[] names = vplug.GetVisGenNames();
-                foreach (string name in names) {
-                    if (name == visGenName) {
-                        return true;
+                IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
+                foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
+                    if (descr.Ident == visGenIdent) {
+                        visDescr = descr;
+                        return vplug;
                     }
                 }
-                return false;
-            };
-            return (IPlugin_Visualizer2d)proj.GetMatchingScript(check);
+            }
+            visDescr = null;
+            return null;
         }
 
 
         public override string ToString() {
-            return "[Vis: " + Tag + " (" + VisGenName + ")]";
+            return "[Vis: " + Tag + " (" + VisGenIdent + ") count=" + VisGenParams.Count + "]";
         }
 
         public static bool operator ==(Visualization a, Visualization b) {
@@ -90,10 +92,17 @@ namespace SourceGen {
                 return false;   // one is null
             }
             // All fields must be equal.
-            if (a.Tag != b.Tag || a.VisGenName != b.VisGenName || a.Thumbnail != b.Thumbnail) {
+            if (a.Tag != b.Tag || a.VisGenIdent != b.VisGenIdent || a.Thumbnail != b.Thumbnail) {
                 return false;
             }
-            return a.VisGenParams != b.VisGenParams;    // TODO(xyzzy): should be item-by-item
+            // Compare the vis gen parameter lists.
+            if (a.VisGenParams == b.VisGenParams) {
+                return true;
+            }
+            if (a.VisGenParams.Count != b.VisGenParams.Count) {
+                return false;
+            }
+            return Container.CompareDicts(a.VisGenParams, b.VisGenParams);
         }
         public static bool operator !=(Visualization a, Visualization b) {
             return !(a == b);
@@ -102,7 +111,8 @@ namespace SourceGen {
             return obj is Visualization && this == (Visualization)obj;
         }
         public override int GetHashCode() {
-            return Tag.GetHashCode() ^ VisGenName.GetHashCode() ^ VisGenParams.Count;
+            // TODO(maybe): hash code should include up VisGenParams items
+            return Tag.GetHashCode() ^ VisGenIdent.GetHashCode() ^ VisGenParams.Count;
         }
     }
 }

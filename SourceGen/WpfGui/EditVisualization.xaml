@@ -30,29 +30,53 @@ limitations under the License.
     <Window.Resources>
         <!-- big thanks: http://drwpf.com/blog/2008/01/03/itemscontrol-d-is-for-datatemplate/ -->
         <DataTemplate x:Key="BoolTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Width="100" Text="{Binding UiName}"/>
-                <CheckBox IsChecked="{Binding Value}"/>
-                <TextBlock Text="{Binding RangeText}" FontFamily="{StaticResource GeneralMonoFont}"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,4,0"
+                           Text="{Binding UiString}" Foreground="{Binding ForegroundBrush}"/>
+                <CheckBox Grid.Column="1" Margin="0,0,0,4" IsChecked="{Binding Value}"
+                          Checked="CheckBox_Changed" Unchecked="CheckBox_Changed"/>
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                           FontFamily="{StaticResource GeneralMonoFont}"/>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="IntTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Width="100" Text="{Binding UiName}"/>
-                <TextBox Width="100" MaxLength="11" Text="{Binding Value}"
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,4,0"
+                           Text="{Binding UiString}" Foreground="{Binding ForegroundBrush}"/>
+                <TextBox Grid.Column="1" MaxLength="11" Margin="0,1,0,4"
+                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                          FontFamily="{StaticResource GeneralMonoFont}"
                          TextChanged="TextBox_TextChanged"/>
-                <TextBlock Text="{Binding RangeText}" FontFamily="{StaticResource GeneralMonoFont}"/>
-            </StackPanel>
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                           FontFamily="{StaticResource GeneralMonoFont}"/>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="FloatTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Width="100" Text="{Binding UiName}"/>
-                <TextBox Width="100" MaxLength="11" Text="{Binding Value}"
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,4,0"
+                           Text="{Binding UiString}" Foreground="{Binding ForegroundBrush}"/>
+                <TextBox Grid.Column="1" MaxLength="11" Margin="0,1,0,4"
+                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                          FontFamily="{StaticResource GeneralMonoFont}"
                          TextChanged="TextBox_TextChanged"/>
-                <TextBlock Text="{Binding RangeText}" FontFamily="{StaticResource GeneralMonoFont}"/>
-            </StackPanel>
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                           FontFamily="{StaticResource GeneralMonoFont}"/>
+            </Grid>
         </DataTemplate>
 
         <!-- define and configure the template selector, which chooses one of the above
@@ -73,10 +97,11 @@ limitations under the License.
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -84,14 +109,19 @@ limitations under the License.
 
             <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0,0,4,0"
                        Text="Visualizer:"/>
-            <ComboBox Grid.Column="1" Grid.Row="0" />
+            <ComboBox Name="visComboBox" Grid.Column="1" Grid.Row="0" Margin="0,0,0,4"
+                      ItemsSource="{Binding VisualizationList}" DisplayMemberPath="UiName"
+                      SelectionChanged="VisComboBox_SelectionChanged"/>
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
-                       Text="Tag:"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Width="300"
-                     Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"/>
+                       Text="Tag:" Foreground="{Binding TagLabelBrush}"/>
+            <TextBox Grid.Column="1" Grid.Row="1"
+                     Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
+                     FontFamily="{StaticResource GeneralMonoFont}"/>
 
-            <TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Text="Preview:"/>
+            <TextBlock Grid.Column="1" Grid.Row="2" Text="• Must be unique, 2+ chars"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,20,0,4" Text="Preview:"/>
         </Grid>
 
         <Image Grid.Row="1" Width="50" Height="50"/>
@@ -102,7 +132,7 @@ limitations under the License.
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Parameters:"/>
+            <TextBlock Grid.Row="0" Text="Parameters:" Margin="0,0,0,4"/>
 
             <!-- generated controls are placed here -->
             <ItemsControl Grid.Row="1"
@@ -114,7 +144,7 @@ limitations under the License.
         <DockPanel Grid.Column="0" Grid.Row="3" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
-                    IsDefault="True" Click="OkButton_Click"/>
+                    IsDefault="True" IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
         </DockPanel>
     </Grid>
 </Window>

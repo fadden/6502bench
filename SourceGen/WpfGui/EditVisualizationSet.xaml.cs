@@ -91,6 +91,9 @@ namespace SourceGen.WpfGui {
         private void NewButton_Click(object sender, RoutedEventArgs e) {
             VisualizationList.Add(new Visualization("VIS #" + VisualizationList.Count,
                 "apple2-hi-res-bitmap", new Dictionary<string, object>()));
+
+            // TODO: disable New button if no appropriate vis plugins can be found (or maybe
+            //   MessageBox here)
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
@@ -100,8 +103,11 @@ namespace SourceGen.WpfGui {
             EditVisualization dlg = new EditVisualization(this, mProject, mFormatter,
                 new Visualization("arbitrary tag", "apple2-hi-res-bitmap", testDict));
             if (dlg.ShowDialog() == true) {
-                // TODO
+                Visualization newVis = dlg.NewVis;
+                Debug.WriteLine("New vis: " + newVis);
             }
+
+            // TODO: disable edit button if matching vis can't be found (or maybe MessageBox)
         }
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e) {
