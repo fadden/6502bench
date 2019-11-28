@@ -216,9 +216,14 @@ namespace PluginCommon {
     /// without scaling or filtering.
     /// </summary>
     public interface IVisualization2d {
-        int GetWidth();
-        int GetHeight();
+        int Width { get; }
+        int Height { get; }
+
+        void SetPixelIndex(int x, int y, byte colorIndex);
         int GetPixel(int x, int y);     // returns ARGB value
+
+        byte[] GetPixels();             // densely-packed index or ARGB values
+        int[] GetPalette();             // 32-bit ARGB values; null for direct-color image
 
         // TODO(maybe): pixel aspect ratio
     }

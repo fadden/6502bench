@@ -84,5 +84,18 @@ namespace PluginCommon {
                 appRef.SetInlineDataFormat(brkOffset + 1, 1, DataType.NumericLE, subType, label);
             }
         }
+
+        /// <summary>
+        /// Converts four 8-bit color values to a single 32-bit ARGB value.  Values should
+        /// not be pre-multiplied.
+        /// </summary>
+        /// <param name="a">Alpha channel.</param>
+        /// <param name="r">Red.</param>
+        /// <param name="g">Green.</param>
+        /// <param name="b">Blue.</param>
+        /// <returns>Combined value.</returns>
+        public static int MakeARGB(int a, int r, int g, int b) {
+            return (a << 24) | (r << 16) | (g << 8) | b;
+        }
     }
 }

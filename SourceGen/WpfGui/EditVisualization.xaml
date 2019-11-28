@@ -110,7 +110,7 @@ limitations under the License.
             <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0,0,4,0"
                        Text="Visualizer:"/>
             <ComboBox Name="visComboBox" Grid.Column="1" Grid.Row="0" Margin="0,0,0,4"
-                      ItemsSource="{Binding VisualizationList}" DisplayMemberPath="UiName"
+                      ItemsSource="{Binding VisualizationList}" DisplayMemberPath="VisDescriptor.UiName"
                       SelectionChanged="VisComboBox_SelectionChanged"/>
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
@@ -124,7 +124,11 @@ limitations under the License.
             <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,20,0,4" Text="Preview:"/>
         </Grid>
 
-        <Image Grid.Row="1" Width="50" Height="50"/>
+        <Border Grid.Row="1" BorderThickness="1"
+                BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}">
+            <Image Name="previewImage" Width="400" Height="400" Source="/Res/AboutImage.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+        </Border>
 
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>

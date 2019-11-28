@@ -25,7 +25,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
+using System.Windows.Media.Imaging;
 using Asm65;
 using PluginCommon;
 
@@ -74,16 +74,25 @@ namespace SourceGen.WpfGui {
         }
         private Brush mTagLabelBrush;
 
+        public class VisualizationItem {
+            public IPlugin_Visualizer Plugin { get; private set; }
+            public VisDescr VisDescriptor { get; private set; }
+            public VisualizationItem(IPlugin_Visualizer plugin, VisDescr descr) {
+                Plugin = plugin;
+                VisDescriptor = descr;
+            }
+        }
+
+        /// <summary>
+        /// List of visualizers, for combo box.
+        /// </summary>
+        public List<VisualizationItem> VisualizationList { get; private set; }
+
         /// <summary>
         /// ItemsSource for the ItemsControl with the generated parameter controls.
         /// </summary>
         public ObservableCollection<ParameterValue> ParameterList { get; private set; } =
             new ObservableCollection<ParameterValue>();
-
-        /// <summary>
-        /// List of visualizers, for combo box.
-        /// </summary>
-        public List<VisDescr> VisualizationList { get; private set; }
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -114,7 +123,7 @@ namespace SourceGen.WpfGui {
             }
 
             int visSelection = 0;
-            VisualizationList = new List<VisDescr>();
+            VisualizationList = new List<VisualizationItem>();
             List<IPlugin> plugins = proj.GetActivePlugins();
             foreach (IPlugin chkPlug in plugins) {
                 if (!(chkPlug is IPlugin_Visualizer)) {
@@ -125,7 +134,7 @@ namespace SourceGen.WpfGui {
                     if (vis != null && vis.VisGenIdent == descr.Ident) {
                         visSelection = VisualizationList.Count;
                     }
-                    VisualizationList.Add(descr);
+                    VisualizationList.Add(new VisualizationItem(vplug, descr));
                 }
             }
 
@@ -180,6 +189,15 @@ namespace SourceGen.WpfGui {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
+            VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
+            Debug.Assert(item != null);
+            Dictionary<string, object> valueDict = CreateVisGenParams();
+            NewVis = new Visualization(TagString, item.VisDescriptor.Ident, valueDict);
+
+            DialogResult = true;
+        }
+
+        private Dictionary<string, object> CreateVisGenParams() {
             // Generate value dictionary.
             Dictionary<string, object> valueDict =
                 new Dictionary<string, object>(ParameterList.Count);
@@ -211,11 +229,7 @@ namespace SourceGen.WpfGui {
                 }
             }
 
-            VisDescr item = (VisDescr)visComboBox.SelectedItem;
-            Debug.Assert(item != null);
-
-            NewVis = new Visualization(TagString, item.Ident, valueDict);
-            DialogResult = true;
+            return valueDict;
         }
 
         private bool ParseInt(string str, VisParamDescr.SpecialMode special, out int intVal) {
@@ -247,7 +261,7 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void CheckValid() {
+        private void UpdateControls() {
             IsValid = true;
 
             string trimTag = TagString.Trim();
@@ -289,31 +303,40 @@ namespace SourceGen.WpfGui {
                     Debug.Assert(false);
                 }
             }
+
+            if (!IsValid) {
+                previewImage.Source = new BitmapImage(new Uri("pack://application:,,,/Res/Logo.png"));
+            } else {
+                VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
+                IVisualization2d vis2d = item.Plugin.Generate2d(item.VisDescriptor,
+                    CreateVisGenParams());
+                previewImage.Source = Visualization.CreateBitmapSource(vis2d);
+            }
         }
 
         private void VisComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            VisDescr item = (VisDescr)visComboBox.SelectedItem;
+            VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             if (item == null) {
                 Debug.Assert(false);    // not expected
                 return;
             }
-            Debug.WriteLine("VisComboBox sel change: " + item.Ident);
-            GenerateParamControls(item);
-            CheckValid();
+            Debug.WriteLine("VisComboBox sel change: " + item.VisDescriptor.Ident);
+            GenerateParamControls(item.VisDescriptor);
+            UpdateControls();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
             TextBox src = (TextBox)sender;
             ParameterValue pv = (ParameterValue)src.DataContext;
             //Debug.WriteLine("TEXT CHANGE " + pv + ": " + src.Text);
-            CheckValid();
+            UpdateControls();
         }
 
         private void CheckBox_Changed(object sender, RoutedEventArgs e) {
             CheckBox src = (CheckBox)sender;
             ParameterValue pv = (ParameterValue)src.DataContext;
             //Debug.WriteLine("CHECK CHANGE" + pv);
-            CheckValid();
+            UpdateControls();
         }
     }
 

@@ -16,7 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommonUtil;
 using PluginCommon;
 
@@ -53,6 +54,30 @@ namespace SourceGen {
             VisGenParams = visGenParams;
         }
 
+        public static BitmapSource CreateBitmapSource(IVisualization2d vis2d) {
+            // Create indexed color palette.
+            int[] intPal = vis2d.GetPalette();
+            List<Color> colors = new List<Color>(intPal.Length);
+            foreach (int argb in intPal) {
+                Color col = Color.FromArgb((byte)(argb >> 24), (byte)(argb >> 16),
+                    (byte)(argb >> 8), (byte)argb);
+                colors.Add(col);
+            }
+            BitmapPalette palette = new BitmapPalette(colors);
+
+            // indexed-color; see https://stackoverflow.com/a/15272528/294248 for direct color
+            BitmapSource image = BitmapSource.Create(
+                vis2d.Width,
+                vis2d.Height,
+                96.0,
+                96.0,
+                PixelFormats.Indexed8,
+                palette,
+                vis2d.GetPixels(),
+                vis2d.Width);
+
+            return image;
+        }
 
         /// <summary>
         /// Finds a plugin that provides the named visualization generator.

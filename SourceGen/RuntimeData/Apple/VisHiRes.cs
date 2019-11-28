@@ -62,7 +62,7 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("Item width (in bytes)",
                         "itemByteWidth", typeof(int), 1, 40, 0, 1),
                     new VisParamDescr("Item height",
-                        "itemHeight", typeof(int), 8, 192, 0, 1),
+                        "itemHeight", typeof(int), 1, 192, 0, 8),
                     new VisParamDescr("Number of items",
                         "count", typeof(int), 1, 256, 0, 1),
                 }),
@@ -83,7 +83,17 @@ namespace RuntimeData.Apple {
         // IPlugin_Visualizer
         public IVisualization2d Generate2d(VisDescr descr,
                 Dictionary<string, object> parms) {
-            throw new NotImplementedException();
+            // TODO: replace with actual
+            VisBitmap8 vb = new VisBitmap8(16, 16);
+            vb.AddColor(Util.MakeARGB(0xff, 0x40, 0x40, 0x40));
+            vb.AddColor(Util.MakeARGB(0xff, 0xff, 0x00, 0x00));
+            vb.AddColor(Util.MakeARGB(0xff, 0x00, 0xff, 0x80));
+
+            for (int i = 0; i < 16; i++) {
+                vb.SetPixelIndex(i, i, 1);
+                vb.SetPixelIndex(15 - i, i, 2);
+            }
+            return vb;
         }
     }
 }
