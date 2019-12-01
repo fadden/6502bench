@@ -76,6 +76,38 @@ See also https://github.com/fadden/DisasmUiTest
                         Width="{Binding LongCommentWidth}"/>
     </GridViewColumnCollection>
 
+    <GridViewColumnCollection x:Key="gvcc_vs">
+        <GridViewColumn DisplayMemberBinding="{Binding Offset}" Width="{Binding
+                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
+                }, Path=View.Columns[0].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Addr}" Width="{Binding
+                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
+                }, Path=View.Columns[1].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Bytes}" Width="{Binding
+                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
+                }, Path=View.Columns[2].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Flags}" Width="{Binding
+                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
+                }, Path=View.Columns[3].ActualWidth}"/>
+        <GridViewColumn DisplayMemberBinding="{Binding Attr}" Width="{Binding
+                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
+                }, Path=View.Columns[4].ActualWidth}"/>
+        <!-- This column holds the long comment.  There's no easy way to set its width, so we
+        have to let the main window take care of that.  (It's tempting to just make its width
+        very large, but that causes the GridView contents to horizontally scroll independently
+        of the GridView header when you reach the edge of the "normal" column set.) -->
+        <GridViewColumn Header="(visualization set)" Width="{Binding LongCommentWidth}">
+            <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Path=Comment}" VerticalAlignment="Center"/>
+                        <Button Width="64" Height="64" Content="Whee"/>
+                    </StackPanel>
+                </DataTemplate>
+            </GridViewColumn.CellTemplate>
+        </GridViewColumn>
+    </GridViewColumnCollection>
+
     <!-- Base template for ListView items, derived from the system default.  We have to define
     this fully so things don't turn into a big mess on long-comment lines. -->
     <ControlTemplate x:Key="baseListItemTemplate" TargetType="{x:Type ListViewItem}">
@@ -199,6 +231,68 @@ See also https://github.com/fadden/DisasmUiTest
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <!-- yet another copy of the template, this one for VisualizationSet lines -->
+    <ControlTemplate x:Key="visualizationSetTemplate" TargetType="{x:Type ListViewItem}">
+        <StackPanel>
+            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="2"
+                    SnapsToDevicePixels="true">
+                <Border x:Name="InnerBorder" BorderThickness="1" CornerRadius="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition MaxHeight="11"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Rectangle x:Name="UpperHighlight" Fill="#75ffffff" Visibility="Collapsed"/>
+                        <GridViewRowPresenter Content="{TemplateBinding Content}"
+                                              Columns="{StaticResource gvcc_vs}"
+                                              Grid.RowSpan="2"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </Border>
+            </Border>
+        </StackPanel>
+
+        <!-- triggers for hover, selection, and activation effects -->
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Background" Value="{StaticResource ListItemHoverFill}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_MouseOverBorder}"/>
+                <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="true">
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedFill}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedBorder}"/>
+                <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#80FFFFFF"/>
+                <Setter Property="Visibility" TargetName="UpperHighlight" Value="Visible"/>
+                <Setter Property="Fill" TargetName="UpperHighlight" Value="#40FFFFFF"/>
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected" Value="true"/>
+                    <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedInactiveFill}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedActiveBorder}"/>
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected" Value="true"/>
+                    <Condition Property="IsMouseOver" Value="true"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{StaticResource ListItemSelectedHoverFill}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush_SelectedMouseOverBorder}"/>
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+
     <!-- ListView style.  We have to override the general foreground/background colors to
     avoid making the whole thing look freakish. -->
     <Style x:Key="codeListStyle" TargetType="{x:Type ListView}">
@@ -224,6 +318,9 @@ See also https://github.com/fadden/DisasmUiTest
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
                 <Setter Property="Template" Value="{StaticResource longCommentTemplate}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IsVisualizationSet}" Value="True">
+                <Setter Property="Template" Value="{StaticResource visualizationSetTemplate}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=HasBackgroundColor}" Value="True">
                 <Setter Property="Background" Value="{Binding Path=BackgroundBrush}"/>

@@ -100,6 +100,21 @@ namespace SourceGen.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
+            public ScriptSupport() { }
+            public void DebugLog(string msg) {
+                Debug.WriteLine("Vis plugin: " + msg);
+            }
+            public bool SetOperandFormat(int offset, DataSubType subType, string label) {
+                throw new InvalidOperationException();
+            }
+            public bool SetInlineDataFormat(int offset, int length, DataType type,
+                    DataSubType subType, string label) {
+                throw new InvalidOperationException();
+            }
+        }
+        private ScriptSupport mScriptSupport = new ScriptSupport();
+
 
         /// <summary>
         /// Constructor.
@@ -140,6 +155,7 @@ namespace SourceGen.WpfGui {
 
             // Set the selection.  This should cause the sel change event to fire.
             visComboBox.SelectedIndex = visSelection;
+            mProject.PrepareScripts(mScriptSupport);
         }
 
         /// <summary>
@@ -186,6 +202,10 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
+        }
+
+        private void Window_Closed(object sender, EventArgs e) {
+            mProject.UnprepareScripts();
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
@@ -305,12 +325,27 @@ namespace SourceGen.WpfGui {
             }
 
             if (!IsValid) {
+                // TODO(xyzzy): default to a meaningful image
                 previewImage.Source = new BitmapImage(new Uri("pack://application:,,,/Res/Logo.png"));
             } else {
                 VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
-                IVisualization2d vis2d = item.Plugin.Generate2d(item.VisDescriptor,
-                    CreateVisGenParams());
-                previewImage.Source = Visualization.CreateBitmapSource(vis2d);
+                IVisualization2d vis2d;
+                try {
+                    vis2d = item.Plugin.Generate2d(item.VisDescriptor,
+                        CreateVisGenParams());
+                    if (vis2d == null) {
+                        Debug.WriteLine("Vis generator returned null");
+                    }
+                } catch (Exception ex) {
+                    // TODO(xyzzy): use different image for failure
+                    Debug.WriteLine("Vis generation failed: " + ex.Message);
+                    vis2d = null;
+                }
+                if (vis2d == null) {
+                    previewImage.Source = new BitmapImage(new Uri("pack://application:,,,/Res/Logo.png"));
+                } else {
+                    previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
+                }
             }
         }
 

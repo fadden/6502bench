@@ -54,7 +54,11 @@ namespace RuntimeData.Apple {
 
             mAppRef.DebugLog("GSOS(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
             //System.Diagnostics.Debugger.Break();
+        }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
         }
 
         public void UpdateSymbolList(List<PlSymbol> plSyms) {

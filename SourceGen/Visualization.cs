@@ -38,15 +38,15 @@ namespace SourceGen {
         /// </summary>
         public Dictionary<string, object> VisGenParams { get; private set; }
 
-        public double Thumbnail { get; }    // TODO - 64x64(?) bitmap
+        private BitmapSource Thumbnail { get; set; }    // TODO - 64x64(?) bitmap
 
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="tag"></param>
-        /// <param name="visGenIdent"></param>
-        /// <param name="visGenParams"></param>
+        /// <param name="tag">Unique identifier.</param>
+        /// <param name="visGenIdent">Visualization generator identifier.</param>
+        /// <param name="visGenParams">Parameters for visualization generator.</param>
         public Visualization(string tag, string visGenIdent,
                 Dictionary<string, object> visGenParams) {
             Tag = tag;
@@ -54,7 +54,12 @@ namespace SourceGen {
             VisGenParams = visGenParams;
         }
 
-        public static BitmapSource CreateBitmapSource(IVisualization2d vis2d) {
+        /// <summary>
+        /// Converts an IVisualization2d to a BitmapSource for display.
+        /// </summary>
+        /// <param name="vis2d"></param>
+        /// <returns></returns>
+        public static BitmapSource ConvertToBitmapSource(IVisualization2d vis2d) {
             // Create indexed color palette.
             int[] intPal = vis2d.GetPalette();
             List<Color> colors = new List<Color>(intPal.Length);

@@ -2443,8 +2443,15 @@ namespace SourceGen {
             return bestSym;
         }
 
+        // Punch-through functions; trying to avoid exposing ScriptManager for now.
         public List<PluginCommon.IPlugin> GetActivePlugins() {
             return mScriptManager.GetActivePlugins();
+        }
+        public void PrepareScripts(PluginCommon.IApplication appRef) {
+            mScriptManager.PrepareScripts(appRef);
+        }
+        public void UnprepareScripts() {
+            mScriptManager.UnprepareScripts();
         }
 
         /// <summary>

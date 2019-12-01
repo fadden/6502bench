@@ -39,6 +39,11 @@ namespace PluginCommon {
         /// <param name="fileData">65xx code and data.</param>
         /// <param name="addrMap">Mapping between offsets and addresses.</param>
         void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans);
+
+        /// <summary>
+        /// Tells the plugin that we're done talking to it for now.
+        /// </summary>
+        void Unprepare();
     }
 
     /// <summary>
@@ -138,7 +143,8 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="descr">VisGen identifier.</param>
         /// <param name="parms">Parameter set.</param>
-        /// <returns>2D visualization object reference.</returns>
+        /// <returns>2D visualization object reference, or null if something went
+        ///   wrong (unknown ident, bad parameters, etc).</returns>
         IVisualization2d Generate2d(VisDescr descr, Dictionary<string, object> parms);
     }
 

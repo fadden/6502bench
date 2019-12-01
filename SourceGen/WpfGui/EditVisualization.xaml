@@ -25,7 +25,8 @@ limitations under the License.
         Title="Edit Visualization"
         Width="460" SizeToContent="Height" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <!-- big thanks: http://drwpf.com/blog/2008/01/03/itemscontrol-d-is-for-datatemplate/ -->
@@ -125,7 +126,8 @@ limitations under the License.
         </Grid>
 
         <Border Grid.Row="1" BorderThickness="1"
-                BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}">
+                BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
+                Background="LightGray">
             <Image Name="previewImage" Width="400" Height="400" Source="/Res/AboutImage.png"
                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
         </Border>

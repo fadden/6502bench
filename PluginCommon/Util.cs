@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 using System;
-
+using System.Collections.Generic;
 using CommonUtil;
 
 namespace PluginCommon {
@@ -96,6 +96,24 @@ namespace PluginCommon {
         /// <returns>Combined value.</returns>
         public static int MakeARGB(int a, int r, int g, int b) {
             return (a << 24) | (r << 16) | (g << 8) | b;
+        }
+
+        /// <summary>
+        /// Extracts a typed value from a dictionary with plain object values.
+        /// </summary>
+        /// <typeparam name="T">Type of value to retrieve.</typeparam>
+        /// <param name="dict">Dictionary with values.</param>
+        /// <param name="key">Entry to find.</param>
+        /// <param name="defVal">Default value.</param>
+        /// <returns>Value found, or the default if the key doesn't exist or the value has the
+        ///   wrong type.</returns>
+        public static T GetFromObjDict<T>(Dictionary<string, object> dict, string key, T defVal) {
+            if (dict.TryGetValue(key, out object objVal)) {
+                if (objVal is T) {
+                    return (T)objVal;
+                }
+            }
+            return defVal;
         }
     }
 }

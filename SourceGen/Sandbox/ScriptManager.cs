@@ -174,6 +174,22 @@ namespace SourceGen.Sandbox {
         }
 
         /// <summary>
+        /// Puts scripts back to sleep.
+        /// </summary>
+        public void UnprepareScripts() {
+            if (DomainMgr == null) {
+                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                    IPlugin ipl = kvp.Value;
+                    ipl.Unprepare();
+                }
+            } else {
+                List<AddressMap.AddressMapEntry> addrEnts = mProject.AddrMap.GetEntryList();
+                DomainMgr.PluginMgr.UnpreparePlugins();
+            }
+        }
+
+
+        /// <summary>
         /// Returns true if any of the plugins report that the before or after label is
         /// significant.
         /// </summary>

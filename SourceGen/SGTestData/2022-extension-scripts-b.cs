@@ -26,6 +26,12 @@ namespace RuntimeData.Test2022 {
             mAppRef.DebugLog("Test2022-B(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+            mAddrTrans = null;
+        }
+
         public void CheckBrk(int offset, bool twoByteBrk, out bool noContinue) {
             noContinue = true;
 

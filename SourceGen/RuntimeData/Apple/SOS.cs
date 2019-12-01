@@ -51,6 +51,11 @@ namespace RuntimeData.Apple {
             //System.Diagnostics.Debugger.Break();
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             // Extract the list of function name constants from the platform symbol file.
             mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, SOS_MLI_TAG, mAppRef);

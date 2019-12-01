@@ -52,7 +52,7 @@ namespace PluginCommon {
         }
 
         public void SetPixelIndex(int x, int y, byte colorIndex) {
-            if (x < 0 || x >= Width || y < 0 || y >= Width) {
+            if (x < 0 || x >= Width || y < 0 || y >= Height) {
                 throw new ArgumentException("Bad x/y: " + x + "," + y + " (width=" + Width +
                     " height=" + Height + ")");
             }
@@ -82,7 +82,18 @@ namespace PluginCommon {
                 Debug.WriteLine("Palette is full");
                 return;
             }
+            for  (int i = 0; i < mNextColor; i++) {
+                if (mPalette[i] == color) {
+                    Debug.WriteLine("Color " + color.ToString("x6") +
+                        " already exists in palette (" + i + ")");
+                    return;
+                }
+            }
             mPalette[mNextColor++] = color;
+        }
+
+        public void AddColor(byte a, byte r, byte g, byte b) {
+            AddColor(Util.MakeARGB(a, r, g, b));
         }
     }
 }

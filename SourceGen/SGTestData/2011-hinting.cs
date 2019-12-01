@@ -24,6 +24,11 @@ namespace RuntimeData.Test2011 {
             mAppRef.DebugLog("Test2011(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void CheckJsr(int offset, int operand, out bool noContinue) {
             int ADDR = 0x2456;
 

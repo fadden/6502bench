@@ -31,6 +31,12 @@ namespace RuntimeData.Test2022 {
 
             mAppRef.DebugLog("Test2022-A(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
+
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             foreach (PlSymbol sym in plSyms) {
                 switch (sym.Label) {

@@ -354,6 +354,7 @@ namespace SourceGen {
             public string Operand { get; private set; }
             public string Comment { get; private set; }
             public bool IsLongComment { get; private set; }
+            public bool IsVisualizationSet { get; private set; }
             public bool HasBackgroundColor { get; private set; }
             public Brush BackgroundBrush { get; private set; }
 
@@ -445,6 +446,13 @@ namespace SourceGen {
                 parts.Opcode = opstr;
                 parts.Operand = addrStr;
                 parts.Comment = comment;
+                return parts;
+            }
+
+            public static FormattedParts CreateVisualizationSet(string summary) {
+                FormattedParts parts = new FormattedParts();
+                parts.Comment = summary;
+                parts.IsVisualizationSet = true;
                 return parts;
             }
 

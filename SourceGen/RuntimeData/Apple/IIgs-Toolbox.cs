@@ -47,6 +47,11 @@ namespace RuntimeData.Apple {
             mAppRef.DebugLog("IIgsToolbox(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             // Extract the list of function name constants from the platform symbol file.
             mFunctionList = PlSymbol.GeneratePlatformValueList(plSyms, TOOLBOX_FUNC_TAG, mAppRef);

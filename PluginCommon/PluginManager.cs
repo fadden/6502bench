@@ -170,6 +170,16 @@ namespace PluginCommon {
         }
 
         /// <summary>
+        /// Invokes the Unprepare() method on all active plugins.
+        /// </summary>
+        public void UnpreparePlugins() {
+            foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
+                IPlugin ipl = kvp.Value;
+                ipl.Unprepare();
+            }
+        }
+
+        /// <summary>
         /// Returns true if any of the plugins report that the before or after label is
         /// significant.
         /// </summary>

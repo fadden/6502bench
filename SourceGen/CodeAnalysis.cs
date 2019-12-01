@@ -292,6 +292,9 @@ namespace SourceGen {
                 searchStart = FindFirstUnvisitedInstruction(searchStart);
             }
 
+            if (mScriptManager != null) {
+                mScriptManager.UnprepareScripts();
+            }
             mScriptSupport.Shutdown();
 
             MarkUnexecutedEmbeddedCode();

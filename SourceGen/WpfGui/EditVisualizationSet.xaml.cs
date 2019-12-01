@@ -98,8 +98,9 @@ namespace SourceGen.WpfGui {
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
             Dictionary<string, object> testDict = new Dictionary<string, object>();
-            testDict.Add("offset", 0x1234);
-            testDict.Add("height", 57);
+            testDict.Add("offset", 0);
+            testDict.Add("byteWidth", 2);
+            testDict.Add("height", 7);
             EditVisualization dlg = new EditVisualization(this, mProject, mFormatter,
                 new Visualization("arbitrary tag", "apple2-hi-res-bitmap", testDict));
             if (dlg.ShowDialog() == true) {
