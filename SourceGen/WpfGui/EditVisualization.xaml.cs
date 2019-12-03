@@ -141,10 +141,9 @@ namespace SourceGen.WpfGui {
         private ScriptSupport mScriptSupport;
 
         /// <summary>
-        /// URI for the image we show when we fail to generate a visualization.
+        /// Image we show when we fail to generate a visualization.
         /// </summary>
-        private static BitmapImage sBadParamsImage =
-            new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
+        private static BitmapImage sBadParamsImage = Visualization.BROKEN_IMAGE;
 
 
         /// <summary>
@@ -259,6 +258,7 @@ namespace SourceGen.WpfGui {
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
             NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict);
+            NewVis.CachedImage = (BitmapSource)previewImage.Source;
 
             DialogResult = true;
         }

@@ -2204,11 +2204,11 @@ namespace SourceGen {
                         }
                         break;
                     case UndoableChange.ChangeType.SetProjectProperties: {
-                            bool needExternalFileReload = !CommonUtil.Container.StringListEquals(
+                            bool needPlatformSymReload = !CommonUtil.Container.StringListEquals(
                                 ((ProjectProperties)oldValue).PlatformSymbolFileIdentifiers,
                                 ((ProjectProperties)newValue).PlatformSymbolFileIdentifiers,
                                 null /*StringComparer.InvariantCulture*/);
-                            needExternalFileReload |= !CommonUtil.Container.StringListEquals(
+                            bool needExtScriptReload = !CommonUtil.Container.StringListEquals(
                                 ((ProjectProperties)oldValue).ExtensionScriptFileIdentifiers,
                                 ((ProjectProperties)newValue).ExtensionScriptFileIdentifiers,
                                 null);
@@ -2226,7 +2226,7 @@ namespace SourceGen {
                             Debug.WriteLine("Replacing CPU def object");
                             UpdateCpuDef();
 
-                            if (needExternalFileReload) {
+                            if (needPlatformSymReload || needExtScriptReload) {
                                 string errMsgs = LoadExternalFiles();
 
                                 // TODO(someday): if the plugin failed to compile, we will have
@@ -2236,6 +2236,14 @@ namespace SourceGen {
                                 //   report the failure elsewhere.  (We also want a manual
                                 //   "reload all external files and plugins" command, which might
                                 //   run through here.)
+                            }
+                            if (needExtScriptReload) {
+                                // Clear all the Visualization thumbnails.  We don't do GUI
+                                // stuff in here, so this just sets a flag.
+                                foreach (KeyValuePair<int, VisualizationSet> kvp
+                                        in VisualizationSets) {
+                                    kvp.Value.RefreshNeeded();
+                                }
                             }
                         }
                         // ignore affectedOffsets

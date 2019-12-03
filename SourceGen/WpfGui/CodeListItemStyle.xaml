@@ -92,16 +92,28 @@ See also https://github.com/fadden/DisasmUiTest
         <GridViewColumn DisplayMemberBinding="{Binding Attr}" Width="{Binding
                     RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}
                 }, Path=View.Columns[4].ActualWidth}"/>
-        <!-- This column holds the long comment.  There's no easy way to set its width, so we
-        have to let the main window take care of that.  (It's tempting to just make its width
-        very large, but that causes the GridView contents to horizontally scroll independently
-        of the GridView header when you reach the edge of the "normal" column set.) -->
+        <!-- This column holds the visualization set. -->
         <GridViewColumn Header="(visualization set)" Width="{Binding LongCommentWidth}">
             <GridViewColumn.CellTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Path=Comment}" VerticalAlignment="Center"/>
-                        <Button Width="64" Height="64" Content="Whee"/>
+                        <ItemsControl ItemsSource="{Binding VisualizationSet}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="1" Margin="8,0,0,0"
+                                            Background="{StaticResource BitmapBackground}">
+                                        <Image Width="64" Height="64" Source="{Binding CachedImage}"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </DataTemplate>
             </GridViewColumn.CellTemplate>

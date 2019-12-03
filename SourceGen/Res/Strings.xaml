@@ -175,6 +175,6 @@ limitations under the License.
     <system:String x:Key="str_TitleNewProject">[new project]</system:String>
     <system:String x:Key="str_TitleReadOnly">*READ-ONLY*</system:String>
     <system:String x:Key="str_Unset">[unset]</system:String>
-    <system:String x:Key="str_VisSetMultipleFmt">Vis: {0} (+{1} more)</system:String>
-    <system:String x:Key="str_VisSetSingleFmt">Vis: {0}</system:String>
+    <system:String x:Key="str_VisSetMultipleFmt">{0}: {1} (+{2} more)</system:String>
+    <system:String x:Key="str_VisSetSingleFmt">{0}: {1}</system:String>
 </ResourceDictionary>

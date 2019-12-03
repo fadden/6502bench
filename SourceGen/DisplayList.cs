@@ -20,6 +20,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace SourceGen {
     /// <summary>
@@ -354,9 +355,12 @@ namespace SourceGen {
             public string Operand { get; private set; }
             public string Comment { get; private set; }
             public bool IsLongComment { get; private set; }
-            public bool IsVisualizationSet { get; private set; }
+
             public bool HasBackgroundColor { get; private set; }
             public Brush BackgroundBrush { get; private set; }
+
+            public bool IsVisualizationSet { get; private set; }
+            public Visualization[] VisualizationSet { get; private set; }
 
             // Set to true if we want to highlight the address and label fields.
             public bool HasAddrLabelHighlight { get; private set; }
@@ -452,8 +456,9 @@ namespace SourceGen {
             public static FormattedParts CreateVisualizationSet(VisualizationSet visSet) {
                 FormattedParts parts = new FormattedParts();
                 if (visSet.Count == 0) {
-                    // not expected
-                    parts.Comment = "!EMPTY!";
+                    // should not happen
+                    parts.Comment = "!EMPTY VSET!";
+                    parts.IsLongComment = true;
                 } else {
                     string fmt;
                     if (visSet.Count == 1) {
@@ -461,10 +466,10 @@ namespace SourceGen {
                     } else {
                         fmt = Res.Strings.VIS_SET_MULTIPLE_FMT;
                     }
-                    parts.Comment = string.Format(fmt, visSet[0].Tag, visSet.Count - 1);
+                    parts.Comment = string.Format(fmt, "Bitmap", visSet[0].Tag, visSet.Count - 1);
+                    parts.VisualizationSet = visSet.ToArray();
+                    parts.IsVisualizationSet = true;
                 }
-                // TODO(xyzzy): show image thumbnails
-                parts.IsVisualizationSet = true;
                 return parts;
             }
 

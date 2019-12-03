@@ -29,15 +29,20 @@ namespace PluginCommon {
         string Identifier { get; }
 
         /// <summary>
-        /// Prepares the plugin for action.  Called at the start of every code analysis pass.
-        /// 
+        /// Prepares the plugin for action.  Called at the start of every code analysis pass
+        /// and when generating visualization images.
+        ///
         /// In the current implementation, the file data will be the same every time,
         /// because it doesn't change after the project is opened.  However, this could
-        /// change if we add a descramble feature.
+        /// change if we add a descramble feature.  The IApplication and AddressTranslate
+        /// references will likely change between invocations.
+        ///
+        /// This may be called even when the plugin won't be asked to do anything.  Avoid
+        /// performing expensive operations here.
         /// </summary>
         /// <param name="appRef">Reference to application interface.</param>
         /// <param name="fileData">65xx code and data.</param>
-        /// <param name="addrMap">Mapping between offsets and addresses.</param>
+        /// <param name="addrTrans">Mapping between offsets and addresses.</param>
         void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans);
 
         /// <summary>
@@ -236,12 +241,13 @@ namespace PluginCommon {
 
     /// <summary>
     /// Interfaces provided by the application for use by plugins.  An IApplication instance
-    /// is passed to the plugin as an argument Prepare().
+    /// is passed to the plugin as an argument to Prepare().
     /// </summary>
     public interface IApplication {
         /// <summary>
         /// Sends a debug message to the application.  This can be useful when debugging scripts.
-        /// (Use DEBUG > Show Analyzer Output to view it.)
+        /// (For example, DEBUG > Show Analyzer Output shows output generated while performing
+        /// code analysis.)
         /// </summary>
         /// <param name="msg">Message to send.</param>
         void DebugLog(string msg);

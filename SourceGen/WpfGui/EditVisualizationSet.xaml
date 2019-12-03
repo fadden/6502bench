@@ -23,7 +23,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Visualization Set"
-        Width="500" Height="400" ResizeMode="NoResize"
+        Width="560" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Closing="Window_Closing">
 
@@ -47,7 +47,7 @@ limitations under the License.
                   IsReadOnly="True"
                   FontFamily="{StaticResource GeneralMonoFont}"
                   SnapsToDevicePixels="True"
-                  GridLinesVisibility="Vertical"
+                  HorizontalGridLinesBrush="#FF7F7F7F"
                   VerticalGridLinesBrush="#FF7F7F7F"
                   AutoGenerateColumns="False"
                   HeadersVisibility="Column"
@@ -64,7 +64,18 @@ limitations under the License.
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
                                  Color="{x:Static SystemColors.HighlightTextColor}"/>
             </DataGrid.Resources>
+            <!-- ItemsSource is a list of Visualization -->
             <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Img" Width="56">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="0" Background="{StaticResource BitmapBackground}">
+                                <Image Source="{Binding CachedImage}" Width="48" Height="48"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Tag" Width="155" Binding="{Binding Tag}"/>
                 <DataGridTextColumn Header="Visualization Generator" Width="220" Binding="{Binding VisGenIdent}"/>
             </DataGrid.Columns>

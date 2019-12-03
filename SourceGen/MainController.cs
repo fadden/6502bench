@@ -983,6 +983,10 @@ namespace SourceGen {
             mReanalysisTimer.StartTask("Generate DisplayList");
             CodeLineList.GenerateAll();
             mReanalysisTimer.EndTask("Generate DisplayList");
+
+            mReanalysisTimer.StartTask("Refresh Visualization thumbnails");
+            VisualizationSet.RefreshAllThumbnails(mProject);
+            mReanalysisTimer.EndTask("Refresh Visualization thumbnails");
         }
 
         #endregion Project management

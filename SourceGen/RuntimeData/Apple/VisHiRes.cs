@@ -121,8 +121,8 @@ namespace RuntimeData.Apple {
             bool isColor, isFirstOdd;
 
             offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
-            byteWidth = Util.GetFromObjDict(parms, P_BYTE_WIDTH, 0); // width ignoring colStride
-            height = Util.GetFromObjDict(parms, P_HEIGHT, 0);
+            byteWidth = Util.GetFromObjDict(parms, P_BYTE_WIDTH, 1); // width ignoring colStride
+            height = Util.GetFromObjDict(parms, P_HEIGHT, 1);
             colStride = Util.GetFromObjDict(parms, P_COL_STRIDE, 0);
             rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
             isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);

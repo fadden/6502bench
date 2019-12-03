@@ -39,10 +39,13 @@ namespace CommonUtil {
 
         /// <summary>
         /// Compares two Dictionaries to see if their contents are equal.  Key and value types
-        /// must have correctly-implemented equality checks.
+        /// must have correctly-implemented equality checks.  (I contend this works incorrectly
+        /// for float -- 5.0f is equal to the integer 5.)
         /// </summary>
         /// <remarks>
         /// https://stackoverflow.com/q/3804367/294248
+        ///
+        /// TODO: make this work right for float/int comparisons
         /// </remarks>
         /// <typeparam name="TKey">Dictionary key type.</typeparam>
         /// <typeparam name="TValue">Dictionary value type.</typeparam>

@@ -18,10 +18,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 using CommonUtil;
 using PluginCommon;
 
 namespace SourceGen {
+    /// <summary>
+    /// Graphical visualization object.  Useful for displaying 2D bitmaps and 3D objects.
+    ///
+    /// Treat this as generally immutable, i.e. don't modify VisGenParams.  The CachedImage
+    /// field is mutable.
+    /// </summary>
     public class Visualization {
         /// <summary>
         /// Unique user-specified tag.  Contents are arbitrary, but may not be empty.
@@ -39,13 +46,19 @@ namespace SourceGen {
         public Dictionary<string, object> VisGenParams { get; private set; }
 
         /// <summary>
-        /// Cached reference to thumbnail.
+        /// Cached reference to 2D image, useful for thumbnails.  Not serialized.
         /// </summary>
         /// <remarks>
         /// Because the underlying data never changes, we only need to regenerate the
-        /// thumbnail if the set of active plugins changes.
+        /// image if the set of active plugins changes.
         /// </remarks>
-        private BitmapSource Thumbnail { get; set; }    // TODO - 64x64(?) bitmap
+        public BitmapSource CachedImage { get; set; }
+
+        /// <summary>
+        /// Image to show when things are broken.
+        /// </summary>
+        public static readonly BitmapImage BROKEN_IMAGE =
+            new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
 
 
         /// <summary>
@@ -59,6 +72,19 @@ namespace SourceGen {
             Tag = tag;
             VisGenIdent = visGenIdent;
             VisGenParams = visGenParams;
+            CachedImage = BROKEN_IMAGE;
+        }
+
+        /// <summary>
+        /// Updates the cached thumbnail image.
+        /// </summary>
+        /// <param name="vis2d">Visualization, or null to clear the thumbnail.</param>
+        public void SetThumbnail(IVisualization2d vis2d) {
+            if (vis2d == null) {
+                CachedImage = BROKEN_IMAGE;
+            } else {
+                CachedImage = ConvertToBitmapSource(vis2d);
+            }
         }
 
         /// <summary>
@@ -110,31 +136,6 @@ namespace SourceGen {
             return image;
         }
 
-        /// <summary>
-        /// Finds a plugin that provides the named visualization generator.
-        /// </summary>
-        /// <param name="proj">Project with script manager.</param>
-        /// <param name="visGenIdent">Visualization generator identifier.</param>
-        /// <returns>A plugin that matches, or null if none found.</returns>
-        public static IPlugin_Visualizer FindPluginByVisGenIdent(DisasmProject proj,
-                string visGenIdent, out VisDescr visDescr) {
-            List<IPlugin> plugins = proj.GetActivePlugins();
-            foreach (IPlugin chkPlug in plugins) {
-                if (!(chkPlug is IPlugin_Visualizer)) {
-                    continue;
-                }
-                IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
-                foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
-                    if (descr.Ident == visGenIdent) {
-                        visDescr = descr;
-                        return vplug;
-                    }
-                }
-            }
-            visDescr = null;
-            return null;
-        }
-
 
         public override string ToString() {
             return "[Vis: " + Tag + " (" + VisGenIdent + ") count=" + VisGenParams.Count + "]";
@@ -147,8 +148,8 @@ namespace SourceGen {
             if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
                 return false;   // one is null
             }
-            // All fields must be equal.
-            if (a.Tag != b.Tag || a.VisGenIdent != b.VisGenIdent || a.Thumbnail != b.Thumbnail) {
+            // All fields must be equal (but we ignore CachedImage).
+            if (a.Tag != b.Tag || a.VisGenIdent != b.VisGenIdent) {
                 return false;
             }
             // Compare the vis gen parameter lists.
@@ -167,7 +168,7 @@ namespace SourceGen {
             return obj is Visualization && this == (Visualization)obj;
         }
         public override int GetHashCode() {
-            // TODO(maybe): hash code should include up VisGenParams items
+            // TODO(maybe): hash code should factor in VisGenParams items
             return Tag.GetHashCode() ^ VisGenIdent.GetHashCode() ^ VisGenParams.Count;
         }
     }

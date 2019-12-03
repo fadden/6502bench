@@ -127,7 +127,7 @@ limitations under the License.
 
         <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Center"
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
-                Background="LightGray">
+                Background="{StaticResource CheckerBackground}">
             <Image Name="previewImage" Width="320" Height="320" Source="/Res/RedX.png"
                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
             <!--<Button Width="400" Height="400" Content="Test"/>-->

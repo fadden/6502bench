@@ -16,13 +16,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+
+using PluginCommon;
 
 namespace SourceGen {
     /// <summary>
     /// Ordered list of visualization objects.
     /// </summary>
     /// <remarks>
-    /// Right now the only thing separating this from a plain List<> is the operator== stuff.
+    /// There's not much separating this from a plain List<>, except perhaps the operator== stuff.
     /// </remarks>
     public class VisualizationSet : IEnumerable<Visualization> {
         /// <summary>
@@ -73,6 +76,122 @@ namespace SourceGen {
         public void Remove(Visualization vis) {
             mList.Remove(vis);
         }
+
+        public Visualization[] ToArray() {
+            Visualization[] arr = new Visualization[mList.Count];
+            for (int i = 0; i < mList.Count; i++) {
+                arr[i] = mList[i];
+            }
+            return arr;
+        }
+
+        #region Image generation
+
+        private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
+            public ScriptSupport() { }
+
+            public void DebugLog(string msg) {
+                Debug.WriteLine("Vis plugin: " + msg);
+            }
+
+            public bool SetOperandFormat(int offset, DataSubType subType, string label) {
+                throw new InvalidOperationException();
+            }
+            public bool SetInlineDataFormat(int offset, int length, DataType type,
+                    DataSubType subType, string label) {
+                throw new InvalidOperationException();
+            }
+        }
+
+        /// <summary>
+        /// Informs all list elements that a refresh is needed.  Call this when the set of active
+        /// plugins changes.  The actual refresh will happen later.
+        /// </summary>
+        public void RefreshNeeded() {
+            foreach (Visualization vis in mList) {
+                vis.SetThumbnail(null);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to refresh broken thumbnails across all visualization sets in the project.
+        /// </summary>
+        /// <param name="project">Project reference.</param>
+        public static void RefreshAllThumbnails(DisasmProject project) {
+            ScriptSupport iapp = null;
+            List<IPlugin> plugins = null;
+
+            foreach (KeyValuePair<int, VisualizationSet> kvp in project.VisualizationSets) {
+                VisualizationSet visSet = kvp.Value;
+                foreach (Visualization vis in visSet) {
+                    if (vis.CachedImage != Visualization.BROKEN_IMAGE) {
+                        continue;
+                    }
+                    Debug.WriteLine("Vis needs refresh: " + vis.Tag);
+
+                    if (plugins == null) {
+                        plugins = project.GetActivePlugins();
+                    }
+                    IPlugin_Visualizer vplug = FindPluginByVisGenIdent(plugins,
+                        vis.VisGenIdent, out VisDescr visDescr);
+                    if (vplug == null) {
+                        Debug.WriteLine("Unable to referesh " + vis.Tag + ": plugin not found");
+                        continue;
+                    }
+
+                    if (iapp == null) {
+                        // Prep the plugins on first need.
+                        iapp = new ScriptSupport();
+                        project.PrepareScripts(iapp);
+                    }
+
+                    IVisualization2d vis2d;
+                    try {
+                        vis2d = vplug.Generate2d(visDescr, vis.VisGenParams);
+                        if (vis2d == null) {
+                            Debug.WriteLine("Vis generator returned null");
+                        }
+                    } catch (Exception ex) {
+                        Debug.WriteLine("Vis generation failed: " + ex);
+                        vis2d = null;
+                    }
+                    if (vis2d != null) {
+                        Debug.WriteLine(" Rendered thumbnail: " + vis.Tag);
+                        vis.SetThumbnail(vis2d);
+                    }
+                }
+            }
+
+            if (iapp != null) {
+                project.UnprepareScripts();
+            }
+        }
+
+        /// <summary>
+        /// Finds a plugin that provides the named visualization generator.
+        /// </summary>
+        /// <param name="plugins">List of plugins, from project ScriptManager.</param>
+        /// <param name="visGenIdent">Visualization generator identifier.</param>
+        /// <returns>A plugin that matches, or null if none found.</returns>
+        private static IPlugin_Visualizer FindPluginByVisGenIdent(List<IPlugin> plugins,
+                string visGenIdent, out VisDescr visDescr) {
+            foreach (IPlugin chkPlug in plugins) {
+                if (!(chkPlug is IPlugin_Visualizer)) {
+                    continue;
+                }
+                IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
+                foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
+                    if (descr.Ident == visGenIdent) {
+                        visDescr = descr;
+                        return vplug;
+                    }
+                }
+            }
+            visDescr = null;
+            return null;
+        }
+
+        #endregion Image generation
 
 
         public override string ToString() {

@@ -22,6 +22,18 @@ limitations under the License.
         <ResourceDictionary>
             <FontFamily x:Key="GeneralMonoFont">Consolas</FontFamily>
 
+            <LinearGradientBrush x:Key="BitmapBackground" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#707070" Offset="0.0"/>
+                <GradientStop Color="#f0f0f0" Offset="1.0"/>
+            </LinearGradientBrush>
+
+            <!-- https://stackoverflow.com/a/47049174/294248 -->
+            <DrawingBrush x:Key="CheckerBackground" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+                <DrawingBrush.Drawing>
+                    <GeometryDrawing Geometry="M0,0 H1 V1 H2 V2 H1 V1 H0Z" Brush="LightGray"/>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Res/Strings.xaml"/>
             </ResourceDictionary.MergedDictionaries>
