@@ -449,9 +449,21 @@ namespace SourceGen {
                 return parts;
             }
 
-            public static FormattedParts CreateVisualizationSet(string summary) {
+            public static FormattedParts CreateVisualizationSet(VisualizationSet visSet) {
                 FormattedParts parts = new FormattedParts();
-                parts.Comment = summary;
+                if (visSet.Count == 0) {
+                    // not expected
+                    parts.Comment = "!EMPTY!";
+                } else {
+                    string fmt;
+                    if (visSet.Count == 1) {
+                        fmt = Res.Strings.VIS_SET_SINGLE_FMT;
+                    } else {
+                        fmt = Res.Strings.VIS_SET_MULTIPLE_FMT;
+                    }
+                    parts.Comment = string.Format(fmt, visSet[0].Tag, visSet.Count - 1);
+                }
+                // TODO(xyzzy): show image thumbnails
                 parts.IsVisualizationSet = true;
                 return parts;
             }

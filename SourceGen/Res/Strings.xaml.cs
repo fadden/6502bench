@@ -89,6 +89,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadSymrefPart");
         public static string ERR_BAD_TYPE_HINT =
             (string)Application.Current.FindResource("str_ErrBadTypeHint");
+        public static string ERR_BAD_VISUALIZATION_FMT =
+            (string)Application.Current.FindResource("str_ErrBadVisualizationFmt");
+        public static string ERR_BAD_VISUALIZATION_SET_FMT =
+            (string)Application.Current.FindResource("str_ErrBadVisualizationSetFmt");
         public static string ERR_DUPLICATE_LABEL_FMT =
             (string)Application.Current.FindResource("str_ErrDuplicateLabelFmt");
         public static string ERR_FILE_COPY_FAILED_FMT =
@@ -327,5 +331,9 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_TitleReadOnly");
         public static string UNSET =
             (string)Application.Current.FindResource("str_Unset");
+        public static string VIS_SET_MULTIPLE_FMT =
+            (string)Application.Current.FindResource("str_VisSetMultipleFmt");
+        public static string VIS_SET_SINGLE_FMT =
+            (string)Application.Current.FindResource("str_VisSetSingleFmt");
     }
 }

@@ -359,6 +359,29 @@ namespace SourceGen {
                 ClearPrevious = varTab.ClearPrevious;
             }
         }
+        public class SerVisualization {
+            public string Tag { get; set; }
+            public string VisGenIdent { get; set; }
+            public Dictionary<string, object> VisGenParams { get; set; }
+
+            public SerVisualization() { }
+            public SerVisualization(Visualization vis) {
+                Tag = vis.Tag;
+                VisGenIdent = vis.VisGenIdent;
+                VisGenParams = vis.VisGenParams;    // Dictionary
+            }
+        }
+        public class SerVisualizationSet {
+            public List<SerVisualization> Items { get; set; }
+
+            public SerVisualizationSet() { }
+            public SerVisualizationSet(VisualizationSet visSet) {
+                Items = new List<SerVisualization>(visSet.Count);
+                foreach (Visualization vis in visSet) {
+                    Items.Add(new SerVisualization(vis));
+                }
+            }
+        }
 
         // Fields are serialized to/from JSON.  Do not change the field names.
         public int _ContentVersion { get; set; }
@@ -374,6 +397,7 @@ namespace SourceGen {
         public Dictionary<string, SerSymbol> UserLabels { get; set; }
         public Dictionary<string, SerFormatDescriptor> OperandFormats { get; set; }
         public Dictionary<string, SerLocalVariableTable> LvTables { get; set; }
+        public Dictionary<string, SerVisualizationSet> VisualizationSets { get; set; }
 
         /// <summary>
         /// Serializes a DisasmProject into an augmented JSON string.
@@ -461,6 +485,11 @@ namespace SourceGen {
             spf.LvTables = new Dictionary<string, SerLocalVariableTable>();
             foreach (KeyValuePair<int, LocalVariableTable> kvp in proj.LvTables) {
                 spf.LvTables.Add(kvp.Key.ToString(), new SerLocalVariableTable(kvp.Value));
+            }
+
+            spf.VisualizationSets = new Dictionary<string, SerVisualizationSet>();
+            foreach (KeyValuePair<int, VisualizationSet> kvp in proj.VisualizationSets) {
+                spf.VisualizationSets.Add(kvp.Key.ToString(), new SerVisualizationSet(kvp.Value));
             }
 
             spf.ProjectProps = new SerProjectProperties(proj.ProjectProps);
@@ -714,6 +743,25 @@ namespace SourceGen {
                 }
             }
 
+            // Deserialize visualization sets.  These were added in v1.5.
+            if (spf.VisualizationSets != null) {
+                foreach (KeyValuePair<string, SerVisualizationSet> kvp in spf.VisualizationSets) {
+                    if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
+                            Res.Strings.PROJECT_FIELD_LV_TABLE, report, out int intKey)) {
+                        continue;
+                    }
+
+                    if (!CreateVisualizationSet(kvp.Value, report, out VisualizationSet visSet)) {
+                        report.Add(FileLoadItem.Type.Warning,
+                            string.Format(Res.Strings.ERR_BAD_VISUALIZATION_SET_FMT, intKey));
+                        continue;
+                    }
+
+                    proj.VisualizationSets[intKey] = visSet;
+
+                }
+            }
+
             return true;
         }
 
@@ -920,6 +968,42 @@ namespace SourceGen {
                     continue;
                 }
                 outLvt.AddOrReplace(defSym);
+            }
+            return true;
+        }
+
+        private static bool CreateVisualizationSet(SerVisualizationSet serVisSet,
+                FileLoadReport report, out VisualizationSet outVisSet) {
+            outVisSet = new VisualizationSet();
+            foreach (SerVisualization serVis in serVisSet.Items) {
+                string trimTag = Visualization.TrimAndValidateTag(serVis.Tag, out bool isTagValid);
+                if (!isTagValid) {
+                    Debug.WriteLine("Visualization with invalid tag: " + serVis.Tag);
+                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT, trimTag);
+                    report.Add(FileLoadItem.Type.Warning, str);
+                    continue;
+                }
+                if (string.IsNullOrEmpty(serVis.VisGenIdent) || serVis.VisGenParams == null) {
+                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                        "ident/params");
+                    report.Add(FileLoadItem.Type.Warning, str);
+                    continue;
+                }
+
+                // The JavaScript deserialization turns floats into Decimal.  Change it back
+                // so we don't have to deal with it later.
+                Dictionary<string, object> parms =
+                    new Dictionary<string, object>(serVis.VisGenParams.Count);
+                foreach (KeyValuePair<string, object> kvp in serVis.VisGenParams) {
+                    object val = kvp.Value;
+                    if (val is decimal) {
+                        val = (double)((decimal)val);
+                    }
+                    parms.Add(kvp.Key, val);
+                }
+
+                Visualization vis = new Visualization(serVis.Tag, serVis.VisGenIdent, parms);
+                outVisSet.Add(vis);
             }
             return true;
         }

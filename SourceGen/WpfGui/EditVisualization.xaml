@@ -25,7 +25,6 @@ limitations under the License.
         Title="Edit Visualization"
         Width="460" SizeToContent="Height" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded"
         Closed="Window_Closed">
 
     <Window.Resources>
@@ -41,7 +40,7 @@ limitations under the License.
                            Text="{Binding UiString}" Foreground="{Binding ForegroundBrush}"/>
                 <CheckBox Grid.Column="1" Margin="0,0,0,4" IsChecked="{Binding Value}"
                           Checked="CheckBox_Changed" Unchecked="CheckBox_Changed"/>
-                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="4,1,0,0"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
             </Grid>
         </DataTemplate>
@@ -58,7 +57,7 @@ limitations under the License.
                          Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                          FontFamily="{StaticResource GeneralMonoFont}"
                          TextChanged="TextBox_TextChanged"/>
-                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="4,1,0,0"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
             </Grid>
         </DataTemplate>
@@ -75,7 +74,7 @@ limitations under the License.
                          Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                          FontFamily="{StaticResource GeneralMonoFont}"
                          TextChanged="TextBox_TextChanged"/>
-                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="0,1,0,0"
+                <TextBlock Grid.Column="2" Text="{Binding RangeText}" Margin="4,1,0,0"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
             </Grid>
         </DataTemplate>
@@ -87,6 +86,7 @@ limitations under the License.
             IntTemplate="{StaticResource IntTemplate}"
             FloatTemplate="{StaticResource FloatTemplate}"/>
     </Window.Resources>
+
 
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -108,7 +108,7 @@ limitations under the License.
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0,0,4,0"
+            <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0,3,4,0"
                        Text="Visualizer:"/>
             <ComboBox Name="visComboBox" Grid.Column="1" Grid.Row="0" Margin="0,0,0,4"
                       ItemsSource="{Binding VisualizationList}" DisplayMemberPath="VisDescriptor.UiName"
@@ -116,7 +116,7 @@ limitations under the License.
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
                        Text="Tag:" Foreground="{Binding TagLabelBrush}"/>
-            <TextBox Grid.Column="1" Grid.Row="1"
+            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,1,0,0"
                      Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
 
@@ -125,23 +125,30 @@ limitations under the License.
             <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,20,0,4" Text="Preview:"/>
         </Grid>
 
-        <Border Grid.Row="1" BorderThickness="1"
+        <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Center"
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
                 Background="LightGray">
-            <Image Name="previewImage" Width="400" Height="400" Source="/Res/AboutImage.png"
+            <Image Name="previewImage" Width="320" Height="320" Source="/Res/RedX.png"
                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+            <!--<Button Width="400" Height="400" Content="Test"/>-->
         </Border>
 
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Parameters:" Margin="0,0,0,4"/>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                <!--<TextBlock Text="Message:" Margin="0,0,8,0"/>-->
+                <TextBlock Text="{Binding PluginErrMessage}" Foreground="Red"/>
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Text="Parameters:" Margin="0,0,0,4"/>
 
             <!-- generated controls are placed here -->
-            <ItemsControl Grid.Row="1"
+            <ItemsControl Grid.Row="2"
                 ItemsSource="{Binding ParameterList}"
                 ItemTemplateSelector="{StaticResource ParameterTemplateSelector}">
             </ItemsControl>

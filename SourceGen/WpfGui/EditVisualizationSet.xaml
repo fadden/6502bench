@@ -19,12 +19,18 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Visualization Set"
-        Width="460" Height="400" ResizeMode="NoResize"
+        Width="500" Height="400" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Closing="Window_Closing">
+
+    <Window.Resources>
+        <system:String x:Key="str_ConfirmDiscardChanges">Are you sure you wish to discard your changes?</system:String>
+        <system:String x:Key="str_ConfirmDiscardChangesCaption">Discard Changes?</system:String>
+    </Window.Resources>
 
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
@@ -36,7 +42,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <DataGrid Name="visualizationList" Grid.Column="0" Grid.Row="0" Margin="4,4,4,0"
+        <DataGrid Name="visualizationGrid" Grid.Column="0" Grid.Row="0" Margin="4,4,4,0"
                   ItemsSource="{Binding VisualizationList}"
                   IsReadOnly="True"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -60,22 +66,22 @@ limitations under the License.
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Tag" Width="155" Binding="{Binding Tag}"/>
-                <DataGridTextColumn Header="Visualization Generator" Width="180" Binding="{Binding VisGenName}"/>
+                <DataGridTextColumn Header="Visualization Generator" Width="220" Binding="{Binding VisGenIdent}"/>
             </DataGrid.Columns>
         </DataGrid>
         
         <StackPanel Grid.Column="1" Grid.Row="0">
             <Button Width="75" Margin="4" Content="_New..."
-                    Click="NewButton_Click"/>
+                    IsEnabled="{Binding HasVisPlugins}" Click="NewButton_Click"/>
             <Button Width="75" Margin="4" Content="_Edit"
-                    Click="EditButton_Click"/>
+                    IsEnabled="{Binding IsEditEnabled}" Click="EditButton_Click"/>
             <Button Width="75" Margin="4" Content="_Remove"
-                    Click="RemoveButton_Click"/>
+                    IsEnabled="{Binding IsRemoveEnabled}" Click="RemoveButton_Click"/>
 
             <Button Width="75" Margin="4,20,4,4" Content="_Up"
-                    Click="UpButton_Click"/>
+                    IsEnabled="{Binding IsUpEnabled}" Click="UpButton_Click"/>
             <Button Width="75" Margin="4,4" Content="_Down"
-                    Click="DownButton_Click"/>
+                    IsEnabled="{Binding IsDownEnabled}" Click="DownButton_Click"/>
         </StackPanel>
 
         <DockPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">

@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Asm65;
@@ -34,8 +31,6 @@ namespace SourceGen.WpfGui {
     /// Visualization editor.
     /// </summary>
     public partial class EditVisualization : Window, INotifyPropertyChanged {
-        private const int MIN_TRIMMED_TAG_LEN = 2;
-
         /// <summary>
         /// Dialog result.
         /// </summary>
@@ -43,6 +38,7 @@ namespace SourceGen.WpfGui {
 
         private DisasmProject mProject;
         private Formatter mFormatter;
+        private int mSetOffset;
         private Visualization mOrigVis;
 
         private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
@@ -64,7 +60,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public string TagString {
             get { return mTagString; }
-            set { mTagString = value; OnPropertyChanged(); }
+            set { mTagString = value; OnPropertyChanged(); UpdateControls(); }
         }
         private string mTagString;
 
@@ -74,6 +70,13 @@ namespace SourceGen.WpfGui {
         }
         private Brush mTagLabelBrush;
 
+        /// <summary>
+        /// Item for combo box.
+        /// </summary>
+        /// <remarks>
+        /// Strictly speaking we could just create an ItemsSource from VisDescr objects, but
+        /// the plugin reference saves a lookup later.
+        /// </remarks>
         public class VisualizationItem {
             public IPlugin_Visualizer Plugin { get; private set; }
             public VisDescr VisDescriptor { get; private set; }
@@ -89,6 +92,21 @@ namespace SourceGen.WpfGui {
         public List<VisualizationItem> VisualizationList { get; private set; }
 
         /// <summary>
+        /// Error message, shown in red.
+        /// </summary>
+        public string PluginErrMessage {
+            get { return mPluginErrMessage; }
+            set { mPluginErrMessage = value; OnPropertyChanged(); }
+        }
+        private string mPluginErrMessage = string.Empty;
+
+        /// <summary>
+        /// Set by the plugin callback.  WPF doesn't like it when we try to fire off a
+        /// property changed event from here.
+        /// </summary>
+        public string LastPluginMessage { get; set; }
+
+        /// <summary>
         /// ItemsSource for the ItemsControl with the generated parameter controls.
         /// </summary>
         public ObservableCollection<ParameterValue> ParameterList { get; private set; } =
@@ -101,10 +119,17 @@ namespace SourceGen.WpfGui {
         }
 
         private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
-            public ScriptSupport() { }
+            private EditVisualization mOuter;
+
+            public ScriptSupport(EditVisualization outer) {
+                mOuter = outer;
+            }
+
             public void DebugLog(string msg) {
                 Debug.WriteLine("Vis plugin: " + msg);
+                mOuter.LastPluginMessage = msg;
             }
+
             public bool SetOperandFormat(int offset, DataSubType subType, string label) {
                 throw new InvalidOperationException();
             }
@@ -113,7 +138,13 @@ namespace SourceGen.WpfGui {
                 throw new InvalidOperationException();
             }
         }
-        private ScriptSupport mScriptSupport = new ScriptSupport();
+        private ScriptSupport mScriptSupport;
+
+        /// <summary>
+        /// URI for the image we show when we fail to generate a visualization.
+        /// </summary>
+        private static BitmapImage sBadParamsImage =
+            new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
 
 
         /// <summary>
@@ -124,17 +155,23 @@ namespace SourceGen.WpfGui {
         /// <param name="formatter">Text formatter.</param>
         /// <param name="vis">Visualization to edit, or null if this is new.</param>
         public EditVisualization(Window owner, DisasmProject proj, Formatter formatter,
-                Visualization vis) {
+                int setOffset, Visualization vis) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mProject = proj;
             mFormatter = formatter;
+            mSetOffset = setOffset;
             mOrigVis = vis;
+
+            mScriptSupport = new ScriptSupport(this);
 
             if (vis != null) {
                 TagString = vis.Tag;
+            } else {
+                // Could make this unique, but probably not worth the bother.
+                TagString = "vis" + mSetOffset.ToString("x6");
             }
 
             int visSelection = 0;
@@ -174,9 +211,19 @@ namespace SourceGen.WpfGui {
             foreach (VisParamDescr vpd in paramDescrs) {
                 string rangeStr = string.Empty;
                 object defaultVal = vpd.DefaultValue;
-                if (mOrigVis.VisGenParams.TryGetValue(vpd.Name, out object val)) {
-                    // Do we need to confirm that val has the correct type?
-                    defaultVal = val;
+
+                // If we're editing a visualization, use the values from that as default.
+                if (mOrigVis != null) {
+                    if (mOrigVis.VisGenParams.TryGetValue(vpd.Name, out object val)) {
+                        // Do we need to confirm that val has the correct type?
+                        defaultVal = val;
+                    }
+                } else {
+                    // New visualization.  Use the set's offset as the default value for
+                    // any parameter called "offset".
+                    if (vpd.Name.ToLowerInvariant() == "offset") {
+                        defaultVal = mSetOffset;
+                    }
                 }
 
                 // Set up rangeStr, if appropriate.
@@ -201,9 +248,6 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
-        }
-
         private void Window_Closed(object sender, EventArgs e) {
             mProject.UnprepareScripts();
         }
@@ -212,7 +256,9 @@ namespace SourceGen.WpfGui {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
             Dictionary<string, object> valueDict = CreateVisGenParams();
-            NewVis = new Visualization(TagString, item.VisDescriptor.Ident, valueDict);
+            string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
+            Debug.Assert(isTagValid);
+            NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict);
 
             DialogResult = true;
         }
@@ -226,22 +272,12 @@ namespace SourceGen.WpfGui {
                     Debug.Assert(pv.Value is bool);
                     valueDict.Add(pv.Descr.Name, (bool)pv.Value);
                 } else if (pv.Descr.CsType == typeof(int)) {
-                    int intVal;
-                    if (pv.Value is int) {
-                        intVal = (int)pv.Value;
-                    } else {
-                        bool ok = ParseInt((string)pv.Value, pv.Descr.Special, out intVal);
-                        Debug.Assert(ok);
-                    }
+                    bool ok = ParseIntObj(pv.Value, pv.Descr.Special, out int intVal);
+                    Debug.Assert(ok);
                     valueDict.Add(pv.Descr.Name, intVal);
                 } else if (pv.Descr.CsType == typeof(float)) {
-                    float floatVal;
-                    if (pv.Value is float || pv.Value is double) {
-                        floatVal = (float)pv.Value;
-                    } else {
-                        bool ok = float.TryParse((string)pv.Value, out floatVal);
-                        Debug.Assert(ok);
-                    }
+                    bool ok = ParseFloatObj(pv.Value, out float floatVal);
+                    Debug.Assert(ok);
                     valueDict.Add(pv.Descr.Name, floatVal);
                 } else {
                     // skip it
@@ -252,7 +288,12 @@ namespace SourceGen.WpfGui {
             return valueDict;
         }
 
-        private bool ParseInt(string str, VisParamDescr.SpecialMode special, out int intVal) {
+        private bool ParseIntObj(object val, VisParamDescr.SpecialMode special, out int intVal) {
+            if (val is int) {
+                intVal = (int)val;
+                return true;
+            }
+            string str = (string)val;
             int numBase = (special == VisParamDescr.SpecialMode.Offset) ? 16 : 10;
 
             string trimStr = str.Trim();
@@ -281,17 +322,28 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        private bool ParseFloatObj(object val, out float floatVal) {
+            if (val is float) {
+                floatVal = (float)val;
+                return true;
+            } else if (val is double) {
+                floatVal = (float)(double)val;
+                return true;
+            } else if (val is int) {
+                floatVal = (int)val;
+                return true;
+            }
+
+            string str = (string)val;
+            if (!float.TryParse(str, out floatVal)) {
+                floatVal = 0.0f;
+                return false;
+            }
+            return true;
+        }
+
         private void UpdateControls() {
             IsValid = true;
-
-            string trimTag = TagString.Trim();
-            if (trimTag.Length < MIN_TRIMMED_TAG_LEN) {
-                IsValid = false;
-                TagLabelBrush = mErrorLabelColor;
-            } else {
-                TagLabelBrush = mDefaultLabelColor;
-            }
-            // TODO: verify tag is unique
 
             foreach (ParameterValue pv in ParameterList) {
                 pv.ForegroundBrush = mDefaultLabelColor;
@@ -300,14 +352,7 @@ namespace SourceGen.WpfGui {
                     continue;
                 } else if (pv.Descr.CsType == typeof(int)) {
                     // integer, possibly Offset special
-                    bool ok = true;
-                    int intVal;
-                    if (pv.Value is int) {
-                        // happens initially, before the TextBox can futz with it
-                        intVal = (int)pv.Value;
-                    } else if (!ParseInt((string)pv.Value, pv.Descr.Special, out intVal)) {
-                        ok = false;
-                    }
+                    bool ok = ParseIntObj(pv.Value, pv.Descr.Special, out int intVal);
                     if (ok && (intVal < (int)pv.Descr.Min || intVal > (int)pv.Descr.Max)) {
                         // TODO(someday): make the range text red instead of the label
                         ok = false;
@@ -318,17 +363,28 @@ namespace SourceGen.WpfGui {
                     }
                 } else if (pv.Descr.CsType == typeof(float)) {
                     // float
+                    bool ok = ParseFloatObj(pv.Value, out float floatVal);
+                    if (ok && (floatVal < (float)pv.Descr.Min || floatVal > (float)pv.Descr.Max)) {
+                        ok = false;
+                    }
+                    if (!ok) {
+                        pv.ForegroundBrush = mErrorLabelColor;
+                        IsValid = false;
+                    }
                 } else {
                     // unexpected
                     Debug.Assert(false);
                 }
             }
 
-            if (!IsValid) {
-                // TODO(xyzzy): default to a meaningful image
-                previewImage.Source = new BitmapImage(new Uri("pack://application:,,,/Res/Logo.png"));
+            VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
+
+            if (!IsValid || item == null) {
+                previewImage.Source = sBadParamsImage;
             } else {
-                VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
+                // Invoke the plugin.
+                PluginErrMessage = string.Empty;
+
                 IVisualization2d vis2d;
                 try {
                     vis2d = item.Plugin.Generate2d(item.VisDescriptor,
@@ -337,16 +393,48 @@ namespace SourceGen.WpfGui {
                         Debug.WriteLine("Vis generator returned null");
                     }
                 } catch (Exception ex) {
-                    // TODO(xyzzy): use different image for failure
-                    Debug.WriteLine("Vis generation failed: " + ex.Message);
+                    Debug.WriteLine("Vis generation failed: " + ex);
                     vis2d = null;
                 }
                 if (vis2d == null) {
-                    previewImage.Source = new BitmapImage(new Uri("pack://application:,,,/Res/Logo.png"));
+                    previewImage.Source = sBadParamsImage;
+                    if (!string.IsNullOrEmpty(LastPluginMessage)) {
+                        // Report the last message we got as an error.
+                        PluginErrMessage = LastPluginMessage;
+                    }
                 } else {
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
                 }
             }
+
+            string trimTag = Visualization.TrimAndValidateTag(TagString, out bool tagOk);
+            Visualization match = FindVisualizationByTag(trimTag);
+            if (match != null && match != mOrigVis) {
+                // Another vis already has this tag.
+                tagOk = false;
+            }
+            if (!tagOk) {
+                TagLabelBrush = mErrorLabelColor;
+                IsValid = false;
+            } else {
+                TagLabelBrush = mDefaultLabelColor;
+            }
+        }
+
+        /// <summary>
+        /// Finds a Visualization with a matching tag, searching across all sets.
+        /// </summary>
+        /// <param name="tag">Tag to search for.</param>
+        /// <returns>Matching Visualization, or null if not found.</returns>
+        private Visualization FindVisualizationByTag(string tag) {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in mProject.VisualizationSets) {
+                foreach (Visualization vis in kvp.Value) {
+                    if (vis.Tag == tag) {
+                        return vis;
+                    }
+                }
+            }
+            return null;
         }
 
         private void VisComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {

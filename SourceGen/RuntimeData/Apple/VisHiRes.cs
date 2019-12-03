@@ -29,9 +29,9 @@ namespace RuntimeData.Apple {
         private byte[] mFileData;
         private AddressTranslate mAddrTrans;
 
-        // Visualization identifiers; DO NOT change or projects will break.
+        // Visualization identifiers; DO NOT change or projects that use them will break.
         private const string VIS_GEN_BITMAP = "apple2-hi-res-bitmap";
-        private const string VIS_GEN_MULTI_MAP = "apple2-hi-res-multi-map";
+        private const string VIS_GEN_BITMAP_FONT = "apple2-hi-res-bitmap-font";
 
         private const string P_OFFSET = "offset";
         private const string P_BYTE_WIDTH = "byteWidth";
@@ -52,8 +52,7 @@ namespace RuntimeData.Apple {
             new VisDescr(VIS_GEN_BITMAP, "Apple II Hi-Res Bitmap", VisDescr.VisType.Bitmap,
                 new VisParamDescr[] {
                     new VisParamDescr("File offset (hex)",
-                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset,
-                        0x2000),
+                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Width (in bytes)",
                         P_BYTE_WIDTH, typeof(int), 1, 40, 0, 1),
                     new VisParamDescr("Height",
@@ -69,11 +68,10 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("Test Float",
                         "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
                 }),
-            new VisDescr(VIS_GEN_MULTI_MAP, "Apple II Hi-Res Multi-Map", VisDescr.VisType.Bitmap,
+            new VisDescr(VIS_GEN_BITMAP_FONT, "Apple II Hi-Res Bitmap Font", VisDescr.VisType.Bitmap,
                 new VisParamDescr[] {
                     new VisParamDescr("File offset (hex)",
-                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset,
-                        0x1000),
+                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Item width (in bytes)",
                         P_ITEM_BYTE_WIDTH, typeof(int), 1, 40, 0, 1),
                     new VisParamDescr("Item height",
@@ -109,8 +107,8 @@ namespace RuntimeData.Apple {
             switch (descr.Ident) {
                 case VIS_GEN_BITMAP:
                     return GenerateBitmap(parms);
-                case VIS_GEN_MULTI_MAP:
-                    // TODO
+                case VIS_GEN_BITMAP_FONT:
+                    // TODO (xyzzy)
                     return null;
                 default:
                     mAppRef.DebugLog("Unknown ident " + descr.Ident);
@@ -140,16 +138,24 @@ namespace RuntimeData.Apple {
 
             if (offset < 0 || offset >= mFileData.Length ||
                     byteWidth <= 0 || byteWidth > MAX_DIM ||
-                    height <= 0 || height > MAX_DIM ||
-                    colStride <= 0 || colStride > MAX_DIM ||
-                    rowStride < byteWidth * colStride - (colStride-1) || rowStride > MAX_DIM) {
+                    height <= 0 || height > MAX_DIM) {
+                // the UI should flag these based on range (and ideally wouldn't have called us)
                 mAppRef.DebugLog("Invalid parameter");
+                return null;
+            }
+            if (colStride <= 0 || colStride > MAX_DIM) {
+                mAppRef.DebugLog("Invalid column stride");
+                return null;
+            }
+            if (rowStride < byteWidth * colStride - (colStride-1) || rowStride > MAX_DIM) {
+                mAppRef.DebugLog("Invalid row stride");
                 return null;
             }
 
             int lastOffset = offset + rowStride * height - (colStride - 1) - 1;
             if (lastOffset >= mFileData.Length) {
-                mAppRef.DebugLog("Bitmap runs off end of file (lastOffset=" + lastOffset + ")");
+                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                    lastOffset.ToString("x6") + ")");
                 return null;
             }
 
@@ -235,7 +241,7 @@ namespace RuntimeData.Apple {
                 }
 #else
                 // Color conversion similar to what CiderPress does, but without the half-pixel
-                // shift (we're trying to create a 1:1 bitmap).
+                // shift (we're trying to create a 1:1 bitmap, not 1:2).
                 bool[] lineBits = new bool[byteWidth * 7];
                 bool[] hiFlags = new bool[byteWidth * 7];   // overkill, but simplifies things
                 int[] colorBuf = new int[byteWidth * 7];
@@ -326,7 +332,7 @@ namespace RuntimeData.Apple {
             White1      = 7
         }
 
-        // HiRes: black0, green, purple, white0, black1, orange, blue, white1
+        // Maps HiResColors to the palette entries.
         private static readonly byte[] sHiResColorMap = new byte[8] {
             1, 3, 4, 2, 1, 5, 6, 2
         };
@@ -334,7 +340,7 @@ namespace RuntimeData.Apple {
         private void SetHiResPalette(VisBitmap8 vb) {
             // These don't match directly to hi-res color numbers because we want to
             // avoid adding black/white twice.
-            vb.AddColor(0xff, 0xff, 0, 0);                // 0=transparent (xyzzy: all 0)
+            vb.AddColor(0, 0, 0, 0);                // 0=transparent
             vb.AddColor(0xff, 0x00, 0x00, 0x00);    // 1=black0/black1
             vb.AddColor(0xff, 0xff, 0xff, 0xff);    // 2=white0/white1
             vb.AddColor(0xff, 0x11, 0xdd, 0x00);    // 3=green

@@ -16,12 +16,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SourceGen {
     /// <summary>
     /// Ordered list of visualization objects.
     /// </summary>
+    /// <remarks>
+    /// Right now the only thing separating this from a plain List<> is the operator== stuff.
+    /// </remarks>
     public class VisualizationSet : IEnumerable<Visualization> {
         /// <summary>
         /// Object list.
@@ -32,9 +34,9 @@ namespace SourceGen {
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="cap">Initial capacity.</param>
-        public VisualizationSet(int cap = 1) {
-            mList = new List<Visualization>(cap);
+        /// <param name="initialCap">Initial capacity.</param>
+        public VisualizationSet(int initialCap = 1) {
+            mList = new List<Visualization>(initialCap);
         }
 
         // IEnumerable
@@ -54,8 +56,22 @@ namespace SourceGen {
             get { return mList.Count; }
         }
 
+        /// <summary>
+        /// Accesses the Nth element.
+        /// </summary>
+        /// <param name="key">Element number.</param>
+        public Visualization this[int key] {
+            get {
+                return mList[key];
+            }
+        }
+
         public void Add(Visualization vis) {
             mList.Add(vis);
+        }
+
+        public void Remove(Visualization vis) {
+            mList.Remove(vis);
         }
 
 

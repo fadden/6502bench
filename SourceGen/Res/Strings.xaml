@@ -54,6 +54,8 @@ limitations under the License.
     <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
     <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
     <system:String x:Key="str_ErrBadTypeHint">Type hint not recognized</system:String>
+    <system:String x:Key="str_ErrBadVisualizationFmt">Invalid visualization item: {0}</system:String>
+    <system:String x:Key="str_ErrBadVisualizationSetFmt">Invalid visualization set at +{0:x6}</system:String>
     <system:String x:Key="str_ErrDuplicateLabelFmt">Removed duplicate label '{0}' (offset +{1:x6})</system:String>
     <system:String x:Key="str_ErrFileCopyFailedFmt">Failed copying {0} to {1}: {2}.</system:String>
     <system:String x:Key="str_ErrFileExistsNotDirFmt">The file {0} exists, but is not a directory.</system:String>
@@ -173,4 +175,6 @@ limitations under the License.
     <system:String x:Key="str_TitleNewProject">[new project]</system:String>
     <system:String x:Key="str_TitleReadOnly">*READ-ONLY*</system:String>
     <system:String x:Key="str_Unset">[unset]</system:String>
+    <system:String x:Key="str_VisSetMultipleFmt">Vis: {0} (+{1} more)</system:String>
+    <system:String x:Key="str_VisSetSingleFmt">Vis: {0}</system:String>
 </ResourceDictionary>

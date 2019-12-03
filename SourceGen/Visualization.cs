@@ -38,6 +38,13 @@ namespace SourceGen {
         /// </summary>
         public Dictionary<string, object> VisGenParams { get; private set; }
 
+        /// <summary>
+        /// Cached reference to thumbnail.
+        /// </summary>
+        /// <remarks>
+        /// Because the underlying data never changes, we only need to regenerate the
+        /// thumbnail if the set of active plugins changes.
+        /// </remarks>
         private BitmapSource Thumbnail { get; set; }    // TODO - 64x64(?) bitmap
 
 
@@ -55,10 +62,29 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Trims a tag, removing leading/trailing whitespace, and checks it for validity.
+        /// </summary>
+        /// <param name="tag">Tag to trim and validate.</param>
+        /// <param name="isValid">Set to true if the tag is valid.</param>
+        /// <returns>Trimmed tag string.  Returns an empty string if tag is null.</returns>
+        public static string TrimAndValidateTag(string tag, out bool isValid) {
+            if (tag == null) {
+                isValid = false;
+                return string.Empty;
+            }
+
+            string trimTag = tag.Trim();
+            if (trimTag.Length < 2) {
+                isValid = false;
+            } else {
+                isValid = true;
+            }
+            return trimTag;
+        }
+
+        /// <summary>
         /// Converts an IVisualization2d to a BitmapSource for display.
         /// </summary>
-        /// <param name="vis2d"></param>
-        /// <returns></returns>
         public static BitmapSource ConvertToBitmapSource(IVisualization2d vis2d) {
             // Create indexed color palette.
             int[] intPal = vis2d.GetPalette();

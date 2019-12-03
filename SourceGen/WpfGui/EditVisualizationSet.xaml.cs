@@ -38,9 +38,44 @@ namespace SourceGen.WpfGui {
 
         private DisasmProject mProject;
         private Formatter mFormatter;
+        private VisualizationSet mOrigSet;
+        private int mOffset;
 
         public ObservableCollection<Visualization> VisualizationList { get; private set; } =
             new ObservableCollection<Visualization>();
+
+        /// <summary>
+        /// True if there are plugins that implement the visualization generation interface.
+        /// </summary>
+        public bool HasVisPlugins {
+            get { return mHasVisPlugins; }
+            set { mHasVisPlugins = value; OnPropertyChanged(); }
+        }
+        private bool mHasVisPlugins;
+
+        public bool IsEditEnabled {
+            get { return mIsEditEnabled; }
+            set { mIsEditEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsEditEnabled;
+
+        public bool IsRemoveEnabled {
+            get { return mIsRemoveEnabled; }
+            set { mIsRemoveEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsRemoveEnabled;
+
+        public bool IsUpEnabled {
+            get { return mIsUpEnabled; }
+            set { mIsUpEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsUpEnabled;
+
+        public bool IsDownEnabled {
+            get { return mIsDownEnabled; }
+            set { mIsDownEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsDownEnabled;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -49,78 +84,133 @@ namespace SourceGen.WpfGui {
         }
 
         public EditVisualizationSet(Window owner, DisasmProject project, Formatter formatter,
-                VisualizationSet curSet) {
+                VisualizationSet curSet, int offset) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mProject = project;
             mFormatter = formatter;
+            mOrigSet = curSet;
+            mOffset = offset;
 
             if (curSet != null) {
+                // Populate the ItemsSource.
                 foreach (Visualization vis in curSet) {
                     VisualizationList.Add(vis);
                 }
             }
-        }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            // Check to see if we have any relevant plugins.  If not, disable New/Edit.
+            List<IPlugin> plugins = project.GetActivePlugins();
+            foreach (IPlugin chkPlug in plugins) {
+                if (chkPlug is IPlugin_Visualizer) {
+                    HasVisPlugins = true;
+                    break;
+                }
+            }
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
-            if (VisualizationList.Count == 0) {
-                NewVisSet = null;
-            } else {
-                NewVisSet = new VisualizationSet(VisualizationList.Count);
-                foreach (Visualization vis in VisualizationList) {
-                    NewVisSet.Add(vis);
+            NewVisSet = MakeVisSet();
+            DialogResult = true;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            if (DialogResult == true) {
+                return;
+            }
+
+            // Check to see if changes have been made.
+            VisualizationSet newSet = MakeVisSet();
+            if (newSet != mOrigSet) {
+                string msg = (string)FindResource("str_ConfirmDiscardChanges");
+                string caption = (string)FindResource("str_ConfirmDiscardChangesCaption");
+                MessageBoxResult result = MessageBox.Show(msg, caption, MessageBoxButton.OKCancel,
+                    MessageBoxImage.Question);
+                if (result == MessageBoxResult.Cancel) {
+                    e.Cancel = true;
                 }
             }
-            DialogResult = true;
+        }
+
+        private VisualizationSet MakeVisSet() {
+            if (VisualizationList.Count == 0) {
+                return null;
+            }
+            VisualizationSet newSet = new VisualizationSet(VisualizationList.Count);
+            foreach (Visualization vis in VisualizationList) {
+                newSet.Add(vis);
+            }
+            return newSet;
         }
 
         private void VisualizationList_SelectionChanged(object sender,
                 SelectionChangedEventArgs e) {
-            Debug.WriteLine("SEL CHANGE");
+            bool isItemSelected = (visualizationGrid.SelectedItem != null);
+            IsEditEnabled = HasVisPlugins && isItemSelected;
+            IsRemoveEnabled = isItemSelected;
+            IsUpEnabled = isItemSelected && visualizationGrid.SelectedIndex != 0;
+            IsDownEnabled = isItemSelected &&
+                visualizationGrid.SelectedIndex != VisualizationList.Count - 1;
         }
 
         private void VisualizationList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            Debug.WriteLine("DBL CLICK");
+            EditSelectedItem();
         }
 
         private void NewButton_Click(object sender, RoutedEventArgs e) {
-            VisualizationList.Add(new Visualization("VIS #" + VisualizationList.Count,
-                "apple2-hi-res-bitmap", new Dictionary<string, object>()));
-
-            // TODO: disable New button if no appropriate vis plugins can be found (or maybe
-            //   MessageBox here)
+            EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
+                null);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+            VisualizationList.Add(dlg.NewVis);
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
-            Dictionary<string, object> testDict = new Dictionary<string, object>();
-            testDict.Add("offset", 0);
-            testDict.Add("byteWidth", 2);
-            testDict.Add("height", 7);
-            EditVisualization dlg = new EditVisualization(this, mProject, mFormatter,
-                new Visualization("arbitrary tag", "apple2-hi-res-bitmap", testDict));
-            if (dlg.ShowDialog() == true) {
-                Visualization newVis = dlg.NewVis;
-                Debug.WriteLine("New vis: " + newVis);
+            EditSelectedItem();
+        }
+
+        private void EditSelectedItem() {
+            if (!IsEditEnabled) {
+                // can happen on a double-click
+                return;
+            }
+            Visualization item = (Visualization)visualizationGrid.SelectedItem;
+
+            EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
+                item);
+            if (dlg.ShowDialog() != true) {
+                return;
             }
 
-            // TODO: disable edit button if matching vis can't be found (or maybe MessageBox)
+            int index = VisualizationList.IndexOf(item);
+            VisualizationList.Remove(item);
+            VisualizationList.Insert(index, dlg.NewVis);
         }
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e) {
-
+            Visualization item = (Visualization)visualizationGrid.SelectedItem;
+            VisualizationList.Remove(item);
         }
 
         private void UpButton_Click(object sender, RoutedEventArgs e) {
-
+            Visualization item = (Visualization)visualizationGrid.SelectedItem;
+            int index = VisualizationList.IndexOf(item);
+            Debug.Assert(index > 0);
+            VisualizationList.Remove(item);
+            VisualizationList.Insert(index - 1, item);
+            visualizationGrid.SelectedIndex = index - 1;
         }
 
         private void DownButton_Click(object sender, RoutedEventArgs e) {
-
+            Visualization item = (Visualization)visualizationGrid.SelectedItem;
+            int index = VisualizationList.IndexOf(item);
+            Debug.Assert(index < VisualizationList.Count - 1);
+            VisualizationList.Remove(item);
+            VisualizationList.Insert(index + 1, item);
+            visualizationGrid.SelectedIndex = index + 1;
         }
     }
 }

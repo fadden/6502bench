@@ -506,11 +506,9 @@ namespace SourceGen {
                         parts = GenerateLvTableLine(line.FileOffset, line.SubLineIndex);
                         break;
                     case Line.Type.VisualizationSet:
-                        // TODO(xyzzy)
                         mProject.VisualizationSets.TryGetValue(line.FileOffset,
                             out VisualizationSet visSet);
-                        parts = FormattedParts.CreateVisualizationSet("!VISUALIZATION SET! " +
-                            (visSet != null ? "VS:" + visSet.Count : "???"));
+                        parts = FormattedParts.CreateVisualizationSet(visSet);
                         break;
                     case Line.Type.Blank:
                         // Nothing to do.

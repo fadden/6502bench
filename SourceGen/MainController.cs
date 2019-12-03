@@ -2161,7 +2161,7 @@ namespace SourceGen {
             mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet curVisSet);
 
             EditVisualizationSet dlg = new EditVisualizationSet(mMainWin, mProject,
-                mOutputFormatter, curVisSet);
+                mOutputFormatter, curVisSet, offset);
             if (dlg.ShowDialog() != true) {
                 return;
             }
