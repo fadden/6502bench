@@ -15,7 +15,8 @@
         "RT:Apple/ProDOS8.sym65"
       ],
       "ExtensionScripts" : [
-        "RT:Apple/ProDOS8.cs"
+        "RT:Apple/ProDOS8.cs",
+        "RT:Apple/VisHiRes.cs"
       ],
       "Parameters" : {
         "load-address":"0x2000"
@@ -33,6 +34,7 @@
         "RT:Apple/DOS33.sym65"
       ],
       "ExtensionScripts" : [
+        "RT:Apple/VisHiRes.cs"
       ],
       "Parameters" : {
         "load-address":"0x2000"
@@ -51,7 +53,8 @@
         "RT:Apple/IIgs-ROM.sym65"
       ],
       "ExtensionScripts" : [
-        "RT:Apple/ProDOS8.cs"
+        "RT:Apple/ProDOS8.cs",
+        "RT:Apple/VisHiRes.cs"
       ],
       "Parameters" : {
         "load-address":"0x2000",

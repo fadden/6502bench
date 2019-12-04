@@ -93,3 +93,9 @@ This is a collection of project files with deliberate errors.  These exist
 to exercise the load-time error reporting.  See the README in that directory
 for a full explanation.
 
+
+## Visualization ##
+
+Some test projects and data files for exercising the visualization generators.
+Not part of a formal test; load the projects and eyeball the results.
+

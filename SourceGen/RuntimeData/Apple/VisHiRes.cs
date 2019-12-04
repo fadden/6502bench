@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 using PluginCommon;
@@ -65,8 +66,8 @@ namespace RuntimeData.Apple {
                         P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                     new VisParamDescr("First col odd",
                         P_IS_FIRST_ODD, typeof(bool), 0, 0, 0, false),
-                    new VisParamDescr("Test Float",
-                        "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
+                    //new VisParamDescr("Test Float",
+                    //    "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
                 }),
             new VisDescr(VIS_GEN_BITMAP_FONT, "Apple II Hi-Res Bitmap Font", VisDescr.VisType.Bitmap,
                 new VisParamDescr[] {
@@ -103,7 +104,7 @@ namespace RuntimeData.Apple {
 
         // IPlugin_Visualizer
         public IVisualization2d Generate2d(VisDescr descr,
-                Dictionary<string, object> parms) {
+                ReadOnlyDictionary<string, object> parms) {
             switch (descr.Ident) {
                 case VIS_GEN_BITMAP:
                     return GenerateBitmap(parms);
@@ -116,7 +117,7 @@ namespace RuntimeData.Apple {
             }
         }
 
-        private IVisualization2d GenerateBitmap(Dictionary<string, object> parms) {
+        private IVisualization2d GenerateBitmap(ReadOnlyDictionary<string, object> parms) {
             int offset, byteWidth, height, colStride, rowStride;
             bool isColor, isFirstOdd;
 
@@ -147,7 +148,7 @@ namespace RuntimeData.Apple {
                 mAppRef.DebugLog("Invalid column stride");
                 return null;
             }
-            if (rowStride < byteWidth * colStride - (colStride-1) || rowStride > MAX_DIM) {
+            if (rowStride < byteWidth * colStride - (colStride - 1) || rowStride > MAX_DIM) {
                 mAppRef.DebugLog("Invalid row stride");
                 return null;
             }
@@ -159,187 +160,283 @@ namespace RuntimeData.Apple {
                 return null;
             }
 
+
             VisBitmap8 vb = new VisBitmap8(byteWidth * 7, height);
             SetHiResPalette(vb);
 
-            if (!isColor) {
-                // B&W mode.  Since we're not displaying this we don't need to worry about
-                // half-pixel shifts, and can just convert 7 bits to pixels.
-                int bx = 0;
-                int by = 0;
-                for (int row = 0; row < height; row++) {
-                    int colIdx = 0;
-                    for (int col = 0; col < byteWidth; col++) {
-                        byte val = mFileData[offset + colIdx];
-                        for (int bit = 0; bit < 7; bit++) {
-                            vb.SetPixelIndex(bx, by, (byte)((val & 0x01) + 1)); // black or white
-                            val >>= 1;
-                            bx++;
-                        }
-                        colIdx += colStride;
-                    }
-                    bx = 0;
-                    by++;
-                    offset += rowStride;
-                }
-            } else {
-                int bx = 0;
-                int by = 0;
-
-#if false
-                // Color mode.  We treat the data as a strictly 140-mode bitmap, which doesn't
-                // quite match up with how the pixels will be displayed, but does allow a
-                // straightforward conversion between file formats.  Color fringing is severe.
-                for (int row = 0; row < height; row++) {
-                    int lastBit;
-                    if (isFirstOdd) {
-                        lastBit = 0;        // pretend we already have one bit
-                    } else {
-                        lastBit = -1;
-                    }
-
-                    for (int colByte = 0; colByte < byteWidth; colByte += colStride) {
-                        byte val = mFileData[offset + colByte];
-                        bool hiBitSet = (val & 0x80) != 0;
-
-                        // Grab 3 or 4 pairs of bits.
-                        int pairCount = (lastBit < 0) ? 3 : 4;
-                        while (pairCount-- > 0) {
-                            int twoBits;
-                            if (lastBit >= 0) {
-                                // merge with bit from previous byte
-                                twoBits = (lastBit << 1) | (val & 0x01);
-                                val >>= 1;
-                                lastBit = -1;
-                            } else {
-                                // grab two bits
-                                twoBits = (val & 0x03);
-                                val >>= 2;
-                            }
-
-                            if (hiBitSet) {
-                                twoBits += 4;
-                            }
-
-                            // We're in 140 mode, so set two adjacent pixels.
-                            vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
-                            vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
-                        }
-
-                        bool thisEven = ((colByte & 0x01) == 0) ^ isFirstOdd;
-                        if (thisEven) {
-                            // started in even column we have one bit left over
-                            lastBit = val & 0x01;
-                        } else {
-                            // started in odd column, all bits consumed
-                            lastBit = -1;
-                        }
-                    }
-                    bx = 0;
-                    by++;
-                    offset += rowStride;
-                }
-#else
-                // Color conversion similar to what CiderPress does, but without the half-pixel
-                // shift (we're trying to create a 1:1 bitmap, not 1:2).
-                bool[] lineBits = new bool[byteWidth * 7];
-                bool[] hiFlags = new bool[byteWidth * 7];   // overkill, but simplifies things
-                int[] colorBuf = new int[byteWidth * 7];
-                for (int row = 0; row < height; row++) {
-                    // Unravel the bits.
-                    int idx = 0;
-                    int colIdx = 0;
-                    for (int col = 0; col < byteWidth; col++) {
-                        byte val = mFileData[offset + colIdx];
-                        bool hiBitSet = (val & 0x80) != 0;
-
-                        for (int bit = 0; bit < 7; bit++) {
-                            hiFlags[idx] = hiBitSet;
-                            lineBits[idx] = (val & 0x01) != 0;
-                            idx++;
-                            val >>= 1;
-                        }
-                        colIdx += colStride;
-                    }
-
-                    // Convert to color.
-                    int lastBit = byteWidth * 7;
-                    for (idx = 0; idx < lastBit; idx++) {
-                        int colorShift = hiFlags[idx] ? 4 : 0;
-                        if (!lineBits[idx]) {
-                            // Bit not set, set pixel to black.
-                            colorBuf[idx] = (int)HiResColors.Black0 + colorShift;
-                        } else {
-                            // Bit set, set pixel to white or color.
-                            if (idx > 0 && colorBuf[idx - 1] != (int)HiResColors.Black0 &&
-                                    colorBuf[idx - 1] != (int)HiResColors.Black1) {
-                                // previous bit was also set, this is white
-                                colorBuf[idx] = (int)HiResColors.White0 + colorShift;
-
-                                // the previous pixel is part of a run of white
-                                colorBuf[idx - 1] = (int)HiResColors.White0 + colorShift;
-                            } else {
-                                // previous bit not set *or* was first pixel in line;
-                                // set color based on whether this is even or odd pixel col
-                                bool isOdd = ((idx & 0x01) != 0) ^ isFirstOdd;
-                                if (isOdd) {
-                                    colorBuf[idx] = (int)HiResColors.Green + colorShift;
-                                } else {
-                                    colorBuf[idx] = (int)HiResColors.Purple + colorShift;
-                                }
-                            }
-
-                            // Do we have a run of the same color?  If so, smooth the color out.
-                            // Note that white blends smoothly with everything.
-                            if (idx > 1 && (colorBuf[idx - 2] == colorBuf[idx] ||
-                                    colorBuf[idx - 2] == (int)HiResColors.White0 ||
-                                    colorBuf[idx - 2] == (int)HiResColors.White1)) {
-
-                                //if (colorBuf[idx - 1] != (int)HiResColors.Black0 &&
-                                //        colorBuf[idx - 1] != (int) HiResColors.Black1) {
-                                //    mAppRef.DebugLog("Unexpected color at row=" + by +
-                                //        " idx=" + idx + ": " + colorBuf[idx - 1]);
-                                //}
-
-                                colorBuf[idx - 1] = colorBuf[idx];
-                            }
-                        }
-                    }
-
-                    // Write to bitmap.
-                    for (idx = 0; idx < lastBit; idx++) {
-                        vb.SetPixelIndex(bx++, by, sHiResColorMap[colorBuf[idx]]);
-                    }
-
-                    // move to next row
-                    bx = 0;
-                    by++;
-                    offset += rowStride;
-                }
-#endif
-            }
+            RenderBitmap(offset, byteWidth, height, colStride, rowStride,
+                isColor ? ColorMode.SimpleColor : ColorMode.Mono, isFirstOdd, vb);
             return vb;
         }
 
-        private enum HiResColors {
-            Black0      = 0,
-            Green       = 1,
-            Purple      = 2,
-            White0      = 3,
-            Black1      = 4,
-            Orange      = 5,
-            Blue        = 6,
-            White1      = 7
+        private enum ColorMode { Mono, ClunkyColor, SimpleColor, IIgsRGB };
+
+        private void RenderBitmap(int offset, int byteWidth, int height, int colStride,
+                int rowStride, ColorMode colorMode, bool isFirstOdd, VisBitmap8 vb) {
+            int bx = 0;
+            int by = 0;
+            switch (colorMode) {
+                case ColorMode.Mono: {
+                        // Since we're not displaying this we don't need to worry about
+                        // half-pixel shifts, and can just convert 7 bits to pixels.
+                        for (int row = 0; row < height; row++) {
+                            int colIdx = 0;
+                            for (int col = 0; col < byteWidth; col++) {
+                                byte val = mFileData[offset + colIdx];
+                                for (int bit = 0; bit < 7; bit++) {
+                                    if ((val & 0x01) == 0) {
+                                        vb.SetPixelIndex(bx, by, (int)HiResColors.Black0);
+                                    } else {
+                                        vb.SetPixelIndex(bx, by, (int)HiResColors.White0);
+                                    }
+                                    val >>= 1;
+                                    bx++;
+                                }
+                                colIdx += colStride;
+                            }
+                            bx = 0;
+                            by++;
+                            offset += rowStride;
+                        }
+                    }
+                    break;
+                case ColorMode.ClunkyColor: {
+                        // We treat the data as a strictly 140-mode bitmap, which doesn't match
+                        // up well with how the pixels will be displayed, but does allow a
+                        // straightforward conversion between file formats.  Color fringing is
+                        // severe.
+                        for (int row = 0; row < height; row++) {
+                            int lastBit;
+                            if (isFirstOdd) {
+                                lastBit = 0;        // pretend we already have one bit
+                            } else {
+                                lastBit = -1;
+                            }
+
+                            for (int colByte = 0; colByte < byteWidth; colByte += colStride) {
+                                byte val = mFileData[offset + colByte];
+                                bool hiBitSet = (val & 0x80) != 0;
+
+                                // Grab 3 or 4 pairs of bits.
+                                int pairCount = (lastBit < 0) ? 3 : 4;
+                                while (pairCount-- > 0) {
+                                    int twoBits;
+                                    if (lastBit >= 0) {
+                                        // merge with bit from previous byte
+                                        twoBits = (lastBit << 1) | (val & 0x01);
+                                        val >>= 1;
+                                        lastBit = -1;
+                                    } else {
+                                        // grab two bits
+                                        twoBits = (val & 0x03);
+                                        val >>= 2;
+                                    }
+
+                                    if (hiBitSet) {
+                                        twoBits += 4;
+                                    }
+
+                                    // We're in 140 mode, so set two adjacent pixels.
+                                    vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
+                                    vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
+                                }
+
+                                bool thisEven = ((colByte & 0x01) == 0) ^ isFirstOdd;
+                                if (thisEven) {
+                                    // started in even column we have one bit left over
+                                    lastBit = val & 0x01;
+                                } else {
+                                    // started in odd column, all bits consumed
+                                    lastBit = -1;
+                                }
+                            }
+                            bx = 0;
+                            by++;
+                            offset += rowStride;
+                        }
+                    }
+                    break;
+                case ColorMode.SimpleColor: {
+                        // Straightforward conversion, with no funky border effects.  This
+                        // represents an idealized version of the hardware.
+
+                        // Bits for every byte, plus a couple of "fake" bits on the ends so
+                        // we don't have to throw range-checks everywhere.
+                        const int OVER = 2;
+                        bool[] lineBits = new bool[OVER + byteWidth * 7 + OVER];
+                        bool[] hiFlags = new bool[OVER + byteWidth * 7 + OVER];
+                        for (int row = 0; row < height; row++) {
+                            // Unravel the bits.  Note we do each byte "backwards", i.e. the
+                            // low bit (which is generally considered to be on the right) is
+                            // the leftmost pixel.
+                            int idx = OVER;     // start past "fake" bits
+                            int colIdx = 0;
+                            for (int col = 0; col < byteWidth; col++) {
+                                byte val = mFileData[offset + colIdx];
+                                bool hiBitSet = (val & 0x80) != 0;
+
+                                for (int bit = 0; bit < 7; bit++) {
+                                    hiFlags[idx] = hiBitSet;
+                                    lineBits[idx] = (val & 0x01) != 0;
+                                    idx++;
+                                    val >>= 1;
+                                }
+                                colIdx += colStride;
+                            }
+
+                            // Convert to color.
+                            int lastBit = byteWidth * 7;
+                            for (idx = OVER; idx < lastBit + OVER; idx++) {
+                                int colorShift = hiFlags[idx] ? 2 : 0;
+                                if (lineBits[idx] && (lineBits[idx - 1] || lineBits[idx + 1])) {
+                                    // [X]11 or [1]1X; two 1s in a row is always white
+                                    vb.SetPixelIndex(bx++, by, (byte)HiResColors.White0);
+                                } else if (lineBits[idx]) {
+                                    // [0]10, color pixel
+                                    bool isOdd = ((idx & 0x01) != 0) ^ isFirstOdd;
+                                    if (isOdd) {
+                                        vb.SetPixelIndex(bx++, by,
+                                                (byte)((int)HiResColors.Green + colorShift));
+                                    } else {
+                                        vb.SetPixelIndex(bx++, by,
+                                                (byte)((int)HiResColors.Purple + colorShift));
+                                    }
+                                } else if (lineBits[idx - 1] && lineBits[idx + 1]) {
+                                    // [1]01, keep color going
+                                    bool isOdd = ((idx & 0x01) != 0) ^ isFirstOdd;
+                                    if (isOdd) {
+                                        vb.SetPixelIndex(bx++, by,
+                                                (byte)((int)HiResColors.Purple + colorShift));
+                                    } else {
+                                        vb.SetPixelIndex(bx++, by,
+                                                (byte)((int)HiResColors.Green + colorShift));
+                                    }
+                                } else {
+                                    // [0]0X or [X]01
+                                    vb.SetPixelIndex(bx++, by, (byte)HiResColors.Black0);
+                                }
+                            }
+
+                            // move to next row
+                            bx = 0;
+                            by++;
+                            offset += rowStride;
+                        }
+                    }
+                    break;
+                case ColorMode.IIgsRGB: {
+                        // Color conversion similar to what CiderPress does, but without the
+                        // half-pixel shift (we're trying to create a 1:1 bitmap, not 1:2).
+                        //
+                        // This replicates some of the oddness in Apple IIgs RGB monitor output,
+                        // but it's not quite right though.  For example:
+                        //
+                        //                   observed                 generated
+                        //  d5 2a:    blue   [dk blue] purple       ... black ...
+                        //  aa 55:    orange [yellow]  green        ... white ...
+                        //  55 aa:    purple [lt blue] blue         ... black ...
+                        //  2a d5:    green  [brown]   orange       ... black ...
+                        //
+                        // KEGS doesn't seem to try to model this; it shows solid colors with no
+                        // wackiness.  AppleWin in "Color TV" mode shows similar effects, but is
+                        // much blurrier (by design).
+                        bool[] lineBits = new bool[byteWidth * 7];
+                        bool[] hiFlags = new bool[byteWidth * 7];   // overkill, but simpler
+                        int[] colorBuf = new int[byteWidth * 7];
+                        for (int row = 0; row < height; row++) {
+                            // Unravel the bits.
+                            int idx = 0;
+                            int colIdx = 0;
+                            for (int col = 0; col < byteWidth; col++) {
+                                byte val = mFileData[offset + colIdx];
+                                bool hiBitSet = (val & 0x80) != 0;
+
+                                for (int bit = 0; bit < 7; bit++) {
+                                    hiFlags[idx] = hiBitSet;
+                                    lineBits[idx] = (val & 0x01) != 0;
+                                    idx++;
+                                    val >>= 1;
+                                }
+                                colIdx += colStride;
+                            }
+
+                            // Convert to color.
+                            int lastBit = byteWidth * 7;
+                            for (idx = 0; idx < lastBit; idx++) {
+                                int colorShift = hiFlags[idx] ? 2 : 0;
+                                if (!lineBits[idx]) {
+                                    // Bit not set, set pixel to black.
+                                    colorBuf[idx] = (int)HiResColors.Black0;
+                                } else {
+                                    // Bit set, set pixel to white or color.
+                                    if (idx > 0 && colorBuf[idx - 1] != (int)HiResColors.Black0) {
+                                        // previous bit was also set, this is white
+                                        colorBuf[idx] = (int)HiResColors.White0;
+
+                                        // the previous pixel is part of a run of white
+                                        colorBuf[idx - 1] = (int)HiResColors.White0;
+                                    } else {
+                                        // previous bit not set *or* was first pixel in line;
+                                        // set color based on whether this is even or odd pixel col
+                                        bool isOdd = ((idx & 0x01) != 0) ^ isFirstOdd;
+                                        if (isOdd) {
+                                            colorBuf[idx] = (int)HiResColors.Green + colorShift;
+                                        } else {
+                                            colorBuf[idx] = (int)HiResColors.Purple + colorShift;
+                                        }
+                                    }
+
+                                    // Do we have a run of the same color?  If so, smooth the
+                                    // color out. Note that white blends smoothly with everything.
+                                    if (idx > 1 && (colorBuf[idx - 2] == colorBuf[idx] ||
+                                            colorBuf[idx - 2] == (int)HiResColors.White0)) {
+                                        colorBuf[idx - 1] = colorBuf[idx];
+                                    }
+                                }
+                            }
+
+                            // Write to bitmap.
+                            for (idx = 0; idx < lastBit; idx++) {
+                                vb.SetPixelIndex(bx++, by, (byte)colorBuf[idx]);
+                            }
+
+                            // move to next row
+                            bx = 0;
+                            by++;
+                            offset += rowStride;
+                        }
+                    }
+                    break;
+                default:
+                    // just leave the bitmap empty
+                    mAppRef.DebugLog("Unknown ColorMode " + colorMode);
+                    break;
+            }
         }
 
-        // Maps HiResColors to the palette entries.
+        /// <summary>
+        /// Map hi-res colors to palette entries.
+        /// </summary>
+        private enum HiResColors : byte {
+            Black0      = 1,
+            Green       = 3,
+            Purple      = 4,
+            White0      = 2,
+            Black1      = 1,
+            Orange      = 5,
+            Blue        = 6,
+            White1      = 2
+        }
+
+        // Maps HiResColors to the palette entries.  Used for mapping 2-bit values to colors.
         private static readonly byte[] sHiResColorMap = new byte[8] {
             1, 3, 4, 2, 1, 5, 6, 2
         };
 
         private void SetHiResPalette(VisBitmap8 vb) {
             // These don't match directly to hi-res color numbers because we want to
-            // avoid adding black/white twice.
+            // avoid adding black/white twice.  The colors correspond to Apple IIgs RGB
+            // monitor output.
             vb.AddColor(0, 0, 0, 0);                // 0=transparent
             vb.AddColor(0xff, 0x00, 0x00, 0x00);    // 1=black0/black1
             vb.AddColor(0xff, 0xff, 0xff, 0xff);    // 2=white0/white1

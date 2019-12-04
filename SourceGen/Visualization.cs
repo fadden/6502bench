@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -26,12 +27,12 @@ namespace SourceGen {
     /// <summary>
     /// Graphical visualization object.  Useful for displaying 2D bitmaps and 3D objects.
     ///
-    /// Treat this as generally immutable, i.e. don't modify VisGenParams.  The CachedImage
-    /// field is mutable.
+    /// This is generally immutable, except for the CachedImage field.
     /// </summary>
     public class Visualization {
         /// <summary>
-        /// Unique user-specified tag.  Contents are arbitrary, but may not be empty.
+        /// Unique user-specified tag.  This may be any valid string that is at least two
+        /// characters long after the leading and trailing whitespace have been trimmed.
         /// </summary>
         public string Tag { get; private set; }
 
@@ -41,9 +42,9 @@ namespace SourceGen {
         public string VisGenIdent { get; private set; }
 
         /// <summary>
-        /// Parameters passed to the visualization generator.
+        /// Parameters to be passed to the visualization generator.
         /// </summary>
-        public Dictionary<string, object> VisGenParams { get; private set; }
+        public ReadOnlyDictionary<string, object> VisGenParams { get; private set; }
 
         /// <summary>
         /// Cached reference to 2D image, useful for thumbnails.  Not serialized.
@@ -68,7 +69,7 @@ namespace SourceGen {
         /// <param name="visGenIdent">Visualization generator identifier.</param>
         /// <param name="visGenParams">Parameters for visualization generator.</param>
         public Visualization(string tag, string visGenIdent,
-                Dictionary<string, object> visGenParams) {
+                ReadOnlyDictionary<string, object> visGenParams) {
             Tag = tag;
             VisGenIdent = visGenIdent;
             VisGenParams = visGenParams;

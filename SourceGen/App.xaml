@@ -22,15 +22,31 @@ limitations under the License.
         <ResourceDictionary>
             <FontFamily x:Key="GeneralMonoFont">Consolas</FontFamily>
 
+            <!-- gradient background for bitmap images -->
             <LinearGradientBrush x:Key="BitmapBackground" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#707070" Offset="0.0"/>
                 <GradientStop Color="#f0f0f0" Offset="1.0"/>
             </LinearGradientBrush>
 
+            <!-- checkerboard background for bitmap images -->
             <!-- https://stackoverflow.com/a/47049174/294248 -->
-            <DrawingBrush x:Key="CheckerBackground" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+            <DrawingBrush x:Key="CheckerBackgroundHG" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+                <!-- draw two squares, leaving the other two untouched (probably window bkgnd color) -->
                 <DrawingBrush.Drawing>
                     <GeometryDrawing Geometry="M0,0 H1 V1 H2 V2 H1 V1 H0Z" Brush="LightGray"/>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+            <DrawingBrush x:Key="CheckerBackground" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <!-- not sure if it's better to do this with overdraw (background
+                            then two squares) or by explicitly drawing four squares -->
+                            <GeometryDrawing Geometry="M0,0 H2 V2 H0Z" Brush="#e8e8e8"/>
+                            <GeometryDrawing Geometry="M0,0 H1 V1 H2 V2 H1 V1 H0Z" Brush="#f0f0f0"/>
+                            <!--<GeometryDrawing Geometry="M0,2 H1 V1 H2 V0 H1 V1 H0Z" Brush="#e8e8e8"/>-->
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
                 </DrawingBrush.Drawing>
             </DrawingBrush>
 

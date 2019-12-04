@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using CommonUtil;
 
 namespace PluginCommon {
@@ -107,7 +108,8 @@ namespace PluginCommon {
         /// <param name="defVal">Default value.</param>
         /// <returns>Value found, or the default if the key doesn't exist or the value has the
         ///   wrong type.</returns>
-        public static T GetFromObjDict<T>(Dictionary<string, object> dict, string key, T defVal) {
+        public static T GetFromObjDict<T>(ReadOnlyDictionary<string, object> dict, string key,
+                T defVal) {
             if (dict.TryGetValue(key, out object objVal)) {
                 if (objVal is T) {
                     return (T)objVal;

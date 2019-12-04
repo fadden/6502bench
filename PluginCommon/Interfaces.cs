@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace PluginCommon {
     /// <summary>
@@ -150,13 +151,18 @@ namespace PluginCommon {
         /// <param name="parms">Parameter set.</param>
         /// <returns>2D visualization object reference, or null if something went
         ///   wrong (unknown ident, bad parameters, etc).</returns>
-        IVisualization2d Generate2d(VisDescr descr, Dictionary<string, object> parms);
+        IVisualization2d Generate2d(VisDescr descr, ReadOnlyDictionary<string, object> parms);
     }
 
+    /// <summary>
+    /// Visualization generator descriptor.  IPlugin_Visualizer instances publish a list of
+    /// these to tell the application about the generators it supports.
+    /// </summary>
     [Serializable]
     public class VisDescr {
         /// <summary>
-        /// Unique identifier.  This is stored in the project file.
+        /// Unique identifier.  This is stored in the project file.  Names beginning with
+        /// underscores ('_') are reserved.
         /// </summary>
         public string Ident { get; private set; }
 
@@ -181,6 +187,9 @@ namespace PluginCommon {
         /// </summary>
         public VisParamDescr[] VisParamDescrs { get; private set; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public VisDescr(string ident, string uiName, VisType type, VisParamDescr[] descrs) {
             Ident = ident;
             UiName = uiName;
@@ -192,24 +201,59 @@ namespace PluginCommon {
     /// <summary>
     /// Visualization parameter descriptor.
     /// </summary>
+    /// <remarks>
+    /// We provide min/max for individual numeric fields, but there's no way to check other
+    /// fields to see if e.g. Stride >= Width.  We'd need a "verify" function and a way to
+    /// report errors that the GUI could use to point out what was wrong.
+    /// </remarks>
     [Serializable]
     public class VisParamDescr {
+        /// <summary>
+        /// Special feature enumeration.
+        /// </summary>
         public enum SpecialMode {
             None = 0, Offset
         }
 
+        /// <summary>
+        /// Label to show in the UI.
+        /// </summary>
         public string UiLabel { get; private set; }
+
+        /// <summary>
+        /// Name to use internally.  Do not use names that start with an underscore ('_'), as
+        /// these are reserved for future internal use.
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Parameter data type.
+        /// </summary>
         public Type CsType { get; private set; }
 
-        // Min/Max values for ints and floats.  Could also be length for strings.
-        // NOTE: ideally we'd provide a "verify" function that tested individual fields and
-        // could also see other fields, e.g. to confirm that Stride >= Width.
+        /// <summary>
+        /// Minimum allowable value for int/float (and perhaps string length).
+        /// </summary>
         public object Min { get; private set; }
+
+        /// <summary>
+        /// Maximum allowable value for int/float (and perhaps string length).
+        /// </summary>
         public object Max { get; private set; }
+
+        /// <summary>
+        /// Set to a value if the field requires special treatment.
+        /// </summary>
         public SpecialMode Special { get; private set; }
+
+        /// <summary>
+        /// Default value for this field.
+        /// </summary>
         public object DefaultValue { get; private set; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public VisParamDescr(string uiLabel, string name, Type csType, object min, object max,
                 SpecialMode special, object defVal) {
             UiLabel = uiLabel;

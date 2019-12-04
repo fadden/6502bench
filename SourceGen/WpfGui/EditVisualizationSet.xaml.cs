@@ -50,6 +50,11 @@ namespace SourceGen.WpfGui {
         }
         private bool mHasVisPlugins;
 
+        public Visibility ScriptWarningVisible {
+            get { return mHasVisPlugins ? Visibility.Collapsed : Visibility.Visible; }
+            // this can't change while the dialog is open, so don't need OnPropertyChanged
+        }
+
         public bool IsEditEnabled {
             get { return mIsEditEnabled; }
             set { mIsEditEnabled = value; OnPropertyChanged(); }
@@ -92,10 +97,13 @@ namespace SourceGen.WpfGui {
             mOffset = offset;
 
             if (curSet != null) {
-                // Populate the ItemsSource.
+                // Populate the data grid ItemsSource.
                 foreach (Visualization vis in curSet) {
                     VisualizationList.Add(vis);
                 }
+            }
+            if (VisualizationList.Count > 0) {
+                visualizationGrid.SelectedIndex = 0;
             }
 
             // Check to see if we have any relevant plugins.  If not, disable New/Edit.
@@ -163,6 +171,7 @@ namespace SourceGen.WpfGui {
                 return;
             }
             VisualizationList.Add(dlg.NewVis);
+            visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
@@ -185,11 +194,19 @@ namespace SourceGen.WpfGui {
             int index = VisualizationList.IndexOf(item);
             VisualizationList.Remove(item);
             VisualizationList.Insert(index, dlg.NewVis);
+            visualizationGrid.SelectedIndex = index;
         }
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e) {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
+            int index = VisualizationList.IndexOf(item);
             VisualizationList.Remove(item);
+            if (index == VisualizationList.Count) {
+                index--;
+            }
+            if (index >= 0) {
+                visualizationGrid.SelectedIndex = index;
+            }
         }
 
         private void UpButton_Click(object sender, RoutedEventArgs e) {

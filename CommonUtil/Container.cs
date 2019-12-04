@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace CommonUtil {
@@ -77,6 +78,22 @@ namespace CommonUtil {
             // Check to see if there are any elements in the first that are not in the second.
             return !dict1.Except(dict2).Any();
 #endif
+        }
+
+        public static bool CompareDicts<TKey, TValue>(
+                ReadOnlyDictionary<TKey, TValue> dict1, ReadOnlyDictionary<TKey, TValue> dict2) {
+            if (dict1 == dict2) {
+                return true;
+            }
+            if (dict1 == null || dict2 == null) {
+                return false;
+            }
+            if (dict1.Count != dict2.Count) {
+                return false;
+            }
+
+            // Check to see if there are any elements in the first that are not in the second.
+            return !dict1.Except(dict2).Any();
         }
     }
 }

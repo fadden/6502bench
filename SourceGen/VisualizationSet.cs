@@ -16,6 +16,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using PluginCommon;
@@ -147,7 +148,8 @@ namespace SourceGen {
 
                     IVisualization2d vis2d;
                     try {
-                        vis2d = vplug.Generate2d(visDescr, vis.VisGenParams);
+                        vis2d = vplug.Generate2d(visDescr,
+                            new ReadOnlyDictionary<string, object>(vis.VisGenParams));
                         if (vis2d == null) {
                             Debug.WriteLine("Vis generator returned null");
                         }

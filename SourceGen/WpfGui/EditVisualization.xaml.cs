@@ -254,7 +254,7 @@ namespace SourceGen.WpfGui {
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
-            Dictionary<string, object> valueDict = CreateVisGenParams();
+            ReadOnlyDictionary<string, object> valueDict = CreateVisGenParams();
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
             NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict);
@@ -263,7 +263,7 @@ namespace SourceGen.WpfGui {
             DialogResult = true;
         }
 
-        private Dictionary<string, object> CreateVisGenParams() {
+        private ReadOnlyDictionary<string, object> CreateVisGenParams() {
             // Generate value dictionary.
             Dictionary<string, object> valueDict =
                 new Dictionary<string, object>(ParameterList.Count);
@@ -285,7 +285,7 @@ namespace SourceGen.WpfGui {
                 }
             }
 
-            return valueDict;
+            return new ReadOnlyDictionary<string, object>(valueDict);
         }
 
         private bool ParseIntObj(object val, VisParamDescr.SpecialMode special, out int intVal) {

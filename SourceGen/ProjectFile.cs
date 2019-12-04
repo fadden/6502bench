@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -368,7 +369,7 @@ namespace SourceGen {
             public SerVisualization(Visualization vis) {
                 Tag = vis.Tag;
                 VisGenIdent = vis.VisGenIdent;
-                VisGenParams = vis.VisGenParams;    // Dictionary
+                VisGenParams = new Dictionary<string, object>(vis.VisGenParams);
             }
         }
         public class SerVisualizationSet {
@@ -1002,7 +1003,8 @@ namespace SourceGen {
                     parms.Add(kvp.Key, val);
                 }
 
-                Visualization vis = new Visualization(serVis.Tag, serVis.VisGenIdent, parms);
+                Visualization vis = new Visualization(serVis.Tag, serVis.VisGenIdent,
+                    new ReadOnlyDictionary<string, object>(parms));
                 outVisSet.Add(vis);
             }
             return true;
