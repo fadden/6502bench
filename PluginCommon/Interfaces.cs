@@ -140,7 +140,9 @@ namespace PluginCommon {
     public interface IPlugin_Visualizer {
         /// <summary>
         /// Retrieves a list of descriptors for visualization generators implemented by this
-        /// plugin.  The caller must not modify the contents.
+        /// plugin.  The items in the set may have values based on the file data.
+        ///
+        /// The caller must not modify the contents.
         /// </summary>
         VisDescr[] GetVisGenDescrs();
 
@@ -150,7 +152,8 @@ namespace PluginCommon {
         /// <param name="descr">VisGen identifier.</param>
         /// <param name="parms">Parameter set.</param>
         /// <returns>2D visualization object reference, or null if something went
-        ///   wrong (unknown ident, bad parameters, etc).</returns>
+        ///   wrong (unknown ident, bad parameters, etc).  By convention, an error
+        ///   message is reported through the IApplication ReportError interface.</returns>
         IVisualization2d Generate2d(VisDescr descr, ReadOnlyDictionary<string, object> parms);
     }
 
@@ -306,6 +309,12 @@ namespace PluginCommon {
     /// is passed to the plugin as an argument to Prepare().
     /// </summary>
     public interface IApplication {
+        /// <summary>
+        /// Reports an error message to the application.  Used by visualizers.
+        /// </summary>
+        /// <param name="msg"></param>
+        void ReportError(string msg);
+
         /// <summary>
         /// Sends a debug message to the application.  This can be useful when debugging scripts.
         /// (For example, DEBUG > Show Analyzer Output shows output generated while performing

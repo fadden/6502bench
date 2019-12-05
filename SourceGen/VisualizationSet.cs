@@ -91,6 +91,10 @@ namespace SourceGen {
         private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
             public ScriptSupport() { }
 
+            public void ReportError(string msg) {
+                DebugLog(msg);
+            }
+
             public void DebugLog(string msg) {
                 Debug.WriteLine("Vis plugin: " + msg);
             }
@@ -130,20 +134,20 @@ namespace SourceGen {
                     }
                     Debug.WriteLine("Vis needs refresh: " + vis.Tag);
 
+                    if (iapp == null) {
+                        // Prep the plugins on first need.
+                        iapp = new ScriptSupport();
+                        project.PrepareScripts(iapp);
+                    }
+
                     if (plugins == null) {
                         plugins = project.GetActivePlugins();
                     }
                     IPlugin_Visualizer vplug = FindPluginByVisGenIdent(plugins,
                         vis.VisGenIdent, out VisDescr visDescr);
                     if (vplug == null) {
-                        Debug.WriteLine("Unable to referesh " + vis.Tag + ": plugin not found");
+                        Debug.WriteLine("Unable to refresh " + vis.Tag + ": plugin not found");
                         continue;
-                    }
-
-                    if (iapp == null) {
-                        // Prep the plugins on first need.
-                        iapp = new ScriptSupport();
-                        project.PrepareScripts(iapp);
                     }
 
                     IVisualization2d vis2d;

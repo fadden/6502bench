@@ -107,6 +107,11 @@ namespace RuntimeData.Apple {
 
         // IPlugin_Visualizer
         public VisDescr[] GetVisGenDescrs() {
+            // We're using a static set, but it could be generated based on file contents.
+            // Confirm that we're prepared.
+            if (mFileData == null) {
+                return null;
+            }
             return mDescriptors;
         }
 
@@ -121,7 +126,7 @@ namespace RuntimeData.Apple {
                 case VIS_GEN_HR_SCREEN:
                     return GenerateScreen(parms);
                 default:
-                    mAppRef.DebugLog("Unknown ident " + descr.Ident);
+                    mAppRef.ReportError("Unknown ident " + descr.Ident);
                     return null;
             }
         }
@@ -147,21 +152,21 @@ namespace RuntimeData.Apple {
                     byteWidth <= 0 || byteWidth > MAX_DIM ||
                     height <= 0 || height > MAX_DIM) {
                 // the UI should flag these based on range (and ideally wouldn't have called us)
-                mAppRef.DebugLog("Invalid parameter");
+                mAppRef.ReportError("Invalid parameter");
                 return null;
             }
             if (colStride <= 0 || colStride > MAX_DIM) {
-                mAppRef.DebugLog("Invalid column stride");
+                mAppRef.ReportError("Invalid column stride");
                 return null;
             }
             if (rowStride < byteWidth * colStride - (colStride - 1) || rowStride > MAX_DIM) {
-                mAppRef.DebugLog("Invalid row stride");
+                mAppRef.ReportError("Invalid row stride");
                 return null;
             }
 
             int lastOffset = offset + rowStride * height - (colStride - 1) - 1;
             if (lastOffset >= mFileData.Length) {
-                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
                 return null;
             }
@@ -185,13 +190,13 @@ namespace RuntimeData.Apple {
                     itemByteWidth <= 0 || itemByteWidth > MAX_DIM ||
                     itemHeight <= 0 || itemHeight > MAX_DIM) {
                 // should be caught by editor
-                mAppRef.DebugLog("Invalid parameter");
+                mAppRef.ReportError("Invalid parameter");
                 return null;
             }
 
             int lastOffset = offset + itemByteWidth * itemHeight - 1;
             if (lastOffset >= mFileData.Length) {
-                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
                 return null;
             }
@@ -248,13 +253,13 @@ namespace RuntimeData.Apple {
 
             if (offset < 0 || offset >= mFileData.Length) {
                 // should be caught by editor
-                mAppRef.DebugLog("Invalid parameter");
+                mAppRef.ReportError("Invalid parameter");
                 return null;
             }
 
             int lastOffset = offset + RAW_IMAGE_SIZE - 1;
             if (lastOffset >= mFileData.Length) {
-                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
                 return null;
             }
@@ -523,7 +528,7 @@ namespace RuntimeData.Apple {
                     break;
                 default:
                     // just leave the bitmap empty
-                    mAppRef.DebugLog("Unknown ColorMode " + colorMode);
+                    mAppRef.ReportError("Unknown ColorMode " + colorMode);
                     break;
             }
         }

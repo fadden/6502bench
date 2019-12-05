@@ -125,9 +125,13 @@ namespace SourceGen.WpfGui {
                 mOuter = outer;
             }
 
+            public void ReportError(string msg) {
+                mOuter.LastPluginMessage = msg;
+                DebugLog(msg);
+            }
+
             public void DebugLog(string msg) {
                 Debug.WriteLine("Vis plugin: " + msg);
-                mOuter.LastPluginMessage = msg;
             }
 
             public bool SetOperandFormat(int offset, DataSubType subType, string label) {
@@ -165,6 +169,7 @@ namespace SourceGen.WpfGui {
             mOrigVis = vis;
 
             mScriptSupport = new ScriptSupport(this);
+            mProject.PrepareScripts(mScriptSupport);
 
             if (vis != null) {
                 TagString = vis.Tag;
@@ -191,7 +196,6 @@ namespace SourceGen.WpfGui {
 
             // Set the selection.  This should cause the sel change event to fire.
             visComboBox.SelectedIndex = visSelection;
-            mProject.PrepareScripts(mScriptSupport);
         }
 
         /// <summary>

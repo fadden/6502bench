@@ -76,6 +76,10 @@ namespace SourceGen {
                 mOuter = null;
             }
 
+            public void ReportError(string msg) {
+                DebugLog(msg);
+            }
+
             public void DebugLog(string msg) {
                 mOuter.mDebugLog.LogI("PLUGIN: " + msg);
             }

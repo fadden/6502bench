@@ -20,7 +20,7 @@ using System.Text;
 
 namespace PluginCommon {
     /// <summary>
-    /// Bitmap with 8-bit palette indices, for use with plugin visualizers.
+    /// Bitmap with 8-bit palette indices, for use with visualization generators.
     /// </summary>
     [Serializable]
     public class VisBitmap8 : IVisualization2d {
