@@ -42,7 +42,7 @@ namespace RuntimeData.Apple {
         private const string P_ROW_STRIDE = "rowStride";
         private const string P_IS_COLOR = "isColor";
         private const string P_IS_FIRST_ODD = "isFirstOdd";
-
+        private const string P_COLOR_CONV_MODE = "colorConvMode";
         private const string P_ITEM_BYTE_WIDTH = "itemByteWidth";
         private const string P_ITEM_HEIGHT = "itemHeight";
         private const string P_COUNT = "count";
@@ -67,6 +67,9 @@ namespace RuntimeData.Apple {
                         P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                     new VisParamDescr("First col odd",
                         P_IS_FIRST_ODD, typeof(bool), 0, 0, 0, false),
+                    //new VisParamDescr("Color conv mode",
+                    //    P_COLOR_CONV_MODE, typeof(int), (int)ColorMode.SimpleColor,
+                    //    (int)ColorMode.IIgsRGB, 0, (int)ColorMode.SimpleColor),
                     //new VisParamDescr("Test Float",
                     //    "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
                 }),
@@ -139,6 +142,8 @@ namespace RuntimeData.Apple {
             int rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
             bool isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
             bool isFirstOdd = Util.GetFromObjDict(parms, P_IS_FIRST_ODD, false);
+            int colorConvMode = !isColor ? (int)ColorMode.Mono :
+                Util.GetFromObjDict(parms, P_COLOR_CONV_MODE, (int)ColorMode.SimpleColor);
 
             // We allow the stride entries to be zero to indicate a "dense" bitmap.
             if (colStride == 0) {
@@ -175,8 +180,7 @@ namespace RuntimeData.Apple {
             SetHiResPalette(vb);
 
             RenderBitmap(mFileData, offset, byteWidth, height, colStride, rowStride,
-                isColor ? ColorMode.SimpleColor : ColorMode.Mono, isFirstOdd,
-                vb, 0, 0);
+                (ColorMode)colorConvMode, isFirstOdd, vb, 0, 0);
             return vb;
         }
 
@@ -287,7 +291,7 @@ namespace RuntimeData.Apple {
         }
 
 
-        private enum ColorMode { Mono, ClunkyColor, SimpleColor, IIgsRGB };
+        private enum ColorMode { Mono, SimpleColor, IIgsRGB };
 
         private void RenderBitmap(byte[] data, int offset, int byteWidth, int height,
                 int colStride, int rowStride, ColorMode colorMode, bool isFirstOdd,
@@ -312,62 +316,6 @@ namespace RuntimeData.Apple {
                                     bx++;
                                 }
                                 colIdx += colStride;
-                            }
-                            bx = xstart;
-                            by++;
-                            offset += rowStride;
-                        }
-                    }
-                    break;
-                case ColorMode.ClunkyColor: {
-                        // We treat the data as a strictly 140-mode bitmap, which doesn't match
-                        // up well with how the pixels will be displayed, but does allow a
-                        // straightforward conversion between file formats.  Color fringing is
-                        // severe.
-                        for (int row = 0; row < height; row++) {
-                            int lastBit;
-                            if (isFirstOdd) {
-                                lastBit = 0;        // pretend we already have one bit
-                            } else {
-                                lastBit = -1;
-                            }
-
-                            for (int colByte = 0; colByte < byteWidth; colByte += colStride) {
-                                byte val = data[offset + colByte];
-                                bool hiBitSet = (val & 0x80) != 0;
-
-                                // Grab 3 or 4 pairs of bits.
-                                int pairCount = (lastBit < 0) ? 3 : 4;
-                                while (pairCount-- > 0) {
-                                    int twoBits;
-                                    if (lastBit >= 0) {
-                                        // merge with bit from previous byte
-                                        twoBits = (lastBit << 1) | (val & 0x01);
-                                        val >>= 1;
-                                        lastBit = -1;
-                                    } else {
-                                        // grab two bits
-                                        twoBits = (val & 0x03);
-                                        val >>= 2;
-                                    }
-
-                                    if (hiBitSet) {
-                                        twoBits += 4;
-                                    }
-
-                                    // We're in 140 mode, so set two adjacent pixels.
-                                    vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
-                                    vb.SetPixelIndex(bx++, by, sHiResColorMap[twoBits]);
-                                }
-
-                                bool thisEven = ((colByte & 0x01) == 0) ^ isFirstOdd;
-                                if (thisEven) {
-                                    // started in even column we have one bit left over
-                                    lastBit = val & 0x01;
-                                } else {
-                                    // started in odd column, all bits consumed
-                                    lastBit = -1;
-                                }
                             }
                             bx = xstart;
                             by++;

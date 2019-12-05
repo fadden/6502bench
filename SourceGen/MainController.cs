@@ -3319,7 +3319,7 @@ namespace SourceGen {
 
                     expectedAddr = attr.Address;
                     groupNum++;
-                } else  if (mProject.UserLabels.ContainsKey(offset)) {
+                } else if (mProject.UserLabels.ContainsKey(offset)) {
                     //if (mProject.GetAnattrib(offset).Symbol != null) {
                     // We consider auto labels when splitting regions for the data analysis,
                     // but I don't think we want to take them into account here.  The specific
@@ -3331,6 +3331,9 @@ namespace SourceGen {
                     groupNum++;
                 } else if (mProject.HasCommentOrNote(offset)) {
                     // Don't carry across a long comment or note.
+                    groupNum++;
+                } else if (mProject.VisualizationSets.ContainsKey(offset)) {
+                    // Don't carry across a visualization.
                     groupNum++;
                 }
 

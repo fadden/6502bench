@@ -17,6 +17,7 @@ count   equ     $05
         bit     bitmap3
         bit     bitmap4
         bit     bitmap5
+        bit     bitmap6
 
         jsr     HGR         ;clear screen, set hi-res mode
         lda     #<bitmap1
@@ -69,6 +70,16 @@ count   equ     $05
         sta     width
         jsr     draw
 
+        lda     #<bitmap6
+        sta     src_ptr
+        lda     #>bitmap6
+        sta     src_ptr+1
+        lda     #$12
+        sta     xoff
+        lda     #$03        ;3x8
+        sta     width
+        jsr     odd_draw
+
         rts
 
 ; Copies an Nx8 bitmap to the hi-res screen.
@@ -81,20 +92,43 @@ draw
 :loop   ldx     line
         lda     addrs,x
         beq     :done
-        sta     _copy+2
+        sta     :_copy+2
         lda     xoff
-        sta     _copy+1
+        sta     :_copy+1
 
         ldx     #$00
 :loop1  lda     (src_ptr),y
-_copy   sta     $2000,x
+:_copy  sta     $2000,x
         iny
         inx
         cpx     width
         bne     :loop1
         inc     line
-        bne     :loop       ;always (more or less)
+        bne     :loop       ;(always... more or less)
+:done   rts
 
+odd_draw
+        ldy     #$00
+        sty     line
+:loop   ldx     line
+        lda     addrs,x
+        beq     :done
+        sta     :_ocopy+2
+        lda     xoff
+        sta     :_ocopy+1
+
+        ldx     #$00
+:loop1  lda     (src_ptr),y
+:_ocopy sta     $2000,x
+        iny                 ;incr source index twice (colStride)
+        iny
+        inx
+        cpx     width
+        bne     :loop1
+        iny                 ;advance twice more (rowStride)
+        iny
+        inc     line
+        bne     :loop       ;(always)
 :done   rts
 
 ; hi byte of base addresses on hi-res screen; must be 8 of them
@@ -153,14 +187,24 @@ bitmap4
         dfb     $aa,$aa
         dfb     $d5,$55
 
-; 3x8 (do in B&W)
+; 3x8
 bitmap5
         dfb     $7f,$7f,$7f
         dfb     $03,$08,$60
         dfb     $03,$1c,$60
-        dfb     $03,$3e,$60
-        dfb     $03,$7f,$60
+        dfb     $06,$3e,$30
+        dfb     $06,$7f,$30
         dfb     $43,$77,$61
         dfb     $63,$63,$63
         dfb     $7f,$7f,$7f
 
+; 3x8, colStride=2 rowStride=8
+bitmap6
+        dfb     $55,7,$08,7,$55,7,1,1
+        dfb     $15,7,$1c,7,$54,7,1,1
+        dfb     $05,7,$2a,7,$50,7,1,1
+        dfb     $01,7,$14,7,$40,7,1,1
+        dfb     $81,7,$94,7,$c0,7,1,1
+        dfb     $85,7,$aa,7,$d0,7,1,1
+        dfb     $95,7,$9c,7,$d4,7,1,1
+        dfb     $d5,7,$88,7,$d5,7,1,1
