@@ -33,6 +33,7 @@ namespace RuntimeData.Apple {
         // Visualization identifiers; DO NOT change or projects that use them will break.
         private const string VIS_GEN_BITMAP = "apple2-hi-res-bitmap";
         private const string VIS_GEN_BITMAP_FONT = "apple2-hi-res-bitmap-font";
+        private const string VIS_GEN_HR_SCREEN = "apple2-hi-res-screen";
 
         private const string P_OFFSET = "offset";
         private const string P_BYTE_WIDTH = "byteWidth";
@@ -78,7 +79,14 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("Item height",
                         P_ITEM_HEIGHT, typeof(int), 1, 192, 0, 8),
                     new VisParamDescr("Number of items",
-                        P_COUNT, typeof(int), 1, 256, 0, 1),
+                        P_COUNT, typeof(int), 1, 256, 0, 96),
+                }),
+            new VisDescr(VIS_GEN_HR_SCREEN, "Apple II Hi-Res Screen Image", VisDescr.VisType.Bitmap,
+                new VisParamDescr[] {
+                    new VisParamDescr("File offset (hex)",
+                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
+                    new VisParamDescr("Color",
+                        P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                 }),
         };
 
@@ -109,8 +117,9 @@ namespace RuntimeData.Apple {
                 case VIS_GEN_BITMAP:
                     return GenerateBitmap(parms);
                 case VIS_GEN_BITMAP_FONT:
-                    // TODO (xyzzy)
-                    return null;
+                    return GenerateBitmapFont(parms);
+                case VIS_GEN_HR_SCREEN:
+                    return GenerateScreen(parms);
                 default:
                     mAppRef.DebugLog("Unknown ident " + descr.Ident);
                     return null;
@@ -118,16 +127,13 @@ namespace RuntimeData.Apple {
         }
 
         private IVisualization2d GenerateBitmap(ReadOnlyDictionary<string, object> parms) {
-            int offset, byteWidth, height, colStride, rowStride;
-            bool isColor, isFirstOdd;
-
-            offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
-            byteWidth = Util.GetFromObjDict(parms, P_BYTE_WIDTH, 1); // width ignoring colStride
-            height = Util.GetFromObjDict(parms, P_HEIGHT, 1);
-            colStride = Util.GetFromObjDict(parms, P_COL_STRIDE, 0);
-            rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
-            isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
-            isFirstOdd = Util.GetFromObjDict(parms, P_IS_FIRST_ODD, false);
+            int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
+            int byteWidth = Util.GetFromObjDict(parms, P_BYTE_WIDTH, 1); // width ignoring colStride
+            int height = Util.GetFromObjDict(parms, P_HEIGHT, 1);
+            int colStride = Util.GetFromObjDict(parms, P_COL_STRIDE, 0);
+            int rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
+            bool isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
+            bool isFirstOdd = Util.GetFromObjDict(parms, P_IS_FIRST_ODD, false);
 
             // We allow the stride entries to be zero to indicate a "dense" bitmap.
             if (colStride == 0) {
@@ -160,21 +166,129 @@ namespace RuntimeData.Apple {
                 return null;
             }
 
-
             VisBitmap8 vb = new VisBitmap8(byteWidth * 7, height);
             SetHiResPalette(vb);
 
-            RenderBitmap(offset, byteWidth, height, colStride, rowStride,
-                isColor ? ColorMode.SimpleColor : ColorMode.Mono, isFirstOdd, vb);
+            RenderBitmap(mFileData, offset, byteWidth, height, colStride, rowStride,
+                isColor ? ColorMode.SimpleColor : ColorMode.Mono, isFirstOdd,
+                vb, 0, 0);
             return vb;
         }
 
+        private IVisualization2d GenerateBitmapFont(ReadOnlyDictionary<string, object> parms) {
+            int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
+            int itemByteWidth = Util.GetFromObjDict(parms, P_ITEM_BYTE_WIDTH, 1);
+            int itemHeight = Util.GetFromObjDict(parms, P_ITEM_HEIGHT, 8);
+            int count = Util.GetFromObjDict(parms, P_COUNT, 96);
+
+            if (offset < 0 || offset >= mFileData.Length ||
+                    itemByteWidth <= 0 || itemByteWidth > MAX_DIM ||
+                    itemHeight <= 0 || itemHeight > MAX_DIM) {
+                // should be caught by editor
+                mAppRef.DebugLog("Invalid parameter");
+                return null;
+            }
+
+            int lastOffset = offset + itemByteWidth * itemHeight - 1;
+            if (lastOffset >= mFileData.Length) {
+                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                    lastOffset.ToString("x6") + ")");
+                return null;
+            }
+
+            // Set the number of horizontal cells to 16 or 32 based on the number of elements.
+            int hcells;
+            if (count > 128) {
+                hcells = 32;
+            } else {
+                hcells = 16;
+            }
+
+            int vcells = (count + hcells - 1) / hcells;
+
+            // Create a bitmap with room for each cell, plus a 1-pixel transparent boundary
+            // between them and around the edges.
+            VisBitmap8 vb = new VisBitmap8(1 + hcells * itemByteWidth * 7 + hcells,
+                                           1 + vcells * itemHeight + vcells);
+            SetHiResPalette(vb);
+
+            int cellx = 1;
+            int celly = 1;
+
+            for (int idx = 0; idx < count; idx++) {
+
+                //byte color = (byte)(1 + idx % 6);
+                //for (int y = 0; y < itemHeight; y++) {
+                //    for (int x = 0; x < itemByteWidth * 7; x++) {
+                //        vb.SetPixelIndex(cellx + x, celly + y, color);
+                //    }
+                //}
+                RenderBitmap(mFileData, offset + idx * itemByteWidth * itemHeight,
+                    itemByteWidth, itemHeight, 1, itemByteWidth,
+                    ColorMode.Mono, false,
+                    vb, cellx, celly);
+
+                cellx += itemByteWidth * 7 + 1;
+                if (cellx == vb.Width) {
+                    cellx = 1;
+                    celly += itemHeight + 1;
+                }
+            }
+            return vb;
+        }
+
+        private IVisualization2d GenerateScreen(ReadOnlyDictionary<string, object> parms) {
+            const int RAW_IMAGE_SIZE = 0x1ff8;
+            const int HR_WIDTH = 280;
+            const int HR_BYTE_WIDTH = HR_WIDTH / 7;
+            const int HR_HEIGHT = 192;
+
+            int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
+            bool isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
+
+            if (offset < 0 || offset >= mFileData.Length) {
+                // should be caught by editor
+                mAppRef.DebugLog("Invalid parameter");
+                return null;
+            }
+
+            int lastOffset = offset + RAW_IMAGE_SIZE - 1;
+            if (lastOffset >= mFileData.Length) {
+                mAppRef.DebugLog("Bitmap runs off end of file (last offset +" +
+                    lastOffset.ToString("x6") + ")");
+                return null;
+            }
+
+            // Linearize the data.
+            byte[] buf = new byte[HR_BYTE_WIDTH * HR_HEIGHT];
+            int outIdx = 0;
+            for (int row = 0; row < HR_HEIGHT; row++) {
+                // If row is ABCDEFGH, we want pppFGHCD EABAB000 (where p is zero for us).
+                int low = ((row & 0xc0) >> 1) | ((row & 0xc0) >> 3) | ((row & 0x08) << 4);
+                int high = ((row & 0x07) << 2) | ((row & 0x30) >> 4);
+                int addr = (high << 8) | low;
+
+                for (int col = 0; col < HR_BYTE_WIDTH; col++) {
+                    buf[outIdx++] = mFileData[offset + addr + col];
+                }
+            }
+
+            VisBitmap8 vb = new VisBitmap8(HR_WIDTH, HR_HEIGHT);
+            SetHiResPalette(vb);
+            RenderBitmap(buf, 0, HR_BYTE_WIDTH, HR_HEIGHT, 1, HR_BYTE_WIDTH,
+                isColor ? ColorMode.SimpleColor : ColorMode.Mono, false,
+                vb, 0, 0);
+            return vb;
+        }
+
+
         private enum ColorMode { Mono, ClunkyColor, SimpleColor, IIgsRGB };
 
-        private void RenderBitmap(int offset, int byteWidth, int height, int colStride,
-                int rowStride, ColorMode colorMode, bool isFirstOdd, VisBitmap8 vb) {
-            int bx = 0;
-            int by = 0;
+        private void RenderBitmap(byte[] data, int offset, int byteWidth, int height,
+                int colStride, int rowStride, ColorMode colorMode, bool isFirstOdd,
+                VisBitmap8 vb, int xstart, int ystart) {
+            int bx = xstart;
+            int by = ystart;
             switch (colorMode) {
                 case ColorMode.Mono: {
                         // Since we're not displaying this we don't need to worry about
@@ -182,7 +296,7 @@ namespace RuntimeData.Apple {
                         for (int row = 0; row < height; row++) {
                             int colIdx = 0;
                             for (int col = 0; col < byteWidth; col++) {
-                                byte val = mFileData[offset + colIdx];
+                                byte val = data[offset + colIdx];
                                 for (int bit = 0; bit < 7; bit++) {
                                     if ((val & 0x01) == 0) {
                                         vb.SetPixelIndex(bx, by, (int)HiResColors.Black0);
@@ -194,7 +308,7 @@ namespace RuntimeData.Apple {
                                 }
                                 colIdx += colStride;
                             }
-                            bx = 0;
+                            bx = xstart;
                             by++;
                             offset += rowStride;
                         }
@@ -214,7 +328,7 @@ namespace RuntimeData.Apple {
                             }
 
                             for (int colByte = 0; colByte < byteWidth; colByte += colStride) {
-                                byte val = mFileData[offset + colByte];
+                                byte val = data[offset + colByte];
                                 bool hiBitSet = (val & 0x80) != 0;
 
                                 // Grab 3 or 4 pairs of bits.
@@ -250,7 +364,7 @@ namespace RuntimeData.Apple {
                                     lastBit = -1;
                                 }
                             }
-                            bx = 0;
+                            bx = xstart;
                             by++;
                             offset += rowStride;
                         }
@@ -272,7 +386,7 @@ namespace RuntimeData.Apple {
                             int idx = OVER;     // start past "fake" bits
                             int colIdx = 0;
                             for (int col = 0; col < byteWidth; col++) {
-                                byte val = mFileData[offset + colIdx];
+                                byte val = data[offset + colIdx];
                                 bool hiBitSet = (val & 0x80) != 0;
 
                                 for (int bit = 0; bit < 7; bit++) {
@@ -318,7 +432,7 @@ namespace RuntimeData.Apple {
                             }
 
                             // move to next row
-                            bx = 0;
+                            bx = xstart;
                             by++;
                             offset += rowStride;
                         }
@@ -348,7 +462,7 @@ namespace RuntimeData.Apple {
                             int idx = 0;
                             int colIdx = 0;
                             for (int col = 0; col < byteWidth; col++) {
-                                byte val = mFileData[offset + colIdx];
+                                byte val = data[offset + colIdx];
                                 bool hiBitSet = (val & 0x80) != 0;
 
                                 for (int bit = 0; bit < 7; bit++) {
@@ -401,7 +515,7 @@ namespace RuntimeData.Apple {
                             }
 
                             // move to next row
-                            bx = 0;
+                            bx = xstart;
                             by++;
                             offset += rowStride;
                         }

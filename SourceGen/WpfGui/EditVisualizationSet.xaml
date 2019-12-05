@@ -47,7 +47,7 @@ limitations under the License.
                    Visibility="{Binding ScriptWarningVisible}"
                    Text="NOTE: no extension scripts with visualization generators are loaded"/>
 
-        <DataGrid Name="visualizationGrid" Grid.Column="0" Grid.Row="1" Margin="4,4,4,0"
+        <DataGrid Name="visualizationGrid" Grid.Column="0" Grid.Row="1" Margin="0,4,4,0"
                   ItemsSource="{Binding VisualizationList}"
                   IsReadOnly="True"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -81,8 +81,8 @@ limitations under the License.
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Tag" Width="170" Binding="{Binding Tag}"/>
-                <DataGridTextColumn Header="Visualization Generator" Width="212" Binding="{Binding VisGenIdent}"/>
+                <DataGridTextColumn Header="Tag" Width="176" Binding="{Binding Tag}"/>
+                <DataGridTextColumn Header="Visualization Generator" Width="210" Binding="{Binding VisGenIdent}"/>
             </DataGrid.Columns>
         </DataGrid>
         

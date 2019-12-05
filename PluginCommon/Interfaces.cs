@@ -271,16 +271,34 @@ namespace PluginCommon {
     /// without scaling or filtering.
     /// </summary>
     public interface IVisualization2d {
+        /// <summary>
+        /// Bitmap width, in pixels.
+        /// </summary>
         int Width { get; }
+
+        /// <summary>
+        /// Bitmap height, in pixels.
+        /// </summary>
         int Height { get; }
 
-        void SetPixelIndex(int x, int y, byte colorIndex);
-        int GetPixel(int x, int y);     // returns ARGB value
+        //void SetPixelIndex(int x, int y, byte colorIndex);
+        //int GetPixel(int x, int y);     // returns ARGB value
 
-        byte[] GetPixels();             // densely-packed index or ARGB values
-        int[] GetPalette();             // 32-bit ARGB values; null for direct-color image
+        /// <summary>
+        /// Returns a densely-packed array of color indices or ARGB values.
+        /// Do not modify.
+        /// </summary>
+        byte[] GetPixels();
 
-        // TODO(maybe): pixel aspect ratio
+        /// <summary>
+        /// Returns the color palette as a series of 32-bit ARGB values.  Will be null for
+        /// direct-color images.
+        /// Do not modify.
+        /// </summary>
+        /// <returns></returns>
+        int[] GetPalette();
+
+        // TODO(maybe): report pixel aspect ratio?
     }
 
     /// <summary>

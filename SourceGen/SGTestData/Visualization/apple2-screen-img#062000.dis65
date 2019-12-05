@@ -1,0 +1,29 @@
+﻿### 6502bench SourceGen dis65 v1.0 ###
+{
+"_ContentVersion":3,"FileDataLength":8184,"FileDataCrc32":-760689174,"ProjectProps":{
+"CpuName":"65C02","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
+"PlatformSymbolFileIdentifiers":["RT:Apple/F8-ROM.sym65","RT:Apple/Cxxx-IO.sym65","RT:Apple/ProDOS8.sym65"],"ExtensionScriptFileIdentifiers":["RT:Apple/ProDOS8.cs","RT:Apple/VisHiRes.cs"],"ProjectSyms":{
+}},
+"AddressMap":[{
+"Offset":0,"Addr":8192}],"TypeHints":[],"StatusFlagOverrides":{
+},
+"Comments":{
+},
+"LongComments":{
+"-2147483647":{
+"Text":"6502bench SourceGen v1.5.0-dev1","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+"Notes":{
+},
+"UserLabels":{
+},
+"OperandFormats":{
+"0":{
+"Length":8184,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
+"LvTables":{
+},
+"VisualizationSets":{
+"0":{
+"Items":[{
+"Tag":"full screen image","VisGenIdent":"apple2-hi-res-screen","VisGenParams":{
+"offset":0,"isColor":true}}]}}}

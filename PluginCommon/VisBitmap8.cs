@@ -26,13 +26,22 @@ namespace PluginCommon {
     public class VisBitmap8 : IVisualization2d {
         public const int MAX_DIMENSION = 4096;
 
+        // IVisualization2d
         public int Width { get; private set; }
+
+        // IVisualization2d
         public int Height { get; private set; }
 
         private byte[] mData;
         private int[] mPalette;
         private int mNextColor;
 
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="width">Bitmap width, in pixels.</param>
+        /// <param name="height">Bitmap height, in pixels.</param>
         public VisBitmap8(int width, int height) {
             Debug.Assert(width > 0 && width <= MAX_DIMENSION);
             Debug.Assert(height > 0 && height <= MAX_DIMENSION);
@@ -45,7 +54,6 @@ namespace PluginCommon {
             mNextColor = 0;
         }
 
-        // IVisualization2d
         public int GetPixel(int x, int y) {
             byte pix = mData[x + y * Width];
             return mPalette[pix];
@@ -77,6 +85,12 @@ namespace PluginCommon {
             return pal;
         }
 
+
+        /// <summary>
+        /// Adds a new color to the palette.  If the color already exists, the call has no
+        /// effect.
+        /// </summary>
+        /// <param name="color">32-bit ARGB color value.</param>
         public void AddColor(int color) {
             if (mNextColor == 256) {
                 Debug.WriteLine("Palette is full");
@@ -92,6 +106,14 @@ namespace PluginCommon {
             mPalette[mNextColor++] = color;
         }
 
+        /// <summary>
+        /// Adds a new color to the palette.  If the color already exists, the call has no
+        /// effect.
+        /// </summary>
+        /// <param name="a">Alpha value.</param>
+        /// <param name="r">Red value.</param>
+        /// <param name="g">Green value.</param>
+        /// <param name="b">Blue value.</param>
         public void AddColor(byte a, byte r, byte g, byte b) {
             AddColor(Util.MakeARGB(a, r, g, b));
         }
