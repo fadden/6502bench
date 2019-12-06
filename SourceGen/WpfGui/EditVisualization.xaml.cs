@@ -42,6 +42,11 @@ namespace SourceGen.WpfGui {
         private Visualization mOrigVis;
         private string mOrigTag;
 
+        /// <summary>
+        /// Identifier for last visualizer we used, for the benefit of "new".
+        /// </summary>
+        private static string sLastVisIdent = string.Empty;
+
         private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
         private Brush mErrorLabelColor = Brushes.Red;
 
@@ -168,7 +173,7 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mSetOffset = setOffset;
             mOrigVis = vis;
-            mOrigTag = vis.Tag;
+            mOrigTag = (vis == null) ? string.Empty : vis.Tag;
 
             mScriptSupport = new ScriptSupport(this);
             mProject.PrepareScripts(mScriptSupport);
@@ -180,7 +185,7 @@ namespace SourceGen.WpfGui {
                 TagString = "vis" + mSetOffset.ToString("x6");
             }
 
-            int visSelection = 0;
+            int visSelection = -1;
             VisualizationList = new List<VisualizationItem>();
             List<IPlugin> plugins = proj.GetActivePlugins();
             foreach (IPlugin chkPlug in plugins) {
@@ -190,6 +195,10 @@ namespace SourceGen.WpfGui {
                 IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
                 foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
                     if (vis != null && vis.VisGenIdent == descr.Ident) {
+                        // found matching descriptor, set selection to this
+                        visSelection = VisualizationList.Count;
+                    } else if (visSelection < 0 && descr.Ident == sLastVisIdent) {
+                        // we used this one last time, use it if nothing better comes along
                         visSelection = VisualizationList.Count;
                     }
                     VisualizationList.Add(new VisualizationItem(vplug, descr));
@@ -197,6 +206,9 @@ namespace SourceGen.WpfGui {
             }
 
             // Set the selection.  This should cause the sel change event to fire.
+            if (visSelection < 0) {
+                visSelection = 0;
+            }
             visComboBox.SelectedIndex = visSelection;
         }
 
@@ -253,7 +265,7 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void Window_ContentRendered(object sender, EventArgs e) {
             // https://stackoverflow.com/a/31407415/294248
             // After the window's size has been established to minimally wrap the elements,
             // we set the minimum width to the current width, and un-freeze the preview image
@@ -283,6 +295,8 @@ namespace SourceGen.WpfGui {
             Debug.Assert(isTagValid);
             NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict);
             NewVis.CachedImage = (BitmapSource)previewImage.Source;
+
+            sLastVisIdent = NewVis.VisGenIdent;
 
             DialogResult = true;
         }

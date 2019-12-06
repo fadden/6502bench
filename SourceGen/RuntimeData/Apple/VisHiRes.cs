@@ -247,7 +247,7 @@ namespace RuntimeData.Apple {
         }
 
         private IVisualization2d GenerateScreen(ReadOnlyDictionary<string, object> parms) {
-            const int RAW_IMAGE_SIZE = 0x1ff8;
+            //const int RAW_IMAGE_SIZE = 0x1ff8;
             const int HR_WIDTH = 280;
             const int HR_BYTE_WIDTH = HR_WIDTH / 7;
             const int HR_HEIGHT = 192;
@@ -261,24 +261,34 @@ namespace RuntimeData.Apple {
                 return null;
             }
 
-            int lastOffset = offset + RAW_IMAGE_SIZE - 1;
-            if (lastOffset >= mFileData.Length) {
-                mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
-                    lastOffset.ToString("x6") + ")");
-                return null;
-            }
+            //int lastOffset = offset + RAW_IMAGE_SIZE - 1;
+            //if (lastOffset >= mFileData.Length) {
+            //    mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
+            //        lastOffset.ToString("x6") + ")");
+            //    return null;
+            //}
 
-            // Linearize the data.
+            // Linearize the data.  To handle programs that move themselves around before
+            // executing we use the address translator (e.g. the title screen in Space Eggs
+            // is contiguous in memory but split in half in the file).  This is slower, but
+            // mAddrTrans is a local (not proxy) object, so it's not too bad.
             byte[] buf = new byte[HR_BYTE_WIDTH * HR_HEIGHT];
             int outIdx = 0;
+            int baseAddr = mAddrTrans.OffsetToAddress(offset);
             for (int row = 0; row < HR_HEIGHT; row++) {
-                // If row is ABCDEFGH, we want pppFGHCD EABAB000 (where p is zero for us).
+                // If row is ABCDEFGH, we want pppFGHCD EABAB000 (where p would be $20/$40).
                 int low = ((row & 0xc0) >> 1) | ((row & 0xc0) >> 3) | ((row & 0x08) << 4);
                 int high = ((row & 0x07) << 2) | ((row & 0x30) >> 4);
-                int addr = (high << 8) | low;
+                int rowAddr = baseAddr + ((high << 8) | low);
 
                 for (int col = 0; col < HR_BYTE_WIDTH; col++) {
-                    buf[outIdx++] = mFileData[offset + addr + col];
+                    int srcOffset = mAddrTrans.AddressToOffset(offset, rowAddr + col);
+                    if (srcOffset < 0) {
+                        mAppRef.ReportError("Address $" + (rowAddr + col).ToString("x4") +
+                            " is outside of file");
+                        return null;
+                    }
+                    buf[outIdx++] = mFileData[srcOffset];
                 }
             }
 

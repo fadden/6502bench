@@ -552,7 +552,7 @@ namespace SourceGen {
                         Debug.Assert(attr.Length > 0);
                         offset += attr.Length;
                     }
-                } else if (attr.Symbol != null || mProject.HasCommentOrNote(offset)) {
+                } else if (attr.Symbol != null || mProject.HasCommentNoteOrVis(offset)) {
                     // In an uncategorized area, but we want to break at this byte
                     // so the user or auto label doesn't get buried in the middle of
                     // a large chunk.

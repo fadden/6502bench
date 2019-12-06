@@ -30,10 +30,14 @@ include them in your project.</p>
 <p>The project file doesn't store the converted graphics.  Instead, the
 project file holds a string that identifies the converter, and a list of
 parameters that are passed to the converter.  Images are generated when
-the project is first opened, and updated if the set of loaded extension
-scripts changes.</p>
+the project is first opened, and updated when certain things change in
+the project.</p>
 <p>Visualizations are not included in generated assembly output.  They
 may be included in HTML exports.</p>
+<p>Because visualizations are associated with a specific file offset,
+they will become "hidden" if the offset isn't at the start of a line,
+e.g. it's in the middle of a multi-byte instruction or data item.  The
+editors will try to prevent you from doing this.</p>
 
 
 <h2><a name="vis-and-sets">Visualizations and Visualization Sets</a></h2>
@@ -43,7 +47,9 @@ assembled output, and do not change how code is analyzed.  They are
 contained in sets that are placed at arbitrary offsets.  Each set can
 contain multiple items.  For example, if a file has data for
 10 bitmaps, you can place a visualization near each, or create a single
-visualization set with all 10 items and put it at the start of the file.</p>
+visualization set with all 10 items and put it at the start of the file.
+You can display a visualization near the instructions that perform the
+drawing.</p>
 
 <p>To create a visualization set, select a code or data line, and use
 Actions &gt; Create/Edit Visualization Set.  To edit a visualization set,
@@ -115,7 +121,11 @@ arrangements are common.  The script defines three generators:</p>
     converted as monochrome, and have a 1-pixel transparent gap
     between elements.</li>
   <li><b>Hi-Res Screen Image</b> - used for 8KiB screen images.  The
-    data is linearized and converted to a 280x192 bitmap.</li>
+    data is linearized and converted to a 280x192 bitmap.  Because
+    images are relatively large, the generator does not require them
+    to be contiguous in the file, i.e. two halves of the image can be
+    in different parts of the file so long as they end up contiguous
+    in memory.</li>
 </ul>
 
 <p>Widths are specified in bytes, not pixels.  Each byte represents 7

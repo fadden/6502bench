@@ -25,7 +25,7 @@ limitations under the License.
         Title="Edit Visualization"
         SizeToContent="WidthAndHeight" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered"
         Closed="Window_Closed">
 
     <Window.Resources>

@@ -1798,14 +1798,16 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Returns true if the offset has a long comment or note.  Used for determining how to
-        /// split up a data area.  Currently not returning true for an end-of-line comment.
+        /// Returns true if the offset has a long comment, note, or visualization.  Used for
+        /// determining how to split up a data area.
+        /// Currently not returning true for an end-of-line comment.
         /// </summary>
         /// <param name="offset">Offset of interest.</param>
-        /// <returns>True if a comment or note was found.</returns>
-        public bool HasCommentOrNote(int offset) {
+        /// <returns>True if a comment, note, or visualization was found.</returns>
+        public bool HasCommentNoteOrVis(int offset) {
             return (LongComments.ContainsKey(offset) ||
-                    Notes.ContainsKey(offset));
+                    Notes.ContainsKey(offset) ||
+                    VisualizationSets.ContainsKey(offset));
         }
 
         /// <summary>
@@ -1985,6 +1987,10 @@ namespace SourceGen {
 
                             Debug.WriteLine("Map offset +" + offset.ToString("x6") + " to $" +
                                 ((int)newValue).ToString("x6"));
+
+                            // Visualization generators in extension scripts could be chasing
+                            // addresses.  Give them a chance to update.
+                            ClearVisualizationCache();
 
                             // ignore affectedOffsets
                             Debug.Assert(uc.ReanalysisRequired ==
@@ -2238,12 +2244,7 @@ namespace SourceGen {
                                 //   run through here.)
                             }
                             if (needExtScriptReload) {
-                                // Clear all the Visualization thumbnails.  We don't do GUI
-                                // stuff in here, so this just sets a flag.
-                                foreach (KeyValuePair<int, VisualizationSet> kvp
-                                        in VisualizationSets) {
-                                    kvp.Value.RefreshNeeded();
-                                }
+                                ClearVisualizationCache();
                             }
                         }
                         // ignore affectedOffsets
@@ -2290,6 +2291,15 @@ namespace SourceGen {
             }
 
             return needReanalysis;
+        }
+
+        /// <summary>
+        /// Clears all visualization cached images.
+        /// </summary>
+        private void ClearVisualizationCache() {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in VisualizationSets) {
+                kvp.Value.RefreshNeeded();
+            }
         }
 
         /// <summary>

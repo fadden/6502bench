@@ -2344,7 +2344,7 @@ namespace SourceGen {
                     Anattrib nextAttr = mProject.GetAnattrib(nextOffset);
                     // This must match what GroupedOffsetSetFromSelected() does.
                     if (!mProject.UserLabels.ContainsKey(nextOffset) &&
-                            !mProject.HasCommentOrNote(nextOffset) &&
+                            !mProject.HasCommentNoteOrVis(nextOffset) &&
                             thisAttr.Address == nextAttr.Address - 1) {
                         // Good to go.
                         Debug.WriteLine("Grabbing second byte from +" + nextOffset.ToString("x6"));
@@ -3329,11 +3329,8 @@ namespace SourceGen {
                     // for the uncategorized data analyzer, but very annoying if you want to
                     // slap a 16-bit numeric format on all entries in a table.
                     groupNum++;
-                } else if (mProject.HasCommentOrNote(offset)) {
-                    // Don't carry across a long comment or note.
-                    groupNum++;
-                } else if (mProject.VisualizationSets.ContainsKey(offset)) {
-                    // Don't carry across a visualization.
+                } else if (mProject.HasCommentNoteOrVis(offset)) {
+                    // Don't carry across a long comment, note, or visualization.
                     groupNum++;
                 }
 

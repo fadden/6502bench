@@ -106,7 +106,7 @@ See also https://github.com/fadden/DisasmUiTest
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderThickness="1" Margin="8,0,0,0"
+                                    <Border BorderThickness="1" Margin="8,0,0,0" Padding="1"
                                             Background="{StaticResource BitmapBackground}">
                                         <Image Width="64" Height="64" Source="{Binding CachedImage}"
                                                RenderOptions.BitmapScalingMode="NearestNeighbor"/>
