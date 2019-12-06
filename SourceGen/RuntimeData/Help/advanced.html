@@ -164,9 +164,10 @@ Interfaces.cs in the PluginCommon directory.  <b>Bear in mind that this
 feature is still evolving, and the interfaces may change significantly
 in the near future.</b></p>
 
-<p>The current interfaces can be used to identify inline data that follows
-JSR, JSL, or BRK instructions, and to format operands.  The latter can be
-useful for replacing immediate load operands with symbolic constants.</p>
+<p>The current interfaces can be used to generate visualizations, to
+identify inline data that follows JSR, JSL, or BRK instructions, and to
+format operands.  The latter can be useful for replacing immediate
+load operands with symbolic constants.</p>
 
 <p>Scripts may be loaded from the RuntimeData directory, or from the directory
 where the project file lives.  Attempts to load them from other locations
@@ -190,16 +191,17 @@ for IntelliSense completion, and get all the usual syntax and compile
 checking in the editor.  (This is why there's a RuntimeData project for
 Visual Studio.)</p>
 
-<p>If you have the solution configured for debug builds, SourceGen will set
-the IncludeDebugInformation flag to true when compiling scripts.  This
+<p>If you have the solution configured for debug builds, SourceGen will pass
+<code>IncludeDebugInformation=true</code> to the script compiler.  This
 causes a .PDB file to be created.  While this can help with debugging,
 it can sometimes get in the way: if you edit the script source code and
-reload the project, SourceGen will recompile the script, but the old .PDB
-file will still be open by VisualStudio and you'll get error messages.</p>
+reload the project without restarting the app, SourceGen will recompile
+the script, but the old .PDB file will still be open by VisualStudio
+and you'll get error messages.</p>
 
-<p>Some commonly useful functions are defined in the PluginCommon.Util class,
-which is available to plugins.  These call into the CommonUtil library,
-which is shared with SourceGen.
+<p>Some commonly useful functions are defined in the
+<code>PluginCommon.Util</code> class, which is available to plugins.  These
+call into the CommonUtil library, which is shared with SourceGen.
 While plugins can use CommonUtil directly, they should avoid doing so.  The
 APIs there are not guaranteed to be stable, so plugins that rely on them
 may break in a subsequent release of SourceGen.</p>
@@ -338,9 +340,9 @@ not help you debug 6502 projects.</p>
     symbols loaded from .sym65 files and find addresses that fall within
     the bounds of the file.  If it finds an address that is the start
     of a code/data line and doesn't already have a user-supplied label,
-    the platform symbol's label will be applied.  Useful for
-    disassembling ROM images or other code with an established set of
-    public entry points.
+    and the platform symbol's label isn't already defined elsewhere, the
+    platform label will be applied.  Useful when disassembling ROM images
+    or other code with an established set of public entry points.
     (Tip: disable "analyze uncategorized data" from the project
     properties editor first.)</li>
 </ul>

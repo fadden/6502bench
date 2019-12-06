@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>Visualizations - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id="content">
+<h1>6502bench SourceGen: Visualizations</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="overview">Overview</a></h2>
+
+<p>Programs are generally a combination of code and data.  Sometimes
+the data is graphical in nature, e.g. a bitmap used as a font or
+game sprite.  Being able to see the data in graphic form can make it
+easier to determine the purpose of associated code.</p>
+<p>While modern systems use GIF, JPEG, and PNG to hold 2D bitmaps,
+graphical elements embedded in 6502 applications are almost always
+in a platform-specific form.  For this reason, the task of generating
+images from data is performed by
+<a href="advanced.html#extension-scripts">extension scripts</a>.  Some
+scripts for common formats are included in the SourceGen runtime directory.
+If these don't do what you need, you can write your own scripts and
+include them in your project.</p>
+<p>The project file doesn't store the converted graphics.  Instead, the
+project file holds a string that identifies the converter, and a list of
+parameters that are passed to the converter.  Images are generated when
+the project is first opened, and updated if the set of loaded extension
+scripts changes.</p>
+<p>Visualizations are not included in generated assembly output.  They
+may be included in HTML exports.</p>
+
+
+<h2><a name="vis-and-sets">Visualizations and Visualization Sets</a></h2>
+
+<p>Visualizations are essentially decorative: they do not affect the
+assembled output, and do not change how code is analyzed.  They are
+contained in sets that are placed at arbitrary offsets.  Each set can
+contain multiple items.  For example, if a file has data for
+10 bitmaps, you can place a visualization near each, or create a single
+visualization set with all 10 items and put it at the start of the file.</p>
+
+<p>To create a visualization set, select a code or data line, and use
+Actions &gt; Create/Edit Visualization Set.  To edit a visualization set,
+select it and use the same menu item, or just double-click on it.  This
+opens the Visualization Set Editor window.</p>
+
+<p>The visualization set editor shows a list of visualizations associated
+with the selected file offset.  You can create a new visualization, edit
+or remove an existing entry, or rearrange them.
+If you select "New Bitmap" or edit an existing bitmap entry, the
+Bitmap Visualization Editor window will open.</p>
+
+<h4>Bitmap Visualization Editor</h4>
+
+<p>The combo box at the top of the screen lists every bitmap visualization
+generator defined by an active extension script.  Select the one that is
+appropriate for the data you're trying to visualize.  Every visualizer may
+have different parameters, so as you select different entries the set of
+input parameters below the preview window may change.</p>
+
+<p>The "tag" is a unique string that will be shown in the display list.
+This is not a label, and may contain any characters you want (but leading
+and trailing whitespace will be trimmed).  The only requirement is that
+it be unique among visualization tags.</p>
+<p>The preview window shows the visualizer output.  The generated image is
+expanded to fill the window, so small images will be shown with very
+large pixels.
+If you resize the editor window, the preview window will expand, which
+can make it easier to see detail on larger images.
+If the generator fails, the preview window will show a red 'X', and an
+error message will appear below it.</p>
+<p>Parameters may be numeric or boolean.  The latter use a simple checkbox,
+the former a text entry field that accepts decimal and hexadecimal values.
+The range of allowable values is shown to the right of the entry field.
+If you enter an invalid value, the parameter description will turn red.</p>
+
+
+<h2><a name="runtime">Scripts Included with SourceGen</a></h2>
+
+<p>A number of visualization generation scripts are included with
+SourceGen, in the platform-specific runtime data directories.</p>
+
+<p>Most generators will take the file offset, bitmap width, and bitmap
+height as parameters.  Offsets are handled as they are elsewhere, i.e.
+always in hexadecimal, with a leading '+'.
+Some less-common parameters include:</p>
+<ul>
+  <li><b>Row stride</b> - number of bytes used to hold a row.  This
+    is used when a row has padding on the end, e.g. a bitmap that's
+    7 bytes wide might be padded to 8 for easy indexing.  If you set
+    this to zero the visualizer will default to no padding
+    (stride == width).</li>
+  <li><b>Column stride</b> - number of bytes used to hold a column.
+    This is uncommon, but could be used if (say) a pair of bitmaps
+    was stored with interleaved bytes.  If you set this to zero the
+    visualizer will default to no interleave (stride == 1).</li>
+</ul>
+
+<h3>Apple II - VisHiRes</h3>
+
+<p>There is no standard format for small hi-res bitmaps, but certain
+arrangements are common.  The script defines three generators:</p>
+
+<ul>
+  <li><b>Hi-Res Bitmap</b> - converts an MxN row-major bitmap.</li>
+  <li><b>Hi-Res Bitmap Font</b> - converts a series of MxN row-major
+    bitmaps.  This is intended for hi-res fonts, which are typically
+    8 bytes per entry, stored one after another.  These are always
+    converted as monochrome, and have a 1-pixel transparent gap
+    between elements.</li>
+  <li><b>Hi-Res Screen Image</b> - used for 8KiB screen images.  The
+    data is linearized and converted to a 280x192 bitmap.</li>
+</ul>
+
+<p>Widths are specified in bytes, not pixels.  Each byte represents 7
+pixels (with some hand-waving).</p>
+
+<p>In addition to offset, dimensions, and stride values, the bitmap
+converter has a checkbox for monochrome or color, and a checkbox that
+will cause the first byte to be treated as an odd column rather than
+an event one.  The odd/even setting affects green/purple and orange/blue,
+but has no effect on black or white.</p>
+<p>The converter generates one output pixel for every source pixel, so
+half-pixel shifts are not rendered.</p>
+
+</div>
+
+<div id="footer">
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2019 faddenSoft -->
+</html>
