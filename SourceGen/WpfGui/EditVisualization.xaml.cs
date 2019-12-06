@@ -40,6 +40,7 @@ namespace SourceGen.WpfGui {
         private Formatter mFormatter;
         private int mSetOffset;
         private Visualization mOrigVis;
+        private string mOrigTag;
 
         private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
         private Brush mErrorLabelColor = Brushes.Red;
@@ -167,6 +168,7 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mSetOffset = setOffset;
             mOrigVis = vis;
+            mOrigTag = vis.Tag;
 
             mScriptSupport = new ScriptSupport(this);
             mProject.PrepareScripts(mScriptSupport);
@@ -249,6 +251,24 @@ namespace SourceGen.WpfGui {
 
                 ParameterList.Add(pv);
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            // https://stackoverflow.com/a/31407415/294248
+            // After the window's size has been established to minimally wrap the elements,
+            // we set the minimum width to the current width, and un-freeze the preview image
+            // control so it changes size with the window.  This allows the window to resize
+            // without clipping any of the controls.
+            //
+            // This isn't quite right of course -- if the user changes the combo box setting
+            // the number of parameter controls will change -- but that just means the preview
+            // window will shrink or grow.  So long as this isn't taken to extremes we won't
+            // clip controls.
+            ClearValue(SizeToContentProperty);
+            SetValue(MinWidthProperty, this.Width);
+            SetValue(MinHeightProperty, this.Height);
+            previewImage.ClearValue(WidthProperty);
+            previewImage.ClearValue(HeightProperty);
         }
 
         private void Window_Closed(object sender, EventArgs e) {
@@ -406,6 +426,7 @@ namespace SourceGen.WpfGui {
                         // Report the last message we got as an error.
                         PluginErrMessage = LastPluginMessage;
                     }
+                    IsValid = false;
                 } else {
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
                 }
@@ -413,8 +434,15 @@ namespace SourceGen.WpfGui {
 
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool tagOk);
             Visualization match = FindVisualizationByTag(trimTag);
-            if (match != null && match != mOrigVis) {
+            if (match != null && trimTag != mOrigTag) {
                 // Another vis already has this tag.
+                //
+                // TODO: this is wrong.  If I edit the set, edit a Vis, change it's tag, then
+                // immediately edit it again, I can't change the tag back to what it originally
+                // was, because the original version of the Vis is in the VisSet and I no longer
+                // have a way to know that that Vis and this Vis are the same.  To make this work
+                // correctly we need to track renames, which I think we may want to do later on
+                // for animations, so not dealing with this yet.
                 tagOk = false;
             }
             if (!tagOk) {

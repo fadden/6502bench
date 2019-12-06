@@ -23,8 +23,9 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Visualization"
-        Width="460" SizeToContent="Height" ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Loaded="Window_Loaded"
         Closed="Window_Closed">
 
     <Window.Resources>
@@ -91,7 +92,7 @@ limitations under the License.
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -110,30 +111,30 @@ limitations under the License.
 
             <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0,3,4,0"
                        Text="Visualizer:"/>
-            <ComboBox Name="visComboBox" Grid.Column="1" Grid.Row="0" Margin="0,0,0,4"
+            <ComboBox Name="visComboBox" Grid.Column="1" Grid.Row="0" Width="250" Margin="0,0,0,4"
+                      HorizontalAlignment="Left"
                       ItemsSource="{Binding VisualizationList}" DisplayMemberPath="VisDescriptor.UiName"
                       SelectionChanged="VisComboBox_SelectionChanged"/>
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
                        Text="Tag:" Foreground="{Binding TagLabelBrush}"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,1,0,0"
+            <TextBox Grid.Column="1" Grid.Row="1" Width="250" Margin="0,1,0,0" HorizontalAlignment="Left"
                      Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
 
             <TextBlock Grid.Column="1" Grid.Row="2" Text="• Must be unique, 2+ chars"/>
 
-            <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,20,0,4" Text="Preview:"/>
+            <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,4" Text="Preview:"/>
         </Grid>
 
-        <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Center"
+        <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Stretch"
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
                 Background="{StaticResource CheckerBackground}">
-            <Image Name="previewImage" Width="320" Height="320" Source="/Res/RedX.png"
+            <Image Name="previewImage" Width="400" Height="400" Source="/Res/RedX.png"
                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-            <!--<Button Width="400" Height="400" Content="Test"/>-->
         </Border>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -148,7 +149,7 @@ limitations under the License.
             <TextBlock Grid.Row="1" Text="Parameters:" Margin="0,0,0,4"/>
 
             <!-- generated controls are placed here -->
-            <ItemsControl Grid.Row="2"
+            <ItemsControl Grid.Row="2" Width="400"
                 ItemsSource="{Binding ParameterList}"
                 ItemTemplateSelector="{StaticResource ParameterTemplateSelector}">
             </ItemsControl>
