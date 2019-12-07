@@ -36,7 +36,7 @@ namespace RuntimeData.Atari {
 
         private const string P_OFFSET = "offset";
         private const string P_HEIGHT = "height";
-        private const string P_ROW_DUP = "rowDup";
+        private const string P_ROW_THICKNESS = "rowThickness";
         private const string P_REFLECTED = "reflected";
 
         private const int MAX_HEIGHT = 192;
@@ -57,8 +57,8 @@ namespace RuntimeData.Atari {
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Height",
                         P_HEIGHT, typeof(int), 1, 192, 0, 1),
-                    new VisParamDescr("Row duplication",
-                        P_ROW_DUP, typeof(int), 0, 10, 0, 3),
+                    new VisParamDescr("Row thickness",
+                        P_ROW_THICKNESS, typeof(int), 1, 20, 0, 4),
                     new VisParamDescr("Reflected",
                         P_REFLECTED, typeof(bool), 0, 0, 0, false),
                 }),
@@ -143,11 +143,12 @@ namespace RuntimeData.Atari {
 
             int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
             int height = Util.GetFromObjDict(parms, P_HEIGHT, 1);
-            int rowDup = Util.GetFromObjDict(parms, P_ROW_DUP, 3);
+            int rowThick = Util.GetFromObjDict(parms, P_ROW_THICKNESS, 4);
             bool isReflected = Util.GetFromObjDict(parms, P_REFLECTED, false);
 
             if (offset < 0 || offset >= mFileData.Length ||
-                    height <= 0 || height > MAX_HEIGHT) {
+                    height <= 0 || height > MAX_HEIGHT ||
+                    rowThick <= 0 || rowThick > MAX_HEIGHT) {
                 // the UI should flag these based on range (and ideally wouldn't have called us)
                 mAppRef.ReportError("Invalid parameter");
                 return null;
@@ -160,10 +161,8 @@ namespace RuntimeData.Atari {
                 return null;
             }
 
-            int rowHeight = rowDup + 1;
-
             // Each half of the playfield is 20 bits wide.
-            VisBitmap8 vb = new VisBitmap8(40, height * rowHeight);
+            VisBitmap8 vb = new VisBitmap8(40, height * rowThick);
             SetPalette(vb);
 
             for (int row = 0; row < height; row++) {
@@ -177,10 +176,10 @@ namespace RuntimeData.Atari {
                 int fwd = RevBits(rev, 20);
 
                 // Render the first part of the line forward.
-                RenderHalfField(vb, row * rowHeight, rowHeight, 0,
+                RenderHalfField(vb, row * rowThick, rowThick, 0,
                     fwd, Color.White);
                 // Render the second half forward or reversed, in grey.
-                RenderHalfField(vb, row * rowHeight, rowHeight, HALF_WIDTH,
+                RenderHalfField(vb, row * rowThick, rowThick, HALF_WIDTH,
                     isReflected ? rev : fwd, Color.Grey);
             }
             return vb;

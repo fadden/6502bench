@@ -60,12 +60,12 @@
 "68":{
 "Items":[{
 "Tag":"Black Maze 3","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":68,"height":7,"rowDup":3,"reflected":false}}]},
+"offset":68,"height":7,"rowThickness":4,"reflected":false}}]},
 "89":{
 "Items":[{
 "Tag":"Red Maze (bottom)","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":89,"height":7,"rowDup":3,"reflected":true}}]},
+"offset":89,"height":7,"rowThickness":4,"reflected":true}}]},
 "110":{
 "Items":[{
 "Tag":"Castle Def","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":110,"height":7,"rowDup":3,"reflected":true}}]}}}
+"offset":110,"height":7,"rowThickness":4,"reflected":true}}]}}}
