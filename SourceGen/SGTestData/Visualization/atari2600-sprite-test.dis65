@@ -1,0 +1,71 @@
+﻿### 6502bench SourceGen dis65 v1.0 ###
+{
+"_ContentVersion":3,"FileDataLength":131,"FileDataCrc32":-1864286961,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
+"PlatformSymbolFileIdentifiers":["RT:Atari/2600.sym65"],"ExtensionScriptFileIdentifiers":["RT:Atari/VisAtari2600.cs"],"ProjectSyms":{
+}},
+"AddressMap":[{
+"Offset":0,"Addr":61440}],"TypeHints":[{
+"Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
+},
+"Comments":{
+},
+"LongComments":{
+"-2147483647":{
+"Text":"A few sprites and playfield graphics from Atari Adventure.\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+"Notes":{
+},
+"UserLabels":{
+"110":{
+"Label":"CastleDef","Value":61550,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"},
+"89":{
+"Label":"RedMazeBottom","Value":61529,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"},
+"68":{
+"Label":"BlackMaze3","Value":61508,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"},
+"45":{
+"Label":"GfxDrag1","Value":61485,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"},
+"24":{
+"Label":"GfxDrag0","Value":61464,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"},
+"20":{
+"Label":"GfxKey","Value":61460,"Source":"User","Type":"GlobalAddr","LabelAnno":"None"}},
+"OperandFormats":{
+"20":{
+"Length":4,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"24":{
+"Length":21,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"45":{
+"Length":23,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"68":{
+"Length":21,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"89":{
+"Length":21,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"110":{
+"Length":21,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
+"LvTables":{
+},
+"VisualizationSets":{
+"20":{
+"Items":[{
+"Tag":"Key sprite","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":20,"height":3}}]},
+"24":{
+"Items":[{
+"Tag":"Dragon 0","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":24,"height":20}}]},
+"45":{
+"Items":[{
+"Tag":"Dragon 1","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":45,"height":22}}]},
+"68":{
+"Items":[{
+"Tag":"Black Maze 3","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":68,"height":7,"rowDup":3,"reflected":false}}]},
+"89":{
+"Items":[{
+"Tag":"Red Maze (bottom)","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":89,"height":7,"rowDup":3,"reflected":true}}]},
+"110":{
+"Items":[{
+"Tag":"Castle Def","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":110,"height":7,"rowDup":3,"reflected":true}}]}}}

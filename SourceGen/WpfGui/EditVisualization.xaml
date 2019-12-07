@@ -29,6 +29,8 @@ limitations under the License.
         Closed="Window_Closed">
 
     <Window.Resources>
+        <system:String x:Key="str_VisGenFailed">Visualization generation failed</system:String>
+
         <!-- big thanks: http://drwpf.com/blog/2008/01/03/itemscontrol-d-is-for-datatemplate/ -->
         <DataTemplate x:Key="BoolTemplate">
             <Grid>

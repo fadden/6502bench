@@ -108,7 +108,7 @@ Some less-common parameters include:</p>
     visualizer will default to no interleave (stride == 1).</li>
 </ul>
 
-<h3>Apple II - VisHiRes</h3>
+<h3>Apple II - Apple/VisHiRes</h3>
 
 <p>There is no standard format for small hi-res bitmaps, but certain
 arrangements are common.  The script defines three generators:</p>
@@ -138,6 +138,23 @@ an event one.  The odd/even setting affects green/purple and orange/blue,
 but has no effect on black or white.</p>
 <p>The converter generates one output pixel for every source pixel, so
 half-pixel shifts are not rendered.</p>
+
+<h3>Atari 2600 - Atari/VisAtari2600</h3>
+
+<p>The Atari 2600 graphics system has registers that determine the
+appearance of a sprite or playfield on a single row.  The visualization
+generator works for data stored in a straightforward fashion.</p>
+
+<ul>
+  <li><b>Sprite</b> - basic 1xN sprite, converted to an image 8 pixels
+    wide.</li>
+  <li><b>Playfield</b> - assumes PF0,PF1,PF2 are stored in that order,
+    multiple entries following each other.  Specify the number of
+    3-byte entries as the height.
+    Since most playfields aren't the full height of the screen,
+    it will tend to look squashed.  Use the "row duplication" feature
+    to repeat each row N times to make it look more like it should.</li>
+</ul>
 
 </div>
 

@@ -43,8 +43,9 @@ namespace PluginCommon {
         /// <param name="width">Bitmap width, in pixels.</param>
         /// <param name="height">Bitmap height, in pixels.</param>
         public VisBitmap8(int width, int height) {
-            Debug.Assert(width > 0 && width <= MAX_DIMENSION);
-            Debug.Assert(height > 0 && height <= MAX_DIMENSION);
+            if (width <= 0 || width > MAX_DIMENSION || height <= 0 || height > MAX_DIMENSION) {
+                throw new ArgumentException("Bad bitmap width/height " + width + "," + height);
+            }
 
             Width = width;
             Height = height;

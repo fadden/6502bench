@@ -195,6 +195,8 @@ namespace SourceGen.WpfGui {
             VisualizationList.Remove(item);
             VisualizationList.Insert(index, dlg.NewVis);
             visualizationGrid.SelectedIndex = index;
+
+            okButton.Focus();
         }
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e) {

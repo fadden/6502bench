@@ -433,12 +433,17 @@ namespace SourceGen.WpfGui {
                 } catch (Exception ex) {
                     Debug.WriteLine("Vis generation failed: " + ex);
                     vis2d = null;
+                    if (string.IsNullOrEmpty(LastPluginMessage)) {
+                        LastPluginMessage = ex.Message;
+                    }
                 }
                 if (vis2d == null) {
                     previewImage.Source = sBadParamsImage;
                     if (!string.IsNullOrEmpty(LastPluginMessage)) {
                         // Report the last message we got as an error.
                         PluginErrMessage = LastPluginMessage;
+                    } else {
+                        PluginErrMessage = (string)FindResource("str_VisGenFailed");
                     }
                     IsValid = false;
                 } else {

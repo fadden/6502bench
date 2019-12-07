@@ -103,7 +103,7 @@ limitations under the License.
 
         <DockPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
-            <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
+            <Button DockPanel.Dock="Right" Name="okButton" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" Click="OkButton_Click"/>
         </DockPanel>
     </Grid>
