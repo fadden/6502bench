@@ -1436,22 +1436,58 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        public Visibility RecentProjectVisibility1 {
+            get { return mRecentProjectVisibility1; }
+            set { mRecentProjectVisibility1 = value; OnPropertyChanged(); }
+        }
+        private Visibility mRecentProjectVisibility1;
+
+        public string RecentProjectName1 {
+            get { return mRecentProjectName1; }
+            set { mRecentProjectName1 = value; OnPropertyChanged(); }
+        }
+        private string mRecentProjectName1;
+
+        public string RecentProjectPath1 {
+            get { return mRecentProjectPath1; }
+            set { mRecentProjectPath1 = value; OnPropertyChanged(); }
+        }
+        private string mRecentProjectPath1;
+
+        public Visibility RecentProjectVisibility2 {
+            get { return mRecentProjectVisibility2; }
+            set { mRecentProjectVisibility2 = value; OnPropertyChanged(); }
+        }
+        private Visibility mRecentProjectVisibility2;
+
+        public string RecentProjectName2 {
+            get { return mRecentProjectName2; }
+            set { mRecentProjectName2 = value; OnPropertyChanged(); }
+        }
+        private string mRecentProjectName2;
+
+        public string RecentProjectPath2 {
+            get { return mRecentProjectPath2; }
+            set { mRecentProjectPath2 = value; OnPropertyChanged(); }
+        }
+        private string mRecentProjectPath2;
+
         public void UpdateRecentLinks() {
             List<string> pathList = mMainCtrl.RecentProjectPaths;
 
             if (pathList.Count >= 1) {
-                recentProjectName1.Text = Path.GetFileName(pathList[0]);
-                recentProjectButton1.Visibility = Visibility.Visible;
+                RecentProjectPath1 = pathList[0];
+                RecentProjectName1 = Path.GetFileName(pathList[0]);
+                RecentProjectVisibility1 = Visibility.Visible;
             } else {
-                recentProjectName1.Text = string.Empty;
-                recentProjectButton1.Visibility = Visibility.Collapsed;
+                RecentProjectVisibility1 = Visibility.Collapsed;
             }
             if (pathList.Count >= 2) {
-                recentProjectName2.Text = Path.GetFileName(pathList[1]);
-                recentProjectButton2.Visibility = Visibility.Visible;
+                RecentProjectPath2 = pathList[1];
+                RecentProjectName2 = Path.GetFileName(pathList[1]);
+                RecentProjectVisibility2 = Visibility.Visible;
             } else {
-                recentProjectName2.Text = string.Empty;
-                recentProjectButton2.Visibility = Visibility.Collapsed;
+                RecentProjectVisibility2 = Visibility.Collapsed;
             }
         }
 

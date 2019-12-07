@@ -585,21 +585,23 @@ limitations under the License.
                             Command="{StaticResource NewProjectCmd}"/>
                     <Button Content="Open existing project" Width="240" Height="50" Margin="10"
                             Command="{StaticResource OpenCmd}"/>
-                    <Button Name="recentProjectButton1" Width="240" Height="50" Margin="10"
+                    <Button Width="240" Height="50" Margin="10" Visibility="{Binding RecentProjectVisibility1}"
+                            ToolTip="{Binding RecentProjectPath1}" ToolTipService.InitialShowDelay="1000"
                             Command="{DynamicResource RecentProjectCmd}" CommandParameter="0">
                         <Button.Content>
                             <StackPanel>
                                 <TextBlock HorizontalAlignment="Center">Recent project #1</TextBlock>
-                                <TextBlock Name="recentProjectName1" HorizontalAlignment="Center">???</TextBlock>
+                                <TextBlock Text="{Binding RecentProjectName1, FallbackValue=RECENT 1}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Name="recentProjectButton2" Width="240" Height="50" Margin="10"
+                    <Button Width="240" Height="50" Margin="10" Visibility="{Binding RecentProjectVisibility2}"
+                            ToolTip="{Binding RecentProjectPath2}" ToolTipService.InitialShowDelay="1000"
                             Command="{DynamicResource RecentProjectCmd}" CommandParameter="1">
                         <Button.Content>
                             <StackPanel>
                                 <TextBlock HorizontalAlignment="Center">Recent project #2</TextBlock>
-                                <TextBlock Name="recentProjectName2" HorizontalAlignment="Center">???</TextBlock>
+                                <TextBlock Text="{Binding RecentProjectName2, FallbackValue=RECENT 1}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>

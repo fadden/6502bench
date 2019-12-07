@@ -1350,6 +1350,8 @@ namespace SourceGen {
 
             mGenerationLog = null;
 
+            UpdateTitle();
+
             // Not necessary, but it lets us check the memory monitor to see if we got
             // rid of everything.
             GC.Collect();
