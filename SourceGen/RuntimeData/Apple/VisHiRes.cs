@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 using PluginCommon;
 
@@ -303,6 +301,24 @@ namespace RuntimeData.Apple {
 
         private enum ColorMode { Mono, SimpleColor, IIgsRGB };
 
+        /// <summary>
+        /// Renders bitmap data.
+        /// </summary>
+        /// <param name="data">Data source, typically the file data.</param>
+        /// <param name="offset">Offset into data of the first byte.</param>
+        /// <param name="byteWidth">Width, in bytes, of the data to render.  Each byte
+        ///   represents 7 pixels in the output (more or less).</param>
+        /// <param name="height">Height, in lines, of the data to render.</param>
+        /// <param name="colStride">Column stride.  The number of bytes used to hold each
+        ///   byte of data.  Must be >= 1.</param>
+        /// <param name="rowStride">Row stride.  The number of bytes used to hold each row
+        ///   of data.  Must be >= (colStride * byteWidth - (colStride - 1)).</param>
+        /// <param name="colorMode">Color conversion mode.</param>
+        /// <param name="isFirstOdd">If true, render as if we're starting on an odd column.
+        ///   This affects the colors.</param>
+        /// <param name="vb">Output bitmap object.</param>
+        /// <param name="xstart">Initial X position in the output.</param>
+        /// <param name="ystart">Initial Y position in the output.</param>
         private void RenderBitmap(byte[] data, int offset, int byteWidth, int height,
                 int colStride, int rowStride, ColorMode colorMode, bool isFirstOdd,
                 VisBitmap8 vb, int xstart, int ystart) {
@@ -504,11 +520,6 @@ namespace RuntimeData.Apple {
             Blue        = 6,
             White1      = 2
         }
-
-        // Maps HiResColors to the palette entries.  Used for mapping 2-bit values to colors.
-        private static readonly byte[] sHiResColorMap = new byte[8] {
-            1, 3, 4, 2, 1, 5, 6, 2
-        };
 
         private void SetHiResPalette(VisBitmap8 vb) {
             // These don't match directly to hi-res color numbers because we want to

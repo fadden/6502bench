@@ -3623,7 +3623,6 @@ namespace SourceGen {
                     }
                     break;
                 case LineListGen.Line.Type.VisualizationSet:
-                    // TODO(xyzzy)
                     lineTypeStr = "visualization set";
                     break;
                 default:

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace PluginCommon {
     /// <summary>
@@ -34,7 +32,7 @@ namespace PluginCommon {
 
         private byte[] mData;
         private int[] mPalette;
-        private int mNextColor;
+        private int mNextColorIdx;
 
 
         /// <summary>
@@ -52,7 +50,7 @@ namespace PluginCommon {
 
             mData = new byte[width * height];
             mPalette = new int[256];
-            mNextColor = 0;
+            mNextColorIdx = 0;
         }
 
         public int GetPixel(int x, int y) {
@@ -60,22 +58,32 @@ namespace PluginCommon {
             return mPalette[pix];
         }
 
+        /// <summary>
+        /// Sets the color for a single pixel.
+        /// </summary>
+        /// <param name="x">X coordinate.</param>
+        /// <param name="y">Y coordinate.</param>
+        /// <param name="colorIndex">Color index.</param>
         public void SetPixelIndex(int x, int y, byte colorIndex) {
             if (x < 0 || x >= Width || y < 0 || y >= Height) {
                 throw new ArgumentException("Bad x/y: " + x + "," + y + " (width=" + Width +
                     " height=" + Height + ")");
             }
-            if (colorIndex < 0 || colorIndex >= mNextColor) {
+            if (colorIndex < 0 || colorIndex >= mNextColorIdx) {
                 throw new ArgumentException("Bad color: " + colorIndex + " (nextCol=" +
-                    mNextColor + ")");
+                    mNextColorIdx + ")");
             }
             mData[x + y * Width] = colorIndex;
         }
 
+        /// <summary>
+        /// Sets the color for all pixels.
+        /// </summary>
+        /// <param name="colorIndex">Color index.</param>
         public void SetAllPixelIndices(byte colorIndex) {
-            if (colorIndex < 0 || colorIndex >= mNextColor) {
+            if (colorIndex < 0 || colorIndex >= mNextColorIdx) {
                 throw new ArgumentException("Bad color: " + colorIndex + " (nextCol=" +
-                    mNextColor + ")");
+                    mNextColorIdx + ")");
             }
             for (int i = 0; i < mData.Length; i++) {
                 mData[i] = colorIndex;
@@ -89,8 +97,8 @@ namespace PluginCommon {
 
         // IVisualization2d
         public int[] GetPalette() {
-            int[] pal = new int[mNextColor];
-            for (int i = 0; i < mNextColor; i++) {
+            int[] pal = new int[mNextColorIdx];
+            for (int i = 0; i < mNextColorIdx; i++) {
                 pal[i] = mPalette[i];
             }
             return pal;
@@ -103,18 +111,19 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="color">32-bit ARGB color value.</param>
         public void AddColor(int color) {
-            if (mNextColor == 256) {
+            if (mNextColorIdx == 256) {
                 Debug.WriteLine("Palette is full");
                 return;
             }
-            for  (int i = 0; i < mNextColor; i++) {
+            // I'm expecting palettes to only have a few colors, so O(n^2) is fine for now.
+            for (int i = 0; i < mNextColorIdx; i++) {
                 if (mPalette[i] == color) {
                     Debug.WriteLine("Color " + color.ToString("x6") +
                         " already exists in palette (" + i + ")");
                     return;
                 }
             }
-            mPalette[mNextColor++] = color;
+            mPalette[mNextColorIdx++] = color;
         }
 
         /// <summary>

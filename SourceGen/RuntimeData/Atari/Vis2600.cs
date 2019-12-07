@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 using PluginCommon;
 
 namespace RuntimeData.Atari {
-    public class VisAtari2600 : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
+    public class Vis2600 : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
         // IPlugin
         public string Identifier {
             get { return "Atari 2600 Graphic Visualizer"; }

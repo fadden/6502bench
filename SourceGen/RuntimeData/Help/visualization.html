@@ -40,8 +40,12 @@ e.g. it's in the middle of a multi-byte instruction or data item.  The
 editors will try to prevent you from doing this.</p>
 <p>Bitmaps will always be scaled up as much as possible to make them
 easy to see.  This means that small shapes and large shapes may appears
-to be the same size.  Bear in mind that this is a disassembler, not a
-graphics conversion tool.</p>
+to be the same size when displayed as thumbnails in the code list.</p>
+<p>The role of a visualization generator is to take a collection of input
+parameters and generate graphical data.  It's most useful for graphical
+sources like bitmaps, but it's not limited to that.  You could, for example,
+write a script that generates random flowers, and use it to make your
+source listings more cheerful.</p>
 
 
 <h2><a name="vis-and-sets">Visualizations and Visualization Sets</a></h2>
@@ -52,8 +56,8 @@ contained in sets that are placed at arbitrary offsets.  Each set can
 contain multiple items.  For example, if a file has data for
 10 bitmaps, you can place a visualization near each, or create a single
 visualization set with all 10 items and put it at the start of the file.
-You can display a visualization near the instructions that perform the
-drawing.</p>
+You can display a visualization near the data or near the instructions
+that perform the drawing.  Or both.</p>
 
 <p>To create a visualization set, select a code or data line, and use
 Actions &gt; Create/Edit Visualization Set.  To edit a visualization set,
@@ -112,6 +116,11 @@ Some less-common parameters include:</p>
     visualizer will default to no interleave (stride == 1).</li>
 </ul>
 
+<p>Remember that this is a disassembler, not an image converter.  The
+results do not need to be perfectly accurate to be useful when disassembling
+code.</p>
+
+
 <h3>Apple II - Apple/VisHiRes</h3>
 
 <p>There is no standard format for small hi-res bitmaps, but certain
@@ -143,11 +152,13 @@ but has no effect on black or white.</p>
 <p>The converter generates one output pixel for every source pixel, so
 half-pixel shifts are not rendered.</p>
 
-<h3>Atari 2600 - Atari/VisAtari2600</h3>
+<h3>Atari 2600 - Atari/Vis2600</h3>
 
 <p>The Atari 2600 graphics system has registers that determine the
-appearance of a sprite or playfield on a single row.  The visualization
-generator works for data stored in a straightforward fashion.</p>
+appearance of a sprite or playfield on a single row.  The register
+values are typically changed as the screen is drawn to get different
+data on successive rows.  The visualization generator works for data
+stored in a straightforward fashion.</p>
 
 <ul>
   <li><b>Sprite</b> - basic 1xN sprite, converted to an image 8 pixels
@@ -163,10 +174,16 @@ generator works for data stored in a straightforward fashion.</p>
 <h3>Commodore 64 - Commodore/VisC64</h3>
 
 <p>The Commodore 64 has a 64-bit sprite format defined by the hardware.
-It supports a single-color "high resolution" 24x21 format, and a 12x21
-"multi-color" format.  Sprites can be doubled in width or height.</p>
+It comes in two basic varieties:</p>
+<ul>
+  <li><b>High-resolution sprite</b> - 24x21 monochrome.  Pixels are either
+    colored or transparent.</li>
+  <li><b>Multi-color sprite</b> - 12x21 3-color.  The width of each pixel
+    is doubled to make it 24x21.
+</ul>
+<p>Sprites can be doubled in width and/or height.</p>
 <p>Colors come from a hardware-defined palette of 16:</p>
-<ol start="0">
+<ol start="0" style="columns:2; -webkit-columns:2; -moz-columns:2;">
   <li><span style="color:#ffffff;background-color:#000000">&nbsp;black&nbsp;</span></li>
   <li><span style="color:#000000;background-color:#ffffff">&nbsp;white&nbsp;</span></li>
   <li><span style="color:#ffffff;background-color:#67372b">&nbsp;red&nbsp;</span></li>

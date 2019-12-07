@@ -3,7 +3,7 @@
 "_ContentVersion":3,"FileDataLength":131,"FileDataCrc32":-1864286961,"ProjectProps":{
 "CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
-"PlatformSymbolFileIdentifiers":["RT:Atari/2600.sym65"],"ExtensionScriptFileIdentifiers":["RT:Atari/VisAtari2600.cs"],"ProjectSyms":{
+"PlatformSymbolFileIdentifiers":["RT:Atari/2600.sym65"],"ExtensionScriptFileIdentifiers":["RT:Atari/Vis2600.cs"],"ProjectSyms":{
 }},
 "AddressMap":[{
 "Offset":0,"Addr":61440}],"TypeHints":[{
@@ -13,7 +13,7 @@
 },
 "LongComments":{
 "-2147483647":{
-"Text":"A few sprites and playfield graphics from Atari Adventure.\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+"Text":"A few sprites and playfield graphics from Warren Robinett\u0027s Adventure.\r\n\r\nCopyright 1980 Atari, Inc.\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
 },
 "UserLabels":{
