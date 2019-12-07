@@ -38,6 +38,10 @@ may be included in HTML exports.</p>
 they will become "hidden" if the offset isn't at the start of a line,
 e.g. it's in the middle of a multi-byte instruction or data item.  The
 editors will try to prevent you from doing this.</p>
+<p>Bitmaps will always be scaled up as much as possible to make them
+easy to see.  This means that small shapes and large shapes may appears
+to be the same size.  Bear in mind that this is a disassembler, not a
+graphics conversion tool.</p>
 
 
 <h2><a name="vis-and-sets">Visualizations and Visualization Sets</a></h2>
@@ -155,6 +159,35 @@ generator works for data stored in a straightforward fashion.</p>
     it will tend to look squashed.  Use the "row thickness" feature
     to repeat each row N times to adjust the proportions.</li>
 </ul>
+
+<h3>Commodore 64 - Commodore/VisC64</h3>
+
+<p>The Commodore 64 has a 64-bit sprite format defined by the hardware.
+It supports a single-color "high resolution" 24x21 format, and a 12x21
+"multi-color" format.  Sprites can be doubled in width or height.</p>
+<p>Colors come from a hardware-defined palette of 16:</p>
+<ol start="0">
+  <li><span style="color:#ffffff;background-color:#000000">&nbsp;black&nbsp;</span></li>
+  <li><span style="color:#000000;background-color:#ffffff">&nbsp;white&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#67372b">&nbsp;red&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#70a4b2">&nbsp;cyan&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#6f3d86">&nbsp;purple&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#588d43">&nbsp;green&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#352879">&nbsp;blue&nbsp;</span></li>
+  <li><span style="color:#000000;background-color:#b8c76f">&nbsp;yellow&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#6f4f25">&nbsp;orange&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#433900">&nbsp;brown&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#9a6759">&nbsp;light red&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#444444">&nbsp;dark grey&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#6c6c6c">&nbsp;grey&nbsp;</span></li>
+  <li><span style="color:#000000;background-color:#9ad284">&nbsp;light green&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#6c5eb5">&nbsp;light blue&nbsp;</span></li>
+  <li><span style="color:#ffffff;background-color:#959595">&nbsp;light grey&nbsp;</span></li>
+</ol>
+
+<p>Bear in mind that the editor scales images to their maximum size, so
+a sprite that is doubled in both width and height will look exactly like
+a sprite that is not doubled at all.</p>
 
 </div>
 

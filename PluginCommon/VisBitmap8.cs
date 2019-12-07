@@ -72,6 +72,16 @@ namespace PluginCommon {
             mData[x + y * Width] = colorIndex;
         }
 
+        public void SetAllPixelIndices(byte colorIndex) {
+            if (colorIndex < 0 || colorIndex >= mNextColor) {
+                throw new ArgumentException("Bad color: " + colorIndex + " (nextCol=" +
+                    mNextColor + ")");
+            }
+            for (int i = 0; i < mData.Length; i++) {
+                mData[i] = colorIndex;
+            }
+        }
+
         // IVisualization2d
         public byte[] GetPixels() {
             return mData;

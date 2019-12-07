@@ -1,0 +1,55 @@
+﻿### 6502bench SourceGen dis65 v1.0 ###
+{
+"_ContentVersion":3,"FileDataLength":2048,"FileDataCrc32":-811860884,"ProjectProps":{
+"CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
+"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"C64Petscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
+"PlatformSymbolFileIdentifiers":["RT:Commodore/C64-Kernal.sym65"],"ExtensionScriptFileIdentifiers":["RT:Commodore/VisC64.cs"],"ProjectSyms":{
+}},
+"AddressMap":[{
+"Offset":0,"Addr":4096}],"TypeHints":[],"StatusFlagOverrides":{
+},
+"Comments":{
+},
+"LongComments":{
+"-2147483647":{
+"Text":"Sprites created with SpritePad v1.8.1\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"0":{
+"Text":"Multi-color","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"64":{
+"Text":"High-resolution","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"128":{
+"Text":"Multi-color, use 2x width\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"192":{
+"Text":"High-resolution, use 2x width \u0026 height","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
+"Notes":{
+},
+"UserLabels":{
+},
+"OperandFormats":{
+"0":{
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"64":{
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"128":{
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null},
+"192":{
+"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
+"LvTables":{
+},
+"VisualizationSets":{
+"0":{
+"Items":[{
+"Tag":"vis000000","VisGenIdent":"c64-multi-color-sprite","VisGenParams":{
+"offset":0,"color":3,"color01":6,"color11":10,"doubleWide":false,"doubleHigh":false}}]},
+"64":{
+"Items":[{
+"Tag":"vis000040","VisGenIdent":"c64-hi-res-sprite","VisGenParams":{
+"offset":64,"color":14,"doubleWide":false,"doubleHigh":false}}]},
+"128":{
+"Items":[{
+"Tag":"vis000080","VisGenIdent":"c64-multi-color-sprite","VisGenParams":{
+"offset":128,"color":4,"color01":6,"color11":10,"doubleWide":true,"doubleHigh":false}}]},
+"192":{
+"Items":[{
+"Tag":"vis0000c0","VisGenIdent":"c64-hi-res-sprite","VisGenParams":{
+"offset":192,"color":5,"doubleWide":true,"doubleHigh":true}}]}}}

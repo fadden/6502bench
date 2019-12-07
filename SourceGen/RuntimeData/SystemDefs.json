@@ -193,6 +193,7 @@
         "RT:Commodore/C64-Kernal.sym65"
       ],
       "ExtensionScripts" : [
+        "RT:Commodore/VisC64.cs"
       ],
       "Parameters" : {
         "first-word-is-load-addr":"true",
@@ -209,6 +210,7 @@
         "RT:Commodore/C64-Kernal.sym65"
       ],
       "ExtensionScripts" : [
+        "RT:Commodore/VisC64.cs"
       ],
       "Parameters" : {
         "default-text-encoding":"c64-petscii"
@@ -225,6 +227,7 @@
         "RT:Commodore/C128-Kernal.sym65"
       ],
       "ExtensionScripts" : [
+        "RT:Commodore/VisC64.cs"
       ],
       "Parameters" : {
         "default-text-encoding":"c64-petscii"
