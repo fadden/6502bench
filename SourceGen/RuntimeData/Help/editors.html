@@ -161,9 +161,10 @@ select both bytes in the editor.  (If you click on the first item, then
 Shift+double-click on the operand field of the last item, you can do
 this very quickly.)  The selection does not need to be contiguous: you
 can use Control+click to select scattered items.</p>
-<p>If the range is discontiguous, or crosses a visual boundary
-such as a change in address, a user-specified label, or a long comment
-or note, the selection will be split into smaller regions.  A message at the
+<p>If the range is discontiguous, crosses a logical boundary
+such as a change in address or a user-specified label, or crosses a
+visual boundary like a long comment, note, or visualization, the selection
+will be split into smaller regions.  A message at the
 top of the dialog indicates how many bytes have been selected, and how
 many regions they have been divided into.</p>
 <p>(End-of-line comments do <i>not</i> split a region, and will
@@ -213,9 +214,10 @@ it requires that each individual string be entirely one or the other.</p>
 <p>Due to fundamental limitations of the character set, C64 screen code
 strings cannot be null terminated ($00 is '@').</p>
 
-<p>To avoid burying a label in the middle of a data item, contiguous areas
-are split at labels.  This can sometimes have unexpected effects.  For
-example, this can be formatted as two 16-bit words or one 32-bit word:</p>
+<p>As noted earlier, to avoid burying elements such as labels in the middle
+of a data item, contiguous areas may be split into smaller regions.  This
+can sometimes have unexpected effects.  For example, this can be formatted
+as two 16-bit words or one 32-bit word:</p>
 <pre>
          .DD1    $01
          .DD1    $ef
@@ -223,7 +225,7 @@ example, this can be formatted as two 16-bit words or one 32-bit word:</p>
          .DD1    $f0
 </pre>
 
-<p>With a label in the middle, it be formatted as two 16-bit words, but
+<p>With a label in the middle, it can be formatted as two 16-bit words, but
 not as a 32-bit word:</p>
 <pre>
          .DD1    $01
@@ -233,7 +235,7 @@ LABEL    .DD1    $01
 CODE     LDA     LABEL
 </pre>
 
-<p>If this is inconvenient, you can add a label at a 32-bit boundary, and
+<p>If this is undesirable, you can add a label at a 32-bit boundary, and
 reference that instead:</p>
 <pre>
 LABEL    .DD1    $01

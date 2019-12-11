@@ -165,6 +165,7 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = string.Empty;
             config.mNonUniqueLabelPrefix = ":";
+            config.mCommaSeparatedDense = false;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
 
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
@@ -313,7 +314,7 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            int maxPerLine = MAX_OPERAND_LEN / 2;
+            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
             for (int i = 0; i < length; i += maxPerLine) {

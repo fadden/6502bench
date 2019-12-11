@@ -276,7 +276,7 @@ namespace SourceGen {
                 case FormatDescriptor.Type.Dense: {
                         // no delimiter, two output bytes per input byte
                         int maxLen = MAX_OPERAND_LEN;
-                        int textLen = dfd.Length * 2;
+                        int textLen = dfd.Length * formatter.CharsPerDenseByte;
                         return (textLen + maxLen - 1) / maxLen;
                     }
                 default:
@@ -364,7 +364,7 @@ namespace SourceGen {
                         }
                         break;
                     case FormatDescriptor.Type.Dense: {
-                            int maxPerLine = MAX_OPERAND_LEN / 2;
+                            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
                             offset += subIndex * maxPerLine;
                             length -= subIndex * maxPerLine;
                             if (length > maxPerLine) {

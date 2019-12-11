@@ -68,6 +68,7 @@ namespace SourceGen {
         public const string FMT_STRING_DELIM = "fmt-string-delim";
         public const string FMT_NON_UNIQUE_LABEL_PREFIX = "fmt-non-unique-label-prefix";
         public const string FMT_LOCAL_VARIABLE_PREFIX = "fmt-local-variable-prefix";
+        public const string FMT_COMMA_SEP_BULK_DATA = "fmt-comma-sep-bulk-data";
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
@@ -101,6 +102,7 @@ namespace SourceGen {
 
         // Operand edit settings.
         public const string OPED_DEFAULT_STRING_ENCODING = "oped-default-string-encoding";
+        public const string OPED_DENSE_HEX_LIMIT = "oped-dense-hex-limit";
 
         // Hex dump viewer settings.
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";

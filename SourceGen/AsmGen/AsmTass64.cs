@@ -131,7 +131,7 @@ namespace SourceGen.AsmGen {
                 //DefineBigData3
                 //DefineBigData4
                 { "Fill", ".fill" },
-                //Dense                     // no equivalent, use .byte with comma-separated args
+                { "Dense", ".byte" },       // not really dense, just comma-separated bytes
                 //Junk
                 { "Align", ".align" },
                 { "StrGeneric", ".text" },
@@ -199,6 +199,7 @@ namespace SourceGen.AsmGen {
             config.mFullLineCommentDelimiterBase = ";";
             config.mBoxLineCommentDelimiter = ";";
             config.mNonUniqueLabelPrefix = "";      // should be '_', but that's a valid label char
+            config.mCommaSeparatedDense = true;
             config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
         }
 
@@ -520,25 +521,18 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            StringBuilder sb = new StringBuilder(MAX_OPERAND_LEN);
+            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
 
-            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.DefineData1);
-
-            int maxPerLine = MAX_OPERAND_LEN / 4;
-            int numChunks = (length + maxPerLine - 1) / maxPerLine;
-            for (int chunk = 0; chunk < numChunks; chunk++) {
-                int chunkStart = chunk * maxPerLine;
-                int chunkEnd = Math.Min((chunk + 1) * maxPerLine, length);
-                for (int i = chunkStart; i < chunkEnd; i++) {
-                    if (i != chunkStart) {
-                        sb.Append(',');
-                    }
-                    sb.Append(formatter.FormatHexValue(data[offset + i], 2));
+            string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
+            for (int i = 0; i < length; i += maxPerLine) {
+                int subLen = length - i;
+                if (subLen > maxPerLine) {
+                    subLen = maxPerLine;
                 }
+                string operandStr = formatter.FormatDenseHex(data, offset + i, subLen);
 
-                OutputLine(labelStr, opcodeStr, sb.ToString(), commentStr);
+                OutputLine(labelStr, opcodeStr, operandStr, commentStr);
                 labelStr = commentStr = string.Empty;
-                sb.Clear();
             }
         }
 

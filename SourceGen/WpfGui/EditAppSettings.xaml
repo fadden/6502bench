@@ -584,6 +584,10 @@ limitations under the License.
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
                     </StackPanel>
 
+                    <CheckBox DockPanel.Dock="Top" Margin="4,6,0,0"
+                              Content="Use comma-separated format for bulk data"
+                              IsChecked="{Binding CommaSeparatedBulkData}"/>
+
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
                               HorizontalAlignment="Right" Padding="2,4">
                         <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"

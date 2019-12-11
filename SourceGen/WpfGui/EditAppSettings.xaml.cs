@@ -889,6 +889,19 @@ namespace SourceGen.WpfGui {
                 }
             }
         }
+        private bool mCommaSeparatedBulkData;
+        public bool CommaSeparatedBulkData {
+            get { return mCommaSeparatedBulkData; }
+            set {
+                if (mCommaSeparatedBulkData != value) {
+                    mCommaSeparatedBulkData = value;
+                    OnPropertyChanged();
+                    mSettings.SetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, value);
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
 
         // prevent recursion
         private bool mSettingDisplayFmtCombo;
@@ -935,11 +948,13 @@ namespace SourceGen.WpfGui {
             public string OperandPrefixLong { get; private set; }
             public string NonUniqueLabelPrefix { get; private set; }
             public string LocalVarPrefix { get; private set; }
+            public bool CommaSeparatedBulkData { get; private set; }
             public ExpressionMode ExpressionStyle { get; private set; }
 
             public DisplayFormatPreset(int id, string name, string opcSuffixAbs,
                     string opcSuffixLong, string operPrefixAbs, string operPrefixLong,
-                    string nonUniqueLabelPrefix, string localVarPrefix, ExpressionMode expStyle) {
+                    string nonUniqueLabelPrefix, string localVarPrefix, bool commaSepBulkData,
+                    ExpressionMode expStyle) {
                 Ident = id;
                 Name = name;
                 OpcodeSuffixAbs = opcSuffixAbs;
@@ -948,6 +963,7 @@ namespace SourceGen.WpfGui {
                 OperandPrefixLong = operPrefixLong;
                 NonUniqueLabelPrefix = nonUniqueLabelPrefix;
                 LocalVarPrefix = localVarPrefix;
+                CommaSeparatedBulkData = commaSepBulkData;
                 ExpressionStyle = expStyle;
             }
         }
@@ -958,10 +974,11 @@ namespace SourceGen.WpfGui {
             DisplayPresets = new DisplayFormatPreset[AssemblerList.Count + 2];
             DisplayPresets[0] = new DisplayFormatPreset(DisplayFormatPreset.ID_CUSTOM,
                 (string)FindResource("str_PresetCustom"), string.Empty, string.Empty,
-                string.Empty, string.Empty, string.Empty, string.Empty, ExpressionMode.Unknown);
+                string.Empty, string.Empty, string.Empty, string.Empty, false,
+                ExpressionMode.Unknown);
             DisplayPresets[1] = new DisplayFormatPreset(DisplayFormatPreset.ID_DEFAULT,
                 (string)FindResource("str_PresetDefault"), string.Empty, "l", "a:", "f:",
-                string.Empty, string.Empty, ExpressionMode.Common);
+                string.Empty, string.Empty, false, ExpressionMode.Common);
             for (int i = 0; i < AssemblerList.Count; i++) {
                 AssemblerInfo asmInfo = AssemblerList[i];
                 AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
@@ -973,7 +990,8 @@ namespace SourceGen.WpfGui {
                     asmInfo.Name, formatConfig.mForceAbsOpcodeSuffix,
                     formatConfig.mForceLongOpcodeSuffix, formatConfig.mForceAbsOperandPrefix,
                     formatConfig.mForceLongOperandPrefix, formatConfig.mNonUniqueLabelPrefix,
-                    formatConfig.mLocalVariableLabelPrefix, formatConfig.mExpressionMode);
+                    formatConfig.mLocalVariableLabelPrefix, formatConfig.mCommaSeparatedDense,
+                    formatConfig.mExpressionMode);
             }
         }
 
@@ -996,6 +1014,8 @@ namespace SourceGen.WpfGui {
                 mSettings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
             LocalVarPrefix =
                 mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
+            CommaSeparatedBulkData =
+                mSettings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, false);
 
             string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
             ExpressionMode mode;
@@ -1053,6 +1073,7 @@ namespace SourceGen.WpfGui {
             OperandPrefixLong = preset.OperandPrefixLong;
             NonUniqueLabelPrefix = preset.NonUniqueLabelPrefix;
             LocalVarPrefix = preset.LocalVarPrefix;
+            CommaSeparatedBulkData = preset.CommaSeparatedBulkData;
 
             SelectExpressionStyle(preset.ExpressionStyle);
             // dirty flag will be set by change watchers if one or more fields have changed
@@ -1078,6 +1099,7 @@ namespace SourceGen.WpfGui {
                         OperandPrefixLong == preset.OperandPrefixLong &&
                         NonUniqueLabelPrefix == preset.NonUniqueLabelPrefix &&
                         LocalVarPrefix == preset.LocalVarPrefix &&
+                        CommaSeparatedBulkData == preset.CommaSeparatedBulkData &&
                         expMode == preset.ExpressionStyle) {
                     // match
                     displayFmtQuickComboBox.SelectedIndex = i;

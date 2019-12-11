@@ -38,18 +38,6 @@ namespace SourceGen.WpfGui {
         public SortedList<int, FormatDescriptor> Results { get; private set; }
 
         /// <summary>
-        /// Set to true when input is valid.  Controls whether the OK button is enabled.
-        /// </summary>
-        public bool IsValid {
-            get { return mIsValid; }
-            set {
-                mIsValid = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool mIsValid;
-
-        /// <summary>
         /// Selected offsets.  An otherwise contiguous range of offsets can be broken up
         /// by user-specified labels and address discontinuities, so this needs to be
         /// processed by range.
@@ -94,6 +82,35 @@ namespace SourceGen.WpfGui {
         /// was unavailable.
         /// </summary>
         private bool mPreferredFormatUnavailable;
+
+        /// <summary>
+        /// Set to true when input is valid.  Controls whether the OK button is enabled.
+        /// </summary>
+        public bool IsValid {
+            get { return mIsValid; }
+            set {
+                mIsValid = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool mIsValid;
+
+        public int MaxDenseBytesPerLine {
+            get { return mMaxDenseBytesPerLine; }
+            set {
+                if (mMaxDenseBytesPerLine != value) {
+                    mMaxDenseBytesPerLine = value;
+                    OnPropertyChanged();
+                    UpdateControls();
+
+                    if (IsLoaded) {
+                        // Set the radio button when text is typed.
+                        radioDenseHexLimited.IsChecked = true;
+                    }
+                }
+            }
+        }
+        private int mMaxDenseBytesPerLine;
 
         /// <summary>
         /// Text encoding combo box item.  We use the same TextScanMode enum that the
@@ -141,6 +158,8 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mSelection = trs;
             mFirstFormatDescriptor = firstDesc;
+
+            MaxDenseBytesPerLine = AppSettings.Global.GetInt(AppSettings.OPED_DENSE_HEX_LIMIT, 8);
 
             StringEncodingItems = new StringEncodingItem[] {
                 new StringEncodingItem(Res.Strings.SCAN_LOW_ASCII,
@@ -362,13 +381,23 @@ namespace SourceGen.WpfGui {
                 }
             }
             IsValid = isOk;
+
+            // If dense hex with a limit is selected, check the value.
+            if (radioDenseHexLimited.IsChecked == true) {
+                if (MaxDenseBytesPerLine > 0) {
+                    AppSettings.Global.SetInt(AppSettings.OPED_DENSE_HEX_LIMIT,
+                        MaxDenseBytesPerLine);
+                } else {
+                    IsValid = false;
+                }
+            }
         }
 
         #region Setup
 
         /// <summary>
         /// Determines the minimum and maximum alignment values, based on the sizes of the
-        /// regions and the address they end on.
+        /// regions and the address they end on.  Used for .align.
         /// </summary>
         /// <param name="min">Minimum allowed format, or None.</param>
         /// <param name="max">Maximum allowed format, or None.</param>
@@ -918,7 +947,6 @@ namespace SourceGen.WpfGui {
             FormatDescriptor.Type type = FormatDescriptor.Type.Default;
             FormatDescriptor.SubType subType = FormatDescriptor.SubType.None;
             WeakSymbolRef symbolRef = null;
-            int chunkLength = -1;
 
             FormatDescriptor.SubType charSubType;
             CharEncoding.InclusionTest charTest;
@@ -1013,6 +1041,7 @@ namespace SourceGen.WpfGui {
             }
 
             // Decode the main format.
+            int chunkLength = -1;
             if (radioDefaultFormat.IsChecked == true) {
                 // Default/None; note this would create a multi-byte Default format, which isn't
                 // really allowed.  What we actually want to do is remove the explicit formatting
@@ -1033,7 +1062,7 @@ namespace SourceGen.WpfGui {
             } else if (radio32BitLittle.IsChecked == true) {
                 type = FormatDescriptor.Type.NumericLE;
                 chunkLength = 4;
-            } else if (radioDenseHex.IsChecked == true) {
+            } else if (radioDenseHex.IsChecked == true || radioDenseHexLimited.IsChecked == true) {
                 type = FormatDescriptor.Type.Dense;
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
@@ -1087,6 +1116,21 @@ namespace SourceGen.WpfGui {
                         break;
                     case FormatDescriptor.Type.StringDci:
                         CreateDciStringEntries(rng.Low, rng.High, type, subType);
+                        break;
+                    case FormatDescriptor.Type.Dense:
+                        if (radioDenseHexLimited.IsChecked == true) {
+                            int low = rng.Low;
+                            while (low <= rng.High) {
+                                int remaining = rng.High - low + 1;
+                                int subLen = Math.Min(remaining, MaxDenseBytesPerLine);
+                                CreateSimpleEntries(type, subType, -1, null, low, low + subLen - 1);
+                                low += subLen;
+                                chunkLength -= subLen;
+                            }
+                        } else {
+                            CreateSimpleEntries(type, subType, chunkLength, null,
+                                rng.Low, rng.High);
+                        }
                         break;
                     default:
                         CreateSimpleEntries(type, subType, chunkLength, symbolRef,

@@ -127,13 +127,20 @@ limitations under the License.
         <TextBlock Text="Bulk Data" Margin="0,12,0,0"/>
         <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2"/>
         <RadioButton Name="radioDenseHex" GroupName="Main" Content="Densely-_packed bytes" Margin="0,4,0,0"
-                             Checked="MainGroup_CheckedChanged"/>
+                     Checked="MainGroup_CheckedChanged"/>
+        <StackPanel Orientation="Horizontal" Margin="20,4,0,0">
+            <RadioButton Name="radioDenseHexLimited" GroupName="Main" Content="...with a limit of"
+                         Checked="MainGroup_CheckedChanged"/>
+            <TextBox Width="40" Margin="7,-3,0,0" MaxLength="2"
+                     Text="{Binding MaxDenseBytesPerLine, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Text="bytes per line" Margin="7,0,0,0"/>
+        </StackPanel>
         <RadioButton Name="radioFill" GroupName="Main" Content="Area _filled with value" Margin="0,4,0,0"
-                             Checked="MainGroup_CheckedChanged"/>
-        <StackPanel Orientation="Horizontal">
-            <RadioButton Name="radioJunk" GroupName="Main" Content="_Junk bytes, end aligned to" Margin="0,4,0,0"
-                                 Checked="MainGroup_CheckedChanged"/>
-            <ComboBox Name="junkAlignComboBox" Margin="8,-1,0,0" Width="200"
+                     Checked="MainGroup_CheckedChanged"/>
+        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+            <RadioButton Name="radioJunk" GroupName="Main" Content="_Junk bytes, end aligned to"
+                         Checked="MainGroup_CheckedChanged"/>
+            <ComboBox Name="junkAlignComboBox" Margin="8,-5,0,0" Width="200"
                       ItemsSource="{Binding JunkAlignmentItems}" DisplayMemberPath="Description"/>
         </StackPanel>
 

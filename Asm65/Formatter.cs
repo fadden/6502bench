@@ -82,6 +82,7 @@ namespace Asm65 {
 
             // miscellaneous
             public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
+            public bool mCommaSeparatedDense;           // "20edfd" vs. "$20,$ed,$fd"
 
             // hex dumps
             public bool mHexDumpAsciiOnly;              // disallow non-ASCII chars in hex dumps?
@@ -935,13 +936,45 @@ namespace Asm65 {
         /// <returns>Formatted data string.</returns>
         public string FormatDenseHex(byte[] data, int offset, int length) {
             char[] hexChars = mFormatConfig.mUpperHexDigits ? sHexCharsUpper : sHexCharsLower;
-            char[] text = new char[length * 2];
-            for (int i = 0; i < length; i++) {
-                byte val = data[offset + i];
-                text[i * 2] = hexChars[val >> 4];
-                text[i * 2 + 1] = hexChars[val & 0x0f];
+            char[] text;
+            if (mFormatConfig.mCommaSeparatedDense) {
+                text = new char[length * 4 - 1];
+                for (int i = 0; i < length; i++) {
+                    byte val = data[offset + i];
+                    text[i * 4] = '$';
+                    text[i * 4 + 1] = hexChars[val >> 4];
+                    text[i * 4 + 2] = hexChars[val & 0x0f];
+                    if (i != length - 1) {
+                        text[i * 4 + 3] = ',';
+                    }
+                }
+            } else {
+                text = new char[length * 2];
+                for (int i = 0; i < length; i++) {
+                    byte val = data[offset + i];
+                    text[i * 2] = hexChars[val >> 4];
+                    text[i * 2 + 1] = hexChars[val & 0x0f];
+                }
             }
             return new string(text);
+        }
+
+        /// <summary>
+        /// Returns the number of characters output for each byte when formatting dense hex.
+        /// </summary>
+        /// <remarks>
+        /// This isn't quite right, because you don't need a comma after the very last element
+        /// in the list for comma-separated values.  Handling this correctly for multi-line
+        /// items is more trouble than it's worth though.
+        /// </remarks>
+        public int CharsPerDenseByte {
+            get {
+                if (mFormatConfig.mCommaSeparatedDense) {
+                    return 4;
+                } else {
+                    return 2;
+                }
+            }
         }
 
         /// <summary>
