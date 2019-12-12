@@ -97,6 +97,7 @@ limitations under the License.
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -136,7 +137,12 @@ limitations under the License.
                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
         </Border>
 
-        <Grid Grid.Row="2" HorizontalAlignment="Left">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock FontSize="10" Text="Bitmap size: "/>
+                <TextBlock FontSize="10" Text="{Binding BitmapDimensions, FallbackValue=32x64}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="3" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -145,7 +151,7 @@ limitations under the License.
 
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
                 <!--<TextBlock Text="Message:" Margin="0,0,8,0"/>-->
-                <TextBlock Text="{Binding PluginErrMessage}" Foreground="Red"/>
+                <TextBlock Text="{Binding PluginErrMessage, FallbackValue=ERROR}" Foreground="Red"/>
             </StackPanel>
 
             <TextBlock Grid.Row="1" Text="Parameters:" Margin="0,0,0,4"/>
@@ -157,7 +163,7 @@ limitations under the License.
             </ItemsControl>
         </Grid>
         
-        <DockPanel Grid.Column="0" Grid.Row="3" Margin="0,8,0,0" LastChildFill="False">
+        <DockPanel Grid.Column="0" Grid.Row="4" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>

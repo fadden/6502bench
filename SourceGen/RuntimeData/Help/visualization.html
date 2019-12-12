@@ -132,7 +132,8 @@ arrangements are common.  The script defines three generators:</p>
     bitmaps.  This is intended for hi-res fonts, which are typically
     8 bytes per entry, stored one after another.  These are always
     converted as monochrome, and have a 1-pixel transparent gap
-    between elements.</li>
+    between elements.  (This also works for Apple /// fonts, but
+    currently ignores the high bit in each byte.)</li>
   <li><b>Hi-Res Screen Image</b> - used for 8KiB screen images.  The
     data is linearized and converted to a 280x192 bitmap.  Because
     images are relatively large, the generator does not require them

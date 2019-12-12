@@ -23,6 +23,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 using Asm65;
 using PluginCommon;
 
@@ -70,6 +71,7 @@ namespace SourceGen.WpfGui {
         }
         private string mTagString;
 
+        // Text turns red on error.
         public Brush TagLabelBrush {
             get { return mTagLabelBrush; }
             set { mTagLabelBrush = value; OnPropertyChanged(); }
@@ -111,6 +113,13 @@ namespace SourceGen.WpfGui {
         /// property changed event from here.
         /// </summary>
         public string LastPluginMessage { get; set; }
+
+        // Bitmap width/height indicator.
+        public string BitmapDimensions {
+            get { return mBitmapDimensions; }
+            set { mBitmapDimensions = value; OnPropertyChanged(); }
+        }
+        private string mBitmapDimensions;
 
         /// <summary>
         /// ItemsSource for the ItemsControl with the generated parameter controls.
@@ -417,6 +426,7 @@ namespace SourceGen.WpfGui {
 
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
 
+            BitmapDimensions = "?";
             if (!IsValid || item == null) {
                 previewImage.Source = sBadParamsImage;
             } else {
@@ -448,6 +458,8 @@ namespace SourceGen.WpfGui {
                     IsValid = false;
                 } else {
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
+                    BitmapDimensions = string.Format("{0}x{1}",
+                        previewImage.Source.Width, previewImage.Source.Height);
                 }
             }
 
