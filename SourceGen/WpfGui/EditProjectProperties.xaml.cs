@@ -78,15 +78,39 @@ namespace SourceGen.WpfGui {
         private string mProjectDir;
         public bool HasProjectDir { get { return !string.IsNullOrEmpty(mProjectDir); } }
 
+        /// <summary>
+        /// Tab page enumeration.
+        /// </summary>
+        public enum Tab {
+            Unknown = 0,
+            General,
+            ProjectSymbols,
+            SymbolFiles,
+            ExtensionScripts
+        }
+
+        /// <summary>
+        /// Tab to show when dialog is first opened.
+        /// </summary>
+        private Tab mInitialTab;
+
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         /// <summary>
         /// Constructor.  Initial state is configured from an existing ProjectProperties object.
         /// </summary>
+        /// <param name="owner">Parent window.</param>
         /// <param name="props">Property holder to clone.</param>
         /// <param name="projectDir">Project directory, if known.</param>
         /// <param name="formatter">Text formatter.</param>
+        /// <param name="initialTab">Tab to open initially.  Pass "Unknown" for default.</param>
         public EditProjectProperties(Window owner, ProjectProperties props, string projectDir,
-                Formatter formatter) {
+                Formatter formatter, Tab initialTab) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
@@ -94,6 +118,7 @@ namespace SourceGen.WpfGui {
             mWorkProps = new ProjectProperties(props);
             mProjectDir = projectDir;
             mFormatter = formatter;
+            mInitialTab = initialTab;
 
             // Construct arrays used as item sources for combo boxes.
             CpuItems = new CpuItem[] {
@@ -133,18 +158,32 @@ namespace SourceGen.WpfGui {
             };
         }
 
-        // INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             Loaded_General();
 
             LoadProjectSymbols();
             LoadPlatformSymbolFiles();
             LoadExtensionScriptNames();
+
+            switch (mInitialTab) {
+                case Tab.General:
+                    tabControl.SelectedItem = generalTab;
+                    break;
+                case Tab.ProjectSymbols:
+                    tabControl.SelectedItem = projectSymbolsTab;
+                    break;
+                case Tab.SymbolFiles:
+                    tabControl.SelectedItem = symbolFilesTab;
+                    break;
+                case Tab.ExtensionScripts:
+                    tabControl.SelectedItem = extensionScriptsTab;
+                    break;
+                case Tab.Unknown:
+                    break;
+                default:
+                    Debug.Assert(false);
+                    break;
+            }
 
             UpdateControls();
         }

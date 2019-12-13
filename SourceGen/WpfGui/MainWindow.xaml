@@ -99,6 +99,11 @@ limitations under the License.
                     <KeyGesture>Ctrl+N</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="EditProjectPropertiesSymbolsCmd">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>F6</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="EditProjectSymbolCmd" Text="Edit Project Symbol..."/>
             <RoutedUICommand x:Key="EditStatusFlagsCmd" Text="Override Status Flags..."/>
             <RoutedUICommand x:Key="EditVisualizationSetCmd" Text="Create/Edit Visualization Set..."/>
@@ -222,6 +227,8 @@ limitations under the License.
                         CanExecute="CanEditNote" Executed="EditNoteCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditOperandCmd}"
                         CanExecute="CanEditOperand" Executed="EditOperandCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditProjectPropertiesSymbolsCmd}"
+                        CanExecute="IsProjectOpen" Executed="EditProjectPropertiesSymbolsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditProjectSymbolCmd}"
                         CanExecute="CanEditProjectSymbol" Executed="EditProjectSymbolCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditStatusFlagsCmd}"
@@ -344,7 +351,7 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Command="{StaticResource EditHeaderCommentCmd}"/>
                 <MenuItem Command="Properties" Header="Project Properties..."/>
-                <!-- IsChecked is set whenever the menu is opened -->
+                <!-- IsChecked is set when the menu is opened -->
                 <MenuItem Name="toggleDataScanMenuItem"
                           Command="{StaticResource ToggleDataScanCmd}" IsCheckable="True"/>
                 <Separator/>

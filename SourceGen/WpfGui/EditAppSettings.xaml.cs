@@ -171,7 +171,6 @@ namespace SourceGen.WpfGui {
                 default:
                     Debug.Assert(false);
                     break;
-
             }
 
             // The various control initializers probably triggered events.  Reset the dirty flag.

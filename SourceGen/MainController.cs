@@ -2071,13 +2071,13 @@ namespace SourceGen {
             }
         }
 
-        public void EditProjectProperties() {
+        public void EditProjectProperties(WpfGui.EditProjectProperties.Tab initialTab) {
             string projectDir = string.Empty;
             if (!string.IsNullOrEmpty(mProjectPathName)) {
                 projectDir = Path.GetDirectoryName(mProjectPathName);
             }
             EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
-                projectDir, mOutputFormatter);
+                projectDir, mOutputFormatter, initialTab);
             dlg.ShowDialog();
             ProjectProperties newProps = dlg.NewProps;
 

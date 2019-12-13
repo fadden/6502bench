@@ -1180,7 +1180,11 @@ namespace SourceGen.WpfGui {
         }
 
         private void EditProjectPropertiesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.EditProjectProperties();
+            mMainCtrl.EditProjectProperties(WpfGui.EditProjectProperties.Tab.Unknown);
+        }
+
+        private void EditProjectPropertiesSymbolsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditProjectProperties(WpfGui.EditProjectProperties.Tab.ProjectSymbols);
         }
 
         private void EditProjectSymbolCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
