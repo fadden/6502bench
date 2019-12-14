@@ -957,6 +957,12 @@ namespace SourceGen {
                         mProject.GetAnattrib(offset - 1).IsData) {
                     // Transition from data to code.  (Don't add blank line for inline data.)
                     lines.Add(GenerateBlankLine(offset));
+                } else if (mProject.VisualizationSets.ContainsKey(offset) && !addBlank &&
+                        offset != 0) {
+                    // Blank line before visualization set helps keep image visually grouped
+                    // with its data.  (Slightly weird things happen with .ORG at the start of
+                    // the file; don't try to add a blank there.)
+                    lines.Add(GenerateBlankLine(offset));
                 } else if (addBlank) {
                     // Previous instruction wanted to be followed by a blank line.
                     lines.Add(GenerateBlankLine(offset));

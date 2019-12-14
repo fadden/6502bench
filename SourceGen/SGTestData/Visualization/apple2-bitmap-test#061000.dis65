@@ -19,7 +19,10 @@
 "Comments":{
 },
 "LongComments":{
-},
+"222":{
+"Text":"\r\nPurple/green diagonal\r\n\r\n","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"0":{
+"Text":"Some images:","BoxMode":false,"MaxWidth":80,"BackgroundColor":0}},
 "Notes":{
 "222":{
 "Text":"Bitmaps here","BoxMode":false,"MaxWidth":80,"BackgroundColor":-256}},
@@ -43,6 +46,19 @@
 "LvTables":{
 },
 "VisualizationSets":{
+"0":{
+"Items":[{
+"Tag":"multi1","VisGenIdent":"apple2-hi-res-bitmap","VisGenParams":{
+"offset":222,"byteWidth":1,"height":8,"colStride":0,"rowStride":0,"isColor":true,"isFirstOdd":false}},
+{
+"Tag":"multi2","VisGenIdent":"apple2-hi-res-bitmap","VisGenParams":{
+"offset":230,"byteWidth":1,"height":8,"colStride":0,"rowStride":0,"isColor":true,"isFirstOdd":false}},
+{
+"Tag":"multi3","VisGenIdent":"apple2-hi-res-bitmap","VisGenParams":{
+"offset":238,"byteWidth":12,"height":1,"colStride":0,"rowStride":0,"isColor":false,"isFirstOdd":false}},
+{
+"Tag":"multi4","VisGenIdent":"apple2-hi-res-bitmap","VisGenParams":{
+"offset":270,"byteWidth":3,"height":8,"colStride":0,"rowStride":0,"isColor":true,"isFirstOdd":false}}]},
 "222":{
 "Items":[{
 "Tag":"vis0000de","VisGenIdent":"apple2-hi-res-bitmap","VisGenParams":{

@@ -165,6 +165,12 @@ namespace SourceGen.WpfGui {
             set { mOverwriteCss = value; OnPropertyChanged(); }
         }
 
+        private bool mGenerateImageFiles;
+        public bool GenerateImageFiles {
+            get { return mGenerateImageFiles; }
+            set { mGenerateImageFiles = value; OnPropertyChanged(); }
+        }
+
         private enum TextMode {
             Unknown = 0,
             PlainText,
@@ -210,6 +216,8 @@ namespace SourceGen.WpfGui {
             SelectionOnly = AppSettings.Global.GetBool(AppSettings.EXPORT_SELECTION_ONLY, false);
             LongLabelNewLine =
                 AppSettings.Global.GetBool(AppSettings.EXPORT_LONG_LABEL_NEW_LINE, false);
+            GenerateImageFiles =
+                AppSettings.Global.GetBool(AppSettings.EXPORT_GENERATE_IMAGE_FILES, true);
 
             int[] colWidths = new int[] { 9, 8, 11, 72 };   // 100-col output
             string colStr = AppSettings.Global.GetString(AppSettings.EXPORT_COL_WIDTHS, null);
@@ -248,6 +256,7 @@ namespace SourceGen.WpfGui {
             AppSettings.Global.SetBool(AppSettings.EXPORT_SHOW_ATTR, ShowAttr);
             AppSettings.Global.SetBool(AppSettings.EXPORT_SELECTION_ONLY, SelectionOnly);
             AppSettings.Global.SetBool(AppSettings.EXPORT_LONG_LABEL_NEW_LINE, LongLabelNewLine);
+            AppSettings.Global.SetBool(AppSettings.EXPORT_GENERATE_IMAGE_FILES,GenerateImageFiles);
             int[] colWidths = new int[] {
                 AsmLabelColWidth, AsmOpcodeColWidth, AsmOperandColWidth, AsmCommentColWidth
             };

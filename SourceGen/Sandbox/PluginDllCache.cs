@@ -79,6 +79,7 @@ namespace SourceGen.Sandbox {
         /// Prepares the plugin directory.  Creates it and copies PluginCommon.dll in.
         /// Throws an exception if something fails.
         /// </summary>
+        /// <exception cref="IOException">Various failures from file/dir operations.</exception>
         public static void PreparePluginDir() {
             string dstDir = GetPluginDirPath();
             if (File.Exists(dstDir) && !Directory.Exists(dstDir)) {

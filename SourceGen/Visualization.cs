@@ -47,7 +47,8 @@ namespace SourceGen {
         public ReadOnlyDictionary<string, object> VisGenParams { get; private set; }
 
         /// <summary>
-        /// Cached reference to 2D image, useful for thumbnails.  Not serialized.
+        /// Cached reference to 2D image, useful for thumbnails.  Not serialized.  This always
+        /// has an image reference; in times of trouble it will point at BROKEN_IMAGE.
         /// </summary>
         /// <remarks>
         /// Because the underlying data never changes, we only need to regenerate the

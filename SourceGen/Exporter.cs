@@ -19,6 +19,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 using Asm65;
 using CommonUtil;
@@ -42,6 +43,11 @@ namespace SourceGen {
         /// Should notes be included in the output?
         /// </summary>
         public bool IncludeNotes { get; set; }
+
+        /// <summary>
+        /// Should image files be generated?
+        /// </summary>
+        public bool GenerateImageFiles { get; set; }
 
         /// <summary>
         /// If set, labels that are wider than the label column should go on their own line.
@@ -82,6 +88,11 @@ namespace SourceGen {
         /// Text formatter.
         /// </summary>
         private Formatter mFormatter;
+
+        /// <summary>
+        /// Directory path for image files.
+        /// </summary>
+        private string mImageDirPath;
 
         /// <summary>
         /// The cumulative width of the columns determines the start point.
@@ -315,7 +326,7 @@ namespace SourceGen {
                     TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Label]);
                     break;
                 case LineListGen.Line.Type.VisualizationSet:
-                    break;      // TODO(xyzzy)
+                    return;     // show nothing
                 case LineListGen.Line.Type.Blank:
                     break;
                 default:
@@ -371,8 +382,8 @@ namespace SourceGen {
         /// <summary>
         /// Generates HTML output to the specified path.
         /// </summary>
-        /// <param name="pathName">Full pathname of output file.  This defines the root
-        ///   directory if there are additional files.</param>
+        /// <param name="pathName">Full pathname of output file (including ".html").  This
+        ///   defines the root directory if there are additional files.</param>
         /// <param name="overwriteCss">If set, existing CSS file will be replaced.</param>
         public void OutputToHtml(string pathName, bool overwriteCss) {
             string exportTemplate = RuntimeDataAccess.GetPathName(HTML_EXPORT_TEMPLATE);
@@ -386,6 +397,41 @@ namespace SourceGen {
                 MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
+            }
+
+            // We should only need the _IMG directory if there are visualizations.
+            if (GenerateImageFiles && mProject.VisualizationSets.Count != 0) {
+                string imageDirName = Path.GetFileNameWithoutExtension(pathName) + "_IMG";
+                string imageDirPath = Path.Combine(Path.GetDirectoryName(pathName), imageDirName);
+                bool exists = false;
+                try {
+                    FileAttributes attr = File.GetAttributes(imageDirPath);
+                    if ((attr & FileAttributes.Directory) != FileAttributes.Directory) {
+                        string msg = string.Format(Res.Strings.ERR_FILE_EXISTS_NOT_DIR_FMT,
+                            imageDirPath);
+                        MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    exists = true;
+                } catch (FileNotFoundException) {
+                } catch (DirectoryNotFoundException) {
+                }
+
+                if (!exists) {
+                    try {
+                        Directory.CreateDirectory(imageDirPath);
+                    } catch (Exception ex) {
+                        string msg = string.Format(Res.Strings.ERR_DIR_CREATE_FAILED_FMT,
+                            imageDirPath, ex.Message);
+                        MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                // All good.
+                mImageDirPath = imageDirPath;
             }
 
             // Perform some quick substitutions.  This could be done more efficiently,
@@ -620,7 +666,16 @@ namespace SourceGen {
                         parts.Comment.Length);
                     break;
                 case LineListGen.Line.Type.VisualizationSet:
-                    break;      // TODO(xyzzy)
+                    if (!GenerateImageFiles) {
+                        // generate nothing at all
+                        return;
+                    }
+                    while (colPos < mColStart[(int)Col.Label]) {
+                        sb.Append(' ');
+                        colPos++;
+                    }
+                    OutputVisualizationSet(line.FileOffset, sb);
+                    break;
                 case LineListGen.Line.Type.Blank:
                     break;
                 default:
@@ -629,6 +684,73 @@ namespace SourceGen {
             }
 
             tw.WriteLine(sb);
+        }
+
+        /// <summary>
+        /// Generate one or more GIF image files, and generate references to them.
+        /// </summary>
+        /// <param name="offset">Visualization set file offset.</param>
+        /// <param name="sb">String builder for the HTML output.</param>
+        private void OutputVisualizationSet(int offset, StringBuilder sb) {
+            if (!mProject.VisualizationSets.TryGetValue(offset,
+                    out VisualizationSet visSet)) {
+                sb.Append("Internal error - visualization set missing");
+                Debug.Assert(false);
+                return;
+            }
+            if (visSet.Count == 0) {
+                sb.Append("Internal error - empty visualization set");
+                Debug.Assert(false);
+                return;
+            }
+
+            string imageDirFileName = Path.GetFileName(mImageDirPath);
+
+            for (int index = 0; index < visSet.Count; index++) {
+                Visualization vis = visSet[index];
+
+                // Encode a GIF the same size as the original bitmap.
+                GifBitmapEncoder encoder = new GifBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
+
+                // Create new or replace existing image file.
+                string fileName = "vis" + offset.ToString("x6") + "_" + index.ToString("d2") +
+                    ".gif";
+                using (FileStream stream = new FileStream(Path.Combine(mImageDirPath, fileName),
+                        FileMode.Create)) {
+                    encoder.Save(stream);
+                }
+
+                // Create as thumbnail, preserving proportions.  I'm assuming most images
+                // will be small enough that generating a separate thumbnail would be
+                // counter-productive.  This seems to look best if the height is consistent
+                // across all visualization lines, but that can create some monsters (e.g.
+                // a bitmap that's 1 pixel high and 40 wide).
+                int dimMult = 64;
+                //double maxDim = Math.Max(vis.CachedImage.Width, vis.CachedImage.Height);
+                double maxDim = vis.CachedImage.Height;
+                if (vis.CachedImage.Width > vis.CachedImage.Height * 2) {
+                    // Too proportionally wide, so use the width as the limit.  Allow it to
+                    // up to 2x the max width (which can't cause the thumb height to exceed
+                    // the height limit).
+                    maxDim = vis.CachedImage.Width;
+                    dimMult *= 2;
+                }
+                int thumbWidth = (int)Math.Round(dimMult * (vis.CachedImage.Width / maxDim));
+                int thumbHeight = (int)Math.Round(dimMult * (vis.CachedImage.Height / maxDim));
+                Debug.WriteLine(vis.CachedImage.Width + "x" + vis.CachedImage.Height + " --> " +
+                    thumbWidth + "x" + thumbHeight + " (" + maxDim + ")");
+
+                if (index != 0) {
+                    sb.Append("&nbsp;");
+                }
+
+                sb.Append("<img class=\"vis\" alt=\"vis\" src=\"");
+                sb.Append(imageDirFileName);
+                sb.Append('/');
+                sb.Append(fileName);
+                sb.Append("\" width=\"" + thumbWidth + "\" height=\"" + thumbHeight + "\"/>");
+            }
         }
 
         /// <summary>

@@ -131,6 +131,7 @@ namespace SourceGen {
         public const string EXPORT_TEXT_MODE = "export-text-mode";
         public const string EXPORT_SELECTION_ONLY = "export-selection-only";
         public const string EXPORT_LONG_LABEL_NEW_LINE = "export-long-label-new-line";
+        public const string EXPORT_GENERATE_IMAGE_FILES = "export-generate-image-files";
 
         // Internal debugging features.
         public const string DEBUG_MENU_ENABLED = "debug-menu-enabled";

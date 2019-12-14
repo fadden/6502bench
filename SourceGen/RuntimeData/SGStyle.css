@@ -24,3 +24,19 @@ a[href^="#"]:hover {
     color: blue;
     text-decoration: underline;
 }
+
+/*
+ * Put a border around visualizations.  Disable smoothing so they don't
+ * blur out.
+ *
+ * Pixelated rendering works in Chrome, Safari, and IE11, but doesn't in
+ * current versions of Edge and Firefox.  We could do it with Javascript
+ * Canvas (e.g. https://stackoverflow.com/a/19129822/294248), or by
+ * generating scaled thumbnail files directly.
+ */
+.vis {
+    border: 1px solid gray;
+
+    -ms-interpolation-mode: nearest-neighbor;
+    image-rendering: pixelated;
+}

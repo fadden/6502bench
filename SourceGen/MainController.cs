@@ -2205,6 +2205,7 @@ namespace SourceGen {
             Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
                 dlg.ColFlags, rightWidths);
             eport.IncludeNotes = dlg.IncludeNotes;
+            eport.GenerateImageFiles = dlg.GenerateImageFiles;
             eport.LongLabelNewLine = dlg.LongLabelNewLine;
             if (dlg.SelectionOnly) {
                 DisplayListSelection selection = mMainWin.CodeDisplayList.SelectedIndices;

@@ -93,6 +93,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadVisualizationFmt");
         public static string ERR_BAD_VISUALIZATION_SET_FMT =
             (string)Application.Current.FindResource("str_ErrBadVisualizationSetFmt");
+        public static string ERR_DIR_CREATE_FAILED_FMT =
+            (string)Application.Current.FindResource("str_ErrDirCreateFailedFmt");
         public static string ERR_DUPLICATE_LABEL_FMT =
             (string)Application.Current.FindResource("str_ErrDuplicateLabelFmt");
         public static string ERR_FILE_COPY_FAILED_FMT =
