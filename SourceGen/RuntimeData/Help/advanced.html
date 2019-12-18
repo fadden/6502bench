@@ -177,6 +177,10 @@ invoked is not defined.</p>
 
 <h4>Known Issues and Limitations</h4>
 
+<p>Scripts are currently limited to C# version 5, because the compiler
+built into .NET only handles that.  C# 6 and later require installing an
+additional package (Roslyn).</p>
+
 <p>When a project is opened, any errors encountered by the script compiler
 are reported to the user.  If the project is already open, and a script
 is added to the project through the Project Properties editor, compiler

@@ -97,12 +97,16 @@
     </Compile>
     <Compile Include="LocalVariableTable.cs" />
     <Compile Include="Visualization.cs" />
+    <Compile Include="VisualizationAnimation.cs" />
     <Compile Include="VisualizationSet.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\EditAppSettings.xaml.cs">
       <DependentUpon>EditAppSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\EditBitmapAnimation.xaml.cs">
+      <DependentUpon>EditBitmapAnimation.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\EditComment.xaml.cs">
       <DependentUpon>EditComment.xaml</DependentUpon>
@@ -275,6 +279,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\EditAppSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\EditBitmapAnimation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

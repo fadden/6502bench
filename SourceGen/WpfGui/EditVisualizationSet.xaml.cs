@@ -31,6 +31,9 @@ namespace SourceGen.WpfGui {
     /// Visualization set editor.
     /// </summary>
     public partial class EditVisualizationSet : Window, INotifyPropertyChanged {
+        /// <summary>
+        /// Modified visualization set.  Only valid after OK is hit.
+        /// </summary>
         public VisualizationSet NewVisSet { get; private set; }
 
         private DisasmProject mProject;
@@ -139,17 +142,6 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private VisualizationSet MakeVisSet() {
-            if (VisualizationList.Count == 0) {
-                return null;
-            }
-            VisualizationSet newSet = new VisualizationSet(VisualizationList.Count);
-            foreach (Visualization vis in VisualizationList) {
-                newSet.Add(vis);
-            }
-            return newSet;
-        }
-
         private void VisualizationList_SelectionChanged(object sender,
                 SelectionChangedEventArgs e) {
             bool isItemSelected = (visualizationGrid.SelectedItem != null);
@@ -164,14 +156,22 @@ namespace SourceGen.WpfGui {
             EditSelectedItem();
         }
 
-        private void NewButton_Click(object sender, RoutedEventArgs e) {
+        private void NewBitmapButton_Click(object sender, RoutedEventArgs e) {
             EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
-                null);
+                CreateEditedSetList(), null);
             if (dlg.ShowDialog() != true) {
                 return;
             }
             VisualizationList.Add(dlg.NewVis);
             visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
+        }
+
+        private void NewBitmapAnimationButton_Click(object sender, RoutedEventArgs e) {
+            EditBitmapAnimation dlg = new EditBitmapAnimation(this);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+            // TODO(xyzzy)
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
@@ -180,13 +180,13 @@ namespace SourceGen.WpfGui {
 
         private void EditSelectedItem() {
             if (!IsEditEnabled) {
-                // can happen on a double-click
+                // can get called here by a double-click
                 return;
             }
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
 
             EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
-                item);
+                CreateEditedSetList(), item);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -227,6 +227,43 @@ namespace SourceGen.WpfGui {
             VisualizationList.Remove(item);
             VisualizationList.Insert(index + 1, item);
             visualizationGrid.SelectedIndex = index + 1;
+        }
+
+        /// <summary>
+        /// Creates a VisualizationSet from the current list of Visualizations.
+        /// </summary>
+        /// <returns>New VisualizationSet.</returns>
+        private VisualizationSet MakeVisSet() {
+            VisualizationSet newSet = new VisualizationSet(VisualizationList.Count);
+            foreach (Visualization vis in VisualizationList) {
+                newSet.Add(vis);
+            }
+            return newSet;
+        }
+
+        /// <summary>
+        /// Generates a list of VisualizationSet references.  This is the list from the
+        /// DisasmProject, but with the set we're editing added or substituted.
+        /// </summary>
+        /// <remarks>
+        /// The editors sometimes need access to the full collection of Visualization objects,
+        /// such as when testing a tag for uniqueness or getting a list of all bitmap
+        /// frames for an animation.  The editor needs access to recent edits that have not
+        /// been pushed to the project yet.
+        /// </remarks>
+        /// <returns>List of VisualizationSet.</returns>
+        private SortedList<int, VisualizationSet> CreateEditedSetList() {
+            SortedList<int, VisualizationSet> mixList =
+                new SortedList<int, VisualizationSet>(mProject.VisualizationSets.Count);
+
+            mixList[mOffset] = MakeVisSet();
+            foreach (KeyValuePair<int, VisualizationSet> kvp in mProject.VisualizationSets) {
+                // Skip the entry for mOffset (if it exists).
+                if (kvp.Key != mOffset) {
+                    mixList[kvp.Key] = kvp.Value;
+                }
+            }
+            return mixList;
         }
     }
 }

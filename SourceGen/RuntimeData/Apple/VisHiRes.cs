@@ -279,6 +279,9 @@ namespace RuntimeData.Apple {
                 int high = ((row & 0x07) << 2) | ((row & 0x30) >> 4);
                 int rowAddr = baseAddr + ((high << 8) | low);
 
+                // Not expecting the data to wrap around, but it's possible.
+                rowAddr = (baseAddr & 0xff0000) | (rowAddr & 0xffff);
+
                 for (int col = 0; col < HR_BYTE_WIDTH; col++) {
                     int srcOffset = mAddrTrans.AddressToOffset(offset, rowAddr + col);
                     if (srcOffset < 0) {

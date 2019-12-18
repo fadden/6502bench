@@ -40,8 +40,8 @@ namespace SourceGen.WpfGui {
         private DisasmProject mProject;
         private Formatter mFormatter;
         private int mSetOffset;
+        private SortedList<int, VisualizationSet> mEditedList;
         private Visualization mOrigVis;
-        private string mOrigTag;
 
         /// <summary>
         /// Identifier for last visualizer we used, for the benefit of "new".
@@ -173,7 +173,7 @@ namespace SourceGen.WpfGui {
         /// <param name="formatter">Text formatter.</param>
         /// <param name="vis">Visualization to edit, or null if this is new.</param>
         public EditVisualization(Window owner, DisasmProject proj, Formatter formatter,
-                int setOffset, Visualization vis) {
+                int setOffset, SortedList<int, VisualizationSet> editedList, Visualization vis) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
@@ -181,8 +181,8 @@ namespace SourceGen.WpfGui {
             mProject = proj;
             mFormatter = formatter;
             mSetOffset = setOffset;
+            mEditedList = editedList;
             mOrigVis = vis;
-            mOrigTag = (vis == null) ? string.Empty : vis.Tag;
 
             mScriptSupport = new ScriptSupport(this);
             mProject.PrepareScripts(mScriptSupport);
@@ -302,7 +302,7 @@ namespace SourceGen.WpfGui {
             ReadOnlyDictionary<string, object> valueDict = CreateVisGenParams();
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
-            NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict);
+            NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
             NewVis.CachedImage = (BitmapSource)previewImage.Source;
 
             sLastVisIdent = NewVis.VisGenIdent;
@@ -465,15 +465,9 @@ namespace SourceGen.WpfGui {
 
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool tagOk);
             Visualization match = FindVisualizationByTag(trimTag);
-            if (match != null && trimTag != mOrigTag) {
-                // Another vis already has this tag.
-                //
-                // TODO: this is wrong.  If I edit the set, edit a Vis, change it's tag, then
-                // immediately edit it again, I can't change the tag back to what it originally
-                // was, because the original version of the Vis is in the VisSet and I no longer
-                // have a way to know that that Vis and this Vis are the same.  To make this work
-                // correctly we need to track renames, which I think we may want to do later on
-                // for animations, so not dealing with this yet.
+            if (match != null && (mOrigVis == null || trimTag != mOrigVis.Tag)) {
+                // Another vis already has this tag.  We're checking the edited list, so we'll
+                // be current with edits to this or other Visualizations in the same set.
                 tagOk = false;
             }
             if (!tagOk) {
@@ -485,12 +479,13 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Finds a Visualization with a matching tag, searching across all sets.
+        /// Finds a Visualization with a matching tag, searching across all sets in the
+        /// edited list.
         /// </summary>
         /// <param name="tag">Tag to search for.</param>
         /// <returns>Matching Visualization, or null if not found.</returns>
         private Visualization FindVisualizationByTag(string tag) {
-            foreach (KeyValuePair<int, VisualizationSet> kvp in mProject.VisualizationSets) {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in mEditedList) {
                 foreach (Visualization vis in kvp.Value) {
                     if (vis.Tag == tag) {
                         return vis;

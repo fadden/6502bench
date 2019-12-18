@@ -2173,11 +2173,16 @@ namespace SourceGen {
             if (dlg.ShowDialog() != true) {
                 return;
             }
-            if (curVisSet != dlg.NewVisSet) {
+            VisualizationSet newSet = dlg.NewVisSet;
+            if (newSet.Count == 0) {
+                // empty sets are deleted
+                newSet = null;
+            }
+            if (curVisSet != newSet) {
                 // New table, edited in place, or deleted.
                 UndoableChange uc = UndoableChange.CreateVisualizationSetChange(offset,
-                    curVisSet, dlg.NewVisSet);
-                Debug.WriteLine("Change " + curVisSet + " to " + dlg.NewVisSet);
+                    curVisSet, newSet);
+                //Debug.WriteLine("Change " + curVisSet + " to " + newSet);
                 ChangeSet cs = new ChangeSet(uc);
                 ApplyUndoableChanges(cs);
             } else {

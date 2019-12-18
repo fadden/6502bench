@@ -88,7 +88,9 @@ limitations under the License.
         
         <StackPanel Grid.Column="1" Grid.Row="1">
             <Button Width="110" Margin="4" Content="_New Bitmap..."
-                    IsEnabled="{Binding HasVisPlugins}" Click="NewButton_Click"/>
+                    IsEnabled="{Binding HasVisPlugins}" Click="NewBitmapButton_Click"/>
+            <Button Width="110" Margin="4" Content="_New Bitmap&#x0a;Animation..."
+                    Click="NewBitmapAnimationButton_Click"/>
 
             <Button Width="110" Margin="4,20,4,4" Content="_Edit..."
                     IsEnabled="{Binding IsEditEnabled}" Click="EditButton_Click"/>

@@ -185,6 +185,10 @@ namespace SourceGen.Sandbox {
                 out FileLoadReport report) {
             report = new FileLoadReport(scriptPathName);
 
+            // To get C#6 (and later) features, a NuGet package must be installed, and
+            // some "black magic" must be invoked.
+            // See https://stackoverflow.com/a/40311406/294248 and nearby answers.
+
             Microsoft.CSharp.CSharpCodeProvider csProvider =
                 new Microsoft.CSharp.CSharpCodeProvider();
 

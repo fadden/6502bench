@@ -132,7 +132,7 @@ namespace SourceGen {
                     if (vis.CachedImage != Visualization.BROKEN_IMAGE) {
                         continue;
                     }
-                    Debug.WriteLine("Vis needs refresh: " + vis.Tag);
+                    //Debug.WriteLine("Vis needs refresh: " + vis.Tag);
 
                     if (iapp == null) {
                         // Prep the plugins on first need.
@@ -162,7 +162,7 @@ namespace SourceGen {
                         vis2d = null;
                     }
                     if (vis2d != null) {
-                        Debug.WriteLine(" Rendered thumbnail: " + vis.Tag);
+                        //Debug.WriteLine(" Rendered thumbnail: " + vis.Tag);
                         vis.SetThumbnail(vis2d);
                     }
                 }

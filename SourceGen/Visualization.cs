@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,6 +30,11 @@ namespace SourceGen {
     ///
     /// This is generally immutable, except for the CachedImage field.
     /// </summary>
+    /// <remarks>
+    /// Immutability is useful here because the undo/redo mechanism operates at VisualizationSet
+    /// granularity.  We want to know that the undo/redo operations are operating on objects
+    /// that weren't changed while sitting in the undo buffer.
+    /// </remarks>
     public class Visualization {
         /// <summary>
         /// Unique user-specified tag.  This may be any valid string that is at least two
@@ -44,15 +50,25 @@ namespace SourceGen {
         /// <summary>
         /// Parameters to be passed to the visualization generator.
         /// </summary>
+        /// <remarks>
+        /// We use a read-only dictionary to reinforce the idea that the plugin shouldn't be
+        /// modifying the parameter dictionary.
+        /// </remarks>
         public ReadOnlyDictionary<string, object> VisGenParams { get; private set; }
 
         /// <summary>
-        /// Cached reference to 2D image, useful for thumbnails.  Not serialized.  This always
-        /// has an image reference; in times of trouble it will point at BROKEN_IMAGE.
+        /// Cached reference to 2D image, useful for thumbnails that we display in the
+        /// code listing.  Not serialized.  This always has an image reference; in times
+        /// of trouble it will point at BROKEN_IMAGE.
         /// </summary>
         /// <remarks>
         /// Because the underlying data never changes, we only need to regenerate the
         /// image if the set of active plugins changes.
+        ///
+        /// For 2D bitmaps this should be close to a 1:1 representation of the original,
+        /// subject to the limitations of the visualization generator.  For other types of
+        /// data (vector line art, 3D meshes) this is a "snapshot" to help the user identify
+        /// the data.
         /// </remarks>
         public BitmapSource CachedImage { get; set; }
 
@@ -62,19 +78,60 @@ namespace SourceGen {
         public static readonly BitmapImage BROKEN_IMAGE =
             new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
 
+        /// <summary>
+        /// Serial number, for reference from other Visualization objects.  Not serialized.
+        /// </summary>
+        /// <remarks>
+        /// This value is only valid in the current session.  It exists because animations
+        /// need to refer to other Visualization objects, and doing so by Tag gets sticky
+        /// if a tag gets renamed.  We need a way to uniquely identify a reference to a
+        /// Visualization that persists across Tag renames and other edits.  When the objects
+        /// are serialized to the project file we just output the tags.
+        /// </remarks>
+        public int SerialNumber { get; private set; }
 
         /// <summary>
-        /// Constructor.
+        /// Serial number source.
+        /// </summary>
+        private static int sNextSerial = 1000;
+
+
+        /// <summary>
+        /// Constructor for a new Visualization.
         /// </summary>
         /// <param name="tag">Unique identifier.</param>
         /// <param name="visGenIdent">Visualization generator identifier.</param>
         /// <param name="visGenParams">Parameters for visualization generator.</param>
         public Visualization(string tag, string visGenIdent,
-                ReadOnlyDictionary<string, object> visGenParams) {
+                ReadOnlyDictionary<string, object> visGenParams)
+                :this(tag, visGenIdent, visGenParams, null) { }
+
+        /// <summary>
+        /// Constructor for a replacement Visualization.
+        /// </summary>
+        /// <param name="tag">Unique identifier.</param>
+        /// <param name="visGenIdent">Visualization generator identifier.</param>
+        /// <param name="visGenParams">Parameters for visualization generator.</param>
+        /// <param name="oldObj">Visualization being replaced, or null if this is new.</param>
+        public Visualization(string tag, string visGenIdent,
+                ReadOnlyDictionary<string, object> visGenParams, Visualization oldObj) {
+            Debug.Assert(!string.IsNullOrEmpty(tag));
+            Debug.Assert(!string.IsNullOrEmpty(visGenIdent));
+            Debug.Assert(visGenParams != null);
+
             Tag = tag;
             VisGenIdent = visGenIdent;
             VisGenParams = visGenParams;
             CachedImage = BROKEN_IMAGE;
+
+            if (oldObj == null) {
+                // not worried about multiple threads
+                SerialNumber = sNextSerial++;
+            } else {
+                Debug.Assert(oldObj.SerialNumber >= 0 && oldObj.SerialNumber < sNextSerial);
+                SerialNumber = oldObj.SerialNumber;
+            }
+            Debug.WriteLine("NEW VIS: Serial=" + SerialNumber);
         }
 
         /// <summary>
