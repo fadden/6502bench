@@ -33,7 +33,7 @@ namespace SourceGen.WpfGui {
     /// </summary>
     public partial class EditVisualization : Window, INotifyPropertyChanged {
         /// <summary>
-        /// Dialog result.
+        /// New/edited visualization, only valid when dialog result is true.
         /// </summary>
         public Visualization NewVis { get; private set; }
 
@@ -44,7 +44,8 @@ namespace SourceGen.WpfGui {
         private Visualization mOrigVis;
 
         /// <summary>
-        /// Identifier for last visualizer we used, for the benefit of "new".
+        /// Visualization generation identifier for the last visualizer we used, for the benefit
+        /// of "new".
         /// </summary>
         private static string sLastVisIdent = string.Empty;
 
@@ -187,6 +188,7 @@ namespace SourceGen.WpfGui {
             mScriptSupport = new ScriptSupport(this);
             mProject.PrepareScripts(mScriptSupport);
 
+            // this will initialize mTagLabelBrush
             if (vis != null) {
                 TagString = vis.Tag;
             } else {
@@ -464,7 +466,8 @@ namespace SourceGen.WpfGui {
             }
 
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool tagOk);
-            Visualization match = FindVisualizationByTag(trimTag);
+            Visualization match =
+                EditVisualizationSet.FindVisualizationByTag(mEditedList, trimTag);
             if (match != null && (mOrigVis == null || trimTag != mOrigVis.Tag)) {
                 // Another vis already has this tag.  We're checking the edited list, so we'll
                 // be current with edits to this or other Visualizations in the same set.
@@ -476,23 +479,6 @@ namespace SourceGen.WpfGui {
             } else {
                 TagLabelBrush = mDefaultLabelColor;
             }
-        }
-
-        /// <summary>
-        /// Finds a Visualization with a matching tag, searching across all sets in the
-        /// edited list.
-        /// </summary>
-        /// <param name="tag">Tag to search for.</param>
-        /// <returns>Matching Visualization, or null if not found.</returns>
-        private Visualization FindVisualizationByTag(string tag) {
-            foreach (KeyValuePair<int, VisualizationSet> kvp in mEditedList) {
-                foreach (Visualization vis in kvp.Value) {
-                    if (vis.Tag == tag) {
-                        return vis;
-                    }
-                }
-            }
-            return null;
         }
 
         private void VisComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {

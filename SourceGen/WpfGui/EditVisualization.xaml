@@ -120,12 +120,13 @@ limitations under the License.
                       SelectionChanged="VisComboBox_SelectionChanged"/>
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
-                       Text="Tag:" Foreground="{Binding TagLabelBrush}"/>
+                       Text="Tag:"/>
             <TextBox Grid.Column="1" Grid.Row="1" Width="250" Margin="0,1,0,0" HorizontalAlignment="Left"
                      Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
 
-            <TextBlock Grid.Column="1" Grid.Row="2" Text="• Must be unique, 2+ chars"/>
+            <TextBlock Grid.Column="1" Grid.Row="2" Text="• Must be unique, 2+ chars"
+                       Foreground="{Binding TagLabelBrush}"/>
 
             <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,4" Text="Preview:"/>
         </Grid>

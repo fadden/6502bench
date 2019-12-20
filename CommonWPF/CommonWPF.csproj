@@ -48,6 +48,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FrameAnimationControl.xaml.cs">
+      <DependentUpon>FrameAnimationControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helper.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="MultiKeyInputGesture.cs" />
@@ -79,6 +82,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="FrameAnimationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WorkProgress.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

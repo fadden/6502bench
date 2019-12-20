@@ -20,10 +20,12 @@ limitations under the License.
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
+        xmlns:common="clr-namespace:CommonWPF;assembly=CommonWPF"
         mc:Ignorable="d"
         Title="Edit Bitmap Animation"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Closing="Window_Closing">
 
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -31,10 +33,23 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- top section: bitmap visualization selection -->
-        <Grid Grid.Row="0">
+        <!-- top section: tag entry -->
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="0,0,4,0" Text="Tag:"/>
+                <TextBox Width="250" Margin="4,1,0,0"
+                         Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
+                         FontFamily="{StaticResource GeneralMonoFont}"/>
+            </StackPanel>
+
+            <TextBlock Text="• Must be unique, 2+ chars" Margin="30,0,0,0" Foreground="{Binding TagLabelBrush}"/>
+        </StackPanel>
+
+        <!-- upper-middle section: bitmap visualization selection -->
+        <Grid Grid.Row="1" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -45,10 +60,10 @@ limitations under the License.
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
-            <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
-                       Text="Select bitmap visualizations to use as animation frames:"/>
+            <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,4"
+                       Text="Select visualizations to use as animation frames:"/>
             
-            <DataGrid Grid.Column="0" Grid.Row="1" Name="visSourceGrid"
+            <DataGrid Grid.Column="0" Grid.Row="1" Name="visSourceGrid" Width="251" Height="300"
                       IsReadOnly="True"
                       ItemsSource="{Binding VisSourceItems}"
                       FontFamily="{StaticResource GeneralMonoFont}"
@@ -59,6 +74,7 @@ limitations under the License.
                       HeadersVisibility="Column"
                       CanUserReorderColumns="False"
                       SelectionMode="Single"
+                      SelectionChanged="VisSourceGrid_SelectionChanged"
                       MouseDoubleClick="VisSourceGrid_MouseDoubleClick">
                 <DataGrid.Resources>
                     <!-- make the no-focus color the same as the in-focus color -->
@@ -83,7 +99,7 @@ limitations under the License.
                 </DataGrid.Columns>
             </DataGrid>
 
-            <DataGrid Grid.Column="2" Grid.Row="1" Name="visAnimGrid"
+            <DataGrid Grid.Column="2" Grid.Row="1" Name="visAnimGrid" Width="251" Height="300"
                       IsReadOnly="True"
                       ItemsSource="{Binding VisAnimItems}"
                       FontFamily="{StaticResource GeneralMonoFont}"
@@ -94,6 +110,7 @@ limitations under the License.
                       HeadersVisibility="Column"
                       CanUserReorderColumns="False"
                       SelectionMode="Single"
+                      SelectionChanged="VisAnimGrid_SelectionChanged"
                       MouseDoubleClick="VisAnimGrid_MouseDoubleClick">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
@@ -116,30 +133,67 @@ limitations under the License.
                 </DataGrid.Columns>
             </DataGrid>
 
-            <StackPanel Grid.Column="1" Grid.Row="1" Height="200">
-                <Button Content="Add &#x2192;" Width="70" Margin="4,24,4,4"/>
-                <Button Content="&#x2190; Remove" Width="70" Margin="4,0,4,4"/>
-                <Button Content="Clear" Width="70" Margin="4,4,4,4"/>
-                <Button Content="Up &#x2191;" Width="70" Margin="4,20,4,4"/>
-                <Button Content="Down &#x2193;" Width="70" Margin="4,0,4,4"/>
+            <StackPanel Grid.Column="1" Grid.Row="1">
+                <Button Content="Add &#x2192;" Width="70" Margin="4,24,4,4"
+                        IsEnabled="{Binding IsAddEnabled}" Click="AddButton_Click"/>
+                <Button Content="&#x2190; Remove" Width="70" Margin="4,0,4,4"
+                        IsEnabled="{Binding IsRemoveEnabled}" Click="RemoveButton_Click"/>
+                <Button Content="Clear" Width="70" Margin="4,4,4,4"
+                        IsEnabled="{Binding IsRemoveEnabled}" Click="ClearButton_Click"/>
+                <Button Content="Up &#x2191;" Width="70" Margin="4,20,4,4"
+                        IsEnabled="{Binding IsUpEnabled}" Click="UpButton_Click"/>
+                <Button Content="Down &#x2193;" Width="70" Margin="4,0,4,4"
+                        IsEnabled="{Binding IsDownEnabled}" Click="DownButton_Click"/>
             </StackPanel>
         </Grid>
         
-        <!-- middle section: parameters -->
-        <Grid Grid.Row="1" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Frame delay (msec):" Margin="0,1,0,0"/>
-                <TextBox Width="40" MaxLength="5" Margin="4,0,0,0"
-                         Text="{Binding FrameDelayTimeMsec, FallbackValue=88888}" />
+        <!-- lower-middle section: parameters -->
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
             </StackPanel>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" Margin="0,1,4,0"
+                           Text="Frame delay (msec):" Foreground="{Binding FrameDelayLabelBrush}"/>
+                <TextBox Grid.Column="1" Grid.Row="2" Width="40" HorizontalAlignment="Left" Margin="0,0,0,0"
+                         Text="{Binding FrameDelayTimeMsec, UpdateSourceTrigger=PropertyChanged, FallbackValue=88888}"
+                         MaxLength="5"/>
+            </Grid>
         </Grid>
         
         <!-- bottom section: preview -->
-        <Grid Grid.Row="2" Margin="0,8,0,0">
-            <TextBlock Text="Preview:"/>
+        <Grid Grid.Row="3" Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{StaticResource CheckerBackground}">
+                <common:FrameAnimationControl Name="previewAnim" Width="256" Height="256"
+                                              RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+            </Border>
+            <Button Grid.Row="1" Width="120" Content="Start / Stop" Margin="0,4,0,0"
+                    Click="showPreviewClick" IsEnabled="{Binding IsPreviewEnabled}"/>
         </Grid>
 
-        <DockPanel Grid.Row="3" Margin="0,8,0,0" LastChildFill="False">
+        <DockPanel Grid.Row="4" Margin="0,8,0,0" LastChildFill="False">
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>

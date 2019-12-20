@@ -167,11 +167,13 @@ namespace SourceGen.WpfGui {
         }
 
         private void NewBitmapAnimationButton_Click(object sender, RoutedEventArgs e) {
-            EditBitmapAnimation dlg = new EditBitmapAnimation(this);
+            EditBitmapAnimation dlg = new EditBitmapAnimation(this, mOffset,
+                CreateEditedSetList(), null);
             if (dlg.ShowDialog() != true) {
                 return;
             }
-            // TODO(xyzzy)
+            VisualizationList.Add(dlg.NewAnim);
+            visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {
@@ -184,16 +186,27 @@ namespace SourceGen.WpfGui {
                 return;
             }
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
+            Visualization newVis;
 
-            EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
-                CreateEditedSetList(), item);
-            if (dlg.ShowDialog() != true) {
-                return;
+            if (item is VisualizationAnimation) {
+                EditBitmapAnimation dlg = new EditBitmapAnimation(this, mOffset,
+                    CreateEditedSetList(), (VisualizationAnimation)item);
+                if (dlg.ShowDialog() != true) {
+                    return;
+                }
+                newVis = dlg.NewAnim;
+            } else {
+                EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
+                    CreateEditedSetList(), item);
+                if (dlg.ShowDialog() != true) {
+                    return;
+                }
+                newVis = dlg.NewVis;
             }
 
             int index = VisualizationList.IndexOf(item);
             VisualizationList.Remove(item);
-            VisualizationList.Insert(index, dlg.NewVis);
+            VisualizationList.Insert(index, newVis);
             visualizationGrid.SelectedIndex = index;
 
             okButton.Focus();
@@ -223,7 +236,7 @@ namespace SourceGen.WpfGui {
         private void DownButton_Click(object sender, RoutedEventArgs e) {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
             int index = VisualizationList.IndexOf(item);
-            Debug.Assert(index < VisualizationList.Count - 1);
+            Debug.Assert(index >= 0 && index < VisualizationList.Count - 1);
             VisualizationList.Remove(item);
             VisualizationList.Insert(index + 1, item);
             visualizationGrid.SelectedIndex = index + 1;
@@ -264,6 +277,24 @@ namespace SourceGen.WpfGui {
                 }
             }
             return mixList;
+        }
+
+        /// <summary>
+        /// Finds a Visualization with a matching tag, searching across all sets in the
+        /// edited list.
+        /// </summary>
+        /// <param name="tag">Tag to search for.</param>
+        /// <returns>Matching Visualization, or null if not found.</returns>
+        public static Visualization FindVisualizationByTag(SortedList<int, VisualizationSet> list,
+                string tag) {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in list) {
+                foreach (Visualization vis in kvp.Value) {
+                    if (vis.Tag == tag) {
+                        return vis;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

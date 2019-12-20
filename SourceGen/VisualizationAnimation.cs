@@ -30,6 +30,16 @@ namespace SourceGen {
     /// </remarks>
     public class VisualizationAnimation : Visualization {
         /// <summary>
+        /// Frame delay parameter.
+        /// </summary>
+        public const string FRAME_DELAY_MSEC_PARAM = "frame-delay-msec";
+
+        /// <summary>
+        /// Fake visualization generation identifier.
+        /// </summary>
+        public const string ANIM_VIS_GEN = "(animation)";
+
+        /// <summary>
         /// Serial numbers of visualizations, e.g. bitmap frames.
         /// </summary>
         /// <remarks>
@@ -59,6 +69,19 @@ namespace SourceGen {
             Debug.Assert(visSerialNumbers != null);
 
             mSerialNumbers = visSerialNumbers;
+        }
+
+        /// <summary>
+        /// Returns true if this visualization holds a reference to the specified serial number.
+        /// </summary>
+        public bool ContainsSerial(int serial) {
+            // Linear search.  We don't do this a lot and our lists our short, so okay for now.
+            foreach (int ser in mSerialNumbers) {
+                if (ser == serial) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
