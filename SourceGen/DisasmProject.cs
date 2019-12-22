@@ -103,6 +103,14 @@ namespace SourceGen {
         /// <summary>
         /// Visualization sets.  Uses file offset as key.
         /// </summary>
+        /// <remarks>
+        /// TODO(maybe): certain operations must be performed on the set of all visualizations
+        /// or the set of all animations, requiring a double "foreach" with an "is" clause.
+        /// It might be simpler and more efficient overall to split this into three lists: one
+        /// for visualizations (perhaps keyed by serial number), one for animations, and one
+        /// for VisualizationSet objects (the latter required to establish ordering).  The
+        /// primary argument against is that this makes undo/redo more complicated.
+        /// </remarks>
         public SortedList<int, VisualizationSet> VisualizationSets { get; private set; }
 
         /// <summary>

@@ -80,7 +80,7 @@ namespace SourceGen {
                 mSerialNumbers.Add(serial);
             }
 
-            CachedImage = ANIM_IMAGE;       // default to this
+            CachedImage = ANIM_OVERLAY_IMAGE;       // default to this
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace SourceGen {
         public void GenerateImage(SortedList<int, VisualizationSet> visSets) {
             const int IMAGE_SIZE = 64;
 
-            CachedImage = ANIM_IMAGE;
+            CachedImage = ANIM_OVERLAY_IMAGE;
 
             if (mSerialNumbers.Count == 0) {
                 return;
@@ -113,16 +113,16 @@ namespace SourceGen {
 
             DrawingVisual visual = new DrawingVisual();
             //RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.NearestNeighbor);
-            DrawingContext dc = visual.RenderOpen();
-            dc.DrawImage(vis.CachedImage, imgBounds);
-            dc.DrawImage(ANIM_IMAGE, new Rect(0, 0, IMAGE_SIZE, IMAGE_SIZE));
-            dc.Close();
+            using (DrawingContext dc = visual.RenderOpen()) {
+                dc.DrawImage(vis.CachedImage, imgBounds);
+                dc.DrawImage(ANIM_OVERLAY_IMAGE, new Rect(0, 0, IMAGE_SIZE, IMAGE_SIZE));
+            }
 
             RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
                 PixelFormats.Pbgra32);
             bmp.Render(visual);
             CachedImage = bmp;
-            Debug.WriteLine("RENDERED " + Tag);
+            //Debug.WriteLine("RENDERED " + Tag);
         }
 
         /// <summary>
@@ -174,6 +174,35 @@ namespace SourceGen {
                 newAnim = null;
             }
             return somethingRemoved;
+        }
+
+        public static BitmapSource GenerateAnimOverlayImage() {
+            const int IMAGE_SIZE = 128;
+
+            // Glowy "high tech" blue.
+            SolidColorBrush outlineBrush = new SolidColorBrush(Color.FromArgb(255, 0, 216, 255));
+            SolidColorBrush fillBrush = new SolidColorBrush(Color.FromArgb(128, 0, 182, 215));
+
+            DrawingVisual visual = new DrawingVisual();
+            using (DrawingContext dc = visual.RenderOpen()) {
+                // Thanks: https://stackoverflow.com/a/29249100/294248
+                Point p1 = new Point(IMAGE_SIZE * 5 / 8, IMAGE_SIZE / 2);
+                Point p2 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE / 4);
+                Point p3 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE * 3 / 4);
+                StreamGeometry sg = new StreamGeometry();
+                using (StreamGeometryContext sgc = sg.Open()) {
+                    sgc.BeginFigure(p1, true, true);
+                    PointCollection points = new PointCollection() { p2, p3 };
+                    sgc.PolyLineTo(points, true, true);
+                }
+                sg.Freeze();
+                dc.DrawGeometry(fillBrush, new Pen(outlineBrush, 3), sg);
+            }
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
+                PixelFormats.Pbgra32);
+            bmp.Render(visual);
+            return bmp;
         }
 
 

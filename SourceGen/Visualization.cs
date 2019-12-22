@@ -77,7 +77,7 @@ namespace SourceGen {
         /// </summary>
         public bool HasImage {
             get {
-                return CachedImage != BROKEN_IMAGE && CachedImage != ANIM_IMAGE;
+                return CachedImage != BROKEN_IMAGE && CachedImage != ANIM_OVERLAY_IMAGE;
             }
         }
 
@@ -87,8 +87,11 @@ namespace SourceGen {
         public static readonly BitmapImage BROKEN_IMAGE =
             new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
 
-        internal static readonly BitmapImage ANIM_IMAGE =
-            new BitmapImage(new Uri("pack://application:,,,/Res/BlueChevron.png"));
+        /// <summary>
+        /// Image to overlay on animation visualizations.
+        /// </summary>
+        internal static readonly BitmapSource ANIM_OVERLAY_IMAGE =
+            VisualizationAnimation.GenerateAnimOverlayImage();
 
         /// <summary>
         /// Serial number, for reference from other Visualization objects.  Not serialized.
