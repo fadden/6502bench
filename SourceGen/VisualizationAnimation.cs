@@ -18,6 +18,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace SourceGen {
     /// <summary>
@@ -27,6 +30,8 @@ namespace SourceGen {
     /// References to Visualization objects (such as a 3D mesh or list of bitmaps) are held
     /// here.  The VisGenParams property holds animation properties, such as frame rate and
     /// view angles.
+    ///
+    /// As with the base class, instances are generally immutable for the benefit of undo/redo.
     /// </remarks>
     public class VisualizationAnimation : Visualization {
         /// <summary>
@@ -64,11 +69,67 @@ namespace SourceGen {
         /// <param name="visGenParams">Parameters for visualization generator.</param>
         /// <param name="visSerialNumbers">Serial numbers of referenced Visualizations.</param>
         public VisualizationAnimation(string tag, string visGenIdent,
-                ReadOnlyDictionary<string, object> visGenParams, List<int> visSerialNumbers)
-                : base(tag, visGenIdent, visGenParams) {
+                ReadOnlyDictionary<string, object> visGenParams, List<int> visSerialNumbers,
+                VisualizationAnimation oldObj)
+                : base(tag, visGenIdent, visGenParams, oldObj) {
             Debug.Assert(visSerialNumbers != null);
 
-            mSerialNumbers = visSerialNumbers;
+            // Make a copy of the list.
+            mSerialNumbers = new List<int>(visSerialNumbers.Count);
+            foreach (int serial in visSerialNumbers) {
+                mSerialNumbers.Add(serial);
+            }
+
+            CachedImage = ANIM_IMAGE;       // default to this
+        }
+
+        /// <summary>
+        /// The number of Visualizations linked from this animation.
+        /// </summary>
+        public int SerialCount {
+            get { return mSerialNumbers.Count; }
+        }
+
+        public void GenerateImage(SortedList<int, VisualizationSet> visSets) {
+            const int IMAGE_SIZE = 64;
+
+            CachedImage = ANIM_IMAGE;
+
+            if (mSerialNumbers.Count == 0) {
+                return;
+            }
+            Visualization vis = VisualizationSet.FindVisualizationBySerial(visSets,
+                mSerialNumbers[0]);
+            if (vis == null) {
+                return;
+            }
+
+            double maxDim = Math.Max(vis.CachedImage.Width, vis.CachedImage.Height);
+            double dimMult = IMAGE_SIZE / maxDim;
+            double adjWidth = vis.CachedImage.Width * dimMult;
+            double adjHeight = vis.CachedImage.Height * dimMult;
+            Rect imgBounds = new Rect((IMAGE_SIZE - adjWidth) / 2, (IMAGE_SIZE - adjHeight) / 2,
+                adjWidth, adjHeight);
+
+            DrawingVisual visual = new DrawingVisual();
+            //RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.NearestNeighbor);
+            DrawingContext dc = visual.RenderOpen();
+            dc.DrawImage(vis.CachedImage, imgBounds);
+            dc.DrawImage(ANIM_IMAGE, new Rect(0, 0, IMAGE_SIZE, IMAGE_SIZE));
+            dc.Close();
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
+                PixelFormats.Pbgra32);
+            bmp.Render(visual);
+            CachedImage = bmp;
+            Debug.WriteLine("RENDERED " + Tag);
+        }
+
+        /// <summary>
+        /// Returns a list of serial numbers.  The caller must not modify the list.
+        /// </summary>
+        public List<int> GetSerialNumbers() {
+            return mSerialNumbers;
         }
 
         /// <summary>
@@ -82,6 +143,75 @@ namespace SourceGen {
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Strips serial numbers out of the list.
+        /// </summary>
+        /// <param name="visAnim">Object to strip serial numbers from.</param>
+        /// <param name="removedSerials">List of serial numbers to remove.</param>
+        /// <param name="newAnim">Object with changes, or null if nothing changed.</param>
+        /// <returns>True if something was actually removed.</returns>
+        public static bool StripEntries(VisualizationAnimation visAnim, List<int> removedSerials,
+                out VisualizationAnimation newAnim) {
+            bool somethingRemoved = false;
+
+            // Both sets should be small, so not worried about O(m*n).
+            List<int> newSerials = new List<int>(visAnim.mSerialNumbers.Count);
+            foreach (int serial in visAnim.mSerialNumbers) {
+                if (removedSerials.Contains(serial)) {
+                    Debug.WriteLine("Removing serial #" + serial + " from " + visAnim.Tag);
+                    somethingRemoved = true;
+                    continue;
+                }
+                newSerials.Add(serial);
+            }
+
+            if (somethingRemoved) {
+                newAnim = new VisualizationAnimation(visAnim.Tag, visAnim.VisGenIdent,
+                    visAnim.VisGenParams, newSerials, visAnim);
+            } else {
+                newAnim = null;
+            }
+            return somethingRemoved;
+        }
+
+
+        public static bool operator ==(VisualizationAnimation a, VisualizationAnimation b) {
+            if (ReferenceEquals(a, b)) {
+                return true;    // same object, or both null
+            }
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                return false;   // one is null
+            }
+            return a.Equals(b);
+        }
+        public static bool operator !=(VisualizationAnimation a, VisualizationAnimation b) {
+            return !(a == b);
+        }
+        public override bool Equals(object obj) {
+            if (!(obj is VisualizationAnimation)) {
+                return false;
+            }
+            // Do base-class equality comparison and the ReferenceEquals check.
+            if (!base.Equals(obj)) {
+                return false;
+            }
+            Debug.WriteLine("Detailed: this=" + Tag + " other=" + Tag);
+            VisualizationAnimation other = (VisualizationAnimation)obj;
+            if (other.mSerialNumbers.Count != mSerialNumbers.Count) {
+                return false;
+            }
+            for (int i = 0; i < mSerialNumbers.Count; i++) {
+                if (other.mSerialNumbers[i] != mSerialNumbers[i]) {
+                    return false;
+                }
+            }
+            Debug.WriteLine("  All serial numbers match");
+            return true;
+        }
+        public override int GetHashCode() {
+            return base.GetHashCode() ^ mSerialNumbers.Count;   // weak
         }
     }
 }

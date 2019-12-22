@@ -158,15 +158,27 @@ namespace SourceGen.WpfGui {
         }
 
         private void PopulateItemLists() {
+            // Add the animation's visualizations, in order.
+            if (mOrigAnim != null) {
+                foreach (int serial in mOrigAnim.GetSerialNumbers()) {
+                    Visualization vis = VisualizationSet.FindVisualizationBySerial(mEditedList,
+                        serial);
+                    if (vis != null) {
+                        VisAnimItems.Add(vis);
+                    } else {
+                        Debug.Assert(false);
+                    }
+                }
+            }
+
+            // Add all remaining non-animation Visualizations to the "source" set.
             foreach (KeyValuePair<int, VisualizationSet> kvp in mEditedList) {
                 foreach (Visualization vis in kvp.Value) {
                     if (vis is VisualizationAnimation) {
-                        // disallow animations with animations
+                        // disallow using animations as animation frames
                         continue;
                     }
-                    if (mOrigAnim != null && mOrigAnim.ContainsSerial(vis.SerialNumber)) {
-                        VisAnimItems.Add(vis);
-                    } else {
+                    if (!VisAnimItems.Contains(vis)) {
                         VisSourceItems.Add(vis);
                     }
                 }
@@ -194,7 +206,7 @@ namespace SourceGen.WpfGui {
             }
 
             NewAnim = new VisualizationAnimation(TagString, VisualizationAnimation.ANIM_VIS_GEN,
-                new ReadOnlyDictionary<string, object>(visGenParams), serials);
+                new ReadOnlyDictionary<string, object>(visGenParams), serials, mOrigAnim);
 
             DialogResult = true;
         }

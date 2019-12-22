@@ -36,11 +36,24 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public VisualizationSet NewVisSet { get; private set; }
 
+        /// <summary>
+        /// List of Visualization serial numbers that were removed from the set.  The caller
+        /// can use this to update animations in other sets that referred to the removed items.
+        /// </summary>
+        /// <remarks>
+        /// We have to use serial numbers because the user might have edited the Visualization
+        /// before removing it.
+        /// </remarks>
+        public List<int> RemovedSerials { get; private set; }
+
         private DisasmProject mProject;
         private Formatter mFormatter;
         private VisualizationSet mOrigSet;
         private int mOffset;
 
+        /// <summary>
+        /// ItemsSource for visualizationGrid.
+        /// </summary>
         public ObservableCollection<Visualization> VisualizationList { get; private set; } =
             new ObservableCollection<Visualization>();
 
@@ -98,6 +111,8 @@ namespace SourceGen.WpfGui {
             mFormatter = formatter;
             mOrigSet = curSet;
             mOffset = offset;
+
+            RemovedSerials = new List<int>();
 
             if (curSet != null) {
                 // Populate the data grid ItemsSource.
@@ -221,6 +236,35 @@ namespace SourceGen.WpfGui {
             }
             if (index >= 0) {
                 visualizationGrid.SelectedIndex = index;
+            }
+
+            RemovedSerials.Add(item.SerialNumber);
+
+            // Update any animations in this set.  Animations in other sets will be updated later.
+            // (This is a bit awkward because we can't modify VisualizationList while iterating
+            // through it, and there's no simple "replace entry" operation on an observable
+            // collection.  Fortunately we don't do this often and the data sets are small.)
+            List<VisualizationAnimation> needsUpdate = new List<VisualizationAnimation>();
+            foreach (Visualization vis in VisualizationList) {
+                if (vis is VisualizationAnimation) {
+                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                    if (visAnim.ContainsSerial(item.SerialNumber)) {
+                        needsUpdate.Add(visAnim);
+                    }
+                }
+            }
+            foreach (VisualizationAnimation visAnim in needsUpdate) {
+                VisualizationAnimation newAnim;
+                if (VisualizationAnimation.StripEntries(visAnim,
+                        new List<int>(1) { item.SerialNumber }, out newAnim)) {
+                    if (newAnim.SerialCount == 0) {
+                        VisualizationList.Remove(visAnim);
+                    } else {
+                        index = VisualizationList.IndexOf(visAnim);
+                        VisualizationList.Remove(visAnim);
+                        VisualizationList.Insert(index, newAnim);
+                    }
+                }
             }
         }
 

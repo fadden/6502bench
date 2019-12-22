@@ -86,6 +86,56 @@ namespace SourceGen {
             return arr;
         }
 
+        /// <summary>
+        /// Finds a Visualization by serial number.
+        /// </summary>
+        /// <param name="visSets">List of sets of visualizations.</param>
+        /// <param name="serial">Serial number to search for.</param>
+        /// <returns>Matching Visualization, or null if not found.</returns>
+        public static Visualization FindVisualizationBySerial(
+                SortedList<int, VisualizationSet> visSets, int serial) {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in visSets) {
+                VisualizationSet visSet = kvp.Value;
+                foreach (Visualization vis in visSet) {
+                    if (vis.SerialNumber == serial) {
+                        return vis;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Strips a set of Visualizations out of animations in the set.  The set is not
+        /// modified; rather, a new set is generated with updated entries.
+        /// </summary>
+        /// <param name="visSet">Input set.</param>
+        /// <param name="removedSerials">Serial numbers of removed items.</param>
+        /// <param name="newSet">Updated set.</param>
+        /// <returns>True if entries were removed.</returns>
+        public static bool StripEntriesFromAnimations(VisualizationSet visSet,
+                List<int> removedSerials, out VisualizationSet newSet) {
+            bool somethingRemoved = false;
+            newSet = new VisualizationSet(visSet.Count);
+            foreach (Visualization vis in visSet) {
+                if (!(vis is VisualizationAnimation)) {
+                    newSet.Add(vis);
+                    continue;
+                }
+
+                if (VisualizationAnimation.StripEntries((VisualizationAnimation) vis,
+                        removedSerials, out VisualizationAnimation newAnim)) {
+                    somethingRemoved = true;
+                    if (newAnim.SerialCount != 0) {
+                        newSet.Add(newAnim);
+                    } else {
+                        Debug.WriteLine("Deleting empty animation " + vis.Tag);
+                    }
+                }
+            }
+            return somethingRemoved;
+        }
+
         #region Image generation
 
         private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
@@ -126,13 +176,19 @@ namespace SourceGen {
             ScriptSupport iapp = null;
             List<IPlugin> plugins = null;
 
-            foreach (KeyValuePair<int, VisualizationSet> kvp in project.VisualizationSets) {
+            SortedList<int, VisualizationSet> visSets = project.VisualizationSets;
+
+            foreach (KeyValuePair<int, VisualizationSet> kvp in visSets) {
                 VisualizationSet visSet = kvp.Value;
                 foreach (Visualization vis in visSet) {
-                    if (vis.CachedImage != Visualization.BROKEN_IMAGE) {
+                    if (vis.HasImage) {
                         continue;
                     }
                     //Debug.WriteLine("Vis needs refresh: " + vis.Tag);
+
+                    if (vis is VisualizationAnimation) {
+                        continue;
+                    }
 
                     if (iapp == null) {
                         // Prep the plugins on first need.
@@ -170,6 +226,19 @@ namespace SourceGen {
 
             if (iapp != null) {
                 project.UnprepareScripts();
+            }
+
+            // Now that we've generated images for the Visualizations, update any
+            // VisualizationAnimation thumbnails that may have been affected.
+            foreach (KeyValuePair<int, VisualizationSet> kvp in visSets) {
+                VisualizationSet visSet = kvp.Value;
+                foreach (Visualization vis in visSet) {
+                    if (!(vis is VisualizationAnimation)) {
+                        continue;
+                    }
+                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                    visAnim.GenerateImage(visSets);
+                }
             }
         }
 
@@ -215,9 +284,9 @@ namespace SourceGen {
             if (a.mList.Count != b.mList.Count) {
                 return false;
             }
-            // Order matters.
+            // Order matters.  Use Equals() rather than == to get polymorphism.
             for (int i = 0; i < a.mList.Count; i++) {
-                if (a.mList[i] != b.mList[i]) {
+                if (!a.mList[i].Equals(b.mList[i])) {
                     return false;
                 }
             }

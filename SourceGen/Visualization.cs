@@ -73,10 +73,22 @@ namespace SourceGen {
         public BitmapSource CachedImage { get; set; }
 
         /// <summary>
+        /// True if CachedImage has something other than the default value.
+        /// </summary>
+        public bool HasImage {
+            get {
+                return CachedImage != BROKEN_IMAGE && CachedImage != ANIM_IMAGE;
+            }
+        }
+
+        /// <summary>
         /// Image to show when things are broken.
         /// </summary>
         public static readonly BitmapImage BROKEN_IMAGE =
             new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
+
+        internal static readonly BitmapImage ANIM_IMAGE =
+            new BitmapImage(new Uri("pack://application:,,,/Res/BlueChevron.png"));
 
         /// <summary>
         /// Serial number, for reference from other Visualization objects.  Not serialized.

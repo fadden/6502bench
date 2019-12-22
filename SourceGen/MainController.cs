@@ -2179,11 +2179,35 @@ namespace SourceGen {
                 newSet = null;
             }
             if (curVisSet != newSet) {
+                ChangeSet cs = new ChangeSet(1);
+
                 // New table, edited in place, or deleted.
                 UndoableChange uc = UndoableChange.CreateVisualizationSetChange(offset,
                     curVisSet, newSet);
                 //Debug.WriteLine("Change " + curVisSet + " to " + newSet);
-                ChangeSet cs = new ChangeSet(uc);
+                cs.Add(uc);
+
+                // And now the messy bit.  If Visualizations were removed, we need to purge
+                // them from any animations that reference them.  The edit dialog took care
+                // of this for animations in the same set, but we need to check other sets.
+                foreach (KeyValuePair<int, VisualizationSet> kvp in mProject.VisualizationSets) {
+                    if (kvp.Value == curVisSet) {
+                        continue;
+                    }
+
+                    VisualizationSet stripSet;
+                    if (VisualizationSet.StripEntriesFromAnimations(kvp.Value, dlg.RemovedSerials,
+                            out stripSet)) {
+                        if (stripSet.Count == 0) {
+                            stripSet = null;
+                        }
+                        uc = UndoableChange.CreateVisualizationSetChange(kvp.Key,
+                            kvp.Value, stripSet);
+                        cs.Add(uc);
+                        Debug.WriteLine("Also updating visSet at +" + kvp.Key.ToString("x6"));
+                    }
+                }
+
                 ApplyUndoableChanges(cs);
             } else {
                 Debug.WriteLine("No change to VisualizationSet");
