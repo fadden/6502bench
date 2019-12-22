@@ -178,9 +178,7 @@ namespace SourceGen.WpfGui {
                         // disallow using animations as animation frames
                         continue;
                     }
-                    if (!VisAnimItems.Contains(vis)) {
-                        VisSourceItems.Add(vis);
-                    }
+                    VisSourceItems.Add(vis);
                 }
             }
 
@@ -191,6 +189,15 @@ namespace SourceGen.WpfGui {
                 visAnimGrid.SelectedIndex = 0;
             }
         }
+
+        // Want to focus on the first item, not the grid.  Probably need a hack like
+        // MainWindow's ItemContainerGenerator_StatusChanged.  Not really worth it here.
+        //private void Window_ContentRendered(object sender, EventArgs e) {
+        //    visSourceGrid.Focus();
+        //    DataGridRow dgr =
+        //        (DataGridRow)visSourceGrid.ItemContainerGenerator.ContainerFromIndex(0);
+        //    dgr.Focus();
+        //}
 
         private void Window_Closing(object sender, CancelEventArgs e) {
             previewAnim.Stop();
@@ -232,6 +239,8 @@ namespace SourceGen.WpfGui {
             IsDownEnabled = isAnimItemSelected &&
                 visAnimGrid.SelectedIndex != VisAnimItems.Count - 1;
             IsPreviewEnabled = VisAnimItems.Count > 0;
+
+            IsValid &= IsPreviewEnabled;    // don't allow animations with no frames
 
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool tagOk);
             Visualization match =
@@ -276,26 +285,17 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Adds an item to the animation list, moving it from the source list.
+        /// Adds an item to the animation list.
         /// </summary>
         private void AddSelection() {
             if (!IsAddEnabled) {
                 return;
             }
 
-            Visualization item = (Visualization)visSourceGrid.SelectedItem;
-            int index = VisSourceItems.IndexOf(item);
-            Debug.Assert(index >= 0);
-            VisSourceItems.Remove(item);
-            VisAnimItems.Add(item);
-
-            if (index == VisSourceItems.Count) {
-                index--;
+            for (int i = 0; i < visSourceGrid.SelectedItems.Count; i++) {
+                Visualization item = (Visualization)visSourceGrid.SelectedItems[i];
+                VisAnimItems.Add(item);
             }
-            if (index >= 0) {
-                visSourceGrid.SelectedIndex = index;
-            }
-
             if (visAnimGrid.SelectedIndex < 0) {
                 visAnimGrid.SelectedIndex = 0;
             }
@@ -304,28 +304,22 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Removes an item from the animation list, moving it to the source list.
+        /// Removes an item from the animation list.
         /// </summary>
         private void RemoveSelection() {
             if (!IsRemoveEnabled) {
                 return;
             }
 
-            Visualization item = (Visualization)visAnimGrid.SelectedItem;
-            int index = VisAnimItems.IndexOf(item);
+            int index = visAnimGrid.SelectedIndex;
             Debug.Assert(index >= 0);
-            VisAnimItems.Remove(item);
-            VisSourceItems.Add(item);
+            VisAnimItems.RemoveAt(index);
 
             if (index == VisAnimItems.Count) {
                 index--;
             }
             if (index >= 0) {
                 visAnimGrid.SelectedIndex = index;
-            }
-
-            if (visSourceGrid.SelectedIndex < 0) {
-                visSourceGrid.SelectedIndex = 0;
             }
 
             RefreshAnim();
@@ -337,15 +331,7 @@ namespace SourceGen.WpfGui {
         private void ClearButton_Click(object sender, RoutedEventArgs e) {
             Debug.Assert(IsRemoveEnabled);
 
-            while (VisAnimItems.Count > 0) {
-                Visualization item = VisAnimItems[0];
-                VisAnimItems.Remove(item);
-                VisSourceItems.Add(item);
-            }
-
-            if (visSourceGrid.SelectedIndex < 0) {
-                visSourceGrid.SelectedIndex = 0;
-            }
+            VisAnimItems.Clear();
 
             RefreshAnim();
         }

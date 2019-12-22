@@ -73,7 +73,7 @@ limitations under the License.
                       AutoGenerateColumns="False"
                       HeadersVisibility="Column"
                       CanUserReorderColumns="False"
-                      SelectionMode="Single"
+                      SelectionMode="Extended"
                       SelectionChanged="VisSourceGrid_SelectionChanged"
                       MouseDoubleClick="VisSourceGrid_MouseDoubleClick">
                 <DataGrid.Resources>
