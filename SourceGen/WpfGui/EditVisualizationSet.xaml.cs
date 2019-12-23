@@ -257,7 +257,7 @@ namespace SourceGen.WpfGui {
                 VisualizationAnimation newAnim;
                 if (VisualizationAnimation.StripEntries(visAnim,
                         new List<int>(1) { item.SerialNumber }, out newAnim)) {
-                    if (newAnim.SerialCount == 0) {
+                    if (newAnim.Count == 0) {
                         VisualizationList.Remove(visAnim);
                     } else {
                         index = VisualizationList.IndexOf(visAnim);

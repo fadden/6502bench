@@ -22,8 +22,8 @@
 "Length":8184,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
 "LvTables":{
 },
-"VisualizationSets":{
+"Visualizations":[{
+"Tag":"vis000000","VisGenIdent":"apple2-hi-res-screen","VisGenParams":{
+"offset":0,"isColor":true}}],"VisualizationAnimations":[],"VisualizationSets":{
 "0":{
-"Items":[{
-"Tag":"full screen image","VisGenIdent":"apple2-hi-res-screen","VisGenParams":{
-"offset":0,"isColor":true}}]}}}
+"Tags":["vis000000"]}}}

@@ -372,14 +372,29 @@ namespace SourceGen {
                 VisGenParams = new Dictionary<string, object>(vis.VisGenParams);
             }
         }
+        public class SerVisualizationAnimation : SerVisualization {
+            public List<string> Tags { get; set; }
+
+            public SerVisualizationAnimation() { }
+            public SerVisualizationAnimation(VisualizationAnimation visAnim,
+                    SortedList<int, VisualizationSet> visSets)
+                    : base(visAnim) {
+                Tags = new List<string>(visAnim.Count);
+                for (int i = 0; i < visAnim.Count; i++) {
+                    Visualization vis =
+                        VisualizationSet.FindVisualizationBySerial(visSets, visAnim[i]);
+                    Tags.Add(vis.Tag);
+                }
+            }
+        }
         public class SerVisualizationSet {
-            public List<SerVisualization> Items { get; set; }
+            public List<string> Tags { get; set; }
 
             public SerVisualizationSet() { }
             public SerVisualizationSet(VisualizationSet visSet) {
-                Items = new List<SerVisualization>(visSet.Count);
+                Tags = new List<string>(visSet.Count);
                 foreach (Visualization vis in visSet) {
-                    Items.Add(new SerVisualization(vis));
+                    Tags.Add(vis.Tag);
                 }
             }
         }
@@ -398,6 +413,8 @@ namespace SourceGen {
         public Dictionary<string, SerSymbol> UserLabels { get; set; }
         public Dictionary<string, SerFormatDescriptor> OperandFormats { get; set; }
         public Dictionary<string, SerLocalVariableTable> LvTables { get; set; }
+        public List<SerVisualization> Visualizations { get; set; }
+        public List<SerVisualizationAnimation> VisualizationAnimations { get; set; }
         public Dictionary<string, SerVisualizationSet> VisualizationSets { get; set; }
 
         /// <summary>
@@ -488,8 +505,20 @@ namespace SourceGen {
                 spf.LvTables.Add(kvp.Key.ToString(), new SerLocalVariableTable(kvp.Value));
             }
 
+            // Output Visualizations, VisualizationAnimations, and VisualizationSets
+            spf.Visualizations = new List<SerVisualization>();
+            spf.VisualizationAnimations = new List<SerVisualizationAnimation>();
             spf.VisualizationSets = new Dictionary<string, SerVisualizationSet>();
             foreach (KeyValuePair<int, VisualizationSet> kvp in proj.VisualizationSets) {
+                foreach (Visualization vis in kvp.Value) {
+                    if (vis is VisualizationAnimation) {
+                        VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                        spf.VisualizationAnimations.Add(new SerVisualizationAnimation(visAnim,
+                                proj.VisualizationSets));
+                    } else {
+                        spf.Visualizations.Add(new SerVisualization(vis));
+                    }
+                }
                 spf.VisualizationSets.Add(kvp.Key.ToString(), new SerVisualizationSet(kvp.Value));
             }
 
@@ -745,21 +774,60 @@ namespace SourceGen {
             }
 
             // Deserialize visualization sets.  These were added in v1.5.
-            if (spf.VisualizationSets != null) {
+            if (spf.VisualizationSets != null && spf.Visualizations != null) {
+                Dictionary<string, Visualization> visDict =
+                    new Dictionary<string, Visualization>(spf.Visualizations.Count);
+
+                // Extract the Visualizations.
+                foreach (SerVisualization serVis in spf.Visualizations) {
+                    if (CreateVisualization(serVis, report, out Visualization vis)) {
+                        try {
+                            visDict.Add(vis.Tag, vis);
+                        } catch (ArgumentException) {
+                            string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                                "duplicate tag " + vis.Tag);
+                            report.Add(FileLoadItem.Type.Warning, str);
+                            continue;
+                        }
+                    }
+                }
+
+                // Extract the VisualizationAnimations, which link to Visualizations by tag.
+                foreach (SerVisualizationAnimation serVisAnim in spf.VisualizationAnimations) {
+                    if (CreateVisualizationAnimation(serVisAnim, visDict, report,
+                            out VisualizationAnimation visAnim)) {
+                        try {
+                            visDict.Add(visAnim.Tag, visAnim);
+                        } catch (ArgumentException) {
+                            string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                                "duplicate tag " + visAnim.Tag);
+                            report.Add(FileLoadItem.Type.Warning, str);
+                            continue;
+                        }
+                    }
+                }
+
+                // Extract the VisualizationSets, which link to Visualizations of all types by tag.
                 foreach (KeyValuePair<string, SerVisualizationSet> kvp in spf.VisualizationSets) {
                     if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
                             Res.Strings.PROJECT_FIELD_LV_TABLE, report, out int intKey)) {
                         continue;
                     }
 
-                    if (!CreateVisualizationSet(kvp.Value, report, out VisualizationSet visSet)) {
+                    if (!CreateVisualizationSet(kvp.Value, visDict, report,
+                            out VisualizationSet visSet)) {
                         report.Add(FileLoadItem.Type.Warning,
                             string.Format(Res.Strings.ERR_BAD_VISUALIZATION_SET_FMT, intKey));
                         continue;
                     }
 
                     proj.VisualizationSets[intKey] = visSet;
+                }
 
+                if (visDict.Count != 0) {
+                    // We remove visualizations as we add them to sets, so this indicates a
+                    // problem.
+                    Debug.WriteLine("WARNING: visDict still has " + visDict.Count + " entries");
                 }
             }
 
@@ -973,39 +1041,115 @@ namespace SourceGen {
             return true;
         }
 
-        private static bool CreateVisualizationSet(SerVisualizationSet serVisSet,
-                FileLoadReport report, out VisualizationSet outVisSet) {
-            outVisSet = new VisualizationSet();
-            foreach (SerVisualization serVis in serVisSet.Items) {
-                string trimTag = Visualization.TrimAndValidateTag(serVis.Tag, out bool isTagValid);
-                if (!isTagValid) {
-                    Debug.WriteLine("Visualization with invalid tag: " + serVis.Tag);
-                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT, trimTag);
-                    report.Add(FileLoadItem.Type.Warning, str);
-                    continue;
-                }
-                if (string.IsNullOrEmpty(serVis.VisGenIdent) || serVis.VisGenParams == null) {
+        /// <summary>
+        /// Creates a Visualization from its serialized form.
+        /// </summary>
+        private static bool CreateVisualization(SerVisualization serVis, FileLoadReport report,
+               out Visualization vis) {
+            if (!CheckVis(serVis, report, out Dictionary<string, object> parms)) {
+                vis = null;
+                return false;
+            }
+            vis = new Visualization(serVis.Tag, serVis.VisGenIdent,
+                new ReadOnlyDictionary<string, object>(parms));
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a VisualizationAnimation from its serialized form.
+        /// </summary>
+        private static bool CreateVisualizationAnimation(SerVisualizationAnimation serVisAnim,
+                Dictionary<string, Visualization> visList, FileLoadReport report,
+                out VisualizationAnimation visAnim) {
+            if (!CheckVis(serVisAnim, report, out Dictionary<string, object> parms)) {
+                visAnim = null;
+                return false;
+            }
+            List<int> serialNumbers = new List<int>(serVisAnim.Tags.Count);
+            foreach (string tag in serVisAnim.Tags) {
+                if (!visList.TryGetValue(tag, out Visualization vis)) {
                     string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
-                        "ident/params");
+                        "unknown tag in animation: " + tag);
+                    report.Add(FileLoadItem.Type.Warning, str);
+                    continue;
+                }
+                if (vis is VisualizationAnimation) {
+                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                        "animation in animation: " + tag);
+                    report.Add(FileLoadItem.Type.Warning, str);
+                    continue;
+                }
+                serialNumbers.Add(vis.SerialNumber);
+            }
+            visAnim = new VisualizationAnimation(serVisAnim.Tag, serVisAnim.VisGenIdent,
+                new ReadOnlyDictionary<string, object>(parms), serialNumbers, null);
+            return true;
+        }
+
+        /// <summary>
+        /// Checks for errors common to Visualization objects.  Generates a replacement
+        /// parameter object to work around JavaScript type conversion.
+        /// </summary>
+        private static bool CheckVis(SerVisualization serVis, FileLoadReport report,
+                out Dictionary<string, object> parms) {
+            parms = null;
+
+            string unused = Visualization.TrimAndValidateTag(serVis.Tag, out bool isTagValid);
+            if (!isTagValid) {
+                Debug.WriteLine("Visualization with invalid tag: " + serVis.Tag);
+                string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT, serVis.Tag);
+                report.Add(FileLoadItem.Type.Warning, str);
+                return false;
+            }
+            if (string.IsNullOrEmpty(serVis.VisGenIdent) || serVis.VisGenParams == null) {
+                string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                    "ident/params");
+                report.Add(FileLoadItem.Type.Warning, str);
+                return false;
+            }
+
+            // The JavaScript deserialization turns floats into Decimal.  Change it back
+            // so we don't have to deal with it later.
+            parms = new Dictionary<string, object>(serVis.VisGenParams.Count);
+            foreach (KeyValuePair<string, object> kvp in serVis.VisGenParams) {
+                object val = kvp.Value;
+                if (val is decimal) {
+                    val = (double)((decimal)val);
+                }
+                parms.Add(kvp.Key, val);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a VisualizationSet from its serialized form.
+        /// </summary>
+        private static bool CreateVisualizationSet(SerVisualizationSet serVisSet,
+                Dictionary<string, Visualization> visList, FileLoadReport report,
+                out VisualizationSet outVisSet) {
+            outVisSet = new VisualizationSet();
+            foreach (string rawTag in serVisSet.Tags) {
+                string trimTag = Visualization.TrimAndValidateTag(rawTag, out bool isTagValid);
+                if (!isTagValid) {
+                    Debug.WriteLine("VisualizationSet with invalid tag: " + rawTag);
+                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT, rawTag);
+                    report.Add(FileLoadItem.Type.Warning, str);
+                    continue;
+                }
+                if (!visList.TryGetValue(trimTag, out Visualization vis)) {
+                    Debug.WriteLine("VisSet ref to unknown tag: " + trimTag);
+                    string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
+                        "unknown tag: " + trimTag);
                     report.Add(FileLoadItem.Type.Warning, str);
                     continue;
                 }
 
-                // The JavaScript deserialization turns floats into Decimal.  Change it back
-                // so we don't have to deal with it later.
-                Dictionary<string, object> parms =
-                    new Dictionary<string, object>(serVis.VisGenParams.Count);
-                foreach (KeyValuePair<string, object> kvp in serVis.VisGenParams) {
-                    object val = kvp.Value;
-                    if (val is decimal) {
-                        val = (double)((decimal)val);
-                    }
-                    parms.Add(kvp.Key, val);
-                }
-
-                Visualization vis = new Visualization(serVis.Tag, serVis.VisGenIdent,
-                    new ReadOnlyDictionary<string, object>(parms));
                 outVisSet.Add(vis);
+
+                // Each Visualization should only appear in one VisualizationSet.  Things
+                // might get weird when we remove one if this isn't true.  So we remove
+                // it from the dictionary.
+                visList.Remove(trimTag);
             }
             return true;
         }

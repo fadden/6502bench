@@ -148,8 +148,9 @@ namespace SourceGen.WpfGui {
             FrameDelayTimeMsec = DEFAULT_FRAME_DELAY.ToString();
             if (origAnim != null) {
                 TagString = origAnim.Tag;
-                int frameDelay = PluginCommon.Util.GetFromObjDict(origAnim.VisGenParams,
+                mFrameDelayIntMsec = PluginCommon.Util.GetFromObjDict(origAnim.VisGenParams,
                     VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, DEFAULT_FRAME_DELAY);
+                FrameDelayTimeMsec = mFrameDelayIntMsec.ToString();
             } else {
                 TagString = "anim" + mSetOffset.ToString("x6");
             }
@@ -160,13 +161,17 @@ namespace SourceGen.WpfGui {
         private void PopulateItemLists() {
             // Add the animation's visualizations, in order.
             if (mOrigAnim != null) {
-                foreach (int serial in mOrigAnim.GetSerialNumbers()) {
+                for (int i = 0; i < mOrigAnim.Count; i++) {
+                    int serial = mOrigAnim[i];
                     Visualization vis = VisualizationSet.FindVisualizationBySerial(mEditedList,
                         serial);
                     if (vis != null) {
                         VisAnimItems.Add(vis);
                     } else {
-                        Debug.Assert(false);
+                        // Could happen if the Visualization exists but isn't referenced by
+                        // any VisualizationSets.  Shouldn't happen unless the project file
+                        // was damaged.  Silently ignore it.
+                        Debug.WriteLine("WARNING: unknown vis serial " + serial);
                     }
                 }
             }

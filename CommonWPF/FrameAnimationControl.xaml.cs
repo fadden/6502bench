@@ -90,6 +90,10 @@ namespace CommonWPF {
         }
 
         public void Start() {
+            if (mBitmaps == null) {
+                throw new InvalidOperationException("Must set bitmaps before starting");
+            }
+            Tick(null, null);   // show something immediately
             mTimer.Start();
         }
 
@@ -98,9 +102,6 @@ namespace CommonWPF {
         }
 
         private void Tick(object sender, EventArgs e) {
-            if (mBitmaps == null) {
-                throw new InvalidOperationException("Must set bitmaps before starting");
-            }
             if (mNext >= mBitmaps.Count) {
                 mNext = 0;
             }

@@ -44,28 +44,35 @@
 "Length":21,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
 "LvTables":{
 },
-"VisualizationSets":{
+"Visualizations":[{
+"Tag":"vis000014","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":20,"height":3}},
+{
+"Tag":"vis000018","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":24,"height":20}},
+{
+"Tag":"vis00002d","VisGenIdent":"atari2600-sprite","VisGenParams":{
+"offset":45,"height":22}},
+{
+"Tag":"vis000044","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":68,"height":7,"rowThickness":4,"reflected":false}},
+{
+"Tag":"vis000059","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":89,"height":7,"rowThickness":4,"reflected":true}},
+{
+"Tag":"vis00006e","VisGenIdent":"atari2600-playfield","VisGenParams":{
+"offset":110,"height":7,"rowThickness":4,"reflected":true}}],"VisualizationAnimations":[{
+"Tags":["vis000018","vis00002d"],"Tag":"anim00002d","VisGenIdent":"(animation)","VisGenParams":{
+"frame-delay-msec":500}}],"VisualizationSets":{
 "20":{
-"Items":[{
-"Tag":"Key sprite","VisGenIdent":"atari2600-sprite","VisGenParams":{
-"offset":20,"height":3}}]},
+"Tags":["vis000014"]},
 "24":{
-"Items":[{
-"Tag":"Dragon 0","VisGenIdent":"atari2600-sprite","VisGenParams":{
-"offset":24,"height":20}}]},
+"Tags":["vis000018"]},
 "45":{
-"Items":[{
-"Tag":"Dragon 1","VisGenIdent":"atari2600-sprite","VisGenParams":{
-"offset":45,"height":22}}]},
+"Tags":["vis00002d","anim00002d"]},
 "68":{
-"Items":[{
-"Tag":"Black Maze 3","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":68,"height":7,"rowThickness":4,"reflected":false}}]},
+"Tags":["vis000044"]},
 "89":{
-"Items":[{
-"Tag":"Red Maze (bottom)","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":89,"height":7,"rowThickness":4,"reflected":true}}]},
+"Tags":["vis000059"]},
 "110":{
-"Items":[{
-"Tag":"Castle Def","VisGenIdent":"atari2600-playfield","VisGenParams":{
-"offset":110,"height":7,"rowThickness":4,"reflected":true}}]}}}
+"Tags":["vis00006e"]}}}

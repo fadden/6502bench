@@ -87,7 +87,7 @@ limitations under the License.
         </DataGrid>
         
         <StackPanel Grid.Column="1" Grid.Row="1">
-            <Button Width="110" Margin="4" Content="_New Bitmap..."
+            <Button Width="110" Height="36" Margin="4" Content="_New Bitmap..."
                     IsEnabled="{Binding HasVisPlugins}" Click="NewBitmapButton_Click"/>
             <Button Width="110" Margin="4" Content="_New Bitmap&#x0a;Animation..."
                     Click="NewBitmapAnimationButton_Click"/>

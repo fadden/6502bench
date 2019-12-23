@@ -126,7 +126,7 @@ namespace SourceGen {
                 if (VisualizationAnimation.StripEntries((VisualizationAnimation) vis,
                         removedSerials, out VisualizationAnimation newAnim)) {
                     somethingRemoved = true;
-                    if (newAnim.SerialCount != 0) {
+                    if (newAnim.Count != 0) {
                         newSet.Add(newAnim);
                     } else {
                         Debug.WriteLine("Deleting empty animation " + vis.Tag);

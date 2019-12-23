@@ -83,13 +83,6 @@ namespace SourceGen {
             CachedImage = ANIM_OVERLAY_IMAGE;       // default to this
         }
 
-        /// <summary>
-        /// The number of Visualizations linked from this animation.
-        /// </summary>
-        public int SerialCount {
-            get { return mSerialNumbers.Count; }
-        }
-
         public void GenerateImage(SortedList<int, VisualizationSet> visSets) {
             const int IMAGE_SIZE = 64;
 
@@ -126,10 +119,22 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Returns a list of serial numbers.  The caller must not modify the list.
+        /// The number of Visualizations linked from this animation.
         /// </summary>
-        public List<int> GetSerialNumbers() {
-            return mSerialNumbers;
+        /// <remarks>
+        /// Visualizations may appear more than once in the list.  Each instance is counted.
+        /// </remarks>
+        public int Count {
+            get { return mSerialNumbers.Count; }
+        }
+
+        /// <summary>
+        /// Indexes the serial number list.
+        /// </summary>
+        public int this[int index] {
+            get {
+                return mSerialNumbers[index];
+            }
         }
 
         /// <summary>
@@ -226,7 +231,6 @@ namespace SourceGen {
             if (!base.Equals(obj)) {
                 return false;
             }
-            Debug.WriteLine("Detailed: this=" + Tag + " other=" + Tag);
             VisualizationAnimation other = (VisualizationAnimation)obj;
             if (other.mSerialNumbers.Count != mSerialNumbers.Count) {
                 return false;
@@ -236,7 +240,6 @@ namespace SourceGen {
                     return false;
                 }
             }
-            Debug.WriteLine("  All serial numbers match");
             return true;
         }
         public override int GetHashCode() {
