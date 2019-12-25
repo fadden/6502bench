@@ -114,6 +114,8 @@ namespace SourceGen {
             COUNT           // number of elements, must be last
         }
 
+        private string mParameterStringBase;
+
 
         /// <summary>
         /// Constructor.
@@ -126,6 +128,7 @@ namespace SourceGen {
             mLeftFlags = leftFlags;
 
             ConfigureColumns(leftFlags, rightWidths);
+            mParameterStringBase = GenerateParameterStringBase(leftFlags, rightWidths);
         }
 
         private void ConfigureColumns(ActiveColumnFlags leftFlags, int[] rightWidths) {
@@ -185,6 +188,68 @@ namespace SourceGen {
             //for (int i = 0; i < (int)Col.COUNT; i++) {
             //    Debug.WriteLine("  " + i + "(" + ((Col)i) + ") " + mColStart[i]);
             //}
+        }
+
+        /// <summary>
+        /// Generates description of some parameters that we only have during construction.
+        /// </summary>
+        private static string GenerateParameterStringBase(ActiveColumnFlags leftFlags,
+                int[] rightWidths) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("cols=");
+            for (int i = 0; i < rightWidths.Length; i++) {
+                if (i != 0) {
+                    sb.Append(',');
+                }
+                sb.Append(rightWidths[i]);
+            }
+
+            sb.Append(";extraCols=");
+            bool first = true;
+            foreach (ActiveColumnFlags flag in Enum.GetValues(typeof(ActiveColumnFlags))) {
+                if (flag == ActiveColumnFlags.ALL) {
+                    continue;
+                }
+                if ((leftFlags & flag) != 0) {
+                    if (!first) {
+                        sb.Append(',');
+                    }
+                    sb.Append(flag);
+                    first = false;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generates a description of configured parameters.  Intended to be human-readable,
+        /// but possibly machine-readable as well.
+        /// </summary>
+        private string GenerateParameterString() {
+            StringBuilder sb = new StringBuilder(mParameterStringBase);
+
+            sb.Append(";byteSpc=");
+            sb.Append(mFormatter.Config.mSpacesBetweenBytes.ToString());
+            sb.Append(";commaBulk=");
+            sb.Append(mFormatter.Config.mCommaSeparatedDense.ToString());
+            sb.Append(";nonuPfx='");
+            sb.Append(mFormatter.Config.mNonUniqueLabelPrefix);
+            sb.Append('\'');
+            sb.Append(";varPfx='");
+            sb.Append(mFormatter.Config.mLocalVariableLabelPrefix);
+            sb.Append('\'');
+            sb.Append(";labelBrk=");
+            sb.Append(LongLabelNewLine.ToString());
+            sb.Append(";notes=");
+            sb.Append(IncludeNotes.ToString());
+            sb.Append(";gfx=");
+            sb.Append(GenerateImageFiles.ToString());
+
+            // Not included: pseudo-op definitions; delimiter definitions
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -449,6 +514,7 @@ namespace SourceGen {
             string timeStr = DateTime.Now.ToString("HH:mm:ss zzz");
             tmplStr = tmplStr.Replace("$CurrentDate$", dateStr);
             tmplStr = tmplStr.Replace("$CurrentTime$", timeStr);
+            tmplStr = tmplStr.Replace("$GenParameters$", GenerateParameterString());
 
             // Generate and substitute the symbol table.  This should be small enough that
             // we won't break the world by doing it with string.Replace().
