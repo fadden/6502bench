@@ -80,42 +80,28 @@ namespace SourceGen {
                 mSerialNumbers.Add(serial);
             }
 
-            CachedImage = ANIM_OVERLAY_IMAGE;       // default to this
+            CachedImage = BLANK_IMAGE;
+            OverlayImage = ANIM_OVERLAY_IMAGE;
         }
 
+        /// <summary>
+        /// Generates a cached image for the animation.
+        /// </summary>
+        /// <remarks>
+        /// Currently just using the first frame.  We could do fancy things, like make a
+        /// poster with the first N images.
+        /// </remarks>
+        /// <param name="visSets">List of visualization sets.</param>
         public void GenerateImage(SortedList<int, VisualizationSet> visSets) {
-            const int IMAGE_SIZE = 64;
-
-            CachedImage = ANIM_OVERLAY_IMAGE;
-
+            CachedImage = BLANK_IMAGE;
             if (mSerialNumbers.Count == 0) {
                 return;
             }
             Visualization vis = VisualizationSet.FindVisualizationBySerial(visSets,
                 mSerialNumbers[0]);
-            if (vis == null) {
-                return;
+            if (vis != null) {
+                CachedImage = vis.CachedImage;
             }
-
-            double maxDim = Math.Max(vis.CachedImage.Width, vis.CachedImage.Height);
-            double dimMult = IMAGE_SIZE / maxDim;
-            double adjWidth = vis.CachedImage.Width * dimMult;
-            double adjHeight = vis.CachedImage.Height * dimMult;
-            Rect imgBounds = new Rect((IMAGE_SIZE - adjWidth) / 2, (IMAGE_SIZE - adjHeight) / 2,
-                adjWidth, adjHeight);
-
-            DrawingVisual visual = new DrawingVisual();
-            //RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.NearestNeighbor);
-            using (DrawingContext dc = visual.RenderOpen()) {
-                dc.DrawImage(vis.CachedImage, imgBounds);
-                dc.DrawImage(ANIM_OVERLAY_IMAGE, new Rect(0, 0, IMAGE_SIZE, IMAGE_SIZE));
-            }
-
-            RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
-                PixelFormats.Pbgra32);
-            bmp.Render(visual);
-            CachedImage = bmp;
-            //Debug.WriteLine("RENDERED " + Tag);
         }
 
         /// <summary>

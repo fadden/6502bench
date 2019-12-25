@@ -715,8 +715,11 @@ namespace SourceGen {
                     ".gif";
                 string pathName = Path.Combine(mImageDirPath, fileName);
 
+                int dispWidth, dispHeight;
+
                 Visualization vis = visSet[index];
                 if (vis is VisualizationAnimation) {
+                    // Animated visualization.
                     VisualizationAnimation visAnim = (VisualizationAnimation)vis;
                     int frameDelay = PluginCommon.Util.GetFromObjDict(visAnim.VisGenParams,
                         VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, 330);
@@ -745,14 +748,17 @@ namespace SourceGen {
                     // Create new or replace existing image file.
                     try {
                         using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
-                            encoder.Save(stream);
+                            encoder.Save(stream, out dispWidth, out dispHeight);
                         }
                     } catch (Exception ex) {
                         // TODO: add an error report
                         Debug.WriteLine("Error creating animated GIF file '" + pathName + "': " +
                             ex.Message);
+                        dispWidth = dispHeight = 1;
                     }
                 } else {
+                    // Bitmap visualization.
+                    //
                     // Encode a GIF the same size as the original bitmap.
                     GifBitmapEncoder encoder = new GifBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
@@ -770,6 +776,9 @@ namespace SourceGen {
                         Debug.WriteLine("Error creating GIF file '" + pathName + "': " +
                             ex.Message);
                     }
+
+                    dispWidth = (int)vis.CachedImage.Width;
+                    dispHeight = (int)vis.CachedImage.Height;
                 }
 
                 // Output thumbnail-size IMG element, preserving proportions.  I'm assuming
@@ -778,17 +787,17 @@ namespace SourceGen {
                 // across all visualization lines, but that can create some monsters (e.g.
                 // a bitmap that's 1 pixel high and 40 wide), so we cap the width.
                 int dimMult = IMAGE_SIZE;
-                double maxDim = vis.CachedImage.Height;
-                if (vis.CachedImage.Width > vis.CachedImage.Height * 2) {
+                double maxDim = dispHeight;
+                if (dispWidth > dispHeight * 2) {
                     // Too proportionally wide, so use the width as the limit.  Allow it to
                     // up to 2x the max width (which can't cause the thumb height to exceed
                     // the height limit).
-                    maxDim = vis.CachedImage.Width;
+                    maxDim = dispWidth;
                     dimMult *= 2;
                 }
-                int thumbWidth = (int)Math.Round(dimMult * (vis.CachedImage.Width / maxDim));
-                int thumbHeight = (int)Math.Round(dimMult * (vis.CachedImage.Height / maxDim));
-                //Debug.WriteLine(vis.CachedImage.Width + "x" + vis.CachedImage.Height + " --> " +
+                int thumbWidth = (int)Math.Round(dimMult * (dispWidth / maxDim));
+                int thumbHeight = (int)Math.Round(dimMult * (dispHeight / maxDim));
+                //Debug.WriteLine(dispWidth + "x" + dispHeight + " --> " +
                 //    thumbWidth + "x" + thumbHeight + " (" + maxDim + ")");
 
                 if (index != 0) {

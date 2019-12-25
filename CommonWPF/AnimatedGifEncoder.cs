@@ -94,7 +94,9 @@ namespace CommonWPF {
         /// Converts the list of frames into an animated GIF, and writes it to the stream.
         /// </summary>
         /// <param name="stream">Output stream.</param>
-        public void Save(Stream stream) {
+        public void Save(Stream stream, out int maxWidth, out int maxHeight) {
+            maxWidth = maxHeight = -1;
+
             if (Frames.Count == 0) {
                 // nothing to do
                 Debug.Assert(false);
@@ -129,8 +131,6 @@ namespace CommonWPF {
             // otherwise *possible*, but we'd need to decode, update palettes and pixels, and
             // re-encode.)
             //
-            int maxWidth = -1;
-            int maxHeight = -1;
             foreach (UnpackedGif gif in gifs) {
                 //gif.DebugDump();
 

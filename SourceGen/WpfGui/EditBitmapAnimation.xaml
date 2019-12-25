@@ -89,8 +89,11 @@ limitations under the License.
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border BorderThickness="0" Background="{StaticResource BitmapBackground}">
-                                    <Image Source="{Binding CachedImage}" Width="48" Height="48"
-                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    <Grid>
+                                        <Image Source="{Binding CachedImage}" Width="48" Height="48"
+                                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                        <Image Source="{Binding OverlayImage}" Width="48" Height="48"/>
+                                    </Grid>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -123,8 +126,11 @@ limitations under the License.
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border BorderThickness="0" Background="{StaticResource BitmapBackground}">
-                                    <Image Source="{Binding CachedImage}" Width="48" Height="48"
-                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    <Grid>
+                                        <Image Source="{Binding CachedImage}" Width="48" Height="48"
+                                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                        <Image Source="{Binding OverlayImage}" Width="48" Height="48"/>
+                                    </Grid>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

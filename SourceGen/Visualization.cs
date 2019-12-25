@@ -73,6 +73,11 @@ namespace SourceGen {
         public BitmapSource CachedImage { get; set; }
 
         /// <summary>
+        /// Image overlaid on CachedImage.  Used to identify thumbnails as animations.
+        /// </summary>
+        public BitmapSource OverlayImage { get; set; }
+
+        /// <summary>
         /// True if CachedImage has something other than the default value.
         /// </summary>
         public bool HasImage {
@@ -92,6 +97,8 @@ namespace SourceGen {
         /// </summary>
         internal static readonly BitmapSource ANIM_OVERLAY_IMAGE =
             VisualizationAnimation.GenerateAnimOverlayImage();
+
+        internal static readonly BitmapSource BLANK_IMAGE = GenerateBlankImage();
 
         /// <summary>
         /// Serial number, for reference from other Visualization objects.  Not serialized.
@@ -138,6 +145,7 @@ namespace SourceGen {
             VisGenIdent = visGenIdent;
             VisGenParams = visGenParams;
             CachedImage = BROKEN_IMAGE;
+            OverlayImage = BLANK_IMAGE;
 
             if (oldObj == null) {
                 // not worried about multiple threads
@@ -208,6 +216,12 @@ namespace SourceGen {
                 vis2d.Width);
 
             return image;
+        }
+
+        private static BitmapSource GenerateBlankImage() {
+            RenderTargetBitmap bmp = new RenderTargetBitmap(1, 1, 96.0, 96.0,
+                PixelFormats.Pbgra32);
+            return bmp;
         }
 
 

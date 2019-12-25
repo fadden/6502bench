@@ -189,13 +189,15 @@ stored in a straightforward fashion.</p>
 
 <ul>
   <li><b>Sprite</b> - basic 1xN sprite, converted to an image 8 pixels
-    wide.</li>
+    wide.  Square pixels are assumed.</li>
   <li><b>Playfield</b> - assumes PF0,PF1,PF2 are stored in that order,
     multiple entries following each other.  Specify the number of
     3-byte entries as the height.
     Since most playfields aren't the full height of the screen,
     it will tend to look squashed.  Use the "row thickness" feature
-    to repeat each row N times to adjust the proportions.</li>
+    to repeat each row N times to adjust the proportions.
+    The "Reflected" checkbox determines whether the right-side image is
+    repeated as-is or flipped.</li>
 </ul>
 
 <h3>Commodore 64 - Commodore/VisC64</h3>
