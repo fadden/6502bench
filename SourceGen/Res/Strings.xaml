@@ -117,11 +117,13 @@ limitations under the License.
     <system:String x:Key="str_MsgFormatDescriptorIgnored">Format ignored</system:String>
     <system:String x:Key="str_MsgHiddenLabel">Hidden label</system:String>
     <system:String x:Key="str_MsgHiddenLocalVariableTable">Hidden variable table</system:String>
+    <system:String x:Key="str_MsgHiddenVisualization">Hidden visualization</system:String>
     <system:String x:Key="str_MsgInvalidDescriptor">Invalid format desc</system:String>
     <system:String x:Key="str_MsgInvalidOffsetOrLength">Invalid offset or len</system:String>
     <system:String x:Key="str_MsgLabelIgnored">Label ignored</system:String>
     <system:String x:Key="str_MsgLocalVariableTableIgnored">LV table skipped over</system:String>
     <system:String x:Key="str_MsgUnresolvedWeakRef">Ref'd symbol not found</system:String>
+    <system:String x:Key="str_MsgVisualizationIgnored">Visualization ignored</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_NoExportedSymbolsFound">No exported symbols found.</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>

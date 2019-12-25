@@ -215,6 +215,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_MsgHiddenLabel");
         public static string MSG_HIDDEN_LOCAL_VARIABLE_TABLE =
             (string)Application.Current.FindResource("str_MsgHiddenLocalVariableTable");
+        public static string MSG_HIDDEN_VISUALIZATION =
+            (string)Application.Current.FindResource("str_MsgHiddenVisualization");
         public static string MSG_INVALID_DESCRIPTOR =
             (string)Application.Current.FindResource("str_MsgInvalidDescriptor");
         public static string MSG_INVALID_OFFSET_OR_LENGTH =
@@ -225,6 +227,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_MsgLocalVariableTableIgnored");
         public static string MSG_UNRESOLVED_WEAK_REF =
             (string)Application.Current.FindResource("str_MsgUnresolvedWeakRef");
+        public static string MSG_VISUALIZATION_IGNORED =
+            (string)Application.Current.FindResource("str_MsgVisualizationIgnored");
         public static string NO_FILES_AVAILABLE =
             (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string NO_EXPORTED_SYMBOLS_FOUND =

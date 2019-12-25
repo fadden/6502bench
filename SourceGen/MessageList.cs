@@ -49,6 +49,7 @@ namespace SourceGen {
                 Unknown = 0,
                 HiddenLabel,
                 HiddenLocalVariableTable,
+                HiddenVisualization,
                 UnresolvedWeakRef,
                 InvalidOffsetOrLength,
                 InvalidDescriptor,
@@ -64,6 +65,7 @@ namespace SourceGen {
                 None,
                 LabelIgnored,
                 LocalVariableTableIgnored,
+                VisualizationIgnored,
                 FormatDescriptorIgnored,
             }
             public ProblemResolution Resolution { get; private set; }
@@ -71,6 +73,8 @@ namespace SourceGen {
 
             public MessageEntry(SeverityLevel severity, int offset, MessageType mtype,
                     object context, ProblemResolution resolution) {
+                Debug.Assert(context != null);
+
                 Severity = severity;
                 Offset = offset;
                 MsgType = mtype;
@@ -155,6 +159,9 @@ namespace SourceGen {
                 case MessageEntry.MessageType.HiddenLocalVariableTable:
                     problem = Res.Strings.MSG_HIDDEN_LOCAL_VARIABLE_TABLE;
                     break;
+                case MessageEntry.MessageType.HiddenVisualization:
+                    problem = Res.Strings.MSG_HIDDEN_VISUALIZATION;
+                    break;
                 case MessageEntry.MessageType.UnresolvedWeakRef:
                     problem = Res.Strings.MSG_UNRESOLVED_WEAK_REF;
                     break;
@@ -187,6 +194,9 @@ namespace SourceGen {
                     break;
                 case MessageEntry.ProblemResolution.FormatDescriptorIgnored:
                     resolution = Res.Strings.MSG_FORMAT_DESCRIPTOR_IGNORED;
+                    break;
+                case MessageEntry.ProblemResolution.VisualizationIgnored:
+                    resolution = Res.Strings.MSG_VISUALIZATION_IGNORED;
                     break;
                 default:
                     resolution = "???";

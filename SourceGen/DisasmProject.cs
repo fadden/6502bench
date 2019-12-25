@@ -689,6 +689,9 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Checks to see if any part of the address map runs across a bank boundary.
+        /// </summary>
         private void ValidateAddressMap() {
             foreach (AddressMap.AddressMapEntry entry in AddrMap) {
                 if ((entry.Addr & 0xff0000) != ((entry.Addr + entry.Length - 1) & 0xff0000)) {
@@ -701,6 +704,27 @@ namespace SourceGen {
                         MessageList.MessageEntry.MessageType.BankOverrun,
                         string.Format(fmt, "+" + badOffset.ToString("x6")),
                         MessageList.MessageEntry.ProblemResolution.None));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks for hidden visualization sets.
+        /// </summary>
+        private void ValidateVisualizationSets() {
+            foreach (KeyValuePair<int, VisualizationSet> kvp in VisualizationSets) {
+                Anattrib attr = GetAnattrib(kvp.Key);
+                if (!attr.IsStart) {
+                    string tag = string.Empty;
+                    if (kvp.Value.Count > 0) {
+                        tag = kvp.Value[0].Tag;
+                    }
+                    Messages.Add(new MessageList.MessageEntry(
+                        MessageList.MessageEntry.SeverityLevel.Warning,
+                        kvp.Key,
+                        MessageList.MessageEntry.MessageType.HiddenVisualization,
+                        tag,
+                        MessageList.MessageEntry.ProblemResolution.VisualizationIgnored));
                 }
             }
         }
@@ -850,7 +874,10 @@ namespace SourceGen {
             Validate();
             reanalysisTimer.EndTask("Validate");
 #endif
+            reanalysisTimer.StartTask("ErrorCheck");
             ValidateAddressMap();
+            ValidateVisualizationSets();
+            reanalysisTimer.EndTask("ErrorCheck");
 
             reanalysisTimer.EndTask("DisasmProject.Analyze()");
             //reanalysisTimer.DumpTimes("DisasmProject timers:", debugLog);
