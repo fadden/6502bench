@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -23,6 +24,7 @@ using System.Windows.Media.Imaging;
 
 using Asm65;
 using CommonUtil;
+using CommonWPF;
 
 namespace SourceGen {
     /// <summary>
@@ -687,11 +689,13 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Generate one or more GIF image files, and generate references to them.
+        /// Generate one or more GIF image files, and output references to them.
         /// </summary>
         /// <param name="offset">Visualization set file offset.</param>
         /// <param name="sb">String builder for the HTML output.</param>
         private void OutputVisualizationSet(int offset, StringBuilder sb) {
+            const int IMAGE_SIZE = 64;
+
             if (!mProject.VisualizationSets.TryGetValue(offset,
                     out VisualizationSet visSet)) {
                 sb.Append("Internal error - visualization set missing");
@@ -707,27 +711,73 @@ namespace SourceGen {
             string imageDirFileName = Path.GetFileName(mImageDirPath);
 
             for (int index = 0; index < visSet.Count; index++) {
-                Visualization vis = visSet[index];
-
-                // Encode a GIF the same size as the original bitmap.
-                GifBitmapEncoder encoder = new GifBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
-
-                // Create new or replace existing image file.
                 string fileName = "vis" + offset.ToString("x6") + "_" + index.ToString("d2") +
                     ".gif";
-                using (FileStream stream = new FileStream(Path.Combine(mImageDirPath, fileName),
-                        FileMode.Create)) {
-                    encoder.Save(stream);
+                string pathName = Path.Combine(mImageDirPath, fileName);
+
+                Visualization vis = visSet[index];
+                if (vis is VisualizationAnimation) {
+                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                    int frameDelay = PluginCommon.Util.GetFromObjDict(visAnim.VisGenParams,
+                        VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, 330);
+                    AnimatedGifEncoder encoder = new AnimatedGifEncoder();
+
+                    // Gather list of frames.
+                    for (int i = 0; i < visAnim.Count; i++) {
+                        Visualization avis = VisualizationSet.FindVisualizationBySerial(
+                            mProject.VisualizationSets, visAnim[i]);
+                        if (avis != null) {
+                            encoder.AddFrame(BitmapFrame.Create(avis.CachedImage), frameDelay);
+                        } else {
+                            Debug.Assert(false);        // not expected
+                        }
+                    }
+
+#if false
+                    using (MemoryStream ms = new MemoryStream()) {
+                        encoder.Save(ms);
+                        Debug.WriteLine("TESTING");
+                        UnpackedGif anim = UnpackedGif.Create(ms.GetBuffer());
+                        anim.DebugDump();
+                    }
+#endif
+
+                    // Create new or replace existing image file.
+                    try {
+                        using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
+                            encoder.Save(stream);
+                        }
+                    } catch (Exception ex) {
+                        // TODO: add an error report
+                        Debug.WriteLine("Error creating animated GIF file '" + pathName + "': " +
+                            ex.Message);
+                    }
+                } else {
+                    // Encode a GIF the same size as the original bitmap.
+                    GifBitmapEncoder encoder = new GifBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
+
+                    // Create new or replace existing image file.
+                    try {
+                        using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
+                            encoder.Save(stream);
+                        }
+                    } catch (Exception ex) {
+                        // Something went wrong with file creation.  We don't have an error
+                        // reporting mechanism, so this will just appear as a broken or stale
+                        // image reference.
+                        // TODO: add an error report
+                        Debug.WriteLine("Error creating GIF file '" + pathName + "': " +
+                            ex.Message);
+                    }
                 }
 
-                // Create as thumbnail, preserving proportions.  I'm assuming most images
-                // will be small enough that generating a separate thumbnail would be
+                // Output thumbnail-size IMG element, preserving proportions.  I'm assuming
+                // images will be small enough that generating a separate thumbnail would be
                 // counter-productive.  This seems to look best if the height is consistent
                 // across all visualization lines, but that can create some monsters (e.g.
-                // a bitmap that's 1 pixel high and 40 wide).
-                int dimMult = 64;
-                //double maxDim = Math.Max(vis.CachedImage.Width, vis.CachedImage.Height);
+                // a bitmap that's 1 pixel high and 40 wide), so we cap the width.
+                int dimMult = IMAGE_SIZE;
                 double maxDim = vis.CachedImage.Height;
                 if (vis.CachedImage.Width > vis.CachedImage.Height * 2) {
                     // Too proportionally wide, so use the width as the limit.  Allow it to
@@ -738,8 +788,8 @@ namespace SourceGen {
                 }
                 int thumbWidth = (int)Math.Round(dimMult * (vis.CachedImage.Width / maxDim));
                 int thumbHeight = (int)Math.Round(dimMult * (vis.CachedImage.Height / maxDim));
-                Debug.WriteLine(vis.CachedImage.Width + "x" + vis.CachedImage.Height + " --> " +
-                    thumbWidth + "x" + thumbHeight + " (" + maxDim + ")");
+                //Debug.WriteLine(vis.CachedImage.Width + "x" + vis.CachedImage.Height + " --> " +
+                //    thumbWidth + "x" + thumbHeight + " (" + maxDim + ")");
 
                 if (index != 0) {
                     sb.Append("&nbsp;");

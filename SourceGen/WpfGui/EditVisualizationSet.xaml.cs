@@ -260,6 +260,7 @@ namespace SourceGen.WpfGui {
                     if (newAnim.Count == 0) {
                         VisualizationList.Remove(visAnim);
                     } else {
+                        newAnim.GenerateImage(CreateEditedSetList());
                         index = VisualizationList.IndexOf(visAnim);
                         VisualizationList.Remove(visAnim);
                         VisualizationList.Insert(index, newAnim);

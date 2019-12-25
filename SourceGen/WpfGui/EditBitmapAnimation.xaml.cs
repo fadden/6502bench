@@ -219,6 +219,7 @@ namespace SourceGen.WpfGui {
 
             NewAnim = new VisualizationAnimation(TagString, VisualizationAnimation.ANIM_VIS_GEN,
                 new ReadOnlyDictionary<string, object>(visGenParams), serials, mOrigAnim);
+            NewAnim.GenerateImage(mEditedList);
 
             DialogResult = true;
         }
@@ -290,8 +291,13 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Adds an item to the animation list.
+        /// Adds an item to the end of the animation list.
         /// </summary>
+        /// <remarks>
+        /// We could make this an insert or add-at-cursor operation.  This feels a bit more
+        /// natural, and works since we're still limited to single-select on the anim list.
+        /// The selection should be set to the last item added so we can add repeatedly.
+        /// </remarks>
         private void AddSelection() {
             if (!IsAddEnabled) {
                 return;

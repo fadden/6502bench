@@ -48,6 +48,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimatedGifEncoder.cs" />
     <Compile Include="FrameAnimationControl.xaml.cs">
       <DependentUpon>FrameAnimationControl.xaml</DependentUpon>
     </Compile>
@@ -90,6 +91,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtil\CommonUtil.csproj">
+      <Project>{a2993eac-35d8-4768-8c54-152b4e14d69c}</Project>
+      <Name>CommonUtil</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

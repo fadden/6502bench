@@ -68,7 +68,9 @@ opens the Visualization Set Editor window.</p>
 with the selected file offset.  You can create a new visualization, edit
 or remove an existing entry, or rearrange them.
 If you select "New Bitmap" or edit an existing bitmap entry, the
-Bitmap Visualization Editor window will open.</p>
+Bitmap Visualization Editor window will open.
+Similarly, if you select "New Bitmap Animation" or edit an existing
+bitmap animation, the Bitmap Animation Editor will open.</p>
 
 <h4>Bitmap Visualization Editor</h4>
 
@@ -81,7 +83,7 @@ input parameters below the preview window may change.</p>
 <p>The "tag" is a unique string that will be shown in the display list.
 This is not a label, and may contain any characters you want (but leading
 and trailing whitespace will be trimmed).  The only requirement is that
-it be unique among visualization tags.</p>
+it be unique across all visualizations (bitmaps, animations, etc).</p>
 <p>The preview window shows the visualizer output.  The generated image is
 expanded to fill the window, so small images will be shown with very
 large pixels.
@@ -93,6 +95,30 @@ error message will appear below it.</p>
 the former a text entry field that accepts decimal and hexadecimal values.
 The range of allowable values is shown to the right of the entry field.
 If you enter an invalid value, the parameter description will turn red.</p>
+
+
+<h4>Bitmap Animation Editor</h4>
+
+<p>Bitmap animations allow you to create a simple animation from a
+collection of other visualizations.  This can be useful when a program
+stores animated graphics as a series of frames.</p>
+<p>The "tag" is a unique string that will be shown in the display list.
+The same rules apply as for bitmap visualizations.</p>
+<p>The list at the top left holds all visualizations.  Select items on
+the left and use the "Add" button to add them to the list on the right,
+which has the set that is included in the animation.  You can reorder
+the list with the up/down buttons.  Adding the same frame multiple times
+is allowed.</p>
+<p>The "frame delay" field lets you specify how long each frame is shown
+on screen, in milliseconds.  Some animation formats may use a different
+time resolution; for example, animated GIFs use units of 1/100th of a
+second.  The closest value will be used.  Note also that some viewers
+(notably web browsers) will cap the update rate.</p>
+<p>When you have one or more frames in the animation list, you can preview
+the result in the window at the bottom.  The actual appearance may be
+slightly different, especially if the frames are different sizes.  For
+example, the preview window scales individual frames, but animated GIFs
+will be scaled to the size of the largest frame.</p>
 
 
 <h2><a name="runtime">Scripts Included with SourceGen</a></h2>

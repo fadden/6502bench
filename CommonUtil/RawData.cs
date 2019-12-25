@@ -59,5 +59,42 @@ namespace CommonUtil {
 
             throw new Exception("GetWord(): should not be here");
         }
+
+        /// <summary>
+        /// Fetches a two-byte little-endian value from a byte stream, advancing the offset.
+        /// </summary>
+        /// <param name="data">Byte stream.</param>
+        /// <param name="offset">Initial offset.  Value will be incremented by 2.</param>
+        /// <returns>Value fetched.</returns>
+        public static ushort FetchLittleUshort(byte[] data, ref int offset) {
+            ushort val = (ushort)(data[offset] | (data[offset + 1] << 8));
+            offset += 2;
+            return val;
+        }
+
+        /// <summary>
+        /// Compare parts of two arrays for equality.
+        /// </summary>
+        /// <remarks>
+        /// We can do this faster with unsafe code.  For byte arrays, see
+        /// https://stackoverflow.com/q/43289/294248 .
+        /// </remarks>
+        /// <param name="ar1">First array.</param>
+        /// <param name="offset1">Initial offset in first array.</param>
+        /// <param name="ar2">Second array.</param>
+        /// <param name="offset2">Initial offset in second array.</param>
+        /// <param name="count">Number of elements to compare.</param>
+        /// <returns>True if the array elements are equal.</returns>
+        public static bool CompareArrays<T>(T[] ar1, int offset1, T[] ar2, int offset2,
+                int count) {
+            Debug.Assert(count > 0);
+
+            for (int i = 0; i < count; i++) {
+                if (!ar1[offset1 + i].Equals(ar2[offset2 + i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
