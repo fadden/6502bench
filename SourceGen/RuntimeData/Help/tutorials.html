@@ -261,12 +261,12 @@ editor, then in the bottom left panel click "Create Label".  Type "IS_OK",
 then click "OK".  Make sure the operand format is still set to Default,
 then click "OK".</p>
 <p>This puts the label IS_OK at line $2009, and we can see the BCC
-instruction has it as well.  We didn't have to manually type the symbol
-for the BCC instruction because the numeric reference to $2009 was
+instruction has it as well.  We were able to leave the BCC instruction
+set to Default format because the numeric reference to $2009 was
 automatically resolved to the IS_OK label.  You could do the same thing
-by editing the label on line $2009 directly, but in many cases --
-particularly when the operand's target address is far off screen --
-it's more convenient to work through the operand editor.</p>
+by editing the label on line $2009 directly as we did earlier, but
+in many cases -- particularly when the operand's target address is far
+off screen -- it's more convenient to work through the operand editor.</p>
 
 <h3>Unique vs. Non-Unique Labels</h3>
 
@@ -275,8 +275,8 @@ scope when a non-local (global) label is encountered.  The actual
 definition of "local" is assembler-specific, but SourceGen allows you
 to create labels that serve the same purpose.</p>
 <p>By default, newly-created labels have global scope and must be
-unique.  You can change that by editing the label.  Up near the top of
-the file, at address $1002, double-click on the label ("L1002").
+unique.  You can change these attributes when you edit the label.  Up near the
+top of the file, at address $1002, double-click on the label ("L1002").
 Change the label to "LOOP" and click the "non-unique local" button.
 Click OK.</p>
 <p>The label at line $1002 should now be "@LOOP".  By default, '@' is
