@@ -328,7 +328,8 @@ namespace SourceGen {
         /// <param name="hasNonUniquePrefix">True if the first character indicates that this is
         ///   a non-unique label.</param>
         /// <param name="anno">Annotation found, or None if none found.</param>
-        /// <returns>Trimmed version of the string.</returns>
+        /// <returns>Trimmed version of the string, or the original string if an error
+        ///   is encountered.</returns>
         public static string TrimAndValidateLabel(string label, string nonUniquePrefix,
                 out bool isValid, out bool isLenValid, out bool isFirstCharValid,
                 out bool hasNonUniquePrefix, out LabelAnnotation anno) {

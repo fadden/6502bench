@@ -716,8 +716,6 @@ namespace SourceGen.WpfGui {
                     part = WeakSymbolRef.Part.Low;
                 }
 
-                string weakLabel = SymbolLabel;
-
                 // Deal with non-unique labels.  If the label refers to an existing
                 // symbol, use its label, which will have the tag.  If the label doesn't
                 // have a match, discard it -- we don't support weak refs to ambiguous
@@ -728,7 +726,7 @@ namespace SourceGen.WpfGui {
                     out Symbol.LabelAnnotation unused3);
                 if (isValid && hasNonUniquePrefix) {
                     if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
-                        weakLabel = sym.Label;
+                        trimLabel = sym.Label;
                     } else {
                         Debug.WriteLine("Attempt to create ref to non-existant non-unique sym");
                         return null;
@@ -736,7 +734,7 @@ namespace SourceGen.WpfGui {
                 }
 
                 return FormatDescriptor.Create(instructionLength,
-                    new WeakSymbolRef(weakLabel, part), false);
+                    new WeakSymbolRef(trimLabel, part), false);
             }
 
             FormatDescriptor.SubType subType;

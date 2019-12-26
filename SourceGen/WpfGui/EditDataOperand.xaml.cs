@@ -1026,13 +1026,13 @@ namespace SourceGen.WpfGui {
 
                         Symbol osym = mProject.FindBestNonUniqueLabel(trimLabel, matchOffset);
                         if (osym != null) {
-                            weakLabel = osym.Label;
+                            trimLabel = osym.Label;
                         } else {
                             Debug.WriteLine("Attempt to create ref to nonexistant non-unique sym");
                             subType = FormatDescriptor.SubType.Hex;
                         }
                     }
-                    symbolRef = new WeakSymbolRef(weakLabel, part);
+                    symbolRef = new WeakSymbolRef(trimLabel, part);
                 } else {
                     Debug.Assert(false);
                 }
