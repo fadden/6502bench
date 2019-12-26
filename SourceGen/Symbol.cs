@@ -229,6 +229,21 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Creates a new Symbol where everything is identical to the argument except the value.
+        /// </summary>
+        public Symbol UpdateValue(int newValue) {
+            Symbol newSym = new Symbol();
+            newSym.Label = Label;
+            newSym.Value = newValue;
+            newSym.SymbolType = SymbolType;
+            newSym.SymbolSource = SymbolSource;
+            newSym.LabelAnno = LabelAnno;
+            // generated field, not dependent on Value
+            newSym.SourceTypeString = SourceTypeString;
+            return newSym;
+        }
+
+        /// <summary>
         /// Generates a displayable form of the label.  This will have the non-unique label
         /// prefix and annotation suffix, and will have the non-unique tag removed.
         /// </summary>

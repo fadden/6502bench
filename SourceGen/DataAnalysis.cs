@@ -573,6 +573,10 @@ namespace SourceGen {
                     offset++;
 
                     // Check to see if the address has changed from the previous entry.
+                    // TODO(BUG): this test is insufficient -- they might have a .ORG that
+                    //   doesn't change the address.  It's currently harmless because the
+                    //   .ORG is a no-op and gets swallowed up by the asm generator, but it
+                    //   looks wrong and could break things.
                     if (offset < mAnattribs.Length &&
                             mAnattribs[offset-1].Address + 1 != mAnattribs[offset].Address) {
                         // Must be an ORG here.  Scan previous region.

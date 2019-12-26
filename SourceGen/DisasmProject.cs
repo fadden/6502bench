@@ -1168,8 +1168,7 @@ namespace SourceGen {
                 Symbol sym = kvp.Value;
                 int expectedAddr = AddrMap.OffsetToAddress(offset);
                 if (sym.Value != expectedAddr) {
-                    Symbol newSym = new Symbol(sym.Label, expectedAddr, sym.SymbolSource,
-                        sym.SymbolType, sym.LabelAnno);
+                    Symbol newSym = sym.UpdateValue(expectedAddr);
                     Debug.WriteLine("Updating label value: " + sym + " --> " + newSym);
                     changes[offset] = newSym;
                     sym = newSym;

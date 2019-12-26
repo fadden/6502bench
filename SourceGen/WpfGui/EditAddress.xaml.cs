@@ -28,10 +28,25 @@ namespace SourceGen.WpfGui {
     /// </summary>
     public partial class EditAddress : Window, INotifyPropertyChanged {
         /// <summary>
-        /// Address typed by user. Only valid after the dialog returns OK.  Will be set to -1
-        /// if the user is attempting to delete the address.
+        /// Address typed by user. Only valid after the dialog returns OK.  Will be set to
+        /// AddressMap.NO_ENTRY_ADDR if the user is attempting to delete the address.
         /// </summary>
-        public int Address { get; private set; }
+        public int NewAddress { get; private set; }
+
+        /// <summary>
+        /// Offset being edited.
+        /// </summary>
+        private int mFirstOffset;
+
+        /// <summary>
+        /// Offset after the end of the selection, or -1 if only one line is selected.
+        /// </summary>
+        private int mNextOffset;
+
+        /// <summary>
+        /// Address after the end of the selection, or -1 if only one line is selected.
+        /// </summary>
+        private int mNextAddress;
 
         /// <summary>
         /// Maximum allowed address value.
@@ -48,10 +63,30 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private Formatter mFormatter;
 
+        public string FirstOffsetStr {
+            get { return mFormatter.FormatOffset24(mFirstOffset); }
+        }
+        public string NextOffsetStr {
+            get { return mFormatter.FormatOffset24(mNextOffset); }
+        }
+        public string NextAddressStr {
+            get { return '$' + mFormatter.FormatAddress(mNextAddress, mNextAddress > 0xffff); }
+        }
+        public string BytesSelectedStr {
+            get {
+                int count = mNextOffset - mFirstOffset;
+                return count.ToString() + " (" + mFormatter.FormatHexValue(count, 2) + ")";
+            }
+        }
+
         /// <summary>
-        /// Bound two-way property.
+        /// Address input TextBox.
         /// </summary>
-        public string AddressText { get; set; }
+        public string AddressText {
+            get { return mAddressText; }
+            set { mAddressText = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private string mAddressText;
 
         /// <summary>
         /// Set to true when input is valid.  Controls whether the OK button is enabled.
@@ -62,11 +97,12 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsValid;
 
-        public Visibility LoadAddressVis {
-            get { return mLoadAddressVis; }
-            set { mLoadAddressVis = value; OnPropertyChanged(); }
+        public Visibility NextAddressVis {
+            get { return mNextAddressVis; }
+            set { mNextAddressVis = value; OnPropertyChanged(); }
         }
-        public Visibility mLoadAddressVis = Visibility.Collapsed;
+        public Visibility mNextAddressVis = Visibility.Collapsed;
+
         public string LoadAddressText {
             get { return mLoadAddressText; }
             set { mLoadAddressText = value; OnPropertyChanged(); }
@@ -80,25 +116,45 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public EditAddress(Window owner, int initialAddr, int loadAddr, int maxAddressValue,
-                Formatter formatter) {
-            // Set the property before initializing the window -- we don't have a property
-            // change notifier.
-            Address = -2;
-            mMaxAddressValue = maxAddressValue;
-            mBaseAddr = loadAddr;
-            mFormatter = formatter;
-
-            AddressText = Asm65.Address.AddressToString(initialAddr, false);
-
-            if (initialAddr != loadAddr) {
-                LoadAddressVis = Visibility.Visible;
-                LoadAddressText = mFormatter.FormatAddress(loadAddr, loadAddr > 0xffff);
-            }
-
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="owner">Parent window.</param>
+        /// <param name="firstOffset">Offset at top of selection.</param>
+        /// <param name="nextOffset">Offset past bottom of selection, or -1 if only one
+        ///   line is selected.</param>
+        /// <param name="project">Project reference.</param>
+        /// <param name="formatter">Text formatter object.</param>
+        public EditAddress(Window owner, int firstOffset, int nextOffset, int nextAddr,
+                DisasmProject project, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
+
+            mFirstOffset = firstOffset;
+            mNextOffset = nextOffset;
+            mNextAddress = nextAddr;
+            mFormatter = formatter;
+            mMaxAddressValue = project.CpuDef.MaxAddressValue;
+
+            // Compute load address, i.e. where the byte would have been placed if the entire
+            // file were loaded at the address of the first address map entry.  We assume
+            // offsets wrap at the bank boundary.
+            int fileStartAddr = project.AddrMap.OffsetToAddress(0);
+            mBaseAddr = ((fileStartAddr + firstOffset) & 0xffff) | (fileStartAddr & 0xff0000);
+
+            int firstAddr = project.GetAnattrib(firstOffset).Address;
+            Debug.Assert(project.AddrMap.OffsetToAddress(firstOffset) == firstAddr);
+
+            AddressText = Asm65.Address.AddressToString(firstAddr, false);
+
+            LoadAddressText = '$' + mFormatter.FormatAddress(mBaseAddr, mBaseAddr > 0xffff);
+
+            if (nextOffset >= 0) {
+                NextAddressVis = Visibility.Visible;
+            }
+
+            NewAddress = -2;
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
@@ -108,10 +164,11 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             if (AddressText.Length == 0) {
-                Address = -1;
+                NewAddress = CommonUtil.AddressMap.NO_ENTRY_ADDR;
             } else {
-                Asm65.Address.ParseAddress(AddressText, mMaxAddressValue, out int addr);
-                Address = addr;
+                bool ok = Asm65.Address.ParseAddress(AddressText, mMaxAddressValue, out int addr);
+                Debug.Assert(ok);
+                NewAddress = addr;
             }
             DialogResult = true;
         }
@@ -123,12 +180,9 @@ namespace SourceGen.WpfGui {
         /// Must have UpdateSourceTrigger=PropertyChanged set for this to work.  The default
         /// for TextBox is LostFocus.
         /// </remarks>
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
-            if (IsLoaded) {
-                string text = AddressText;
-                IsValid = (text.Length == 0) ||
-                    Asm65.Address.ParseAddress(text, mMaxAddressValue, out int unused);
-            }
+        private void UpdateControls() {
+            IsValid = (AddressText.Length == 0) ||
+                Asm65.Address.ParseAddress(AddressText, mMaxAddressValue, out int unused);
         }
     }
 

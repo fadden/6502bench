@@ -161,8 +161,11 @@ the Actions menu item in the menu bar.  The set of options that are
 enabled will depend on what you have selected in the main window.</p>
 <ul>
   <li><a href="editors.html#address">Set Address</a>.  Sets the
-    target address at that offset.  Enabled when a single instruction or
-    data line is selected.</li>
+    target address at that offset.  When multiple lines are selected,
+    the target addresses at the start and end of the range is set.
+    Enabled when the first line selected is code, data, or an address
+    override, and the full selected range does not overlap with another
+    address override.</li>
   <li><a href="editors.html#flags">Override Status Flags</a>.  Changes
     the status flags at that offset.  Enabled when a single instruction
     line is selected.</li>

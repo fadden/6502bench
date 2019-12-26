@@ -33,6 +33,8 @@ namespace CommonUtil {
     /// script extensions.
     /// </remarks>
     public class AddressMap : IEnumerable<AddressMap.AddressMapEntry> {
+        public const int NO_ENTRY_ADDR = -1;    // address value indicating no entry
+
         /// <summary>
         /// Code starting at the specified offset will have the specified address.
         /// 
@@ -45,6 +47,10 @@ namespace CommonUtil {
         /// Entries are mutable, but must only be altered by AddressMap.  Don't retain
         /// instances of this across other activity.
         /// </summary>
+        /// <remarks>
+        /// TODO: make this immutable.  That should allow us to eliminate the copy constructor,
+        /// since we won't need to make copies of things.
+        /// </remarks>
         [Serializable]
         public class AddressMapEntry {
             public int Offset { get; set; }
@@ -55,6 +61,13 @@ namespace CommonUtil {
                 Offset = offset;
                 Addr = addr;
                 Length = len;
+            }
+
+            // Copy constructor.
+            public AddressMapEntry(AddressMapEntry src) {
+                Offset = src.Offset;
+                Addr = src.Addr;
+                Length = src.Length;
             }
         }
 
@@ -84,11 +97,11 @@ namespace CommonUtil {
         /// </summary>
         /// <param name="entries">List of AddressMapEntry.</param>
         public AddressMap(List<AddressMapEntry> entries) {
-            // TODO(someday): validate list contents
             mTotalLength = entries[entries.Count - 1].Offset + entries[entries.Count - 1].Length;
             foreach (AddressMapEntry ent in entries) {
-                mAddrList.Add(ent);
+                mAddrList.Add(new AddressMapEntry(ent));
             }
+            DebugValidate();
         }
 
         /// <summary>
@@ -98,7 +111,7 @@ namespace CommonUtil {
         public List<AddressMapEntry> GetEntryList() {
             List<AddressMapEntry> newList = new List<AddressMapEntry>(mAddrList.Count);
             foreach (AddressMapEntry ent in mAddrList) {
-                newList.Add(ent);
+                newList.Add(new AddressMapEntry(ent));
             }
             return newList;
         }
@@ -127,7 +140,8 @@ namespace CommonUtil {
 
         /// <summary>
         /// Returns the Address value of the address map entry associated with the specified
-        /// offset, or -1 if there is no address map entry there.  The offset must match exactly.
+        /// offset, or NO_ENTRY_ADDR if there is no address map entry there.  The offset must
+        /// match exactly.
         /// </summary>
         public int Get(int offset) {
             foreach (AddressMapEntry ad in mAddrList) {
@@ -135,7 +149,7 @@ namespace CommonUtil {
                     return ad.Addr;
                 }
             }
-            return -1;
+            return NO_ENTRY_ADDR;
         }
 
         /// <summary>
@@ -159,7 +173,7 @@ namespace CommonUtil {
         /// <param name="addr">24-bit address.</param>
         public void Set(int offset, int addr) {
             Debug.Assert(offset >= 0);
-            if (addr == -1) {
+            if (addr == NO_ENTRY_ADDR) {
                 if (offset != 0) {      // ignore attempts to remove entry at offset zero
                     Remove(offset);
                 }

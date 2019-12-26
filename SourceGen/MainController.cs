@@ -1653,54 +1653,130 @@ namespace SourceGen {
         }
 
         public bool CanEditAddress() {
-            if (SelectionAnalysis.mNumItemsSelected != 1) {
+            // First line must be code, data, or an ORG directive.
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            if (selIndex < 0) {
                 return false;
             }
-            EntityCounts counts = SelectionAnalysis.mEntityCounts;
-            // Line must be code, data, or an ORG directive.
-            return (counts.mDataLines > 0 || counts.mCodeLines > 0) ||
-                (SelectionAnalysis.mLineType == LineListGen.Line.Type.OrgDirective);
+            LineListGen.Line selLine = CodeLineList[selIndex];
+            if (selLine.LineType != LineListGen.Line.Type.Code &&
+                    selLine.LineType != LineListGen.Line.Type.Data &&
+                    selLine.LineType != LineListGen.Line.Type.OrgDirective) {
+                return false;
+            }
+
+            // If multiple lines are selected, there must not be an address change between them.
+            int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
+            int firstOffset = CodeLineList[selIndex].FileOffset;
+            int lastOffset = CodeLineList[lastIndex].FileOffset;
+            if (firstOffset == lastOffset) {
+                // Single-item selection, we're fine.
+                return true;
+            }
+
+            int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
+
+            foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
+                // It's okay to have an existing entry at firstOffset or nextOffset.
+                if (ent.Offset > firstOffset && ent.Offset < nextOffset) {
+                    Debug.WriteLine("Found mid-selection AddressMap entry at +" +
+                        ent.Offset.ToString("x6"));
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void EditAddress() {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
-            int offset = CodeLineList[selIndex].FileOffset;
-            Anattrib attr = mProject.GetAnattrib(offset);
+            int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
+            int firstOffset = CodeLineList[selIndex].FileOffset;
+            int lastOffset = CodeLineList[lastIndex].FileOffset;
+            int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
+            int nextAddr;
 
-            // Compute load address, i.e. where the byte would have been placed if the entire
-            // file were loaded at the address of the first address map entry.  We assume
-            // offsets wrap at the bank boundary.
-            int firstAddr = mProject.AddrMap.OffsetToAddress(0);
-            int loadAddr = ((firstAddr + offset) & 0xffff) | (firstAddr & 0xff0000);
-            EditAddress dlg = new EditAddress(mMainWin, attr.Address, loadAddr,
-                mProject.CpuDef.MaxAddressValue, mOutputFormatter);
+            if (firstOffset == lastOffset || nextOffset == mProject.FileDataLength) {
+                // Single item (which may not be a single *line*) is selected, or the
+                // last selected item is the end of the file.
+                nextOffset = -1;
+                nextAddr = AddressMap.NO_ENTRY_ADDR;
+            } else {
+                // Compute "nextAddr".  If there's an existing entry at nextOffset, we use
+                // that.  If not, we use the "load address", which is determined by the very
+                // first address.
+                //
+                // I tried this by just removing the selected entry and seeing what the address
+                // would be without it, useful for relocations inside relocations.  This worked
+                // poorly when relocations were chained, i.e. two consecutive blocks were
+                // relocated to different places.  The end address of the second block gets
+                // set based on the first address of the first block, which doesn't seem useful.
+#if false
+                nextAddr = mProject.AddrMap.Get(nextOffset);
+                if (nextAddr == AddressMap.NO_ENTRY_ADDR) {
+                    AddressMap cloneMap = new AddressMap(mProject.AddrMap.GetEntryList());
+                    if (firstOffset != 0) {
+                        cloneMap.Remove(firstOffset);
+                    }
+                    nextAddr = cloneMap.OffsetToAddress(nextOffset);
+                }
+#else
+                int fileStartAddr = mProject.AddrMap.OffsetToAddress(0);
+                nextAddr = ((fileStartAddr + nextOffset) & 0xffff) | (fileStartAddr & 0xff0000);
+#endif
+            }
+
+            EditAddress dlg = new EditAddress(mMainWin, firstOffset, nextOffset, nextAddr,
+                mProject, mOutputFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
 
-            if (offset == 0 && dlg.Address < 0) {
+            if (firstOffset == 0 && dlg.NewAddress < 0) {
                 // Not allowed.  The AddressMap will just put it back, which confuses
                 // the undo operation.
                 Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
-            } else if (true || attr.Address != dlg.Address) {
-                // NOTE: we used to prevent creation of an apparently redundant address change,
-                // but it's really helpful to put one on code that isn't moving before you
-                // start moving other stuff around.
-                Debug.WriteLine("EditAddress: changing addr at offset +" + offset.ToString("x6") +
-                    " to " + dlg.Address);
+                return;
+            }
 
-                AddressMap addrMap = mProject.AddrMap;
-                // Get the previous address map entry for this exact offset, if one
-                // exists.  This may be different from the value used as the default
-                // (attr.Address), which is the address assigned to the offset, in
-                // the case where no previous mapping existed.
-                int prevAddress = addrMap.Get(offset);
-                UndoableChange uc = UndoableChange.CreateAddressChange(offset,
-                    prevAddress, dlg.Address);
-                ChangeSet cs = new ChangeSet(uc);
+            ChangeSet cs = new ChangeSet(1);
+
+            if (mProject.AddrMap.Get(firstOffset) != dlg.NewAddress) {
+                // Added / removed / changed existing entry.
+                //
+                // We allow creation of an apparently redundant address override, because
+                // sometimes it's helpful to add one to "anchor" an area before relocating
+                // something that appears earlier in the file.
+                int prevAddress = mProject.AddrMap.Get(firstOffset);
+                UndoableChange uc = UndoableChange.CreateAddressChange(firstOffset,
+                    prevAddress, dlg.NewAddress);
+                cs.Add(uc);
+                Debug.WriteLine("EditAddress: changing addr at offset +" +
+                    firstOffset.ToString("x6") + " to $" + dlg.NewAddress.ToString("x4"));
+            }
+
+            // We want to create an entry for the chunk that follows the selected area.
+            // We don't modify the trailing address if an entry already exists.
+            // (Note the "can edit" code prevented us from being called if there's an
+            // address map entry in the middle of the selected area.)
+            //
+            // If they're removing an existing entry, don't add a new entry at the end.
+            if (nextAddr >= 0 && dlg.NewAddress != AddressMap.NO_ENTRY_ADDR &&
+                    mProject.AddrMap.Get(nextOffset) == AddressMap.NO_ENTRY_ADDR) {
+                // We don't screen for redundant entries here.  That should only happen if
+                // they select a range and then don't change the address.  Maybe it's useful?
+                int prevAddress = mProject.AddrMap.Get(nextOffset);
+                UndoableChange uc = UndoableChange.CreateAddressChange(nextOffset,
+                    prevAddress, nextAddr);
+                cs.Add(uc);
+                Debug.WriteLine("EditAddress: setting trailing addr at offset +" +
+                    nextOffset.ToString("x6") + " to $" + nextAddr.ToString("x4"));
+            }
+
+            if (cs.Count > 0) {
                 ApplyUndoableChanges(cs);
             } else {
-                Debug.WriteLine("EditAddress: no change");
+                Debug.WriteLine("EditAddress: no changes");
             }
         }
 
@@ -3110,7 +3186,6 @@ namespace SourceGen {
                 int lastOffset = Math.Max(firstOffset, CodeLineList[lastIndex].FileOffset +
                     CodeLineList[lastIndex].OffsetSpan - 1);
                 mHexDumpDialog.ShowOffsetRange(firstOffset, lastOffset);
-
             }
         }
 

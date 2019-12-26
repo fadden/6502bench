@@ -17,6 +17,16 @@
 <h2><a name="address">Edit Address</a></h2>
 <p>This adds a target address directive (".ORG") to the current offset.
 If you leave the text field blank, the directive will be removed.</p>
+<p>The text entry field is initialized to the address of the
+first selected line.  The "load address", i.e. the place where the
+code or data will live when the file is first loaded into memory,
+is shown for reference.</p>
+<p>If multiple lines were selected, some additional information will be
+shown, and an address directive will be added after the last selected
+line.  This directive will set the address to the "load address".
+This is useful for "relocating" a block of code or data in the middle of
+the file.  You're not allowed to do this when the selected range of
+lines spans another address directive.</p>
 <p>Addresses are always interpreted as hexadecimal.  You can prefix
 it with a '$', but that's not required.
 24-bit addresses may be written with a bank separator, e.g. "12/3456"
@@ -24,9 +34,6 @@ would resolve to address $123456.</p>
 
 <p>There will always be an address directive at the start of the file.
 Attempts to remove it will be ignored.</p>
-
-<p>If the byte at the current offset is not at the address where it was
-initially loaded, the "load address" will be shown for reference.</p>
 
 
 <h2><a name="flags">Edit Status Flag Override</a></h2>
