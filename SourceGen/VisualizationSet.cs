@@ -174,7 +174,7 @@ namespace SourceGen {
         /// <param name="project">Project reference.</param>
         public static void RefreshAllThumbnails(DisasmProject project) {
             ScriptSupport iapp = null;
-            List<IPlugin> plugins = null;
+            Dictionary<string, IPlugin> plugins = null;
 
             SortedList<int, VisualizationSet> visSets = project.VisualizationSets;
 
@@ -248,9 +248,9 @@ namespace SourceGen {
         /// <param name="plugins">List of plugins, from project ScriptManager.</param>
         /// <param name="visGenIdent">Visualization generator identifier.</param>
         /// <returns>A plugin that matches, or null if none found.</returns>
-        private static IPlugin_Visualizer FindPluginByVisGenIdent(List<IPlugin> plugins,
-                string visGenIdent, out VisDescr visDescr) {
-            foreach (IPlugin chkPlug in plugins) {
+        private static IPlugin_Visualizer FindPluginByVisGenIdent(
+                Dictionary<string, IPlugin> plugins, string visGenIdent, out VisDescr visDescr) {
+            foreach (IPlugin chkPlug in plugins.Values) {
                 if (!(chkPlug is IPlugin_Visualizer)) {
                     continue;
                 }

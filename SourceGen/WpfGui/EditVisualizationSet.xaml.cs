@@ -125,8 +125,8 @@ namespace SourceGen.WpfGui {
             }
 
             // Check to see if we have any relevant plugins.  If not, disable New/Edit.
-            List<IPlugin> plugins = project.GetActivePlugins();
-            foreach (IPlugin chkPlug in plugins) {
+            Dictionary<string, IPlugin> plugins = project.GetActivePlugins();
+            foreach (IPlugin chkPlug in plugins.Values) {
                 if (chkPlug is IPlugin_Visualizer) {
                     HasVisPlugins = true;
                     break;

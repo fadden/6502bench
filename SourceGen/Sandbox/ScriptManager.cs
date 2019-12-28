@@ -140,15 +140,17 @@ namespace SourceGen.Sandbox {
         /// </summary>
         /// <returns>Newly-created list of plugin references.</returns>
         public List<IPlugin> GetAllInstances() {
+            Dictionary<string, IPlugin> dict;
             if (DomainMgr == null) {
-                List<IPlugin> list = new List<IPlugin>(mActivePlugins.Count);
-                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    list.Add(kvp.Value);
-                }
-                return list;
+                dict = mActivePlugins;
             } else {
-                return DomainMgr.PluginMgr.GetActivePlugins();
+                dict = DomainMgr.PluginMgr.GetActivePlugins();
             }
+            List<IPlugin> list = new List<IPlugin>(dict.Count);
+            foreach (KeyValuePair<string, IPlugin> kvp in dict) {
+                list.Add(kvp.Value);
+            }
+            return list;
         }
 
         /// <summary>
@@ -272,36 +274,36 @@ namespace SourceGen.Sandbox {
             return plSymbols;
         }
 
+#if false
         public delegate bool CheckMatch(IPlugin plugin);
         public IPlugin GetMatchingScript(CheckMatch check) {
+            Dictionary<string, IPlugin> plugins;
             if (DomainMgr == null) {
-                foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    if (check(kvp.Value)) {
-                        return kvp.Value;
-                    }
-                }
+                plugins = mActivePlugins;
             } else {
-                List<IPlugin> plugins = DomainMgr.PluginMgr.GetActivePlugins();
-                foreach (IPlugin plugin in plugins) {
-                    if (check(plugin)) {
-                        return plugin;
-                    }
+                plugins = DomainMgr.PluginMgr.GetActivePlugins();
+            }
+            foreach (IPlugin plugin in plugins.Values) {
+                if (check(plugin)) {
+                    return plugin;
                 }
             }
             return null;
         }
+#endif
 
         /// <summary>
         /// Returns a list of loaded plugins.  Callers should not retain this list, as the
         /// set can change due to user activity.
         /// </summary>
-        public List<IPlugin> GetActivePlugins() {
+        public Dictionary<string, IPlugin> GetActivePlugins() {
             if (DomainMgr == null) {
-                List<IPlugin> plist = new List<IPlugin>();
+                // copy the contents
+                Dictionary<string, IPlugin> pdict = new Dictionary<string, IPlugin>();
                 foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                    plist.Add(kvp.Value);
+                    pdict.Add(kvp.Key, kvp.Value);
                 }
-                return plist;
+                return pdict;
             } else {
                 return DomainMgr.PluginMgr.GetActivePlugins();
             }
@@ -322,8 +324,8 @@ namespace SourceGen.Sandbox {
                     DebugGetScriptInfo(kvp.Value, sb);
                 }
             } else {
-                List<IPlugin> plugins = DomainMgr.PluginMgr.GetActivePlugins();
-                foreach (IPlugin plugin in plugins) {
+                Dictionary<string, IPlugin> plugins = DomainMgr.PluginMgr.GetActivePlugins();
+                foreach (IPlugin plugin in plugins.Values) {
                     string loc = DomainMgr.PluginMgr.GetPluginAssemblyLocation(plugin);
                     sb.AppendFormat("[sub {0}] ", DomainMgr.Id);
                     sb.Append(loc);

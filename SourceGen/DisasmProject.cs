@@ -2496,8 +2496,11 @@ namespace SourceGen {
         }
 
         // Punch-through functions; trying to avoid exposing ScriptManager for now.
-        public List<PluginCommon.IPlugin> GetActivePlugins() {
+        public Dictionary<string, PluginCommon.IPlugin> GetActivePlugins() {
             return mScriptManager.GetActivePlugins();
+        }
+        public PluginCommon.IPlugin GetPlugin(string scriptIdent) {
+            return mScriptManager.GetInstance(scriptIdent);
         }
         public void PrepareScripts(PluginCommon.IApplication appRef) {
             mScriptManager.PrepareScripts(appRef);

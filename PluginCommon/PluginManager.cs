@@ -132,14 +132,16 @@ namespace PluginCommon {
         /// Generates a list of references to instances of active plugins.
         /// </summary>
         /// <returns>Newly-created list of plugin references.</returns>
-        public List<IPlugin> GetActivePlugins() {
-            List<IPlugin> list = new List<IPlugin>(mActivePlugins.Count);
+        public Dictionary<string, IPlugin> GetActivePlugins() {
+            Dictionary<string, IPlugin> dict =
+                new Dictionary<string, IPlugin>(mActivePlugins.Count);
             foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
-                list.Add(kvp.Value);
+                // copy the contents; probably not necessary across AppDomain
+                dict.Add(kvp.Key, kvp.Value);
             }
-            Debug.WriteLine("PluginManager: returning " + list.Count + " plugins (id=" +
+            Debug.WriteLine("PluginManager: returning " + dict.Count + " plugins (id=" +
                 AppDomain.CurrentDomain.Id + ")");
-            return list;
+            return dict;
         }
 
         /// <summary>

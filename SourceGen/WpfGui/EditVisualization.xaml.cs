@@ -84,13 +84,15 @@ namespace SourceGen.WpfGui {
         /// </summary>
         /// <remarks>
         /// Strictly speaking we could just create an ItemsSource from VisDescr objects, but
-        /// the plugin reference saves a lookup later.
+        /// the plugin reference saves a lookup later.  We store the script ident rather than
+        /// an IPlugin reference because our reference would be a proxy object that expires,
+        /// and there's no value in creating a Sponsor<> or playing keep-alive.
         /// </remarks>
         public class VisualizationItem {
-            public IPlugin_Visualizer Plugin { get; private set; }
+            public string ScriptIdent { get; private set; }
             public VisDescr VisDescriptor { get; private set; }
-            public VisualizationItem(IPlugin_Visualizer plugin, VisDescr descr) {
-                Plugin = plugin;
+            public VisualizationItem(string scriptIdent, VisDescr descr) {
+                ScriptIdent = scriptIdent;
                 VisDescriptor = descr;
             }
         }
@@ -198,12 +200,12 @@ namespace SourceGen.WpfGui {
 
             int visSelection = -1;
             VisualizationList = new List<VisualizationItem>();
-            List<IPlugin> plugins = proj.GetActivePlugins();
-            foreach (IPlugin chkPlug in plugins) {
-                if (!(chkPlug is IPlugin_Visualizer)) {
+            Dictionary<string, IPlugin> plugins = proj.GetActivePlugins();
+            foreach (KeyValuePair<string, IPlugin> kvp in plugins) {
+                if (!(kvp.Value is IPlugin_Visualizer)) {
                     continue;
                 }
-                IPlugin_Visualizer vplug = (IPlugin_Visualizer)chkPlug;
+                IPlugin_Visualizer vplug = (IPlugin_Visualizer)kvp.Value;
                 foreach (VisDescr descr in vplug.GetVisGenDescrs()) {
                     if (vis != null && vis.VisGenIdent == descr.Ident) {
                         // found matching descriptor, set selection to this
@@ -212,7 +214,7 @@ namespace SourceGen.WpfGui {
                         // we used this one last time, use it if nothing better comes along
                         visSelection = VisualizationList.Count;
                     }
-                    VisualizationList.Add(new VisualizationItem(vplug, descr));
+                    VisualizationList.Add(new VisualizationItem(kvp.Key, descr));
                 }
             }
 
@@ -437,8 +439,9 @@ namespace SourceGen.WpfGui {
 
                 IVisualization2d vis2d;
                 try {
-                    vis2d = item.Plugin.Generate2d(item.VisDescriptor,
-                        CreateVisGenParams());
+                    IPlugin_Visualizer plugin =
+                        (IPlugin_Visualizer)mProject.GetPlugin(item.ScriptIdent);
+                    vis2d = plugin.Generate2d(item.VisDescriptor, CreateVisGenParams());
                     if (vis2d == null) {
                         Debug.WriteLine("Vis generator returned null");
                     }
