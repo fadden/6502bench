@@ -3380,7 +3380,8 @@ namespace SourceGen {
         /// Converts the ListView's selected items into a set of offsets.  If a line
         /// spans multiple offsets (e.g. a 3-byte instruction), offsets for every
         /// byte are included.
-        ///
+        /// </summary>
+        /// <remarks>
         /// Contiguous regions with user labels or address changes are split into
         /// independent regions by using a serial number for the range type.  Same for
         /// long comments and notes.
@@ -3390,7 +3391,7 @@ namespace SourceGen {
         /// or a string.  It should not be possible to select part of a formatted section,
         /// unless the user has been playing weird games with type hints to get overlapping
         /// format descriptors.
-        /// </summary>
+        /// </remarks>
         /// <returns>TypedRangeSet with all offsets.</returns>
         private TypedRangeSet GroupedOffsetSetFromSelected() {
             TypedRangeSet rs = new TypedRangeSet();

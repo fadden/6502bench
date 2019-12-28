@@ -23,6 +23,7 @@ manual is recommended.</p>
   <li><a href="#advanced-features">#2: Advanced Features</a></li>
   <li><a href="#address-tables">#3: Address Table Formatting</a></li>
   <li><a href="#extension-scripts">#4: Extension Scripts</a></li>
+  <li><a href="#visualizations">#5: Visualizations</a></li>
 </ul>
 
 
@@ -203,9 +204,9 @@ comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
 <p>Select the line with address $2003 ("CMP #$04"), then
 Actions &gt; Edit Operand.  This allows you to pick how you want the
-operand to look.  It's currently set to Default, which for an 8-bit
+operand to look.  It's currently set to "Default", which for an 8-bit
 immediate argument means it's shown as a hexadecimal value.  Click
-Binary, then OK.  It now appears as a binary value.</p>
+"Binary", then "OK".  It now appears as a binary value.</p>
 
 <p>The operand in the LDA instruction at line $2000 refers to an address
 ($3000) that isn't part of the file.  We want to create an equate directive to
@@ -374,6 +375,8 @@ it should always match exactly.)</p>
 
 <p>At this point you know enough to work with a SourceGen project.  Continue
 on to the next tutorial to learn more.</p>
+
+<hr/>
 
 
 <h2><a name="advanced-features">Tutorial #2: Advanced Features</a></h2>
@@ -573,6 +576,8 @@ used extensively in Microsoft BASICs, such as Applesoft.)  When you see the
 extra symbol in the opcode field, you need to look closely at what's going
 on.</p>
 
+<hr/>
+
 
 <h2><a name="address-tables">Tutorial #3: Address Table Formatting</a></h2>
 
@@ -654,6 +659,8 @@ code entry point hint -- but did several of them at once.</p>
 <p>We don't want to save this project, so select File &gt; Close.  When
 SourceGen asks for confirmation, click Discard & Continue.</p>
 
+<hr/>
+
 
 <h2><a name="extension-scripts">Tutorial #4: Extension Scripts</a></h2>
 
@@ -681,7 +688,7 @@ you'll see that it's looking for a JSR to a function called
 "PrintInlineL1String".  So let's give it one.</p>
 <p>Double-click the JSR operand ("L1026"), click "Create Label", and
 enter "PrintInlineL1String".  Remember that labels are case-sensitive;
-you must enter it exactly as shown.  Hit OK to accept the label, and OK
+you must enter it exactly as shown.  Hit "OK" to accept the label, and "OK"
 to close the operand editor.  If all went well, address $1003 should now be
 an L1 string "How long?", and adress $100D should be another JSR.</p>
 
@@ -692,7 +699,7 @@ and add the script "InlineNullTermString.cs".</p>
 that starts with "PrintInlineNullString".  So let's give it a couple of
 those.</p>
 <p>Double-click the operand on line $100D ("L1027"), click Create Label,
-and set the label to "PrintInlineNullStringOne".  Hit OK twice.  That
+and set the label to "PrintInlineNullStringOne".  Hit "OK" twice.  That
 formatted the first one and got us to the next JSR.  Repeat the process
 on line $1019 ("L1028"), setting the label to "PrintInlineNullStringTwo".</p>
 
@@ -706,6 +713,127 @@ strings and clean up the disassembly automatically.</p>
 some programming experience.  See the
 <a href="advanced.html#extension-scripts">manual</a> for more details.</p>
 
+<hr/>
+
+
+<h2><a name="visualizations">Tutorial #5: Visualizations</a></h2>
+
+<p><i>This tutorial covers one specific feature.</i></p>
+
+<p>Many programs contain a significant amount of graphical data.  This is
+especially true for games, where the space used for bitmaps is often
+larger than the space required for the code.  When disassembling a program
+it can be very helpful to be able to see the contents of the data
+regions in graphical form.</p>
+
+<p>Start a new project with "Generic 6502", and in the SourceGen Tutorial
+directory select "Tutorial5".  We'll need to load an extension script from
+the project directory, so immediately save the project, using the
+default name ("Tutorial5.dis65").</p>
+<p>Normally a project will give you some sort of hint as to the data
+format, e.g. the graphics might be a platform-specific sprite.  For
+non-standard formats you can glean dimensions from the drawing code.  For
+the purposes of this tutorial we're just using a simple monochrome bitmap
+format, with 8 pixels per byte, and we'll know that our images are for
+a Tic-Tac-Toe game.  The 'X' and the 'O' are 8x8, the game board is 40x40.
+The bitmaps are sprites with transparency, so pixels are either solid
+or transparent.</p>
+<p>The first thing we need to do is load an extension script that can
+decode this format.  The RuntimeData directory has a few, but for this
+tutorial we're using a custom one.  Select Edit &gt; Project Properties,
+select the Extension Scripts tab, and click "Add Scripts from Project".
+Double-click on "VisTutorial5.cs", then click "OK".</p>
+
+<p>The address of the three bitmaps are helpfully identified by the
+load instructions at the top of the file.  Select the first one at
+address $100A, then Actions &gt; Create/Edit Visualization Set.  In
+the window that opens, click "New Bitmap".</p>
+<p>We're going to ignore most of what's going on and just focus on the
+list of parameters at the bottom.  The file offset indicates where in
+the file the bitmap starts; note this is an offset, not an address
+(that way, if you change the address, your visualizations don't break).
+This is followed by the bitmap's width in bytes, and the bitmap's height.
+Because we have 8 pixels per byte, we're currently showing a 1x1 image.
+We'll come back to row stride.</p>
+<p>We happen to know (by playing the game and/or reading the fictitious
+drawing code) that the image is 8x8, so change the value in the height
+field to 8.  As soon as you do, the preview window shows a big blue 'X'.
+(The 'X' is 7x7; the last row/column of pixels are transparent so adjacent
+images don't blend into each other.)</p>
+<p>Let's try doing it wrong.  Add a 0 to make the height 80.  You can see
+some additional bitmap data.  Add another 0 to make it 800.  Now you get
+a big red X, and the "Height" parameter is shown in red.  That's because
+the maximum value for the height is 512, as shown by "[1,512]" on the
+right.</p>
+<p>Change it back to 8, and hit "OK".  Hit "OK" in the Edit Visualization
+Set window as well.  You should now see the blue 'X' in the code listing
+above line $100A.</p>
+
+<p>Repeat the process at line $1012: select the line, create a visualization
+set, create a new bitmap, set the height to 8, click "OK" twice.</p>
+
+<p>Repeat the process at line $101A, but this time the image is 40x40
+rather than 8x8.  Set the width to 5, and the height to 40.  This makes
+a mess.</p>
+<p>In this case, the bitmap data is 5 bytes wide, but the data is stored
+as 8 bytes per row.  This is known as the "stride" or "pitch" of the row.
+To tell the visualizer to skip the last 3 bytes on each row, set the
+"Row stride (bytes)" field to 8.  Now we have a proper Tic-Tac-Toe grid.
+Note that it fills the preview window just as the 'X' and 'O' did, even
+though it's 5x as large.  The preview window scales everything up.</p>
+<p>Let's format the bitmap data.  Select line $101A, then shift-click the
+last line in the file ($1159).  Actions &gt; Edit Operand.  Select
+"densely-packed bytes", and click "OK".  This is perhaps a little too
+dense.  Open the operand editor again, but this time select the
+densely-packed bytes sub-option "...with a limit", and set the limit
+to 8 bytes per line.  Instead of one very dense statement spread across
+a few lines, you get one line of code per row of bitmap.  If you prefer
+to see individual bytes, you can use Edit &gt; Settings, select the
+Display Format tab, and check "use comma-separated format for bulk data".
+This can make it a bit easier to read.</p>
+
+<h4>Animations</h4>
+
+<p>Some graphics represent individual frames in an animated sequence.
+You can convert those as well.  Double-click on the blue 'X' to open
+the visualization set editor, then click "New Bitmap Animation".  This
+opens the Bitmap Animation Editor.</p>
+<p>Let's try it with our Tic-Tac-Toe board pieces.  From the list on the
+left, select the blue 'X' and click "Add", then click the 'O' and click
+"Add".  Below the list, set the frame delay to 500.  Near the bottom,
+click "Start / Stop.  This causes the animation to play in a loop.  You
+can use the controls to add and remove items, change their order, and change
+the animation speed.  You can add the grid to the animation set, but the
+preview scales the bitmaps up to full size, so it may not look the way
+you expect.</p>
+<p>Hit "OK" to save the animation, then "OK" to update the visualization set.
+The code list now shows two entries, one of which has a blue triangle
+superimposed.  You can have as many bitmaps an animations on a line
+as you want.</p>
+<p>If you have a lot of bitmaps it can be helpful to give them meaningful
+names, so that they're easy to identify and sort together in the list.
+The "tag" field at the top of the editor windows lets you give things
+names.  Tags must be unique.</p>
+
+<h4>Other Notes</h4>
+
+<p>The visualization editor is intended to be very dynamic, showing the
+results of parameter changes immediately.  This can be helpful if you're
+not exactly sure what the size or format of a bitmap is.  Just keep
+tweaking values until it looks right.</p>
+
+<p>Visualization generators are defined by extension scripts.  If you're
+disassembling a program with a totally custom way of storing graphics,
+you can write a totally custom visualizer and distribute it with the
+project.  Because the file offset is a parameter, you're not limited to
+placing visualizations at the start of the graphic data -- you can put
+them on any code or data line.</p>
+
+<p>Visualizations have no effect on assembly source code generation,
+but they do appear in code exported to HTML.  Bitmaps are converted to GIF
+images, and animations become animated GIFs.</p>
+
+<hr/>
 
 
 <h2>End of Tutorials</h2>

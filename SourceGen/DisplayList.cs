@@ -314,7 +314,8 @@ namespace SourceGen {
             for (int i = 0; i < newCount; i++) {
                 mList.Insert(startIndex, null);
             }
-            // TODO: can we null out existing entries, and just insert/remove when counts differ?
+            // TODO(someday): can we null out existing entries, and just insert/remove when
+            //   counts differ?
 
             if (oldCount != newCount) {
                 SelectedIndices = new DisplayListSelection(mList.Count);
@@ -323,9 +324,9 @@ namespace SourceGen {
 
             OnPropertyChanged(CountString);
             OnPropertyChanged(IndexerName);
-            // TODO(performance): this causes the ListView to format the entire listing, despite
+            // TODO: this causes the ListView to format the entire listing, despite
             //   being virtual.  So we're regenerating the entire list after something trivial,
-            //   like renaming a label.  Need to figure this out.
+            //   like renaming a label, which hampers performance.  Need to figure this out.
             OnCollectionReset();
         }
 
