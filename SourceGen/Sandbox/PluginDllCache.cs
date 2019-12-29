@@ -104,7 +104,7 @@ namespace SourceGen.Sandbox {
         /// <param name="dstDir">Destination directory.</param>
         private static void CopyIfNewer(string srcDll, string dstDir) {
             string dstFile = Path.Combine(dstDir, Path.GetFileName(srcDll));
-            if (FileUtil.FileMissingOrOlder(dstFile, srcDll)) {
+            if (FileUtil.IsFileMissingOrOlder(dstFile, srcDll)) {
                 Debug.WriteLine("Copying " + srcDll + " to " + dstFile);
                 File.Copy(srcDll, dstFile, true);
             }
@@ -155,10 +155,10 @@ namespace SourceGen.Sandbox {
             // the DLLs the app uses, not the copy the plugins use, but earlier we made sure
             // that they were the same.  This test doesn't handle the case where the DLLs
             // get rolled back, but that's probably not interesting for us.)
-            bool needCompile = FileUtil.FileMissingOrOlder(destPathName, srcPathName) ||
-                FileUtil.FileMissingOrOlder(destPathName,
+            bool needCompile = FileUtil.IsFileMissingOrOlder(destPathName, srcPathName) ||
+                FileUtil.IsFileMissingOrOlder(destPathName,
                     typeof(PluginCommon.PluginManager).Assembly.Location) ||
-                FileUtil.FileMissingOrOlder(destPathName,
+                FileUtil.IsFileMissingOrOlder(destPathName,
                     typeof(CommonUtil.CRC32).Assembly.Location);
             if (needCompile) {
                 Debug.WriteLine("Compiling " + srcPathName + " to " + destPathName);

@@ -47,13 +47,13 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Computes a CRC on part of a buffer of data.
+        /// Computes a CRC-32 on part of a buffer of data.
         /// </summary>
-        /// <param name="crc">Previously computed CRC value. Initially zero.</param>
+        /// <param name="crc">Previously computed CRC value. Use zero as initial value.</param>
         /// <param name="buffer">Data to compute CRC on.</param>
         /// <param name="offset">Start offset within buffer.</param>
         /// <param name="count">Number of bytes to process.</param>
-        /// <returns>New CRC value.</returns>
+        /// <returns>Computed CRC value.</returns>
         public static uint OnBuffer(uint crc, byte[] buffer, int offset, int count) {
             crc = crc ^ INVERT;
             while (count-- != 0) {
@@ -64,45 +64,37 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Computes a CRC on a buffer of data.
+        /// Computes a CRC-32 on a buffer of data.
         /// </summary>
         /// <param name="crc">Previously computed CRC value. Initially zero.</param>
         /// <param name="buffer">Data to compute CRC on.</param>
-        /// <returns>New CRC value.</returns>
+        /// <returns>Computed CRC value.</returns>
         public static uint OnWholeBuffer(uint crc, byte[] buffer) {
             return OnBuffer(crc, buffer, 0, buffer.Length);
         }
 
         /// <summary>
-        /// Computes a CRC on an entire file.
+        /// Computes a CRC-32 on an entire file.  An exception will be thrown on file errors.
         /// </summary>
         /// <param name="pathName">Full path to file to open.</param>
-        /// <param name="ocrc">Receives the CRC.</param>
-        /// <returns>True on success, false on file error.</returns>
-        public static bool OnWholeFile(string pathName, out uint ocrc) {
-            try {
-                using (FileStream fs = File.Open(pathName, FileMode.Open, FileAccess.Read)) {
-                    byte[] buffer = new byte[8192];
-                    uint crc = 0;
-                    long remain = fs.Length;
-                    while (remain != 0) {
-                        int toRead = (remain < buffer.Length) ? (int)remain : buffer.Length;
-                        int actual = fs.Read(buffer, 0, toRead);
-                        if (toRead != actual) {
-                            throw new IOException("Expected " + toRead + ", got " + actual);
-                        }
-
-                        crc = OnBuffer(crc, buffer, 0, toRead);
-                        remain -= toRead;
+        /// <returns>Computed CRC value.</returns>
+        public static uint OnWholeFile(string pathName) {
+            using (FileStream fs = File.Open(pathName, FileMode.Open, FileAccess.Read)) {
+                byte[] buffer = new byte[8192];
+                uint crc = 0;
+                long remain = fs.Length;
+                while (remain != 0) {
+                    int toRead = (remain < buffer.Length) ? (int)remain : buffer.Length;
+                    int actual = fs.Read(buffer, 0, toRead);
+                    if (toRead != actual) {
+                        throw new IOException("Expected " + toRead + ", got " + actual);
                     }
 
-                    ocrc = crc;
-                    return true;
+                    crc = OnBuffer(crc, buffer, 0, toRead);
+                    remain -= toRead;
                 }
-            } catch (IOException ioe) {
-                Debug.WriteLine("Fail: " + ioe);
-                ocrc = 0;
-                return false;
+
+                return crc;
             }
         }
     }

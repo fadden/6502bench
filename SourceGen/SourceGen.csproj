@@ -86,6 +86,9 @@
     </Compile>
     <Compile Include="Tools\ApplesoftToHtml.cs" />
     <Compile Include="Tools\VirtualHexDump.cs" />
+    <Compile Include="Tools\WpfGui\FileConcatenator.xaml.cs">
+      <DependentUpon>FileConcatenator.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\WpfGui\InstructionChart.xaml.cs">
       <DependentUpon>InstructionChart.xaml</DependentUpon>
     </Compile>
@@ -259,6 +262,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tests\WpfGui\GenTestRunner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\FileConcatenator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

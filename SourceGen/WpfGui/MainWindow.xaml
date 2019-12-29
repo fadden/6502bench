@@ -63,6 +63,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
+            <RoutedUICommand x:Key="ConcatenateFilesCmd" Text="Concatenate Files..."/>
             <RoutedUICommand x:Key="CreateLocalVariableTableCmd" Text="Create Local Variable Table..."/>
             <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
                 <RoutedUICommand.InputGestures>
@@ -161,7 +162,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+A</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="Hex Dump..."/>
+            <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="File Hex Dump..."/>
             <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
             <RoutedUICommand x:Key="ToggleAsciiChartCmd" Text="ASCII Chart"/>
             <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
@@ -203,6 +204,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="AssembleCmd_Executed"/>
         <CommandBinding Command="{StaticResource CloseCmd}"
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ConcatenateFilesCmd}"
+                        Executed="ConcatenateFilesCmd_Executed"/>
         <CommandBinding Command="{StaticResource CreateLocalVariableTableCmd}"
                         CanExecute="CanCreateLocalVariableTable" Executed="CreateLocalVariableTableCmd_Executed"/>
         <CommandBinding Command="{StaticResource DeleteMlcCmd}"
@@ -393,11 +396,12 @@ limitations under the License.
                 <MenuItem Command="{StaticResource ShowHexDumpCmd}"/>
             </MenuItem>
             <MenuItem Header="_Tools" SubmenuOpened="ToolsMenu_SubmenuOpened">
-                <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
-                <MenuItem Name="toggleAsciiChartMenuItem"
-                          Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
                 <MenuItem Name="toggleInstructionChartMenuItem"
                           Command="{StaticResource ToggleInstructionChartCmd}" IsCheckable="True"/>
+                <MenuItem Name="toggleAsciiChartMenuItem"
+                          Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
+                <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
+                <MenuItem Command="{StaticResource ConcatenateFilesCmd}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>

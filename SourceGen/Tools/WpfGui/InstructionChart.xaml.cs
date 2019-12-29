@@ -87,6 +87,8 @@ namespace SourceGen.Tools.WpfGui {
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="owner">Parent window.</param>
+        /// <param name="formatter">Text formatter.</param>
         public InstructionChart(Window owner, Formatter formatter) {
             InitializeComponent();
             Owner = owner;

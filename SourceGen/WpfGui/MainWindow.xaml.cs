@@ -1131,6 +1131,10 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        private void ConcatenateFilesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ConcatenateFiles();
+        }
+
         private void CreateLocalVariableTableCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.CreateLocalVariableTable();
         }

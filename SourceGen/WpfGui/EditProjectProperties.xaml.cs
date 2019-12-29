@@ -831,7 +831,7 @@ namespace SourceGen.WpfGui {
             }
         }
 
-        private void SymbolFileUpButton_Click(object sender, EventArgs e) {
+        private void SymbolFileUpButton_Click(object sender, RoutedEventArgs e) {
             Debug.Assert(symbolFilesListBox.SelectedItems.Count == 1);
             int selIndex = symbolFilesListBox.SelectedIndex;
             Debug.Assert(selIndex > 0);
@@ -839,7 +839,7 @@ namespace SourceGen.WpfGui {
             MoveSingleItem(selIndex, symbolFilesListBox.SelectedItem, -1);
         }
 
-        private void SymbolFileDownButton_Click(object sender, EventArgs e) {
+        private void SymbolFileDownButton_Click(object sender, RoutedEventArgs e) {
             Debug.Assert(symbolFilesListBox.SelectedItems.Count == 1);
             int selIndex = symbolFilesListBox.SelectedIndex;
             Debug.Assert(selIndex < symbolFilesListBox.Items.Count - 1);
@@ -862,7 +862,7 @@ namespace SourceGen.WpfGui {
             UpdateControls();
         }
 
-        private void SymbolFileRemoveButton_Click(object sender, EventArgs e) {
+        private void SymbolFileRemoveButton_Click(object sender, RoutedEventArgs e) {
             Debug.Assert(symbolFilesListBox.SelectedItems.Count > 0);
             for (int i = symbolFilesListBox.SelectedItems.Count - 1; i >= 0; i--) {
                 string selItem = (string)symbolFilesListBox.SelectedItems[i];

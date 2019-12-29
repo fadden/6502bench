@@ -71,6 +71,11 @@ namespace SourceGen.WpfGui {
             // this can't change while the dialog is open, so don't need OnPropertyChanged
         }
 
+        //
+        // Every action causes a selection change, so we don't explicitly call an "update
+        // controls" function.
+        //
+
         public bool IsEditEnabled {
             get { return mIsEditEnabled; }
             set { mIsEditEnabled = value; OnPropertyChanged(); }
@@ -229,8 +234,10 @@ namespace SourceGen.WpfGui {
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e) {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
-            int index = VisualizationList.IndexOf(item);
-            VisualizationList.Remove(item);
+            int index = visualizationGrid.SelectedIndex;
+            VisualizationList.RemoveAt(index);
+
+            // Keep selection at same index, unless we just removed the item at the end.
             if (index == VisualizationList.Count) {
                 index--;
             }
@@ -271,18 +278,18 @@ namespace SourceGen.WpfGui {
 
         private void UpButton_Click(object sender, RoutedEventArgs e) {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
-            int index = VisualizationList.IndexOf(item);
+            int index = visualizationGrid.SelectedIndex;
             Debug.Assert(index > 0);
-            VisualizationList.Remove(item);
+            VisualizationList.RemoveAt(index);
             VisualizationList.Insert(index - 1, item);
             visualizationGrid.SelectedIndex = index - 1;
         }
 
         private void DownButton_Click(object sender, RoutedEventArgs e) {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
-            int index = VisualizationList.IndexOf(item);
+            int index = visualizationGrid.SelectedIndex;
             Debug.Assert(index >= 0 && index < VisualizationList.Count - 1);
-            VisualizationList.Remove(item);
+            VisualizationList.RemoveAt(index);
             VisualizationList.Insert(index + 1, item);
             visualizationGrid.SelectedIndex = index + 1;
         }

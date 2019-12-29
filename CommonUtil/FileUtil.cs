@@ -125,7 +125,7 @@ namespace CommonUtil {
         /// <param name="dstFile">File of interest.</param>
         /// <param name="srcFile">File to compare dates with.</param>
         /// <returns>True if dstFile is missing or older than srcFile.</returns>
-        public static bool FileMissingOrOlder(string dstFile, string srcFile) {
+        public static bool IsFileMissingOrOlder(string dstFile, string srcFile) {
             FileInfo fid = new FileInfo(dstFile);
             if (!fid.Exists) {
                 return true;    // not there
