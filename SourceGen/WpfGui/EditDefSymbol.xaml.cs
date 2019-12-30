@@ -149,8 +149,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private bool mIsWidthOptional;
 
-        // Saved off at dialog load time.
-        private Brush mDefaultLabelColor;
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -205,8 +204,6 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            mDefaultLabelColor = labelNotesLabel.Foreground;
-
             if (mOldSym != null) {
                 Label = mOldSym.GenerateDisplayLabel(mNumFormatter);
                 Value = mNumFormatter.FormatValueInBase(mOldSym.Value,

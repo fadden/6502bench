@@ -141,7 +141,7 @@ namespace SourceGen {
         /// 
         /// This is shared with the DisplayList.
         /// </summary>
-        private Formatter mOutputFormatter;
+        private Formatter mFormatter;
 
         /// <summary>
         /// Pseudo-op names.
@@ -180,7 +180,7 @@ namespace SourceGen {
         /// CPU definition used when the Formatter was created.  If the CPU choice or
         /// inclusion of undocumented opcodes changes, we need to wipe the formatter.
         /// </summary>
-        private CpuDef mOutputFormatterCpuDef;
+        private CpuDef mFormatterCpuDef;
 
         /// <summary>
         /// Instruction description object.  Used for Info window.
@@ -486,10 +486,10 @@ namespace SourceGen {
             }
 
 
-            // Update the formatter, and null out mOutputFormatterCpuDef to force a refresh
+            // Update the formatter, and null out mFormatterCpuDef to force a refresh
             // of related items.
-            mOutputFormatter = new Formatter(mFormatterConfig);
-            mOutputFormatterCpuDef = null;
+            mFormatter = new Formatter(mFormatterConfig);
+            mFormatterCpuDef = null;
 
             // Set pseudo-op names.  Entries aren't allowed to be blank, so we start with the
             // default values and merge in whatever the user has configured.
@@ -737,7 +737,7 @@ namespace SourceGen {
 
         private void FinishPrep() {
             CodeLineList = new LineListGen(mProject, mMainWin.CodeDisplayList,
-                mOutputFormatter, mPseudoOpNames);
+                mFormatter, mPseudoOpNames);
             SetCodeLineListColorMultiplier();
 
             string messages = mProject.LoadExternalFiles();
@@ -959,13 +959,13 @@ namespace SourceGen {
             // Changing the CPU type or whether undocumented instructions are supported
             // invalidates the Formatter's mnemonic cache.  We can change these values
             // through undo/redo, so we need to check it here.
-            if (mOutputFormatterCpuDef != mProject.CpuDef) {    // reference equality is fine
+            if (mFormatterCpuDef != mProject.CpuDef) {    // reference equality is fine
                 Debug.WriteLine("CpuDef has changed, resetting formatter (now " +
                     mProject.CpuDef + ")");
-                mOutputFormatter = new Formatter(mFormatterConfig);
-                CodeLineList.SetFormatter(mOutputFormatter);
+                mFormatter = new Formatter(mFormatterConfig);
+                CodeLineList.SetFormatter(mFormatter);
                 CodeLineList.SetPseudoOpNames(mPseudoOpNames);
-                mOutputFormatterCpuDef = mProject.CpuDef;
+                mFormatterCpuDef = mProject.CpuDef;
             }
 
             if (reanalysisRequired != UndoableChange.ReanalysisScope.DisplayOnly) {
@@ -978,7 +978,7 @@ namespace SourceGen {
                 mReanalysisTimer.EndTask("Call DisasmProject.Analyze()");
 
                 mReanalysisTimer.StartTask("Update message list");
-                mMainWin.UpdateMessageList(mProject.Messages, mOutputFormatter);
+                mMainWin.UpdateMessageList(mProject.Messages, mFormatter);
                 mReanalysisTimer.EndTask("Update message list");
             }
 
@@ -1410,7 +1410,7 @@ namespace SourceGen {
             } else if (format == ClipLineFormat.AllColumns) {
                 colFlags = Exporter.ActiveColumnFlags.ALL;
             }
-            Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
+            Exporter eport = new Exporter(mProject, CodeLineList, mFormatter,
                 colFlags, rightWidths);
             eport.Selection = selection;
 
@@ -1727,7 +1727,7 @@ namespace SourceGen {
             }
 
             EditAddress dlg = new EditAddress(mMainWin, firstOffset, nextOffset, nextAddr,
-                mProject, mOutputFormatter);
+                mProject, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -1826,7 +1826,7 @@ namespace SourceGen {
 
             Anattrib attr = mProject.GetAnattrib(offset);
             EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, attr.Address, offset,
-                mProject.SymbolTable, mOutputFormatter);
+                mProject.SymbolTable, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -1907,7 +1907,7 @@ namespace SourceGen {
             mProject.LvTables.TryGetValue(offset, out LocalVariableTable oldLvt);
 
             EditLocalVariableTable dlg = new EditLocalVariableTable(mMainWin, mProject,
-                mOutputFormatter, oldLvt, offset);
+                mFormatter, oldLvt, offset);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -1953,7 +1953,7 @@ namespace SourceGen {
         }
 
         private void EditLongComment(int offset) {
-            EditLongComment dlg = new EditLongComment(mMainWin, mOutputFormatter);
+            EditLongComment dlg = new EditLongComment(mMainWin, mFormatter);
             if (mProject.LongComments.TryGetValue(offset, out MultiLineComment oldComment)) {
                 dlg.LongComment = oldComment;
             }
@@ -2042,7 +2042,7 @@ namespace SourceGen {
 
         private void EditInstructionOperand(int offset) {
             EditInstructionOperand dlg = new EditInstructionOperand(mMainWin, mProject,
-                offset, mOutputFormatter);
+                offset, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -2130,7 +2130,7 @@ namespace SourceGen {
             mProject.OperandFormats.TryGetValue(firstOffset.Value, out FormatDescriptor dfd);
 
             EditDataOperand dlg =
-                new EditDataOperand(mMainWin, mProject, mOutputFormatter, trs, dfd);
+                new EditDataOperand(mMainWin, mProject, mFormatter, trs, dfd);
             if (dlg.ShowDialog() == true) {
                 // Merge the changes into the OperandFormats list.  We need to remove all
                 // FormatDescriptors that overlap the selected region.  We don't need to
@@ -2153,7 +2153,7 @@ namespace SourceGen {
                 projectDir = Path.GetDirectoryName(mProjectPathName);
             }
             EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
-                projectDir, mOutputFormatter, initialTab);
+                projectDir, mFormatter, initialTab);
             dlg.ShowDialog();
             ProjectProperties newProps = dlg.NewProps;
 
@@ -2185,7 +2185,7 @@ namespace SourceGen {
             DefSymbol origDefSym = mProject.ActiveDefSymbolList[symIndex];
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
-            EditDefSymbol dlg = new EditDefSymbol(mMainWin, mOutputFormatter,
+            EditDefSymbol dlg = new EditDefSymbol(mMainWin, mFormatter,
                 mProject.ProjectProps.ProjectSyms, origDefSym, null);
             if (dlg.ShowDialog() == true) {
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
@@ -2245,7 +2245,7 @@ namespace SourceGen {
             mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet curVisSet);
 
             EditVisualizationSet dlg = new EditVisualizationSet(mMainWin, mProject,
-                mOutputFormatter, curVisSet, offset);
+                mFormatter, curVisSet, offset);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -2307,7 +2307,7 @@ namespace SourceGen {
                 dlg.AsmLabelColWidth, dlg.AsmOpcodeColWidth,
                 dlg.AsmOperandColWidth, dlg.AsmCommentColWidth
             };
-            Exporter eport = new Exporter(mProject, CodeLineList, mOutputFormatter,
+            Exporter eport = new Exporter(mProject, CodeLineList, mFormatter,
                 dlg.ColFlags, rightWidths);
             eport.IncludeNotes = dlg.IncludeNotes;
             eport.GenerateImageFiles = dlg.GenerateImageFiles;
@@ -2526,7 +2526,7 @@ namespace SourceGen {
             }
 
             FormatAddressTable dlg = new FormatAddressTable(mMainWin, mProject, trs,
-                mOutputFormatter);
+                mFormatter);
 
             dlg.ShowDialog();
             if (dlg.DialogResult != true) {
@@ -2583,7 +2583,7 @@ namespace SourceGen {
             }
             int offset = CodeLineList[index].FileOffset;
 
-            GotoBox dlg = new GotoBox(mMainWin, mProject, offset, mOutputFormatter);
+            GotoBox dlg = new GotoBox(mMainWin, mProject, offset, mFormatter);
             if (dlg.ShowDialog() == true) {
                 GoToLocation(new NavStack.Location(dlg.TargetOffset, 0, false),
                     GoToMode.JumpToCodeData, true);
@@ -2696,7 +2696,7 @@ namespace SourceGen {
             // We're comparing to the formatted strings -- safer than trying to find the symbol
             // in the table and then guess at how the table arranges itself for display -- so we
             // need to compare the formatted form of the label.
-            string cmpStr = mOutputFormatter.FormatVariableLabel(symRef.Label);
+            string cmpStr = mFormatter.FormatVariableLabel(symRef.Label);
             int lineIndex = CodeLineList.FindLineIndexByOffset(varOffset);
             while (lineIndex < mProject.FileDataLength) {
                 LineListGen.Line line = CodeLineList[lineIndex];
@@ -3125,7 +3125,7 @@ namespace SourceGen {
                 // when it's not on top, it can sit behind the main app window until you
                 // double-click something else.
                 mHexDumpDialog = new Tools.WpfGui.HexDumpViewer(null,
-                    mProject.FileData, mOutputFormatter);
+                    mProject.FileData, mFormatter);
                 mHexDumpDialog.Closing += (sender, e) => {
                     Debug.WriteLine("Hex dump dialog closed");
                     //showHexDumpToolStripMenuItem.Checked = false;
@@ -3448,7 +3448,7 @@ namespace SourceGen {
             }
 
             // TODO(someday): localization
-            Asm65.Formatter formatter = mOutputFormatter;
+            Asm65.Formatter formatter = mFormatter;
             bool showBank = !mProject.CpuDef.HasAddr16;
             for (int i = 0; i < xrefs.Count; i++) {
                 XrefSet.Xref xr = xrefs[i];
@@ -3565,7 +3565,7 @@ namespace SourceGen {
                 }
 
                 MainWindow.NotesListItem nli = new MainWindow.NotesListItem(offset,
-                    mOutputFormatter.FormatOffset24(offset),
+                    mFormatter.FormatOffset24(offset),
                     nocrlfStr,
                     mlc.BackgroundColor);
                 mMainWin.NotesList.Add(nli);
@@ -3583,13 +3583,13 @@ namespace SourceGen {
         private void PopulateSymbolsList() {
             mMainWin.SymbolsList.Clear();
             foreach (Symbol sym in mProject.SymbolTable) {
-                string valueStr = mOutputFormatter.FormatHexValue(sym.Value, 0);
+                string valueStr = mFormatter.FormatHexValue(sym.Value, 0);
                 string sourceTypeStr = sym.SourceTypeString;
                 if (sym is DefSymbol) {
                     DefSymbol defSym = (DefSymbol)sym;
                     if (defSym.MultiMask != null) {
                         valueStr += " & " +
-                            mOutputFormatter.FormatHexValue(defSym.MultiMask.AddressMask, 4);
+                            mFormatter.FormatHexValue(defSym.MultiMask.AddressMask, 4);
                     }
                     if (defSym.Direction == DefSymbol.DirectionFlags.Read) {
                         sourceTypeStr += '<';
@@ -3599,7 +3599,7 @@ namespace SourceGen {
                 }
 
                 MainWindow.SymbolsListItem sli = new MainWindow.SymbolsListItem(sym,
-                    sourceTypeStr, valueStr, sym.GenerateDisplayLabel(mOutputFormatter));
+                    sourceTypeStr, valueStr, sym.GenerateDisplayLabel(mFormatter));
                 mMainWin.SymbolsList.Add(sli);
             }
         }
@@ -3970,7 +3970,7 @@ namespace SourceGen {
         public void ToggleInstructionChart() {
             if (mInstructionChartDialog == null) {
                 // Create without owner so it doesn't have to be in front of main window.
-                mInstructionChartDialog = new Tools.WpfGui.InstructionChart(null, mOutputFormatter);
+                mInstructionChartDialog = new Tools.WpfGui.InstructionChart(null, mFormatter);
                 mInstructionChartDialog.Closing += (sender, e) => {
                     Debug.WriteLine("Instruction chart closed");
                     mInstructionChartDialog = null;
@@ -4009,7 +4009,7 @@ namespace SourceGen {
 
             // Create the dialog without an owner, and add it to the "unowned" list.
             Tools.WpfGui.HexDumpViewer dlg = new Tools.WpfGui.HexDumpViewer(null,
-                data, mOutputFormatter);
+                data, mFormatter);
             dlg.SetFileName(Path.GetFileName(fileName));
             dlg.Closing += (sender, e) => {
                 Debug.WriteLine("Window " + dlg + " closed, removing from unowned list");
@@ -4023,6 +4023,21 @@ namespace SourceGen {
             Tools.WpfGui.FileConcatenator concat =
                 new Tools.WpfGui.FileConcatenator(this.mMainWin);
             concat.ShowDialog();
+        }
+
+        public void SliceFiles() {
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+            string pathName = Path.GetFullPath(fileDlg.FileName);
+
+            Tools.WpfGui.FileSlicer slicer = new Tools.WpfGui.FileSlicer(this.mMainWin, pathName,
+                mFormatter);
+            slicer.ShowDialog();
         }
 
         #endregion Tools

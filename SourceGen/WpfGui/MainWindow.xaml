@@ -164,13 +164,14 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="File Hex Dump..."/>
             <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
+            <RoutedUICommand x:Key="SliceFilesCmd" Text="Slice Files..."/>
             <RoutedUICommand x:Key="ToggleAsciiChartCmd" Text="ASCII Chart"/>
             <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+D</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="ToggleInstructionChartCmd" Text="Instruction Chart"/>
+            <RoutedUICommand x:Key="ToggleInstructionChartCmd" Text="65xx Instruction Chart"/>
             <RoutedUICommand x:Key="ToggleSingleByteFormatCmd" Text="Toggle Single-Byte Format">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+B</KeyGesture>
@@ -291,6 +292,8 @@ limitations under the License.
                         Executed="ShowFileHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource ShowHexDumpCmd}"
                         CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
+        <CommandBinding Command="{StaticResource SliceFilesCmd}"
+                        Executed="SliceFilesCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleAsciiChartCmd}"
                         Executed="ToggleAsciiChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
@@ -400,8 +403,10 @@ limitations under the License.
                           Command="{StaticResource ToggleInstructionChartCmd}" IsCheckable="True"/>
                 <MenuItem Name="toggleAsciiChartMenuItem"
                           Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
+                <Separator/>
                 <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
                 <MenuItem Command="{StaticResource ConcatenateFilesCmd}"/>
+                <MenuItem Command="{StaticResource SliceFilesCmd}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>

@@ -126,7 +126,7 @@ namespace SourceGen.Tools.WpfGui {
         /// Sets the filename associated with the data.  This is for display purposes only.
         /// </summary>
         public void SetFileName(string fileName) {
-            Title = fileName;
+            Title = fileName + (string)FindResource("str_TitleAddon");
         }
 
         private void CharConvComboBox_SelectionChanged(object sender,

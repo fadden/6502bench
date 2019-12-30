@@ -985,7 +985,8 @@ namespace Asm65 {
         /// <param name="offset">Start offset.</param>
         /// <returns>Formatted string.</returns>
         public string FormatHexDump(byte[] data, int offset) {
-            FormatHexDumpCommon(data, offset);
+            int length = Math.Min(16, data.Length - offset);
+            FormatHexDumpCommon(data, offset, offset, length);
             // this is the only allocation
             return new string(mHexDumpBuffer);
         }
@@ -998,14 +999,21 @@ namespace Asm65 {
         /// <param name="offset">Start offset.</param>
         /// <param name="sb">StringBuilder that receives output.</param>
         public void FormatHexDump(byte[] data, int offset, StringBuilder sb) {
-            FormatHexDumpCommon(data, offset);
+            int length = Math.Min(16, data.Length - offset);
+            FormatHexDumpCommon(data, offset, offset, length);
+            sb.Append(mHexDumpBuffer);
+        }
+
+        public void FormatHexDump(byte[] data, int offset, int addr, int length,
+                StringBuilder sb) {
+            FormatHexDumpCommon(data, offset, addr, length);
             sb.Append(mHexDumpBuffer);
         }
 
         /// <summary>
         /// Formats up to 16 bytes of data into mHexDumpBuffer.
         /// </summary>
-        private void FormatHexDumpCommon(byte[] data, int offset) {
+        private void FormatHexDumpCommon(byte[] data, int offset, int addr, int length) {
             Debug.Assert(offset >= 0 && offset < data.Length);
             Debug.Assert(data.Length < (1 << 24));
             const int dataCol = 8;
@@ -1014,21 +1022,30 @@ namespace Asm65 {
             char[] hexChars = mFormatConfig.mUpperHexDigits ? sHexCharsUpper : sHexCharsLower;
             char[] outBuf = mHexDumpBuffer;
 
+            int skip = addr & 0x0f;     // we skip this many entries...
+            offset -= skip;             // ...so adjust offset to balance it
+            addr &= ~0x0f;
+
             // address field
-            int addr = offset;
             for (int i = 5; i >= 0; i--) {
                 outBuf[i] = hexChars[addr & 0x0f];
                 addr >>= 4;
             }
 
-            // hex digits and characters
-            int length = Math.Min(16, data.Length - offset);
+            // If addr doesn't start at xxx0, pad it.
             int index;
-            for (index = 0; index < length; index++) {
+            for (index = 0; index < skip; index++) {
+                outBuf[dataCol + index * 3] = outBuf[dataCol + index * 3 + 1] =
+                    outBuf[asciiCol + index] = ' ';
+            }
+
+            // hex digits and characters
+            for (int i = 0; i < length; i++) {
                 byte val = data[offset + index];
                 outBuf[dataCol + index * 3] = hexChars[val >> 4];
                 outBuf[dataCol + index * 3 + 1] = hexChars[val & 0x0f];
                 outBuf[asciiCol + index] = CharConv(val);
+                index++;
             }
 
             // for partial line, clear out previous contents

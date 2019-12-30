@@ -89,6 +89,9 @@
     <Compile Include="Tools\WpfGui\FileConcatenator.xaml.cs">
       <DependentUpon>FileConcatenator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Tools\WpfGui\FileSlicer.xaml.cs">
+      <DependentUpon>FileSlicer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\WpfGui\InstructionChart.xaml.cs">
       <DependentUpon>InstructionChart.xaml</DependentUpon>
     </Compile>
@@ -266,6 +269,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\WpfGui\FileConcatenator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\FileSlicer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -47,7 +47,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Select files:"/>
+        <TextBlock Grid.Row="0" Text="Select files:" Margin="0,0,0,4"/>
 
         <DataGrid Name="concatGrid" Grid.Row="1" Height="300" Width="480"
                   IsReadOnly="True"
@@ -95,6 +95,5 @@ limitations under the License.
                     IsEnabled="{Binding IsSaveEnabled}" Click="SaveButton_Click"/>
             <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>
         </StackPanel>
-
     </Grid>
 </Window>

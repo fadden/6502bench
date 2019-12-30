@@ -1,0 +1,93 @@
+﻿<!--
+Copyright 2019 faddenSoft
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<Window x:Class="SourceGen.Tools.WpfGui.FileSlicer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceGen.Tools.WpfGui"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="File Slicer"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Closing="Window_Closing">
+
+    <Window.Resources>
+        <system:String x:Key="str_LastByteAt" xml:space="preserve"> - last byte at </system:String>
+        <system:String x:Key="str_SuccessCaption">Success</system:String>
+        <system:String x:Key="str_SuccessMsg">File created.</system:String>
+        <system:String x:Key="str_FileAccessFailedCaption">File Access Error</system:String>
+        <system:String x:Key="str_FileAccessFailedFmt">Unable to access file: {0}</system:String>
+    </Window.Resources>
+
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Text="Select region to extract:"/>
+        
+        <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,8,4,0"
+                   Text="File size:"/>
+        <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,8,0,0"
+                   Text="{Binding FileLengthStr, FallbackValue=12345 ($abcd)}"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" Margin="0,5,4,0"
+                   Foreground="{Binding SliceStartBrush}" Text="Slice start:"/>
+        <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+            <TextBox HorizontalAlignment="Left" Width="80"
+                     Text="{Binding SliceStart, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Margin="8,0,0,0" Text="{Binding SliceStartDesc, FallbackValue=12345 ($abcd)}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" Margin="0,5,4,0"
+                   Foreground="{Binding SliceLengthBrush}" Text="Slice length:"/>
+        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,0">
+            <TextBox HorizontalAlignment="Left" Width="80"
+                     Text="{Binding SliceLength, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Margin="8,0,0,0" Text="{Binding SliceLengthDesc, FallbackValue=12345 ($abcd)}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   Margin="0,4,4,0" Text="Start"/>
+        <TextBox Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,8,0,0" Width="491" Height="74"
+                 IsReadOnly="True" FontFamily="{StaticResource GeneralMonoFont}" Text="{Binding StartHexDump}"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   Margin="0,4,4,0" Text="End"/>
+        <TextBox Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,8,0,0" Width="491" Height="74"
+                 IsReadOnly="True" FontFamily="{StaticResource GeneralMonoFont}" Text="{Binding EndHexDump}"/>
+
+        <StackPanel Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3"
+                    Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Save..." IsDefault="True" Width="70"
+                    IsEnabled="{Binding IsSaveEnabled}" Click="SaveButton_Click"/>
+            <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

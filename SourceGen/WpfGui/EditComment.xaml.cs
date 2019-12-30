@@ -40,7 +40,7 @@ namespace SourceGen.WpfGui {
         }
         private string mCommentText;
 
-        private Brush mDefaultLabelColor;
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -54,7 +54,6 @@ namespace SourceGen.WpfGui {
             DataContext = this;
 
             CommentText = comment;
-            mDefaultLabelColor = asciiOnlyLabel.Foreground;
         }
 
         public void Window_ContentRendered(object sender, EventArgs e) {

@@ -1334,6 +1334,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.ShowHexDump();
         }
 
+        private void SliceFilesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.SliceFiles();
+        }
+
         private void ToggleAsciiChartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ToggleAsciiChart();
         }

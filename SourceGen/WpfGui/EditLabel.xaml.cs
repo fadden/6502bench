@@ -53,8 +53,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private Formatter mFormatter;
 
-        // Dialog label text color, saved off at dialog load time.
-        private Brush mDefaultLabelColor;
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
 
         /// <summary>
         /// Recursion guard.
@@ -146,8 +145,6 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            mDefaultLabelColor = maxLengthLabel.Foreground;
-
             IsNonUniqueEnabled = IsLocalEnabled = IsGlobalEnabled = IsExportedEnabled = true;
 
             if (LabelSym == null) {

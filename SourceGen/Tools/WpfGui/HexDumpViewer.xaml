@@ -32,6 +32,7 @@ limitations under the License.
         <system:String x:Key="str_LowHighAscii">Low/High ASCII</system:String>
         <system:String x:Key="str_C64Petscii">C64 PETSCII</system:String>
         <system:String x:Key="str_C64ScreenCode">C64 Screen Code</system:String>
+        <system:String x:Key="str_TitleAddon" xml:space="preserve"> - Hex Dump Viewer</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
