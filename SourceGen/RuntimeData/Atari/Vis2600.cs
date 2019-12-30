@@ -126,9 +126,9 @@ namespace RuntimeData.Atari {
                 byte val = mFileData[offset + row];
                 for (int col = 0; col < 8; col++) {
                     if ((val & 0x80) != 0) {
-                        vb.SetPixelIndex(col, row, (byte)Color.White);
+                        vb.SetPixelIndex(col, row, (byte)Color.Solid);
                     } else {
-                        vb.SetPixelIndex(col, row, (byte)Color.Black);
+                        vb.SetPixelIndex(col, row, (byte)Color.Transparent);
                     }
                     val <<= 1;
                 }
@@ -212,16 +212,18 @@ namespace RuntimeData.Atari {
 
         private enum Color : byte {
             Transparent = 0,
-            Black = 1,
-            White = 2,
-            Grey = 3
+            Solid = 1,
+            Black = 2,
+            White = 3,
+            Grey = 4
         }
 
         private void SetPalette(VisBitmap8 vb) {
             vb.AddColor(0, 0, 0, 0);                // 0=transparent
-            vb.AddColor(0xff, 0x00, 0x00, 0x00);    // 1=black
-            vb.AddColor(0xff, 0xff, 0xff, 0xff);    // 2=white
-            vb.AddColor(0xff, 0xd0, 0xd0, 0xd0);    // 3=grey
+            vb.AddColor(0xff, 0x20, 0x20, 0xe0);    // 1=solid (mostly blue)
+            vb.AddColor(0xff, 0x00, 0x00, 0x00);    // 2=black
+            vb.AddColor(0xff, 0xff, 0xff, 0xff);    // 3=white
+            vb.AddColor(0xff, 0xd0, 0xd0, 0xd0);    // 4=grey
         }
     }
 }
