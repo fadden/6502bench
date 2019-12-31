@@ -114,12 +114,15 @@ The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
 the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
 installer was able to get the 4.6.2 installer to work.)
 
-SourceGen does not currently run on Linux or Mac OS X.  Versions 1.0 and 1.1
-used the WinForms API, which has been implemented for Mono, but after
-encountering significant bugs that I wasn't able to work around I abandoned
-the idea and switched to WPF.  Besides working better under Windows, WPF
-uses a more modern approach (XAML) that may ease the transition to a modern
-cross-platform GUI like Avalonia.
+SourceGen does not currently run on Linux or Mac OS X.  My understanding is
+that .NET apps don't work under WINE, so it can only be run on a full
+Windows system emulation.
+
+(SourceGen Versions 1.0 and 1.1 used the WinForms API, which has been
+implemented for Mono, but after encountering significant bugs that I wasn't
+able to work around I abandoned the approach and switched to WPF.  Besides
+working better under Windows, WPF uses a more modern approach (XAML) that
+may ease the transition to a cross-platform GUI API like Avalonia.)
 
 
 ## Getting Started ##
@@ -140,24 +143,4 @@ display it.
 
 ## About the Code ##
 
-All of the code is written in C# .NET, using the (free to download) Visual
-Studio Community 2017 IDE as the primary development environment.  The user
-interface uses the WPF API.
-
-The Solution file is called "WorkBench.sln" rather than "6502bench.sln"
-because some things in Visual Studio got weird when it didn't start with a
-letter.
-
-The code style is closer to what Android uses than "standard" C#.  Lines
-are folded to fit 100 columns.
-
-The source code is licensed under Apache 2.0
-(http://www.apache.org/licenses/LICENSE-2.0), which makes it free for use in
-both open-source programs and closed-source commercial software.  The license
-terms are similar to BSD or MIT, but with some additional constraints on
-patent licensing.  (This is the same license Google uses for the Android
-Open Source Project.)
-
-Images are licensed under Creative Commons ShareAlike 4.0 International
-(https://creativecommons.org/licenses/by-sa/4.0/).
-
+See the [source code notes](SourceNotes.md).
