@@ -116,9 +116,9 @@ namespace CommonUtil {
         /// messing with the quoted items.  Assumes that quoted quotes (backslash-quote) only
         /// appear inside quoted text.
         /// </summary>
-        /// <param name="inStr"></param>
-        /// <param name="findStr"></param>
-        /// <param name="repStr"></param>
+        /// <param name="inStr">Input string.</param>
+        /// <param name="findStr">Substring to find.</param>
+        /// <param name="repStr">If string found, replace with this.</param>
         public static string NonQuoteReplace(string inStr, string findStr, string repStr) {
             // There's probably a better way to do this...
             StringBuilder sb = new StringBuilder(inStr.Length + inStr.Length / 20);

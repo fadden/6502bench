@@ -75,6 +75,7 @@ namespace SourceGen {
                     // much more useful.
                     serializedData = TextUtil.NonQuoteReplace(serializedData, "{", "{\r\n");
                     serializedData = TextUtil.NonQuoteReplace(serializedData, "},", "},\r\n");
+                    serializedData = TextUtil.NonQuoteReplace(serializedData, ",", ",\r\n");
                 }
 
                 // Check to see if the project file is read-only.  We want to fail early

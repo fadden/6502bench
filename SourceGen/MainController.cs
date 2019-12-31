@@ -1126,6 +1126,7 @@ namespace SourceGen {
 
             mProject = newProject;
             mProjectPathName = mProject.ProjectPathName = projPathName;
+            mDataPathName = dataPathName;
             FinishPrep();
         }
 
