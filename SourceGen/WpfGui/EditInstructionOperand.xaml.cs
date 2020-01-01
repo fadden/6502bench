@@ -392,7 +392,9 @@ namespace SourceGen.WpfGui {
                         mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
                         out bool unused2, out bool hasNonUniquePrefix,
                         out Symbol.LabelAnnotation unused3);
-                    if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
+                    if (string.IsNullOrEmpty(trimLabel)) {
+                        sb.Append("?");
+                    } else if (LookupSymbol(trimLabel, hasNonUniquePrefix, out Symbol sym)) {
                         // Block move is a little weird.  "MVN label1,label2" is supposed to use
                         // the bank byte, while "MVN #const1,#const2" uses the entire symbol.
                         // The easiest thing to do is require the user to specify the "bank"
@@ -434,7 +436,6 @@ namespace SourceGen.WpfGui {
                         }
                     } else {
                         sb.Append(dfd.SymbolRef.Label + " (?)");
-                        Debug.Assert(!string.IsNullOrEmpty(dfd.SymbolRef.Label));
                         //symbolValueLabel.Text = Properties.Resources.MSG_SYMBOL_NOT_FOUND;
                     }
                     break;

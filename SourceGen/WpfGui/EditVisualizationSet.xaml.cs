@@ -292,6 +292,7 @@ namespace SourceGen.WpfGui {
             VisualizationList.RemoveAt(index);
             VisualizationList.Insert(index - 1, item);
             visualizationGrid.SelectedIndex = index - 1;
+            visualizationGrid.ScrollIntoView(item);
         }
 
         private void DownButton_Click(object sender, RoutedEventArgs e) {
@@ -301,6 +302,7 @@ namespace SourceGen.WpfGui {
             VisualizationList.RemoveAt(index);
             VisualizationList.Insert(index + 1, item);
             visualizationGrid.SelectedIndex = index + 1;
+            visualizationGrid.ScrollIntoView(item);
         }
 
         /// <summary>

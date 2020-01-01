@@ -154,7 +154,7 @@ namespace SourceGen {
                 Debug.Assert(oldObj.SerialNumber >= 0 && oldObj.SerialNumber < sNextSerial);
                 SerialNumber = oldObj.SerialNumber;
             }
-            Debug.WriteLine("NEW VIS: Serial=" + SerialNumber);
+            //Debug.WriteLine("NEW VIS: Serial=" + SerialNumber);
         }
 
         /// <summary>

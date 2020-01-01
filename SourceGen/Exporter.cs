@@ -761,6 +761,7 @@ namespace SourceGen {
         /// <param name="sb">String builder for the HTML output.</param>
         private void OutputVisualizationSet(int offset, StringBuilder sb) {
             const int IMAGE_SIZE = 64;
+            const int MAX_WIDTH_PER_LINE = 768;
 
             if (!mProject.VisualizationSets.TryGetValue(offset,
                     out VisualizationSet visSet)) {
@@ -775,11 +776,10 @@ namespace SourceGen {
             }
 
             string imageDirFileName = Path.GetFileName(mImageDirPath);
+            int outputWidth = 0;
 
             for (int index = 0; index < visSet.Count; index++) {
-                string fileName = "vis" + offset.ToString("x6") + "_" + index.ToString("d2") +
-                    ".gif";
-                string pathName = Path.Combine(mImageDirPath, fileName);
+                string fileName = "vis" + offset.ToString("x6") + "_" + index.ToString("d2");
 
                 int dispWidth, dispHeight;
 
@@ -803,6 +803,7 @@ namespace SourceGen {
                     }
 
 #if false
+                    // try feeding the animated GIF into our GIF unpacker
                     using (MemoryStream ms = new MemoryStream()) {
                         encoder.Save(ms);
                         Debug.WriteLine("TESTING");
@@ -812,6 +813,8 @@ namespace SourceGen {
 #endif
 
                     // Create new or replace existing image file.
+                    fileName += "_ani.gif";
+                    string pathName = Path.Combine(mImageDirPath, fileName);
                     try {
                         using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
                             encoder.Save(stream, out dispWidth, out dispHeight);
@@ -830,6 +833,8 @@ namespace SourceGen {
                     encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
 
                     // Create new or replace existing image file.
+                    fileName += ".gif";
+                    string pathName = Path.Combine(mImageDirPath, fileName);
                     try {
                         using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
                             encoder.Save(stream);
@@ -866,9 +871,19 @@ namespace SourceGen {
                 //Debug.WriteLine(dispWidth + "x" + dispHeight + " --> " +
                 //    thumbWidth + "x" + thumbHeight + " (" + maxDim + ")");
 
-                if (index != 0) {
+                if (outputWidth > MAX_WIDTH_PER_LINE) {
+                    // Add a line break.  In "pre" mode the bitmaps just run off the right
+                    // edge of the screen.  The way we're doing it is imprecise and doesn't
+                    // flow with changes to the browser width, but it'll do for now.
+                    sb.AppendLine("<br/>");
+                    for (int i = 0; i < mColStart[(int)Col.Label]; i++) {
+                        sb.Append(' ');
+                    }
+                    outputWidth = 0;
+                } else if (index != 0) {
                     sb.Append("&nbsp;");
                 }
+                outputWidth += thumbWidth;
 
                 sb.Append("<img class=\"vis\" alt=\"vis\" src=\"");
                 sb.Append(imageDirFileName);

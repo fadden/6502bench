@@ -357,6 +357,7 @@ namespace SourceGen.WpfGui {
             VisAnimItems.Remove(item);
             VisAnimItems.Insert(index - 1, item);
             visAnimGrid.SelectedIndex = index - 1;
+            visAnimGrid.ScrollIntoView(item);
 
             //RefreshAnim();
         }
@@ -371,6 +372,7 @@ namespace SourceGen.WpfGui {
             VisAnimItems.Remove(item);
             VisAnimItems.Insert(index + 1, item);
             visAnimGrid.SelectedIndex = index + 1;
+            visAnimGrid.ScrollIntoView(item);
 
             //RefreshAnim();
         }
