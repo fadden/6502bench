@@ -121,8 +121,8 @@ limitations under the License.
 
             <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Margin="0,0,4,0"
                        Text="Tag:"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Width="250" Margin="0,1,0,0" HorizontalAlignment="Left"
-                     Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Column="1" Grid.Row="1" Name="tagTextBox" Width="250" Margin="0,1,0,0"
+                     HorizontalAlignment="Left" Text="{Binding TagString, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
 
             <TextBlock Grid.Column="1" Grid.Row="2" Text="• Must be unique, 2+ chars"

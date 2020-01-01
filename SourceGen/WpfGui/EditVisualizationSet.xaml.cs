@@ -150,7 +150,12 @@ namespace SourceGen.WpfGui {
             }
 
             // Check to see if changes have been made.
-            VisualizationSet newSet = MakeVisSet();
+            VisualizationSet newSet;
+            if (VisualizationList.Count == 0) {
+                newSet = null;
+            } else {
+                newSet = MakeVisSet();
+            }
             if (newSet != mOrigSet) {
                 string msg = (string)FindResource("str_ConfirmDiscardChanges");
                 string caption = (string)FindResource("str_ConfirmDiscardChangesCaption");
@@ -184,6 +189,8 @@ namespace SourceGen.WpfGui {
             }
             VisualizationList.Add(dlg.NewVis);
             visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
+
+            okButton.Focus();
         }
 
         private void NewBitmapAnimationButton_Click(object sender, RoutedEventArgs e) {
@@ -194,6 +201,8 @@ namespace SourceGen.WpfGui {
             }
             VisualizationList.Add(dlg.NewAnim);
             visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
+
+            okButton.Focus();
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e) {

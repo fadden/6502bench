@@ -49,6 +49,13 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private static string sLastVisIdent = string.Empty;
 
+        /// <summary>
+        /// Parameters specified for the last thing we saved.  Convenient when there's N frames
+        /// of an animation where everything is the same size / color.
+        /// </summary>
+        private static ReadOnlyDictionary<string, object> sLastParams =
+            new ReadOnlyDictionary<string, object>(new Dictionary<string, object>());
+
         private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
         private Brush mErrorLabelColor = Brushes.Red;
 
@@ -250,9 +257,12 @@ namespace SourceGen.WpfGui {
                     }
                 } else {
                     // New visualization.  Use the set's offset as the default value for
-                    // any parameter called "offset".
+                    // any parameter called "offset".  Otherwise try to pull a value with
+                    // the same name out of the last thing we edited.
                     if (vpd.Name.ToLowerInvariant() == "offset") {
                         defaultVal = mSetOffset;
+                    } else if (sLastParams.TryGetValue(vpd.Name, out object value)) {
+                        defaultVal = value;
                     }
                 }
 
@@ -294,6 +304,9 @@ namespace SourceGen.WpfGui {
             SetValue(MinHeightProperty, this.Height);
             previewImage.ClearValue(WidthProperty);
             previewImage.ClearValue(HeightProperty);
+
+            tagTextBox.SelectAll();
+            tagTextBox.Focus();
         }
 
         private void Window_Closed(object sender, EventArgs e) {
@@ -303,7 +316,7 @@ namespace SourceGen.WpfGui {
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
-            ReadOnlyDictionary<string, object> valueDict = CreateVisGenParams();
+            ReadOnlyDictionary<string, object> valueDict = sLastParams = CreateVisGenParams();
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
             NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
