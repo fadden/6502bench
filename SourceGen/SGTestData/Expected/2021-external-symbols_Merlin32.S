@@ -35,8 +35,8 @@ L1000    lda   CodeWrap+255
          ldx   L1000
          ldy   L1000+1
          lda   :L1148
-         lda   CodeWrap+585
-         lda   CodeWrap+592
+         lda   CodeWrap+$249
+         lda   CodeWrap+$250
          nop
          lda   $1ffe
          lda   SameName1-1
@@ -112,7 +112,7 @@ L1000    lda   CodeWrap+255
          lda   $4000
          lda   $4001
          lda   BankWrap+8
-         lda   <BankWrap-65512
+         lda   <BankWrap-$ffe8
          nop
          lda   ReadOnly
          lda   ReadOnly+1

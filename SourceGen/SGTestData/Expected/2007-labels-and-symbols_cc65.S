@@ -64,12 +64,12 @@ start:   clc
          lda     #zip+64
          lda     #absl
          lda     #absl >> 8
-         lda     #absl-4096
+         lda     #absl-$1000
          lda     #absl >> 8 -16
          lda     #absl >> 16
          lda     #absh
          lda     #absh >> 8
-         lda     #absh-61440
+         lda     #absh-$f000
          lda     #absh >> 8 +16
          lda     #absh >> 16 +1
          lda     #start & $ffff
@@ -89,11 +89,11 @@ start:   clc
          .word   zip
          .word   absl
          .word   absl >> 8
-         .word   absl-4096
+         .word   absl-$1000
          .word   absl >> 8 -16
          .word   absh
          .word   absh >> 8
-         .word   absh-61440
+         .word   absh-$f000
          .word   absh >> 8 +16
          .word   start & $ffff
          .word   start >> 8

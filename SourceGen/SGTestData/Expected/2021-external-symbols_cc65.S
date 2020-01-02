@@ -37,8 +37,8 @@ L1000:   lda     CodeWrap+255
          ldx     L1000
          ldy     L1000+1
          lda     L1148
-         lda     CodeWrap+585
-         lda     CodeWrap+592
+         lda     CodeWrap+$249
+         lda     CodeWrap+$250
          nop
          lda     $1ffe
          lda     SameName1-1

@@ -639,18 +639,27 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Formats an adjustment, as "+decimal" or "-decimal".  If no adjustment
-        /// is required, an empty string is returned.
+        /// Formats an adjustment.  Small values are formatted as "+decimal" or "-decimal",
+        /// larger values are formatted as hex.  If no adjustment is required, an empty string
+        /// is returned.
         /// </summary>
         /// <param name="adjValue">Adjustment value.</param>
         /// <returns>Formatted string.</returns>
         public string FormatAdjustment(int adjValue) {
             if (adjValue == 0) {
                 return string.Empty;
+            } else if (Math.Abs(adjValue) >= 256) {
+                // not using mHexPrefix here, since dec vs. hex matters
+                if (adjValue < 0) {
+                    return "-$" + (-adjValue).ToString(mHexValueFormats[0]);
+                } else {
+                    return "+$" + adjValue.ToString(mHexValueFormats[0]);
+                }
+            } else {
+                // This formats in decimal with a leading '+' or '-'.  To avoid adding a plus
+                // on zero, we'd use "+#;-#;0", but we took care of the zero case above.
+                return adjValue.ToString("+0;-#");
             }
-            // This formats in decimal with a leading '+' or '-'.  To avoid adding a plus
-            // on zero, we'd use "+#;-#;0", but we took care of the zero case above.
-            return adjValue.ToString("+0;-#");
         }
 
         /// <summary>

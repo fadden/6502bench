@@ -19,11 +19,11 @@ start    clc
          lda   #<absh
          lda   #>absh
          lda   #<absh+64
-         lda   #>absh+256
+         lda   #>absh+$100
          lda   #<absl
          lda   #>absl
          lda   #<absl-64
-         lda   #>absl-256
+         lda   #>absl-$100
          lda   #<start
          lda   #>start
          lda   #^start
@@ -59,14 +59,14 @@ start    clc
          lda   #zip+64
          lda   #absl
          lda   #>absl
-         lda   #absl-4096
-         lda   #>absl-4096
+         lda   #absl-$1000
+         lda   #>absl-$1000
          lda   #^absl
          lda   #absh
          lda   #>absh
-         lda   #absh+4096
-         lda   #>absh+4096
-         lda   #^absh+65536
+         lda   #absh+$1000
+         lda   #>absh+$1000
+         lda   #^absh+$10000
          lda   #start
          lda   #>start
          lda   #^start
@@ -84,12 +84,12 @@ start    clc
          dw    zip
          dw    absl
          dw    >absl
-         dw    absl-4096
-         dw    >absl-4096
+         dw    absl-$1000
+         dw    >absl-$1000
          dw    absh
          dw    >absh
-         dw    absh+4096
-         dw    >absh+4096
+         dw    absh+$1000
+         dw    >absh+$1000
          dw    start
          dw    >start
          dw    ^start
@@ -110,9 +110,9 @@ start    clc
          adrl  >start
          adrl  ^start
 
-:skipdata lda  #^biggie-65536
-         mvn   #^biggie,#^biggie-1114112
-         mvp   #^start,#^start+1114112
+:skipdata lda  #^biggie-$10000
+         mvn   #^biggie,#^biggie-$110000
+         mvp   #^start,#^start+$110000
          mvn   #18,#1
          mvp   #%00000001,#%00010010
          per   :skipdata
@@ -189,12 +189,12 @@ start    clc
          asc   'he quick brown fox jumps over the lazy dogs.'
 
 :L118E   lda   #<thirty2+2
-         lda   #>thirty2+768
+         lda   #>thirty2+$300
          lda   #^thirty2
          rep   #$30
          mx    %00
          lda   #thirty2+3
-         lda   #>thirty2+1024
+         lda   #>thirty2+$400
          lda   #^thirty2
          rts
 
