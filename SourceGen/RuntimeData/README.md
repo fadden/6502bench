@@ -60,5 +60,7 @@ These are described in the "Advanced Topics" section of the manual
 
 ## Misc Files ##
 
-LegalStuff.txt, Logo.png, and AboutImage.png are displayed by SourceGen,
-on the start screen and the About box.
+ExportTemplate.html and SGStyle.css are used by SourceGen's HTML export
+feature.
+
+LegalStuff.txt is displayed in the About box.
