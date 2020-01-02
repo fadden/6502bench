@@ -387,10 +387,33 @@ namespace SourceGen {
                 (int)mMainWin.RightPanelWidth);
 
             // Vertical splitters.
-            AppSettings.Global.SetInt(AppSettings.MAIN_REFERENCES_HEIGHT,
-                (int)mMainWin.ReferencesPanelHeight);
-            AppSettings.Global.SetInt(AppSettings.MAIN_SYMBOLS_HEIGHT,
-                (int)mMainWin.SymbolsPanelHeight);
+            //AppSettings.Global.SetInt(AppSettings.MAIN_REFERENCES_HEIGHT,
+            //    (int)mMainWin.ReferencesPanelHeight);
+            //AppSettings.Global.SetInt(AppSettings.MAIN_SYMBOLS_HEIGHT,
+            //    (int)mMainWin.SymbolsPanelHeight);
+
+            // Something peculiar happens when we switch from the launch window to the
+            // code list: the refs/notes splitter and sym/info splitter shift down a pixel.
+            // Closing the project causes everything to shift back.  I'm not sure what's
+            // causing the layout to change.  I'm working around the issue by not saving the
+            // splitter positions if they've only moved 1 pixel.
+            // TODO: fix this properly
+            int refSetting = AppSettings.Global.GetInt(AppSettings.MAIN_REFERENCES_HEIGHT, -1);
+            if ((int)mMainWin.ReferencesPanelHeight == refSetting ||
+                    (int)mMainWin.ReferencesPanelHeight == refSetting - 1) {
+                Debug.WriteLine("NOT updating references height");
+            } else {
+                AppSettings.Global.SetInt(AppSettings.MAIN_REFERENCES_HEIGHT,
+                    (int)mMainWin.ReferencesPanelHeight);
+            }
+            int symSetting = AppSettings.Global.GetInt(AppSettings.MAIN_SYMBOLS_HEIGHT, -1);
+            if ((int)mMainWin.SymbolsPanelHeight == symSetting ||
+                    (int)mMainWin.SymbolsPanelHeight == symSetting - 1) {
+                Debug.WriteLine("NOT updating symbols height");
+            } else {
+                AppSettings.Global.SetInt(AppSettings.MAIN_SYMBOLS_HEIGHT,
+                    (int)mMainWin.SymbolsPanelHeight);
+            }
 
             mMainWin.CaptureColumnWidths();
 
