@@ -3,7 +3,7 @@ L10F0    sec              ;2
          xce              ;2
          bra   :L1108     ;4  crosses page boundary
 
-         ds    20,$00
+         ds    20
 
 :L1108   bra   :L110A     ;3
 

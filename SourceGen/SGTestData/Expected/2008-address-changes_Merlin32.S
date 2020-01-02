@@ -63,9 +63,9 @@ L2000    bit   L2000
          org   $2800
          dfb   $00
          dfb   $28
-         ds    14,$00
+         ds    14
          org   $2820
-         ds    18,$00
+         ds    18
 
          org   $3000
 :L3000   bit   :L3000

@@ -24,9 +24,9 @@
          dfb   $00
          dfb   $00
          dfb   $81
-         ds    5,$00
+         ds    5
          dfb   $81
-         ds    8,$00
-L10AC    ds    8,$00
+         ds    8
+L10AC    ds    8
          ds    8,$82
 L10BC    ds    8,$82

@@ -17,7 +17,7 @@ load11   lda   #$11
          dw    :L1042
          dw    :L1041
          dw    :L1042+1
-:fill0   ds    16,$00
+:fill0   ds    16
 :L1041   dfb   $80
 
 :L1042   lda   :predat+2

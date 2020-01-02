@@ -264,7 +264,11 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.Fill:
                     opcodeStr = sDataOpNames.Fill;
-                    operandStr = length + "," + formatter.FormatHexValue(data[offset], 2);
+                    if (data[offset] == 0) {
+                        operandStr = length.ToString();
+                    } else {
+                        operandStr = length + "," + formatter.FormatHexValue(data[offset], 2);
+                    }
                     break;
                 case FormatDescriptor.Type.Dense:
                     multiLine = true;
@@ -278,9 +282,17 @@ namespace SourceGen.AsmGen {
                         if (dfd.FormatSubType == FormatDescriptor.SubType.Align256 &&
                                 GenCommon.CheckJunkAlign(offset, dfd, Project.AddrMap)) {
                             // special syntax for page alignment
-                            operandStr = "\\," + formatter.FormatHexValue(fillVal, 2);
+                            if (fillVal == 0) {
+                                operandStr = "\\";
+                            } else {
+                                operandStr = "\\," + formatter.FormatHexValue(fillVal, 2);
+                            }
                         } else {
-                            operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
+                            if (fillVal == 0) {
+                                operandStr = length.ToString();
+                            } else {
+                                operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
+                            }
                         }
                     } else {
                         // treat same as Dense

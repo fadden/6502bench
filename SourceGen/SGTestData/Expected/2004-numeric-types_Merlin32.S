@@ -29,15 +29,15 @@
          ddb   $1122
          dfb   $11,$22,$33
          dfb   $11,$22,$33,$44
-         ds    2,$00
+         ds    2
          dfb   $80
-         ds    3,$00
+         ds    3
          dfb   $80
-         ds    4,$00
+         ds    4
          dfb   $80
-         ds    5,$00
+         ds    5
          dfb   $80
-         ds    256,$00
+         ds    256
          dfb   $80
          ds    257,$cc
          hex   11
@@ -49,7 +49,7 @@ LABEL    hex   00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff 
          dfb   $80
          ds    \,$aa
          dfb   $81
-         ds    63,$00
+         ds    63
          dfb   $81
          ds    31,$ab
          hex   0000000000000001
@@ -57,7 +57,7 @@ LABEL    hex   00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff 
          hex   1000000000000000
          dfb   $81
          ds    2,$dd      ;incorrect alignment
-         ds    \,$00
+         ds    \
          ds    16,$82
          ds    8,$83
          org   $1428
