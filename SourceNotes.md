@@ -11,18 +11,10 @@ letter.
 The code style is closer to what Android uses than "standard" C#.  Lines
 are folded to fit 100 columns.
 
-The source code is licensed under Apache 2.0
-(http://www.apache.org/licenses/LICENSE-2.0), which makes it free for use in
-both open-source programs and closed-source commercial software.  The license
-terms are similar to BSD or MIT, but with some additional constraints on
-patent licensing.  (This is the same license Google uses for the Android
-Open Source Project.)
-
-Images are licensed under Creative Commons ShareAlike 4.0 International
-(https://creativecommons.org/licenses/by-sa/4.0/).
-
 
 ## SourceGen Points of Interest ##
+
+Places to start...
 
 The main window UI is in WpfGui/MainWindow.xaml[.cs].  Much of the
 implementation lives in MainController.cs.
@@ -35,3 +27,9 @@ Source code generation and assembler execution is routed through
 AsmGen/AssemblerInfo.cs.  If you want to add support for a new
 cross-assembler, start by adding new entries to the enum and data
 tables there.
+
+Nothing system-specific is baked into the main application.  The
+SourceGen/RuntimeData directory has the system definitions for the
+"new project" list, and subdirectories with symbol files and extension
+scripts.  The [README file there](SourceGen/RuntimeData/README.md)
+explains a bit more.

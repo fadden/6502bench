@@ -143,4 +143,14 @@ display it.
 
 ## About the Code ##
 
-See the [source code notes](SourceNotes.md).
+The source code is licensed under Apache 2.0
+(http://www.apache.org/licenses/LICENSE-2.0), which makes it free for use in
+both open-source programs and closed-source commercial software.  The license
+terms are similar to BSD or MIT, but with some additional constraints on
+patent licensing.  (This is the same license Google uses for the Android
+Open Source Project.)
+
+Images are licensed under Creative Commons ShareAlike 4.0 International
+(https://creativecommons.org/licenses/by-sa/4.0/).
+
+For additional details, see the [source code notes](SourceNotes.md).
