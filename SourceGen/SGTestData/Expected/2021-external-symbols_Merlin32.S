@@ -14,8 +14,8 @@ ChkProj2 equ   $2204
 ProjSym2 equ   $220a
 Over1    equ   $3000      ;$3000-300f, inclusive
 Over2    equ   $3002      ;$3002-3009
-Over2a   equ   $3006      ;$3006
 Over3    equ   $3006      ;$3006-300c
+Over2a   equ   $3006      ;$3006
 SepOver1 equ   $3100      ;$3100-3103, inclusive
 SepOver2 equ   $3102      ;$3102-3105, inclusive
 ReadOnly equ   $5000      ;R
