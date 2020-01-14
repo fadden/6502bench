@@ -141,5 +141,9 @@ namespace SourceGen {
         IEnumerator<Xref> IEnumerable<Xref>.GetEnumerator() {
             return ((IEnumerable<Xref>)mRefs).GetEnumerator();
         }
+
+        public override string ToString() {
+            return "[XrefSet count=" + Count + "]";
+        }
     }
 }

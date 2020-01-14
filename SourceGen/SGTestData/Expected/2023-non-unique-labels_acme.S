@@ -93,10 +93,10 @@ LDAL    !byte   $af
         !byte   $00
         nop
         !zone   Z00009a
-.plain_1 =      $11
+.plain_DUP1 =   $11
 ._under1 =      $12
 .__dub1 =       $13
-        lda     .plain_1
+        lda     .plain_DUP1
         lda     ._under1
         lda     .__dub1
 @plain  lda     @plain
@@ -106,10 +106,10 @@ global8 dex
 X_under1 lda    X_under1
 @X__dub1 lda    @X__dub1
         !zone   Z0000af
-.plain_1 =      $11
+.plain_DUP1 =   $11
 .__dub1 =       $13
 ._under1 =      $22
-        lda     .plain_1
+        lda     .plain_DUP1
         lda     ._under1
         rts
 

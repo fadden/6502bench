@@ -92,11 +92,11 @@ LDAL    .byte   $af
         .byte   $10
         .byte   $00
         nop
-plain_1 .var    $11
-X_under1_1 .var $12
+plain_DUP1 .var $11
+X_under1_DUP1 .var $12
 X__dub1 .var    $13
-        lda     plain_1
-        lda     X_under1_1
+        lda     plain_DUP1
+        lda     X_under1_DUP1
         lda     X__dub1
 _plain  lda     _plain
 plain   lda     plain
@@ -104,8 +104,8 @@ global8 dex
         bne     plain
 X_under1 lda    X_under1
 _X__dub1 lda    _X__dub1
-X_under1_1 .var $22
-        lda     plain_1
-        lda     X_under1_1
+X_under1_DUP1 .var $22
+        lda     plain_DUP1
+        lda     X_under1_DUP1
         rts
 

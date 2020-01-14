@@ -1397,13 +1397,13 @@ namespace SourceGen {
                 return FormattedParts.CreateLongComment("BAD INDEX +" + offset.ToString("x6") +
                     " sub=" + subLineIndex);
             } else {
-                // We use the entry directly from the LvTable, without LvLookup processing.
-                // This is good, because the entries in the display list match what the editor
-                // shows, but not quite right, because labels that are duplicates of
-                // non-variables (which ideally wouldn't happen) won't show their de-duplicated
-                // form.  I think this is fine.
-                DefSymbol defSym = lvt[subLineIndex];
-                // Use an operand length of 1 so things are shown as concisely as possible.
+                // Getting the symbol directly from the LvTable yields the original form,
+                // but we want the de-dup form.
+                //DefSymbol defSym = lvt[subLineIndex];
+                List<DefSymbol> lvars = mLvLookup.GetVariablesDefinedAtOffset(offset);
+                DefSymbol defSym = lvars[subLineIndex];
+
+                // Use an operand length of 1 so the value is shown as concisely as possible.
                 string addrStr = PseudoOp.FormatNumericOperand(mFormatter, mProject.SymbolTable,
                     null, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.None);
@@ -1433,7 +1433,10 @@ namespace SourceGen {
                 return null;
             }
 
-            return lvt[tableIndex];
+            // Go through LvLookup to get de-dup form of labels.
+            //return lvt[tableIndex];
+            List<DefSymbol> lvars = mLvLookup.GetVariablesDefinedAtOffset(offset);
+            return lvars[tableIndex];
         }
 
         private FormattedParts[] GenerateStringLines(int offset, string popcode,

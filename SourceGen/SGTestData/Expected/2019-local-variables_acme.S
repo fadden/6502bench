@@ -31,8 +31,8 @@ PROJ_ONE =      $01        ;project addr
 .VAR_ZERO =     $00
 .VAR_TWO =      $02
 .VAR_THREE =    $03
-.PROJ_ZERO_1 =  $10        ;clash with project symbol
-.DPCODE_1 =     $80        ;clash with user label
+.PROJ_ZERO_DUP1 = $10      ;clash with project symbol
+.DPCODE_DUP1 =  $80        ;clash with user label
 .CONST_ZERO_VAR = $f0
         lda     .VAR_ZERO
         lda     .VAR_ZERO+1
@@ -41,12 +41,12 @@ PROJ_ONE =      $01        ;project addr
 .VAR_ZERO =     $00
 .VAR_TWO =      $02
 .VAR_THREE =    $03
-.PROJ_ZERO_1 =  $10        ;clash with project symbol
-.DPCODE_1 =     $80        ;clash with user label
+.PROJ_ZERO_DUP1 = $10      ;clash with project symbol
+.DPCODE_DUP1 =  $80        ;clash with user label
 .CONST_ZERO_VAR = $f0
         lda     .VAR_THREE
         lda     $04
-        lda     .PROJ_ZERO_1
+        lda     .PROJ_ZERO_DUP1
         lda     $11
         lda+1   DPCODE
         !zone   Z00002c

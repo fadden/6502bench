@@ -62,6 +62,10 @@ namespace SourceGen {
         /// <summary>
         /// List of variables, sorted by label.
         /// </summary>
+        /// <remarks>
+        /// This is the original form of the label.  De-duplication and uniquification have
+        /// not been applied.
+        /// </remarks>
         private SortedList<string, DefSymbol> mVarByLabel;
 
         /// <summary>

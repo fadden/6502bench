@@ -91,10 +91,10 @@ LDAL     dfb   $af
          dfb   $10
          dfb   $00
          nop
-]plain_1 equ   $11
+]plain_DUP1 equ $11
 ]_under1 equ   $12
 ]__dub1  equ   $13
-         lda   ]plain_1
+         lda   ]plain_DUP1
          lda   ]_under1
          lda   ]__dub1
 :plain   lda   :plain
@@ -104,7 +104,7 @@ global8  dex
 X_under1 lda   X_under1
 :X__dub1 lda   :X__dub1
 ]_under1 equ   $22
-         lda   ]plain_1
+         lda   ]plain_DUP1
          lda   ]_under1
          rts
 

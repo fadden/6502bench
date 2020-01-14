@@ -23,14 +23,14 @@ PROJ_ONE equ   $01        ;project addr
          sta   $f1,S
          eor   0
          ora   240,S
-]PROJ_ZERO_1 equ $10      ;clash with project symbol
-]DPCODE_1 equ  $80        ;clash with user label
+]PROJ_ZERO_DUP1 equ $10   ;clash with project symbol
+]DPCODE_DUP1 equ $80      ;clash with user label
          lda   ]VAR_ZERO
          lda   ]VAR_ZERO+1
          lda   ]VAR_TWO
          lda   ]VAR_THREE
          lda   $04
-         lda   ]PROJ_ZERO_1
+         lda   ]PROJ_ZERO_DUP1
          lda   $11
          lda   DPCODE
          ldx   PROJ_ZERO

@@ -30,6 +30,22 @@ namespace SourceGen {
     ///       The symbol table is latched when the object is constructed.
     ///   (2) If the assembler doesn't define a way to re-use variable names, we make them
     ///       globally unique.  [currently not needed]
+    ///
+    /// De-duplication changes the label in *most* circumstances.  We want to show the de-dup
+    /// form everywhere except for the LvTable editor and the Lv editor.  Using the correct
+    /// string at the correct time is necessary for some basic editor operations:
+    ///  - Double-click on the opcode of LDA [lvar].  The selection should jump to the specific
+    ///    entry in the LvTable.
+    ///  - Double-click on the operand of LDA [lvar].  The instruction operand editor should
+    ///    open and offer to edit the de-dup form.  Clicking on the shortcut button should open
+    ///    the Lv editor, with the original label shown (and perhaps a warning about
+    ///    non-uniqueness).
+    ///  - Double-click on the LvTable.  The table listing should show the original label.
+    ///  - Click on a de-duped entry and verify that the correct cross-references exist.
+    ///
+    /// To reduce confusion, the fact that something has been de-duped should be obvious.
+    ///
+    /// A few quick clicks in the 2019-local-variables test should confirm these.
     /// </remarks>
     public class LocalVariableLookup {
         /// <summary>
@@ -60,6 +76,8 @@ namespace SourceGen {
         /// through the label map.
         /// </summary>
         private Dictionary<string, Symbol> mAllNvSymbols;
+
+        private Dictionary<string, string> mLabelMap;
 
         /// <summary>
         /// Label uniquification helper.
@@ -145,7 +163,6 @@ namespace SourceGen {
         private int mNextLvtIndex;
         private int mNextLvtOffset;
 
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -161,6 +178,7 @@ namespace SourceGen {
                 bool maskLeadingUnderscores, bool uniquify) {
             mLvTables = lvTables;
             mProject = project;
+            mLabelMap = labelMap;
             mMaskLeadingUnderscores = maskLeadingUnderscores;
             mDoUniquify = uniquify;
 
@@ -169,11 +187,31 @@ namespace SourceGen {
             if (uniquify) {
                 mUniqueLabels = new Dictionary<string, UniqueLabel>();
             }
-            CreateAllSymbolsDict(labelMap);
             Reset();
         }
 
-        private void CreateAllSymbolsDict(Dictionary<string, string> labelMap) {
+        public void Reset(bool rebuildSyms = true) {
+            mRecentOffset = -1;
+            mRecentSymbols = null;
+            mCurrentTable.Clear();
+            mUniqueLabels?.Clear();
+            mDupRemap.Clear();
+            if (mLvTables.Count == 0) {
+                mNextLvtIndex = -1;
+                mNextLvtOffset = mProject.FileDataLength;
+            } else {
+                mNextLvtIndex = 0;
+                mNextLvtOffset = mLvTables.Keys[0];
+            }
+            CreateAllSymbolsDict();
+        }
+
+        private void CreateAllSymbolsDict() {
+            // TODO(someday): we don't need to regenerate the all-symbols list if the list
+            // of symbols hasn't actually changed.  Currently no way to tell.
+
+            Dictionary<string, string> labelMap = mLabelMap;
+
             SymbolTable symTab = mProject.SymbolTable;
             mAllNvSymbols = new Dictionary<string, Symbol>(symTab.Count);
             foreach (Symbol sym in symTab) {
@@ -189,21 +227,6 @@ namespace SourceGen {
                 } else {
                     mAllNvSymbols[sym.Label] = sym;
                 }
-            }
-        }
-
-        public void Reset() {
-            mRecentOffset = -1;
-            mRecentSymbols = null;
-            mCurrentTable.Clear();
-            mUniqueLabels?.Clear();
-            mDupRemap.Clear();
-            if (mLvTables.Count == 0) {
-                mNextLvtIndex = -1;
-                mNextLvtOffset = mProject.FileDataLength;
-            } else {
-                mNextLvtIndex = 0;
-                mNextLvtOffset = mLvTables.Keys[0];
             }
         }
 
@@ -262,10 +285,15 @@ namespace SourceGen {
         /// <param name="symRef">Reference to symbol.</param>
         /// <returns>Table index, or -1 if not found.</returns>
         public int GetDefiningTableOffset(int offset, WeakSymbolRef symRef) {
-            // symRef is the non-uniquified, non-de-duplicated symbol that was generated
-            // during the analysis pass.  This matches the contents of the tables, so we don't
-            // need to transform it at all.
-            //
+            // Get mDupRemap et. al. into the right state.
+            AdvanceToOffset(offset);
+
+            // symRef is the non-uniquified, de-duplicated symbol that was generated
+            // during the analysis pass.  We either need to un-de-duplicate the label,
+            // or de-duplicate what we pull out of the Lv tables.  The former requires
+            // a linear string search but will be faster if there are a lot of tables.
+            string label = UnDeDuplicate(symRef.Label);
+
             // Walk backward through the list of tables until we find a match.
             IList<int> keys = mLvTables.Keys;
             for (int i = keys.Count - 1; i >= 0; i--) {
@@ -274,15 +302,42 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (mLvTables.Values[i].GetByLabel(symRef.Label) != null) {
+                if (mLvTables.Values[i].GetByLabel(label) != null) {
                     // found it
                     return keys[i];
                 }
             }
 
             // if we didn't find it, it doesn't exist... right?
-            Debug.Assert(mCurrentTable.GetByLabel(symRef.Label) == null);
+            Debug.Assert(mCurrentTable.GetByLabel(label) == null);
             return -1;
+        }
+
+        private string UnDeDuplicate(string label) {
+            foreach (KeyValuePair<string, string> kvp in mDupRemap) {
+                if (kvp.Value == label) {
+                    return kvp.Key;
+                }
+            }
+            return label;
+        }
+
+        /// <summary>
+        /// Restores a de-duplicated symbol to original form.
+        /// </summary>
+        /// <remarks>
+        /// Another kluge on the de-duplication system.  This is used by the instruction
+        /// operand editor's "edit variable" shortcut mechanism, because trying to edit the
+        /// DefSymbol with the de-duplicated name ends badly.
+        /// </remarks>
+        /// <param name="sym">Symbol to un-de-duplicate.</param>
+        /// <returns>Original or un-de-duplicated symbol.</returns>
+        public DefSymbol GetOriginalForm(DefSymbol sym) {
+            string orig = UnDeDuplicate(sym.Label);
+            if (orig == sym.Label) {
+                return sym;
+            }
+            return new DefSymbol(sym, orig);
         }
 
         /// <summary>
@@ -355,7 +410,7 @@ namespace SourceGen {
             }
             if (targetOffset < mRecentOffset) {
                 // We went backwards.
-                Reset();
+                Reset(false);
             }
             while (mNextLvtOffset <= targetOffset) {
                 if (!mProject.GetAnattrib(mNextLvtOffset).IsStart) {
@@ -392,7 +447,7 @@ namespace SourceGen {
                         if (mAllNvSymbols.TryGetValue(newLabel, out Symbol unused)) {
                             Debug.WriteLine("Detected duplicate non-var label " + newLabel +
                                 " at +" + mNextLvtOffset.ToString("x6"));
-                            newLabel = DeDupLabel(newLabel);
+                            newLabel = GenerateDeDupLabel(newLabel);
                         }
 
                         if (newLabel != defSym.Label) {
@@ -432,12 +487,17 @@ namespace SourceGen {
         /// <summary>
         /// Generates a unique label for the duplicate remap table.
         /// </summary>
-        private string DeDupLabel(string baseLabel) {
+        /// <remarks>
+        /// We need to worry about clashes with the main symbol table, but we don't have to
+        /// worry about other entries in the remap table because we know their baseLabels
+        /// are different.
+        /// </remarks>
+        private string GenerateDeDupLabel(string baseLabel) {
             string testLabel;
             int counter = 0;
             do {
                 counter++;
-                testLabel = baseLabel + "_" + counter;
+                testLabel = baseLabel + "_DUP" + counter;
             } while (mAllNvSymbols.TryGetValue(testLabel, out Symbol unused));
             return testLabel;
         }

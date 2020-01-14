@@ -1151,13 +1151,14 @@ namespace SourceGen.WpfGui {
             } else {
                 // Found a table.  Do we have a matching symbol?
                 ShowLvCreateEditButton = true;
-                mEditedLocalVar = lvLookup.GetSymbol(mOffset, mOperandValue,
+                DefSymbol existingVar = lvLookup.GetSymbol(mOffset, mOperandValue,
                     mOpDef.IsDirectPageInstruction ?
                         Symbol.Type.ExternalAddr : Symbol.Type.Constant);
-                if (mEditedLocalVar == null) {
+                if (existingVar == null) {
                     ShowLvNoMatchFound = true;
                     CreateEditLocalVariableText = CREATE_LOCAL_VARIABLE;
                 } else {
+                    mEditedLocalVar = lvLookup.GetOriginalForm(existingVar);
                     ShowLvMatchFound = true;
                     CreateEditLocalVariableText = EDIT_LOCAL_VARIABLE;
                     LocalVariableLabel = mEditedLocalVar.Label;

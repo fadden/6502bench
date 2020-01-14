@@ -294,6 +294,10 @@ namespace SourceGen {
         /// <remarks>
         /// This can't be a simple Rename() function that uses a copy constructor because
         /// the label is in the base class.
+        ///
+        /// The Xrefs reference points to the actual XrefSet in the original.  This is not
+        /// ideal, but it's the easiest way to keep xrefs working across Lv de-duplication
+        /// (you actually *want* xrefs added to copies to be held by the original).
         /// </remarks>
         /// <param name="defSym">Source DefSymbol.</param>
         /// <param name="label">Label to use.</param>
@@ -302,7 +306,10 @@ namespace SourceGen {
                   defSym.LabelAnno, defSym.DataDescriptor.FormatSubType,
                   defSym.DataDescriptor.Length, defSym.HasWidth, defSym.Comment,
                   defSym.Direction, defSym.MultiMask, defSym.Tag)
-            { }
+        {
+            Debug.Assert(SymbolSource == Source.Variable);
+            Xrefs = defSym.Xrefs;
+        }
 
         /// <summary>
         /// Determines whether a symbol overlaps with a region.  Useful for variables.

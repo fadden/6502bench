@@ -93,10 +93,10 @@ LDAL:    .byte   $af
          .byte   $10
          .byte   $00
          nop
-plain_1  .set    $11
+plain_DUP1 .set  $11
 _under1  .set    $12
 __dub1   .set    $13
-         lda     plain_1
+         lda     plain_DUP1
          lda     _under1
          lda     __dub1
 @plain:  lda     @plain
@@ -106,7 +106,7 @@ global8: dex
 X_under1: lda    X_under1
 @X__dub1: lda    @X__dub1
 _under1  .set    $22
-         lda     plain_1
+         lda     plain_DUP1
          lda     _under1
          rts
 
