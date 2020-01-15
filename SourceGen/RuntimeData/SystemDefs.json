@@ -137,7 +137,7 @@
         "RT:Atari/2600.sym65"
       ],
       "ExtensionScripts" : [
-        "RT:Atari/VisAtari2600.cs"
+        "RT:Atari/Vis2600.cs"
       ],
       "Parameters" : {
         "load-address":"0xf000"

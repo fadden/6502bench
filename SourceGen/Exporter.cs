@@ -602,8 +602,15 @@ namespace SourceGen {
                         line.LineType == LineListGen.Line.Type.Data ||
                         line.LineType == LineListGen.Line.Type.EquDirective) &&
                     !string.IsNullOrEmpty(parts.Label)) {
-                anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + parts.Label +
-                    "\">" + parts.Label + "</a>";
+                if (parts.Label.StartsWith(mFormatter.NonUniqueLabelPrefix)) {
+                    // TODO(someday): handle non-unique labels.  ':' is valid in HTML anchors,
+                    // so we can use that to distinguish them from other labels, but we still
+                    // need to ensure that the label is unique and all references point to the
+                    // correct instance.  We can't get that from the Parts list.
+                } else {
+                    anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + parts.Label +
+                        "\">" + parts.Label + "</a>";
+                }
             }
 
             // If needed, create an HTML link for the operand field.
