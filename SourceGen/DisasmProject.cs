@@ -1442,6 +1442,12 @@ namespace SourceGen {
                     (sym as DefSymbol).Xrefs.Clear();
                 }
             }
+            // TODO: seriously, put the XrefSet ref somewhere else
+            foreach (LocalVariableTable lvt in LvTables.Values) {
+                for (int i = 0; i < lvt.Count; i++) {
+                    lvt[i].Xrefs.Clear();
+                }
+            }
 
             // Create a mapping from label (which must be unique) to file offset.  This
             // is different from UserLabels (which only has user-created labels, and is
@@ -1594,7 +1600,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Adds an Xref entry to an XrefSet.  The XrefSet will be created if necessary.
+        /// Adds an Xref entry to an XrefSet in mXrefs.  The XrefSet will be created if necessary.
         /// </summary>
         /// <param name="offset">File offset for which cross-references are being noted.</param>
         /// <param name="xref">Cross reference to add to the set.</param>
