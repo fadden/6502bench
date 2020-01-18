@@ -439,12 +439,13 @@ namespace SourceGen.AsmGen {
         /// <param name="offset">File offset of directive.</param>
         /// <param name="dfd">Format descriptor.</param>
         /// <param name="addrMap">Offset to address map.</param>
-        /// <returns>True if the .junk alignment directive is correct.</returns>
+        /// <returns>True if the .junk alignment directive is correct, false if it's
+        ///   incorrect or not an alignment sub-type (e.g. None).</returns>
         public static bool CheckJunkAlign(int offset, FormatDescriptor dfd,
                 CommonUtil.AddressMap addrMap) {
             Debug.Assert(dfd.FormatType == FormatDescriptor.Type.Junk);
             if (dfd.FormatSubType == FormatDescriptor.SubType.None) {
-                return true;
+                return false;
             }
             Debug.Assert(dfd.IsAlignedJunk);
 
