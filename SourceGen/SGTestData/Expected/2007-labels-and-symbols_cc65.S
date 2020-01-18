@@ -1,6 +1,7 @@
 ;Project was edited to add a label in the middle of a dense hex region, and add
 ;a duplicate label.
          .setcpu "65816"
+BMI1     =       $30        ;opcode mnemonic
 zip      =       $cd
 absl     =       $1029
 absh     =       $feed
@@ -201,7 +202,7 @@ start:   clc
 @L118E:  lda     #<thirty2+2
          lda     #>thirty2+3
          lda     #^thirty2
-         rep     #$30
+         rep     #BMI1
          .a16
          .i16
          lda     #thirty2 & $ffff +3

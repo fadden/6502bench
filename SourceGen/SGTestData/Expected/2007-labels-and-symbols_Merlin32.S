@@ -1,5 +1,6 @@
 ;Project was edited to add a label in the middle of a dense hex region, and add
 ;a duplicate label.
+BMI      equ   $30        ;opcode mnemonic
 zip      equ   $cd
 absl     equ   $1029
 absh     equ   $feed
@@ -191,7 +192,7 @@ start    clc
 :L118E   lda   #<thirty2+2
          lda   #>thirty2+$300
          lda   #^thirty2
-         rep   #$30
+         rep   #BMI
          mx    %00
          lda   #thirty2+3
          lda   #>thirty2+$400

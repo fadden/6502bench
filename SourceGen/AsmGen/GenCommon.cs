@@ -159,7 +159,8 @@ namespace SourceGen.AsmGen {
                 string valueStr = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                     gen.Localizer.LabelMap, defSym.DataDescriptor, defSym.Value, 1,
                     PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
-                gen.OutputEquDirective(defSym.Label, valueStr, defSym.Comment);
+                string labelStr = gen.Localizer.ConvLabel(defSym.Label);
+                gen.OutputEquDirective(labelStr, valueStr, defSym.Comment);
 
                 prevConst = defSym.IsConstant;
             }

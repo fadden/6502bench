@@ -3,6 +3,7 @@
         .cpu    "65816"
         .enc    sg_ascii
         .cdef   $20,$7e,$20
+BMI1    =       $30        ;opcode mnemonic
 zip     =       $cd
 absl    =       $1029
 absh    =       $feed
@@ -201,7 +202,7 @@ _string .text   "This is a long string. Put a label and comment on it to confir"
 _L118E  lda     #<thirty2+2
         lda     #(>thirty2)+3
         lda     #`thirty2
-        rep     #$30
+        rep     #BMI1
         .al
         .xl
         lda     #(thirty2 & $ffff)+3

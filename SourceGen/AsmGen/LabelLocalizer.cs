@@ -293,6 +293,17 @@ namespace SourceGen.AsmGen {
                 allGlobalLabels.Add(newLabel, newLabel);
             }
 
+            // Remap any project/platform symbols that clash with opcode mnemonics.
+            foreach (DefSymbol defSym in mProject.ActiveDefSymbolList) {
+                if (opNames != null && opNames.ContainsKey(defSym.Label.ToUpperInvariant())) {
+                    // Clashed with mnemonic.  Uniquify it.
+                    Debug.WriteLine("Renaming clashing def sym: " + defSym.Label);
+                    string newLabel = MakeUnique(defSym.Label, allGlobalLabels);
+                    LabelMap[defSym.Label] = newLabel;
+                    allGlobalLabels.Add(newLabel, newLabel);
+                }
+            }
+
             //
             // Step 4: remap local labels.  There are two operations here.
             //
