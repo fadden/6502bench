@@ -10,11 +10,15 @@
 MON_WNDLEFT     @ $20       ;left column of scroll window
 MON_WNDWDTH     @ $21       ;width of scroll window
 MON_WNDTOP      @ $22       ;top of scroll window
-MON_WNDBTM      @ $23       ;bottom of scsroll window
+MON_WNDBTM      @ $23       ;bottom of scroll window
 MON_CH          @ $24       ;cursor horizontal displacement
 MON_CV          @ $25       ;cursor vertical displacement
 MON_GBASL       @ $26       ;base address for lo-res drawing (lo)
 MON_GBASH       @ $27       ;base address for lo-res drawing (hi)
+MON_BASL        @ $28       ;base address for text output (lo)
+MON_BASH        @ $29       ;base address for text output (hi)
+;MON_BAS2L       @ $2A       ;used when scrolling text
+;MON_BAS2H       @ $2B       ;used when scrolling text
 MON_H2          @ $2C       ;right end of horizontal line drawn by HLINE
 MON_V2          @ $2D       ;bottom of vertical line drawn by VLINE
 MON_COLOR       @ $30       ;lo-res graphics color

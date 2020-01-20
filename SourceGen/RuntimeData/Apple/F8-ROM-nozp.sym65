@@ -20,6 +20,10 @@ MON_CH          @ erase
 MON_CV          @ erase
 MON_GBASL       @ erase
 MON_GBASH       @ erase
+MON_BASL        @ erase
+MON_BASH        @ erase
+;MON_BAS2L       @ erase
+;MON_BAS2H       @ erase
 MON_H2          @ erase
 MON_V2          @ erase
 MON_COLOR       @ erase

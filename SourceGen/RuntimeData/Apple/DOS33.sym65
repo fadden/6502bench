@@ -11,6 +11,7 @@ DOS_FM          @ $03d6     ;DOS file manager entry point
 DOS_RWTS        @ $03d9     ;RWTS entry point
 DOS_LOCFPL      @ $03dc     ;loads Y/A with address of FM param list
 DOS_LOCRPL      @ $03e3     ;loads Y/A with address of RWTS IOB
+DOS_CHARIO      @ $03ea     ;jumps to routine that connects DOS KSW/CSW
 
 ; I/O scratchpad RAM addresses
 ; See Apple II Reference Manual table 26 (page 83)
