@@ -259,6 +259,10 @@ namespace PluginCommon {
         /// </summary>
         public VisParamDescr(string uiLabel, string name, Type csType, object min, object max,
                 SpecialMode special, object defVal) {
+            if (defVal.GetType() != csType) {
+                throw new ArgumentException("Mismatch between type and default value in \"" +
+                    name + "\"");
+            }
             UiLabel = uiLabel;
             Name = name;
             CsType = csType;

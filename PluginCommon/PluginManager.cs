@@ -86,9 +86,10 @@ namespace PluginCommon {
         /// <param name="dllPath">Full path to compiled assembly.</param>
         /// <param name="scriptIdent">Identifier to use in e.g. GetPlugin().</param>
         /// <returns>Reference to plugin instance.</returns>
-        public IPlugin LoadPlugin(string dllPath, string scriptIdent) {
+        public IPlugin LoadPlugin(string dllPath, string scriptIdent, out string failMsg) {
             if (mActivePlugins.TryGetValue(dllPath, out IPlugin ip)) {
                 Debug.WriteLine("PM: returning cached plugin for " + dllPath);
+                failMsg = string.Empty;
                 return ip;
             }
 
@@ -100,9 +101,22 @@ namespace PluginCommon {
                     type.GetInterfaces().Contains(typeof(IPlugin))) {
 
                     ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
-                    IPlugin iplugin = (IPlugin)ctor.Invoke(null);
+                    IPlugin iplugin;
+                    try {
+                        iplugin = (IPlugin)ctor.Invoke(null);
+                    } catch (Exception ex) {
+                        if (ex.InnerException != null) {
+                            failMsg = ex.InnerException.Message;
+                        } else {
+                            failMsg = ex.Message;
+                        }
+                        Debug.WriteLine("LoadPlugin: failed to load '" + scriptIdent + "': "
+                            + failMsg);
+                        return null;
+                    }
                     Debug.WriteLine("PM created instance: " + iplugin);
                     mActivePlugins.Add(scriptIdent, iplugin);
+                    failMsg = string.Empty;
                     return iplugin;
                 }
             }

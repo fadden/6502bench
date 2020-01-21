@@ -118,7 +118,11 @@ namespace SourceGen.Sandbox {
                 report = new FileLoadReport(dllPath);       // empty report
                 return true;
             } else {
-                IPlugin plugin = DomainMgr.PluginMgr.LoadPlugin(dllPath, scriptIdent);
+                IPlugin plugin = DomainMgr.PluginMgr.LoadPlugin(dllPath, scriptIdent,
+                    out string failMsg);
+                if (plugin == null) {
+                    report.Add(FileLoadItem.Type.Error, "Failed loading plugin: " + failMsg);
+                }
                 return plugin != null;
             }
         }
