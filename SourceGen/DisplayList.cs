@@ -305,11 +305,13 @@ namespace SourceGen {
                 " new=" + newCount + " (mList.Count=" + mList.Count + ")");
 
             Debug.Assert(startIndex >= 0 && startIndex < mList.Count);
-            Debug.Assert(oldCount > 0 && startIndex + oldCount <= mList.Count);
+            Debug.Assert(oldCount >= 0 && startIndex + oldCount <= mList.Count);
             Debug.Assert(newCount >= 0);
 
             // Remove the old elements to clear them.
-            mList.RemoveRange(startIndex, oldCount);
+            if (oldCount != 0) {
+                mList.RemoveRange(startIndex, oldCount);
+            }
             // Replace with the appropriate number of null entries.
             for (int i = 0; i < newCount; i++) {
                 mList.Insert(startIndex, null);
