@@ -16,3 +16,25 @@ DOS_CHARIO      @ $03ea     ;jumps to routine that connects DOS KSW/CSW
 ; I/O scratchpad RAM addresses
 ; See Apple II Reference Manual table 26 (page 83)
 DOS_BOOT_SLOT   @ $05f8     ;disk controller boot slot
+
+DOS_FILE_LENGTH @ $aa60 2   ;range length for LOAD and BLOAD
+DOS_FILE_ADDRESS @ $aa72 2  ;address of last file loaded
+
+RWTS_ENTRY      @ $b7b5     ;disable interrupts and call RWTS
+
+RWTS_PARAM_BLOCK @ $b7e8    ;RWTS parameter block
+RWTS_TABLE_TYPE @ $b7e8     ;table type, must be $01
+RWTS_SLOT_NUM   @ $b7e9     ;slot number times 16
+RWTS_DRIVE_NUM  @ $b7ea     ;drive number (1 or 2)
+RWTS_VOL_EXP    @ $b7eb     ;volume number expected (0 matches all)
+RWTS_TRACK_NUM  @ $b7ec     ;track number (0 - 34)
+RWTS_SECTOR_NUM @ $b7ed     ;sector number (0-15)
+RWTS_DCT        @ $b7ee 2   ;pointer to Device Characteristics Table
+RWTS_BUF        @ $b7f0 2   ;pointer to data buffer for READ/WRITE
+RWTS_PARTIAL_COUNT @ $b7f3  ;byte count for partial sector
+RWTS_CMD_CODE   @ $b7f4     ;0=seek, 1=read, 2=write, 4=format
+RWTS_ERR_CODE   @ $b7f5     ;err code (when carry set)
+; $10=write protected, $20=volume mismatch, $40=drive error, $08=INIT error
+RWTS_VOL_FOUND  @ $b7f6     ;volume number found
+RWTS_SLOT_FOUND @ $b7f7     ;slot number found
+RWTS_DRIVE_FOUND @ $b7f8    ;drive number found

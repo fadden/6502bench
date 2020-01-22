@@ -69,12 +69,14 @@ BAS_AMPERV      @ $03F5 3   ;JMP to function that handles Applesoft '&' cmds
 ; TODO: there are many more
 ;
 BAS_ERROR       @ $D412     ;print error based on X-reg
-BAS_FRMNUM      @ $DD67     ;evalute expression at TXTPTR, result into FAC
+BAS_FRMNUM      @ $DD67     ;call FRMEVL, confirm expr is numeric
+BAS_FRMEVL      @ $DD7B     ;eval expr at TXTPTR (num/str), result into FAC
 BAS_SYN_ERROR   @ $DEC9     ;throw SYNTAX ERROR
 BAS_CHKCOM      @ $DEBE     ;checks TXTPTR for comma
 BAS_ILLQ_ERROR  @ $E199     ;throw ILLEGAL QUANTITY ERROR
 BAS_GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
 BAS_GETBYT      @ $E6F8     ;gets byte, in X/FACLO
+BAS_QINT        @ $EBF2     ;converts FP value in FAC to int in FAC+1..FAC+4
 BAS_HFNS        @ $F6B9     ;get hi-res x/y for hplot
 
 ;
