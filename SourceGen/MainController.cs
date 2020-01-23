@@ -2713,6 +2713,16 @@ namespace SourceGen {
                 return;
             }
 
+            // Find the actual symbol definition.
+            LocalVariableTable lvTable = mProject.LvTables[varOffset];
+            DefSymbol foundSym = lvTable.GetByLabel(symRef.Label);
+            if (foundSym == null) {
+                // shouldn't be possible
+                Debug.WriteLine("Did not find " + symRef.Label + " in expected table");
+                Debug.Assert(false);
+                return;
+            }
+
             // We have the offset to which the local variable table is bound.  We need to
             // walk down until we find the variable definitions, and find the line with the
             // matching symbol.
@@ -2720,7 +2730,10 @@ namespace SourceGen {
             // We're comparing to the formatted strings -- safer than trying to find the symbol
             // in the table and then guess at how the table arranges itself for display -- so we
             // need to compare the formatted form of the label.
-            string cmpStr = mFormatter.FormatVariableLabel(symRef.Label);
+            //
+            // We need to use GenerateDisplayLabel() because the symbol might have an annotation.
+            string cmpStr = mFormatter.FormatVariableLabel(
+                foundSym.GenerateDisplayLabel(mFormatter));
             int lineIndex = CodeLineList.FindLineIndexByOffset(varOffset);
             while (lineIndex < mProject.FileDataLength) {
                 LineListGen.Line line = CodeLineList[lineIndex];
