@@ -166,4 +166,14 @@ Dir     equ     $5000
 
         nop
 
+; test some more overlapping symbols
+        lda     $6000       ;OverA_0
+        lda     $6100       ;OverA_1
+        lda     $6200       ;OverB_2
+        lda     $6304       ;OverB_3 + 4
+        lda     $6400       ;OverA_4 - 1
+        lda     $6401       ;OverA_4
+        lda     $6402       ;OverB_4
+        lda     $6403       ;OverC_4
+
 END     rts

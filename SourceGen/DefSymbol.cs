@@ -334,6 +334,23 @@ namespace SourceGen {
             return (maxStart <= minEnd);
         }
 
+        /// <summary>
+        /// Determines whether symbol one is "wider" than symbol two.  It's wider if it
+        /// has a width, and the other symbol either doesn't have a width or has a width
+        /// but is narrower.
+        /// </summary>
+        public static bool IsWider(DefSymbol a, DefSymbol b) {
+            if (!a.HasWidth && !b.HasWidth) {
+                return false;
+            } else if (a.HasWidth && !b.HasWidth) {
+                return true;
+            } else if (!a.HasWidth && b.HasWidth) {
+                return false;
+            } else {
+                return a.DataDescriptor.Length > b.DataDescriptor.Length;
+            }
+        }
+
 
         public static bool operator ==(DefSymbol a, DefSymbol b) {
             if (ReferenceEquals(a, b)) {

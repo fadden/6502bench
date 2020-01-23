@@ -26,8 +26,8 @@ ChkProj1    @   $2200   4
 ChkProj2    @   $2204   4
 
 ; Overlapping regions, defined within a single platform file.  We
-; should always use the most-recently-defined symbol.  When all
-; else is equal, alphabetical.
+; should prefer matches by proximity and width.  When all else is
+; equal, choose alphabetically.
 Over1       @   $3000   16      ;$3000-300f, inclusive
 Over2       @   $3002   8       ;$3002-3009
 Over3       @   $3006   7       ;$3006-300c
@@ -53,6 +53,20 @@ BankWrap    @   $fff0   $20
 
 ; Width specifiers on constants should be ignored.
 FatConst    =   $4000   8
+
+; Overlapping multi-byte items with exact and inexact matches.
+OverA_0     @   $6000   8       ;should win, alphabetically
+OverB_0     @   $6000   8
+OverB_1     @   $6100   8       ;(file order reversed)
+OverA_1     @   $6100   8       ;should win, alphabetically
+OverA_2     @   $6200   8
+OverB_2     @   $6200           ;should win because narrower
+OverA_3     @   $6300   8       ;(ref OverA_3+4)
+OverB_3     @   $6300   7       ;should win because narrower
+OverA_4     @   $6401   8       ;(ref OverA_4+2)
+OverB_4     @   $6402   8       ;should win because closer
+OverC_4     @   $6403   8
+
 
 ; I/O direction test
 ReadOnly    <   $5000 2         ;R

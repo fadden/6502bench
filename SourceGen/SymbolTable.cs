@@ -41,7 +41,11 @@ The basic rules for determining the symbol associated with a given address are:
     BAR=$2005/10, $2004 would be FOO and $2005 would be BAR.  (Note this can only happen for
     two symbols inside the same platform file or in the project symbol definitions; otherwise
     one of the previous rules would have determined it.)
- 5. If everything else is equal, e.g. we have FOO=$2000 and BAR=$2000 in the same file,
+ 5. If two symbols have the same value, and one is wider than the other, we use the
+    narrower definition.  The previous definition allows you to declare a symbol that spans
+    a buffer and then define individual values within it; this rule makes it work right
+    for the first byte.
+ 6. If everything else is equal, e.g. we have FOO=$2000 and BAR=$2000 in the same file,
     the winner is determined alphabetically.  (We don't track symbol definition line numbers,
     and there's no definite order in project properties, so there's not much else to do.)
 
@@ -431,6 +435,17 @@ namespace SourceGen {
                 return sym1;
             } else if (sym1.Value < sym2.Value) {
                 return sym2;
+            }
+
+            // Check widths.  Prefer the narrower definition.
+            if (sym1 is DefSymbol && sym2 is DefSymbol) {
+                DefSymbol dsym1 = (DefSymbol)sym1;
+                DefSymbol dsym2 = (DefSymbol)sym2;
+                if (DefSymbol.IsWider(dsym1, dsym2)) {
+                    return dsym2;
+                } else if (DefSymbol.IsWider(dsym2, dsym1)) {
+                    return dsym1;
+                }
             }
 
             // In the absence of anything better, we select them alphabetically.  (If they have

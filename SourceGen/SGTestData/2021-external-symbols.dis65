@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":2,"FileDataLength":329,"FileDataCrc32":-573118187,"ProjectProps":{
+"_ContentVersion":2,"FileDataLength":353,"FileDataCrc32":2100812075,"ProjectProps":{
 "CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
 "PlatformSymbolFileIdentifiers":["PROJ:2021-external-symbols-1.sym65","PROJ:2021-external-symbols-2.sym65","PROJ:2021-external-symbols-3.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{

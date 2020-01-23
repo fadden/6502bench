@@ -22,6 +22,13 @@ SepOver2 =      $3102      ;$3102-3105, inclusive
 ReadOnly =      $5000      ;R
 WriteOnly =     $5001      ;W
 WriteOnly2 =    $5002
+OverA_0 =       $6000      ;should win, alphabetically
+OverA_1 =       $6100      ;should win, alphabetically
+OverB_2 =       $6200      ;should win because narrower
+OverB_3 =       $6300      ;should win because narrower
+OverA_4 =       $6401      ;(ref OverA_4+2)
+OverB_4 =       $6402      ;should win because closer
+OverC_4 =       $6403
 MultiRead =     $c004      ;$c004/5/6, read-only
 MultiWrite =    $c005      ;$c005/6/7, write-only
 AlsoMultiZero = $c010      ;wins (alphabetically)
@@ -35,9 +42,9 @@ BankWrap =      $fff0
 L1000   lda     CodeWrap+255
         ldx     L1000
         ldy     L1000+1
-        lda     @L1148
-        lda     CodeWrap+$249
-        lda     CodeWrap+$250
+        lda     @L1160
+        lda     CodeWrap+$261
+        lda     CodeWrap+$268
         nop
         lda     $1ffe
         lda     SameName1-1
@@ -156,5 +163,13 @@ L1000   lda     CodeWrap+255
         bit     MoreMultiZero+32
         bit     MoreMultiZero+240
         nop
-@L1148  rts
+        lda     OverA_0
+        lda     OverA_1
+        lda     OverB_2
+        lda     OverB_3+4
+        lda     OverA_4-1
+        lda     OverA_4
+        lda     OverB_4
+        lda     OverC_4
+@L1160  rts
 

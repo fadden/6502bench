@@ -1693,25 +1693,13 @@ namespace SourceGen {
                     return -1;
                 } else if (a.Value > b.Value) {
                     return 1;
-                } else if (IsWider(a, b)) {
+                } else if (DefSymbol.IsWider(a, b)) {
                     return -1;
-                } else if (IsWider(b, a)) {
+                } else if (DefSymbol.IsWider(b, a)) {
                     return 1;
                 }
                 return Asm65.Label.LABEL_COMPARER.Compare(a.Label, b.Label);
             });
-        }
-
-        private bool IsWider(DefSymbol a, DefSymbol b) {
-            if (!a.HasWidth && !b.HasWidth) {
-                return false;
-            } else if (a.HasWidth && !b.HasWidth) {
-                return true;
-            } else if (!a.HasWidth && !b.HasWidth) {
-                return true;
-            } else {
-                return a.DataDescriptor.Length > b.DataDescriptor.Length;
-            }
         }
 
         #endregion Analysis
