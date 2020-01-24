@@ -136,7 +136,10 @@ namespace SourceGen.WpfGui {
             if (input[0] == '+') {
                 // this can only be an offset; convert as hexadecimal number
                 try {
-                    TargetOffset = Convert.ToInt32(input.Substring(1), 16);
+                    int offset = Convert.ToInt32(input.Substring(1), 16);
+                    if (offset >= 0 && offset < mProject.FileDataLength) {
+                        TargetOffset = offset;
+                    }
                 } catch (Exception) {
                 }
                 return;
