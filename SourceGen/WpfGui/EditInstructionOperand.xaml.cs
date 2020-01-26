@@ -1005,8 +1005,9 @@ namespace SourceGen.WpfGui {
             if (origSym == null) {
                 // Need to start with a symbol so we can set the value field.
                 string symName = "SYM";
-                if (!string.IsNullOrEmpty(SymbolLabel)) {
-                    symName = SymbolLabel;  // may not be valid, but it doesn't have to be
+                if (!string.IsNullOrEmpty(SymbolLabel) &&
+                        Asm65.Label.ValidateLabel(SymbolLabel)) {
+                    symName = SymbolLabel;
                 }
                 origSym = new DefSymbol(symName, mOperandValue, Symbol.Source.Project,
                     Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
