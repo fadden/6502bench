@@ -21,7 +21,8 @@ as well as many less-common ones.
 
 - Fully interactive point-and-click GUI.  Define labels, set addresses,
   add comments, and see the results immediately.  Add multi-line comments
-  and have them word-wrapped automatically.
+  and have them word-wrapped automatically.  Create inline visualizations
+  of embedded graphics and animated sequences.
 - The disassembly engine traces code execution, automatically finding all
   instructions reachable from a given starting point. Changes to the
   processor status flags are tracked, allowing identification of branches
@@ -66,7 +67,8 @@ User interface:
 - Multi-line comments can be "boxed" for an authentic retro feel.
 - Notes can be added that aren't included in generated output. These also
   function as color-coded bookmarks. Very useful for marking up a work in
-  progress.
+  progress.  Similarly, symbols can be marked as uncertain by adding a
+  '?' that is automatically stripped away during code generation.
 - Instruction summaries, including CPU cycles and flags modified, are shown
   along with a description of the opcode's function.
 - Various aspects of the code display can be reconfigured, including
@@ -75,7 +77,9 @@ User interface:
   project according to their own personal preferences.
 
 Code generation:
-- Labels can be coaxed from global to local as allowed by the assembler.
+- Labels can be global or local.  Use non-unique labels like "@Loop"
+  for clarity.  Labels will be promoted from local to global or renamed
+  to be unique as required by each assembler.
 - Symbols may be exported from one project and imported into another to
   facilitate multi-binary disassembly.
 - Listings can be generated in HTML form for publication on the web.
@@ -86,12 +90,15 @@ Miscellaneous:
 - The project file includes nothing from the data file but a CRC. This may
   allow the project to be shared without violating copyrights (subject to
   local laws).
+- Handy tools: file slicer, file concatenator, CPU instruction reference
+  chart, ASCII chart, file hex dump.
 
 #### Limitations ####
 
 Support for 65816 code is largely complete, lacking only a way to specify
 the data bank register.  However, the current user interface tries to
-keep everything in a single list, which works poorly for multi-bank binaries.
+keep everything in a single list, which works poorly for large
+multi-bank binaries.
 
 To learn about other areas for improvement, visit the wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
