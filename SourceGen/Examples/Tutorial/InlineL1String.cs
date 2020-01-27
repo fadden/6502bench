@@ -33,6 +33,11 @@ namespace ExtensionScriptSample {
                 AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             // reset this every time, in case they remove the symbol
             mInlineL1StringAddr = -1;

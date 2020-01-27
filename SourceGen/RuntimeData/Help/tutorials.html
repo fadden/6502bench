@@ -44,7 +44,7 @@ provides some details on whichever platform is selected.  The bottom
 window will have some information about the data file, once we choose one.</p>
 <p>Scroll down in the list, and select "Generic 6502".  Then click
 "Select File...", navigate to the SourceGen installation directory,
-open the Examples folder, then open the "Tutorial" folder.  Select the
+open the "Examples" folder, then open the "Tutorial" folder.  Select the
 file named "Tutorial1", and click "Open".</p>
 <p>The filename now appears in the bottom window, along with an indication
 of the file's size.</p>
@@ -105,8 +105,8 @@ References window.  Note the selection jumps to L1002.  You can immediately
 jump to any reference.</p>
 <p>At the top of the Symbols window on the right side of the screen is a
 row of buttons.  Make sure "Auto" and "Addr" are selected.  You should see
-three labels in the window (L1002, L1014, L1017).  Double-click on L1014.  The
-selection jumps to the appropriate line.</p>
+three labels in the window (L1002, L1014, L1017).  Double-click on "L1014"
+in the Symbols list.  The selection jumps to the appropriate line.</p>
 
 <p>Select Navigate &gt; Find.  Type "hello", and hit Enter.  The selection will
 move to address $100E, which is a string that says "hello!".  You can use
@@ -114,7 +114,7 @@ Navigate &gt; Find Next to try to find the next occurrence (there isn't one).  Y
 can search for any text that appears in the rightmost columns (label, opcode,
 operand, comment).</p>
 <p>Select Navigate &gt; Go To.  You can enter a label, address, or file offset.
-Enter "100b" to set the selection to $100B.</p>
+Enter "100b" to set the selection to the line at address $100B.</p>
 
 <p>Near the top-left of the SourceGen window is a set of toolbar icons.
 Click the curly left-pointing arrow, and watch the selection move.  Click
@@ -152,8 +152,8 @@ top of the file.  If you typed enough words, your comment will span
 multiple lines.  You can select the comment by selecting any line in it.</p>
 
 <p>Click on the comment, then shift-click on L1014.  Right-click, and look
-at the menu.  Nearly all of the menu items are disabled.  Most editors are
-only enabled when a single instance of a relevant item is selected, so
+at the menu.  Nearly all of the menu items are disabled.  Most edit features
+are only enabled when a single instance of a relevant item is selected, so
 for example Edit Long Comment won't be enabled if you have an instruction
 selected.</p>
 
@@ -194,8 +194,8 @@ so you'll be forgiven if you reduce the offset column width to zero.)</p>
 <p>On the line at address $2000, select Actions &gt; Edit Label, or
 double-click on the label "L2000".  Change the label to "MAIN", and hit
 Enter.  The label changes on that line, and on the two lines that refer
-to address $2000.  (If you're not sure what refers to address $2000, select
-that line and check the References window.)</p>
+to address $2000.  (If you're not sure which lines refer to address $2000,
+select line $2000 and look at the References window.)</p>
 <p>On that same line, select Actions &gt; Edit Comment.  Type a short
 comment, and hit Enter.  Your comment appears in the "comment" column.</p>
 
@@ -280,16 +280,18 @@ unique.  You can change these attributes when you edit the label.  Up near the
 top of the file, at address $1002, double-click on the label ("L1002").
 Change the label to "LOOP" and click the "non-unique local" button.
 Click OK.</p>
-<p>The label at line $1002 should now be "@LOOP".  By default, '@' is
-used to indicate non-unique labels, though you can change it to a
-different character in the application settings.</p>
+<p>The label at line $1002 (and the operand on line $100B) should now
+be "@LOOP".  By default, '@' is used to indicate non-unique labels,
+though you can change it to a different character in the application
+settings.</p>
 <p>At address $2019, double-click to edit the label ("L2019").  If
-you type "MAIN" or "IS_OK" you'll get an error, but if you type "@LOOP"
-it will be accepted.  Note the "non-unique local" button is selected
-automatically if you start a label with '@'.  Click OK.</p>
-<p>You now have two lines with the same label, separated by global
-labels.  The assembly source generator may "promote" them to globals or
-rename them if your chosen assembler requires it.</p>
+you type "MAIN" or "IS_OK" with Global selected you'll get an error,
+but if you type "@LOOP" it will be accepted.  Note the "non-unique local"
+button is selected automatically if you start a label with '@' (or
+whatever character you have configured).  Click OK.</p>
+<p>You now have two lines with the same label.  The assembly source
+generator may "promote" them to globals or rename them if your chosen
+assembler requires it.</p>
 
 <h3>Editing Data Operands</h3>
 
@@ -497,7 +499,8 @@ cycles but might take more.  That's because conditional branches take an
 extra cycle if the branch is taken.  The BNE on line $2061" shows 3 cycles,
 because we know that the branch is always taken.  (If you want to see why,
 look at the value of the 'Z' flag in the "flags" column.  Lower-case 'z'
-means the zero-flag is clear.)</p>
+means the zero-flag is clear.  You can see it got set on the
+<code>ORA #$80</code> line.)</p>
 <p>The cycle-count comments are included in assembled output as well.  If
 you add an end-of-line comment, it appears after the cycle count.</p>
 <p>Hit Ctrl+S to save your project.  Make that a habit.</p>
@@ -591,7 +594,7 @@ This particular program interfaces with Applesoft BASIC, so we can make it
 a bit more meaningful by loading an additional platform
 symbol file.  Select Edit &gt; Project Properties, then the Symbol Files
 tab.  Click Add Symbol Files from Runtime.  The file browser starts in
-the RuntimeData directory.  Open the Apple folder, then select
+the RuntimeData directory.  Open the "Apple" folder, then select
 <code>Applesoft.sym65</code>, and click "Open".  Click "OK" to close
 the project properties window.</p>
 <p>The <code>STA</code> instructions now reference <code>BAS_AMPERV</code>,
@@ -667,12 +670,12 @@ SourceGen asks for confirmation, click Discard & Continue.</p>
 <p><i>This tutorial covers one specific feature.</i></p>
 
 <p>Some repetitive formatting tasks can be handled with automatic scripts.
-This is especially useful for inline data, which confuses the disassembler
-because code is expected.</p>
+This is especially useful for inline data, which can confuse the code
+analyzer.</p>
 <p>An earlier tutorial demonstrated how to manually mark bytes as
 inline data.  We're going to do it a faster way.  For this tutorial,
 start a new project with "Generic 6502", and in the SourceGen
-Tutorial directory select "Tutorial4".</p>
+Examples/Tutorial directory select "Tutorial4".</p>
 <p>We'll need to load scripts from the project directory, so we have to
 save the project.  File > Save, use the default name ("Tutorial4.dis65").</p>
 
@@ -683,8 +686,8 @@ can handle that, so use Edit > Project Properties, select the
 Extension Scripts tab, and click "Add Scripts from Project".  The file
 browser opens in the project directory.  Select the file
 "InlineL1String.cs", click Open, then OK.</p>
-<p>Nothing happened.  If you look at the script (and you know some C#),
-you'll see that it's looking for a JSR to a function called
+<p>Nothing happened.  If you look at the script with an editor (and you
+know some C#), you'll see that it's looking for a JSR to a function called
 "PrintInlineL1String".  So let's give it one.</p>
 <p>Double-click the JSR operand ("L1026"), click "Create Label", and
 enter "PrintInlineL1String".  Remember that labels are case-sensitive;
@@ -707,7 +710,9 @@ on line $1019 ("L1028"), setting the label to "PrintInlineNullStringTwo".</p>
 "Print Inline" locations would be actual print functions, not just RTS
 instructions.  There would likely be multiple JSRs to the print function,
 so labeling a single function entry point could format dozens of inline
-strings and clean up the disassembly automatically.</p>
+strings and clean up the disassembly automatically.  The reason for
+allowing wildcard names is that some functions may have multiple
+entry points or chain through different locations.</p>
 
 <p>Extension scripts can make your life much easier, but they do require
 some programming experience.  See the
@@ -745,7 +750,7 @@ select the Extension Scripts tab, and click "Add Scripts from Project".
 Double-click on "VisTutorial5.cs", then click "OK".</p>
 
 <p>The address of the three bitmaps are helpfully identified by the
-load instructions at the top of the file.  Select the first one at
+load instructions at the top of the file.  Select the list at
 address $100A, then Actions &gt; Create/Edit Visualization Set.  In
 the window that opens, click "New Bitmap".</p>
 <p>We're going to ignore most of what's going on and just focus on the
@@ -780,7 +785,8 @@ as 8 bytes per row.  This is known as the "stride" or "pitch" of the row.
 To tell the visualizer to skip the last 3 bytes on each row, set the
 "Row stride (bytes)" field to 8.  Now we have a proper Tic-Tac-Toe grid.
 Note that it fills the preview window just as the 'X' and 'O' did, even
-though it's 5x as large.  The preview window scales everything up.</p>
+though it's 5x as large.  The preview window scales everything up.  Hit
+"OK" twice to create the visualization.</p>
 <p>Let's format the bitmap data.  Select line $101A, then shift-click the
 last line in the file ($1159).  Actions &gt; Edit Operand.  Select
 "densely-packed bytes", and click "OK".  This is perhaps a little too
@@ -807,9 +813,11 @@ the animation speed.  You can add the grid to the animation set, but the
 preview scales the bitmaps up to full size, so it may not look the way
 you expect.</p>
 <p>Hit "OK" to save the animation, then "OK" to update the visualization set.
-The code list now shows two entries, one of which has a blue triangle
-superimposed.  You can have as many bitmaps an animations on a line
-as you want.</p>
+The code list now shows two entries in the line: the first is the 'X'
+bitmap, the second is the animation, which is shown as the initial frame
+with a blue triangle superimposed.  (If you go back into the editor and
+reverse the order of the frames, the list will show the 'O' instead.)
+You can have as many bitmaps and animations on a line as you want.</p>
 <p>If you have a lot of bitmaps it can be helpful to give them meaningful
 names, so that they're easy to identify and sort together in the list.
 The "tag" field at the top of the editor windows lets you give things
@@ -846,7 +854,7 @@ don't be afraid to play around.</p>
 <p>If you want to work on something large over a long period, save your
 progress by putting the .dis65 project into a source code control system
 like git.  Project files are stored in a text format that, while not meant
-to be human-readable, will yield reasonable diffs.</p>
+to be human-readable, should yield reasonable diffs.</p>
 
 </div>
 

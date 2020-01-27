@@ -33,6 +33,11 @@ namespace ExtensionScriptSample {
                 AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             mNullStringAddrs.Clear();
 
