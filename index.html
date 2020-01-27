@@ -2,10 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>6502bench Tools</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="main.css" rel="stylesheet" type="text/css" />
+
+    <title>6502bench Tools</title>
 </head>
 
 <body>
@@ -18,22 +19,28 @@ features one tool, the SourceGen disassembler.</p>
 
 <p>Quick links:</p>
 <ul>
-  <li>Watch a (somewhat outdated) 9-minute video of
-  <a href="https://youtu.be/dalISyBPQq8">the product in action</a></li>
+  <li>Watch a (somewhat dated) 9-minute video of
+    <a href="https://youtu.be/dalISyBPQq8">basic product features</a></li>
+  <li>See an 8-minute
+    <a href="https://youtu.be/lSvEr5nCHbY">demonstration of visualizers</a>
+    in a disassembly of the Apple II game <i>Space Eggs</i></li>
   <li>Download source &amp; binaries for the latest version
-  <a href="https://github.com/fadden/6502bench/releases/">from the Releases page</a></li>
+    <a href="https://github.com/fadden/6502bench/releases/">from the Releases page</a></li>
   <li>Check out the
-  <a href="https://github.com/fadden/6502bench/">GitHub project</a></li>
+    <a href="https://github.com/fadden/6502bench/">GitHub project</a></li>
+  <li>See some completed
+    <a href="https://6502disassembly.com/">disassembly projects</a></li>
 </ul>
 
 <hr/>
 
 <p><strong>SourceGen</strong> is an industrial-strength disassembler for 6502,
-65C02, and 65816 programs.  Key features include:</p>
+65C02, and 65816 programs.  It runs on Windows 7 or later.  Key features include:</p>
 <ul>
-  <li>Fully interactive point-and-click GUI.  Define labels, set addresses,
-  add comments, and see the results immediately.  Add multi-line comments
-  and have them word-wrapped automatically.</li>
+  <li>Fully interactive point-and-click GUI. Define labels, set addresses,
+  add comments, and see the results immediately. Add multi-line comments
+  and have them word-wrapped automatically. Create inline visualizations of
+  embedded graphics and animated sequences.</li>
   <li>The disassembly engine traces code execution, automatically finding all
   instructions reachable from a given starting point.  Changes to the
   processor status flags are tracked, allowing identification of branches
@@ -85,8 +92,9 @@ features one tool, the SourceGen disassembler.</p>
     in the program.</li>
     <li>Multi-line comments can be "boxed" for an authentic retro feel.</li>
     <li>Notes can be added that aren't included in generated output.  These
-    also function as color-coded bookmarks.  Very useful for marking up a
-    work in progress.</li>
+    also function as color-coded bookmarks. Very useful for marking up a
+    work in progress.  Similarly, symbols can be marked as uncertain by
+    adding a '?' that is automatically stripped away during code generation.</li>
     <li>Instruction summaries, including CPU cycles and flags modified, are
     shown along with a description of the opcode's function.</li>
     <li>Various aspects of the code display can be reconfigured, including
@@ -96,8 +104,9 @@ features one tool, the SourceGen disassembler.</p>
   </ul></li>
   <li>Code generation:
   <ul>
-    <li>Labels can be coaxed from global to local as allowed by the
-    assembler.</li>
+    <li>Labels can be global or local. Use non-unique labels like "@Loop"
+    for clarity.  Labels will be promoted from local to global or renamed to
+    be unique as required by each assembler.</li>
     <li>Symbols may be exported from one project and imported into another
     to facilitate multi-binary disassembly.</li>
     <li>Listings can be generated in HTML form for publication on the web. Many
@@ -109,6 +118,8 @@ features one tool, the SourceGen disassembler.</p>
     <li>The project file includes nothing from the data file but a CRC.  This
     may allow the project to be shared without violating copyrights (subject
     to local laws).</li>
+    <li>Handy tools: file slicer, file concatenator, CPU instruction reference
+    chart, ASCII chart, file hex dump.</li>
   </ul></li>
 </ul>
 
@@ -121,7 +132,7 @@ The full source code for the project is available on GitHub, licensed under Apac
 
 <div id="footer">
 <hr/>
-<p>Copyright 2019 faddenSoft</p>
+<p>Copyright 2020 faddenSoft</p>
 </div>
 </body>
 </html>
