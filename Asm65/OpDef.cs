@@ -667,10 +667,12 @@ namespace Asm65 {
         }
         private static StatusFlags FlagUpdater_ANDImm(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
-            // AND #00 --> Z=1, else Z=prev
+            // AND #00 --> Z=1, else if Z=0 then Z=?
             // AND #7f --> N=0, else N=prev
             if (immVal == 0) {
-                flags.Z = 1;
+                flags.Z = 1;    // acc is now zero
+            } else if (flags.Z == 0) {
+                flags.Z = TriState16.INDETERMINATE; // acc *might* now be zero
             }
             bool hiBitClear;
             if (immVal >= 0) {

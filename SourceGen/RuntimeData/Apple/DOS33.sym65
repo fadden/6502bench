@@ -31,6 +31,7 @@ RWTS_TRACK_NUM  @ $b7ec     ;track number (0 - 34)
 RWTS_SECTOR_NUM @ $b7ed     ;sector number (0-15)
 RWTS_DCT        @ $b7ee 2   ;pointer to Device Characteristics Table
 RWTS_BUF        @ $b7f0 2   ;pointer to data buffer for READ/WRITE
+;RWTS_UNUSED    @ $b7f2
 RWTS_PARTIAL_COUNT @ $b7f3  ;byte count for partial sector
 RWTS_CMD_CODE   @ $b7f4     ;0=seek, 1=read, 2=write, 4=format
 RWTS_ERR_CODE   @ $b7f5     ;err code (when carry set)

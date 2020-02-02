@@ -154,8 +154,8 @@ L105F   sep     #$80
 @L10B3  lda     #$ff
         and     #$7f
         bne     @L10BB
+        brk
 
-        !byte   $00
         !byte   $db
 
 @L10BB  bpl     @L10BF

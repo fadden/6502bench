@@ -154,8 +154,8 @@ _L10AB  lda     #$00
 _L10B3  lda     #$ff
         and     #$7f
         bne     _L10BB
+        brk
 
-        .byte   $00
         .byte   $db
 
 _L10BB  bpl     _L10BF
