@@ -113,6 +113,7 @@ namespace SourceGen.Tools.WpfGui {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 0,
+                Multiselect = true,
                 Title = (string)FindResource("str_SelectFileTitle")
             };
             if (fileDlg.ShowDialog() != true) {
@@ -120,11 +121,13 @@ namespace SourceGen.Tools.WpfGui {
             }
 
             try {
-                string pathName = Path.GetFullPath(fileDlg.FileName);
-                long length = new FileInfo(pathName).Length;
-                uint crc32 = CRC32.OnWholeFile(pathName);
-                ConcatItems.Add(new ConcatItem(pathName, length, crc32));
-                concatGrid.SelectedIndex = ConcatItems.Count - 1;
+                foreach (string pathName in fileDlg.FileNames) {
+                    // The names in FileNames appear to be fully qualified.
+                    long length = new FileInfo(pathName).Length;
+                    uint crc32 = CRC32.OnWholeFile(pathName);
+                    ConcatItems.Add(new ConcatItem(pathName, length, crc32));
+                    concatGrid.SelectedIndex = ConcatItems.Count - 1;
+                }
             } catch (Exception ex) {
                 string caption = (string)FindResource("str_FileAccessFailedCaption");
                 string fmt = (string)FindResource("str_FileAccessFailedFmt");
