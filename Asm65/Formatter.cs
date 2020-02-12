@@ -449,6 +449,11 @@ namespace Asm65 {
                 mSregChar = 's';
             }
 
+            for (int index = 0; index < 4; index++) {
+                int width = (index + 1) * 2;
+                mHexValueFormats[index] = mHexFmtChar + width.ToString();
+            }
+
             // process the delimiter patterns
             DelimiterSet chrDelim = mFormatConfig.mCharDelimiters;
             if (chrDelim == null) {
@@ -506,9 +511,6 @@ namespace Asm65 {
                 width = 4;
             }
             int index = (width / 2) - 1;
-            if (mHexValueFormats[index] == null) {
-                mHexValueFormats[index] = mHexFmtChar + width.ToString();
-            }
             return mHexPrefix + value.ToString(mHexValueFormats[index]);
         }
 
