@@ -137,22 +137,31 @@ LCBANK1         @ $C08B     ;RWx2 read/write RAM bank 1
 
 CLRROM          @ $CFFF     ;disable slot C8 ROM
 
-;IWM:PH0 off @ C0E0
-;IWM:PH0 on @ C0E1
-;IWM:PH1 off @ C0E2
-;IWM:PH1 on @ C0E3
-;IWM:PH2 off @ C0E4
-;IWM:PH2 on @ C0E5
-;IWM:PH3 off @ C0E6
-;IWM:PH3 on @ C0E7
-;IWM:motor off @ C0E8
-;IWM:motor on @ C0E9
-;IWM:drive 1 @ C0EA
-;IWM:drive 2 @ C0EB
-;IWM:Q6 OFF (Read) @ C0EC
-;IWM:Q6 ON  (WP-sense) @ C0ED
-;IWM:Q7 OFF (WP-sense/Read) @ C0EE
-;IWM:Q7 ON  (Write) @ C0EF
+; Disk ][ I/O locations.
+;
+; A few things hard-code slot 6 for disk access, in which case
+; these will work.  In most cases code uses something like
+; "LDA $C088,X", which clashes with the slot 0 definitions.  We
+; define these for slot 6 to get the symbols defined in a way that
+; is unlikely to clash, allowing them to be manually set for values
+; in the C08x range.
+IWM_PH0_OFF     @ $C0E0     ;IWM phase 0 off
+IWM_PH0_ON      @ $C0E1     ;IWM phase 0 on
+IWM_PH1_OFF     @ $C0E2     ;IWM phase 1 off
+IWM_PH1_ON      @ $C0E3     ;IWM phase 1 on
+IWM_PH2_OFF     @ $C0E4     ;IWM phase 2 off
+IWM_PH2_ON      @ $C0E5     ;IWM phase 2 on
+IWM_PH3_OFF     @ $C0E6     ;IWM phase 3 off
+IWM_PH3_ON      @ $C0E7     ;IWM phase 3 on
+IWM_MOTOR_OFF   @ $C0E8     ;IWM motor off
+IWM_MOTOR_ON    @ $C0E9     ;IWM motor on
+IWM_DRIVE_1     @ $C0EA     ;IWM select drive 1
+IWM_DRIVE_2     @ $C0EB     ;IWM select drive 2
+IWM_Q6_OFF      @ $C0EC     ;read
+IWM_Q6_ON       @ $C0ED     ;WP-sense
+IWM_Q7_OFF      @ $C0EE     ;WP-sense/read
+IWM_Q7_ON       @ $C0EF     ;write
+
 
 ; Not strictly I/O locations, but they're in the neighborhood.
 ROM_AUXMOVE     @ $C311
