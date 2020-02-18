@@ -81,7 +81,7 @@ limitations under the License.
         </DataGrid>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
-            <Button Width="90" Content="Add File..." Click="AddButton_Click"/>
+            <Button Width="90" Content="Add Files..." Click="AddButton_Click"/>
             <Button Width="90" Margin="0,4,0,0" Content="Remove File"
                     IsEnabled="{Binding IsRemoveEnabled}" Click="RemoveButton_Click"/>
             <Button Width="90" Margin="0,12,0,0" Content="Up"

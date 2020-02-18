@@ -41,6 +41,9 @@ limitations under the License.
                       HorizontalAlignment="Left"
                       ItemsSource="{Binding CpuItems}" DisplayMemberPath="Name"
                       SelectionChanged="CpuSelectionComboBox_SelectionChanged"/>
+
+            <CheckBox Margin="32,4,0,0" Content="Show undocumented instructions"
+                      IsChecked="{Binding ShowUndocumented}"/>
         </StackPanel>
 
         <DataGrid DockPanel.Dock="Top" Name="instructionGrid"
@@ -57,8 +60,9 @@ limitations under the License.
                   SelectionMode="Extended"
                   VerticalScrollBarVisibility="Visible">
             <DataGrid.Resources>
-                <Style x:Key="undocCellStyle" TargetType="{x:Type DataGridCell}">
+                <Style x:Key="cellStyle" TargetType="{x:Type DataGridCell}">
                     <Style.Triggers>
+                        <!-- show undocumented opcodes differently -->
                         <DataTrigger Binding="{Binding Path=IsUndocumented}" Value="True">
                             <Setter Property="FontStyle" Value="Italic"/>
                             <Setter Property="Foreground"
@@ -70,7 +74,7 @@ limitations under the License.
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Opc" Binding="{Binding Opcode}"/>
                 <DataGridTextColumn Header="Instruction" Binding="{Binding Sample}"
-                                    CellStyle="{StaticResource undocCellStyle}"/>
+                                    CellStyle="{StaticResource cellStyle}"/>
                 <DataGridTextColumn Header="Flags" Binding="{Binding Flags}"/>
                 <DataGridTextColumn Header="Cyc" Binding="{Binding Cycles}"/>
                 <DataGridTextColumn Header="Description" Binding="{Binding ShortDesc}"

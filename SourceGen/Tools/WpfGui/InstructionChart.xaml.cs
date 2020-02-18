@@ -45,6 +45,12 @@ namespace SourceGen.Tools.WpfGui {
         }
         public CpuItem[] CpuItems { get; private set; }
 
+        public bool ShowUndocumented {
+            get { return mShowUndocumented; }
+            set { mShowUndocumented = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mShowUndocumented;
+
         /// <summary>
         /// Item for main list.
         /// </summary>
@@ -104,9 +110,11 @@ namespace SourceGen.Tools.WpfGui {
         }
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
-            // Restore chart mode setting.
+            // Restore chart settings.
             CpuDef.CpuType type = (CpuDef.CpuType)AppSettings.Global.GetEnum(
-                AppSettings.ASCCH_MODE, typeof(CpuDef.CpuType), (int)CpuDef.CpuType.Cpu6502);
+                AppSettings.INSTCH_MODE, typeof(CpuDef.CpuType), (int)CpuDef.CpuType.Cpu6502);
+            ShowUndocumented = AppSettings.Global.GetBool(AppSettings.INSTCH_SHOW_UNDOC, true);
+
             int index = 0;
             for (int i = 0; i < CpuItems.Length; i++) {
                 if (CpuItems[i].Type == type) {
@@ -137,14 +145,18 @@ namespace SourceGen.Tools.WpfGui {
             }
 
             // Push current choice to settings.
-            AppSettings.Global.SetEnum(AppSettings.ASCCH_MODE, typeof(CpuDef.CpuType),
+            AppSettings.Global.SetEnum(AppSettings.INSTCH_MODE, typeof(CpuDef.CpuType),
                 (int)item.Type);
+            AppSettings.Global.SetBool(AppSettings.INSTCH_SHOW_UNDOC, mShowUndocumented);
 
             // Populate the items source.
             InstructionItems.Clear();
             CpuDef cpuDef = CpuDef.GetBestMatch(item.Type, true, false);
             for (int opc = 0; opc < 256; opc++) {
                 OpDef op = cpuDef[opc];
+                if (!mShowUndocumented && op.IsUndocumented) {
+                    continue;
+                }
 
                 int opLen = op.GetLength(StatusFlags.AllIndeterminate);
                 string sampleValue = "$12";
@@ -155,7 +167,8 @@ namespace SourceGen.Tools.WpfGui {
                 } else if (opLen == 4) {
                     sampleValue = "$123456";
                 }
-                string instrSample = op.Mnemonic + " " +
+                string instrSample = mFormatter.FormatMnemonic(op.Mnemonic,
+                        OpDef.WidthDisambiguation.None) + " " +
                     mFormatter.FormatOperand(op, sampleValue, OpDef.WidthDisambiguation.None);
 
 

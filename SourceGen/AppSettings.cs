@@ -111,6 +111,10 @@ namespace SourceGen {
         // ASCII chart viewer settings.
         public const string ASCCH_MODE = "ascch-mode1";
 
+        // Instruction chart settings.
+        public const string INSTCH_MODE = "instch-mode";
+        public const string INSTCH_SHOW_UNDOC = "instch-show-undoc";
+
         // Source generation settings.
         public const string SRCGEN_DEFAULT_ASM = "srcgen-default-asm";
         public const string SRCGEN_ADD_IDENT_COMMENT = "srcgen-add-ident-comment";
