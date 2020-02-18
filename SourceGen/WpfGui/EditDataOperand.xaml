@@ -33,9 +33,15 @@ limitations under the License.
         <system:String x:Key="str_SingleGroup">Select data format ({0} bytes selected):</system:String>
         <system:String x:Key="str_MultiGroup">Select data format ({0} bytes selected in {1} groups):</system:String>
 
-        <system:String x:Key="str_StringMixed">Mixed character ({0} bytes) and non-character ({1} bytes)</system:String>
-        <system:String x:Key="str_StringMixedReverse">Reversed character ({0} bytes) and non-character ({1} bytes)</system:String>
-        <system:String x:Key="str_StringNullTerm">Null-terminated strings ({0})</system:String>
+        <system:String x:Key="str_NotApplicable">--</system:String>
+        <system:String x:Key="str_StringSingleFmt">{0} string</system:String>
+        <system:String x:Key="str_StringPluralFmt">{0} strings</system:String>
+        <system:String x:Key="str_ByteSingleFmt">{0} byte</system:String>
+        <system:String x:Key="str_BytePluralFmt">{0} bytes</system:String>
+
+        <system:String x:Key="str_StringMixed">_Mixed character ({0}) and non-character ({1})</system:String>
+        <system:String x:Key="str_StringMixedReverse">Reversed character ({0}) and non-character ({1})</system:String>
+        <system:String x:Key="str_StringNullTerm">_Null-terminated strings ({0})</system:String>
         <system:String x:Key="str_StringLen8">Strings prefixed with 8-bit length ({0})</system:String>
         <system:String x:Key="str_StringLen16">Strings prefixed with 16-bit length ({0})</system:String>
         <system:String x:Key="str_StringDci">Dextral character inverted ({0})</system:String>
@@ -129,7 +135,7 @@ limitations under the License.
         <RadioButton Name="radioDenseHex" GroupName="Main" Content="Densely-_packed bytes" Margin="0,4,0,0"
                      Checked="MainGroup_CheckedChanged"/>
         <StackPanel Orientation="Horizontal" Margin="20,4,0,0">
-            <RadioButton Name="radioDenseHexLimited" GroupName="Main" Content="...with a limit of"
+            <RadioButton Name="radioDenseHexLimited" GroupName="Main" Content="...with a _limit of"
                          Checked="MainGroup_CheckedChanged"/>
             <TextBox Width="40" Margin="7,-3,0,0" MaxLength="2"
                      Text="{Binding MaxDenseBytesPerLine, UpdateSourceTrigger=PropertyChanged}"/>

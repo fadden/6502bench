@@ -670,57 +670,37 @@ namespace SourceGen.WpfGui {
 
             // Update the dialog with string and character counts, summed across all regions.
 
+            string UNSUP_STR = (string)FindResource("str_NotApplicable");
             string fmt;
-            const string UNSUP_STR = "xx";
             fmt = (string)FindResource("str_StringMixed");
             string revfmt = (string)FindResource("str_StringMixedReverse");
             if (mixedCharOkCount > 0) {
                 Debug.Assert(radioStringMixed.IsEnabled);
                 radioStringMixed.Content = string.Format(fmt,
-                    mixedCharOkCount, mixedCharNotCount);
+                    FormatByteCount(mixedCharOkCount), FormatByteCount(mixedCharNotCount));
                 radioStringMixedReverse.Content = string.Format(revfmt,
-                    mixedCharOkCount, mixedCharNotCount);
+                    FormatByteCount(mixedCharOkCount), FormatByteCount(mixedCharNotCount));
             } else {
                 Debug.Assert(!radioStringMixed.IsEnabled);
                 radioStringMixed.Content = string.Format(fmt, UNSUP_STR, UNSUP_STR);
                 radioStringMixedReverse.Content = string.Format(revfmt, UNSUP_STR, UNSUP_STR);
             }
 
+            Debug.Assert((nullTermStringCount > 0) ^ (radioStringNullTerm.IsEnabled == false));
             fmt = (string)FindResource("str_StringNullTerm");
-            if (nullTermStringCount > 0) {
-                Debug.Assert(radioStringNullTerm.IsEnabled);
-                radioStringNullTerm.Content = string.Format(fmt, nullTermStringCount);
-            } else {
-                Debug.Assert(!radioStringNullTerm.IsEnabled);
-                radioStringNullTerm.Content = string.Format(fmt, UNSUP_STR);
-            }
+            radioStringNullTerm.Content = FormatStringOption(fmt, nullTermStringCount);
 
+            Debug.Assert((len8StringCount > 0) ^ (radioStringLen8.IsEnabled == false));
             fmt = (string)FindResource("str_StringLen8");
-            if (len8StringCount > 0) {
-                Debug.Assert(radioStringLen8.IsEnabled);
-                radioStringLen8.Content = string.Format(fmt, len8StringCount);
-            } else {
-                Debug.Assert(!radioStringLen8.IsEnabled);
-                radioStringLen8.Content = string.Format(fmt, UNSUP_STR);
-            }
+            radioStringLen8.Content = FormatStringOption(fmt, len8StringCount);
 
+            Debug.Assert((len16StringCount > 0) ^ (radioStringLen16.IsEnabled == false));
             fmt = (string)FindResource("str_StringLen16");
-            if (len16StringCount > 0) {
-                Debug.Assert(radioStringLen16.IsEnabled);
-                radioStringLen16.Content = string.Format(fmt, len16StringCount);
-            } else {
-                Debug.Assert(!radioStringLen16.IsEnabled);
-                radioStringLen16.Content = string.Format(fmt, UNSUP_STR);
-            }
+            radioStringLen16.Content = FormatStringOption(fmt, len16StringCount);
 
+            Debug.Assert((dciStringCount > 0) ^ (radioStringDci.IsEnabled == false));
             fmt = (string)FindResource("str_StringDci");
-            if (dciStringCount > 0) {
-                Debug.Assert(radioStringDci.IsEnabled);
-                radioStringDci.Content = string.Format(fmt, dciStringCount);
-            } else {
-                Debug.Assert(!radioStringDci.IsEnabled);
-                radioStringDci.Content = string.Format(fmt, UNSUP_STR);
-            }
+            radioStringDci.Content = FormatStringOption(fmt, dciStringCount);
 
             // If this invalidated the selected item, reset to Default.
             if ((radioStringMixed.IsChecked == true && !radioStringMixed.IsEnabled) ||
@@ -732,6 +712,32 @@ namespace SourceGen.WpfGui {
 
                 Debug.WriteLine("Previous selection invalidated");
                 radioDefaultFormat.IsChecked = true;
+            }
+        }
+
+        private string FormatByteCount(int count) {
+            string fmt;
+            if (count <= 0) {
+                return (string)FindResource("str_NotApplicable");
+            } else if (count == 1) {
+                fmt = (string)FindResource("str_ByteSingleFmt");
+            } else {
+                fmt = (string)FindResource("str_BytePluralFmt");
+            }
+            return string.Format(fmt, count);
+        }
+
+        private string FormatStringOption(string fmt, int count) {
+            if (count <= 0) {
+                return string.Format(fmt, (string)FindResource("str_NotApplicable"));
+            } else if (count == 1) {
+                string fmtSingleString = (string)FindResource("str_StringSingleFmt");
+                return string.Format(fmt,
+                    string.Format(fmtSingleString, count));
+            } else {
+                string fmtPluralString = (string)FindResource("str_StringPluralFmt");
+                return string.Format(fmt,
+                    string.Format(fmtPluralString, count));
             }
         }
 
