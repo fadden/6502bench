@@ -30,6 +30,7 @@ namespace RuntimeData.Apple {
 
         // Visualization identifiers; DO NOT change or projects that use them will break.
         private const string VIS_GEN_BITMAP = "apple2-hi-res-bitmap";
+        private const string VIS_GEN_BITMAP_GRID = "apple2-hi-res-bitmap-grid";
         private const string VIS_GEN_BITMAP_FONT = "apple2-hi-res-bitmap-font";
         private const string VIS_GEN_HR_SCREEN = "apple2-hi-res-screen";
 
@@ -38,8 +39,10 @@ namespace RuntimeData.Apple {
         private const string P_HEIGHT = "height";
         private const string P_COL_STRIDE = "colStride";
         private const string P_ROW_STRIDE = "rowStride";
+        private const string P_CELL_STRIDE = "cellStride";
         private const string P_IS_COLOR = "isColor";
         private const string P_IS_FIRST_ODD = "isFirstOdd";
+        private const string P_IS_HIGH_BIT_FLIPPED = "isHighBitFlipped";
         private const string P_COLOR_CONV_MODE = "colorConvMode";
         private const string P_ITEM_BYTE_WIDTH = "itemByteWidth";
         private const string P_ITEM_HEIGHT = "itemHeight";
@@ -54,22 +57,47 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("File offset (hex)",
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Width (in bytes)",
-                        P_BYTE_WIDTH, typeof(int), 1, 40, 0, 1),
+                        P_BYTE_WIDTH, typeof(int), 1, 256, 0, 1),
                     new VisParamDescr("Height",
-                        P_HEIGHT, typeof(int), 1, 192, 0, 1),
+                        P_HEIGHT, typeof(int), 1, 1024, 0, 1),
                     new VisParamDescr("Column stride (bytes)",
-                        P_COL_STRIDE, typeof(int), 0, 256, 0, 0),
+                        P_COL_STRIDE, typeof(int), 0, 1024, 0, 0),
                     new VisParamDescr("Row stride (bytes)",
-                        P_ROW_STRIDE, typeof(int), 0, 256, 0, 0),
+                        P_ROW_STRIDE, typeof(int), 0, 1024, 0, 0),
                     new VisParamDescr("Color",
                         P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                     new VisParamDescr("First col odd",
                         P_IS_FIRST_ODD, typeof(bool), 0, 0, 0, false),
+                    new VisParamDescr("High bit flipped",
+                        P_IS_HIGH_BIT_FLIPPED, typeof(bool), 0, 0, 0, false),
                     //new VisParamDescr("Color conv mode",
                     //    P_COLOR_CONV_MODE, typeof(int), (int)ColorMode.SimpleColor,
                     //    (int)ColorMode.IIgsRGB, 0, (int)ColorMode.SimpleColor),
                     //new VisParamDescr("Test Float",
                     //    "floaty", typeof(float), -5.0f, 5.0f, 0, 0.1f),
+                }),
+            new VisDescr(VIS_GEN_BITMAP_GRID, "Apple II Hi-Res Sprite Sheet", VisDescr.VisType.Bitmap,
+                new VisParamDescr[] {
+                    new VisParamDescr("File offset (hex)",
+                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
+                    new VisParamDescr("Cell width (in bytes)",
+                        P_ITEM_BYTE_WIDTH, typeof(int), 1, 40, 0, 1),
+                    new VisParamDescr("Cell height",
+                        P_ITEM_HEIGHT, typeof(int), 1, 192, 0, 1),
+                    new VisParamDescr("Column stride (bytes)",
+                        P_COL_STRIDE, typeof(int), 0, 1024, 0, 0),
+                    new VisParamDescr("Row stride (bytes)",
+                        P_ROW_STRIDE, typeof(int), 0, 1024, 0, 0),
+                    new VisParamDescr("Cell stride (bytes)",
+                        P_CELL_STRIDE, typeof(int), 0, 4096, 0, 0),
+                    new VisParamDescr("Number of items",
+                        P_COUNT, typeof(int), 1, 1024, 0, 64),
+                    new VisParamDescr("Color",
+                        P_IS_COLOR, typeof(bool), 0, 0, 0, true),
+                    new VisParamDescr("First col odd",
+                        P_IS_FIRST_ODD, typeof(bool), 0, 0, 0, false),
+                    new VisParamDescr("High bit flipped",
+                        P_IS_HIGH_BIT_FLIPPED, typeof(bool), 0, 0, 0, false),
                 }),
             new VisDescr(VIS_GEN_BITMAP_FONT, "Apple II Hi-Res Bitmap Font", VisDescr.VisType.Bitmap,
                 new VisParamDescr[] {
@@ -122,6 +150,8 @@ namespace RuntimeData.Apple {
             switch (descr.Ident) {
                 case VIS_GEN_BITMAP:
                     return GenerateBitmap(parms);
+                case VIS_GEN_BITMAP_GRID:
+                    return GenerateBitmapGrid(parms);
                 case VIS_GEN_BITMAP_FONT:
                     return GenerateBitmapFont(parms);
                 case VIS_GEN_HR_SCREEN:
@@ -140,6 +170,7 @@ namespace RuntimeData.Apple {
             int rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
             bool isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
             bool isFirstOdd = Util.GetFromObjDict(parms, P_IS_FIRST_ODD, false);
+            bool isHighBitFlipped = Util.GetFromObjDict(parms, P_IS_HIGH_BIT_FLIPPED, false);
             int colorConvMode = !isColor ? (int)ColorMode.Mono :
                 Util.GetFromObjDict(parms, P_COLOR_CONV_MODE, (int)ColorMode.SimpleColor);
 
@@ -178,8 +209,27 @@ namespace RuntimeData.Apple {
             SetHiResPalette(vb);
 
             RenderBitmap(mFileData, offset, byteWidth, height, colStride, rowStride,
-                (ColorMode)colorConvMode, isFirstOdd, vb, 0, 0);
+                (ColorMode)colorConvMode, isFirstOdd, isHighBitFlipped, vb, 0, 0);
             return vb;
+        }
+
+        private IVisualization2d GenerateBitmapGrid(ReadOnlyDictionary<string, object> parms) {
+            int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
+            int itemByteWidth = Util.GetFromObjDict(parms, P_ITEM_BYTE_WIDTH, 1);
+            int itemHeight = Util.GetFromObjDict(parms, P_ITEM_HEIGHT, 8);
+            int colStride = Util.GetFromObjDict(parms, P_COL_STRIDE, 0);
+            int rowStride = Util.GetFromObjDict(parms, P_ROW_STRIDE, 0);
+            int cellStride = Util.GetFromObjDict(parms, P_CELL_STRIDE, 0);
+            int count = Util.GetFromObjDict(parms, P_COUNT, 96);
+            bool isColor = Util.GetFromObjDict(parms, P_IS_COLOR, true);
+            bool isFirstOdd = Util.GetFromObjDict(parms, P_IS_FIRST_ODD, false);
+            bool isHighBitFlipped = Util.GetFromObjDict(parms, P_IS_HIGH_BIT_FLIPPED, false);
+
+            ColorMode colorConvMode = !isColor ? ColorMode.Mono :
+                (ColorMode)Util.GetFromObjDict(parms, P_COLOR_CONV_MODE, (int)ColorMode.SimpleColor);
+
+            return GenerateGrid(offset, itemByteWidth, itemHeight, colStride, rowStride,
+                cellStride, count, colorConvMode, isFirstOdd, isHighBitFlipped);
         }
 
         private IVisualization2d GenerateBitmapFont(ReadOnlyDictionary<string, object> parms) {
@@ -188,15 +238,45 @@ namespace RuntimeData.Apple {
             int itemHeight = Util.GetFromObjDict(parms, P_ITEM_HEIGHT, 8);
             int count = Util.GetFromObjDict(parms, P_COUNT, 96);
 
+            return GenerateGrid(offset, itemByteWidth, itemHeight, 0, 0, 0, count,
+                ColorMode.Mono, false, false);
+        }
+
+        private IVisualization2d GenerateGrid(int offset, int itemByteWidth, int itemHeight,
+                int colStride, int rowStride, int cellStride, int count,
+                ColorMode colorConvMode, bool isFirstOdd, bool isHighBitFlipped) {
+
+            // We allow the stride entries to be zero to indicate a "dense" bitmap.
+            if (colStride == 0) {
+                colStride = 1;
+            }
+            if (rowStride == 0) {
+                rowStride = itemByteWidth * colStride;
+            }
+            if (cellStride == 0) {
+                cellStride = rowStride * itemHeight;
+            }
+
             if (offset < 0 || offset >= mFileData.Length ||
                     itemByteWidth <= 0 || itemByteWidth > MAX_DIM ||
-                    itemHeight <= 0 || itemHeight > MAX_DIM) {
+                    itemHeight <= 0 || itemHeight > MAX_DIM ||
+                    count <= 0 || count > MAX_DIM) {
                 // should be caught by editor
                 mAppRef.ReportError("Invalid parameter");
                 return null;
             }
 
-            int lastOffset = offset + itemByteWidth * itemHeight * count - 1;
+            if (colStride <= 0 || colStride > MAX_DIM) {
+                mAppRef.ReportError("Invalid column stride");
+                return null;
+            }
+            if (rowStride < itemByteWidth * colStride - (colStride - 1) || rowStride > MAX_DIM) {
+                mAppRef.ReportError("Invalid row stride");
+                return null;
+            }
+
+            int lastOffset = offset + (cellStride * (count - 1)) +
+                rowStride * itemHeight - (colStride - 1) - 1;
             if (lastOffset >= mFileData.Length) {
                 mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
@@ -221,18 +301,10 @@ namespace RuntimeData.Apple {
 
             int cellx = 1;
             int celly = 1;
-
             for (int idx = 0; idx < count; idx++) {
-
-                //byte color = (byte)(1 + idx % 6);
-                //for (int y = 0; y < itemHeight; y++) {
-                //    for (int x = 0; x < itemByteWidth * 7; x++) {
-                //        vb.SetPixelIndex(cellx + x, celly + y, color);
-                //    }
-                //}
-                RenderBitmap(mFileData, offset + idx * itemByteWidth * itemHeight,
-                    itemByteWidth, itemHeight, 1, itemByteWidth,
-                    ColorMode.Mono, false,
+                RenderBitmap(mFileData, offset + idx * cellStride,
+                    itemByteWidth, itemHeight, colStride, rowStride,
+                    colorConvMode, isFirstOdd, isHighBitFlipped,
                     vb, cellx, celly);
 
                 cellx += itemByteWidth * 7 + 1;
@@ -296,7 +368,7 @@ namespace RuntimeData.Apple {
             VisBitmap8 vb = new VisBitmap8(HR_WIDTH, HR_HEIGHT);
             SetHiResPalette(vb);
             RenderBitmap(buf, 0, HR_BYTE_WIDTH, HR_HEIGHT, 1, HR_BYTE_WIDTH,
-                isColor ? ColorMode.SimpleColor : ColorMode.Mono, false,
+                isColor ? ColorMode.SimpleColor : ColorMode.Mono, false, false,
                 vb, 0, 0);
             return vb;
         }
@@ -319,12 +391,14 @@ namespace RuntimeData.Apple {
         /// <param name="colorMode">Color conversion mode.</param>
         /// <param name="isFirstOdd">If true, render as if we're starting on an odd column.
         ///   This affects the colors.</param>
+        /// <param name="isHighBitFlipped">If true, render as if the high bit has the
+        ///   opposite value.  This affects the colors.</param>
         /// <param name="vb">Output bitmap object.</param>
         /// <param name="xstart">Initial X position in the output.</param>
         /// <param name="ystart">Initial Y position in the output.</param>
         private void RenderBitmap(byte[] data, int offset, int byteWidth, int height,
                 int colStride, int rowStride, ColorMode colorMode, bool isFirstOdd,
-                VisBitmap8 vb, int xstart, int ystart) {
+                bool isHighBitFlipped, VisBitmap8 vb, int xstart, int ystart) {
             int bx = xstart;
             int by = ystart;
             switch (colorMode) {
@@ -372,7 +446,7 @@ namespace RuntimeData.Apple {
                                 bool hiBitSet = (val & 0x80) != 0;
 
                                 for (int bit = 0; bit < 7; bit++) {
-                                    hiFlags[idx] = hiBitSet;
+                                    hiFlags[idx] = hiBitSet ^ isHighBitFlipped;
                                     lineBits[idx] = (val & 0x01) != 0;
                                     idx++;
                                     val >>= 1;
@@ -448,7 +522,7 @@ namespace RuntimeData.Apple {
                                 bool hiBitSet = (val & 0x80) != 0;
 
                                 for (int bit = 0; bit < 7; bit++) {
-                                    hiFlags[idx] = hiBitSet;
+                                    hiFlags[idx] = hiBitSet ^ isHighBitFlipped;
                                     lineBits[idx] = (val & 0x01) != 0;
                                     idx++;
                                     val >>= 1;

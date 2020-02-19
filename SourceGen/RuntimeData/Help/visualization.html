@@ -131,15 +131,20 @@ height as parameters.  Offsets are handled as they are elsewhere, i.e.
 always in hexadecimal, with a leading '+'.
 Some less-common parameters include:</p>
 <ul>
-  <li><b>Row stride</b> - number of bytes used to hold a row.  This
-    is used when a row has padding on the end, e.g. a bitmap that's
-    7 bytes wide might be padded to 8 for easy indexing.  If you set
-    this to zero the visualizer will default to no padding
-    (stride == width).</li>
   <li><b>Column stride</b> - number of bytes used to hold a column.
     This is uncommon, but could be used if (say) a pair of bitmaps
     was stored with interleaved bytes.  If you set this to zero the
-    visualizer will default to no interleave (stride == 1).</li>
+    visualizer will default to no interleave (col_stride = 1).</li>
+  <li><b>Row stride</b> - number of bytes between the start of each
+    row.  This is used when a row has padding on the end, e.g. a
+    bitmap that's 7 bytes wide might be padded to 8 for easy indexing,
+    or when bitmap data is interleaved.  If you set this to zero the
+    visualizer will default to no padding
+    (row_stride = width * column_stride).</li>
+  <li><b>Cell stride</b> - for multi-bitmap data like a font or sprite
+    sheet, this determines the number of bytes between the start of
+    one item and the next.  If set to zero a "dense" arrangement is
+    assumed (cell_stride = row_stride * item_height).</li>
 </ul>
 
 <p>Remember that this is a disassembler, not an image converter.  The
@@ -147,19 +152,23 @@ results do not need to be perfectly accurate to be useful when disassembling
 code.</p>
 
 
-<h3>Apple II - Apple/VisHiRes</h3>
+<h3>Apple II - Apple/VisHiRes and Apple/VisShapeTable</h3>
 
 <p>There is no standard format for small hi-res bitmaps, but certain
-arrangements are common.  The script defines three generators:</p>
+arrangements are common.  The VisHiRes script defines four generators:</p>
 
 <ul>
   <li><b>Hi-Res Bitmap</b> - converts an MxN row-major bitmap.</li>
-  <li><b>Hi-Res Bitmap Font</b> - converts a series of MxN row-major
-    bitmaps.  This is intended for hi-res fonts, which are typically
-    8 bytes per entry, stored one after another.  These are always
-    converted as monochrome, and have a 1-pixel transparent gap
-    between elements.  (This also works for Apple /// fonts, but
-    currently ignores the high bit in each byte.)</li>
+  <li><b>Hi-Res Sprite Sheet</b> - converts a series of bitmaps and
+    renders them in a grid.  Useful for games that use cell
+    animation.  The generated bitmap has a 1-pixel transparent gap
+    between elements.</li>
+  <li><b>Hi-Res Bitmap Font</b> - a simplified version of the
+    Sprite Sheet, intended for the common 7x8 monochrome fonts.
+    Most fonts have 96 or 128 glyphs, though some drop the last
+    character.
+    (This also works for Apple /// fonts, but currently ignores
+    the high bit in each byte.)</li>
   <li><b>Hi-Res Screen Image</b> - used for 8KiB screen images.  The
     data is linearized and converted to a 280x192 bitmap.  Because
     images are relatively large, the generator does not require them
@@ -172,12 +181,19 @@ arrangements are common.  The script defines three generators:</p>
 pixels (with some hand-waving).</p>
 
 <p>In addition to offset, dimensions, and stride values, the bitmap
-converter has a checkbox for monochrome or color, and a checkbox that
-will cause the first byte to be treated as an odd column rather than
-an event one.  The odd/even setting affects green/purple and orange/blue,
-but has no effect on black or white.</p>
+converter has a checkbox for monochrome or color, and two checkboxes
+that affect the color.  The first causes the first byte to be treated
+as being in an odd column rather than an even one, which affects
+green vs. purple and orange vs. blue.  The second flips the high bits
+on every byte, switching green vs. orange and purple vs. blue.
+Neither has any effect on black &amp; white bitmaps.</p>
 <p>The converter generates one output pixel for every source pixel, so
-half-pixel shifts are not rendered.</p>
+half-pixel shifts are not represented.</p>
+
+<p>The VisShapeTable script renders Applesoft shape tables, which can
+have multiple vector shapes.  The only parameter other than the offset
+is the shape number.</p>
+
 
 <h3>Atari 2600 - Atari/Vis2600</h3>
 
