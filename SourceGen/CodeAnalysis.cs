@@ -1044,7 +1044,7 @@ namespace SourceGen {
                     " label='" + label + "'; file length is" + mFileData.Length);
             }
 
-            if (!mAddrMap.IsContiguous(offset, length)) {
+            if (!mAddrMap.IsSingleAddrRange(offset, length)) {
                 LogW(offset, "SIDF: format crosses address map boundary (len=" + length + ")");
                 return false;
             }

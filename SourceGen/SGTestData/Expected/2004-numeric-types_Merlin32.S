@@ -58,10 +58,12 @@ LABEL    hex   00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff 
          dfb   $81
          ds    2,$dd      ;incorrect alignment
          ds    \
-         ds    16,$82
+         ds    8,$82
+         org   $1408
+         ds    8,$82      ;note no-op .ORG
          ds    8,$83
          org   $1428
-         ds    8,$83
+         ds    8,$83      ;meaningful .ORG
          ds    8,$84
 UserLabel ds   8,$84
          ds    8,$85

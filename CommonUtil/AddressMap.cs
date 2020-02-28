@@ -24,13 +24,13 @@ namespace CommonUtil {
     /// multiple ORG directives.
     /// 
     /// It's possible to generate code that would overlap once relocated at run time,
-    /// which means a given address could map to multiple offsets.  For this reason
-    /// it's useful to know the offset of the referring code when evaluating a
-    /// reference, so that a "local" match can take priority.
+    /// which means a given address can map to multiple offsets (overlays, bank-switched
+    /// RAM, etc).  For this reason it's useful to know the offset of the referring code
+    /// when evaluating a reference, so that "local" matches take priority.
     /// </summary>
     /// <remarks>
     /// This was part of the main SourceGen application, but I want to share it with
-    /// script extensions.
+    /// the extension script mechanism.
     /// </remarks>
     public class AddressMap : IEnumerable<AddressMap.AddressMapEntry> {
         public const int NO_ENTRY_ADDR = -1;    // address value indicating no entry
@@ -44,30 +44,18 @@ namespace CommonUtil {
         /// entry in the list.  It's convenient to maintain it explicitly however, as
         /// the list is read far more often than it is updated.
         /// 
-        /// Entries are mutable, but must only be altered by AddressMap.  Don't retain
-        /// instances of this across other activity.
+        /// Instances are immutable.
         /// </summary>
-        /// <remarks>
-        /// TODO: make this immutable.  That should allow us to eliminate the copy constructor,
-        /// since we won't need to make copies of things.
-        /// </remarks>
         [Serializable]
         public class AddressMapEntry {
-            public int Offset { get; set; }
-            public int Addr { get; set; }
-            public int Length { get; set; }
+            public int Offset { get; private set; }
+            public int Addr { get; private set; }
+            public int Length { get; private set; }
 
             public AddressMapEntry(int offset, int addr, int len) {
                 Offset = offset;
                 Addr = addr;
                 Length = len;
-            }
-
-            // Copy constructor.
-            public AddressMapEntry(AddressMapEntry src) {
-                Offset = src.Offset;
-                Addr = src.Addr;
-                Length = src.Length;
             }
         }
 
@@ -99,7 +87,7 @@ namespace CommonUtil {
         public AddressMap(List<AddressMapEntry> entries) {
             mTotalLength = entries[entries.Count - 1].Offset + entries[entries.Count - 1].Length;
             foreach (AddressMapEntry ent in entries) {
-                mAddrList.Add(new AddressMapEntry(ent));
+                mAddrList.Add(ent);
             }
             DebugValidate();
         }
@@ -111,7 +99,7 @@ namespace CommonUtil {
         public List<AddressMapEntry> GetEntryList() {
             List<AddressMapEntry> newList = new List<AddressMapEntry>(mAddrList.Count);
             foreach (AddressMapEntry ent in mAddrList) {
-                newList.Add(new AddressMapEntry(ent));
+                newList.Add(ent);
             }
             return newList;
         }
@@ -186,8 +174,7 @@ namespace CommonUtil {
                 AddressMapEntry ad = mAddrList[i];
                 if (ad.Offset == offset) {
                     // update existing
-                    ad.Addr = addr;
-                    mAddrList[i] = ad;
+                    mAddrList[i] = new AddressMapEntry(ad.Offset, addr, ad.Length);
                     return;
                 } else if (ad.Offset > offset) {
                     // The i'th entry is one past the interesting part.
@@ -199,8 +186,7 @@ namespace CommonUtil {
             AddressMapEntry prev = mAddrList[i - 1];
             int prevOldLen = prev.Length;
             int prevNewLen = offset - prev.Offset;
-            prev.Length = prevNewLen;
-            mAddrList[i - 1] = prev;
+            mAddrList[i - 1] = new AddressMapEntry(prev.Offset, prev.Addr, prevNewLen);
 
             mAddrList.Insert(i,
                 new AddressMapEntry(offset, addr, prevOldLen - prevNewLen));
@@ -223,8 +209,8 @@ namespace CommonUtil {
                 if (mAddrList[i].Offset == offset) {
                     // Add the length to the previous entry.
                     AddressMapEntry prev = mAddrList[i - 1];
-                    prev.Length += mAddrList[i].Length;
-                    mAddrList[i - 1] = prev;
+                    mAddrList[i - 1] = new AddressMapEntry(prev.Offset, prev.Addr,
+                        prev.Length + mAddrList[i].Length);
 
                     mAddrList.RemoveAt(i);
                     DebugValidate();
@@ -297,13 +283,14 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Checks to see if the specified range of offsets is in a contiguous range of
-        /// addresses.  Use this to see if something crosses an address-change boundary.
+        /// Checks to see if the specified range of offsets is in a single address range.  Use
+        /// this to see if something crosses an address-change boundary.  This does not
+        /// handle no-op address changes specially.
         /// </summary>
         /// <param name="offset">Start offset.</param>
         /// <param name="length">Length of region.</param>
         /// <returns>True if the data area is unbroken.</returns>
-        public bool IsContiguous(int offset, int length) {
+        public bool IsSingleAddrRange(int offset, int length) {
             Debug.Assert(offset >= 0 && offset < mTotalLength);
             Debug.Assert(length > 0 && offset + length <= mTotalLength);
             return (IndexForOffset(offset) == IndexForOffset(offset + length - 1));

@@ -2479,7 +2479,7 @@ namespace SourceGen {
                     // This must match what GroupedOffsetSetFromSelected() does.
                     if (!mProject.UserLabels.ContainsKey(nextOffset) &&
                             !mProject.HasCommentNoteOrVis(nextOffset) &&
-                            thisAttr.Address == nextAttr.Address - 1) {
+                            mProject.AddrMap.IsSingleAddrRange(nextOffset - 1, 2)) {
                         // Good to go.
                         Debug.WriteLine("Grabbing second byte from +" + nextOffset.ToString("x6"));
                         trs.Add(nextOffset, rng.Type);
@@ -3362,6 +3362,9 @@ namespace SourceGen {
         /// or a string.  It should not be possible to select part of a formatted section,
         /// unless the user has been playing weird games with type hints to get overlapping
         /// format descriptors.
+        ///
+        /// The type values used in the TypedRangeSet may not be contiguous.  They're only
+        /// there to create group separation from otherwise contiguous address ranges.
         /// </remarks>
         /// <returns>TypedRangeSet with all offsets.</returns>
         private TypedRangeSet GroupedOffsetSetFromSelected() {
@@ -3394,11 +3397,17 @@ namespace SourceGen {
                 if (attr.Address != expectedAddr) {
                     // For a contiguous selection, this should only happen if there's a .ORG
                     // address change.  For non-contiguous selection this is expected.  In the
-                    // latter case, incrementing the group number is unnecessary but harmless.
-                    Debug.WriteLine("Address break: " + attr.Address + " vs. " + expectedAddr);
-                    //Debug.Assert(mProject.AddrMap.Get(offset) >= 0);
-
+                    // latter case, incrementing the group number is unnecessary but harmless
+                    // (the TypedRangeSet splits at the gap).
+                    //Debug.WriteLine("Address break: $" + attr.Address.ToString("x4") + " vs. $"
+                    //    + expectedAddr.ToString("x4"));
                     expectedAddr = attr.Address;
+                    groupNum++;
+                } else if (offset > 0 && !mProject.AddrMap.IsSingleAddrRange(offset - 1, 2)) {
+                    // Was the previous byte in a different address range?  This is only
+                    // strictly necessary if the previous byte was in the selection set (which
+                    // it won't be if the selection starts at the beginning of an address
+                    // range), but bumping the group number is harmless if it wasn't.
                     groupNum++;
                 } else if (mProject.UserLabels.ContainsKey(offset)) {
                     //if (mProject.GetAnattrib(offset).Symbol != null) {

@@ -533,8 +533,8 @@ namespace SourceGen {
             int startOffset = -1;
             for (int offset = 0; offset < mAnattribs.Length; ) {
                 // We want to find a contiguous series of offsets which are not known
-                // to hold code or data.  We stop if we encounter a user-defined label
-                // or format descriptor.
+                // to hold code or data.  We stop if we encounter a user-defined label,
+                // format descriptor, or address override.
                 Anattrib attr = mAnattribs[offset];
 
                 if (attr.IsInstruction || attr.IsInlineData || attr.IsDataStart) {
@@ -572,19 +572,17 @@ namespace SourceGen {
                     }
                     offset++;
 
-                    // Check to see if the address has changed from the previous entry.
-                    // TODO(BUG): this test is insufficient -- they might have a .ORG that
-                    //   doesn't change the address.  It's currently harmless because the
-                    //   .ORG is a no-op and gets swallowed up by the asm generator, but it
-                    //   looks wrong and could break things.
+                    // Check to see if we just crossed an address change.
                     if (offset < mAnattribs.Length &&
-                            mAnattribs[offset-1].Address + 1 != mAnattribs[offset].Address) {
-                        // Must be an ORG here.  Scan previous region.
+                            !mProject.AddrMap.IsSingleAddrRange(offset - 1, 2)) {
+                        // Must be an ORG here.  End region and scan.
                         AnalyzeRange(startOffset, offset - 1);
                         startOffset = -1;
                     }
                 }
             }
+
+            // Do the last bit.
             if (startOffset >= 0) {
                 AnalyzeRange(startOffset, mAnattribs.Length - 1);
             }

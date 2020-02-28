@@ -969,7 +969,7 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (!AddrMap.IsContiguous(offset, dfd.Length)) {
+                if (!AddrMap.IsSingleAddrRange(offset, dfd.Length)) {
                     string msg = "descriptor straddles address change; len=" + dfd.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(

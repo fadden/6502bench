@@ -63,10 +63,13 @@ LABEL   .byte   $00,$11,$22,$33,$44,$55,$66,$77,$88,$99,$aa,$bb,$cc,$dd,$ee,$ff 
         .byte   $81
         .fill   2,$dd      ;incorrect alignment
         .align  256,$00
-        .fill   16,$82
+        .fill   8,$82
+        .logical $1408
+        .fill   8,$82      ;note no-op .ORG
         .fill   8,$83
+        .here
         .logical $1428
-        .fill   8,$83
+        .fill   8,$83      ;meaningful .ORG
         .fill   8,$84
 UserLabel .fill 8,$84
         .fill   8,$85

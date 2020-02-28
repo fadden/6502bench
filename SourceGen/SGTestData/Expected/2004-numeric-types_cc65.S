@@ -62,11 +62,14 @@ LABEL:   .byte   $00,$11,$22,$33,$44,$55,$66,$77,$88,$99,$aa,$bb,$cc,$dd,$ee,$ff
          .byte   $81
          .res    2,$dd      ;incorrect alignment
          .res    140,$00
-         .res    16,$82
+         .res    8,$82
+;         .segment "SEG001"
+         .org    $1408
+         .res    8,$82      ;note no-op .ORG
          .res    8,$83
 ;         .segment "SEG002"
          .org    $1428
-         .res    8,$83
+         .res    8,$83      ;meaningful .ORG
          .res    8,$84
 UserLabel: .res  8,$84
          .res    8,$85

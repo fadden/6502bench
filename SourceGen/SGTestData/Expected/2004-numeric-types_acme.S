@@ -59,10 +59,13 @@ LABEL   !hex    00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
         !byte   $81
         !fill   2,$dd      ;incorrect alignment
         !align  255,0,$00
-        !fill   16,$82
+        !fill   8,$82
+        !pseudopc $1408 {
+        !fill   8,$82      ;note no-op .ORG
         !fill   8,$83
+        } ;!pseudopc
         !pseudopc $1428 {
-        !fill   8,$83
+        !fill   8,$83      ;meaningful .ORG
         !fill   8,$84
 UserLabel !fill 8,$84
         !fill   8,$85
