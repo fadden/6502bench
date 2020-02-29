@@ -900,6 +900,9 @@ namespace SourceGen.WpfGui {
                 // Seek back to the start of the instruction or data item if the operand points
                 // into the middle of one.  This is *not* the same as the "nearby" search,
                 // which will traverse multiple items to find a match.
+                // TODO: this can create a situation where the code list shows FUBAR-1 but we
+                // edit an earlier label, if the earlier label has a multi-byte format that
+                // includes the target address.  (An example can be found in 2024-ui-edge-cases.)
                 mEditedLabelOffset =
                     DataAnalysis.GetBaseOperandOffset(mProject, attr.OperandOffset);
                 mLabelTargetAddress = mProject.GetAnattrib(mEditedLabelOffset).Address;
