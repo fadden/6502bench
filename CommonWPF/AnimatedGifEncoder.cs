@@ -122,14 +122,16 @@ namespace CommonWPF {
             }
 
             //
-            // Step 2: determine the size of the largest image.  This will become the logical
-            // size of the animated GIF.
+            // Step 2: determine the dimensions of the largest image.  This will become the
+            // logical size of the animated GIF.
             //
             // TODO(maybe): We have an opportunity to replace all of the local color tables with a
             // single global color table.  This is only possible if all of the local tables are
             // identical and the transparency values in the GCE also match up.  (Well, it's
             // otherwise *possible*, but we'd need to decode, update palettes and pixels, and
             // re-encode.)
+            // TODO(maybe): add an arg to Save() that causes it to use the first bitmap's
+            // palette as the global palette.
             //
             foreach (UnpackedGif gif in gifs) {
                 //gif.DebugDump();

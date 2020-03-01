@@ -149,12 +149,28 @@ namespace PluginCommon {
         /// <summary>
         /// Executes the specified visualization generator with the supplied parameters.
         /// </summary>
-        /// <param name="descr">VisGen identifier.</param>
+        /// <param name="descr">Visualization generator descriptor.</param>
         /// <param name="parms">Parameter set.</param>
         /// <returns>2D visualization object reference, or null if something went
         ///   wrong (unknown ident, bad parameters, etc).  By convention, an error
         ///   message is reported through the IApplication ReportError interface.</returns>
         IVisualization2d Generate2d(VisDescr descr, ReadOnlyDictionary<string, object> parms);
+    }
+
+    /// <summary>
+    /// Version 2 of the visualizer interface.  Adds wireframe objects.
+    /// </summary>
+    public interface IPlugin_Visualizer_v2 : IPlugin_Visualizer {
+        /// <summary>
+        /// Executes the specified visualization generator with the supplied parameters.
+        /// </summary>
+        /// <param name="descr">Visualization generator descriptor.</param>
+        /// <param name="parms">Parameter set.</param>
+        /// <returns>Wireframe visualization object reference, or null if something went
+        ///   wrong (unknown ident, bad parameters, etc).  By convention, an error
+        ///   message is reported through the IApplication ReportError interface.</returns>
+        IVisualizationWireframe GenerateWireframe(VisDescr descr,
+            ReadOnlyDictionary<string, object> parms);
     }
 
     /// <summary>
@@ -178,6 +194,7 @@ namespace PluginCommon {
         public enum VisType {
             Unknown = 0,
             Bitmap,             // 2D bitmap
+            Wireframe,          // wireframe mesh
         }
 
         /// <summary>
@@ -302,10 +319,57 @@ namespace PluginCommon {
         /// direct-color images.
         /// Do not modify.
         /// </summary>
-        /// <returns></returns>
         int[] GetPalette();
 
         // TODO(maybe): report pixel aspect ratio?
+    }
+
+    /// <summary>
+    /// Holds raw vertex/edge/normal data collected from a 2D or 3D wireframe mesh.  We use
+    /// a typical right-handed coordinate system (Z comes out of the screen), with the
+    /// expectation that the mesh will be presented such that the object is right-side up
+    /// and facing toward the viewer (nose toward +Z).
+    ///
+    /// All objects will have vertices and edges.  Face normals are optional.
+    /// </summary>
+    /// <remarks>
+    /// The face-normal stuff is designed specifically for Elite, which is one of the very
+    /// few games to use backface removal.
+    ///
+    /// We favor multiple arrays over compound objects for this interface to avoid having
+    /// to define those at the plugin interface level.
+    ///
+    /// TODO(maybe): specify colors for edges.  Not widely used?
+    /// </remarks>
+    public interface IVisualizationWireframe {
+        // Each function returns the specified data.  Do not modify.
+
+        float[] GetVerticesX();
+        float[] GetVerticesY();
+        float[] GetVerticesZ();
+
+        IntPair[] GetEdges();
+
+        float[] GetNormalsX();
+        float[] GetNormalsY();
+        float[] GetNormalsZ();
+
+        IntPair[] GetVertexFaces();
+        IntPair[] GetEdgeFaces();
+    }
+
+    /// <summary>
+    /// Represents a pair of integers.  Immutable.
+    /// </summary>
+    [Serializable]
+    public struct IntPair {
+        public int Val0 { get; private set; }
+        public int Val1 { get; private set; }
+
+        public IntPair(int val0, int val1) {
+            Val0 = val0;
+            Val1 = val1;
+        }
     }
 
     /// <summary>
