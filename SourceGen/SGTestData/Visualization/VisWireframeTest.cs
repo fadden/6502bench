@@ -41,6 +41,12 @@ namespace WireframeTest {
                 new VisParamDescr[] {
                     new VisParamDescr("File offset (hex)",
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
+
+                    // These are interpreted by the main app.
+                    VisWireframe.Param_EulerX("Euler rotation X", 0),
+                    VisWireframe.Param_EulerY("Euler rotation Y", 0),
+                    VisWireframe.Param_EulerZ("Euler rotation Z", 0),
+                    VisWireframe.Param_IsPerspective("Perspective projection", true),
                 }),
         };
 

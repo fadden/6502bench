@@ -697,7 +697,7 @@ namespace SourceGen {
             float dataPerc = (mProject.ByteCounts.DataByteCount * 100.0f) / total;
             float junkPerc = (mProject.ByteCounts.JunkByteCount * 100.0f) / total;
             mMainWin.ByteCountText = string.Format(Res.Strings.STATUS_BYTE_COUNT_FMT,
-                codePerc, dataPerc, junkPerc);
+                total / 1024.0f, codePerc, dataPerc, junkPerc);
         }
 
         #endregion Init and settings

@@ -17,7 +17,8 @@
 "SmartPlpHandling":true},
 
 "PlatformSymbolFileIdentifiers":[],
-"ExtensionScriptFileIdentifiers":["PROJ:VisWireframeTest.cs"],
+"ExtensionScriptFileIdentifiers":["PROJ:VisWireframeTest.cs",
+"RT:Apple/VisHiRes.cs"],
 "ProjectSyms":{
 }},
 
@@ -239,7 +240,30 @@
 "LvTables":{
 },
 
-"Visualizations":[],
+"Visualizations":[{
+"Tag":"wf_data",
+"VisGenIdent":"wireframe-test",
+"VisGenParams":{
+"offset":10,
+"_eulerRotX":0,
+"_eulerRotY":0,
+"_eulerRotZ":0,
+"_isPerspective":true}},
+
+{
+"Tag":"bmp_data",
+"VisGenIdent":"apple2-hi-res-bitmap",
+"VisGenParams":{
+"offset":10,
+"byteWidth":3,
+"height":11,
+"colStride":0,
+"rowStride":0,
+"isColor":true,
+"isFirstOdd":false,
+"isHighBitFlipped":false}}],
 "VisualizationAnimations":[],
 "VisualizationSets":{
-}}
+"10":{
+"Tags":["wf_data",
+"bmp_data"]}}}

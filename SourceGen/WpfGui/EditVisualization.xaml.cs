@@ -302,8 +302,8 @@ namespace SourceGen.WpfGui {
             ClearValue(SizeToContentProperty);
             SetValue(MinWidthProperty, this.Width);
             SetValue(MinHeightProperty, this.Height);
-            previewImage.ClearValue(WidthProperty);
-            previewImage.ClearValue(HeightProperty);
+            previewGrid.ClearValue(WidthProperty);
+            previewGrid.ClearValue(HeightProperty);
 
             tagTextBox.SelectAll();
             tagTextBox.Focus();
@@ -450,13 +450,25 @@ namespace SourceGen.WpfGui {
                 // Invoke the plugin.
                 PluginErrMessage = string.Empty;
 
-                IVisualization2d vis2d;
+                IVisualization2d vis2d = null;
+                IVisualizationWireframe visWire = null;
+                ReadOnlyDictionary<string, object> parms = CreateVisGenParams();
                 try {
                     IPlugin_Visualizer plugin =
                         (IPlugin_Visualizer)mProject.GetPlugin(item.ScriptIdent);
-                    vis2d = plugin.Generate2d(item.VisDescriptor, CreateVisGenParams());
-                    if (vis2d == null) {
-                        Debug.WriteLine("Vis generator returned null");
+                    if (item.VisDescriptor.VisualizationType == VisDescr.VisType.Bitmap) {
+                        vis2d = plugin.Generate2d(item.VisDescriptor, parms);
+                        if (vis2d == null) {
+                            Debug.WriteLine("Vis2d generator returned null");
+                        }
+                    } else if (item.VisDescriptor.VisualizationType == VisDescr.VisType.Wireframe) {
+                        IPlugin_Visualizer_v2 plugin2 = (IPlugin_Visualizer_v2)plugin;
+                        visWire = plugin2.GenerateWireframe(item.VisDescriptor, parms);
+                        if (visWire == null) {
+                            Debug.WriteLine("VisWire generator returned null");
+                        }
+                    } else {
+                        Debug.Assert(false);
                     }
                 } catch (Exception ex) {
                     Debug.WriteLine("Vis generation failed: " + ex);
@@ -465,7 +477,7 @@ namespace SourceGen.WpfGui {
                         LastPluginMessage = ex.Message;
                     }
                 }
-                if (vis2d == null) {
+                if (vis2d == null && visWire == null) {
                     previewImage.Source = sBadParamsImage;
                     if (!string.IsNullOrEmpty(LastPluginMessage)) {
                         // Report the last message we got as an error.
@@ -474,10 +486,16 @@ namespace SourceGen.WpfGui {
                         PluginErrMessage = (string)FindResource("str_VisGenFailed");
                     }
                     IsValid = false;
-                } else {
+                } else if (vis2d != null) {
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
+                    wireframePath.Data = new GeometryGroup();
                     BitmapDimensions = string.Format("{0}x{1}",
                         previewImage.Source.Width, previewImage.Source.Height);
+                } else {
+                    previewImage.Source = Visualization.BLACK_IMAGE;
+                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms,
+                        previewImage.ActualWidth / 2);
+                    BitmapDimensions = "n/a";
                 }
             }
 

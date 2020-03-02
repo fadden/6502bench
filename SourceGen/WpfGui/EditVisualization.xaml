@@ -134,8 +134,13 @@ limitations under the License.
         <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Stretch"
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
                 Background="{StaticResource CheckerBackground}">
-            <Image Name="previewImage" Width="400" Height="400" Source="/Res/RedX.png"
-                   RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+            <Grid Name="previewGrid" Width="400" Height="400">
+                <Image Name="previewImage" Source="/Res/RedX.png"
+                        RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                <Viewbox>
+                    <Path Name="wireframePath" Stroke="White"/>
+                </Viewbox>
+            </Grid>
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">

@@ -20,9 +20,27 @@ using System.Diagnostics;
 namespace PluginCommon {
     /// <summary>
     /// Wireframe mesh with optional backface normals, for use with visualization generators.
+    /// Call the various functions to add data, then call Validate() to check for broken
+    /// references.
     /// </summary>
     [Serializable]
     public class VisWireframe : IVisualizationWireframe {
+        public static VisParamDescr Param_IsPerspective(string uiLabel, bool defaultVal) {
+            return new VisParamDescr(uiLabel, "_isPerspective", typeof(bool), 0, 0, 0, defaultVal);
+        }
+        public static VisParamDescr Param_IsBackfaceRemoved(string uiLabel, bool defaultVal) {
+            return new VisParamDescr(uiLabel, "_isBackfaceRemoved", typeof(bool), 0, 0, 0, defaultVal);
+        }
+        public static VisParamDescr Param_EulerX(string uiLabel, int defaultVal) {
+            return new VisParamDescr(uiLabel, "_eulerRotX", typeof(int), 0, 359, 0, defaultVal);
+        }
+        public static VisParamDescr Param_EulerY(string uiLabel, int defaultVal) {
+            return new VisParamDescr(uiLabel, "_eulerRotY", typeof(int), 0, 359, 0, defaultVal);
+        }
+        public static VisParamDescr Param_EulerZ(string uiLabel, int defaultVal) {
+            return new VisParamDescr(uiLabel, "_eulerRotZ", typeof(int), 0, 359, 0, defaultVal);
+        }
+
         private List<float> mVerticesX = new List<float>();
         private List<float> mVerticesY = new List<float>();
         private List<float> mVerticesZ = new List<float>();
@@ -56,14 +74,15 @@ namespace PluginCommon {
         }
 
         /// <summary>
-        /// Adds the edge to the list.
+        /// Adds an edge to the list.  The referenced vertices do not need to be defined
+        /// before calling.
         /// </summary>
         /// <param name="index0">Index of first vertex.</param>
         /// <param name="index1">Index of second vertex.</param>
         /// <returns>Edge index.  Indices start at zero and count up.</returns>
         public int AddEdge(int index0, int index1) {
-            Debug.Assert(index0 >= 0 && index0 < mVerticesX.Count);
-            Debug.Assert(index1 >= 0 && index1 < mVerticesX.Count);
+            Debug.Assert(index0 >= 0);
+            Debug.Assert(index1 >= 0);
             mEdges.Add(new IntPair(index0, index1));
             return mEdges.Count - 1;
         }
@@ -84,24 +103,26 @@ namespace PluginCommon {
         }
 
         /// <summary>
-        /// Marks a vertex's visibility as being tied to the specified face.  The face does
-        /// not need to be in the list yet.
+        /// Marks a vertex's visibility as being tied to the specified face.  The vertices and
+        /// faces being referenced do not need to exist yet.
         /// </summary>
         /// <param name="vertexIndex">Index of vertex.</param>
         /// <param name="faceIndex">Index of face.</param>
         public void AddVertexFace(int vertexIndex, int faceIndex) {
-            Debug.Assert(vertexIndex >= 0 && vertexIndex < mVerticesX.Count);
+            Debug.Assert(vertexIndex >= 0);
+            Debug.Assert(faceIndex >= 0);
             mVertexFaces.Add(new IntPair(vertexIndex, faceIndex));
         }
 
         /// <summary>
-        /// Marks an edge's visibility as being tied to the specified face.  The face does
-        /// not need to be in the list yet.
+        /// Marks an edge's visibility as being tied to the specified face.  The edges and
+        /// faces being referenced do not need to exist yet.
         /// </summary>
         /// <param name="edgeIndex">Index of edge.</param>
         /// <param name="faceIndex">Index of face.</param>
         public void AddEdgeFace(int edgeIndex, int faceIndex) {
-            Debug.Assert(edgeIndex >= 0 && edgeIndex < mEdges.Count);
+            Debug.Assert(edgeIndex >= 0);
+            Debug.Assert(faceIndex >= 0);
             mEdgeFaces.Add(new IntPair(edgeIndex, faceIndex));
         }
 

@@ -181,7 +181,7 @@ namespace SourceGen.WpfGui {
             EditSelectedItem();
         }
 
-        private void NewBitmapButton_Click(object sender, RoutedEventArgs e) {
+        private void NewVisualizationButton_Click(object sender, RoutedEventArgs e) {
             EditVisualization dlg = new EditVisualization(this, mProject, mFormatter, mOffset,
                 CreateEditedSetList(), null);
             if (dlg.ShowDialog() != true) {
@@ -191,6 +191,10 @@ namespace SourceGen.WpfGui {
             visualizationGrid.SelectedIndex = VisualizationList.Count - 1;
 
             okButton.Focus();
+        }
+
+        private void NewWireframeAnimationButton_Click(object sender, RoutedEventArgs e) {
+            // TODO(xyzzy)
         }
 
         private void NewBitmapAnimationButton_Click(object sender, RoutedEventArgs e) {

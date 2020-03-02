@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -99,6 +100,7 @@ namespace SourceGen {
             VisualizationAnimation.GenerateAnimOverlayImage();
 
         internal static readonly BitmapSource BLANK_IMAGE = GenerateBlankImage();
+        internal static readonly BitmapSource BLACK_IMAGE = GenerateBlackImage();
 
         /// <summary>
         /// Serial number, for reference from other Visualization objects.  Not serialized.
@@ -106,9 +108,10 @@ namespace SourceGen {
         /// <remarks>
         /// This value is only valid in the current session.  It exists because animations
         /// need to refer to other Visualization objects, and doing so by Tag gets sticky
-        /// if a tag gets renamed.  We need a way to uniquely identify a reference to a
+        /// if a Tag gets renamed.  We need a way to uniquely identify a reference to a
         /// Visualization that persists across Tag renames and other edits.  When the objects
-        /// are serialized to the project file we just output the tags.
+        /// are serialized to the project file we don't include the serial, and just reference
+        /// by Tag.
         /// </remarks>
         public int SerialNumber { get; private set; }
 
@@ -191,7 +194,8 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Converts an IVisualization2d to a BitmapSource for display.
+        /// Converts an IVisualization2d to a BitmapSource for display.  The bitmap will be
+        /// the same size as the original content.
         /// </summary>
         public static BitmapSource ConvertToBitmapSource(IVisualization2d vis2d) {
             // Create indexed color palette.
@@ -218,10 +222,67 @@ namespace SourceGen {
             return image;
         }
 
+        /// <summary>
+        /// Generates a BitmapSource from IVisualizationWireframe data.  Useful for thumbnails
+        /// and GIF exports.
+        /// </summary>
+        /// <param name="visWire">Visualization data.</param>
+        /// <param name="parms">Parameter set, for rotations and render options.</param>
+        /// <param name="width">Output bitmap width.</param>
+        /// <param name="height">Output bitmap height.</param>
+        /// <returns></returns>
+        public static BitmapSource GenerateWireframeImage(IVisualizationWireframe visWire,
+                ReadOnlyDictionary<string, object> parms, double width, double height) {
+            // TODO(xyzzy): need to get path into a bitmap for thumbnails / GIFs...; call
+            //  GenerateWireframePath and then render the path
+            // https://stackoverflow.com/a/23582564/294248
+            Debug.WriteLine("Render " + visWire + " at " + width + "x" + height);
+            return null;
+        }
+
+        /// <summary>
+        /// Generates a WPF path from IVisualizationWireframe data.
+        /// </summary>
+        public static GeometryGroup GenerateWireframePath(IVisualizationWireframe visWire,
+                ReadOnlyDictionary<string, object> parms, double scale) {
+            GeometryGroup geo = new GeometryGroup();
+            // This establishes the geometry bounds.  It's a zero-length line segment, so
+            // nothing is actually drawn.
+            Debug.WriteLine("using scale=" + scale);
+            Point corner = new Point(scale + 1, scale + 1);
+            geo.Children.Add(new LineGeometry(corner, corner));
+
+            // TODO(xyzzy): render
+            geo.Children.Add(new LineGeometry(new Point(6, 6), new Point(197, 197)));
+            geo.Children.Add(new LineGeometry(new Point(6, 197), new Point(197, 6)));
+            return geo;
+        }
+
+        /// <summary>
+        /// Returns a bitmap with a single transparent pixel.
+        /// </summary>
         private static BitmapSource GenerateBlankImage() {
             RenderTargetBitmap bmp = new RenderTargetBitmap(1, 1, 96.0, 96.0,
                 PixelFormats.Pbgra32);
             return bmp;
+        }
+
+        /// <summary>
+        /// Returns a bitmap with a single black pixel.
+        /// </summary>
+        private static BitmapSource GenerateBlackImage() {
+            BitmapPalette palette = new BitmapPalette(new List<Color> { Colors.Black });
+            BitmapSource image = BitmapSource.Create(
+                1,
+                1,
+                96.0,
+                96.0,
+                PixelFormats.Indexed8,
+                palette,
+                new byte[] { 0 },
+                1);
+
+            return image;
         }
 
 
