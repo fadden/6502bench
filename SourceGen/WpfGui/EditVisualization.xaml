@@ -134,9 +134,14 @@ limitations under the License.
         <Border Grid.Row="1" BorderThickness="1" HorizontalAlignment="Stretch"
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
                 Background="{StaticResource CheckerBackground}">
+            <!-- explicit width gets cleared after initial window layout -->
             <Grid Name="previewGrid" Width="400" Height="400">
+                <!-- either the image or the path is shown, not both; background is set to
+                transparent for image, black for path -->
                 <Image Name="previewImage" Source="/Res/RedX.png"
                         RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                <!-- ClipToBounds="True" -->
+                <!-- RenderOptions.EdgeMode="Aliased" -->
                 <Viewbox>
                     <Path Name="wireframePath" Stroke="White"/>
                 </Viewbox>

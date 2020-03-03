@@ -472,7 +472,6 @@ namespace SourceGen.WpfGui {
                     }
                 } catch (Exception ex) {
                     Debug.WriteLine("Vis generation failed: " + ex);
-                    vis2d = null;
                     if (string.IsNullOrEmpty(LastPluginMessage)) {
                         LastPluginMessage = ex.Message;
                     }
@@ -487,12 +486,14 @@ namespace SourceGen.WpfGui {
                     }
                     IsValid = false;
                 } else if (vis2d != null) {
+                    previewGrid.Background = null;
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
                     wireframePath.Data = new GeometryGroup();
                     BitmapDimensions = string.Format("{0}x{1}",
                         previewImage.Source.Width, previewImage.Source.Height);
                 } else {
-                    previewImage.Source = Visualization.BLACK_IMAGE;
+                    previewGrid.Background = Brushes.Black;
+                    previewImage.Source = Visualization.BLANK_IMAGE;
                     wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms,
                         previewImage.ActualWidth / 2);
                     BitmapDimensions = "n/a";

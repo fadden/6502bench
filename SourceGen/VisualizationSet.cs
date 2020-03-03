@@ -206,20 +206,33 @@ namespace SourceGen {
                         continue;
                     }
 
-                    IVisualization2d vis2d;
+                    IVisualization2d vis2d = null;
+                    IVisualizationWireframe visWire = null;
+                    ReadOnlyDictionary<string, object> parms =
+                        new ReadOnlyDictionary<string, object>(vis.VisGenParams);
                     try {
-                        vis2d = vplug.Generate2d(visDescr,
-                            new ReadOnlyDictionary<string, object>(vis.VisGenParams));
-                        if (vis2d == null) {
-                            Debug.WriteLine("Vis generator returned null");
+                        if (visDescr.VisualizationType == VisDescr.VisType.Bitmap) {
+                            vis2d = vplug.Generate2d(visDescr, parms);
+                            if (vis2d == null) {
+                                Debug.WriteLine("Vis2d generator returned null");
+                            }
+                        } else if (visDescr.VisualizationType == VisDescr.VisType.Wireframe) {
+                            IPlugin_Visualizer_v2 plugin2 = (IPlugin_Visualizer_v2)vplug;
+                            visWire = plugin2.GenerateWireframe(visDescr, parms);
+                            if (visWire == null) {
+                                Debug.WriteLine("VisWire generator returned null");
+                            }
+                        } else {
+                            Debug.Assert(false);
                         }
                     } catch (Exception ex) {
                         Debug.WriteLine("Vis generation failed: " + ex);
-                        vis2d = null;
                     }
                     if (vis2d != null) {
                         //Debug.WriteLine(" Rendered thumbnail: " + vis.Tag);
                         vis.SetThumbnail(vis2d);
+                    } else if (visWire != null) {
+                        vis.SetThumbnail(visWire, parms);
                     }
                 }
             }

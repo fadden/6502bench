@@ -21,7 +21,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
+using System.Windows.Shapes;
 using CommonUtil;
 using PluginCommon;
 
@@ -100,7 +100,7 @@ namespace SourceGen {
             VisualizationAnimation.GenerateAnimOverlayImage();
 
         internal static readonly BitmapSource BLANK_IMAGE = GenerateBlankImage();
-        internal static readonly BitmapSource BLACK_IMAGE = GenerateBlackImage();
+        //internal static readonly BitmapSource BLACK_IMAGE = GenerateBlackImage();
 
         /// <summary>
         /// Serial number, for reference from other Visualization objects.  Not serialized.
@@ -172,6 +172,15 @@ namespace SourceGen {
             }
         }
 
+        public void SetThumbnail(IVisualizationWireframe visWire,
+                ReadOnlyDictionary<string, object> parms) {
+            if (visWire == null) {
+                CachedImage = BROKEN_IMAGE;
+            } else {
+                CachedImage = GenerateWireframeImage(visWire, parms, 64);
+            }
+        }
+
         /// <summary>
         /// Trims a tag, removing leading/trailing whitespace, and checks it for validity.
         /// </summary>
@@ -228,33 +237,118 @@ namespace SourceGen {
         /// </summary>
         /// <param name="visWire">Visualization data.</param>
         /// <param name="parms">Parameter set, for rotations and render options.</param>
-        /// <param name="width">Output bitmap width.</param>
-        /// <param name="height">Output bitmap height.</param>
-        /// <returns></returns>
+        /// <param name="dim">Output bitmap dimension (width and height).</param>
+        /// <returns>Rendered bitmap.</returns>
         public static BitmapSource GenerateWireframeImage(IVisualizationWireframe visWire,
-                ReadOnlyDictionary<string, object> parms, double width, double height) {
-            // TODO(xyzzy): need to get path into a bitmap for thumbnails / GIFs...; call
-            //  GenerateWireframePath and then render the path
-            // https://stackoverflow.com/a/23582564/294248
-            Debug.WriteLine("Render " + visWire + " at " + width + "x" + height);
-            return null;
+                ReadOnlyDictionary<string, object> parms, double dim) {
+            GeometryGroup geo = GenerateWireframePath(visWire, parms, dim);
+
+            // Render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
+            Rect bounds = geo.GetRenderBounds(null);
+
+            Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + visWire);
+
+            // Create bitmap.
+            RenderTargetBitmap bitmap = new RenderTargetBitmap(
+                (int)bounds.Width,
+                (int)bounds.Height,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            //RenderOptions.SetEdgeMode(bitmap, EdgeMode.Aliased);  <-- doesn't work?
+
+            // Clear the bitmap to black.  (Is there an easier way?)
+            GeometryGroup bkgnd = new GeometryGroup();
+            bkgnd.Children.Add(new RectangleGeometry(new Rect(0, 0, bounds.Width, bounds.Height)));
+            Path path = new Path();
+            path.Data = bkgnd;
+            path.Stroke = path.Fill = Brushes.Black;
+            path.Measure(bounds.Size);
+            path.Arrange(bounds);
+            bitmap.Render(path);
+
+            path = new Path();
+            path.Data = geo;
+            path.Stroke = Brushes.White;
+            path.Measure(bounds.Size);
+            path.Arrange(bounds);
+            bitmap.Render(path);
+
+            return bitmap;
         }
 
         /// <summary>
-        /// Generates a WPF path from IVisualizationWireframe data.
+        /// Generates a WPF path from IVisualizationWireframe data.  Line widths get scaled
+        /// if the output area is larger or smaller than the path, so this scales coordinates
+        /// so they fit within the box.
         /// </summary>
+        /// <param name="visWire">Visualization data.</param>
+        /// <param name="parms">Visualization parameters.</param>
+        /// <param name="dim">Width/height to use for path area.</param>
         public static GeometryGroup GenerateWireframePath(IVisualizationWireframe visWire,
-                ReadOnlyDictionary<string, object> parms, double scale) {
+                ReadOnlyDictionary<string, object> parms, double dim) {
+            // WPF path drawing is based on a system where a pixel is drawn at the center
+            // of the coordinate, and integer coordinates start at the top left edge.  If
+            // you draw a pixel at (0,0), most of the pixel will be outside the window
+            // (visible or not based on ClipToBounds).
+            //
+            // If you draw a line from (1,1 to 4,1), the line's length will appear to
+            // be (4 - 1) = 3.  It touches four pixels -- the end point is not exclusive --
+            // but because the thickness doesn't extend past the endpoints, the filled
+            // area is only three.  If you have a window of size 10x10, and you draw from
+            // 0,0 to 9,9, the line will extend for half a line-thickness off the top,
+            // but will not go past the right/left edges.
+            //
+            // Similarly, drawing a horizontal line two units long results in a square, and
+            // drawing a line that starts and ends at the same point doesn't appear to
+            // produce anything.
+            //
+            // It's possible to clean up the edges by adding 0.5 to all coordinate values.
+            // This turns out to be important for another reason: a line from (1,1) to (9,1)
+            // shows up as a double-wide half-bright line, while a line from (1.5,1.5) to
+            // (9.5,1.5) is drawn as a single-wide full-brightness line.  This is because of
+            // the anti-aliasing.
+            //
+            // The path has a bounding box that starts at (0,0) in the top left, and extends
+            // out as far as needed.  If we want a path-drawn shape to animate smoothly we
+            // want to ensure that the bounds are constant across all renderings of a shape
+            // (which could get thinner or wider as it rotates), so we draw an invisible
+            // pixel in our desired bottom-right corner.
+            //
+            // If we want an 8x8 bitmap, we draw a line from (8,8) to (8,8) to establish the
+            // bounds, then draw lines with coordinates from 0.5 to 7.5.
+
             GeometryGroup geo = new GeometryGroup();
             // This establishes the geometry bounds.  It's a zero-length line segment, so
             // nothing is actually drawn.
-            Debug.WriteLine("using scale=" + scale);
-            Point corner = new Point(scale + 1, scale + 1);
+            Debug.WriteLine("using max=" + dim);
+            // TODO: currently ignoring dim
+            Point corner = new Point(8, 8);
+            geo.Children.Add(new LineGeometry(corner, corner));
+            corner = new Point(0, 0);
             geo.Children.Add(new LineGeometry(corner, corner));
 
             // TODO(xyzzy): render
-            geo.Children.Add(new LineGeometry(new Point(6, 6), new Point(197, 197)));
-            geo.Children.Add(new LineGeometry(new Point(6, 197), new Point(197, 6)));
+            //geo.Children.Add(new LineGeometry(new Point(0.0, 0.0), new Point(1.0, 0.0)));
+            //geo.Children.Add(new LineGeometry(new Point(0.5, 0.5), new Point(1.5, 0.5)));
+            //geo.Children.Add(new LineGeometry(new Point(0.75, 0.75), new Point(1.75, 0.75)));
+            geo.Children.Add(new LineGeometry(new Point(0.0, 0.0), new Point(5.0, 7.0)));
+
+            geo.Children.Add(new LineGeometry(new Point(0.5, 2), new Point(0.5, 3)));
+            geo.Children.Add(new LineGeometry(new Point(1.5, 3), new Point(1.5, 4)));
+            geo.Children.Add(new LineGeometry(new Point(2.5, 2), new Point(2.5, 3)));
+            geo.Children.Add(new LineGeometry(new Point(3.5, 3), new Point(3.5, 4)));
+            geo.Children.Add(new LineGeometry(new Point(4.5, 2), new Point(4.5, 3)));
+            geo.Children.Add(new LineGeometry(new Point(5.5, 3), new Point(5.5, 4)));
+            geo.Children.Add(new LineGeometry(new Point(6.5, 2), new Point(6.5, 3)));
+            geo.Children.Add(new LineGeometry(new Point(7.5, 3), new Point(7.5, 4)));
+
+            //geo.Children.Add(new LineGeometry(new Point(4, 5), new Point(3, 5)));
+            //geo.Children.Add(new LineGeometry(new Point(2, 5), new Point(1, 5)));
+
+            //geo.Children.Add(new LineGeometry(new Point(4, 7), new Point(1, 7)));
+            //geo.Children.Add(new LineGeometry(new Point(5, 7), new Point(9, 7)));
+            //geo.Children.Add(new LineGeometry(new Point(0, 8.5), new Point(9, 8.5)));
             return geo;
         }
 
@@ -270,20 +364,20 @@ namespace SourceGen {
         /// <summary>
         /// Returns a bitmap with a single black pixel.
         /// </summary>
-        private static BitmapSource GenerateBlackImage() {
-            BitmapPalette palette = new BitmapPalette(new List<Color> { Colors.Black });
-            BitmapSource image = BitmapSource.Create(
-                1,
-                1,
-                96.0,
-                96.0,
-                PixelFormats.Indexed8,
-                palette,
-                new byte[] { 0 },
-                1);
+        //private static BitmapSource GenerateBlackImage() {
+        //    BitmapPalette palette = new BitmapPalette(new List<Color> { Colors.Black });
+        //    BitmapSource image = BitmapSource.Create(
+        //        1,
+        //        1,
+        //        96.0,
+        //        96.0,
+        //        PixelFormats.Indexed8,
+        //        palette,
+        //        new byte[] { 0 },
+        //        1);
 
-            return image;
-        }
+        //    return image;
+        //}
 
 
         public override string ToString() {
