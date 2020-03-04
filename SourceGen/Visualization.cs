@@ -172,13 +172,16 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Updates the cached thumbnail image.
+        /// </summary>
+        /// <param name="visWire">Visualization object.</param>
+        /// <param name="parms">Visualization parameters.</param>
         public void SetThumbnail(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms) {
-            if (visWire == null) {
-                CachedImage = BROKEN_IMAGE;
-            } else {
-                CachedImage = GenerateWireframeImage(visWire, parms, 64);
-            }
+            Debug.Assert(visWire != null);
+            Debug.Assert(parms != null);
+            CachedImage = GenerateWireframeImage(visWire, parms, 64);
         }
 
         /// <summary>
@@ -250,8 +253,8 @@ namespace SourceGen {
 
             // Create bitmap.
             RenderTargetBitmap bitmap = new RenderTargetBitmap(
-                (int)bounds.Width,
-                (int)bounds.Height,
+                (int)dim,
+                (int)dim,
                 96,
                 96,
                 PixelFormats.Pbgra32);
@@ -297,7 +300,8 @@ namespace SourceGen {
             // but because the thickness doesn't extend past the endpoints, the filled
             // area is only three.  If you have a window of size 10x10, and you draw from
             // 0,0 to 9,9, the line will extend for half a line-thickness off the top,
-            // but will not go past the right/left edges.
+            // but will not go past the right/left edges.  (This becomes very obvious when
+            // you're working with an up-scaled 8x8 path.)
             //
             // Similarly, drawing a horizontal line two units long results in a square, and
             // drawing a line that starts and ends at the same point doesn't appear to
@@ -309,46 +313,39 @@ namespace SourceGen {
             // (9.5,1.5) is drawn as a single-wide full-brightness line.  This is because of
             // the anti-aliasing.
             //
-            // The path has a bounding box that starts at (0,0) in the top left, and extends
-            // out as far as needed.  If we want a path-drawn shape to animate smoothly we
-            // want to ensure that the bounds are constant across all renderings of a shape
-            // (which could get thinner or wider as it rotates), so we draw an invisible
-            // pixel in our desired bottom-right corner.
+            // The path has an axis-aligned bounding box that covers the pixel centers.  If we
+            // want a path-drawn shape to animate smoothly we want to ensure that the bounds
+            // are constant across all renderings of a shape (which could get thinner or wider
+            // as it rotates), so we draw an invisible pixel in our desired bottom-right corner.
             //
             // If we want an 8x8 bitmap, we draw a line from (8,8) to (8,8) to establish the
             // bounds, then draw lines with coordinates from 0.5 to 7.5.
 
             GeometryGroup geo = new GeometryGroup();
-            // This establishes the geometry bounds.  It's a zero-length line segment, so
-            // nothing is actually drawn.
             Debug.WriteLine("using max=" + dim);
-            // TODO: currently ignoring dim
-            Point corner = new Point(8, 8);
-            geo.Children.Add(new LineGeometry(corner, corner));
-            corner = new Point(0, 0);
-            geo.Children.Add(new LineGeometry(corner, corner));
 
-            // TODO(xyzzy): render
-            //geo.Children.Add(new LineGeometry(new Point(0.0, 0.0), new Point(1.0, 0.0)));
-            //geo.Children.Add(new LineGeometry(new Point(0.5, 0.5), new Point(1.5, 0.5)));
-            //geo.Children.Add(new LineGeometry(new Point(0.75, 0.75), new Point(1.75, 0.75)));
-            geo.Children.Add(new LineGeometry(new Point(0.0, 0.0), new Point(5.0, 7.0)));
+            // Draw invisible line segments to establish Path bounds.
+            Point topLeft = new Point(0, 0);
+            Point botRight = new Point(dim, dim);
+            geo.Children.Add(new LineGeometry(topLeft, topLeft));
+            geo.Children.Add(new LineGeometry(botRight, botRight));
 
-            geo.Children.Add(new LineGeometry(new Point(0.5, 2), new Point(0.5, 3)));
-            geo.Children.Add(new LineGeometry(new Point(1.5, 3), new Point(1.5, 4)));
-            geo.Children.Add(new LineGeometry(new Point(2.5, 2), new Point(2.5, 3)));
-            geo.Children.Add(new LineGeometry(new Point(3.5, 3), new Point(3.5, 4)));
-            geo.Children.Add(new LineGeometry(new Point(4.5, 2), new Point(4.5, 3)));
-            geo.Children.Add(new LineGeometry(new Point(5.5, 3), new Point(5.5, 4)));
-            geo.Children.Add(new LineGeometry(new Point(6.5, 2), new Point(6.5, 3)));
-            geo.Children.Add(new LineGeometry(new Point(7.5, 3), new Point(7.5, 4)));
+            // Generate a list of clip-space line segments.  Coordinate values are [-1,1].
+            WireframeObject wireObj = WireframeObject.Create(visWire);
+            List<WireframeObject.LineSeg> segs = wireObj.Generate(parms);
 
-            //geo.Children.Add(new LineGeometry(new Point(4, 5), new Point(3, 5)));
-            //geo.Children.Add(new LineGeometry(new Point(2, 5), new Point(1, 5)));
+            // Convert clip-space coords to screen.  We need to scale up, round them to the
+            // nearest whole pixel, and add +0.5 to make the thumbnails look crisp.
+            double scale = (dim - 0.5) / 2;
+            double adj = 0.5;
+            foreach (WireframeObject.LineSeg seg in segs) {
+                Point start = new Point(Math.Round((seg.X0 + 1) * scale) + adj,
+                    Math.Round((1 - seg.Y0) * scale) + adj);
+                Point end = new Point(Math.Round((seg.X1 + 1) * scale) + adj,
+                    Math.Round((1 - seg.Y1) * scale) + adj);
+                geo.Children.Add(new LineGeometry(start, end));
+            }
 
-            //geo.Children.Add(new LineGeometry(new Point(4, 7), new Point(1, 7)));
-            //geo.Children.Add(new LineGeometry(new Point(5, 7), new Point(9, 7)));
-            //geo.Children.Add(new LineGeometry(new Point(0, 8.5), new Point(9, 8.5)));
             return geo;
         }
 

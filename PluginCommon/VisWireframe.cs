@@ -25,20 +25,26 @@ namespace PluginCommon {
     /// </summary>
     [Serializable]
     public class VisWireframe : IVisualizationWireframe {
+        public const string P_IS_PERSPECTIVE = "_isPerspective";
+        public const string P_IS_BACKFACE_REMOVED = "_isBackfaceRemoved";
+        public const string P_EULER_ROT_X = "_eulerRotX";
+        public const string P_EULER_ROT_Y = "_eulerRotY";
+        public const string P_EULER_ROT_Z = "_eulerRotZ";
+
         public static VisParamDescr Param_IsPerspective(string uiLabel, bool defaultVal) {
-            return new VisParamDescr(uiLabel, "_isPerspective", typeof(bool), 0, 0, 0, defaultVal);
+            return new VisParamDescr(uiLabel, P_IS_PERSPECTIVE, typeof(bool), 0, 0, 0, defaultVal);
         }
         public static VisParamDescr Param_IsBackfaceRemoved(string uiLabel, bool defaultVal) {
-            return new VisParamDescr(uiLabel, "_isBackfaceRemoved", typeof(bool), 0, 0, 0, defaultVal);
+            return new VisParamDescr(uiLabel, P_IS_BACKFACE_REMOVED, typeof(bool), 0, 0, 0, defaultVal);
         }
         public static VisParamDescr Param_EulerX(string uiLabel, int defaultVal) {
-            return new VisParamDescr(uiLabel, "_eulerRotX", typeof(int), 0, 359, 0, defaultVal);
+            return new VisParamDescr(uiLabel, P_EULER_ROT_X, typeof(int), 0, 359, 0, defaultVal);
         }
         public static VisParamDescr Param_EulerY(string uiLabel, int defaultVal) {
-            return new VisParamDescr(uiLabel, "_eulerRotY", typeof(int), 0, 359, 0, defaultVal);
+            return new VisParamDescr(uiLabel, P_EULER_ROT_Y, typeof(int), 0, 359, 0, defaultVal);
         }
         public static VisParamDescr Param_EulerZ(string uiLabel, int defaultVal) {
-            return new VisParamDescr(uiLabel, "_eulerRotZ", typeof(int), 0, 359, 0, defaultVal);
+            return new VisParamDescr(uiLabel, P_EULER_ROT_Z, typeof(int), 0, 359, 0, defaultVal);
         }
 
         private List<float> mVerticesX = new List<float>();
@@ -135,6 +141,12 @@ namespace PluginCommon {
             int vertexCount = mVerticesX.Count;
             int faceCount = mNormalsX.Count;
             int edgeCount = mEdges.Count;
+
+            // complain about empty objects (should we fail if no edges were defined?)
+            if (vertexCount == 0) {
+                msg = "no vertices defined";
+                return false;
+            }
 
             // check edges
             foreach (IntPair ip in mEdges) {

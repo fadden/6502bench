@@ -23,7 +23,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Visualization Set"
-        Width="600" Height="400" ResizeMode="NoResize"
+        Width="640" Height="480" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Closing="Window_Closing">
 
@@ -71,21 +71,21 @@ limitations under the License.
             </DataGrid.Resources>
             <!-- ItemsSource is a list of Visualization -->
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Img" Width="56">
+                <DataGridTemplateColumn Header="Img" Width="68">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border BorderThickness="0" Background="{StaticResource BitmapBackground}">
                                 <Grid>
-                                    <Image Source="{Binding CachedImage}" Width="48" Height="48"
+                                    <Image Source="{Binding CachedImage}" Width="64" Height="64"
                                            RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-                                    <Image Source="{Binding OverlayImage}" Width="48" Height="48"/>
+                                    <Image Source="{Binding OverlayImage}" Width="64" Height="64"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Tag" Width="176" Binding="{Binding Tag}"/>
-                <DataGridTextColumn Header="Visualization Generator" Width="200" Binding="{Binding VisGenIdent}"/>
+                <DataGridTextColumn Header="Tag" Width="180" Binding="{Binding Tag}"/>
+                <DataGridTextColumn Header="Visualization Generator" Width="224" Binding="{Binding VisGenIdent}"/>
             </DataGrid.Columns>
         </DataGrid>
         

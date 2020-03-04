@@ -342,7 +342,7 @@ namespace PluginCommon {
     /// TODO(maybe): specify colors for edges.  Not widely used?
     /// </remarks>
     public interface IVisualizationWireframe {
-        // Each function returns the specified data.  Do not modify.
+        // Each function returns the specified data.  Do not modify the returned arrays.
 
         float[] GetVerticesX();
         float[] GetVerticesY();

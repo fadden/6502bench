@@ -105,6 +105,7 @@
     <Compile Include="Visualization.cs" />
     <Compile Include="VisualizationAnimation.cs" />
     <Compile Include="VisualizationSet.cs" />
+    <Compile Include="WireframeObject.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>

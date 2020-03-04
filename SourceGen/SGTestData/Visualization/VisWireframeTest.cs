@@ -124,7 +124,9 @@ namespace WireframeTest {
 
                     int edge = vw.AddEdge(v0, v1);
                     vw.AddEdgeFace(edge, f0);
-                    vw.AddEdgeFace(edge, f1);
+                    if (f1 != f0) {
+                        vw.AddEdgeFace(edge, f1);
+                    }
                 }
 
                 while (true) {
