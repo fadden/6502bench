@@ -26,7 +26,7 @@ namespace PluginCommon {
     [Serializable]
     public class VisWireframe : IVisualizationWireframe {
         public const string P_IS_PERSPECTIVE = "_isPerspective";
-        public const string P_IS_BACKFACE_REMOVED = "_isBackfaceRemoved";
+        public const string P_IS_BFC_ENABLED = "_isBfcEnabled";
         public const string P_EULER_ROT_X = "_eulerRotX";
         public const string P_EULER_ROT_Y = "_eulerRotY";
         public const string P_EULER_ROT_Z = "_eulerRotZ";
@@ -34,8 +34,8 @@ namespace PluginCommon {
         public static VisParamDescr Param_IsPerspective(string uiLabel, bool defaultVal) {
             return new VisParamDescr(uiLabel, P_IS_PERSPECTIVE, typeof(bool), 0, 0, 0, defaultVal);
         }
-        public static VisParamDescr Param_IsBackfaceRemoved(string uiLabel, bool defaultVal) {
-            return new VisParamDescr(uiLabel, P_IS_BACKFACE_REMOVED, typeof(bool), 0, 0, 0, defaultVal);
+        public static VisParamDescr Param_IsBfcEnabled(string uiLabel, bool defaultVal) {
+            return new VisParamDescr(uiLabel, P_IS_BFC_ENABLED, typeof(bool), 0, 0, 0, defaultVal);
         }
         public static VisParamDescr Param_EulerX(string uiLabel, int defaultVal) {
             return new VisParamDescr(uiLabel, P_EULER_ROT_X, typeof(int), 0, 359, 0, defaultVal);
@@ -182,6 +182,9 @@ namespace PluginCommon {
                     return false;
                 }
             }
+
+            // TODO(maybe): confirm that every face has a vertex.  Not strictly necessary
+            // since you can do orthographic-projection BFC without it... but who does that?
 
             msg = string.Empty;
             return true;

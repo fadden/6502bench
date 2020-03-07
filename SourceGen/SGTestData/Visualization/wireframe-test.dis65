@@ -2,7 +2,7 @@
 {
 "_ContentVersion":3,
 "FileDataLength":120,
-"FileDataCrc32":1432202158,
+"FileDataCrc32":1015994132,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -245,10 +245,11 @@
 "VisGenIdent":"wireframe-test",
 "VisGenParams":{
 "offset":10,
-"_eulerRotX":0,
-"_eulerRotY":0,
+"_eulerRotX":15,
+"_eulerRotY":30,
 "_eulerRotZ":0,
-"_isPerspective":true}},
+"_isPerspective":true,
+"_isBfcEnabled":true}},
 
 {
 "Tag":"bmp_data",

@@ -67,11 +67,17 @@ namespace SourceGen {
         }
 
         private class Face {
+            // Surface normal.
             public Vector3 Normal { get; private set; }
+            // One vertex on the face, for BFC.
+            public Vertex Vert { get; set; }
+            // Flag set during BFC calculation.
+            public bool IsVisible { get; set; }
 
             public Face(double x, double y, double z) {
                 Normal = new Vector3(x, y, z);
-                Normal.Normalize();
+                Normal.Normalize();     // not necessary, but easier to read in debug output
+                IsVisible = true;
             }
         }
 
@@ -154,7 +160,11 @@ namespace SourceGen {
                     return null;
                 }
 
-                wireObj.mVertices[vindex].Faces.Add(wireObj.mFaces[findex]);
+                Face face = wireObj.mFaces[findex];
+                wireObj.mVertices[vindex].Faces.Add(face);
+                if (face.Vert == null) {
+                    face.Vert = wireObj.mVertices[vindex];
+                }
             }
 
             IntPair[] efaces = visWire.GetEdgeFaces();
@@ -168,7 +178,11 @@ namespace SourceGen {
                     return null;
                 }
 
-                wireObj.mEdges[eindex].Faces.Add(wireObj.mFaces[findex]);
+                Face face = wireObj.mFaces[findex];
+                wireObj.mEdges[eindex].Faces.Add(face);
+                if (face.Vert == null) {
+                    face.Vert = wireObj.mEdges[eindex].Vertex0;
+                }
             }
 
             //
@@ -197,39 +211,119 @@ namespace SourceGen {
         ///   was especially successful.</returns>
         public List<LineSeg> Generate(ReadOnlyDictionary<string, object> parms) {
             List<LineSeg> segs = new List<LineSeg>(mEdges.Count);
+            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
+            bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
 
-            // Perspective distance adjustment.
+            // Camera Z coordinate adjustment, used to control how perspective projections
+            // appear.  The larger the value, the farther the object appears to be.  Very
+            // large values approximate an orthographic projection.
             const double zadj = 3.0;
 
-            // Scale values to [-1,1].
-            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
+            // Scale coordinate values to [-1,1].
             double scale = 1.0 / mBigMag;
             if (doPersp) {
-                scale = (scale * zadj) / (zadj + 1);
+                // objects closer to camera are bigger; reduce scale slightly
+                scale = (scale * zadj) / (zadj + 0.5);
+            }
+
+            int eulerX = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_X, 0);
+            int eulerY = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_Y, 0);
+            int eulerZ = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_Z, 0);
+            Matrix44 rotMat = new Matrix44();
+            rotMat.SetRotationEuler(eulerX, eulerY, eulerZ);
+
+            if (doBfc) {
+                // Mark faces as visible or not.  This is determined with the surface normal,
+                // rather than by checking whether a transformed triangle is clockwise.
+                foreach (Face face in mFaces) {
+                    // Transform the surface normal.
+                    Vector3 rotNorm = rotMat.Multiply(face.Normal);
+                    if (doPersp) {
+                        // Transform one vertex to get a vector from the camera to the
+                        // surface.  We want (V0 - C), where C is the camera; since we're
+                        // at the origin, we just need -C.
+                        if (face.Vert == null) {
+                            Debug.WriteLine("GLITCH: no vertex for face");
+                            face.IsVisible = true;
+                            continue;
+                        }
+                        Vector3 camVec = rotMat.Multiply(face.Vert.Vec);
+                        camVec.Multiply(-scale);    // scale to [-1,1] and negate to get -C
+                        camVec.Z += zadj;           // translate
+
+                        // Now compute the dot product of the camera vector.
+                        double dot = Vector3.Dot(camVec, rotNorm);
+                        face.IsVisible = (dot >= 0);
+                        //Debug.WriteLine(string.Format(
+                        //    "Face {0} vis={1,-5} dot={2,-8:N2}: camVec={3} rotNorm={4}",
+                        //    index++, face.IsVisible, dot, camVec, rotNorm));
+                    } else {
+                        // For orthographic projection, the camera is essentially looking
+                        // down the Z axis at every X,Y, so we can trivially check the
+                        // value of Z in the transformed normal.
+                        face.IsVisible = (rotNorm.Z >= 0);
+                    }
+                }
             }
 
             foreach (Edge edge in mEdges) {
+                if (doBfc) {
+                    // To be visible, vertices and edges must either not specify any
+                    // faces, or must specify a visible face.
+                    if (!IsVertexVisible(edge.Vertex0) ||
+                            !IsVertexVisible(edge.Vertex1) ||
+                            !IsEdgeVisible(edge)) {
+                        continue;
+                    }
+                }
+
+                Vector3 trv0 = rotMat.Multiply(edge.Vertex0.Vec);
+                Vector3 trv1 = rotMat.Multiply(edge.Vertex1.Vec);
                 double x0, y0, x1, y1;
 
                 if (doPersp) {
-                    // +Z is closer to the viewer, so we negate it here
-                    double z0 = -edge.Vertex0.Vec.Z * scale;
-                    double z1 = -edge.Vertex1.Vec.Z * scale;
-                    x0 = (edge.Vertex0.Vec.X * scale * zadj) / (zadj + z0);
-                    y0 = (edge.Vertex0.Vec.Y * scale * zadj) / (zadj + z0);
-                    x1 = (edge.Vertex1.Vec.X * scale * zadj) / (zadj + z1);
-                    y1 = (edge.Vertex1.Vec.Y * scale * zadj) / (zadj + z1);
+                    // +Z on the shape is closer to the viewer, so we negate it here
+                    double z0 = -trv0.Z * scale;
+                    double z1 = -trv1.Z * scale;
+                    x0 = (trv0.X * scale * zadj) / (zadj + z0);
+                    y0 = (trv0.Y * scale * zadj) / (zadj + z0);
+                    x1 = (trv1.X * scale * zadj) / (zadj + z1);
+                    y1 = (trv1.Y * scale * zadj) / (zadj + z1);
                 } else {
-                    x0 = edge.Vertex0.Vec.X * scale;
-                    y0 = edge.Vertex0.Vec.Y * scale;
-                    x1 = edge.Vertex1.Vec.X * scale;
-                    y1 = edge.Vertex1.Vec.Y * scale;
+                    x0 = trv0.X * scale;
+                    y0 = trv0.Y * scale;
+                    x1 = trv1.X * scale;
+                    y1 = trv1.Y * scale;
                 }
 
                 segs.Add(new LineSeg(x0, y0, x1, y1));
             }
 
             return segs;
+        }
+
+        private bool IsVertexVisible(Vertex vert) {
+            if (vert.Faces.Count == 0) {
+                return true;
+            }
+            foreach (Face face in vert.Faces) {
+                if (face.IsVisible) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool IsEdgeVisible(Edge edg) {
+            if (edg.Faces.Count == 0) {
+                return true;
+            }
+            foreach (Face face in edg.Faces) {
+                if (face.IsVisible) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

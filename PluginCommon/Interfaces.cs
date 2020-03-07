@@ -333,11 +333,12 @@ namespace PluginCommon {
     /// All objects will have vertices and edges.  Face normals are optional.
     /// </summary>
     /// <remarks>
-    /// The face-normal stuff is designed specifically for Elite, which is one of the very
-    /// few games to use backface removal.
+    /// The face-normal stuff is designed specifically for Elite.  Besides being one of the
+    /// very few 6502-based games to use backface culling, it extended the concept to allow
+    /// convex shapes to have protrusions.
     ///
-    /// We favor multiple arrays over compound objects for this interface to avoid having
-    /// to define those at the plugin interface level.
+    /// We favor multiple arrays over compound objects for this interface to avoid making
+    /// such objects part of the plugin interface.
     ///
     /// TODO(maybe): specify colors for edges.  Not widely used?
     /// </remarks>

@@ -37,6 +37,8 @@ namespace SourceGen {
     /// that weren't changed while sitting in the undo buffer.
     /// </remarks>
     public class Visualization {
+        public const double THUMBNAIL_DIM = 64;
+
         /// <summary>
         /// Unique user-specified tag.  This may be any valid string that is at least two
         /// characters long after the leading and trailing whitespace have been trimmed.
@@ -181,7 +183,7 @@ namespace SourceGen {
                 ReadOnlyDictionary<string, object> parms) {
             Debug.Assert(visWire != null);
             Debug.Assert(parms != null);
-            CachedImage = GenerateWireframeImage(visWire, parms, 64);
+            CachedImage = GenerateWireframeImage(visWire, parms, THUMBNAIL_DIM);
         }
 
         /// <summary>
@@ -322,7 +324,6 @@ namespace SourceGen {
             // bounds, then draw lines with coordinates from 0.5 to 7.5.
 
             GeometryGroup geo = new GeometryGroup();
-            Debug.WriteLine("using max=" + dim);
 
             // Draw invisible line segments to establish Path bounds.
             Point topLeft = new Point(0, 0);
@@ -330,12 +331,14 @@ namespace SourceGen {
             geo.Children.Add(new LineGeometry(topLeft, topLeft));
             geo.Children.Add(new LineGeometry(botRight, botRight));
 
-            // Generate a list of clip-space line segments.  Coordinate values are [-1,1].
+            // Generate a list of clip-space line segments.  Coordinate values are in the
+            // range [-1,1], with +X to the right and +Y upward.
             WireframeObject wireObj = WireframeObject.Create(visWire);
             List<WireframeObject.LineSeg> segs = wireObj.Generate(parms);
 
-            // Convert clip-space coords to screen.  We need to scale up, round them to the
-            // nearest whole pixel, and add +0.5 to make the thumbnails look crisp.
+            // Convert clip-space coords to screen.  We need to translate to [0,2] with +Y
+            // toward the bottom of the screen, scale up, round to the nearest whole pixel,
+            // and add +0.5 to make thumbnail-size bitmaps look crisp.
             double scale = (dim - 0.5) / 2;
             double adj = 0.5;
             foreach (WireframeObject.LineSeg seg in segs) {

@@ -43,6 +43,8 @@ namespace SourceGen.WpfGui {
         private SortedList<int, VisualizationSet> mEditedList;
         private Visualization mOrigVis;
 
+        public BitmapSource mThumbnail;
+
         /// <summary>
         /// Visualization generation identifier for the last visualizer we used, for the benefit
         /// of "new".
@@ -320,7 +322,7 @@ namespace SourceGen.WpfGui {
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
             NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
-            NewVis.CachedImage = (BitmapSource)previewImage.Source;
+            NewVis.CachedImage = mThumbnail;
 
             sLastVisIdent = NewVis.VisGenIdent;
 
@@ -446,6 +448,8 @@ namespace SourceGen.WpfGui {
             BitmapDimensions = "?";
             if (!IsValid || item == null) {
                 previewImage.Source = sBadParamsImage;
+                previewGrid.Background = null;
+                wireframePath.Data = new GeometryGroup();
             } else {
                 // Invoke the plugin.
                 PluginErrMessage = string.Empty;
@@ -491,12 +495,17 @@ namespace SourceGen.WpfGui {
                     wireframePath.Data = new GeometryGroup();
                     BitmapDimensions = string.Format("{0}x{1}",
                         previewImage.Source.Width, previewImage.Source.Height);
+
+                    mThumbnail = (BitmapSource)previewImage.Source;
                 } else {
                     previewGrid.Background = Brushes.Black;
                     previewImage.Source = Visualization.BLANK_IMAGE;
                     wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms,
                         previewImage.ActualWidth / 2);
                     BitmapDimensions = "n/a";
+
+                    mThumbnail = Visualization.GenerateWireframeImage(visWire, parms,
+                        Visualization.THUMBNAIL_DIM);
                 }
             }
 

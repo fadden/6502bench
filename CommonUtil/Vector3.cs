@@ -51,5 +51,20 @@ namespace CommonUtil {
             mY *= len_r;
             mZ *= len_r;
         }
+
+        public void Multiply(double sc) {
+            mX *= sc;
+            mY *= sc;
+            mZ *= sc;
+        }
+
+        public static double Dot(Vector3 v0, Vector3 v1) {
+            return v0.X * v1.X + v0.Y * v1.Y + v0.Z * v1.Z;
+        }
+
+
+        public override string ToString() {
+            return string.Format("|{0,8:N3} {1,8:N3} {2,8:N3}|", X, Y, Z);
+        }
     }
 }
