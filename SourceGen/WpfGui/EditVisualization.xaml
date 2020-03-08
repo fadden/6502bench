@@ -98,6 +98,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -135,7 +136,7 @@ limitations under the License.
                 BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
                 Background="{StaticResource CheckerBackground}">
             <!-- explicit width gets cleared after initial window layout -->
-            <Grid Name="previewGrid" Width="400" Height="400">
+            <Grid Name="previewGrid" Width="548" Height="400">
                 <!-- either the image or the path is shown, not both; background is set to
                 transparent for image, black for path -->
                 <Image Name="previewImage" Source="/Res/RedX.png"
@@ -173,8 +174,78 @@ limitations under the License.
                 ItemTemplateSelector="{StaticResource ParameterTemplateSelector}">
             </ItemsControl>
         </Grid>
+
+        <Grid Grid.Row="4" HorizontalAlignment="Left" Visibility="{Binding WireframeCtrlVisibility}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Rectangle Grid.Row="0" Grid.ColumnSpan="3" Margin="4" HorizontalAlignment="Stretch"
+                       Fill="LightGray" Height="2"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Initial X rotation (deg):" Margin="0,5,0,0"/>
+            <TextBox Grid.Column="1" Grid.Row="1" Margin="4,4,0,0" Width="30" MaxLength="3"
+                     Text="{Binding ElementName=initialXSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"/>
+            <Slider Name="initialXSlider" Grid.Column="2" Grid.Row="1" Margin="4,4,0,0" Width="360"
+                    Minimum="0" Maximum="359" TickFrequency="1" IsSnapToTickEnabled="True"
+                    ValueChanged="InitialRotSlider_ValueChanged"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="2" Text="Initial Y rotation (deg):" Margin="0,5,0,0"/>
+            <TextBox Grid.Column="1" Grid.Row="2" Margin="4,4,0,0" Width="30" MaxLength="3"
+                     Text="{Binding ElementName=initialYSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"/>
+            <Slider Name="initialYSlider" Grid.Column="2" Grid.Row="2" Margin="4,4,0,0" Width="360"
+                    Minimum="0" Maximum="359" TickFrequency="1" IsSnapToTickEnabled="True"
+                    ValueChanged="InitialRotSlider_ValueChanged"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="3" Text="Initial Z rotation (deg):" Margin="0,5,0,0"/>
+            <TextBox Grid.Column="1" Grid.Row="3" Margin="4,4,0,0" Width="30" MaxLength="3"
+                     Text="{Binding ElementName=initialZSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"/>
+            <Slider Name="initialZSlider" Grid.Column="2" Grid.Row="3" Margin="4,4,0,0" Width="360"
+                    Minimum="0" Maximum="359" TickFrequency="1" IsSnapToTickEnabled="True"
+                    ValueChanged="InitialRotSlider_ValueChanged"/>
+
+            <CheckBox Name="isAnimated" Grid.Column="0" Grid.Row="4" Content="Animated" Margin="0,4,0,0"
+                      IsChecked="{Binding IsWireframeAnimated}"/>
+
+            <!-- remaining items are enabled when "isAnimated" checkbox is checked -->
+
+            <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,5,0,0"
+                       Text="Rotation per frame:"/>
+            <StackPanel Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="4,4,0,0"
+                       IsEnabled="{Binding ElementName=isAnimated, Path=IsChecked}">
+                <TextBlock Text="X:" Margin="0,1,0,0"/>
+                <TextBox Width="40" MaxLength="4" Margin="4,0,0,0"/>
+                <TextBlock Text="Y:" Margin="8,1,0,0"/>
+                <TextBox Width="40" MaxLength="4" Margin="4,0,0,0"/>
+                <TextBlock Text="Z:" Margin="8,1,0,0"/>
+                <TextBox Width="40" MaxLength="4" Margin="4,0,0,0"/>
+            </StackPanel>
+
+            <TextBlock Grid.Column="0" Grid.Row="6" Text="Frame count:" Margin="0,5,0,0"/>
+            <TextBox Grid.Column="1" Grid.Row="6" Width="50" Height="18" Margin="4,4,0,0"/>
+            <Button Grid.Column="2" Grid.Row="6" Width="70" Margin="4,4,0,0" HorizontalAlignment="Left"
+                    Content="Auto" />
+
+            <TextBlock Grid.Column="0" Grid.Row="7" Text="Frame delay (msec):" Margin="0,5,0,0"/>
+            <TextBox Grid.Column="1" Grid.Row="7" Width="50" Margin="4,4,0,0"/>
+        </Grid>
         
-        <DockPanel Grid.Column="0" Grid.Row="4" Margin="0,8,0,0" LastChildFill="False">
+        <DockPanel Grid.Column="0" Grid.Row="5" Margin="0,8,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="Test Animation" Padding="4,0" Click="TestAnim_Click"
+                    Visibility="{Binding WireframeCtrlVisibility}"
+                    IsEnabled="{Binding ElementName=isAnimated, Path=IsChecked}"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
                     IsDefault="True" IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>

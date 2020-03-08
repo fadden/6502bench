@@ -245,11 +245,11 @@
 "VisGenIdent":"wireframe-test",
 "VisGenParams":{
 "offset":10,
-"_eulerRotX":15,
-"_eulerRotY":30,
-"_eulerRotZ":0,
 "_isPerspective":true,
-"_isBfcEnabled":true}},
+"_isBfcEnabled":true,
+"_eulerRotX":0,
+"_eulerRotY":34,
+"_eulerRotZ":65}},
 
 {
 "Tag":"bmp_data",
@@ -263,8 +263,17 @@
 "isColor":true,
 "isFirstOdd":false,
 "isHighBitFlipped":false}}],
-"VisualizationAnimations":[],
+"VisualizationAnimations":[{
+"Tags":["wf_data",
+"bmp_data"],
+"Tag":"anim00002c",
+"VisGenIdent":"(animation)",
+"VisGenParams":{
+"_frame-delay-msec":500}}],
 "VisualizationSets":{
 "10":{
 "Tags":["wf_data",
-"bmp_data"]}}}
+"bmp_data"]},
+
+"44":{
+"Tags":["anim00002c"]}}}

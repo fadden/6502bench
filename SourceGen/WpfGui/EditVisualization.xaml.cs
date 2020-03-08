@@ -31,6 +31,15 @@ namespace SourceGen.WpfGui {
     /// <summary>
     /// Visualization editor.
     /// </summary>
+    /// <remarks>
+    /// This provides editing of bitmap and wireframe visualizations, which have some
+    /// significant differences.  We deal with them both here to provide an illusion of
+    /// consistency, and because it's nice to have the plugin management and generated
+    /// parameter edit controls in one place.
+    ///
+    /// The most significant difference is that, while bitmap animations are a collection
+    /// of visualizations, wireframe animations are just additional parameters.
+    /// </remarks>
     public partial class EditVisualization : Window, INotifyPropertyChanged {
         /// <summary>
         /// New/edited visualization, only valid when dialog result is true.
@@ -43,7 +52,7 @@ namespace SourceGen.WpfGui {
         private SortedList<int, VisualizationSet> mEditedList;
         private Visualization mOrigVis;
 
-        public BitmapSource mThumbnail;
+        public object mVisObj;
 
         /// <summary>
         /// Visualization generation identifier for the last visualizer we used, for the benefit
@@ -71,6 +80,18 @@ namespace SourceGen.WpfGui {
             set { mIsValid = value; OnPropertyChanged(); }
         }
         private bool mIsValid;
+
+        public Visibility WireframeCtrlVisibility {
+            get { return mWireframeCtrlVisibility; }
+            set { mWireframeCtrlVisibility = value; OnPropertyChanged(); }
+        }
+        private Visibility mWireframeCtrlVisibility;
+
+        public bool IsWireframeAnimated {
+            get { return mIsWireframeAnimated; }
+            set { mIsWireframeAnimated = value; OnPropertyChanged(); }
+        }
+        private bool mIsWireframeAnimated;
 
         /// <summary>
         /// Visualization tag.
@@ -318,18 +339,34 @@ namespace SourceGen.WpfGui {
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
-            ReadOnlyDictionary<string, object> valueDict = sLastParams = CreateVisGenParams();
+            bool isWireframe = (item.VisDescriptor.VisualizationType == VisDescr.VisType.Wireframe);
+            ReadOnlyDictionary<string, object> valueDict = CreateVisGenParams(isWireframe);
+            sLastParams = valueDict;
+
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
-            NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
-            NewVis.CachedImage = mThumbnail;
+            if (isWireframe && IsWireframeAnimated) {
+                NewVis = new VisWireframeAnimation(trimTag, item.VisDescriptor.Ident, valueDict,
+                    mOrigVis, (IVisualizationWireframe) mVisObj);
+            } else {
+                NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
+            }
+            if (isWireframe) {
+                Debug.Assert(mVisObj is IVisualizationWireframe);
+                NewVis.CachedImage =
+                    Visualization.GenerateWireframeImage((IVisualizationWireframe)mVisObj,
+                        valueDict, Visualization.THUMBNAIL_DIM);
+            } else {
+                Debug.Assert(mVisObj is IVisualization2d);
+                NewVis.CachedImage =
+                    Visualization.ConvertToBitmapSource((IVisualization2d)mVisObj);
+            }
 
             sLastVisIdent = NewVis.VisGenIdent;
-
             DialogResult = true;
         }
 
-        private ReadOnlyDictionary<string, object> CreateVisGenParams() {
+        private ReadOnlyDictionary<string, object> CreateVisGenParams(bool includeWire) {
             // Generate value dictionary.
             Dictionary<string, object> valueDict =
                 new Dictionary<string, object>(ParameterList.Count);
@@ -349,6 +386,17 @@ namespace SourceGen.WpfGui {
                     // skip it
                     Debug.Assert(false);
                 }
+            }
+
+            WireframeCtrlVisibility = includeWire ? Visibility.Visible : Visibility.Collapsed;
+            if (includeWire) {
+                int rotX = (int)initialXSlider.Value;
+                int rotY = (int)initialYSlider.Value;
+                int rotZ = (int)initialZSlider.Value;
+
+                valueDict.Add(VisWireframeAnimation.P_EULER_ROT_X, rotX);
+                valueDict.Add(VisWireframeAnimation.P_EULER_ROT_Y, rotY);
+                valueDict.Add(VisWireframeAnimation.P_EULER_ROT_Z, rotZ);
             }
 
             return new ReadOnlyDictionary<string, object>(valueDict);
@@ -446,26 +494,28 @@ namespace SourceGen.WpfGui {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
 
             BitmapDimensions = "?";
+            previewGrid.Background = null;
+            wireframePath.Data = new GeometryGroup();
             if (!IsValid || item == null) {
                 previewImage.Source = sBadParamsImage;
-                previewGrid.Background = null;
-                wireframePath.Data = new GeometryGroup();
             } else {
                 // Invoke the plugin.
                 PluginErrMessage = string.Empty;
 
                 IVisualization2d vis2d = null;
                 IVisualizationWireframe visWire = null;
-                ReadOnlyDictionary<string, object> parms = CreateVisGenParams();
+                ReadOnlyDictionary<string, object> parms = null;
                 try {
                     IPlugin_Visualizer plugin =
                         (IPlugin_Visualizer)mProject.GetPlugin(item.ScriptIdent);
                     if (item.VisDescriptor.VisualizationType == VisDescr.VisType.Bitmap) {
+                        parms = CreateVisGenParams(false);
                         vis2d = plugin.Generate2d(item.VisDescriptor, parms);
                         if (vis2d == null) {
                             Debug.WriteLine("Vis2d generator returned null");
                         }
                     } else if (item.VisDescriptor.VisualizationType == VisDescr.VisType.Wireframe) {
+                        parms = CreateVisGenParams(true);
                         IPlugin_Visualizer_v2 plugin2 = (IPlugin_Visualizer_v2)plugin;
                         visWire = plugin2.GenerateWireframe(item.VisDescriptor, parms);
                         if (visWire == null) {
@@ -496,16 +546,15 @@ namespace SourceGen.WpfGui {
                     BitmapDimensions = string.Format("{0}x{1}",
                         previewImage.Source.Width, previewImage.Source.Height);
 
-                    mThumbnail = (BitmapSource)previewImage.Source;
+                    mVisObj = vis2d;
                 } else {
                     previewGrid.Background = Brushes.Black;
                     previewImage.Source = Visualization.BLANK_IMAGE;
                     wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms,
-                        previewImage.ActualWidth / 2);
+                        Math.Min(previewImage.ActualWidth, previewImage.ActualHeight) / 2);
                     BitmapDimensions = "n/a";
 
-                    mThumbnail = Visualization.GenerateWireframeImage(visWire, parms,
-                        Visualization.THUMBNAIL_DIM);
+                    mVisObj = visWire;
                 }
             }
 
@@ -533,6 +582,16 @@ namespace SourceGen.WpfGui {
             }
             Debug.WriteLine("VisComboBox sel change: " + item.VisDescriptor.Ident);
             GenerateParamControls(item.VisDescriptor);
+
+            if (mOrigVis != null) {
+                initialXSlider.Value = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_EULER_ROT_X, 0);
+                initialYSlider.Value = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_EULER_ROT_Y, 0);
+                initialZSlider.Value = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_EULER_ROT_Z, 0);
+            }
+
             UpdateControls();
         }
 
@@ -548,6 +607,15 @@ namespace SourceGen.WpfGui {
             ParameterValue pv = (ParameterValue)src.DataContext;
             //Debug.WriteLine("CHECK CHANGE" + pv);
             UpdateControls();
+        }
+
+        private void InitialRotSlider_ValueChanged(object sender,
+                RoutedPropertyChangedEventArgs<double> e) {
+            UpdateControls();
+        }
+
+        private void TestAnim_Click(object sender, RoutedEventArgs e) {
+            Debug.WriteLine("TEST!");
         }
     }
 

@@ -43,9 +43,6 @@ namespace WireframeTest {
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
 
                     // These are interpreted by the main app.
-                    VisWireframe.Param_EulerX("Rotation about X", 0),
-                    VisWireframe.Param_EulerY("Rotation about Y", 0),
-                    VisWireframe.Param_EulerZ("Rotation about Z", 0),
                     VisWireframe.Param_IsPerspective("Perspective projection", true),
                     VisWireframe.Param_IsBfcEnabled("Backface culling", true),
                 }),

@@ -181,7 +181,7 @@ namespace PluginCommon {
     public class VisDescr {
         /// <summary>
         /// Unique identifier.  This is stored in the project file.  Names beginning with
-        /// underscores ('_') are reserved.
+        /// underscores ('_') are reserved and must not be defined by plugins.
         /// </summary>
         public string Ident { get; private set; }
 

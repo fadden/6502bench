@@ -209,7 +209,8 @@ namespace SourceGen {
         /// <param name="parms">Visualization parameters.</param>
         /// <returns>List of line segments, which could be empty if backface removal
         ///   was especially successful.</returns>
-        public List<LineSeg> Generate(ReadOnlyDictionary<string, object> parms) {
+        public List<LineSeg> Generate(ReadOnlyDictionary<string, object> parms,
+                int eulerX, int eulerY, int eulerZ) {
             List<LineSeg> segs = new List<LineSeg>(mEdges.Count);
             bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
@@ -226,9 +227,6 @@ namespace SourceGen {
                 scale = (scale * zadj) / (zadj + 0.5);
             }
 
-            int eulerX = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_X, 0);
-            int eulerY = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_Y, 0);
-            int eulerZ = Util.GetFromObjDict(parms, VisWireframe.P_EULER_ROT_Z, 0);
             Matrix44 rotMat = new Matrix44();
             rotMat.SetRotationEuler(eulerX, eulerY, eulerZ);
 

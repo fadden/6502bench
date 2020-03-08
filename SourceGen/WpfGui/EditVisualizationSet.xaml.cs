@@ -221,9 +221,9 @@ namespace SourceGen.WpfGui {
             Visualization item = (Visualization)visualizationGrid.SelectedItem;
             Visualization newVis;
 
-            if (item is VisualizationAnimation) {
+            if (item is VisBitmapAnimation) {
                 EditBitmapAnimation dlg = new EditBitmapAnimation(this, mOffset,
-                    CreateEditedSetList(), (VisualizationAnimation)item);
+                    CreateEditedSetList(), (VisBitmapAnimation)item);
                 if (dlg.ShowDialog() != true) {
                     return;
                 }
@@ -264,18 +264,18 @@ namespace SourceGen.WpfGui {
             // (This is a bit awkward because we can't modify VisualizationList while iterating
             // through it, and there's no simple "replace entry" operation on an observable
             // collection.  Fortunately we don't do this often and the data sets are small.)
-            List<VisualizationAnimation> needsUpdate = new List<VisualizationAnimation>();
+            List<VisBitmapAnimation> needsUpdate = new List<VisBitmapAnimation>();
             foreach (Visualization vis in VisualizationList) {
-                if (vis is VisualizationAnimation) {
-                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                if (vis is VisBitmapAnimation) {
+                    VisBitmapAnimation visAnim = (VisBitmapAnimation)vis;
                     if (visAnim.ContainsSerial(item.SerialNumber)) {
                         needsUpdate.Add(visAnim);
                     }
                 }
             }
-            foreach (VisualizationAnimation visAnim in needsUpdate) {
-                VisualizationAnimation newAnim;
-                if (VisualizationAnimation.StripEntries(visAnim,
+            foreach (VisBitmapAnimation visAnim in needsUpdate) {
+                VisBitmapAnimation newAnim;
+                if (VisBitmapAnimation.StripEntries(visAnim,
                         new List<int>(1) { item.SerialNumber }, out newAnim)) {
                     if (newAnim.Count == 0) {
                         VisualizationList.Remove(visAnim);

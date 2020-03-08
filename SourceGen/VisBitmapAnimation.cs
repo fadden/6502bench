@@ -27,17 +27,17 @@ namespace SourceGen {
     /// A visualization with animated contents.
     /// </summary>
     /// <remarks>
-    /// References to Visualization objects (such as a 3D mesh or list of bitmaps) are held
-    /// here.  The VisGenParams property holds animation properties, such as frame rate and
-    /// view angles.
+    /// This has a list of references to Visualization objects.  The cached images are
+    /// displayed in sequence, at a rate determined by animation parameters also held here.
     ///
     /// As with the base class, instances are generally immutable for the benefit of undo/redo.
     /// </remarks>
-    public class VisualizationAnimation : Visualization {
+    public class VisBitmapAnimation : Visualization {
         /// <summary>
         /// Frame delay parameter.
         /// </summary>
-        public const string FRAME_DELAY_MSEC_PARAM = "frame-delay-msec";
+        public const string P_FRAME_DELAY_MSEC_PARAM = "_frame-delay-msec";
+        public const string P_FRAME_DELAY_MSEC_PARAM_OLD = "frame-delay-msec";
 
         /// <summary>
         /// Fake visualization generation identifier.
@@ -68,9 +68,9 @@ namespace SourceGen {
         /// <param name="visGenIdent">Visualization generator identifier.</param>
         /// <param name="visGenParams">Parameters for visualization generator.</param>
         /// <param name="visSerialNumbers">Serial numbers of referenced Visualizations.</param>
-        public VisualizationAnimation(string tag, string visGenIdent,
-                ReadOnlyDictionary<string, object> visGenParams, List<int> visSerialNumbers,
-                VisualizationAnimation oldObj)
+        public VisBitmapAnimation(string tag, string visGenIdent,
+                ReadOnlyDictionary<string, object> visGenParams, VisBitmapAnimation oldObj,
+                List<int> visSerialNumbers)
                 : base(tag, visGenIdent, visGenParams, oldObj) {
             Debug.Assert(visSerialNumbers != null);
 
@@ -143,8 +143,8 @@ namespace SourceGen {
         /// <param name="removedSerials">List of serial numbers to remove.</param>
         /// <param name="newAnim">Object with changes, or null if nothing changed.</param>
         /// <returns>True if something was actually removed.</returns>
-        public static bool StripEntries(VisualizationAnimation visAnim, List<int> removedSerials,
-                out VisualizationAnimation newAnim) {
+        public static bool StripEntries(VisBitmapAnimation visAnim, List<int> removedSerials,
+                out VisBitmapAnimation newAnim) {
             bool somethingRemoved = false;
 
             // Both sets should be small, so not worried about O(m*n).
@@ -159,45 +159,16 @@ namespace SourceGen {
             }
 
             if (somethingRemoved) {
-                newAnim = new VisualizationAnimation(visAnim.Tag, visAnim.VisGenIdent,
-                    visAnim.VisGenParams, newSerials, visAnim);
+                newAnim = new VisBitmapAnimation(visAnim.Tag, visAnim.VisGenIdent,
+                    visAnim.VisGenParams, visAnim, newSerials);
             } else {
                 newAnim = null;
             }
             return somethingRemoved;
         }
 
-        public static BitmapSource GenerateAnimOverlayImage() {
-            const int IMAGE_SIZE = 128;
 
-            // Glowy "high tech" blue.
-            SolidColorBrush outlineBrush = new SolidColorBrush(Color.FromArgb(255, 0, 216, 255));
-            SolidColorBrush fillBrush = new SolidColorBrush(Color.FromArgb(128, 0, 182, 215));
-
-            DrawingVisual visual = new DrawingVisual();
-            using (DrawingContext dc = visual.RenderOpen()) {
-                // Thanks: https://stackoverflow.com/a/29249100/294248
-                Point p1 = new Point(IMAGE_SIZE * 5 / 8, IMAGE_SIZE / 2);
-                Point p2 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE / 4);
-                Point p3 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE * 3 / 4);
-                StreamGeometry sg = new StreamGeometry();
-                using (StreamGeometryContext sgc = sg.Open()) {
-                    sgc.BeginFigure(p1, true, true);
-                    PointCollection points = new PointCollection() { p2, p3 };
-                    sgc.PolyLineTo(points, true, true);
-                }
-                sg.Freeze();
-                dc.DrawGeometry(fillBrush, new Pen(outlineBrush, 3), sg);
-            }
-
-            RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
-                PixelFormats.Pbgra32);
-            bmp.Render(visual);
-            return bmp;
-        }
-
-
-        public static bool operator ==(VisualizationAnimation a, VisualizationAnimation b) {
+        public static bool operator ==(VisBitmapAnimation a, VisBitmapAnimation b) {
             if (ReferenceEquals(a, b)) {
                 return true;    // same object, or both null
             }
@@ -206,18 +177,18 @@ namespace SourceGen {
             }
             return a.Equals(b);
         }
-        public static bool operator !=(VisualizationAnimation a, VisualizationAnimation b) {
+        public static bool operator !=(VisBitmapAnimation a, VisBitmapAnimation b) {
             return !(a == b);
         }
         public override bool Equals(object obj) {
-            if (!(obj is VisualizationAnimation)) {
+            if (!(obj is VisBitmapAnimation)) {
                 return false;
             }
             // Do base-class equality comparison and the ReferenceEquals check.
             if (!base.Equals(obj)) {
                 return false;
             }
-            VisualizationAnimation other = (VisualizationAnimation)obj;
+            VisBitmapAnimation other = (VisBitmapAnimation)obj;
             if (other.mSerialNumbers.Count != mSerialNumbers.Count) {
                 return false;
             }

@@ -36,11 +36,11 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// New/edited animation, only valid when dialog result is true.
         /// </summary>
-        public VisualizationAnimation NewAnim { get; private set; }
+        public VisBitmapAnimation NewAnim { get; private set; }
 
         private int mSetOffset;
         private SortedList<int, VisualizationSet> mEditedList;
-        private VisualizationAnimation mOrigAnim;
+        private VisBitmapAnimation mOrigAnim;
 
         private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
         private Brush mErrorLabelColor = Brushes.Red;
@@ -135,7 +135,7 @@ namespace SourceGen.WpfGui {
         /// Constructor.
         /// </summary>
         public EditBitmapAnimation(Window owner, int setOffset,
-                SortedList<int, VisualizationSet> editedList, VisualizationAnimation origAnim) {
+                SortedList<int, VisualizationSet> editedList, VisBitmapAnimation origAnim) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
@@ -149,7 +149,12 @@ namespace SourceGen.WpfGui {
             if (origAnim != null) {
                 TagString = origAnim.Tag;
                 mFrameDelayIntMsec = PluginCommon.Util.GetFromObjDict(origAnim.VisGenParams,
-                    VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, DEFAULT_FRAME_DELAY);
+                    VisBitmapAnimation.P_FRAME_DELAY_MSEC_PARAM, DEFAULT_FRAME_DELAY);
+                if (mFrameDelayIntMsec == DEFAULT_FRAME_DELAY) {
+                    // check for old-style
+                    mFrameDelayIntMsec = PluginCommon.Util.GetFromObjDict(origAnim.VisGenParams,
+                        VisBitmapAnimation.P_FRAME_DELAY_MSEC_PARAM_OLD, DEFAULT_FRAME_DELAY);
+                }
                 FrameDelayTimeMsec = mFrameDelayIntMsec.ToString();
             } else {
                 TagString = "anim" + mSetOffset.ToString("x6");
@@ -179,7 +184,7 @@ namespace SourceGen.WpfGui {
             // Add all remaining non-animation Visualizations to the "source" set.
             foreach (KeyValuePair<int, VisualizationSet> kvp in mEditedList) {
                 foreach (Visualization vis in kvp.Value) {
-                    if (vis is VisualizationAnimation) {
+                    if (vis is VisBitmapAnimation) {
                         // disallow using animations as animation frames
                         continue;
                     }
@@ -210,15 +215,15 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             Dictionary<string, object> visGenParams = new Dictionary<string, object>(1);
-            visGenParams.Add(VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, mFrameDelayIntMsec);
+            visGenParams.Add(VisBitmapAnimation.P_FRAME_DELAY_MSEC_PARAM, mFrameDelayIntMsec);
 
             List<int> serials = new List<int>(VisAnimItems.Count);
             foreach (Visualization vis in VisAnimItems) {
                 serials.Add(vis.SerialNumber);
             }
 
-            NewAnim = new VisualizationAnimation(TagString, VisualizationAnimation.ANIM_VIS_GEN,
-                new ReadOnlyDictionary<string, object>(visGenParams), serials, mOrigAnim);
+            NewAnim = new VisBitmapAnimation(TagString, VisBitmapAnimation.ANIM_VIS_GEN,
+                new ReadOnlyDictionary<string, object>(visGenParams), mOrigAnim, serials);
             NewAnim.GenerateImage(mEditedList);
 
             DialogResult = true;

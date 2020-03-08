@@ -791,11 +791,11 @@ namespace SourceGen {
                 int dispWidth, dispHeight;
 
                 Visualization vis = visSet[index];
-                if (vis is VisualizationAnimation) {
+                if (vis is VisBitmapAnimation) {
                     // Animated visualization.
-                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                    VisBitmapAnimation visAnim = (VisBitmapAnimation)vis;
                     int frameDelay = PluginCommon.Util.GetFromObjDict(visAnim.VisGenParams,
-                        VisualizationAnimation.FRAME_DELAY_MSEC_PARAM, 330);
+                        VisBitmapAnimation.P_FRAME_DELAY_MSEC_PARAM, 330);
                     AnimatedGifEncoder encoder = new AnimatedGifEncoder();
 
                     // Gather list of frames.

@@ -103,8 +103,9 @@
     </Compile>
     <Compile Include="LocalVariableTable.cs" />
     <Compile Include="Visualization.cs" />
-    <Compile Include="VisualizationAnimation.cs" />
+    <Compile Include="VisBitmapAnimation.cs" />
     <Compile Include="VisualizationSet.cs" />
+    <Compile Include="VisWireframeAnimation.cs" />
     <Compile Include="WireframeObject.cs" />
     <Compile Include="WpfGui\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>

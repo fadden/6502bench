@@ -118,13 +118,13 @@ namespace SourceGen {
             bool somethingRemoved = false;
             newSet = new VisualizationSet(visSet.Count);
             foreach (Visualization vis in visSet) {
-                if (!(vis is VisualizationAnimation)) {
+                if (!(vis is VisBitmapAnimation)) {
                     newSet.Add(vis);
                     continue;
                 }
 
-                if (VisualizationAnimation.StripEntries((VisualizationAnimation) vis,
-                        removedSerials, out VisualizationAnimation newAnim)) {
+                if (VisBitmapAnimation.StripEntries((VisBitmapAnimation) vis,
+                        removedSerials, out VisBitmapAnimation newAnim)) {
                     somethingRemoved = true;
                     if (newAnim.Count != 0) {
                         newSet.Add(newAnim);
@@ -186,7 +186,7 @@ namespace SourceGen {
                     }
                     //Debug.WriteLine("Vis needs refresh: " + vis.Tag);
 
-                    if (vis is VisualizationAnimation) {
+                    if (vis is VisBitmapAnimation) {
                         continue;
                     }
 
@@ -242,14 +242,14 @@ namespace SourceGen {
             }
 
             // Now that we've generated images for the Visualizations, update any
-            // VisualizationAnimation thumbnails that may have been affected.
+            // VisBitmapAnimation thumbnails that may have been affected.
             foreach (KeyValuePair<int, VisualizationSet> kvp in visSets) {
                 VisualizationSet visSet = kvp.Value;
                 foreach (Visualization vis in visSet) {
-                    if (!(vis is VisualizationAnimation)) {
+                    if (!(vis is VisBitmapAnimation)) {
                         continue;
                     }
-                    VisualizationAnimation visAnim = (VisualizationAnimation)vis;
+                    VisBitmapAnimation visAnim = (VisBitmapAnimation)vis;
                     visAnim.GenerateImage(visSets);
                 }
             }

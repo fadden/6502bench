@@ -373,11 +373,11 @@ namespace SourceGen {
                 VisGenParams = new Dictionary<string, object>(vis.VisGenParams);
             }
         }
-        public class SerVisualizationAnimation : SerVisualization {
+        public class SerVisBitmapAnimation : SerVisualization {
             public List<string> Tags { get; set; }
 
-            public SerVisualizationAnimation() { }
-            public SerVisualizationAnimation(VisualizationAnimation visAnim,
+            public SerVisBitmapAnimation() { }
+            public SerVisBitmapAnimation(VisBitmapAnimation visAnim,
                     SortedList<int, VisualizationSet> visSets)
                     : base(visAnim) {
                 Tags = new List<string>(visAnim.Count);
@@ -400,7 +400,7 @@ namespace SourceGen {
             }
         }
 
-        // Fields are serialized to/from JSON.  Do not change the field names.
+        // Fields are serialized to/from JSON.  DO NOT change the field names.
         public int _ContentVersion { get; set; }
         public int FileDataLength { get; set; }
         public int FileDataCrc32 { get; set; }
@@ -415,7 +415,7 @@ namespace SourceGen {
         public Dictionary<string, SerFormatDescriptor> OperandFormats { get; set; }
         public Dictionary<string, SerLocalVariableTable> LvTables { get; set; }
         public List<SerVisualization> Visualizations { get; set; }
-        public List<SerVisualizationAnimation> VisualizationAnimations { get; set; }
+        public List<SerVisBitmapAnimation> VisualizationAnimations { get; set; }
         public Dictionary<string, SerVisualizationSet> VisualizationSets { get; set; }
 
         /// <summary>
@@ -506,15 +506,15 @@ namespace SourceGen {
                 spf.LvTables.Add(kvp.Key.ToString(), new SerLocalVariableTable(kvp.Value));
             }
 
-            // Output Visualizations, VisualizationAnimations, and VisualizationSets
+            // Output Visualizations, VisBitmapAnimations, and VisualizationSets
             spf.Visualizations = new List<SerVisualization>();
-            spf.VisualizationAnimations = new List<SerVisualizationAnimation>();
+            spf.VisualizationAnimations = new List<SerVisBitmapAnimation>();
             spf.VisualizationSets = new Dictionary<string, SerVisualizationSet>();
             foreach (KeyValuePair<int, VisualizationSet> kvp in proj.VisualizationSets) {
                 foreach (Visualization vis in kvp.Value) {
-                    if (vis is VisualizationAnimation) {
-                        VisualizationAnimation visAnim = (VisualizationAnimation)vis;
-                        spf.VisualizationAnimations.Add(new SerVisualizationAnimation(visAnim,
+                    if (vis is VisBitmapAnimation) {
+                        VisBitmapAnimation visAnim = (VisBitmapAnimation)vis;
+                        spf.VisualizationAnimations.Add(new SerVisBitmapAnimation(visAnim,
                                 proj.VisualizationSets));
                     } else {
                         spf.Visualizations.Add(new SerVisualization(vis));
@@ -793,10 +793,10 @@ namespace SourceGen {
                     }
                 }
 
-                // Extract the VisualizationAnimations, which link to Visualizations by tag.
-                foreach (SerVisualizationAnimation serVisAnim in spf.VisualizationAnimations) {
-                    if (CreateVisualizationAnimation(serVisAnim, visDict, report,
-                            out VisualizationAnimation visAnim)) {
+                // Extract the VisBitmapAnimations, which link to Visualizations by tag.
+                foreach (SerVisBitmapAnimation serVisAnim in spf.VisualizationAnimations) {
+                    if (CreateVisBitmapAnimation(serVisAnim, visDict, report,
+                            out VisBitmapAnimation visAnim)) {
                         try {
                             visDict.Add(visAnim.Tag, visAnim);
                         } catch (ArgumentException) {
@@ -1057,11 +1057,11 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Creates a VisualizationAnimation from its serialized form.
+        /// Creates a VisBitmapAnimation from its serialized form.
         /// </summary>
-        private static bool CreateVisualizationAnimation(SerVisualizationAnimation serVisAnim,
+        private static bool CreateVisBitmapAnimation(SerVisBitmapAnimation serVisAnim,
                 Dictionary<string, Visualization> visList, FileLoadReport report,
-                out VisualizationAnimation visAnim) {
+                out VisBitmapAnimation visAnim) {
             if (!CheckVis(serVisAnim, report, out Dictionary<string, object> parms)) {
                 visAnim = null;
                 return false;
@@ -1074,7 +1074,7 @@ namespace SourceGen {
                     report.Add(FileLoadItem.Type.Warning, str);
                     continue;
                 }
-                if (vis is VisualizationAnimation) {
+                if (vis is VisBitmapAnimation) {
                     string str = string.Format(Res.Strings.ERR_BAD_VISUALIZATION_FMT,
                         "animation in animation: " + tag);
                     report.Add(FileLoadItem.Type.Warning, str);
@@ -1082,8 +1082,8 @@ namespace SourceGen {
                 }
                 serialNumbers.Add(vis.SerialNumber);
             }
-            visAnim = new VisualizationAnimation(serVisAnim.Tag, serVisAnim.VisGenIdent,
-                new ReadOnlyDictionary<string, object>(parms), serialNumbers, null);
+            visAnim = new VisBitmapAnimation(serVisAnim.Tag, serVisAnim.VisGenIdent,
+                new ReadOnlyDictionary<string, object>(parms), null, serialNumbers);
             return true;
         }
 

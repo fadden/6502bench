@@ -35,6 +35,20 @@ namespace SourceGen {
     /// Immutability is useful here because the undo/redo mechanism operates at VisualizationSet
     /// granularity.  We want to know that the undo/redo operations are operating on objects
     /// that weren't changed while sitting in the undo buffer.
+    ///
+    /// At a basic level, bitmap and wireframe visualizations are the same: you take a
+    /// visualization generation identifier and a bunch of parameters, and generate Stuff.
+    /// The nature of the Stuff and what you do with it after are very different, however.
+    ///
+    /// For a bitmap, we can generate the data once, and then scale or transform it as
+    /// necessary.  Bitmap animations are a collection of bitmap visualizations.
+    ///
+    /// For wireframes, we generate a WireframeObject using some of the parameters, and then
+    /// transform it with other parameters.  The parameters are stored in a single dictionary,
+    /// but viewer-only parameters are prefixed with '_', which is not allowed in plugins.
+    ///
+    /// This class represents the common ground between bitmaps and wireframes.  It holds the
+    /// identifier and parameters, as well as the thumbnail data that we display in the list.
     /// </remarks>
     public class Visualization {
         public const double THUMBNAIL_DIM = 64;
@@ -98,8 +112,7 @@ namespace SourceGen {
         /// <summary>
         /// Image to overlay on animation visualizations.
         /// </summary>
-        internal static readonly BitmapSource ANIM_OVERLAY_IMAGE =
-            VisualizationAnimation.GenerateAnimOverlayImage();
+        internal static readonly BitmapSource ANIM_OVERLAY_IMAGE = GenerateAnimOverlayImage();
 
         internal static readonly BitmapSource BLANK_IMAGE = GenerateBlankImage();
         //internal static readonly BitmapSource BLACK_IMAGE = GenerateBlackImage();
@@ -246,6 +259,7 @@ namespace SourceGen {
         /// <returns>Rendered bitmap.</returns>
         public static BitmapSource GenerateWireframeImage(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms, double dim) {
+            // Generate the path geometry.
             GeometryGroup geo = GenerateWireframePath(visWire, parms, dim);
 
             // Render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
@@ -283,15 +297,19 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Generates a WPF path from IVisualizationWireframe data.  Line widths get scaled
-        /// if the output area is larger or smaller than the path, so this scales coordinates
-        /// so they fit within the box.
+        /// Generates WPF Path geometry from IVisualizationWireframe data.  Line widths get
+        /// scaled if the output area is larger or smaller than the path bounds, so this scales
+        /// coordinates so they fit within the box.
         /// </summary>
         /// <param name="visWire">Visualization data.</param>
         /// <param name="parms">Visualization parameters.</param>
         /// <param name="dim">Width/height to use for path area.</param>
         public static GeometryGroup GenerateWireframePath(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms, double dim) {
+            int eulerX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
+            int eulerY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
+            int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
+
             // WPF path drawing is based on a system where a pixel is drawn at the center
             // of the coordinate, and integer coordinates start at the top left edge.  If
             // you draw a pixel at (0,0), most of the pixel will be outside the window
@@ -334,7 +352,7 @@ namespace SourceGen {
             // Generate a list of clip-space line segments.  Coordinate values are in the
             // range [-1,1], with +X to the right and +Y upward.
             WireframeObject wireObj = WireframeObject.Create(visWire);
-            List<WireframeObject.LineSeg> segs = wireObj.Generate(parms);
+            List<WireframeObject.LineSeg> segs = wireObj.Generate(parms, eulerX, eulerY, eulerZ);
 
             // Convert clip-space coords to screen.  We need to translate to [0,2] with +Y
             // toward the bottom of the screen, scale up, round to the nearest whole pixel,
@@ -358,6 +376,39 @@ namespace SourceGen {
         private static BitmapSource GenerateBlankImage() {
             RenderTargetBitmap bmp = new RenderTargetBitmap(1, 1, 96.0, 96.0,
                 PixelFormats.Pbgra32);
+            return bmp;
+        }
+
+        /// <summary>
+        /// Generate an image to overlay on thumbnails of animations.
+        /// </summary>
+        /// <returns></returns>
+        private static BitmapSource GenerateAnimOverlayImage() {
+            const int IMAGE_SIZE = 128;
+
+            // Glowy "high tech" blue.
+            SolidColorBrush outlineBrush = new SolidColorBrush(Color.FromArgb(255, 0, 216, 255));
+            SolidColorBrush fillBrush = new SolidColorBrush(Color.FromArgb(128, 0, 182, 215));
+
+            DrawingVisual visual = new DrawingVisual();
+            using (DrawingContext dc = visual.RenderOpen()) {
+                // Thanks: https://stackoverflow.com/a/29249100/294248
+                Point p1 = new Point(IMAGE_SIZE * 5 / 8, IMAGE_SIZE / 2);
+                Point p2 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE / 4);
+                Point p3 = new Point(IMAGE_SIZE * 3 / 8, IMAGE_SIZE * 3 / 4);
+                StreamGeometry sg = new StreamGeometry();
+                using (StreamGeometryContext sgc = sg.Open()) {
+                    sgc.BeginFigure(p1, true, true);
+                    PointCollection points = new PointCollection() { p2, p3 };
+                    sgc.PolyLineTo(points, true, true);
+                }
+                sg.Freeze();
+                dc.DrawGeometry(fillBrush, new Pen(outlineBrush, 3), sg);
+            }
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
+                PixelFormats.Pbgra32);
+            bmp.Render(visual);
             return bmp;
         }
 
