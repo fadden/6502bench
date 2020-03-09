@@ -32,16 +32,22 @@ namespace SourceGen {
         /// <summary>
         /// Frame delay parameter.
         /// </summary>
-        public const string P_FRAME_DELAY_MSEC = "_frame-delay-msec";
+        public const string P_FRAME_DELAY_MSEC = "_frameDelayMsec";
 
         /// <summary>
         /// Frame count parameter.
         /// </summary>
-        public const string P_FRAME_COUNT = "_frame-count";
+        public const string P_FRAME_COUNT = "_frameCount";
+
+        public const string P_IS_ANIMATED = "_isAnimatedWireframe";
 
         public const string P_EULER_ROT_X = "_eulerRotX";
         public const string P_EULER_ROT_Y = "_eulerRotY";
         public const string P_EULER_ROT_Z = "_eulerRotZ";
+
+        public const string P_DELTA_ROT_X = "_deltaRotX";
+        public const string P_DELTA_ROT_Y = "_deltaRotY";
+        public const string P_DELTA_ROT_Z = "_deltaRotZ";
 
         private IVisualizationWireframe mVisWire;
 
@@ -49,8 +55,13 @@ namespace SourceGen {
                 ReadOnlyDictionary<string, object> visGenParams, Visualization oldObj,
                 IVisualizationWireframe visWire)
                 : base(tag, visGenIdent, visGenParams, oldObj) {
-            Debug.Assert(visWire != null);
+            // visWire may be null when loading from project file
+            mVisWire = visWire;
+        }
 
+        public override void SetThumbnail(IVisualizationWireframe visWire,
+                ReadOnlyDictionary<string, object> parms) {
+            base.SetThumbnail(visWire, parms);
             mVisWire = visWire;
         }
     }

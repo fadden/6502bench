@@ -192,7 +192,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="visWire">Visualization object.</param>
         /// <param name="parms">Visualization parameters.</param>
-        public void SetThumbnail(IVisualizationWireframe visWire,
+        public virtual void SetThumbnail(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms) {
             Debug.Assert(visWire != null);
             Debug.Assert(parms != null);

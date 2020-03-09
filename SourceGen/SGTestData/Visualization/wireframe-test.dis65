@@ -42,7 +42,26 @@
 },
 
 "UserLabels":{
-},
+"10":{
+"Label":"vertices",
+"Value":4106,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"44":{
+"Label":"edges",
+"Value":4140,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"101":{
+"Label":"faces",
+"Value":4197,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"}},
 
 "OperandFormats":{
 "10":{
@@ -248,8 +267,14 @@
 "_isPerspective":true,
 "_isBfcEnabled":true,
 "_eulerRotX":0,
-"_eulerRotY":34,
-"_eulerRotZ":65}},
+"_eulerRotY":21,
+"_eulerRotZ":65,
+"_isAnimatedWireframe":true,
+"_deltaRotX":-6,
+"_deltaRotY":30,
+"_deltaRotZ":0,
+"_frameCount":60,
+"_frameDelayMsec":100}},
 
 {
 "Tag":"bmp_data",
@@ -269,7 +294,7 @@
 "Tag":"anim00002c",
 "VisGenIdent":"(animation)",
 "VisGenParams":{
-"_frame-delay-msec":500}}],
+"_frameDelayMsec":100}}],
 "VisualizationSets":{
 "10":{
 "Tags":["wf_data",

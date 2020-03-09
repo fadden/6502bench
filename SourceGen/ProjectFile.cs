@@ -1051,8 +1051,18 @@ namespace SourceGen {
                 vis = null;
                 return false;
             }
-            vis = new Visualization(serVis.Tag, serVis.VisGenIdent,
-                new ReadOnlyDictionary<string, object>(parms));
+
+            // We don't store VisWireframeAnimations in a separate area.  They're just like
+            // static Visualizations but with an extra "is animated" parameter set.  Check
+            // for that here and create the correct type.
+            if (parms.TryGetValue(VisWireframeAnimation.P_IS_ANIMATED, out object objVal) &&
+                    objVal is bool && (bool)objVal) {
+                vis = new VisWireframeAnimation(serVis.Tag, serVis.VisGenIdent,
+                    new ReadOnlyDictionary<string, object>(parms), null, null);
+            } else {
+                vis = new Visualization(serVis.Tag, serVis.VisGenIdent,
+                    new ReadOnlyDictionary<string, object>(parms));
+            }
             return true;
         }
 

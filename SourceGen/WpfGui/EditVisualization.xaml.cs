@@ -81,18 +81,6 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsValid;
 
-        public Visibility WireframeCtrlVisibility {
-            get { return mWireframeCtrlVisibility; }
-            set { mWireframeCtrlVisibility = value; OnPropertyChanged(); }
-        }
-        private Visibility mWireframeCtrlVisibility;
-
-        public bool IsWireframeAnimated {
-            get { return mIsWireframeAnimated; }
-            set { mIsWireframeAnimated = value; OnPropertyChanged(); }
-        }
-        private bool mIsWireframeAnimated;
-
         /// <summary>
         /// Visualization tag.
         /// </summary>
@@ -165,6 +153,54 @@ namespace SourceGen.WpfGui {
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        #region Wireframe Stuff
+
+        // Visibility of the wireframe-specific UI.
+        public Visibility WireframeCtrlVisibility {
+            get { return mWireframeCtrlVisibility; }
+            set { mWireframeCtrlVisibility = value; OnPropertyChanged(); }
+        }
+        private Visibility mWireframeCtrlVisibility;
+
+        // "Animated" checkbox.
+        public bool IsWireframeAnimated {
+            get { return mIsWireframeAnimated; }
+            set { mIsWireframeAnimated = value; OnPropertyChanged(); }
+        }
+        private bool mIsWireframeAnimated;
+
+        public int RotDeltaX {
+            get { return mRotDeltaX; }
+            set { mRotDeltaX = value; OnPropertyChanged(); }
+        }
+        private int mRotDeltaX;
+
+        public int RotDeltaY {
+            get { return mRotDeltaY; }
+            set { mRotDeltaY = value; OnPropertyChanged(); }
+        }
+        private int mRotDeltaY;
+
+        public int RotDeltaZ {
+            get { return mRotDeltaZ; }
+            set { mRotDeltaZ = value; OnPropertyChanged(); }
+        }
+        private int mRotDeltaZ;
+
+        public int FrameCount {
+            get { return mFrameCount; }
+            set { mFrameCount = value; OnPropertyChanged(); }
+        }
+        private int mFrameCount;
+
+        public int FrameDelayMsec {
+            get { return mFrameDelayMsec; }
+            set { mFrameDelayMsec = value; OnPropertyChanged(); }
+        }
+        private int mFrameDelayMsec;
+
+        #endregion Wireframe Stuff
 
         private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
             private EditVisualization mOuter;
@@ -390,6 +426,7 @@ namespace SourceGen.WpfGui {
 
             WireframeCtrlVisibility = includeWire ? Visibility.Visible : Visibility.Collapsed;
             if (includeWire) {
+                // Slider control limits values to [0,359].
                 int rotX = (int)initialXSlider.Value;
                 int rotY = (int)initialYSlider.Value;
                 int rotZ = (int)initialZSlider.Value;
@@ -397,6 +434,22 @@ namespace SourceGen.WpfGui {
                 valueDict.Add(VisWireframeAnimation.P_EULER_ROT_X, rotX);
                 valueDict.Add(VisWireframeAnimation.P_EULER_ROT_Y, rotY);
                 valueDict.Add(VisWireframeAnimation.P_EULER_ROT_Z, rotZ);
+
+                // Strictly speaking we don't need this, because we use a different object
+                // type, but this ties into how the object is stored in the project file.
+                valueDict.Add(VisWireframeAnimation.P_IS_ANIMATED, IsWireframeAnimated);
+
+                // These could be any integer value, but the UI limits them to 4 chars, and
+                // it's all mod 360.
+                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_X, RotDeltaX);
+                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Y, RotDeltaY);
+                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Z, RotDeltaZ);
+
+                // These aren't strictly checked by the UI, so range-check here.
+                int fc = (FrameCount >= 1 && FrameCount <= 9999) ? FrameCount : 1;
+                valueDict.Add(VisWireframeAnimation.P_FRAME_COUNT, fc);
+                int dly = (FrameDelayMsec >= 1 && FrameDelayMsec <= 999999) ? FrameDelayMsec : 100;
+                valueDict.Add(VisWireframeAnimation.P_FRAME_DELAY_MSEC, dly);
             }
 
             return new ReadOnlyDictionary<string, object>(valueDict);
@@ -550,8 +603,9 @@ namespace SourceGen.WpfGui {
                 } else {
                     previewGrid.Background = Brushes.Black;
                     previewImage.Source = Visualization.BLANK_IMAGE;
-                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms,
-                        Math.Min(previewImage.ActualWidth, previewImage.ActualHeight) / 2);
+                    double dim = Math.Floor(
+                        Math.Min(previewImage.ActualWidth, previewImage.ActualHeight));
+                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms, dim);
                     BitmapDimensions = "n/a";
 
                     mVisObj = visWire;
@@ -590,6 +644,26 @@ namespace SourceGen.WpfGui {
                     VisWireframeAnimation.P_EULER_ROT_Y, 0);
                 initialZSlider.Value = Util.GetFromObjDict(mOrigVis.VisGenParams,
                     VisWireframeAnimation.P_EULER_ROT_Z, 0);
+
+                // Set this according to the object type, rather than P_IS_ANIMATED.  The two
+                // should always be in sync.  This should help make it more obvious if they
+                // aren't.
+                IsWireframeAnimated = (mOrigVis is VisWireframeAnimation);
+
+                // This should make it *really* obvious.
+                Debug.Assert(IsWireframeAnimated == Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_IS_ANIMATED, false));
+
+                RotDeltaX = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_DELTA_ROT_X, 0);
+                RotDeltaY = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_DELTA_ROT_Y, 0);
+                RotDeltaZ = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_DELTA_ROT_Z, 0);
+                FrameCount = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_FRAME_COUNT, 1);
+                FrameDelayMsec = Util.GetFromObjDict(mOrigVis.VisGenParams,
+                    VisWireframeAnimation.P_FRAME_DELAY_MSEC, 100);
             }
 
             UpdateControls();
@@ -616,6 +690,40 @@ namespace SourceGen.WpfGui {
 
         private void TestAnim_Click(object sender, RoutedEventArgs e) {
             Debug.WriteLine("TEST!");
+        }
+
+        /// <summary>
+        /// Sets the number of frames in the animation based on how many incremental
+        /// rotations are required to return the shape to its initial orientation.  The
+        /// count will always be between 1 and 360.
+        /// </summary>
+        /// <remarks>
+        /// There might be a clever way to do this with math, but this is pretty simple.
+        /// </remarks>
+        private void AutoFrameCountButton_Click(object sender, RoutedEventArgs e) {
+            int xr, yr, zr;
+            int xstart = xr = (int)initialXSlider.Value;
+            int ystart = yr = (int)initialYSlider.Value;
+            int zstart = zr = (int)initialZSlider.Value;
+
+            int count;
+            if (RotDeltaX == 0 && RotDeltaY == 0 && RotDeltaZ == 0) {
+                count = 1;
+            } else {
+                count = 0;
+                while (count < 360) {
+                    xr = (xr + 360 + RotDeltaX) % 360;
+                    yr = (yr + 360 + RotDeltaY) % 360;
+                    zr = (zr + 360 + RotDeltaZ) % 360;
+                    count++;
+
+                    if (xr == xstart && yr == ystart && zr == zstart) {
+                        break;
+                    }
+                }
+            }
+
+            FrameCount = count;
         }
     }
 

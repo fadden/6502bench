@@ -36,7 +36,7 @@ namespace SourceGen {
         /// <summary>
         /// Frame delay parameter.
         /// </summary>
-        public const string P_FRAME_DELAY_MSEC_PARAM = "_frame-delay-msec";
+        public const string P_FRAME_DELAY_MSEC_PARAM = "_frameDelayMsec";
         public const string P_FRAME_DELAY_MSEC_PARAM_OLD = "frame-delay-msec";
 
         /// <summary>
