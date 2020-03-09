@@ -72,20 +72,25 @@ Bitmap Visualization Editor window will open.
 Similarly, if you select "New Bitmap Animation" or edit an existing
 bitmap animation, the Bitmap Animation Editor will open.</p>
 
-<h4>Bitmap Visualization Editor</h4>
+<h4>Visualization Editor</h4>
 
-<p>The combo box at the top of the screen lists every bitmap visualization
+<p>The combo box at the top of the screen lists every visualization
 generator defined by an active extension script.  Select the one that is
 appropriate for the data you're trying to visualize.  Every visualizer may
 have different parameters, so as you select different entries the set of
 input parameters below the preview window may change.</p>
+<p>There are two categorizes of visualization generator: bitmap, and
+wireframe.  Bitmaps are simple 2D images, but wireframes are 2D or 3D
+meshes that can be viewed from different angles.  When you select a
+wireframe generator, additional view controls will be added at the bottom.
+(See below.)</p>
 
 <p>The "tag" is a unique string that will be shown in the display list.
 This is not a label, and may contain any characters you want (but leading
 and trailing whitespace will be trimmed).  The only requirement is that
 it be unique across all visualizations (bitmaps, animations, etc).</p>
 <p>The preview window shows the visualizer output.  The generated image is
-expanded to fill the window, so small images will be shown with very
+expanded to fill the window, so small bitmaps will be shown with very
 large pixels.
 If you resize the editor window, the preview window will expand, which
 can make it easier to see detail on larger images.
@@ -96,6 +101,23 @@ the former a text entry field that accepts decimal and hexadecimal values.
 The range of allowable values is shown to the right of the entry field.
 If you enter an invalid value, the parameter description will turn red.</p>
 
+<h5>Wireframe View Controls</h5>
+
+<p>The wireframe generator may offer the choice of perspective vs.
+orthographic projection, and whether or not to enable backface
+culling.  If the generator doesn't provide them, the default is to
+render with a perspective projection and without culling.</p>
+<p>The viewer allows you to rotate the image about the X, Y, and Z
+axes.  The viewer provides a conventional right-handed coordinate system,
+with +X toward the right, +Y toward the top of the screen, and +Z
+coming out of the screen.  Positive rotations cause a counter-clockwise
+rotation when looking down the axis in the positive direction.</p>
+<p>If you check the "Animated" box, you can add a simple spin.  Choose
+the number of degrees to rotate per frame, how many frames to generate before
+resetting, and the delay between each frame.  Clicking the "Auto" button
+will automatically select the number of frames needed to display the
+animation in an unbroken loop (useful for animated GIFs).  Click
+the "Test Animation" button to see it in action.</p>
 
 <h4>Bitmap Animation Editor</h4>
 
