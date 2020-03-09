@@ -267,13 +267,13 @@
 "_isPerspective":true,
 "_isBfcEnabled":true,
 "_eulerRotX":0,
-"_eulerRotY":21,
-"_eulerRotZ":65,
+"_eulerRotY":0,
+"_eulerRotZ":0,
 "_isAnimatedWireframe":true,
-"_deltaRotX":-6,
-"_deltaRotY":30,
+"_deltaRotX":3,
+"_deltaRotY":6,
 "_deltaRotZ":0,
-"_frameCount":60,
+"_frameCount":120,
 "_frameDelayMsec":100}},
 
 {
@@ -291,14 +291,14 @@
 "VisualizationAnimations":[{
 "Tags":["wf_data",
 "bmp_data"],
-"Tag":"anim00002c",
+"Tag":"ugly flash",
 "VisGenIdent":"(animation)",
 "VisGenParams":{
-"_frameDelayMsec":100}}],
+"_frameDelayMsec":1000}}],
 "VisualizationSets":{
 "10":{
 "Tags":["wf_data",
 "bmp_data"]},
 
 "44":{
-"Tags":["anim00002c"]}}}
+"Tags":["ugly flash"]}}}

@@ -193,10 +193,6 @@ namespace SourceGen.WpfGui {
             okButton.Focus();
         }
 
-        private void NewWireframeAnimationButton_Click(object sender, RoutedEventArgs e) {
-            // TODO(xyzzy)
-        }
-
         private void NewBitmapAnimationButton_Click(object sender, RoutedEventArgs e) {
             EditBitmapAnimation dlg = new EditBitmapAnimation(this, mOffset,
                 CreateEditedSetList(), null);

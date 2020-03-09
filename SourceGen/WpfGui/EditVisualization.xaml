@@ -255,8 +255,8 @@ limitations under the License.
         </Grid>
         
         <DockPanel Grid.Column="0" Grid.Row="5" Margin="0,8,0,0" LastChildFill="False">
-            <Button DockPanel.Dock="Left" Content="Test Animation" Padding="4,0" Click="TestAnim_Click"
-                    Visibility="{Binding WireframeCtrlVisibility}"
+            <Button DockPanel.Dock="Left" Content="_Test Animation..." Width="110"
+                    Click="TestAnim_Click" Visibility="{Binding WireframeCtrlVisibility}"
                     IsEnabled="{Binding ElementName=isAnimated, Path=IsChecked}"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="8,0,0,0" IsCancel="True"/>
             <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"

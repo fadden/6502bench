@@ -97,10 +97,6 @@ limitations under the License.
             <Button Width="120" Margin="4" Click="NewBitmapAnimationButton_Click">
                 <AccessText Text="New _Bitmap Animation..." TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
-            <Button Width="120" Margin="4"
-                    IsEnabled="{Binding HasVisPlugins}" Click="NewWireframeAnimationButton_Click">
-                <AccessText Text="New _Wireframe Animation..." TextWrapping="Wrap" TextAlignment="Center"/>
-            </Button>
 
             <Button Width="110" Margin="4,20,4,4" Content="_Edit..."
                     IsEnabled="{Binding IsEditEnabled}" Click="EditButton_Click"/>

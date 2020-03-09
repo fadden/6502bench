@@ -808,7 +808,6 @@ namespace SourceGen {
                             Debug.Assert(false);        // not expected
                         }
                     }
-
 #if false
                     // try feeding the animated GIF into our GIF unpacker
                     using (MemoryStream ms = new MemoryStream()) {
@@ -828,8 +827,25 @@ namespace SourceGen {
                         }
                     } catch (Exception ex) {
                         // TODO: add an error report
-                        Debug.WriteLine("Error creating animated GIF file '" + pathName + "': " +
-                            ex.Message);
+                        Debug.WriteLine("Error creating animated GIF file '" + pathName +
+                            "': " + ex.Message);
+                        dispWidth = dispHeight = 1;
+                    }
+                } else if (vis is VisWireframeAnimation) {
+                    AnimatedGifEncoder encoder = new AnimatedGifEncoder();
+                    ((VisWireframeAnimation)vis).EncodeGif(encoder, IMAGE_SIZE);
+
+                    // Create new or replace existing image file.
+                    fileName += "_ani.gif";
+                    string pathName = Path.Combine(mImageDirPath, fileName);
+                    try {
+                        using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
+                            encoder.Save(stream, out dispWidth, out dispHeight);
+                        }
+                    } catch (Exception ex) {
+                        // TODO: add an error report
+                        Debug.WriteLine("Error creating animated WF GIF file '" + pathName +
+                            "': " + ex.Message);
                         dispWidth = dispHeight = 1;
                     }
                 } else {

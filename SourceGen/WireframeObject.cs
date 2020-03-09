@@ -206,14 +206,16 @@ namespace SourceGen {
         /// Generates a list of line segments for the wireframe data and the specified
         /// parameters.
         /// </summary>
-        /// <param name="parms">Visualization parameters.</param>
-        /// <returns>List of line segments, which could be empty if backface removal
+        /// <param name="eulerX">Rotation about X axis.</params>
+        /// <param name="eulerY">Rotation about Y axis.</params>
+        /// <param name="eulerZ">Rotation about Z axis.</params>
+        /// <param name="doPersp">Perspective or othographic projection?</param>
+        /// <param name="doBfc">Perform backface culling?</param>
+        /// <returns>List a of line segments, which could be empty if backface culling
         ///   was especially successful.</returns>
-        public List<LineSeg> Generate(ReadOnlyDictionary<string, object> parms,
-                int eulerX, int eulerY, int eulerZ) {
+        public List<LineSeg> Generate(int eulerX, int eulerY, int eulerZ,
+                bool doPersp, bool doBfc) {
             List<LineSeg> segs = new List<LineSeg>(mEdges.Count);
-            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
-            bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
 
             // Camera Z coordinate adjustment, used to control how perspective projections
             // appear.  The larger the value, the farther the object appears to be.  Very

@@ -52,6 +52,7 @@ namespace SourceGen.WpfGui {
         private SortedList<int, VisualizationSet> mEditedList;
         private Visualization mOrigVis;
 
+        // IVisualization2d or IVisualizationWireframe
         public object mVisObj;
 
         /// <summary>
@@ -391,7 +392,7 @@ namespace SourceGen.WpfGui {
                 Debug.Assert(mVisObj is IVisualizationWireframe);
                 NewVis.CachedImage =
                     Visualization.GenerateWireframeImage((IVisualizationWireframe)mVisObj,
-                        valueDict, Visualization.THUMBNAIL_DIM);
+                        Visualization.THUMBNAIL_DIM, valueDict);
             } else {
                 Debug.Assert(mVisObj is IVisualization2d);
                 NewVis.CachedImage =
@@ -605,7 +606,7 @@ namespace SourceGen.WpfGui {
                     previewImage.Source = Visualization.BLANK_IMAGE;
                     double dim = Math.Floor(
                         Math.Min(previewImage.ActualWidth, previewImage.ActualHeight));
-                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, parms, dim);
+                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, dim, parms);
                     BitmapDimensions = "n/a";
 
                     mVisObj = visWire;
@@ -689,7 +690,9 @@ namespace SourceGen.WpfGui {
         }
 
         private void TestAnim_Click(object sender, RoutedEventArgs e) {
-            Debug.WriteLine("TEST!");
+            ShowWireframeAnimation dlg = new ShowWireframeAnimation(this, (IVisualizationWireframe)mVisObj,
+                CreateVisGenParams(true));
+            dlg.ShowDialog();
         }
 
         /// <summary>
@@ -706,20 +709,15 @@ namespace SourceGen.WpfGui {
             int ystart = yr = (int)initialYSlider.Value;
             int zstart = zr = (int)initialZSlider.Value;
 
-            int count;
-            if (RotDeltaX == 0 && RotDeltaY == 0 && RotDeltaZ == 0) {
-                count = 1;
-            } else {
-                count = 0;
-                while (count < 360) {
-                    xr = (xr + 360 + RotDeltaX) % 360;
-                    yr = (yr + 360 + RotDeltaY) % 360;
-                    zr = (zr + 360 + RotDeltaZ) % 360;
-                    count++;
+            int count = 0;
+            while (count < 360) {
+                xr = (xr + 360 + RotDeltaX) % 360;
+                yr = (yr + 360 + RotDeltaY) % 360;
+                zr = (zr + 360 + RotDeltaZ) % 360;
+                count++;
 
-                    if (xr == xstart && yr == ystart && zr == zstart) {
-                        break;
-                    }
+                if (xr == xstart && yr == ystart && zr == zstart) {
+                    break;
                 }
             }
 
