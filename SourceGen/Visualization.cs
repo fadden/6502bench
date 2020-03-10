@@ -196,7 +196,8 @@ namespace SourceGen {
                 ReadOnlyDictionary<string, object> parms) {
             Debug.Assert(visWire != null);
             Debug.Assert(parms != null);
-            CachedImage = GenerateWireframeImage(visWire, THUMBNAIL_DIM, parms);
+            WireframeObject wireObj = WireframeObject.Create(visWire);
+            CachedImage = GenerateWireframeImage(wireObj, THUMBNAIL_DIM, parms);
         }
 
         /// <summary>
@@ -257,30 +258,30 @@ namespace SourceGen {
         /// <param name="dim">Output bitmap dimension (width and height).</param>
         /// <param name="parms">Parameter set, for rotations and render options.</param>
         /// <returns>Rendered bitmap.</returns>
-        public static BitmapSource GenerateWireframeImage(IVisualizationWireframe visWire,
+        public static BitmapSource GenerateWireframeImage(WireframeObject wireObj,
                 double dim, ReadOnlyDictionary<string, object> parms) {
             int eulerX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
             int eulerY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
             bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
-            return GenerateWireframeImage(visWire, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
+            return GenerateWireframeImage(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
         }
 
         /// <summary>
         /// Generates a BitmapSource from IVisualizationWireframe data.  Useful for thumbnails
         /// and GIF exports.
         /// </summary>
-        public static BitmapSource GenerateWireframeImage(IVisualizationWireframe visWire,
+        public static BitmapSource GenerateWireframeImage(WireframeObject wireObj,
                 double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc) {
             // Generate the path geometry.
-            GeometryGroup geo = GenerateWireframePath(visWire, dim, eulerX, eulerY, eulerZ,
+            GeometryGroup geo = GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ,
                 doPersp, doBfc);
 
             // Render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
             Rect bounds = geo.GetRenderBounds(null);
 
-            Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + visWire);
+            Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + wireObj);
 
             // Create bitmap.
             RenderTargetBitmap bitmap = new RenderTargetBitmap(
@@ -319,14 +320,14 @@ namespace SourceGen {
         /// <param name="visWire">Visualization data.</param>
         /// <param name="dim">Width/height to use for path area.</param>
         /// <param name="parms">Visualization parameters.</param>
-        public static GeometryGroup GenerateWireframePath(IVisualizationWireframe visWire,
+        public static GeometryGroup GenerateWireframePath(WireframeObject wireObj,
                 double dim, ReadOnlyDictionary<string, object> parms) {
             int eulerX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
             int eulerY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
             bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
-            return GenerateWireframePath(visWire, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
+            return GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
         }
 
         /// <summary>
@@ -334,20 +335,21 @@ namespace SourceGen {
         /// scaled if the output area is larger or smaller than the path bounds, so this scales
         /// coordinates so they fit within the box.
         /// </summary>
-        public static GeometryGroup GenerateWireframePath(IVisualizationWireframe visWire,
+        public static GeometryGroup GenerateWireframePath(WireframeObject wireObj,
                 double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc) {
             // WPF path drawing is based on a system where a pixel is drawn at the center
-            // of the coordinate, and integer coordinates start at the top left edge.  If
-            // you draw a pixel at (0,0), most of the pixel will be outside the window
-            // (visible or not based on ClipToBounds).
+            // of its coordinates, and integer coordinates start at the top left edge of
+            // the drawing area.  If you draw a pixel at (0,0), 3/4ths of the pixel will be
+            // outside the window (visible or not based on ClipToBounds).
             //
             // If you draw a line from (1,1 to 4,1), the line's length will appear to
             // be (4 - 1) = 3.  It touches four pixels -- the end point is not exclusive --
-            // but because the thickness doesn't extend past the endpoints, the filled
-            // area is only three.  If you have a window of size 10x10, and you draw from
-            // 0,0 to 9,9, the line will extend for half a line-thickness off the top,
-            // but will not go past the right/left edges.  (This becomes very obvious when
-            // you're working with an up-scaled 8x8 path.)
+            // but the filled area is only three, because the thickness doesn't extend the
+            // line's length, and the line stops at the coordinate at the center of the pixel.
+            // You're not drawing N pixels, you're drawing from one coordinate point to another.
+            // If you have a window of size 8x8, and you draw from 0,0 to 7,0, the line will
+            // extend for half a line-thickness off the top, but will not go past the right/left
+            // edges.  (This becomes very obvious when you're working with an up-scaled 8x8 path.)
             //
             // Similarly, drawing a horizontal line two units long results in a square, and
             // drawing a line that starts and ends at the same point doesn't appear to
@@ -357,12 +359,13 @@ namespace SourceGen {
             // This turns out to be important for another reason: a line from (1,1) to (9,1)
             // shows up as a double-wide half-bright line, while a line from (1.5,1.5) to
             // (9.5,1.5) is drawn as a single-wide full-brightness line.  This is because of
-            // the anti-aliasing.
+            // the anti-aliasing.  Anti-aliasing can be disabled, but the lines look much
+            // nicer with it enabled.
             //
             // The path has an axis-aligned bounding box that covers the pixel centers.  If we
-            // want a path-drawn shape to animate smoothly we want to ensure that the bounds
+            // want a path-drawn mesh to animate smoothly we want to ensure that the bounds
             // are constant across all renderings of a shape (which could get thinner or wider
-            // as it rotates), so we draw an invisible pixel in our desired bottom-right corner.
+            // as it rotates), so we plot an invisible point in our desired bottom-right corner.
             //
             // If we want an 8x8 bitmap, we draw a line from (8,8) to (8,8) to establish the
             // bounds, then draw lines with coordinates from 0.5 to 7.5.
@@ -377,7 +380,6 @@ namespace SourceGen {
 
             // Generate a list of clip-space line segments.  Coordinate values are in the
             // range [-1,1], with +X to the right and +Y upward.
-            WireframeObject wireObj = WireframeObject.Create(visWire);
             List<WireframeObject.LineSeg> segs = wireObj.Generate(eulerX, eulerY, eulerZ,
                 doPersp, doBfc);
 

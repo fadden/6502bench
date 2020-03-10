@@ -33,7 +33,7 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private DispatcherTimer mTimer;
 
-        IVisualizationWireframe mVisWire;
+        WireframeObject mWireObj;
         private int mFrameCount;
         private int mInitialX, mInitialY, mInitialZ;
         private int mDeltaX, mDeltaY, mDeltaZ;
@@ -43,12 +43,12 @@ namespace SourceGen.WpfGui {
 
         private int mCurFrame;
 
-        public ShowWireframeAnimation(Window owner, IVisualizationWireframe visWire,
+        public ShowWireframeAnimation(Window owner, WireframeObject wireObj,
                 ReadOnlyDictionary<string, object> parms) {
             InitializeComponent();
             Owner = owner;
 
-            mVisWire = visWire;
+            mWireObj = wireObj;
 
             mCurX = mInitialX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
             mCurY = mInitialY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
@@ -98,7 +98,7 @@ namespace SourceGen.WpfGui {
             // We use the dimensions of the Border surrounding the ViewBox, rather than the
             // ViewBox itself, because on the first iteration the ViewBox has a size of zero.
             double dim = Math.Floor(Math.Min(testBorder.ActualWidth, testBorder.ActualHeight));
-            wireframePath.Data = Visualization.GenerateWireframePath(mVisWire, dim,
+            wireframePath.Data = Visualization.GenerateWireframePath(mWireObj, dim,
                 mCurX, mCurY, mCurZ, mDoPersp, mDoBfc);
         }
     }

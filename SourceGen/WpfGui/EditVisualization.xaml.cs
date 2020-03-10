@@ -52,8 +52,8 @@ namespace SourceGen.WpfGui {
         private SortedList<int, VisualizationSet> mEditedList;
         private Visualization mOrigVis;
 
-        // IVisualization2d or IVisualizationWireframe
-        public object mVisObj;
+        private BitmapSource mThumbnail;
+        private WireframeObject mWireObj;
 
         /// <summary>
         /// Visualization generation identifier for the last visualizer we used, for the benefit
@@ -384,19 +384,19 @@ namespace SourceGen.WpfGui {
             Debug.Assert(isTagValid);
             if (isWireframe && IsWireframeAnimated) {
                 NewVis = new VisWireframeAnimation(trimTag, item.VisDescriptor.Ident, valueDict,
-                    mOrigVis, (IVisualizationWireframe) mVisObj);
+                    mOrigVis, mWireObj);
             } else {
                 NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
             }
+
+            // Set the thumbnail image.
             if (isWireframe) {
-                Debug.Assert(mVisObj is IVisualizationWireframe);
-                NewVis.CachedImage =
-                    Visualization.GenerateWireframeImage((IVisualizationWireframe)mVisObj,
-                        Visualization.THUMBNAIL_DIM, valueDict);
+                Debug.Assert(mWireObj != null);
+                NewVis.CachedImage = Visualization.GenerateWireframeImage(mWireObj,
+                    Visualization.THUMBNAIL_DIM, valueDict);
             } else {
-                Debug.Assert(mVisObj is IVisualization2d);
-                NewVis.CachedImage =
-                    Visualization.ConvertToBitmapSource((IVisualization2d)mVisObj);
+                Debug.Assert(mThumbnail != null);
+                NewVis.CachedImage = mThumbnail;
             }
 
             sLastVisIdent = NewVis.VisGenIdent;
@@ -600,16 +600,17 @@ namespace SourceGen.WpfGui {
                     BitmapDimensions = string.Format("{0}x{1}",
                         previewImage.Source.Width, previewImage.Source.Height);
 
-                    mVisObj = vis2d;
+                    mThumbnail = (BitmapSource)previewImage.Source;
                 } else {
                     previewGrid.Background = Brushes.Black;
                     previewImage.Source = Visualization.BLANK_IMAGE;
                     double dim = Math.Floor(
                         Math.Min(previewImage.ActualWidth, previewImage.ActualHeight));
-                    wireframePath.Data = Visualization.GenerateWireframePath(visWire, dim, parms);
+                    WireframeObject wireObj = WireframeObject.Create(visWire);
+                    wireframePath.Data = Visualization.GenerateWireframePath(wireObj, dim, parms);
                     BitmapDimensions = "n/a";
 
-                    mVisObj = visWire;
+                    mWireObj = wireObj;
                 }
             }
 
@@ -690,7 +691,7 @@ namespace SourceGen.WpfGui {
         }
 
         private void TestAnim_Click(object sender, RoutedEventArgs e) {
-            ShowWireframeAnimation dlg = new ShowWireframeAnimation(this, (IVisualizationWireframe)mVisObj,
+            ShowWireframeAnimation dlg = new ShowWireframeAnimation(this, mWireObj,
                 CreateVisGenParams(true));
             dlg.ShowDialog();
         }

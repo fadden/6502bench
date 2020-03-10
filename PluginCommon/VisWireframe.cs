@@ -140,7 +140,8 @@ namespace PluginCommon {
             foreach (IntPair ip in mEdges) {
                 if (ip.Val0 < 0 || ip.Val0 >= vertexCount ||
                         ip.Val1 < 0 || ip.Val1 >= vertexCount) {
-                    msg = "invalid edge";
+                    msg = "invalid edge (vertices " + ip.Val0 + ", " + ip.Val1 +
+                        "; count=" + vertexCount + ")";
                     return false;
                 }
             }
@@ -149,7 +150,7 @@ namespace PluginCommon {
             foreach (IntPair ip in mVertexFaces) {
                 if (ip.Val0 < 0 || ip.Val0 >= vertexCount ||
                         ip.Val1 < 0 || ip.Val1 >= faceCount) {
-                    msg = "invalid vertex-face";
+                    msg = "invalid vertex-face (v=" + ip.Val0 + ", f=" + ip.Val1 + ")";
                     return false;
                 }
             }
@@ -158,7 +159,7 @@ namespace PluginCommon {
             foreach (IntPair ip in mVertexFaces) {
                 if (ip.Val0 < 0 || ip.Val0 >= edgeCount ||
                         ip.Val1 < 0 || ip.Val1 >= faceCount) {
-                    msg = "invalid edge-face";
+                    msg = "invalid edge-face (e=" + ip.Val0 + ", f=" + ip.Val1 + ")";
                     return false;
                 }
             }
