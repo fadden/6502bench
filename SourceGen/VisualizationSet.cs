@@ -139,6 +139,8 @@ namespace SourceGen {
         #region Image generation
 
         private class ScriptSupport : MarshalByRefObject, PluginCommon.IApplication {
+            public string MsgTag { get; set; } = string.Empty;
+
             public ScriptSupport() { }
 
             public void ReportError(string msg) {
@@ -146,7 +148,7 @@ namespace SourceGen {
             }
 
             public void DebugLog(string msg) {
-                Debug.WriteLine("Vis plugin: " + msg);
+                Debug.WriteLine("Vis [" + MsgTag + "]: " + msg);
             }
 
             public bool SetOperandFormat(int offset, DataSubType subType, string label) {
@@ -195,6 +197,7 @@ namespace SourceGen {
                         iapp = new ScriptSupport();
                         project.PrepareScripts(iapp);
                     }
+                    iapp.MsgTag = vis.Tag;
 
                     if (plugins == null) {
                         plugins = project.GetActivePlugins();

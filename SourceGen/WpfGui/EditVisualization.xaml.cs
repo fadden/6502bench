@@ -440,19 +440,24 @@ namespace SourceGen.WpfGui {
 
                 // Strictly speaking we don't need this, because we use a different object
                 // type, but this ties into how the object is stored in the project file.
+                // We add it here rather than in the project file save code so that the
+                // parameter manipulation is all in one place.
                 valueDict.Add(VisWireframeAnimation.P_IS_ANIMATED, IsWireframeAnimated);
 
-                // These could be any integer value, but the UI limits them to 4 chars, and
-                // it's all mod 360.
-                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_X, RotDeltaX);
-                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Y, RotDeltaY);
-                valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Z, RotDeltaZ);
+                if (IsWireframeAnimated) {
+                    // These could be any integer value, but the UI limits them to 4 chars, and
+                    // it's all mod 360.
+                    valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_X, RotDeltaX);
+                    valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Y, RotDeltaY);
+                    valueDict.Add(VisWireframeAnimation.P_DELTA_ROT_Z, RotDeltaZ);
 
-                // These aren't strictly checked by the UI, so range-check here.
-                int fc = (FrameCount >= 1 && FrameCount <= 9999) ? FrameCount : 1;
-                valueDict.Add(VisWireframeAnimation.P_FRAME_COUNT, fc);
-                int dly = (FrameDelayMsec >= 1 && FrameDelayMsec <= 999999) ? FrameDelayMsec : 100;
-                valueDict.Add(VisWireframeAnimation.P_FRAME_DELAY_MSEC, dly);
+                    // These aren't strictly checked by the UI, so range-check here.
+                    int fc = (FrameCount >= 1 && FrameCount <= 9999) ? FrameCount : 1;
+                    valueDict.Add(VisWireframeAnimation.P_FRAME_COUNT, fc);
+                    int dly = (FrameDelayMsec >= 1 && FrameDelayMsec <= 999999) ?
+                        FrameDelayMsec : 100;
+                    valueDict.Add(VisWireframeAnimation.P_FRAME_DELAY_MSEC, dly);
+                }
             }
 
             return new ReadOnlyDictionary<string, object>(valueDict);

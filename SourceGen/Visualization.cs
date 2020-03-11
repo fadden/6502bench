@@ -263,7 +263,7 @@ namespace SourceGen {
             int eulerX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
             int eulerY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
-            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
+            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
             return GenerateWireframeImage(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
         }
@@ -325,7 +325,7 @@ namespace SourceGen {
             int eulerX = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_X, 0);
             int eulerY = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Y, 0);
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
-            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, false);
+            bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
             return GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
         }

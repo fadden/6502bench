@@ -19,6 +19,9 @@ using System.Collections.ObjectModel;
 using PluginCommon;
 
 namespace RuntimeData.Apple {
+    /// <summary>
+    /// Visualizer for Apple II hi-res bitmaps.
+    /// </summary>
     public class VisHiRes : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
         // IPlugin
         public string Identifier {

@@ -45,6 +45,8 @@ namespace PluginCommon {
             Val[0, 0] = Val[1, 1] = Val[2, 2] = Val[3, 3] = 1.0;
         }
 
+        private enum RotMode { XYZ, ZYX, ZXY };
+
         /// <summary>
         /// Sets the matrix to perform rotation about Euler angles in the order X, Y, Z.
         /// </summary>
@@ -66,33 +68,51 @@ namespace PluginCommon {
             double sycx = sy * cx;
             double sysx = sy * sx;
 
-            bool useXyz = true;
-            if (useXyz) {
-                // R = Rz * Ry * Rx (from wikipedia)
-                Val[0, 0] = cz * cy;
-                Val[0, 1] = sz * cy;
-                Val[0, 2] = -sy;
+            RotMode rm = RotMode.ZYX;
+            switch (rm) {
+                case RotMode.ZYX:
+                    // R = Rz * Ry * Rx (from wikipedia)
+                    Val[0, 0] = cz * cy;
+                    Val[0, 1] = sz * cy;
+                    Val[0, 2] = -sy;
 
-                Val[1, 0] = cz * sysx - sz * cx;
-                Val[1, 1] = sz * sysx + cz * cx;
-                Val[1, 2] = cy * sx;
+                    Val[1, 0] = cz * sysx - sz * cx;
+                    Val[1, 1] = sz * sysx + cz * cx;
+                    Val[1, 2] = cy * sx;
 
-                Val[2, 0] = cz * sycx + sz * sx;
-                Val[2, 1] = sz * sycx - cz * sx;
-                Val[2, 2] = cy * cx;
-            } else {
-                // R = Rx * Ry * Rz (from Arc3D)
-                Val[0, 0] = cz * cy;
-                Val[0, 1] = -sz * cy;
-                Val[0, 2] = sy;
+                    Val[2, 0] = cz * sycx + sz * sx;
+                    Val[2, 1] = sz * sycx - cz * sx;
+                    Val[2, 2] = cy * cx;
+                    break;
+                case RotMode.XYZ:
+                    // R = Rx * Ry * Rz (from Arc3D)
+                    Val[0, 0] = cz * cy;
+                    Val[0, 1] = -sz * cy;
+                    Val[0, 2] = sy;
 
-                Val[1, 0] = cz * sysx + sz * cx;
-                Val[1, 1] = -sz * sysx + cz * cx;
-                Val[1, 2] = -cy * sx;
+                    Val[1, 0] = cz * sysx + sz * cx;
+                    Val[1, 1] = -sz * sysx + cz * cx;
+                    Val[1, 2] = -cy * sx;
 
-                Val[2, 0] = -cz * sycx + sz * sx;
-                Val[2, 1] = sz * sycx + cz * sx;
-                Val[2, 2] = cy * cx;
+                    Val[2, 0] = -cz * sycx + sz * sx;
+                    Val[2, 1] = sz * sycx + cz * sx;
+                    Val[2, 2] = cy * cx;
+                    break;
+                case RotMode.ZXY:
+                    // R = Rz * Rx * Ry (from Arc3D)
+                    double cysx = cy * sx;
+                    Val[0, 0] = cz * cy + sz * sysx;
+                    Val[0, 1] = -sz * cy + cz * sysx;
+                    Val[0, 2] = sy * cx;
+
+                    Val[1, 0] = sz * cx;
+                    Val[1, 1] = cz * cx;
+                    Val[1, 2] = -sx;
+
+                    Val[2, 0] = -cz * sy + sz * cysx;
+                    Val[2, 1] = sz * sy + cz * cysx;
+                    Val[2, 2] = cy * cx;
+                    break;
             }
             //Val[0, 3] = Val[1, 3] = Val[2, 3] = Val[3, 0] = Val[3, 1] = Val[3, 2] = 0.0;
             Val[3, 3] = 1.0;
