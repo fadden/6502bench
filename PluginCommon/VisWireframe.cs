@@ -172,8 +172,9 @@ namespace PluginCommon {
                 }
             }
 
-            // TODO(maybe): confirm that every face has a vertex.  Not strictly necessary
-            // since you can do orthographic-projection BFC without it... but who does that?
+            // TODO(maybe): confirm that every face (i.e. normal) has a vertex we can use for
+            // BFC calculation.  Not strictly necessary since you can do orthographic-projection
+            // BFC without it... but who does that?
 
             msg = string.Empty;
             return true;

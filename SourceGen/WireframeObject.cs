@@ -52,6 +52,10 @@ namespace SourceGen {
                 Vec = new Vector3(x, y, z);
                 Faces = new List<Face>();
             }
+
+            public override string ToString() {
+                return Vec.ToString() + " + " + Faces.Count + " faces";
+            }
         }
 
         private class Edge {
@@ -226,7 +230,7 @@ namespace SourceGen {
             double scale = 1.0 / mBigMag;
             if (doPersp) {
                 // objects closer to camera are bigger; reduce scale slightly
-                scale = (scale * zadj) / (zadj + 0.5);
+                scale = (scale * zadj) / (zadj + 0.3);
             }
 
             Matrix44 rotMat = new Matrix44();

@@ -605,7 +605,7 @@ namespace SourceGen.WpfGui {
                     previewGrid.Background = Brushes.Black;
                     previewImage.Source = Visualization.BLANK_IMAGE;
                     double dim = Math.Floor(
-                        Math.Min(previewImage.ActualWidth, previewImage.ActualHeight));
+                        Math.Min(previewGrid.ActualWidth, previewGrid.ActualHeight));
                     WireframeObject wireObj = WireframeObject.Create(visWire);
                     wireframePath.Data = Visualization.GenerateWireframePath(wireObj, dim, parms);
                     BitmapDimensions = "n/a";

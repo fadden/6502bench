@@ -15,7 +15,7 @@
  */
 using System;
 
-namespace CommonUtil {
+namespace PluginCommon {
     /// <summary>
     /// Simple 3-element column vector.
     /// </summary>
@@ -32,7 +32,6 @@ namespace CommonUtil {
             get { return mZ; }
             set { mZ = value; }
         }
-
         private double mX, mY, mZ;
 
         public Vector3(double x, double y, double z) {

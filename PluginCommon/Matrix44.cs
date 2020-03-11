@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CommonUtil {
+namespace PluginCommon {
     /// <summary>
     /// Simple 4x4 matrix.
     /// </summary>
@@ -26,7 +26,6 @@ namespace CommonUtil {
             get { return mVal; }
             private set { mVal = value; }
         }
-
         private double[,] mVal;
 
         public Matrix44() {
@@ -67,7 +66,7 @@ namespace CommonUtil {
             double sycx = sy * cx;
             double sysx = sy * sx;
 
-            bool useXyz = false;
+            bool useXyz = true;
             if (useXyz) {
                 // R = Rz * Ry * Rx (from wikipedia)
                 Val[0, 0] = cz * cy;

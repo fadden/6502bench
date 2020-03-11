@@ -111,7 +111,10 @@ render with a perspective projection and without culling.</p>
 axes.  The viewer provides a conventional right-handed coordinate system,
 with +X toward the right, +Y toward the top of the screen, and +Z
 coming out of the screen.  Positive rotations cause a counter-clockwise
-rotation when looking down the axis in the positive direction.</p>
+rotation when looking down the axis in the positive direction.  The
+rotations are performed with a matrix using Euler angles, and are
+subject to gimbal lock (e.g. if you set Y to 90 degrees, X and Z rotate
+about the same axis).</p>
 <p>If you check the "Animated" box, you can add a simple spin.  Choose
 the number of degrees to rotate per frame, how many frames to generate before
 resetting, and the delay between each frame.  Clicking the "Auto" button
