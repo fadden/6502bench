@@ -376,6 +376,8 @@ namespace SourceGen.WpfGui {
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
+
+            // Generate parameter dictionary.  Save a reference to it for next time.
             bool isWireframe = (item.VisDescriptor.VisualizationType == VisDescr.VisType.Wireframe);
             ReadOnlyDictionary<string, object> valueDict = CreateVisGenParams(isWireframe);
             sLastParams = valueDict;
@@ -639,6 +641,7 @@ namespace SourceGen.WpfGui {
             Debug.WriteLine("VisComboBox sel change: " + item.VisDescriptor.Ident);
             GenerateParamControls(item.VisDescriptor);
 
+            // Configure the viewer controls from the visualization, or from the previous edit.
             if (mOrigVis != null) {
                 initialXSlider.Value = Util.GetFromObjDict(mOrigVis.VisGenParams,
                     VisWireframeAnimation.P_EULER_ROT_X, 0);
@@ -666,9 +669,35 @@ namespace SourceGen.WpfGui {
                     VisWireframeAnimation.P_FRAME_COUNT, 1);
                 FrameDelayMsec = Util.GetFromObjDict(mOrigVis.VisGenParams,
                     VisWireframeAnimation.P_FRAME_DELAY_MSEC, 100);
+            } else {
+                initialXSlider.Value = GetLastValue(VisWireframeAnimation.P_EULER_ROT_X, 0);
+                initialYSlider.Value = GetLastValue(VisWireframeAnimation.P_EULER_ROT_Y, 0);
+                initialZSlider.Value = GetLastValue(VisWireframeAnimation.P_EULER_ROT_Z, 0);
+                IsWireframeAnimated = GetLastValue(VisWireframeAnimation.P_IS_ANIMATED, false);
+                RotDeltaX = GetLastValue(VisWireframeAnimation.P_DELTA_ROT_X, 0);
+                RotDeltaY = GetLastValue(VisWireframeAnimation.P_DELTA_ROT_Y, 0);
+                RotDeltaZ = GetLastValue(VisWireframeAnimation.P_DELTA_ROT_Z, 0);
+                FrameCount = GetLastValue(VisWireframeAnimation.P_FRAME_COUNT, 1);
+                FrameDelayMsec = GetLastValue(VisWireframeAnimation.P_FRAME_DELAY_MSEC, 100);
             }
 
             UpdateControls();
+        }
+
+        /// <summary>
+        /// Retrieves a value from sLastParams.
+        /// </summary>
+        /// <typeparam name="T">Value's type.</typeparam>
+        /// <param name="name">Parameter name.</param>
+        /// <param name="defVal">Default value.</param>
+        /// <returns>Parameter value, or if the parameter isn't found or has the wrong type,
+        ///   the default value.</returns>
+        private T GetLastValue<T>(string name, T defVal) {
+            if (sLastParams.TryGetValue(name, out object val) && val is T) {
+                return (T)val;
+            } else {
+                return defVal;
+            }
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) {
