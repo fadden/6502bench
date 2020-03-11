@@ -252,8 +252,8 @@ namespace SourceGen {
                             continue;
                         }
                         Vector3 camVec = rotMat.Multiply(face.Vert.Vec);
-                        camVec.Multiply(-scale);    // scale to [-1,1] and negate to get -C
-                        camVec.Z += zadj;           // translate
+                        camVec = camVec.Multiply(-scale);   // scale to [-1,1] and negate to get -C
+                        camVec = camVec.Add(new Vector3(0, 0, zadj));   // translate
 
                         // Now compute the dot product of the camera vector.
                         double dot = Vector3.Dot(camVec, rotNorm);

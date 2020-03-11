@@ -281,7 +281,7 @@ namespace SourceGen {
             // Render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
             Rect bounds = geo.GetRenderBounds(null);
 
-            Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + wireObj);
+            //Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + wireObj);
 
             // Create bitmap.
             RenderTargetBitmap bitmap = new RenderTargetBitmap(

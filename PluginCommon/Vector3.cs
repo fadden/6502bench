@@ -17,20 +17,20 @@ using System;
 
 namespace PluginCommon {
     /// <summary>
-    /// Simple 3-element column vector.
+    /// Simple 3-element column vector.  Immutable.
     /// </summary>
     public class Vector3 {
         public double X {
             get { return mX; }
-            set { mX = value; }
+            private set { mX = value; }
         }
         public double Y {
             get { return mY; }
-            set { mY = value; }
+            private set { mY = value; }
         }
         public double Z {
             get { return mZ; }
-            set { mZ = value; }
+            private set { mZ = value; }
         }
         private double mX, mY, mZ;
 
@@ -44,17 +44,32 @@ namespace PluginCommon {
             return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
 
-        public void Normalize() {
+        public Vector3 Normalize() {
             double len_r = 1.0 / Magnitude();
-            mX *= len_r;
-            mY *= len_r;
-            mZ *= len_r;
+            return new Vector3(mX * len_r, mY * len_r, mZ * len_r);
         }
 
-        public void Multiply(double sc) {
-            mX *= sc;
-            mY *= sc;
-            mZ *= sc;
+        public Vector3 Multiply(double sc) {
+            return new Vector3(mX * sc, mY * sc, mZ * sc);
+        }
+
+        public Vector3 Add(Vector3 vec) {
+            return new Vector3(mX + vec.X, mY + vec.Y, mZ + vec.Z);
+        }
+
+        public static Vector3 Add(Vector3 v0, Vector3 v1) {
+            return new Vector3(v0.X + v1.X, v0.Y + v1.Y, v0.Z + v1.Z);
+        }
+
+        public static Vector3 Subtract(Vector3 v0, Vector3 v1) {
+            return new Vector3(v0.X - v1.X, v0.Y - v1.Y, v0.Z - v1.Z);
+        }
+
+        public static Vector3 Cross(Vector3 v0, Vector3 v1) {
+            return new Vector3(
+                v0.Y * v1.Z - v0.Z * v1.Y,
+                v0.Z * v1.X - v0.X * v1.Z,
+                v0.X * v1.Y - v0.Y * v1.X);
         }
 
         public static double Dot(Vector3 v0, Vector3 v1) {

@@ -97,6 +97,19 @@ namespace PluginCommon {
         }
 
         /// <summary>
+        /// Replaces the specified face normal.
+        /// </summary>
+        /// <param name="index">Face index.</param>
+        /// <param name="x">X coordinate.</param>
+        /// <param name="y">Y coordinate.</param>
+        /// <param name="z">Z coordinate.</param>
+        public void ReplaceFaceNormal(int index, float x, float y, float z) {
+            mNormalsX[index] = x;
+            mNormalsY[index] = y;
+            mNormalsZ[index] = z;
+        }
+
+        /// <summary>
         /// Marks a vertex's visibility as being tied to the specified face.  The vertices and
         /// faces being referenced do not need to exist yet.
         /// </summary>
