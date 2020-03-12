@@ -1,4 +1,4 @@
-6502bench SourceGen is Copyright 2018 faddenSoft.  Source and binaries may
+6502bench SourceGen is Copyright 2020 faddenSoft.  Source and binaries may
 be distributed under terms of the Apache 2.0 license (included below).
 
 --------------------------------------------------------------------------------
