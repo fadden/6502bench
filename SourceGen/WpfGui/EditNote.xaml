@@ -54,30 +54,44 @@ limitations under the License.
                  VerticalScrollBarVisibility="Auto"
                  AcceptsReturn="True" TextWrapping="Wrap"/>
 
-        <GroupBox Grid.Row="2" Header="Select Highlight Color" Width="200" HorizontalAlignment="Left">
+        <GroupBox Grid.Row="2" Header="Select Highlight Color" Width="270" HorizontalAlignment="Left">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <RadioButton Name="colorDefaultRadio" Grid.Column="0" Grid.Row="0" Margin="0,4,0,0"
+                <RadioButton Name="colorDefaultRadio" Grid.Column="0" Grid.Row="0" Margin="0,6,0,0"
                              Content="_None"/>
-                <RadioButton Name="colorGreenRadio" Grid.Column="0" Grid.Row="1" Margin="0,4,0,0"
+                <RadioButton Name="colorGreenRadio" Grid.Column="0" Grid.Row="1" Margin="0,6,0,0"
                              Content="_Green" Background="LightGreen"/>
-                <RadioButton Name="colorBlueRadio" Grid.Column="0" Grid.Row="2" Margin="0,4,0,0"
+                <RadioButton Name="colorBlueRadio" Grid.Column="0" Grid.Row="2" Margin="0,6,0,0"
                              Content="_Blue" Background="LightBlue"/>
-                <RadioButton Name="colorYellowRadio" Grid.Column="1" Grid.Row="0" Margin="0,4,0,0"
+                <RadioButton Name="colorYellowRadio" Grid.Column="1" Grid.Row="0" Margin="0,6,0,0"
                              Content="_Yellow" Background="Yellow"/>
-                <RadioButton Name="colorPinkRadio" Grid.Column="1" Grid.Row="1" Margin="0,4,0,0"
+                <RadioButton Name="colorPinkRadio" Grid.Column="1" Grid.Row="1" Margin="0,6,0,0"
                              Content="_Pink" Background="LightPink"/>
-                <RadioButton Name="colorOrangeRadio" Grid.Column="1" Grid.Row="2" Margin="0,4,0,0"
+                <RadioButton Name="colorOrangeRadio" Grid.Column="1" Grid.Row="2" Margin="0,6,0,0"
                              Content="_Orange" Background="Orange"/>
+                <RadioButton Name="colorCustomRadio" Grid.Column="3" Grid.Row="0" Margin="0,6,0,0"
+                             Content="_Custom" IsChecked="{Binding IsCustomChecked}"/>
+                <TextBox Name="customColorBox" Grid.Column="3" Grid.Row="1" MaxLength="12" Width="100" Margin="18,2,0,0">
+                    <TextBox.Text>
+                        <Binding Path="CustomColorStr" UpdateSourceTrigger="PropertyChanged" FallbackValue="#008800">
+                            <Binding.ValidationRules>
+                                <local:ColorRule ValidatesOnTargetUpdated="True"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <Rectangle Grid.Column="3" Grid.Row="2" Fill="{Binding CustomColorBrush}" Margin="18,4,0,0"/>
             </Grid>
         </GroupBox>
 
