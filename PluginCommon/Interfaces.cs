@@ -357,6 +357,8 @@ namespace PluginCommon {
 
         IntPair[] GetVertexFaces();
         IntPair[] GetEdgeFaces();
+        int[] GetExcludedVertices();
+        int[] GetExcludedEdges();
     }
 
     /// <summary>

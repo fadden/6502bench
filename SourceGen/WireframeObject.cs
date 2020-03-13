@@ -15,10 +15,8 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 
-using CommonUtil;
 using PluginCommon;
 
 namespace SourceGen {
@@ -44,13 +42,14 @@ namespace SourceGen {
         }
 
         private class Vertex {
-            public List<Face> Faces { get; private set; }
-
             public Vector3 Vec { get; private set; }
+            public List<Face> Faces { get; private set; }
+            public bool IsExcluded { get; private set; }
 
-            public Vertex(double x, double y, double z) {
+            public Vertex(double x, double y, double z, bool isExcluded) {
                 Vec = new Vector3(x, y, z);
                 Faces = new List<Face>();
+                IsExcluded = isExcluded;
             }
 
             public override string ToString() {
@@ -62,11 +61,13 @@ namespace SourceGen {
             public Vertex Vertex0 { get; private set; }
             public Vertex Vertex1 { get; private set; }
             public List<Face> Faces { get; private set; }
+            public bool IsExcluded { get; private set; }
 
-            public Edge(Vertex v0, Vertex v1) {
+            public Edge(Vertex v0, Vertex v1, bool isExcluded) {
                 Vertex0 = v0;
                 Vertex1 = v1;
                 Faces = new List<Face>();
+                IsExcluded = isExcluded;
             }
         }
 
@@ -125,6 +126,7 @@ namespace SourceGen {
             float[] verticesX = visWire.GetVerticesX();
             float[] verticesY = visWire.GetVerticesY();
             float[] verticesZ = visWire.GetVerticesZ();
+            int[] excludedVertices = visWire.GetExcludedVertices();
             if (verticesX.Length == 0) {
                 Debug.Assert(false);
                 return null;
@@ -135,10 +137,12 @@ namespace SourceGen {
             }
 
             for (int i = 0; i < verticesX.Length; i++) {
-                wireObj.mVertices.Add(new Vertex(verticesX[i], verticesY[i], verticesZ[i]));
+                wireObj.mVertices.Add(new Vertex(verticesX[i], verticesY[i], verticesZ[i],
+                    HasIndex(excludedVertices, i)));
             }
 
             IntPair[] edges = visWire.GetEdges();
+            int[] excludedEdges = visWire.GetExcludedEdges();
             for (int i = 0; i < edges.Length; i++) {
                 int v0index = edges[i].Val0;
                 int v1index = edges[i].Val1;
@@ -149,8 +153,8 @@ namespace SourceGen {
                     return null;
                 }
 
-                wireObj.mEdges.Add(
-                    new Edge(wireObj.mVertices[v0index], wireObj.mVertices[v1index]));
+                wireObj.mEdges.Add(new Edge(wireObj.mVertices[v0index],
+                    wireObj.mVertices[v1index], HasIndex(excludedEdges, i)));
             }
 
             IntPair[] vfaces = visWire.GetVertexFaces();
@@ -204,6 +208,15 @@ namespace SourceGen {
             wireObj.mBigMag = bigMag;
 
             return wireObj;
+        }
+
+        private static bool HasIndex(int[] arr, int val) {
+            for (int i = 0; i < arr.Length; i++) {
+                if (arr[i] == val) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -273,10 +286,11 @@ namespace SourceGen {
             foreach (Edge edge in mEdges) {
                 if (doBfc) {
                     // To be visible, vertices and edges must either not specify any
-                    // faces, or must specify a visible face.
-                    if (!IsVertexVisible(edge.Vertex0) ||
-                            !IsVertexVisible(edge.Vertex1) ||
-                            !IsEdgeVisible(edge)) {
+                    // faces, or must specify a visible face.  They can also be hidden
+                    // by the level-of-detail exclusion mechanism.
+                    if (!IsVertexVisible(edge.Vertex0) || edge.Vertex0.IsExcluded ||
+                            !IsVertexVisible(edge.Vertex1) || edge.Vertex1.IsExcluded ||
+                            !IsEdgeVisible(edge) || edge.IsExcluded) {
                         continue;
                     }
                 }

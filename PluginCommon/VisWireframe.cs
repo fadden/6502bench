@@ -48,13 +48,18 @@ namespace PluginCommon {
         private List<IntPair> mVertexFaces = new List<IntPair>();
         private List<IntPair> mEdgeFaces = new List<IntPair>();
 
+        private List<int> mExcludedVertices = new List<int>();
+        private List<int> mExcludedEdges = new List<int>();
+
+
         /// <summary>
         /// Constructor.  Nothing much to do.
         /// </summary>
         public VisWireframe() { }
 
         /// <summary>
-        /// Adds the vertex to the list.
+        /// Adds the vertex to the list.  Coordinates may be INVALID_VERTEX to exclude the
+        /// vertex from rendering.
         /// </summary>
         /// <param name="x">X coordinate.</param>
         /// <param name="y">Y coordinate.</param>
@@ -134,6 +139,24 @@ namespace PluginCommon {
         }
 
         /// <summary>
+        /// Marks a vertex as excluded.  Used for level-of-detail reduction.
+        /// </summary>
+        /// <param name="vertexIndex">Index of vertex.</param>
+        public void AddVertexExclusion(int vertexIndex) {
+            Debug.Assert(vertexIndex >= 0);
+            mExcludedVertices.Add(vertexIndex);
+        }
+
+        /// <summary>
+        /// Marks an edge as excluded.  Used for level-of-detail reduction.
+        /// </summary>
+        /// <param name="edgeIndex">Index of edge.</param>
+        public void AddEdgeExclusion(int edgeIndex) {
+            Debug.Assert(edgeIndex >= 0);
+            mExcludedEdges.Add(edgeIndex);
+        }
+
+        /// <summary>
         /// Verifies that the various references by index are valid.
         /// </summary>
         /// <param name="msg">Failure detail.</param>
@@ -185,6 +208,22 @@ namespace PluginCommon {
                 }
             }
 
+            // check excluded vertices
+            for (int i = 0; i < mExcludedVertices.Count; i++) {
+                if (mExcludedVertices[i] < 0 || mExcludedVertices[i] >= vertexCount) {
+                    msg = "excluded nonexistent vertex " + i;
+                    return false;
+                }
+            }
+
+            // check excluded edges
+            for (int i = 0; i < mExcludedEdges.Count; i++) {
+                if (mExcludedEdges[i] < 0 || mExcludedEdges[i] >= edgeCount) {
+                    msg = "excluded nonexistent edge " + i;
+                    return false;
+                }
+            }
+
             // TODO(maybe): confirm that every face (i.e. normal) has a vertex we can use for
             // BFC calculation.  Not strictly necessary since you can do orthographic-projection
             // BFC without it... but who does that?
@@ -231,6 +270,14 @@ namespace PluginCommon {
 
         public IntPair[] GetEdgeFaces() {
             return mEdgeFaces.ToArray();
+        }
+
+        public int[] GetExcludedVertices() {
+            return mExcludedVertices.ToArray();
+        }
+
+        public int[] GetExcludedEdges() {
+            return mExcludedEdges.ToArray();
         }
 
 
