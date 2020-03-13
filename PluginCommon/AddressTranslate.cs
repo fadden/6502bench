@@ -36,6 +36,15 @@ namespace PluginCommon {
         }
 
         /// <summary>
+        /// Converts a file offset to an address.
+        /// </summary>
+        /// <param name="offset">File offset.</param>
+        /// <returns>24-bit address.</returns>
+        public int OffsetToAddress(int offset) {
+            return mAddrMap.OffsetToAddress(offset);
+        }
+
+        /// <summary>
         /// Determines the file offset that best contains the specified target address.
         /// </summary>
         /// <param name="srcOffset">Offset of the address reference.  Only matters when
@@ -47,12 +56,37 @@ namespace PluginCommon {
         }
 
         /// <summary>
-        /// Converts a file offset to an address.
+        /// Returns the data found at the specified address.  If the address is out
+        /// of bounds this throws an AddressException.
         /// </summary>
-        /// <param name="offset">File offset.</param>
-        /// <returns>24-bit address.</returns>
-        public int OffsetToAddress(int offset) {
-            return mAddrMap.OffsetToAddress(offset);
+        /// <param name="data">Data array.</param>
+        /// <param name="srcOffset">Offset of the address reference.  Only matters when
+        ///   multiple file offsets map to the same address.</param>
+        /// <param name="address">Data address.</param>
+        /// <returns>Data found.</returns>
+        public byte GetDataAtAddress(byte[] data, int srcOffset, int address) {
+            int offset = AddressToOffset(srcOffset, address);
+            if (offset == -1) {
+                Exception ex = new AddressTranslateException("Address $" + address.ToString("X4") +
+                    " is outside the file bounds");
+                ex.Data.Add("Address", address);
+                throw ex;
+            }
+            try {
+                byte foo = data[offset];
+            } catch (Exception ex) {
+                throw new AddressTranslateException("FAILED at srcOff=$" + srcOffset.ToString("x4") +
+                    " addr=$" + address.ToString("x4"));
+            }
+            return data[offset];
         }
+    }
+
+    /// <summary>
+    /// Exception thrown by AddressTranslate's GetDataAtAddress().
+    /// </summary>
+    public class AddressTranslateException : Exception {
+        public AddressTranslateException() : base() { }
+        public AddressTranslateException(string msg) : base(msg) { }
     }
 }
