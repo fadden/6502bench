@@ -105,13 +105,17 @@ If you enter an invalid value, the parameter description will turn red.</p>
 
 <p>The wireframe generator may offer the choice of perspective vs.
 orthographic projection, and whether or not to enable backface
-culling.  If the generator doesn't provide them, the default is to
-render with a perspective projection and without culling.</p>
+culling.  These are declared in the visualization generator script,
+but implemented in the viewer.  If the generator doesn't
+declare them, the default is to render with a perspective projection
+and without culling.</p>
 <p>The viewer allows you to rotate the image about the X, Y, and Z
-axes.  The viewer provides a conventional right-handed coordinate system,
+axes.  The viewer provides a left-handed coordinate system,
 with +X toward the right, +Y toward the top of the screen, and +Z
-coming out of the screen.  Positive rotations cause a counter-clockwise
-rotation when looking down the axis in the positive direction.  The
+going into the screen.  The object will be placed a short distance
+down the Z axis and scaled to fit the window.
+Positive rotations cause a counter-clockwise rotation when the axis
+about which rotations are performed points toward the viewer.  The
 rotations are performed with a matrix using Euler angles, and are
 subject to gimbal lock (e.g. if you set Y to 90 degrees, X and Z rotate
 about the same axis).</p>

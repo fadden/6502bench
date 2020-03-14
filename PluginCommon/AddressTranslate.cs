@@ -82,7 +82,7 @@ namespace PluginCommon {
             }
             try {
                 byte foo = data[offset];
-            } catch (Exception ex) {
+            } catch (Exception) {
                 throw new AddressTranslateException("FAILED at srcOff=$" + srcOffset.ToString("x4") +
                     " addr=$" + address.ToString("x4"));
             }

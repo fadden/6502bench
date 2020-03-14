@@ -326,9 +326,9 @@ namespace PluginCommon {
 
     /// <summary>
     /// Holds raw vertex/edge/normal data collected from a 2D or 3D wireframe mesh.  We use
-    /// a typical right-handed coordinate system (Z comes out of the screen), with the
-    /// expectation that the mesh will be presented such that the object is right-side up
-    /// and facing toward the viewer (nose toward +Z).
+    /// a left-handed coordinate system (+Z goes into the screen).  If the project being
+    /// disassembled uses different definitions for the axes, it's probably best to convert.
+    /// 2D data should use X/Y with Z=0.
     ///
     /// All objects will have vertices and edges.  Face normals are optional.
     /// </summary>

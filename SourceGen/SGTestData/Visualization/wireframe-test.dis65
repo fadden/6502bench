@@ -2,7 +2,7 @@
 {
 "_ContentVersion":3,
 "FileDataLength":120,
-"FileDataCrc32":1015994132,
+"FileDataCrc32":-604155558,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -274,7 +274,7 @@
 "_deltaRotY":6,
 "_deltaRotZ":0,
 "_frameCount":120,
-"_frameDelayMsec":100}},
+"_frameDelayMsec":33}},
 
 {
 "Tag":"bmp_data",

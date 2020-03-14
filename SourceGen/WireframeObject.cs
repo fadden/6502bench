@@ -246,8 +246,18 @@ namespace SourceGen {
                 scale = (scale * zadj) / (zadj + 0.3);
             }
 
-            Matrix44 rotMat = new Matrix44();
-            rotMat.SetRotationEuler(eulerX, eulerY, eulerZ);
+            // In a left-handed coordinate system, +Z is away from the viewer.  The
+            // visualizer expects a left-handed system with the "nose" aimed toward +Z,
+            // which leaves us looking at the back end of things.  We can add a 180 degree
+            // rotation about Y so we're looking at the front instead, though this
+            // effectively reverses the direction of rotation about X.  We can compensate
+            // for it by reversing the handedness of the X rotation.
+            //eulerY = (eulerY + 180) % 360;
+
+            // Form rotation matrix.
+            Matrix33 rotMat = new Matrix33();
+            rotMat.SetRotationEuler(eulerX, eulerY, eulerZ, Matrix33.RotMode.ZYX_LLL);
+            //Debug.WriteLine("ROT: " + rotMat);
 
             if (doBfc) {
                 // Mark faces as visible or not.  This is determined with the surface normal,
@@ -264,9 +274,9 @@ namespace SourceGen {
                             face.IsVisible = true;
                             continue;
                         }
-                        Vector3 camVec = rotMat.Multiply(face.Vert.Vec);
+                        Vector3 camVec = rotMat.Multiply(face.Vert.Vec);    // transform
                         camVec = camVec.Multiply(-scale);   // scale to [-1,1] and negate to get -C
-                        camVec = camVec.Add(new Vector3(0, 0, zadj));   // translate
+                        camVec = camVec.Add(new Vector3(0, 0, -zadj));      // translate
 
                         // Now compute the dot product of the camera vector.
                         double dot = Vector3.Dot(camVec, rotNorm);
@@ -278,7 +288,7 @@ namespace SourceGen {
                         // For orthographic projection, the camera is essentially looking
                         // down the Z axis at every X,Y, so we can trivially check the
                         // value of Z in the transformed normal.
-                        face.IsVisible = (rotNorm.Z >= 0);
+                        face.IsVisible = (rotNorm.Z <= 0);
                     }
                 }
             }
@@ -300,9 +310,9 @@ namespace SourceGen {
                 double x0, y0, x1, y1;
 
                 if (doPersp) {
-                    // +Z on the shape is closer to the viewer, so we negate it here
-                    double z0 = -trv0.Z * scale;
-                    double z1 = -trv1.Z * scale;
+                    // Left-handed system, so +Z is away from viewer.
+                    double z0 = trv0.Z * scale;
+                    double z1 = trv1.Z * scale;
                     x0 = (trv0.X * scale * zadj) / (zadj + z0);
                     y0 = (trv0.Y * scale * zadj) / (zadj + z0);
                     x1 = (trv1.X * scale * zadj) / (zadj + z1);

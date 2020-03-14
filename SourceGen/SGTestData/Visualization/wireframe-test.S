@@ -3,6 +3,9 @@
 ;
 ; Assembler: Merlin 32
 
+; Cube with a decoration on the front (should look like a "7").
+; Defined in a left-handed coordinate system (+Z away from viewer).
+
         org     $1000
 
         lda     vertices
@@ -12,19 +15,19 @@
 
 ; List of vertices (X,Y,Z).
 vertices
-        dfb     -32,32,32       ;0
-        dfb     -32,-32,32      ;1
-        dfb     32,-32,32       ;2
-        dfb     32,32,32        ;3
-        dfb     -32,32,-32      ;4
-        dfb     -32,-32,-32     ;5
-        dfb     32,-32,-32      ;6
-        dfb     32,32,-32       ;7
+        dfb     -32,32,-32      ;0
+        dfb     -32,-32,-32     ;1
+        dfb     32,-32,-32      ;2
+        dfb     32,32,-32       ;3
+        dfb     -32,32,32       ;4
+        dfb     -32,-32,32      ;5
+        dfb     32,-32,32       ;6
+        dfb     32,32,32        ;7
 
-; put a decoration on the front face; should look like a '7'
-        dfb     -20,-20,32      ;8
-        dfb     20,20,32        ;9
-        dfb     10,20,32        ;10
+; Put a decoration on the front face.
+        dfb     -20,-20,-32     ;8
+        dfb     20,20,-32       ;9
+        dfb     10,20,-32       ;10
         dfb     $80
 
 ; List of edges (vertex0, vertex1, face0, face1).
@@ -48,8 +51,8 @@ edges
 
 ; List of faces (surface normal X,Y,Z).
 faces
-        dfb     0,0,1           ;0 front
-        dfb     0,0,-1          ;1 back
+        dfb     0,0,-1          ;0 front
+        dfb     0,0,1           ;1 back
         dfb     0,1,0           ;2 top
         dfb     0,-1,0          ;3 bottom
         dfb     1,0,0           ;4 right
