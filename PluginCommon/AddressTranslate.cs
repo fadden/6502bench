@@ -27,6 +27,14 @@ namespace PluginCommon {
     /// <remarks>
     /// This is currently simple enough that it could just be an interface, but I don't want
     /// to rely on that remaining true.
+    ///
+    /// TODO(maybe): add a "IsAddressRangeValid(int srcOffset, int addr, int length)" method
+    /// that verifies an entire address range is in memory.  This would allow subsequent access
+    /// to skip error checks.  (You still have to do the address-to-offset translation on every
+    /// byte though, which is where most of the expense is.)
+    /// TODO(maybe): add a "CopyAddressRange(byte[] data, int srcOffset, int addr, int length)"
+    /// that returns a newly-allocated buffer with the data copied out.  This would allow fast
+    /// access to data that is split into multiple regions.
     /// </remarks>
     public class AddressTranslate {
         private AddressMap mAddrMap;

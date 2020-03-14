@@ -192,7 +192,7 @@ namespace PluginCommon {
             }
 
             // check edge-faces
-            foreach (IntPair ip in mVertexFaces) {
+            foreach (IntPair ip in mEdgeFaces) {
                 if (ip.Val0 < 0 || ip.Val0 >= edgeCount ||
                         ip.Val1 < 0 || ip.Val1 >= faceCount) {
                     msg = "invalid edge-face (e=" + ip.Val0 + ", f=" + ip.Val1 + ")";
