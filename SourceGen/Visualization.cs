@@ -106,8 +106,11 @@ namespace SourceGen {
         /// <summary>
         /// Image to show when things are broken.
         /// </summary>
-        public static readonly BitmapImage BROKEN_IMAGE =
-            new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
+        public static readonly BitmapImage BROKEN_IMAGE;
+        static Visualization() {
+            BROKEN_IMAGE = new BitmapImage(new Uri("pack://application:,,,/Res/RedX.png"));
+            BROKEN_IMAGE.Freeze();
+        }
 
         /// <summary>
         /// Image to overlay on animation visualizations.
@@ -185,19 +188,24 @@ namespace SourceGen {
             } else {
                 CachedImage = ConvertToBitmapSource(vis2d);
             }
+            Debug.Assert(CachedImage.IsFrozen);
         }
 
         /// <summary>
         /// Updates the cached thumbnail image.
         /// </summary>
-        /// <param name="visWire">Visualization object.</param>
+        /// <param name="visWire">Visualization object, or null to clear the thumbnail.</param>
         /// <param name="parms">Visualization parameters.</param>
         public virtual void SetThumbnail(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms) {
-            Debug.Assert(visWire != null);
-            Debug.Assert(parms != null);
-            WireframeObject wireObj = WireframeObject.Create(visWire);
-            CachedImage = GenerateWireframeImage(wireObj, THUMBNAIL_DIM, parms);
+            if (visWire == null) {
+                CachedImage = BROKEN_IMAGE;
+            } else {
+                Debug.Assert(parms != null);
+                WireframeObject wireObj = WireframeObject.Create(visWire);
+                CachedImage = GenerateWireframeImage(wireObj, THUMBNAIL_DIM, parms);
+            }
+            Debug.Assert(CachedImage.IsFrozen);
         }
 
         /// <summary>
@@ -246,6 +254,7 @@ namespace SourceGen {
                 palette,
                 vis2d.GetPixels(),
                 vis2d.Width);
+            image.Freeze();
 
             return image;
         }
@@ -274,11 +283,17 @@ namespace SourceGen {
         /// </summary>
         public static BitmapSource GenerateWireframeImage(WireframeObject wireObj,
                 double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc) {
+            if (wireObj == null) {
+                // Can happen if the visualization generator is failing on stuff loaded from
+                // the project file.
+                return BROKEN_IMAGE;
+            }
+
             // Generate the path geometry.
             GeometryGroup geo = GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ,
                 doPersp, doBfc);
 
-            // Render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
+            // Render geometry to bitmap -- https://stackoverflow.com/a/869767/294248
             Rect bounds = geo.GetRenderBounds(null);
 
             //Debug.WriteLine("RenderWF dim=" + dim + " bounds=" + bounds + ": " + wireObj);
@@ -290,7 +305,18 @@ namespace SourceGen {
                 96,
                 96,
                 PixelFormats.Pbgra32);
-            //RenderOptions.SetEdgeMode(bitmap, EdgeMode.Aliased);  <-- doesn't work?
+            //RenderOptions.SetEdgeMode(bitmap, EdgeMode.Aliased);  <-- no apparent effect
+
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen()) {
+                dc.DrawRectangle(Brushes.Black, null, new Rect(0, 0, bounds.Width, bounds.Height));
+                Pen pen = new Pen(Brushes.White, 1.0);
+                dc.DrawGeometry(Brushes.White, pen, geo);
+            }
+            bitmap.Render(dv);
+
+#if false
+            // Old way: render Path to bitmap -- https://stackoverflow.com/a/23582564/294248
 
             // Clear the bitmap to black.  (Is there an easier way?)
             GeometryGroup bkgnd = new GeometryGroup();
@@ -308,7 +334,9 @@ namespace SourceGen {
             path.Measure(bounds.Size);
             path.Arrange(bounds);
             bitmap.Render(path);
+#endif
 
+            bitmap.Freeze();
             return bitmap;
         }
 
@@ -405,6 +433,7 @@ namespace SourceGen {
         private static BitmapSource GenerateBlankImage() {
             RenderTargetBitmap bmp = new RenderTargetBitmap(1, 1, 96.0, 96.0,
                 PixelFormats.Pbgra32);
+            bmp.Freeze();
             return bmp;
         }
 
@@ -438,6 +467,7 @@ namespace SourceGen {
             RenderTargetBitmap bmp = new RenderTargetBitmap(IMAGE_SIZE, IMAGE_SIZE, 96.0, 96.0,
                 PixelFormats.Pbgra32);
             bmp.Render(visual);
+            bmp.Freeze();
             return bmp;
         }
 

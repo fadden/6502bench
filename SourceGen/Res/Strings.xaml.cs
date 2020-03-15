@@ -143,6 +143,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrTooLargeForPreview");
         public static string ERR_VALUE_INCOMPATIBLE_WITH_MASK =
             (string)Application.Current.FindResource("str_ErrValueIncompatibleWithMask");
+        public static string EXPORTING_HTML =
+            (string)Application.Current.FindResource("str_ExportingHtml");
+        public static string EXPORTING_HTML_AND_IMAGES =
+            (string)Application.Current.FindResource("str_ExportingHtmlAndImages");
         public static string EXTERNAL_FILE_BAD_DIR_FMT =
             (string)Application.Current.FindResource("str_ExternalFileBadDirFmt");
         public static string EXTERNAL_FILE_BAD_DIR_CAPTION =

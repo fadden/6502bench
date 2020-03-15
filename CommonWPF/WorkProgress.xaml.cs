@@ -107,7 +107,10 @@ namespace CommonWPF {
             int percent = e.ProgressPercentage;
             string msg = e.UserState as string;
 
-            Debug.Assert(percent >= 0 && percent <= 100);
+            if (percent < 0 || percent > 100) {
+                Debug.WriteLine("WorkProgress: bad percent " + percent);
+                percent = 0;
+            }
 
             if (!string.IsNullOrEmpty(msg)) {
                 messageText.Text = msg;

@@ -79,7 +79,12 @@ namespace SourceGen {
         public override void SetThumbnail(IVisualizationWireframe visWire,
                 ReadOnlyDictionary<string, object> parms) {
             base.SetThumbnail(visWire, parms);
-            mWireObj = WireframeObject.Create(visWire);
+            if (visWire == null) {
+                // Thumbnail cache is being cleared.  Throw out the wireframe object too.
+                mWireObj = null;
+            } else {
+                mWireObj = WireframeObject.Create(visWire);
+            }
         }
 
         /// <summary>
@@ -98,6 +103,20 @@ namespace SourceGen {
             int frameDelayMsec = Util.GetFromObjDict(VisGenParams, P_FRAME_DELAY_MSEC, 100);
             bool doPersp = Util.GetFromObjDict(VisGenParams, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(VisGenParams, VisWireframe.P_IS_BFC_ENABLED, false);
+
+            // Try to avoid System.Runtime.InteropServices.COMException (0x88980003):
+            //   MILERR_WIN32ERROR (Exception from HRESULT: 0x88980003)
+            // The problem seems to be that the bitmaps are GDI handles, there's a hard limit of
+            // 10,000, and they don't get released until finalizers run.  If we wait for
+            // pending finalizers the pool stays at a manageable level.  If we poke the GC
+            // every time the memory graph looks better but I suspect there's a performance hit.
+            //GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            if (mWireObj == null) {
+                Debug.WriteLine("EncodeGif: wire obj is null");
+                frameCount = 1;
+            }
 
             for (int frame = 0; frame < frameCount; frame++) {
                 BitmapSource bs = GenerateWireframeImage(mWireObj, dim,

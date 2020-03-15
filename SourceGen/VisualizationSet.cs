@@ -167,6 +167,7 @@ namespace SourceGen {
         public void RefreshNeeded() {
             foreach (Visualization vis in mList) {
                 vis.SetThumbnail(null);
+                vis.SetThumbnail(null, null);
             }
         }
 

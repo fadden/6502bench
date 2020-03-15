@@ -15,6 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -446,13 +447,45 @@ namespace SourceGen {
         private const string HTML_EXPORT_CSS_FILE = "SGStyle.css";
         private const string LABEL_LINK_PREFIX = "Sym";
 
+        private class ExportWorker : WorkProgress.IWorker {
+            private Exporter mExporter;
+            private string mPathName;
+            private bool mOverwriteCss;
+
+            public bool Success { get; private set; }
+
+            public ExportWorker(Exporter exp, string pathName, bool overwriteCss) {
+                mExporter = exp;
+                mPathName = pathName;
+                mOverwriteCss = overwriteCss;
+            }
+            public object DoWork(BackgroundWorker worker) {
+                return mExporter.OutputToHtml(worker, mPathName, mOverwriteCss);
+            }
+            public void RunWorkerCompleted(object results) {
+                if (results != null) {
+                    Success = (bool)results;
+                }
+            }
+        }
+
         /// <summary>
         /// Generates HTML output to the specified path.
         /// </summary>
         /// <param name="pathName">Full pathname of output file (including ".html").  This
         ///   defines the root directory if there are additional files.</param>
         /// <param name="overwriteCss">If set, existing CSS file will be replaced.</param>
-        public void OutputToHtml(string pathName, bool overwriteCss) {
+        public void OutputToHtml(Window parent, string pathName, bool overwriteCss) {
+            ExportWorker ew = new ExportWorker(this, pathName, overwriteCss);
+            WorkProgress dlg = new WorkProgress(parent, ew, false);
+            if (dlg.ShowDialog() != true) {
+                Debug.WriteLine("Export unsuccessful");
+            } else {
+                Debug.WriteLine("Export complete");
+            }
+        }
+
+        private bool OutputToHtml(BackgroundWorker worker, string pathName, bool overwriteCss) {
             string exportTemplate = RuntimeDataAccess.GetPathName(HTML_EXPORT_TEMPLATE);
             string tmplStr;
             try {
@@ -463,7 +496,7 @@ namespace SourceGen {
                     pathName, ex.Message);
                 MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             // We should only need the _IMG directory if there are visualizations.
@@ -478,7 +511,7 @@ namespace SourceGen {
                             imageDirPath);
                         MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                             MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        return false;
                     }
                     exists = true;
                 } catch (FileNotFoundException) {
@@ -493,13 +526,20 @@ namespace SourceGen {
                             imageDirPath, ex.Message);
                         MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                             MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        return false;
                     }
                 }
 
                 // All good.
                 mImageDirPath = imageDirPath;
             }
+
+            if (mImageDirPath == null) {
+                worker.ReportProgress(0, Res.Strings.EXPORTING_HTML);
+            } else {
+                worker.ReportProgress(0, Res.Strings.EXPORTING_HTML_AND_IMAGES);
+            }
+
 
             // Perform some quick substitutions.  This could be done more efficiently,
             // but we're only doing this on the template file, which should be small.
@@ -527,10 +567,12 @@ namespace SourceGen {
             int splitPoint = tmplStr.IndexOf(CodeLinesStr);
             if (splitPoint < 0) {
                 Debug.WriteLine("No place to put code");
-                return;
+                return false;
             }
             string template1 = tmplStr.Substring(0, splitPoint);
             string template2 = tmplStr.Substring(splitPoint + CodeLinesStr.Length);
+
+            int lastProgressPerc = 0;
 
             // Generate UTF-8 text, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
@@ -545,10 +587,25 @@ namespace SourceGen {
                     }
 
                     GenerateHtmlLine(lineIndex, sw, sb);
+
+                    if (worker.CancellationPending) {
+                        break;
+                    }
+                    int perc = (lineIndex * 100) / mCodeLineList.Count;
+                    if (perc != lastProgressPerc) {
+                        lastProgressPerc = perc;
+                        worker.ReportProgress(perc);
+                    }
                 }
                 sw.WriteLine("</pre>\r\n");
 
                 sw.Write(template2);
+            }
+
+            if (worker.CancellationPending) {
+                Debug.WriteLine("Cancel requested, deleting " + pathName);
+                File.Delete(pathName);
+                return false;
             }
 
             string cssFile = RuntimeDataAccess.GetPathName(HTML_EXPORT_CSS_FILE);
@@ -563,9 +620,11 @@ namespace SourceGen {
                         cssFile, outputPath, ex.Message);
                     MessageBox.Show(msg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
                         MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    return false;
                 }
             }
+
+            return true;
         }
 
         /// <summary>

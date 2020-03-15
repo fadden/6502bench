@@ -81,6 +81,8 @@ limitations under the License.
     <system:String x:Key="str_ErrProjectSaveFail">Unable to save project file</system:String>
     <system:String x:Key="str_ErrTooLargeForPreview">[File was too large for preview window]</system:String>
     <system:String x:Key="str_ErrValueIncompatibleWithMask">Symbol value is incompatible with current multi-mask</system:String>
+    <system:String x:Key="str_ExportingHtml">Exporting HTML...</system:String>
+    <system:String x:Key="str_ExportingHtmlAndImages">Exporting HTML and images...</system:String>
     <system:String x:Key="str_ExternalFileBadDirFmt" xml:space="preserve">Symbol files and extension scripts must live in the application runtime directory ({0}) or project directory ({1}).&#x0d;&#x0d;File {2} lives elsewhere.</system:String>
     <system:String x:Key="str_ExternalFileBadDirCaption">File Not In Runtime Directory</system:String>
     <system:String x:Key="str_FileFilterAll">All files (*.*)|*.*</system:String>

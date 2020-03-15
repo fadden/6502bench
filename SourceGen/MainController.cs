@@ -2345,18 +2345,18 @@ namespace SourceGen {
                 eport.Selection = selection;
             }
 
-            // This is generally fast enough that I don't feel the need to create a
-            // progress window.
-            try {
-                Mouse.OverrideCursor = Cursors.Wait;
-
-                if (dlg.GenType == WpfGui.Export.GenerateFileType.Html) {
-                    eport.OutputToHtml(dlg.PathName, dlg.OverwriteCss);
-                } else {
+            if (dlg.GenType == WpfGui.Export.GenerateFileType.Html) {
+                // Generating wireframe animations can be slow, so we need to use a
+                // progress dialog.
+                eport.OutputToHtml(mMainWin, dlg.PathName, dlg.OverwriteCss);
+            } else {
+                // Text output is generally very fast.  Put up a wait cursor just in case.
+                try {
+                    Mouse.OverrideCursor = Cursors.Wait;
                     eport.OutputToText(dlg.PathName, dlg.TextModeCsv);
+                } finally {
+                    Mouse.OverrideCursor = null;
                 }
-            } finally {
-                Mouse.OverrideCursor = null;
             }
         }
 

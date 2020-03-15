@@ -318,7 +318,7 @@ namespace SourceGen.AsmGen.WpfGui {
         }
 
         private class AsmWorker : WorkProgress.IWorker {
-            IAssembler mAssembler;
+            private IAssembler mAssembler;
             public AssemblerResults Results { get; private set; }
 
             public AsmWorker(IAssembler asm) {
