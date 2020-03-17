@@ -1541,9 +1541,8 @@ namespace SourceGen {
                                     sym.SymbolSource == Symbol.Source.Platform) {
                                 DefSymbol defSym = sym as DefSymbol;
                                 int adj = 0;
-                                if (operandOffset >= 0) {
-                                    adj = defSym.Value - operandOffset;
-                                }
+                                Debug.Assert(operandOffset < 0);    // outside file scope
+                                adj = defSym.Value - attr.OperandAddress;
                                 defSym.Xrefs.Add(
                                     new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             } else {

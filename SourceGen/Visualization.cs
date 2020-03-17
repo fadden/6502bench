@@ -311,7 +311,7 @@ namespace SourceGen {
             using (DrawingContext dc = dv.RenderOpen()) {
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0, 0, bounds.Width, bounds.Height));
                 Pen pen = new Pen(Brushes.White, 1.0);
-                dc.DrawGeometry(Brushes.White, pen, geo);
+                dc.DrawGeometry(null, pen, geo);
             }
             bitmap.Render(dv);
 
