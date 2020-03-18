@@ -1542,7 +1542,14 @@ namespace SourceGen {
                                 DefSymbol defSym = sym as DefSymbol;
                                 int adj = 0;
                                 Debug.Assert(operandOffset < 0);    // outside file scope
-                                adj = defSym.Value - attr.OperandAddress;
+                                if (sym.SymbolType != Symbol.Type.Constant) {
+                                    adj = defSym.Value - attr.OperandAddress;
+                                } else {
+                                    // We could compute the operand's value and display
+                                    // the difference, so "LDA #$00" --> "LDA #FOO" when
+                                    // FOO is 1 would display "FOO -1" in the xref table.
+                                    // Not sure if that's useful.
+                                }
                                 defSym.Xrefs.Add(
                                     new XrefSet.Xref(offset, true, xrefType, accType, adj));
                             } else {
