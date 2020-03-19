@@ -667,7 +667,10 @@ namespace SourceGen {
                     // need to ensure that the label is unique and all references point to the
                     // correct instance.  We can't get that from the Parts list.
                 } else {
-                    anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + parts.Label +
+                    string trimLabel = Symbol.TrimAndValidateLabel(parts.Label,
+                        mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
+                        out bool unused2, out bool unused3, out Symbol.LabelAnnotation unusedAnno);
+                    anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + trimLabel +
                         "\">" + parts.Label + "</a>";
                 }
             }
