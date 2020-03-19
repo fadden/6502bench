@@ -71,3 +71,13 @@ _more_ascii .byte 'h'
         .word   _more_ascii
         .long   _more_ascii
         .byte   $10,$70
+        .byte   '['
+        .byte   '{'
+        .byte   '|'
+        .byte   '}'
+        .byte   ','
+        .byte   '[' | $80
+        .byte   '{' | $80
+        .byte   '|' | $80
+        .byte   '}' | $80
+        .byte   ',' | $80

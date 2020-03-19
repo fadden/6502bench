@@ -67,3 +67,13 @@ skipdata lda    #'h'
         !word   @more_ascii
         !24     @more_ascii
         !byte   $10,$70
+        !byte   '['
+        !byte   '{'
+        !byte   '|'
+        !byte   '}'
+        !byte   ','
+        !byte   '[' | $80
+        !byte   '{' | $80
+        !byte   '|' | $80
+        !byte   '}' | $80
+        !byte   ',' | $80

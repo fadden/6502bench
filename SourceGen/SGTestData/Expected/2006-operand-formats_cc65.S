@@ -68,3 +68,13 @@ skipdata: lda    #'h'
          .word   @more_ascii
          .faraddr @more_ascii
          .dbyt   @more_ascii
+         .byte   '['
+         .byte   '{'
+         .byte   '|'
+         .byte   '}'
+         .byte   ','
+         .byte   '[' | $80
+         .byte   '{' | $80
+         .byte   '|' | $80
+         .byte   '}' | $80
+         .byte   ',' | $80

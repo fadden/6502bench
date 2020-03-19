@@ -84,3 +84,14 @@
         adr     :ascii
         dfb     >:ascii,:ascii          ;format as big-endian symbol
 
+; Merlin 1.0 has trouble with "DFB '{'".
+        dfb     '['
+        dfb     $7b
+        dfb     $7c
+        dfb     $7d
+        dfb     ','
+        dfb     "["
+        dfb     $fb
+        dfb     $fc
+        dfb     $fd
+        dfb     ","

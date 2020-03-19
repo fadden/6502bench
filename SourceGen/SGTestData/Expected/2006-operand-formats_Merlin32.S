@@ -63,3 +63,13 @@ skipdata lda   #'h'
          dw    :more_ascii
          adr   :more_ascii
          ddb   :more_ascii
+         dfb   '['
+         dfb   $7b
+         dfb   '|'
+         dfb   $7d
+         dfb   ','
+         dfb   "["
+         dfb   $fb
+         dfb   "|"
+         dfb   $fd
+         dfb   ","
