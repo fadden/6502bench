@@ -1542,13 +1542,19 @@ namespace SourceGen {
                                 DefSymbol defSym = sym as DefSymbol;
                                 int adj = 0;
                                 Debug.Assert(operandOffset < 0);    // outside file scope
-                                if (sym.SymbolType != Symbol.Type.Constant) {
+                                if (sym.SymbolType != Symbol.Type.Constant &&
+                                        attr.OperandAddress >= 0) {
+                                    // It's an address operand, so we can compute the offset.
                                     adj = defSym.Value - attr.OperandAddress;
                                 } else {
                                     // We could compute the operand's value and display
-                                    // the difference, so "LDA #$00" --> "LDA #FOO" when
+                                    // the difference, so "LDA #$00" --> "LDA #FOO-1" when
                                     // FOO is 1 would display "FOO -1" in the xref table.
                                     // Not sure if that's useful.
+                                    //
+                                    // We would need to shift the value to match the part,
+                                    // e.g. "LDA #>BLAH" would grab the high part.  We'd need
+                                    // to tweak the adjustment math appropriately.
                                 }
                                 defSym.Xrefs.Add(
                                     new XrefSet.Xref(offset, true, xrefType, accType, adj));
