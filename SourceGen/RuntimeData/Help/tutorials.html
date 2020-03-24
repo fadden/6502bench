@@ -752,7 +752,7 @@ Double-click on "VisTutorial5.cs", then click "OK".</p>
 <p>The address of the three bitmaps are helpfully identified by the
 load instructions at the top of the file.  Select the list at
 address $100A, then Actions &gt; Create/Edit Visualization Set.  In
-the window that opens, click "New Bitmap".</p>
+the window that opens, click "New Visualization".</p>
 <p>We're going to ignore most of what's going on and just focus on the
 list of parameters at the bottom.  The file offset indicates where in
 the file the bitmap starts; note this is an offset, not an address
@@ -798,9 +798,9 @@ to see individual bytes, you can use Edit &gt; Settings, select the
 Display Format tab, and check "use comma-separated format for bulk data".
 This can make it a bit easier to read.</p>
 
-<h4>Animations</h4>
+<h4>Bitmap Animations</h4>
 
-<p>Some graphics represent individual frames in an animated sequence.
+<p>Some bitmaps represent individual frames in an animated sequence.
 You can convert those as well.  Double-click on the blue 'X' to open
 the visualization set editor, then click "New Bitmap Animation".  This
 opens the Bitmap Animation Editor.</p>
@@ -840,6 +840,9 @@ them on any code or data line.</p>
 <p>Visualizations have no effect on assembly source code generation,
 but they do appear in code exported to HTML.  Bitmaps are converted to GIF
 images, and animations become animated GIFs.</p>
+
+<p>You can also create animated visualizations of wireframe objects,
+but that's not covered in this tutorial.</p>
 
 <hr/>
 
