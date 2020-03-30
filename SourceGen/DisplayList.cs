@@ -435,6 +435,7 @@ namespace SourceGen {
                 if (color != NoColor) {
                     parts.HasBackgroundColor = true;
                     parts.BackgroundBrush = new SolidColorBrush(color);
+                    parts.BackgroundBrush.Freeze();     // export runs on non-UI thread
                 }
                 return parts;
             }

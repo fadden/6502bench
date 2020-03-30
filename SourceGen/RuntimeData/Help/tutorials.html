@@ -36,7 +36,7 @@ The buttons are shortcuts for items in the File menu.</p>
 
 <h3>Create the project</h3>
 
-<p>Click "Start new project".</p>
+<p>Click the "Start new project" button.</p>
 
 <p>The New Project window has three parts.  The top-left window has a
 tree of known platforms, arranged by manufacturer.  The top-right window
@@ -460,7 +460,7 @@ to 2 (it's a 2-byte pointer).  Click "OK" to create the entry, and then
 "OK" to update the table.</p>
 <p>There's now a ".var" statement (similar to a .equ) above line $203d,
 and the stores to $02/$03 have changed to "PTR1" and "PTR1+1".</p>
-<p>Double-click on the JSR on line $2045 to jump to L209A.  This just
+<p>Double-click on the JSR on line $2045 to jump to L20A7.  This just
 loads a value from $3000 into the accumulator and returns, so not much
 to see here.  Hit the back-arrow in the toolbar to jump back to the JSR.</p>
 <p>The next bit of code masks the accumulator so it holds a value between
@@ -497,7 +497,8 @@ counts are adjusted for everything SourceGen can figure out.  For example,
 the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
 cycles but might take more.  That's because conditional branches take an
 extra cycle if the branch is taken.  The BNE on line $2061" shows 3 cycles,
-because we know that the branch is always taken.  (If you want to see why,
+because we know that the branch is always taken and doesn't cross a page
+boundary.  (If you want to see why it's always taken,
 look at the value of the 'Z' flag in the "flags" column.  Lower-case 'z'
 means the zero-flag is clear.  You can see it got set on the
 <code>ORA #$80</code> line.)</p>
@@ -588,7 +589,8 @@ on.</p>
 
 <p>Start a new project.  Select the Apple //e platform, click Select File
 and navigate to the Examples directory.  In A2-Amper-fdraw, select
-<code>AMPERFDRAW#061d60</code>.  Click "OK" to create the project.</p>
+<code>AMPERFDRAW#061d60</code> (ignore the existing .dis65 file).  Click
+"OK" to create the project.</p>
 <p>Not a lot to see here -- just half a dozen lines of loads and stores.
 This particular program interfaces with Applesoft BASIC, so we can make it
 a bit more meaningful by loading an additional platform
@@ -758,7 +760,7 @@ list of parameters at the bottom.  The file offset indicates where in
 the file the bitmap starts; note this is an offset, not an address
 (that way, if you change the address, your visualizations don't break).
 This is followed by the bitmap's width in bytes, and the bitmap's height.
-Because we have 8 pixels per byte, we're currently showing a 1x1 image.
+Because we have 8 pixels per byte, we're currently showing an 8x1 image.
 We'll come back to row stride.</p>
 <p>We happen to know (by playing the game and/or reading the fictitious
 drawing code) that the image is 8x8, so change the value in the height
@@ -775,7 +777,8 @@ Set window as well.  You should now see the blue 'X' in the code listing
 above line $100A.</p>
 
 <p>Repeat the process at line $1012: select the line, create a visualization
-set, create a new bitmap, set the height to 8, click "OK" twice.</p>
+set, create a new visualization.  The height will default to 8 because
+that's what you used last time.  Click "OK" in both dialogs to close them.</p>
 
 <p>Repeat the process at line $101A, but this time the image is 40x40
 rather than 8x8.  Set the width to 5, and the height to 40.  This makes

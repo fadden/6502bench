@@ -277,7 +277,7 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>For some failures, an exit code of zero is returned.</li>
   <li>Immediate operands with a comma (e.g. <code>LDA #','</code>)
-    cause an error.</li>
+    or curly braces (e.g. <code>LDA #'{'</code>) cause an error.</li>
   <li>Some DP indexed store instructions cause errors if the label isn't
     unambiguously DP (e.g. <code>STX $00,X</code> vs.
     <code>STX $0000,X</code>).  This isn't a problem with project/platform

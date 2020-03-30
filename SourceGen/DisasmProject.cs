@@ -1592,7 +1592,7 @@ namespace SourceGen {
                     }
                 }
 
-                if (attr.IsDataStart) {
+                if (attr.IsDataStart || attr.IsInlineDataStart) {
                     // There shouldn't be data items inside of other data items.
                     offset += attr.Length;
 
