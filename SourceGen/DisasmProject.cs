@@ -1576,10 +1576,29 @@ namespace SourceGen {
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.Address) {
                         // not expecting this format on an instruction operand
                         Debug.Assert(attr.IsData || attr.IsInlineData);
-                        int operandOffset = RawData.GetWord(mFileData, offset,
+
+                        // This generally doesn't happen for internal addresses, because
+                        // we create an auto label for the target address, and a weak ref
+                        // to the auto label, which means the xref is handled by the symbol
+                        // code above.  This case really only happens for external addresses,
+                        // which either have a label (because we defined a symbol) and got
+                        // handled earlier, or don't have a label and aren't useful for a
+                        // cross-reference.
+                        //
+                        // There might be a case I'm missing, so I'm going to take a swing
+                        // at it and spit out a debug message either way.
+                        int operandAddr = RawData.GetWord(mFileData, offset,
                             dfd.Length, dfd.FormatType == FormatDescriptor.Type.NumericBE);
-                        AddXref(operandOffset,
-                            new XrefSet.Xref(offset, false, xrefType, accType, 0));
+                        int targetOffset = AddrMap.AddressToOffset(offset, operandAddr);
+                        if (targetOffset < 0) {
+                            Debug.WriteLine("No xref for addr $" + operandAddr.ToString("x4") +
+                                " at +" + offset.ToString("x6"));
+                        } else {
+                            Debug.WriteLine("HEY: found unlabeled addr ref at +" +
+                                offset.ToString("x6"));
+                            AddXref(targetOffset,
+                                new XrefSet.Xref(offset, false, xrefType, accType, 0));
+                        }
                     }
 
                     // Look for instruction offset references.  We skip this if we've already
