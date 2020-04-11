@@ -19,7 +19,8 @@ using System.Diagnostics;
 namespace CommonUtil {
     public class RawData {
         /// <summary>
-        /// Extracts an integer from the data stream.
+        /// Extracts an integer from the data stream.  Integers less than 4 bytes wide
+        /// are not sign-extended.
         /// </summary>
         /// <param name="data">Raw data stream.</param>
         /// <param name="offset">Start offset.</param>

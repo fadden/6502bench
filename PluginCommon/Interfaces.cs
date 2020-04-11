@@ -327,20 +327,24 @@ namespace PluginCommon {
     /// <summary>
     /// Holds raw vertex/edge/normal data collected from a 2D or 3D wireframe mesh.  We use
     /// a left-handed coordinate system (+Z goes into the screen).  If the project being
-    /// disassembled uses different definitions for the axes, it's probably best to convert.
-    /// 2D data should use X/Y with Z=0.
+    /// disassembled uses different definitions for the axes, it's probably best to convert
+    /// them in the visualizer.  2D data should use X/Y with Z=0.
     ///
-    /// All objects will have vertices and edges.  Face normals are optional.
+    /// All objects will have vertices.  Most will have edges, some will have points.  Face
+    /// normals are optional.
     /// </summary>
     /// <remarks>
     /// The face-normal stuff is designed specifically for Elite.  Besides being one of the
     /// very few 6502-based games to use backface culling, it extended the concept to allow
     /// convex shapes to have protrusions.
     ///
+    /// Points are included primarily for the benefit of AVG games like Battlezone.
+    ///
     /// We favor multiple arrays over compound objects for this interface to avoid making
     /// such objects part of the plugin interface.
     ///
-    /// TODO(maybe): specify colors for edges.  Not widely used?
+    /// TODO(maybe): specify colors for points and edges.  Not widely used?  Could be handy for
+    /// color AVG games like Tempest.
     /// </remarks>
     public interface IVisualizationWireframe {
         // Each function returns the specified data.  Do not modify the returned arrays.
@@ -349,6 +353,7 @@ namespace PluginCommon {
         float[] GetVerticesY();
         float[] GetVerticesZ();
 
+        int[] GetPoints();
         IntPair[] GetEdges();
 
         float[] GetNormalsX();

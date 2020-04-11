@@ -28,7 +28,8 @@ namespace PluginCommon {
     /// </summary>
     public static class Util {
         /// <summary>
-        /// Extracts an integer from the data stream.
+        /// Extracts an integer from the data stream.  Integers shorter than 4 bytes are
+        /// not sign-extended.
         /// </summary>
         /// <param name="data">Raw data stream.</param>
         /// <param name="offset">Start offset.</param>

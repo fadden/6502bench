@@ -87,6 +87,7 @@ namespace SourceGen {
         }
 
         private List<Vertex> mVertices = new List<Vertex>();
+        private List<Vertex> mPoints = new List<Vertex>();
         private List<Edge> mEdges = new List<Edge>();
         private List<Face> mFaces = new List<Face>();
         private double mBigMag = -1.0;
@@ -105,7 +106,8 @@ namespace SourceGen {
 
             //
             // Start by extracting data from the visualization object.  Everything stored
-            // there is loaded into this object.
+            // there is loaded into this object.  The VisWireframe validator will have
+            // ensured that all the indices are in range.
             //
 
             float[] normalsX = visWire.GetNormalsX();
@@ -139,6 +141,11 @@ namespace SourceGen {
             for (int i = 0; i < verticesX.Length; i++) {
                 wireObj.mVertices.Add(new Vertex(verticesX[i], verticesY[i], verticesZ[i],
                     HasIndex(excludedVertices, i)));
+            }
+
+            int[] points = visWire.GetPoints();
+            for (int i = 0; i < points.Length; i++) {
+                wireObj.mPoints.Add(wireObj.mVertices[i]);
             }
 
             IntPair[] edges = visWire.GetEdges();
@@ -229,7 +236,8 @@ namespace SourceGen {
         /// <param name="doPersp">Perspective or othographic projection?</param>
         /// <param name="doBfc">Perform backface culling?</param>
         /// <returns>List a of line segments, which could be empty if backface culling
-        ///   was especially successful.</returns>
+        ///   was especially successful.  All segment coordinates are in the range
+        ///   [-1,1].</returns>
         public List<LineSeg> Generate(int eulerX, int eulerY, int eulerZ,
                 bool doPersp, bool doBfc) {
             List<LineSeg> segs = new List<LineSeg>(mEdges.Count);
@@ -291,6 +299,29 @@ namespace SourceGen {
                         face.IsVisible = (rotNorm.Z <= 0);
                     }
                 }
+            }
+
+            foreach (Vertex point in mPoints) {
+                // There are no "point faces" at the moment, so no BFC is applied.
+                Vector3 trv = rotMat.Multiply(point.Vec);
+                double xc, yc;
+                if (doPersp) {
+                    double zc = trv.Z * scale;
+                    xc = (trv.X * scale * zadj) / (zadj + zc);
+                    yc = (trv.Y * scale * zadj) / (zadj + zc);
+                } else {
+                    xc = trv.X * scale;
+                    yc = trv.Y * scale;
+                }
+
+                // Zero-length line segments don't do anything.  Try a '+'.
+                const double dist = 1 / 64.0;
+                double x0 = Math.Max(-1.0, xc - dist);
+                double x1 = Math.Min(xc + dist, 1.0);
+                segs.Add(new LineSeg(x0, yc, x1, yc));
+                double y0 = Math.Max(-1.0, yc - dist);
+                double y1 = Math.Min(yc + dist, 1.0);
+                segs.Add(new LineSeg(xc, y0, xc, y1));
             }
 
             foreach (Edge edge in mEdges) {

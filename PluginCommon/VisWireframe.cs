@@ -39,6 +39,7 @@ namespace PluginCommon {
         private List<float> mVerticesY = new List<float>();
         private List<float> mVerticesZ = new List<float>();
 
+        private List<int> mPoints = new List<int>();
         private List<IntPair> mEdges = new List<IntPair>();
 
         private List<float> mNormalsX = new List<float>();
@@ -70,6 +71,16 @@ namespace PluginCommon {
             mVerticesY.Add(y);
             mVerticesZ.Add(z);
             return mVerticesX.Count - 1;
+        }
+
+        /// <summary>
+        /// Adds a point to the list.
+        /// </summary>
+        /// <param name="index">Vertex index.</param>
+        /// <returns>Point index.  Indices start at zero and count up.</returns>
+        public int AddPoint(int index) {
+            mPoints.Add(index);
+            return mPoints.Count - 1;
         }
 
         /// <summary>
@@ -172,6 +183,14 @@ namespace PluginCommon {
                 return false;
             }
 
+            // check points
+            foreach (int vi in mPoints) {
+                if (vi < 0 || vi >= vertexCount) {
+                    msg = "invalid point (index=" + vi + "; count=" + vertexCount + ")";
+                    return false;
+                }
+            }
+
             // check edges
             foreach (IntPair ip in mEdges) {
                 if (ip.Val0 < 0 || ip.Val0 >= vertexCount ||
@@ -246,6 +265,10 @@ namespace PluginCommon {
 
         public float[] GetVerticesZ() {
             return mVerticesZ.ToArray();
+        }
+
+        public int[] GetPoints() {
+            return mPoints.ToArray();
         }
 
         public IntPair[] GetEdges() {
