@@ -86,11 +86,14 @@ namespace SourceGen {
             }
         }
 
+        private bool mIs2d = false;
         private List<Vertex> mVertices = new List<Vertex>();
         private List<Vertex> mPoints = new List<Vertex>();
         private List<Edge> mEdges = new List<Edge>();
         private List<Face> mFaces = new List<Face>();
         private double mBigMag = -1.0;
+        private double mBigMagRc = -1.0;
+        private double mCenterAdjX, mCenterAdjY;
 
 
         // private constructor; use Create()
@@ -104,10 +107,15 @@ namespace SourceGen {
         public static WireframeObject Create(IVisualizationWireframe visWire) {
             WireframeObject wireObj = new WireframeObject();
 
+            wireObj.mIs2d = visWire.Is2d;
+
             //
             // Start by extracting data from the visualization object.  Everything stored
             // there is loaded into this object.  The VisWireframe validator will have
             // ensured that all the indices are in range.
+            //
+            // IMPORTANT: do not retain "visWire", as it may be a proxy for an object with a
+            // limited lifespan.
             //
 
             float[] normalsX = visWire.GetNormalsX();
@@ -138,6 +146,13 @@ namespace SourceGen {
                 return null;
             }
 
+            // Compute min/max for X/Y for 2d re-centering.  The trick is that we only want
+            // to use vertices that are visible.  If the shape starts with a huge move off to
+            // the left, we don't want to include (0,0).
+            double xmin, xmax, ymin, ymax;
+            xmin = ymin = 10e9;
+            xmax = ymax = -10e9;
+
             for (int i = 0; i < verticesX.Length; i++) {
                 wireObj.mVertices.Add(new Vertex(verticesX[i], verticesY[i], verticesZ[i],
                     HasIndex(excludedVertices, i)));
@@ -145,7 +160,9 @@ namespace SourceGen {
 
             int[] points = visWire.GetPoints();
             for (int i = 0; i < points.Length; i++) {
-                wireObj.mPoints.Add(wireObj.mVertices[i]);
+                Vertex vert = wireObj.mVertices[points[i]];
+                wireObj.mPoints.Add(vert);
+                UpdateMinMax(vert, ref xmin, ref xmax, ref ymin, ref ymax);
             }
 
             IntPair[] edges = visWire.GetEdges();
@@ -160,8 +177,12 @@ namespace SourceGen {
                     return null;
                 }
 
-                wireObj.mEdges.Add(new Edge(wireObj.mVertices[v0index],
-                    wireObj.mVertices[v1index], HasIndex(excludedEdges, i)));
+                Vertex vert0 = wireObj.mVertices[v0index];
+                Vertex vert1 = wireObj.mVertices[v1index];
+                wireObj.mEdges.Add(new Edge(vert0, vert1, HasIndex(excludedEdges, i)));
+
+                UpdateMinMax(vert0, ref xmin, ref xmax, ref ymin, ref ymax);
+                UpdateMinMax(vert1, ref xmin, ref xmax, ref ymin, ref ymax);
             }
 
             IntPair[] vfaces = visWire.GetVertexFaces();
@@ -204,17 +225,46 @@ namespace SourceGen {
             // All data has been loaded into friendly classes.
             //
 
+            // Compute center of visible vertices.
+            wireObj.mCenterAdjX = -(xmin + xmax) / 2;
+            wireObj.mCenterAdjY = -(ymin + ymax / 2);
+
             // Compute the magnitude of the largest vertex, for scaling.
             double bigMag = -1.0;
+            double bigMagRc = -1.0;
             for (int i = 0; i < wireObj.mVertices.Count; i++) {
-                double mag = wireObj.mVertices[i].Vec.Magnitude();
+                Vector3 vec = wireObj.mVertices[i].Vec;
+                double mag = vec.Magnitude();
                 if (bigMag < mag) {
                     bigMag = mag;
                 }
+
+                // Repeat the operation with recentering.  This isn't quite right as we're
+                // including all vertices, not just the visible ones.
+                mag = new Vector3(vec.X + wireObj.mCenterAdjX,
+                    vec.Y + wireObj.mCenterAdjY, vec.Z).Magnitude();
+                if (bigMagRc < mag) {
+                    bigMagRc = mag;
+                }
             }
             wireObj.mBigMag = bigMag;
+            wireObj.mBigMagRc = bigMagRc;
 
             return wireObj;
+        }
+
+        private static void UpdateMinMax(Vertex vert, ref double xmin, ref double xmax,
+                ref double ymin, ref double ymax) {
+            if (vert.Vec.X < xmin) {
+                xmin = vert.Vec.X;
+            } else if (vert.Vec.X > xmax) {
+                xmax = vert.Vec.X;
+            }
+            if (vert.Vec.Y < ymin) {
+                ymin = vert.Vec.Y;
+            } else if (vert.Vec.Y > ymax) {
+                ymax = vert.Vec.Y;
+            }
         }
 
         private static bool HasIndex(int[] arr, int val) {
@@ -235,11 +285,19 @@ namespace SourceGen {
         /// <param name="eulerZ">Rotation about Z axis.</params>
         /// <param name="doPersp">Perspective or othographic projection?</param>
         /// <param name="doBfc">Perform backface culling?</param>
+        /// <param name="doRecenter">Re-center 2D renderings?</param>
         /// <returns>List a of line segments, which could be empty if backface culling
         ///   was especially successful.  All segment coordinates are in the range
         ///   [-1,1].</returns>
         public List<LineSeg> Generate(int eulerX, int eulerY, int eulerZ,
-                bool doPersp, bool doBfc) {
+                bool doPersp, bool doBfc, bool doRecenter) {
+            // overrule flags that don't make sense
+            if (mIs2d) {
+                doPersp = doBfc = false;
+            } else {
+                doRecenter = false;
+            }
+
             List<LineSeg> segs = new List<LineSeg>(mEdges.Count);
 
             // Camera Z coordinate adjustment, used to control how perspective projections
@@ -248,10 +306,23 @@ namespace SourceGen {
             const double zadj = 3.0;
 
             // Scale coordinate values to [-1,1].
-            double scale = 1.0 / mBigMag;
+            double scale;
+            if (doRecenter) {
+                scale = 1.0 / mBigMagRc;
+            } else {
+                scale = 1.0 / mBigMag;
+            }
             if (doPersp) {
                 // objects closer to camera are bigger; reduce scale slightly
                 scale = (scale * zadj) / (zadj + 0.3);
+            }
+
+            // Configure X/Y translation for 2D wireframes.
+            double transX = 0;
+            double transY = 0;
+            if (doRecenter) {
+                transX = mCenterAdjX;
+                transY = mCenterAdjY;
             }
 
             // In a left-handed coordinate system, +Z is away from the viewer.  The
@@ -303,7 +374,12 @@ namespace SourceGen {
 
             foreach (Vertex point in mPoints) {
                 // There are no "point faces" at the moment, so no BFC is applied.
-                Vector3 trv = rotMat.Multiply(point.Vec);
+                Vector3 vec = point.Vec;
+                if (doRecenter) {
+                    vec = new Vector3(vec.X + transX, vec.Y + transY, vec.Z);
+                }
+                Vector3 trv = rotMat.Multiply(vec);
+
                 double xc, yc;
                 if (doPersp) {
                     double zc = trv.Z * scale;
@@ -313,6 +389,8 @@ namespace SourceGen {
                     xc = trv.X * scale;
                     yc = trv.Y * scale;
                 }
+
+                //Debug.WriteLine("POINT " + xc + "," + yc);
 
                 // Zero-length line segments don't do anything.  Try a '+'.
                 const double dist = 1 / 64.0;
@@ -336,8 +414,14 @@ namespace SourceGen {
                     }
                 }
 
-                Vector3 trv0 = rotMat.Multiply(edge.Vertex0.Vec);
-                Vector3 trv1 = rotMat.Multiply(edge.Vertex1.Vec);
+                Vector3 vec0 = edge.Vertex0.Vec;
+                Vector3 vec1 = edge.Vertex1.Vec;
+                if (doRecenter) {
+                    vec0 = new Vector3(vec0.X + transX, vec0.Y + transY, vec0.Z);
+                    vec1 = new Vector3(vec1.X + transX, vec1.Y + transY, vec1.Z);
+                }
+                Vector3 trv0 = rotMat.Multiply(vec0);
+                Vector3 trv1 = rotMat.Multiply(vec1);
                 double x0, y0, x1, y1;
 
                 if (doPersp) {

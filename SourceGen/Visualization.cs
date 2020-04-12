@@ -274,7 +274,9 @@ namespace SourceGen {
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
             bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
-            return GenerateWireframeImage(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
+            bool doRecenter = Util.GetFromObjDict(parms, VisWireframe.P_IS_RECENTERED, true);
+            return GenerateWireframeImage(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc,
+                doRecenter);
         }
 
         /// <summary>
@@ -282,7 +284,8 @@ namespace SourceGen {
         /// and GIF exports.
         /// </summary>
         public static BitmapSource GenerateWireframeImage(WireframeObject wireObj,
-                double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc) {
+                double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc,
+                bool doRecenter) {
             if (wireObj == null) {
                 // Can happen if the visualization generator is failing on stuff loaded from
                 // the project file.
@@ -291,7 +294,7 @@ namespace SourceGen {
 
             // Generate the path geometry.
             GeometryGroup geo = GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ,
-                doPersp, doBfc);
+                doPersp, doBfc, doRecenter);
 
             // Render geometry to bitmap -- https://stackoverflow.com/a/869767/294248
             Rect bounds = geo.GetRenderBounds(null);
@@ -355,7 +358,9 @@ namespace SourceGen {
             int eulerZ = Util.GetFromObjDict(parms, VisWireframeAnimation.P_EULER_ROT_Z, 0);
             bool doPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
-            return GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc);
+            bool doRecenter = Util.GetFromObjDict(parms, VisWireframe.P_IS_RECENTERED, true);
+            return GenerateWireframePath(wireObj, dim, eulerX, eulerY, eulerZ, doPersp, doBfc,
+                doRecenter);
         }
 
         /// <summary>
@@ -364,7 +369,8 @@ namespace SourceGen {
         /// coordinates so they fit within the box.
         /// </summary>
         public static GeometryGroup GenerateWireframePath(WireframeObject wireObj,
-                double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc) {
+                double dim, int eulerX, int eulerY, int eulerZ, bool doPersp, bool doBfc,
+                bool doRecenter) {
             // WPF path drawing is based on a system where a pixel is drawn at the center
             // of its coordinates, and integer coordinates start at the top left edge of
             // the drawing area.  If you draw a pixel at (0,0), 3/4ths of the pixel will be
@@ -409,7 +415,7 @@ namespace SourceGen {
             // Generate a list of clip-space line segments.  Coordinate values are in the
             // range [-1,1], with +X to the right and +Y upward.
             List<WireframeObject.LineSeg> segs = wireObj.Generate(eulerX, eulerY, eulerZ,
-                doPersp, doBfc);
+                doPersp, doBfc, doRecenter);
 
             // Convert clip-space coords to screen.  We need to translate to [0,2] with +Y
             // toward the bottom of the screen, scale up, round to the nearest whole pixel,

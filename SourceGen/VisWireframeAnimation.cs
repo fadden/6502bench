@@ -103,6 +103,7 @@ namespace SourceGen {
             int frameDelayMsec = Util.GetFromObjDict(VisGenParams, P_FRAME_DELAY_MSEC, 100);
             bool doPersp = Util.GetFromObjDict(VisGenParams, VisWireframe.P_IS_PERSPECTIVE, true);
             bool doBfc = Util.GetFromObjDict(VisGenParams, VisWireframe.P_IS_BFC_ENABLED, false);
+            bool doRecenter = Util.GetFromObjDict(VisGenParams, VisWireframe.P_IS_RECENTERED, false);
 
             // Try to avoid System.Runtime.InteropServices.COMException (0x88980003):
             //   MILERR_WIN32ERROR (Exception from HRESULT: 0x88980003)
@@ -120,7 +121,7 @@ namespace SourceGen {
 
             for (int frame = 0; frame < frameCount; frame++) {
                 BitmapSource bs = GenerateWireframeImage(mWireObj, dim,
-                    curX, curY, curZ, doPersp, doBfc);
+                    curX, curY, curZ, doPersp, doBfc, doRecenter);
                 encoder.AddFrame(BitmapFrame.Create(bs), frameDelayMsec);
 
                 curX = (curX + 360 + deltaX) % 360;

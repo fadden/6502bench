@@ -37,7 +37,7 @@ namespace SourceGen.WpfGui {
         private int mFrameCount;
         private int mInitialX, mInitialY, mInitialZ;
         private int mDeltaX, mDeltaY, mDeltaZ;
-        private bool mDoPersp, mDoBfc;
+        private bool mDoPersp, mDoBfc, mDoRecenter;
 
         private int mCurX, mCurY, mCurZ;
 
@@ -59,6 +59,7 @@ namespace SourceGen.WpfGui {
             mFrameCount = Util.GetFromObjDict(parms, VisWireframeAnimation.P_FRAME_COUNT, 1);
             mDoPersp = Util.GetFromObjDict(parms, VisWireframe.P_IS_PERSPECTIVE, true);
             mDoBfc = Util.GetFromObjDict(parms, VisWireframe.P_IS_BFC_ENABLED, false);
+            mDoRecenter = Util.GetFromObjDict(parms, VisWireframe.P_IS_RECENTERED, false);
 
             int intervalMsec = Util.GetFromObjDict(parms,
                 VisWireframeAnimation.P_FRAME_DELAY_MSEC, 100);
@@ -99,7 +100,7 @@ namespace SourceGen.WpfGui {
             // ViewBox itself, because on the first iteration the ViewBox has a size of zero.
             double dim = Math.Floor(Math.Min(testBorder.ActualWidth, testBorder.ActualHeight));
             wireframePath.Data = Visualization.GenerateWireframePath(mWireObj, dim,
-                mCurX, mCurY, mCurZ, mDoPersp, mDoBfc);
+                mCurX, mCurY, mCurZ, mDoPersp, mDoBfc, mDoRecenter);
         }
     }
 }

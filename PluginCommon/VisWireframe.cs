@@ -25,14 +25,22 @@ namespace PluginCommon {
     /// </summary>
     [Serializable]
     public class VisWireframe : IVisualizationWireframe {
+        //
+        // Names and definitions of parameters that are interpreted by the wireframe
+        // renderer, rather than the visualization generator.
+        //
         public const string P_IS_PERSPECTIVE = "_isPerspective";
         public const string P_IS_BFC_ENABLED = "_isBfcEnabled";
+        public const string P_IS_RECENTERED = "_isRecentered";
 
         public static VisParamDescr Param_IsPerspective(string uiLabel, bool defaultVal) {
             return new VisParamDescr(uiLabel, P_IS_PERSPECTIVE, typeof(bool), 0, 0, 0, defaultVal);
         }
         public static VisParamDescr Param_IsBfcEnabled(string uiLabel, bool defaultVal) {
             return new VisParamDescr(uiLabel, P_IS_BFC_ENABLED, typeof(bool), 0, 0, 0, defaultVal);
+        }
+        public static VisParamDescr Param_IsRecentered(string uiLabel, bool defaultVal) {
+            return new VisParamDescr(uiLabel, P_IS_RECENTERED, typeof(bool), 0, 0, 0, defaultVal);
         }
 
         private List<float> mVerticesX = new List<float>();
@@ -254,6 +262,8 @@ namespace PluginCommon {
         //
         // IVisualizationWireframe implementation.
         //
+
+        public bool Is2d { get; set; }
 
         public float[] GetVerticesX() {
             return mVerticesX.ToArray();

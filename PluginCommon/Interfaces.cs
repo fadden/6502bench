@@ -191,6 +191,9 @@ namespace PluginCommon {
         /// </summary>
         public string UiName { get; private set; }
 
+        /// <summary>
+        /// Visualization type, used to distinguish between bitmaps and wireframes.
+        /// </summary>
         public enum VisType {
             Unknown = 0,
             Bitmap,             // 2D bitmap
@@ -348,6 +351,8 @@ namespace PluginCommon {
     /// </remarks>
     public interface IVisualizationWireframe {
         // Each function returns the specified data.  Do not modify the returned arrays.
+
+        bool Is2d { get; }
 
         float[] GetVerticesX();
         float[] GetVerticesY();
