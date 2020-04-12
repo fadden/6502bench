@@ -911,9 +911,11 @@ namespace SourceGen {
                         dispWidth = dispHeight = 1;
                     }
                 } else {
-                    // Bitmap visualization.
+                    // Bitmap visualization -or- non-animated wireframe visualization.
                     //
-                    // Encode a GIF the same size as the original bitmap.
+                    // Encode a GIF the same size as the original bitmap.  For a wireframe
+                    // visualization this means the bitmap will be the same size as the
+                    // generated thumbnail.
                     GifBitmapEncoder encoder = new GifBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(vis.CachedImage));
 

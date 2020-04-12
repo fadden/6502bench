@@ -21,6 +21,15 @@ using PluginCommon;
 namespace RuntimeData.Atari {
     /// <summary>
     /// Visualizer for Atari Analog Vector Generator commands.
+    ///
+    /// References:
+    ///  http://www.ionpool.net/arcade/atari_docs/avg.pdf
+    ///  https://www.jmargolin.com/vgens/vgcmd.pdf
+    ///  http://www.brouhaha.com/~eric/software/vecsim/
+    ///
+    /// https://github.com/mamedev/mame/blob/master/src/mame/video/avgdvg.cpp is the
+    /// definitive description, but it's harder to parse than the above (it's emulating
+    /// the hardware at a lower level).
     /// </summary>
     public class VisAVG : MarshalByRefObject, IPlugin, IPlugin_Visualizer_v2 {
         // IPlugin
@@ -180,9 +189,12 @@ namespace RuntimeData.Atari {
                             }
                             break;
                         case Opcode.STAT:   // 0110-EHO IIIICCCC
+                            // Note this is different for e.g. Star Wars: 0110-RGB ZZZZZZZZ
                             ii = (code0 >> 4) & 0x0f;
                             break;
                         case Opcode.SCAL:   // 0111-BBB LLLLLLLL
+                            // Binary scaling adjusts vector drawing time, linear scaling does
+                            // not.  (Does this affect the intensity?)
                             int bs = (code0 >> 8) & 0x07;
                             int ls = code0 & 0xff;
                             scale = (16384 - (ls << 6)) >> bs;
@@ -192,7 +204,7 @@ namespace RuntimeData.Atari {
                             curVertex = centerVertex;
                             break;
                         case Opcode.JSR:    // 101-AAAA AAAAAAAA
-                            vaddr = code0 & 0x0fff;
+                            vaddr = code0 & 0x0fff;     // spec says 12 bits, VECSIM uses 13
                             if (stackPtr == stack.Length) {
                                 mAppRef.ReportError("Stack overflow at +" + offset.ToString("x6"));
                                 return null;
@@ -210,7 +222,7 @@ namespace RuntimeData.Atari {
                             }
                             break;
                         case Opcode.JMP:    // 111-AAAA AAAAAAAA
-                            vaddr = code0 & 0x0fff;
+                            vaddr = code0 & 0x0fff;     // spec says 12 bits, VECSIM uses 13
                             if (!Branch(vaddr, baseAddr, ref offset)) {
                                 return null;
                             }
