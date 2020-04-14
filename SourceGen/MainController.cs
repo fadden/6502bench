@@ -4187,7 +4187,7 @@ namespace SourceGen {
             string basPathName = Path.GetFullPath(fileDlg.FileName);
             try {
                 data = File.ReadAllBytes(basPathName);
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 // not expecting this to happen
                 MessageBox.Show(ex.Message);
                 return;
@@ -4199,6 +4199,66 @@ namespace SourceGen {
             Tools.WpfGui.ShowText showTextDlg = new Tools.WpfGui.ShowText(mMainWin, html);
             showTextDlg.Title = "Applesoft to HTML";
             showTextDlg.ShowDialog();
+        }
+
+        public void Debug_ApplyEditCommands() {
+            OpenFileDialog fileDlg = new OpenFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_SGEC + "|" + Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+
+            string sgecPathName = Path.GetFullPath(fileDlg.FileName);
+            string[] lines;
+            try {
+                lines = File.ReadAllLines(sgecPathName);
+            } catch (IOException ex) {
+                // not expecting this to happen
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+            ChangeSet cs = new ChangeSet(1);
+
+            List<int> changed = new List<int>(lines.Length);
+
+            string setComment = "set-comment +";
+            foreach (string line in lines) {
+                if (!line.StartsWith(setComment)) {
+                    Debug.WriteLine("Ignoring " + line);
+                    continue;
+                }
+
+                int offset;
+                try {
+                    offset = Convert.ToInt32(line.Substring(setComment.Length, 6), 16);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Failed on " + line);
+                    MessageBox.Show(ex.Message);
+                    return;
+                }
+
+                if (changed.Contains(offset)) {
+                    Debug.WriteLine("Skipping repeated entry +" + offset.ToString("X6"));
+                    continue;
+                }
+
+                string oldComment = mProject.Comments[offset];
+                string newComment = line.Substring(setComment.Length + 7);
+                if (!string.IsNullOrEmpty(oldComment)) {
+                    Debug.WriteLine("Replacing comment +" + offset.ToString("x6") +
+                        " '" + oldComment + "'");
+                }
+
+                UndoableChange uc = UndoableChange.CreateCommentChange(offset,
+                    oldComment, newComment);
+                cs.Add(uc);
+                changed.Add(offset);
+            }
+
+            ApplyUndoableChanges(cs);
         }
 
         public void Debug_ApplyPlatformSymbols() {

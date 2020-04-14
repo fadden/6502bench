@@ -86,6 +86,8 @@ namespace SourceGen {
             }
         }
 
+        public bool VerboseDebug { get; set; }
+
         private bool mIs2d = false;
         private List<Vertex> mVertices = new List<Vertex>();
         private List<Vertex> mPoints = new List<Vertex>();
@@ -257,12 +259,14 @@ namespace SourceGen {
                 ref double ymin, ref double ymax) {
             if (vert.Vec.X < xmin) {
                 xmin = vert.Vec.X;
-            } else if (vert.Vec.X > xmax) {
+            }
+            if (vert.Vec.X > xmax) {
                 xmax = vert.Vec.X;
             }
             if (vert.Vec.Y < ymin) {
                 ymin = vert.Vec.Y;
-            } else if (vert.Vec.Y > ymax) {
+            }
+            if (vert.Vec.Y > ymax) {
                 ymax = vert.Vec.Y;
             }
         }
@@ -291,6 +295,11 @@ namespace SourceGen {
         ///   [-1,1].</returns>
         public List<LineSeg> Generate(int eulerX, int eulerY, int eulerZ,
                 bool doPersp, bool doBfc, bool doRecenter) {
+            if (VerboseDebug) {
+                Debug.WriteLine("Found center=" + mCenterAdjX + "," + mCenterAdjY);
+                Debug.WriteLine("  bigMag=" + mBigMag + " / " + mBigMagRc);
+            }
+
             // overrule flags that don't make sense
             if (mIs2d) {
                 doPersp = doBfc = false;

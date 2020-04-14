@@ -41,7 +41,7 @@ namespace RuntimeData.Atari {
         private AddressTranslate mAddrTrans;
 
         // Visualization identifiers; DO NOT change or projects that use them will break.
-        private const string VIS_GEN_AVG = "atari-avg";
+        private const string VIS_GEN_AVG = "atari-avg-bz";  // Battlezone, Red Baron
 
         private const string P_OFFSET = "offset";
         private const string P_BASE_ADDR = "baseAddr";
@@ -55,7 +55,7 @@ namespace RuntimeData.Atari {
                     new VisParamDescr("Base address",
                         P_BASE_ADDR, typeof(int), 0x0000, 0xffff, 0, 0x2000),
 
-                    VisWireframe.Param_IsRecentered("Re-center", true),
+                    VisWireframe.Param_IsRecentered("Centered", true),
                 }),
         };
 
@@ -274,6 +274,13 @@ namespace RuntimeData.Atari {
             return (short)val13 >> 3;
         }
 
+        /// <summary>
+        /// Converts a JSR/JMP operand to a file offset.
+        /// </summary>
+        /// <param name="vaddr">AVG address operand.</param>
+        /// <param name="baseAddr">Base address of vector memory.</param>
+        /// <param name="offset">File offset of instruction.</param>
+        /// <returns>False if the target address is outside the file bounds.</returns>
         private bool Branch(int vaddr, int baseAddr, ref int offset) {
             int fileAddr = baseAddr + vaddr * 2;
             int fileOffset = mAddrTrans.AddressToOffset(offset, fileAddr);

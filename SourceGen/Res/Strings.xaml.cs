@@ -161,6 +161,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_FileFilterDis65");
         public static string FILE_FILTER_HTML =
             (string)Application.Current.FindResource("str_FileFilterHtml");
+        public static string FILE_FILTER_SGEC =
+            (string)Application.Current.FindResource("str_FileFilterSgec");
         public static string FILE_FILTER_SYM65 =
             (string)Application.Current.FindResource("str_FileFilterSym65");
         public static string FILE_FILTER_TEXT =
