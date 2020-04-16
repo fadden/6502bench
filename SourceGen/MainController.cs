@@ -2708,7 +2708,7 @@ namespace SourceGen {
             LocalVariableLookup lvLookup = new LocalVariableLookup(mProject.LvTables, mProject,
                 null, false, false);
             int varOffset = lvLookup.GetDefiningTableOffset(offset, symRef);
-            if (varOffset <= 0) {
+            if (varOffset < 0) {
                 Debug.WriteLine("Local variable not found; offset=" + offset + " ref=" + symRef);
                 return;
             }
