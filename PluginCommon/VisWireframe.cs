@@ -190,6 +190,10 @@ namespace PluginCommon {
                 msg = "no vertices defined";
                 return false;
             }
+            if (mVerticesX.Count != mVerticesY.Count || mVerticesX.Count != mVerticesZ.Count) {
+                msg = "inconsistent vertex arrays";
+                return false;
+            }
 
             // check points
             foreach (int vi in mPoints) {
@@ -233,6 +237,10 @@ namespace PluginCommon {
                     msg = "zero-length normal";
                     return false;
                 }
+            }
+            if (mNormalsX.Count != mNormalsY.Count || mNormalsX.Count != mNormalsZ.Count) {
+                msg = "inconsistent normal arrays";
+                return false;
             }
 
             // check excluded vertices

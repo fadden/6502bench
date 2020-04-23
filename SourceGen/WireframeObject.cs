@@ -105,8 +105,15 @@ namespace SourceGen {
         /// Creates a new object from a wireframe visualization.
         /// </summary>
         /// <param name="visWire">Visualization object.</param>
-        /// <returns>New object.</returns>
+        /// <returns>New object, or null if visualization data fails validation.</returns>
         public static WireframeObject Create(IVisualizationWireframe visWire) {
+            if (!visWire.Validate(out string msg)) {
+                // Should not be here -- visualizer should have checked validation and
+                // reported an error.
+                Debug.WriteLine("Wireframe validation failed: " + msg);
+                return null;
+            }
+
             WireframeObject wireObj = new WireframeObject();
 
             wireObj.mIs2d = visWire.Is2d;
@@ -125,11 +132,6 @@ namespace SourceGen {
                 float[] normalsY = visWire.GetNormalsY();
                 float[] normalsZ = visWire.GetNormalsZ();
 
-                if (normalsX.Length != normalsY.Length || normalsX.Length != normalsZ.Length) {
-                    Debug.Assert(false);
-                    return null;
-                }
-
                 for (int i = 0; i < normalsX.Length; i++) {
                     wireObj.mFaces.Add(new Face(normalsX[i], normalsY[i], normalsZ[i]));
                 }
@@ -139,14 +141,6 @@ namespace SourceGen {
             float[] verticesY = visWire.GetVerticesY();
             float[] verticesZ = visWire.GetVerticesZ();
             int[] excludedVertices = visWire.GetExcludedVertices();
-            if (verticesX.Length == 0) {
-                Debug.Assert(false);
-                return null;
-            }
-            if (verticesX.Length != verticesY.Length || verticesX.Length != verticesZ.Length) {
-                Debug.Assert(false);
-                return null;
-            }
 
             // Compute min/max for X/Y for 2d re-centering.  The trick is that we only want
             // to use vertices that are visible.  If the shape starts with a huge move off to
@@ -173,11 +167,11 @@ namespace SourceGen {
                 int v0index = edges[i].Val0;
                 int v1index = edges[i].Val1;
 
-                if (v0index < 0 || v0index >= wireObj.mVertices.Count ||
-                        v1index < 0 || v1index >= wireObj.mVertices.Count) {
-                    Debug.Assert(false);
-                    return null;
-                }
+                //if (v0index < 0 || v0index >= wireObj.mVertices.Count ||
+                //        v1index < 0 || v1index >= wireObj.mVertices.Count) {
+                //    Debug.Assert(false);
+                //    return null;
+                //}
 
                 Vertex vert0 = wireObj.mVertices[v0index];
                 Vertex vert1 = wireObj.mVertices[v1index];
@@ -192,11 +186,11 @@ namespace SourceGen {
                 int vindex = vfaces[i].Val0;
                 int findex = vfaces[i].Val1;
 
-                if (vindex < 0 || vindex >= wireObj.mVertices.Count ||
-                        findex < 0 || findex >= wireObj.mFaces.Count) {
-                    Debug.Assert(false);
-                    return null;
-                }
+                //if (vindex < 0 || vindex >= wireObj.mVertices.Count ||
+                //        findex < 0 || findex >= wireObj.mFaces.Count) {
+                //    Debug.Assert(false);
+                //    return null;
+                //}
 
                 Face face = wireObj.mFaces[findex];
                 wireObj.mVertices[vindex].Faces.Add(face);
@@ -210,11 +204,11 @@ namespace SourceGen {
                 int eindex = efaces[i].Val0;
                 int findex = efaces[i].Val1;
 
-                if (eindex < 0 || eindex >= wireObj.mEdges.Count ||
-                        findex < 0 || findex >= wireObj.mFaces.Count) {
-                    Debug.Assert(false);
-                    return null;
-                }
+                //if (eindex < 0 || eindex >= wireObj.mEdges.Count ||
+                //        findex < 0 || findex >= wireObj.mFaces.Count) {
+                //    Debug.Assert(false);
+                //    return null;
+                //}
 
                 Face face = wireObj.mFaces[findex];
                 wireObj.mEdges[eindex].Faces.Add(face);

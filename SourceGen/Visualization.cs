@@ -203,7 +203,11 @@ namespace SourceGen {
             } else {
                 Debug.Assert(parms != null);
                 WireframeObject wireObj = WireframeObject.Create(visWire);
-                CachedImage = GenerateWireframeImage(wireObj, THUMBNAIL_DIM, parms);
+                if (wireObj != null) {
+                    CachedImage = GenerateWireframeImage(wireObj, THUMBNAIL_DIM, parms);
+                } else {
+                    CachedImage = BROKEN_IMAGE;
+                }
             }
             Debug.Assert(CachedImage.IsFrozen);
         }

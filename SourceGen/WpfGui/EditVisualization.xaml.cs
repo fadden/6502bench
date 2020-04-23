@@ -591,15 +591,9 @@ namespace SourceGen.WpfGui {
                         LastPluginMessage = ex.Message;
                     }
                 }
+                bool failed = false;
                 if (vis2d == null && visWire == null) {
-                    previewImage.Source = sBadParamsImage;
-                    if (!string.IsNullOrEmpty(LastPluginMessage)) {
-                        // Report the last message we got as an error.
-                        PluginErrMessage = LastPluginMessage;
-                    } else {
-                        PluginErrMessage = (string)FindResource("str_VisGenFailed");
-                    }
-                    IsValid = false;
+                    failed = true;
                 } else if (vis2d != null) {
                     previewGrid.Background = null;
                     previewImage.Source = Visualization.ConvertToBitmapSource(vis2d);
@@ -609,15 +603,31 @@ namespace SourceGen.WpfGui {
 
                     mThumbnail = (BitmapSource)previewImage.Source;
                 } else {
-                    previewGrid.Background = Brushes.Black;
-                    previewImage.Source = Visualization.BLANK_IMAGE;
-                    double dim = Math.Floor(
-                        Math.Min(previewGrid.ActualWidth, previewGrid.ActualHeight));
                     WireframeObject wireObj = WireframeObject.Create(visWire);
-                    wireframePath.Data = Visualization.GenerateWireframePath(wireObj, dim, parms);
-                    BitmapDimensions = "n/a";
+                    if (wireObj != null) {
+                        previewGrid.Background = Brushes.Black;
+                        previewImage.Source = Visualization.BLANK_IMAGE;
+                        double dim = Math.Floor(
+                            Math.Min(previewGrid.ActualWidth, previewGrid.ActualHeight));
+                        wireframePath.Data =
+                            Visualization.GenerateWireframePath(wireObj, dim, parms);
+                        BitmapDimensions = "n/a";
 
-                    mWireObj = wireObj;
+                        mWireObj = wireObj;
+                    } else {
+                        failed = true;
+                    }
+                }
+                if (failed) {
+                    previewImage.Source = sBadParamsImage;
+                    if (!string.IsNullOrEmpty(LastPluginMessage)) {
+                        // Report the last message we got as an error.
+                        PluginErrMessage = LastPluginMessage;
+                    } else {
+                        // Generic failure message.
+                        PluginErrMessage = (string)FindResource("str_VisGenFailed");
+                    }
+                    IsValid = false;
                 }
             }
 

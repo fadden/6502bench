@@ -369,6 +369,8 @@ namespace PluginCommon {
         IntPair[] GetEdgeFaces();
         int[] GetExcludedVertices();
         int[] GetExcludedEdges();
+
+        bool Validate(out string msg);
     }
 
     /// <summary>
