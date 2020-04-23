@@ -1192,7 +1192,7 @@ namespace SourceGen.WpfGui {
         }
 
         private void EditProjectSymbolCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.EditProjectSymbol();
+            mMainCtrl.EditProjectSymbol(MainController.CodeListColumn.Label);
         }
 
         private void EditStatusFlagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

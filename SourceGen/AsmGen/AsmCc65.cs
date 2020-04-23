@@ -722,6 +722,13 @@ namespace SourceGen.AsmGen {
                     if (!mHighAsciiMacroOutput) {
                         mHighAsciiMacroOutput = true;
                         // Output a macro for high-ASCII strings.
+                        //
+                        // TODO(maybe): the preferred way to do this is apparently
+                        // ".macpack apple2" to load some standard macros, then e.g.
+                        // scrcode "My high-ASCII string".  The macro takes 9 arguments and
+                        // recognizes characters and numbers, so it should be possible to
+                        // mix strings, string delimiters, and control chars so long as the
+                        // argument count is not exceeded.
                         OutputLine(".macro", "HiAscii", "Arg", string.Empty);
                         OutputLine(string.Empty, ".repeat", ".strlen(Arg), I", string.Empty);
                         OutputLine(string.Empty, ".byte", ".strat(Arg, I) | $80", string.Empty);

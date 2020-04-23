@@ -1541,7 +1541,10 @@ namespace SourceGen {
                                     sym.SymbolSource == Symbol.Source.Platform) {
                                 DefSymbol defSym = sym as DefSymbol;
                                 int adj = 0;
-                                Debug.Assert(operandOffset < 0);    // outside file scope
+                                // NOTE: operandOffset may be valid, since you are allowed to
+                                // define project symbols for addresses inside the file.  I
+                                // don't think we need to fiddle with that though.
+                                //Debug.Assert(operandOffset < 0);
                                 if (sym.SymbolType != Symbol.Type.Constant &&
                                         attr.OperandAddress >= 0) {
                                     // It's an address operand, so we can compute the offset.

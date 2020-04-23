@@ -34,6 +34,14 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public DefSymbol NewSym { get; private set; }
 
+        public enum InputField {
+            Unknown = 0, Label, Value, Comment
+        }
+        /// <summary>
+        /// Determines which field gets focus initially.
+        /// </summary>
+        public InputField InitialFocusField { get; set; }
+
         /// <summary>
         /// Set to true when all fields are valid.  Controls whether the OK button is enabled.
         /// </summary>
@@ -234,8 +242,21 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
-            labelTextBox.SelectAll();
-            labelTextBox.Focus();
+            TextBox field;
+            switch (InitialFocusField) {
+                case InputField.Value:
+                    field = valueTextBox;
+                    break;
+                case InputField.Comment:
+                    field = commentTextBox;
+                    break;
+                case InputField.Label:
+                default:
+                    field = labelTextBox;
+                    break;
+            }
+            field.SelectAll();
+            field.Focus();
         }
 
         /// <summary>

@@ -1495,7 +1495,7 @@ namespace SourceGen {
                     // Currently only does something for project symbols; platform symbols
                     // do nothing.
                     if (CanEditProjectSymbol()) {
-                        EditProjectSymbol();
+                        EditProjectSymbol((CodeListColumn)col);
                     }
                     break;
                 case LineListGen.Line.Type.OrgDirective:
@@ -2203,7 +2203,7 @@ namespace SourceGen {
             return (defSym.SymbolSource == Symbol.Source.Project);
         }
 
-        public void EditProjectSymbol() {
+        public void EditProjectSymbol(CodeListColumn col) {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int symIndex = LineListGen.DefSymIndexFromOffset(CodeLineList[selIndex].FileOffset);
             DefSymbol origDefSym = mProject.ActiveDefSymbolList[symIndex];
@@ -2211,6 +2211,20 @@ namespace SourceGen {
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mFormatter,
                 mProject.ProjectProps.ProjectSyms, origDefSym, null);
+
+            switch (col) {
+                case CodeListColumn.Operand:
+                    dlg.InitialFocusField = EditDefSymbol.InputField.Value;
+                    break;
+                case CodeListColumn.Comment:
+                    dlg.InitialFocusField = EditDefSymbol.InputField.Comment;
+                    break;
+                case CodeListColumn.Label:
+                default:
+                    dlg.InitialFocusField = EditDefSymbol.InputField.Label;
+                    break;
+            }
+
             if (dlg.ShowDialog() == true) {
                 ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
                 newProps.ProjectSyms.Remove(origDefSym.Label);

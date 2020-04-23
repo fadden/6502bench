@@ -72,7 +72,7 @@ limitations under the License.
 
         <TextBlock Grid.Column="0" Grid.Row="2" Text="Value:"/>
         <StackPanel Grid.Column="1" Grid.Row="2" VerticalAlignment="Top" Margin="0,0,0,16">
-            <TextBox Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Name="valueTextBox" Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"
                      IsReadOnly="{Binding ReadOnlyValueAndType}"/>
             <TextBlock Name="varValueRangeLabel" Text="• Value between 0-255, including width" Margin="0,4,0,0"
@@ -97,7 +97,7 @@ limitations under the License.
 
         <TextBlock Grid.Column="0" Grid.Row="4" Text="Comment:" Margin="0,0,8,0"/>
         <StackPanel Grid.Column="1" Grid.Row="4" Margin="0,0,0,16">
-            <TextBox Margin="0,1,0,0" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Name="commentTextBox" Margin="0,1,0,0" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}" ScrollViewer.CanContentScroll="True"/>
             <TextBlock Text="• Optional" Margin="0,4,0,0"/>
         </StackPanel>
