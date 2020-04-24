@@ -219,50 +219,57 @@ _L10F2  lda     #$00
         .byte   $00
         .byte   $dc
 
-_L10FA  clc
+_L10FA  lda     #$ff
+        lsr     a
+        bpl     _L1101
+
+        .byte   $00
+        .byte   $dd
+
+_L1101  clc
         php
         sec
         plp
-        bcc     _L1102
+        bcc     _L1109
 
         .byte   $00
         .byte   $00
 
-_L1102  sec
-        bcs     _L1106
+_L1109  sec
+        bcs     _L110D
 
-_L1105  clc
-_L1106  lda     $33
-        beq     _L1105
-        bcs     _L110E
+_L110C  clc
+_L110D  lda     $33
+        beq     _L110C
+        bcs     _L1115
         lda     $44
-_L110E  nop
+_L1115  nop
         rep     #$20
         .al
         sep     #$10
-        jsr     _L112A
+        jsr     _L1131
         rep     #$30
         .xl
-        jsr     _L1130
+        jsr     _L1137
         sep     #$30
         .as
         .xs
-        jsr     _L1130
+        jsr     _L1137
         rep     #$20
         .al
         sep     #$10
-        jsr     _L112A
+        jsr     _L1131
         sep     #$30
         .as
         rts
 
         .al
-_L112A  lda     #$1234
+_L1131  lda     #$1234
         ldx     #$ff
         rts
 
         .as
-_L1130  lda     #$ff
+_L1137  lda     #$ff
         ldx     #$ee
         ldy     #$dd
         rts

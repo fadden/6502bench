@@ -195,6 +195,13 @@ ok_ror2
         brk     $dc
 ok_rol1
 
+; check lsr
+        lda     #$ff
+        lsr     A           ;lsr always clears the high bit
+        bpl     ok_lsr
+        brk     $dd
+ok_lsr
+
 ; simple php/plp pair test
         clc
         php

@@ -709,6 +709,12 @@ namespace Asm65 {
             }
             return flags;
         }
+        private static StatusFlags FlagUpdater_LSR(StatusFlags flags, int immVal,
+                ref StatusFlags condBranchTakenFlags) {
+            flags.C = flags.Z = TriState16.INDETERMINATE;
+            flags.N = 0;    // always shifts 0 into high bit
+            return flags;
+        }
         private static StatusFlags FlagUpdater_ROL(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
             // this rotates the N flag into C, so set C=N
@@ -1152,7 +1158,7 @@ namespace Asm65 {
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.ReadModifyWrite,
             FlagsAffected = FlagsAffected_NZC,
-            StatusFlagUpdater = FlagUpdater_NZC
+            StatusFlagUpdater = FlagUpdater_LSR
         };
         private static OpDef OpMVN = new OpDef() {
             Mnemonic = OpName.MVN,

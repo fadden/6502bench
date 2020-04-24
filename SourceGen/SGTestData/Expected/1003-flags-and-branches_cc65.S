@@ -220,50 +220,57 @@ L105F:   sep     #$80
          .byte   $00
          .byte   $dc
 
-@L10FA:  clc
+@L10FA:  lda     #$ff
+         lsr     A
+         bpl     @L1101
+
+         .byte   $00
+         .byte   $dd
+
+@L1101:  clc
          php
          sec
          plp
-         bcc     @L1102
+         bcc     @L1109
 
          .byte   $00
          .byte   $00
 
-@L1102:  sec
-         bcs     @L1106
+@L1109:  sec
+         bcs     @L110D
 
-@L1105:  clc
-@L1106:  lda     $33
-         beq     @L1105
-         bcs     @L110E
+@L110C:  clc
+@L110D:  lda     $33
+         beq     @L110C
+         bcs     @L1115
          lda     $44
-@L110E:  nop
+@L1115:  nop
          rep     #$20
          .a16
          sep     #$10
-         jsr     @L112A
+         jsr     @L1131
          rep     #$30
          .i16
-         jsr     @L1130
+         jsr     @L1137
          sep     #$30
          .a8
          .i8
-         jsr     @L1130
+         jsr     @L1137
          rep     #$20
          .a16
          sep     #$10
-         jsr     @L112A
+         jsr     @L1131
          sep     #$30
          .a8
          rts
 
          .a16
-@L112A:  lda     #$1234
+@L1131:  lda     #$1234
          ldx     #$ff
          rts
 
          .a8
-@L1130:  lda     #$ff
+@L1137:  lda     #$ff
          ldx     #$ee
          ldy     #$dd
          rts
