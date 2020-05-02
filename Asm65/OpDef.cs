@@ -237,6 +237,22 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// True for instructions that index off of the operand.  The goal is to identify
+        /// instructions like "LDA $1234,Y" that may not access the address specified by
+        /// their operand.  So "(dp,X)" returns true, but "(dp),Y" does not.
+        /// </summary>
+        public bool IsIndexedAccessInstruction {
+            get {
+                return AddrMode == AddressMode.AbsIndexX ||
+                       AddrMode == AddressMode.AbsIndexXInd ||
+                       AddrMode == AddressMode.AbsIndexY ||
+                       AddrMode == AddressMode.DPIndexX ||
+                       AddrMode == AddressMode.DPIndexXInd ||
+                       AddrMode == AddressMode.DPIndexY;
+            }
+        }
+
+        /// <summary>
         /// True if the operand's width is uniquely determined by the opcode mnemonic, even
         /// if the operation supports operands with varying widths.
         /// 

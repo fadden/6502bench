@@ -70,23 +70,31 @@ namespace SourceGen {
             public Asm65.OpDef.MemoryEffect AccType { get; private set; }
 
             /// <summary>
+            /// For Type==MemAccessOp, true if the instruction applies an index offset, to
+            /// the operand, meaning the referenced address might not actually be accessed.
+            /// </summary>
+            public bool IsIndexedAccess { get; private set; }
+
+            /// <summary>
             /// Adjustment to symbol.  For example, "LDA label+2" adds an xref entry to
             /// "label", with an adjustment of +2.
             /// </summary>
             public int Adjustment { get; private set; }
 
             public Xref(int offset, bool isByName, XrefType type,
-                    Asm65.OpDef.MemoryEffect accType, int adjustment) {
+                    Asm65.OpDef.MemoryEffect accType, bool isIndexedAccess, int adjustment) {
                 Offset = offset;
                 IsByName = isByName;
                 Type = type;
                 AccType = accType;
+                IsIndexedAccess = isIndexedAccess;
                 Adjustment = adjustment;
             }
 
             public override string ToString() {
                 return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsByName +
-                    " type=" + Type + " accType= " + AccType + " adj=" + Adjustment;
+                    " type=" + Type + " accType= " + AccType + " idx=" + IsIndexedAccess +
+                    " adj=" + Adjustment;
             }
         }
 

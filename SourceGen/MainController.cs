@@ -3513,6 +3513,7 @@ namespace SourceGen {
             for (int i = 0; i < xrefs.Count; i++) {
                 XrefSet.Xref xr = xrefs[i];
 
+                string idxStr = string.Empty;
                 string typeStr;
                 switch (xr.Type) {
                     case XrefSet.XrefType.SubCallOp:
@@ -3544,6 +3545,9 @@ namespace SourceGen {
                                 typeStr = "??! ";
                                 break;
                         }
+                        if (xr.IsIndexedAccess) {
+                            idxStr = "idx ";
+                        }
                         break;
                     default:
                         Debug.Assert(false);
@@ -3554,7 +3558,7 @@ namespace SourceGen {
                 MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(xr.Offset,
                     formatter.FormatOffset24(xr.Offset),
                     formatter.FormatAddress(mProject.GetAnattrib(xr.Offset).Address, showBank),
-                    (xr.IsByName ? "Sym " : "Oth ") + typeStr +
+                    (xr.IsByName ? "Sym " : "Oth ") + typeStr + idxStr +
                         formatter.FormatAdjustment(-xr.Adjustment));
 
                 mMainWin.ReferencesList.Add(rli);

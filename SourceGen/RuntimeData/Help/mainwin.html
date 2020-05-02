@@ -256,6 +256,9 @@ data operand, and provides an indication of the nature of the reference:</p>
   <li>data - reference to address by data
     (e.g. <code>.DD2 addr</code>)</li>
 </ul>
+<p>References from instructions that use indexed addressing
+(e.g. <code>LDA addr,Y</code>) will also show "idx" to indicate that
+the instruction is using the location as a base address.</p>
 <p>This will be prefixed with "Sym" or "Oth" to indicate whether or not
 the reference used the label at the current address.  To understand
 this, consider that addresses can be referenced in different ways.

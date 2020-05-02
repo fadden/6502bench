@@ -1484,6 +1484,7 @@ namespace SourceGen {
 
                 XrefSet.XrefType xrefType = XrefSet.XrefType.Unknown;
                 OpDef.MemoryEffect accType = OpDef.MemoryEffect.Unknown;
+                bool isIndexedDirect = false;
                 if (attr.IsInstruction) {
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
                     if (op.IsSubroutineCall) {
@@ -1493,6 +1494,7 @@ namespace SourceGen {
                     } else {
                         xrefType = XrefSet.XrefType.MemAccessOp;
                         accType = op.MemEffect;
+                        isIndexedDirect = op.IsIndexedAccessInstruction;
                     }
                 } else if (attr.IsData || attr.IsInlineData) {
                     xrefType = XrefSet.XrefType.RefFromData;
@@ -1520,8 +1522,8 @@ namespace SourceGen {
                                     mAnattribs[operandOffset].Address;
                             }
 
-                            AddXref(symOffset,
-                                new XrefSet.Xref(offset, true, xrefType, accType, adj));
+                            AddXref(symOffset, new XrefSet.Xref(offset, true, xrefType, accType,
+                                isIndexedDirect, adj));
                             if (adj == 0) {
                                 hasZeroOffsetSym = true;
                             }
@@ -1532,8 +1534,8 @@ namespace SourceGen {
                                 if (operandOffset >= 0) {
                                     adj = defSym.Value - operandOffset;
                                 }
-                                defSym.Xrefs.Add(
-                                    new XrefSet.Xref(offset, true, xrefType, accType, adj));
+                                defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, accType,
+                                    isIndexedDirect, adj));
                             }
                         } else if (SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
                             // Is this a reference to a project/platform symbol?
@@ -1559,8 +1561,8 @@ namespace SourceGen {
                                     // e.g. "LDA #>BLAH" would grab the high part.  We'd need
                                     // to tweak the adjustment math appropriately.
                                 }
-                                defSym.Xrefs.Add(
-                                    new XrefSet.Xref(offset, true, xrefType, accType, adj));
+                                defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, accType,
+                                    isIndexedDirect, adj));
                             } else {
                                 // Can get here if somebody creates an address operand symbol
                                 // that refers to a local variable.
@@ -1599,8 +1601,8 @@ namespace SourceGen {
                         } else {
                             Debug.WriteLine("HEY: found unlabeled addr ref at +" +
                                 offset.ToString("x6"));
-                            AddXref(targetOffset,
-                                new XrefSet.Xref(offset, false, xrefType, accType, 0));
+                            AddXref(targetOffset, new XrefSet.Xref(offset, false, xrefType,
+                                accType, isIndexedDirect, 0));
                         }
                     }
 
@@ -1609,8 +1611,8 @@ namespace SourceGen {
                     // just leave a duplicate entry.  (The symbolic ref wins because we need
                     // it for the label localizer and possibly the label refactorer.)
                     if (!hasZeroOffsetSym && attr.IsInstructionStart && attr.OperandOffset >= 0) {
-                        AddXref(attr.OperandOffset,
-                            new XrefSet.Xref(offset, false, xrefType, accType, 0));
+                        AddXref(attr.OperandOffset, new XrefSet.Xref(offset, false, xrefType,
+                            accType, isIndexedDirect, 0));
                     }
                 }
 
