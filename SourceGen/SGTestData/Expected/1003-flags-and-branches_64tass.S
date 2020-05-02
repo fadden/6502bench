@@ -145,131 +145,140 @@ _L10A3  lda     #$ff
         .byte   $db
 
 _L10AB  lda     #$00
+        ldx     #$80
         and     #$ff
-        beq     _L10B3
+        beq     _L10B5
+        bne     _L10B5
+
+_L10B5  lda     #$ff
+        ldx     #$00
+        and     #$7f
+        beq     _L10BF
+        bne     _L10BF
+
+_L10BF  bpl     _L10C3
 
         .byte   $00
         .byte   $db
 
-_L10B3  lda     #$ff
-        and     #$7f
-        bne     _L10BB
+_L10C3  lda     #$ff
+        and     #$80
+        bmi     _L10CB
         brk
 
         .byte   $db
 
-_L10BB  bpl     _L10BF
+_L10CB  lda     #$00
+        ldx     #$80
+        bne     _L10D3
 
         .byte   $00
         .byte   $db
 
-_L10BF  lda     #$ff
-        and     #$80
-        bmi     _L10C7
+_L10D3  ora     #$00
+        beq     _L10D9
+        bne     _L10D9
+
+_L10D9  ora     #$01
+        bne     _L10DF
 
         .byte   $00
         .byte   $db
 
-_L10C7  lda     #$00
-        ora     #$00
-        beq     _L10CF
+_L10DF  lda     #$00
+        ldx     #$80
+        bmi     _L10E7
 
         .byte   $00
         .byte   $db
 
-_L10CF  ora     #$01
-        bne     _L10D5
+_L10E7  ora     #$7f
+        bpl     _L10EF
+        bmi     _L10EF
 
         .byte   $00
         .byte   $db
 
-_L10D5  lda     #$00
-        ora     #$7f
-        bpl     _L10DD
+_L10EF  ora     #$80
+        bmi     _L10F5
 
         .byte   $00
         .byte   $db
 
-_L10DD  ora     #$80
-        bmi     _L10E3
-
-        .byte   $00
-        .byte   $db
-
-_L10E3  lda     _L10E3
+_L10F5  lda     _L10F5
         sec
         ror     a
-        bmi     _L10EC
+        bmi     _L10FE
 
         .byte   $00
         .byte   $dc
 
-_L10EC  clc
+_L10FE  clc
         ror     a
-        bpl     _L10F2
+        bpl     _L1104
 
         .byte   $00
         .byte   $dc
 
-_L10F2  lda     #$00
+_L1104  lda     #$00
         sec
         rol     a
-        bne     _L10FA
+        bne     _L110C
 
         .byte   $00
         .byte   $dc
 
-_L10FA  lda     #$ff
+_L110C  lda     #$ff
         lsr     a
-        bpl     _L1101
+        bpl     _L1113
 
         .byte   $00
         .byte   $dd
 
-_L1101  clc
+_L1113  clc
         php
         sec
         plp
-        bcc     _L1109
+        bcc     _L111B
 
         .byte   $00
         .byte   $00
 
-_L1109  sec
-        bcs     _L110D
+_L111B  sec
+        bcs     _L111F
 
-_L110C  clc
-_L110D  lda     $33
-        beq     _L110C
-        bcs     _L1115
+_L111E  clc
+_L111F  lda     $33
+        beq     _L111E
+        bcs     _L1127
         lda     $44
-_L1115  nop
+_L1127  nop
         rep     #$20
         .al
         sep     #$10
-        jsr     _L1131
+        jsr     _L1143
         rep     #$30
         .xl
-        jsr     _L1137
+        jsr     _L1149
         sep     #$30
         .as
         .xs
-        jsr     _L1137
+        jsr     _L1149
         rep     #$20
         .al
         sep     #$10
-        jsr     _L1131
+        jsr     _L1143
         sep     #$30
         .as
         rts
 
         .al
-_L1131  lda     #$1234
+_L1143  lda     #$1234
         ldx     #$ff
         rts
 
         .as
-_L1137  lda     #$ff
+_L1149  lda     #$ff
         ldx     #$ee
         ldy     #$dd
         rts

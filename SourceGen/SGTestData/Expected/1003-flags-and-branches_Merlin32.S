@@ -140,130 +140,139 @@ L105F    sep   #$80
          dfb   $db
 
 :L10AB   lda   #$00
+         ldx   #$80
          and   #$ff
-         beq   :L10B3
+         beq   :L10B5
+         bne   :L10B5
+
+:L10B5   lda   #$ff
+         ldx   #$00
+         and   #$7f
+         beq   :L10BF
+         bne   :L10BF
+
+:L10BF   bpl   :L10C3
 
          dfb   $00
          dfb   $db
 
-:L10B3   lda   #$ff
-         and   #$7f
-         bne   :L10BB
+:L10C3   lda   #$ff
+         and   #$80
+         bmi   :L10CB
          brk
 
          dfb   $db
 
-:L10BB   bpl   :L10BF
+:L10CB   lda   #$00
+         ldx   #$80
+         bne   :L10D3
 
          dfb   $00
          dfb   $db
 
-:L10BF   lda   #$ff
-         and   #$80
-         bmi   :L10C7
+:L10D3   ora   #$00
+         beq   :L10D9
+         bne   :L10D9
+
+:L10D9   ora   #$01
+         bne   :L10DF
 
          dfb   $00
          dfb   $db
 
-:L10C7   lda   #$00
-         ora   #$00
-         beq   :L10CF
+:L10DF   lda   #$00
+         ldx   #$80
+         bmi   :L10E7
 
          dfb   $00
          dfb   $db
 
-:L10CF   ora   #$01
-         bne   :L10D5
+:L10E7   ora   #$7f
+         bpl   :L10EF
+         bmi   :L10EF
 
          dfb   $00
          dfb   $db
 
-:L10D5   lda   #$00
-         ora   #$7f
-         bpl   :L10DD
+:L10EF   ora   #$80
+         bmi   :L10F5
 
          dfb   $00
          dfb   $db
 
-:L10DD   ora   #$80
-         bmi   :L10E3
-
-         dfb   $00
-         dfb   $db
-
-:L10E3   lda   :L10E3
+:L10F5   lda   :L10F5
          sec
          ror   A
-         bmi   :L10EC
+         bmi   :L10FE
 
          dfb   $00
          dfb   $dc
 
-:L10EC   clc
+:L10FE   clc
          ror   A
-         bpl   :L10F2
+         bpl   :L1104
 
          dfb   $00
          dfb   $dc
 
-:L10F2   lda   #$00
+:L1104   lda   #$00
          sec
          rol   A
-         bne   :L10FA
+         bne   :L110C
 
          dfb   $00
          dfb   $dc
 
-:L10FA   lda   #$ff
+:L110C   lda   #$ff
          lsr   A
-         bpl   :L1101
+         bpl   :L1113
 
          dfb   $00
          dfb   $dd
 
-:L1101   clc
+:L1113   clc
          php
          sec
          plp
-         bcc   :L1109
+         bcc   :L111B
 
          dfb   $00
          dfb   $00
 
-:L1109   sec
-         bcs   :L110D
+:L111B   sec
+         bcs   :L111F
 
-:L110C   clc
-:L110D   lda   $33
-         beq   :L110C
-         bcs   :L1115
+:L111E   clc
+:L111F   lda   $33
+         beq   :L111E
+         bcs   :L1127
          lda   $44
-:L1115   nop
+:L1127   nop
          rep   #$20
          mx    %01
          sep   #$10
-         jsr   :L1131
+         jsr   :L1143
          rep   #$30
          mx    %00
-         jsr   :L1137
+         jsr   :L1149
          sep   #$30
          mx    %11
-         jsr   :L1137
+         jsr   :L1149
          rep   #$20
          mx    %01
          sep   #$10
-         jsr   :L1131
+         jsr   :L1143
          sep   #$30
          mx    %11
          rts
 
          mx    %01
-:L1131   lda   #$1234
+:L1143   lda   #$1234
          ldx   #$ff
          rts
 
          mx    %11
-:L1137   lda   #$ff
+:L1149   lda   #$ff
          ldx   #$ee
          ldy   #$dd
          rts

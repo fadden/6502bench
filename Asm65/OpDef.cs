@@ -667,12 +667,13 @@ namespace Asm65 {
         }
         private static StatusFlags FlagUpdater_ANDImm(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
-            // AND #00 --> Z=1, else if Z=0 then Z=?
-            // AND #7f --> N=0, else N=prev
+            // If we LDA #$81, LDX #$00, AND #$01, Z flag is clear (for us, Z=unknown).
+            // AND #00 --> Z=1, else Z=unknown
+            // AND #7f --> N=0, else N=unknown
             if (immVal == 0) {
                 flags.Z = 1;    // acc is now zero
-            } else if (flags.Z == 0) {
-                flags.Z = TriState16.INDETERMINATE; // acc *might* now be zero
+            } else {
+                flags.Z = TriState16.INDETERMINATE; // may or may not be zero
             }
             bool hiBitClear;
             if (immVal >= 0) {
@@ -685,15 +686,20 @@ namespace Asm65 {
             }
             if (hiBitClear) {
                 flags.N = 0;
+            } else {
+                flags.N = TriState16.INDETERMINATE;
             }
             return flags;
         }
         private static StatusFlags FlagUpdater_ORAImm(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
-            // ORA #00 --> Z=prev, else Z=0
-            // ORA #80 --> N=1, else N=prev
+            // If we LDA #$80, LDX #$00, ORA #$00, the N flag will be set (for us, N=unknown).
+            // ORA #00 --> Z=unknown, else Z=0
+            // ORA #80 --> N=1, else N=unknown
             if (immVal != 0) {
-                flags.Z = 0;
+                flags.Z = 0;    // acc is now nonzero
+            } else {
+                flags.Z = TriState16.INDETERMINATE; // may or may not be zero
             }
             bool hiBitSet;
             if (immVal >= 0) {
@@ -706,6 +712,8 @@ namespace Asm65 {
             }
             if (hiBitSet) {
                 flags.N = 1;
+            } else {
+                flags.N = TriState16.INDETERMINATE;
             }
             return flags;
         }

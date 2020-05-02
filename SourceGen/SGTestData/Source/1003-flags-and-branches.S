@@ -138,14 +138,16 @@ ok_neg
         brk     $db
 ok_andZ1
         lda     #$00
+        ldx     #$80
         and     #$ff
         beq     ok_andZ1A
-        brk     $db
+        bne     ok_andZ1A
 ok_andZ1A
         lda     #$ff
+        ldx     #$00
         and     #$7f
+        beq     ok_andZ0
         bne     ok_andZ0
-        brk     $db
 ok_andZ0
         bpl     ok_andN0
         brk     $db
@@ -158,17 +160,24 @@ ok_andN1
 
 ; check NZ flags set by immediate ORA
         lda     #$00
-        ora     #$00
-        beq     ok_oraZ1
+        ldx     #$80
+        bne     :next1
         brk     $db
+:next1  ora     #$00
+        beq     ok_oraZ1
+        bne     ok_oraZ1
 ok_oraZ1
         ora     #$01
         bne     ok_oraZ0
         brk     $db
 ok_oraZ0
         lda     #$00
-        ora     #$7f
-        bpl     ok_oraN0
+        ldx     #$80
+        bmi     :next2
+        brk     $db
+:next2  ora     #$7f        ;N-flag clear, but analyzer doesn't know
+        bpl     ok_oraN0    ;so both of these are considered viable
+        bmi     ok_oraN0
         brk     $db
 ok_oraN0
         ora     #$80
