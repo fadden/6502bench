@@ -87,7 +87,7 @@ limitations under the License.
                                  IsChecked="{Binding FormatBinary}"/>
                     <RadioButton GroupName="Main" Content="_ASCII (low or high) character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatAsciiAllowed}" IsChecked="{Binding FormatAscii}"/>
-                    <RadioButton GroupName="Main" Content="C64 _PETSCII character" Margin="0,2,0,0"
+                    <RadioButton GroupName="Main" Content="C64 PE_TSCII character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatPetsciiAllowed}" IsChecked="{Binding FormatPetscii}"/>
                     <RadioButton GroupName="Main" Content="C64 Sc_reen character" Margin="0,2,0,0"
                                  IsEnabled="{Binding IsFormatScreenCodeAllowed}" IsChecked="{Binding FormatScreenCode}"/>

@@ -101,7 +101,7 @@ limitations under the License.
                                  GroupName="Display" Content="_ASCII (low or high) character"
                                  Checked="SimpleDisplay_CheckedChanged"/>
                     <RadioButton Name="radioSimpleDataPetscii" Grid.Column="1" Grid.Row="1"
-                                 GroupName="Display" Content="C64 _PETSCII character" Margin="0,4,0,0"
+                                 GroupName="Display" Content="C64 PE_TSCII character" Margin="0,4,0,0"
                                  Checked="SimpleDisplay_CheckedChanged"/>
                     <RadioButton Name="radioSimpleDataScreenCode" Grid.Column="1" Grid.Row="2"
                                  GroupName="Display" Content="C64 S_creen character" Margin="0,4,0,0"
