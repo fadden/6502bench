@@ -18,9 +18,9 @@ PrintInlineDciString equ $013000
          strl  'string with length/2'
          jsl   PrintInlineDciString
          dci   'DCI string'
-         jsr   L10B5
-         jsr   L110F
-         jsr   L1108
+         jsr   L1800
+         jsr   L184F
+         jsr   L1848
          brk   $01
          dw    data01
          brk   $02
@@ -32,7 +32,7 @@ L1085    dfb   $a9
          dfb   $00
          sta   $ff
          dfb   $ea
-         rts
+         jmp   Next1
 
 PrintInline8String rts
 
@@ -61,23 +61,50 @@ data02   dw    :data03
          dfb   $80
 :data03  asc   "AllEight"
 
-L10B5    jsr   PrintInlineNullString ;split across address change
-         per   $802d
+NoCont   pla              ;split across address change
+         pla
+         rts
+
+L10BA    jsr   NoCont
+
+         dfb   $00
+         dfb   $80
+
+L10BF    jsr   NoCont
+
+         dfb   $00
+         dfb   $80
+
+Next1    jsr   L10BA
+         jsr   :L10CF
+         clc
+         jsr   L10BF
+         rts
+
+:L10CF   sec
+         jsr   L10BF
+         rts
+
+         ds    300
+
+         org   $1800
+L1800    jsr   PrintInlineNullString
+         per   $8778
          rtl
 
          dfb   $65
          dfb   $6e
          dfb   $20
          dfb   $01
-         org   $1100
+         org   $1840
          asc   'string'
          dfb   $00
          dfb   $60
 
-L1108    jsl   PrintInlineL2String
+L1848    jsl   PrintInlineL2String
          asl   A
          brk   $60
 
-L110F    jsr   PrintInlineNullString
+L184F    jsr   PrintInlineNullString
          adc   $6e
          dfb   $64

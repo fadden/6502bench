@@ -19,6 +19,8 @@ namespace RuntimeData.Test2022 {
         private int mInlineL2StringAddr;        // jsl
         private int mInlineDciStringAddr;       // jsl
 
+        private int mNoContAddr;                // jsr
+
         public string Identifier {
             get {
                 return "Test 2022-extension-scripts A";
@@ -57,6 +59,9 @@ namespace RuntimeData.Test2022 {
                         break;
                     case "PrintInlineDciString":
                         mInlineDciStringAddr = sym.Value;
+                        break;
+                    case "NoCont":
+                        mNoContAddr = sym.Value;
                         break;
                 }
             }
@@ -101,6 +106,8 @@ namespace RuntimeData.Test2022 {
                 }
                 mAppRef.SetInlineDataFormat(offset + 3, nullOff - (offset + 3) + 1,
                     DataType.StringNullTerm, DataSubType.Ascii, null);
+            } else if (operand == mNoContAddr) {
+                noContinue = true;
             }
         }
 

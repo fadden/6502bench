@@ -690,11 +690,11 @@ namespace SourceGen {
                     }
                 }
 
-                if (!doContinue) {
-                    mAnattribs[offset].DoesNotContinue = true;
+                mAnattribs[offset].NoContinue = !doContinue;
+                if (mAnattribs[offset].DoesNotContinue) {
+                    // If we just decided not to continue, or an extension script set a flag
+                    // on a previous visit, stop scanning forward.
                     break;
-                } else {
-                    mAnattribs[offset].DoesNotContinue = false;
                 }
 
                 // Sanity check to avoid infinite loop.
@@ -710,14 +710,15 @@ namespace SourceGen {
                     break;
                 }
 
-                // On first visit, check for JSR/JSL inline call.
+                // On first visit, check for JSR/JSL inline call.  If it's "no-continue",
+                // set a flag and halt here.
                 if (firstVisit) {
                     // Currently ignoring OpDef.OpJSR_AbsIndexXInd
                     if (op == OpDef.OpJSR_Abs || op == OpDef.OpJSR_AbsLong) {
                         bool noContinue = CheckForInlineCall(op, offset, false);
                         if (noContinue) {
                             LogD(offset, "Script declared inline call no-continue");
-                            mAnattribs[offset].DoesNotContinue = true;
+                            mAnattribs[offset].NoContinueScript = true;
                             break;
                         }
                     }

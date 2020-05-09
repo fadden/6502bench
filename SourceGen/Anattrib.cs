@@ -41,6 +41,7 @@ namespace SourceGen {
             ExternalBranch = 1 << 10,   // this abs/rel branch lands outside input file
 
             NoContinue = 1 << 12,       // execution does not continue to following instruction
+            NoContinueScript = 1 << 13, // no-continue flag set by extension script
 
             Visited = 1 << 16,          // has the analyzer visited this byte?
             Changed = 1 << 17,          // set/cleared as the analyzer works
@@ -148,16 +149,28 @@ namespace SourceGen {
                 }
             }
         }
-        public bool DoesNotContinue {
-            get {
-                return (mAttribFlags & AttribFlags.NoContinue) != 0;
-            }
+        public bool NoContinue {
             set {
                 if (value) {
                     mAttribFlags |= AttribFlags.NoContinue;
                 } else {
                     mAttribFlags &= ~AttribFlags.NoContinue;
                 }
+            }
+        }
+        public bool NoContinueScript {
+            set {
+                if (value) {
+                    mAttribFlags |= AttribFlags.NoContinueScript;
+                } else {
+                    mAttribFlags &= ~AttribFlags.NoContinueScript;
+                }
+            }
+        }
+        public bool DoesNotContinue {
+            get {
+                return (mAttribFlags & AttribFlags.NoContinue) != 0 ||
+                       (mAttribFlags & AttribFlags.NoContinueScript) != 0;
             }
         }
         public bool DoesNotBranch {

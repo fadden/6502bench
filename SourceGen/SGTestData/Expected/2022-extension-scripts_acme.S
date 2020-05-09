@@ -21,9 +21,9 @@ PrintInlineDciString = $013000
         !text   $14,$00,"string with length/2"
         jsl     PrintInlineDciString
         !text   "DCI strin",$e7
-        jsr     L10B5
-        jsr     L110F
-        jsr     L1108
+        jsr     L1800
+        jsr     L184F
+        jsr     L1848
         !byte   $00,$01
         !word   data01
         !byte   $00,$02
@@ -35,7 +35,7 @@ L1085   !byte   $a9
         !byte   $00
         sta     $ff
         !byte   $ea
-        rts
+        jmp     Next1
 
 PrintInline8String rts
 
@@ -66,24 +66,52 @@ data02  !word   @data03
 @data03 !text   "AllEight"
         }
 
-L10B5   jsr     PrintInlineNullString ;split across address change
-        per     $802d
+NoCont  pla                ;split across address change
+        pla
+        rts
+
+L10BA   jsr     NoCont
+
+        !byte   $00
+        !byte   $80
+
+L10BF   jsr     NoCont
+
+        !byte   $00
+        !byte   $80
+
+Next1   jsr     L10BA
+        jsr     @L10CF
+        clc
+        jsr     L10BF
+        rts
+
+@L10CF  sec
+        jsr     L10BF
+        rts
+
+        !fill   300,$00
+
+        !pseudopc $1800 {
+L1800   jsr     PrintInlineNullString
+        per     $8778
         rtl
 
         !byte   $65
         !byte   $6e
         !byte   $20
         !byte   $01
-        !pseudopc $1100 {
+        } ;!pseudopc
+        !pseudopc $1840 {
         !text   "string"
         !byte   $00
         !byte   $60
 
-L1108   jsl     PrintInlineL2String
+L1848   jsl     PrintInlineL2String
         asl
         !byte   $00,$60
 
-L110F   jsr     PrintInlineNullString
+L184F   jsr     PrintInlineNullString
         adc     $6e
         !byte   $64
         } ;!pseudopc

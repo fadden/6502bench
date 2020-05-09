@@ -66,7 +66,7 @@ edge1   dfb     $a9                     ;2: LDA imm
         dfb     $ff                     ;1: address $eaff
         nop                             ;2:
 
-        rts
+        jmp     Next1
 
 PrintInline8String    rts               ;EDIT: set label
 PrintInlineRev8String rts               ;EDIT: set label
@@ -93,10 +93,50 @@ data03                                  ;EDIT: set label
         asc     "AllEight"
 
 
+;
+; The analyzer is trying to avoid calling the inline JSR check on code it
+; has previously visited.  There was a bug that caused us to lose the
+; no-continue value if code was revisited.
+;
+; To ensure we revisit the function, we need to call it, then call
+; something else that calls it, changing up the flags.
+;
+
+NoCont  pla
+        pla
+        rts
+
+TestNC1 jsr     NoCont
+        dfb     $00,$80
+TestNC2 jsr     NoCont
+        dfb     $00,$80
+
+Next1   jsr     TestNC1
+
+        jsr     PushThing
+        clc
+        jsr     TestNC2
+        rts
+
+PushThing
+        sec
+        jsr     TestNC2
+        rts
+
+
+; Failed call tests.  Some of these need to be at the end of the file.
+; We use an align directive to ensure their offsets don't change as we
+; update stuff earlier in the file.
+        ds      \
+        ds      256
+
+
+        org     $1800
+
 ; check address split across string
 broken  jsr     PrintInlineNullString
         asc     'broken ',01
-        org     $1100                   ;EDIT: split address
+        org     $1840                   ;EDIT: split address
         asc     'string',00
         rts
 

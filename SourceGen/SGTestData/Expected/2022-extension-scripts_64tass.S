@@ -25,9 +25,9 @@ PrintInlineDciString = $013000
         .text   $14,$00,"string with length/2"
         jsl     PrintInlineDciString
         .shift  "DCI string"
-        jsr     L10B5
-        jsr     L110F
-        jsr     L1108
+        jsr     L1800
+        jsr     L184F
+        jsr     L1848
         brk     #$01
         .word   data01
         brk     #$02
@@ -39,7 +39,7 @@ L1085   .byte   $a9
         .byte   $00
         sta     $ff
         .byte   $ea
-        rts
+        jmp     Next1
 
 PrintInline8String rts
 
@@ -69,25 +69,53 @@ data02  .word   _data03
         .enc    sg_hiascii
 _data03 .text   "AllEight"
 
-L10B5   jsr     PrintInlineNullString ;split across address change
-        per     $802d
+NoCont  pla                ;split across address change
+        pla
+        rts
+
+L10BA   jsr     NoCont
+
+        .byte   $00
+        .byte   $80
+
+L10BF   jsr     NoCont
+
+        .byte   $00
+        .byte   $80
+
+Next1   jsr     L10BA
+        jsr     _L10CF
+        clc
+        jsr     L10BF
+        rts
+
+_L10CF  sec
+        jsr     L10BF
+        rts
+
+        .fill   300,$00
+
+        .logical $1800
+L1800   jsr     PrintInlineNullString
+        per     $8778
         rtl
 
         .byte   $65
         .byte   $6e
         .byte   $20
         .byte   $01
-        .logical $1100
+        .here
+        .logical $1840
         .enc    sg_ascii
         .text   "string"
         .byte   $00
         .byte   $60
 
-L1108   jsl     PrintInlineL2String
+L1848   jsl     PrintInlineL2String
         asl     a
         brk     #$60
 
-L110F   jsr     PrintInlineNullString
+L184F   jsr     PrintInlineNullString
         adc     $6e
         .byte   $64
         .here

@@ -22,9 +22,9 @@ PrintInlineDciString = $013000
          .byte   $14,$00,"string with length/2"
          jsl     PrintInlineDciString
          .byte   "DCI strin",$e7
-         jsr     L10B5
-         jsr     L110F
-         jsr     L1108
+         jsr     L1800
+         jsr     L184F
+         jsr     L1848
          brk     $01
          .word   data01
          brk     $02
@@ -36,7 +36,7 @@ L1085:   .byte   $a9
          .byte   $00
          sta     $ff
          .byte   $ea
-         rts
+         jmp     Next1
 
 PrintInline8String: rts
 
@@ -70,24 +70,52 @@ data02:  .word   @data03
 .endmacro
 @data03: HiAscii "AllEight"
 
-L10B5:   jsr     PrintInlineNullString ;split across address change
-         per     $802d
+NoCont:  pla                ;split across address change
+         pla
+         rts
+
+L10BA:   jsr     NoCont
+
+         .byte   $00
+         .byte   $80
+
+L10BF:   jsr     NoCont
+
+         .byte   $00
+         .byte   $80
+
+Next1:   jsr     L10BA
+         jsr     @L10CF
+         clc
+         jsr     L10BF
+         rts
+
+@L10CF:  sec
+         jsr     L10BF
+         rts
+
+         .res    300,$00
+
+;         .segment "SEG001"
+         .org    $1800
+L1800:   jsr     PrintInlineNullString
+         per     $8778
          rtl
 
          .byte   $65
          .byte   $6e
          .byte   $20
          .byte   $01
-;         .segment "SEG001"
-         .org    $1100
+;         .segment "SEG002"
+         .org    $1840
          .byte   "string"
          .byte   $00
          .byte   $60
 
-L1108:   jsl     PrintInlineL2String
+L1848:   jsl     PrintInlineL2String
          asl     A
          brk     $60
 
-L110F:   jsr     PrintInlineNullString
+L184F:   jsr     PrintInlineNullString
          adc     $6e
          .byte   $64
