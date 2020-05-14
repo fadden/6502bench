@@ -229,8 +229,9 @@ is the shape number.</p>
 <p>The Atari 2600 graphics system has registers that determine the
 appearance of a sprite or playfield on a single row.  The register
 values are typically changed as the screen is drawn to get different
-data on successive rows.  The visualization generator works for data
-stored in a straightforward fashion.</p>
+data on successive rows.  The visualization generator doesn't attempt
+to emulate this behavior, but works well for data stored in a
+straightforward fashion.</p>
 
 <ul>
   <li><b>Sprite</b> - basic 1xN sprite, converted to an image 8 pixels
@@ -244,6 +245,17 @@ stored in a straightforward fashion.</p>
     The "Reflected" checkbox determines whether the right-side image is
     repeated as-is or flipped.</li>
 </ul>
+
+<h3>Atari Arcade - Atari/VisAVG </h3>
+
+<p>Different versions of Atari's Analog Vector Graphics were used in
+several games, notably Battlezone, Tempest, and Star Wars.  The commands
+drove a vector display monitor.  SourceGen visualizes them as 2D
+wireframes, which isn't a perfect fit since they can describe points as
+well as lines, but works fine for annotating a disassembly.</p>
+<p>The visualizer takes two arguments: the offset of the start of
+the commands to visualize, and the base address of vector RAM.  The latter
+is necessary to convert AVG JMP/JSR commands into offsets.</p>
 
 <h3>Commodore 64 - Commodore/VisC64</h3>
 
@@ -279,6 +291,16 @@ It comes in two basic varieties:</p>
 <p>Bear in mind that the editor scales images to their maximum size, so
 a sprite that is doubled in both width and height will look exactly like
 a sprite that is not doubled at all.</p>
+
+<h3>Nintendo Entertainment System - Nintendo/VisNES</h3>
+
+<p>NES PPU pattern tables hold 8x8 tiles with 2 bits of color per pixel.
+Converting the full collection to a reference bitmap is straightforward.
+A few color palette options are offered.</p>
+
+<p>Sprites and backgrounds are formed from collections of tiles.  In
+some cases this is straightfoward, in others it's not.  A visualization
+generator that renders a "tile grid" is available for simpler cases.</p>
 
 </div>
 

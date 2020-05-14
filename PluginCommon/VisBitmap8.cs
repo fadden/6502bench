@@ -16,6 +16,8 @@
 using System;
 using System.Diagnostics;
 
+using CommonUtil;
+
 namespace PluginCommon {
     /// <summary>
     /// Bitmap with 8-bit palette indices, for use with visualization generators.
@@ -136,6 +138,35 @@ namespace PluginCommon {
         /// <param name="b">Blue value.</param>
         public void AddColor(byte a, byte r, byte g, byte b) {
             AddColor(Util.MakeARGB(a, r, g, b));
+        }
+
+        /// <summary>
+        /// Draws an 8x8 character on the bitmap.
+        /// </summary>
+        /// <param name="vb">Bitma to draw on.</param>
+        /// <param name="ch">Character to draw.</param>
+        /// <param name="xc">X coord of upper-left pixel.</param>
+        /// <param name="yc">Y coord of upper-left pixel.</param>
+        /// <param name="foreColor">Foreground color index.</param>
+        /// <param name="backColor">Background color index.</param>
+        public static void DrawChar(VisBitmap8 vb, char ch, int xc, int yc,
+                byte foreColor, byte backColor) {
+            int origXc = xc;
+            int[] charBits = Font8x8.GetBitData(ch);
+            for (int row = 0; row < 8; row++) {
+                int rowBits = charBits[row];
+                for (int col = 7; col >= 0; col--) {
+                    if ((rowBits & (1 << col)) != 0) {
+                        vb.SetPixelIndex(xc, yc, foreColor);
+                    } else {
+                        vb.SetPixelIndex(xc, yc, backColor);
+                    }
+                    xc++;
+                }
+
+                xc = origXc;
+                yc++;
+            }
         }
     }
 }
