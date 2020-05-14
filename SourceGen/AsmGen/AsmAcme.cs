@@ -523,19 +523,28 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputOrgDirective(int offset, int address) {
-            // For the first one, set the "real" PC.  For all subsequent directives, set the
-            // "pseudo" PC.
+            // If there's only one address range, just set the "real" PC.  If there's more
+            // than one we can run out of space if the source file has a chunk in high memory
+            // followed by a chunk in low memory, because the "real" PC determines when the
+            // 64KB bank is overrun.
             if (offset == 0) {
-                OutputLine("*", "=", SourceFormatter.FormatHexValue(address, 4), string.Empty);
-            } else {
-                if (mInPseudoPcBlock) {
-                    // close previous block
-                    OutputLine(string.Empty, CLOSE_PSEUDOPC, string.Empty, string.Empty);
+                // first one
+                if (Project.AddrMap.Count == 1) {
+                    OutputLine("*", "=", SourceFormatter.FormatHexValue(address, 4), string.Empty);
+                    return;
+                } else {
+                    // set the real PC to address zero to ensure we get a full 64KB
+                    OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
                 }
-                OutputLine(string.Empty, sDataOpNames.OrgDirective,
-                    SourceFormatter.FormatHexValue(address, 4) + " {", string.Empty);
-                mInPseudoPcBlock = true;
             }
+
+            if (mInPseudoPcBlock) {
+                // close previous block
+                OutputLine(string.Empty, CLOSE_PSEUDOPC, string.Empty, string.Empty);
+            }
+            OutputLine(string.Empty, sDataOpNames.OrgDirective,
+                SourceFormatter.FormatHexValue(address, 4) + " {", string.Empty);
+            mInPseudoPcBlock = true;
         }
 
         // IGenerator

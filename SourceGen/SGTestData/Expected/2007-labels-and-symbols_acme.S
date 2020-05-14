@@ -1,5 +1,6 @@
 ;ACME can't handle 65816 code that lives outside bank zero
-*       =       $012345
+*       =       $0000
+        !pseudopc $012345 {
         !hex    18fbe230a9cda9dda90da9eda9fea92da9ffa929a910a9e9a90fa945a923a901
         !hex    f4edfef44523f40100f45634f41200f4edfef44523f40100f45634f41200a5ce
         !hex    adce00afce0000adecfeafecfe00adeefeafeefe00ad4623af462301ad4423af
@@ -22,3 +23,4 @@
         !hex    656172206f6e20746865206669727374206c696e652e20205468652071756963
         !hex    6b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920
         !hex    646f67732ea97aa959a934c230a97b56a95a34a9341260
+        } ;!pseudopc

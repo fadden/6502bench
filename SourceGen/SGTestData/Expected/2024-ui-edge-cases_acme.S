@@ -1,8 +1,10 @@
         !cpu    6502
-*       =       $2000
+*       =       $0000
+        !pseudopc $2000 {
         jmp     L2100
 
         !text   "hello, "  ;string should be split by no-op addr change
+        } ;!pseudopc
         !pseudopc $200a {
         !text   "world"
         !byte   $80

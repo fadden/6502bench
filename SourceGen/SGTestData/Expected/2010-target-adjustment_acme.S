@@ -1,5 +1,6 @@
         !cpu    65816
-*       =       $1000
+*       =       $0000
+        !pseudopc $1000 {
         !as
         !rs
 load11  lda     #$11
@@ -48,6 +49,7 @@ load11  lda     #$11
 
         !byte   $80
 @dat81  !byte   $81
+        } ;!pseudopc
         !pseudopc $2000 {
 @L2000  !byte   $82
         !byte   $83

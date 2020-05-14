@@ -1,7 +1,8 @@
 ;Project file was edited to get all big-endian data types, and to have an
 ;incorrect .junk alignment directive.
         !cpu    6502
-*       =       $1000
+*       =       $0000
+        !pseudopc $1000 {
         bit     L1448
         jsr     L14A8
         nop
@@ -60,6 +61,7 @@ LABEL   !hex    00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
         !fill   2,$dd      ;incorrect alignment
         !align  255,0,$00
         !fill   8,$82
+        } ;!pseudopc
         !pseudopc $1408 {
         !fill   8,$82      ;note no-op .ORG
         !fill   8,$83

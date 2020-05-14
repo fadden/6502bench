@@ -1,5 +1,6 @@
         !cpu    65816
-*       =       $1000
+*       =       $0000
+        !pseudopc $1000 {
         !as
         !rs
         clc
@@ -9,6 +10,7 @@
         jsr     L1107
         jmp     L2000
 
+        } ;!pseudopc
         !pseudopc $1100 {
 L1100   bit     L1100
 L1103   lda     #$11
