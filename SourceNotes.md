@@ -1,8 +1,9 @@
 # 6502bench Source Code Notes # 
 
 All of the code is written in C# .NET, using the (free to download) Visual
-Studio Community 2017 IDE as the primary development environment.  The user
-interface uses the WPF API.
+Studio Community 2019 IDE as the primary development environment.  The user
+interface uses the WPF API.  When installing Visual Studio, be sure to
+include ".NET Desktop Development".
 
 The Solution file is called "WorkBench.sln" rather than "6502bench.sln"
 because some things in Visual Studio got weird when it didn't start with a
