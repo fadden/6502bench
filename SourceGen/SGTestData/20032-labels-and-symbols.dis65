@@ -16,7 +16,7 @@
 "SeekNearbyTargets":true,
 "SmartPlpHandling":true},
 
-"PlatformSymbolFileIdentifiers":["PROJ:2007-labels-and-symbols.sym65",
+"PlatformSymbolFileIdentifiers":["PROJ:20030-labels-and-symbols.sym65",
 "RT:TestData/TestSyms.sym65"],
 "ExtensionScriptFileIdentifiers":[],
 "ProjectSyms":{

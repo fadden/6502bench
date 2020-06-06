@@ -3,7 +3,7 @@
 "_ContentVersion":2,"FileDataLength":72,"FileDataCrc32":-800253778,"ProjectProps":{
 "CpuName":"6502","IncludeUndocumentedInstr":false,"EntryFlags":33489103,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
-"PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":["PROJ:2011-hinting.cs"],"ProjectSyms":{
+"PlatformSymbolFileIdentifiers":[],"ExtensionScriptFileIdentifiers":["PROJ:20070-hinting.cs"],"ProjectSyms":{
 }},
 "AddressMap":[{
 "Offset":0,"Addr":4096}],"TypeHints":[{

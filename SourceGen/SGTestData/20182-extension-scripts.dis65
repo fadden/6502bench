@@ -16,9 +16,9 @@
 "SeekNearbyTargets":true,
 "SmartPlpHandling":true},
 
-"PlatformSymbolFileIdentifiers":["PROJ:2022-extension-scripts.sym65"],
-"ExtensionScriptFileIdentifiers":["PROJ:2022-extension-scripts-a.cs",
-"PROJ:2022-extension-scripts-b.cs"],
+"PlatformSymbolFileIdentifiers":["PROJ:20180-extension-scripts.sym65"],
+"ExtensionScriptFileIdentifiers":["PROJ:20180-extension-scripts-a.cs",
+"PROJ:20180-extension-scripts-b.cs"],
 "ProjectSyms":{
 "PrintInlineDciString":{
 "DataDescriptor":{

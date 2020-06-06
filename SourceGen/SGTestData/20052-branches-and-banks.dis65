@@ -3,7 +3,7 @@
 "_ContentVersion":2,"FileDataLength":119,"FileDataCrc32":-1095650494,"ProjectProps":{
 "CpuName":"65816","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":33489103,"AutoLabelStyle":"Simple","AnalysisParams":{
 "AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
-"PlatformSymbolFileIdentifiers":["PROJ:2009-branches-and-banks.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
+"PlatformSymbolFileIdentifiers":["PROJ:20050-branches-and-banks.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
 }},
 "AddressMap":[{
 "Offset":0,"Addr":4096},
