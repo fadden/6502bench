@@ -20,7 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
-
+using Asm65;
 using CommonUtil;
 using SourceGen.AsmGen;
 
@@ -40,7 +40,7 @@ namespace SourceGen.Tests {
         private const string EXPECTED_DIR_NAME = "Expected";
 
         //private static char[] sInvalidChars = new char[] { '.', '_' };
-        private const string TestCasePattern = @"^\d\d\d\d-[A-Za-z0-9-]+$";
+        private const string TestCasePattern = @"^\d\d\d\d\d-[A-Za-z0-9-]+$";
         private static Regex sTestCaseRegex = new Regex(TestCasePattern);
 
         /// <summary>
@@ -185,7 +185,21 @@ namespace SourceGen.Tests {
         private int GetTestNum(string pathName) {
             // Should always succeed if pathName matched on our regex.
             string fileName = Path.GetFileName(pathName);
-            return int.Parse(fileName.Substring(0, 4));
+            return int.Parse(fileName.Substring(0, 5));
+        }
+
+        /// <summary>
+        /// Determines the desired CPU from the test case number.
+        /// </summary>
+        /// <param name="testNum"></param>
+        /// <returns></returns>
+        private CpuDef.CpuType GetCpuTypeFromNum(int testNum) {
+            switch (testNum % 10) {
+                case 0:     return CpuDef.CpuType.Cpu6502;
+                case 1:     return CpuDef.CpuType.Cpu65C02;
+                case 2:     return CpuDef.CpuType.Cpu65816;
+                default:    return CpuDef.CpuType.CpuUnknown;
+            }
         }
 
         /// <summary>
@@ -434,8 +448,9 @@ namespace SourceGen.Tests {
             projectLoadReport = null;
 
             int testNum = GetTestNum(dataPathName);
+            CpuDef.CpuType cpuType = GetCpuTypeFromNum(testNum);
 
-            if (testNum < 2000) {
+            if (testNum < 20000) {
                 // create new disasm project for data file
                 byte[] fileData;
                 try {
@@ -446,6 +461,10 @@ namespace SourceGen.Tests {
                 }
 
                 project.Initialize(fileData.Length);
+                project.ProjectProps.CpuType = cpuType;
+                project.ProjectProps.IncludeUndocumentedInstr = true;
+                project.ProjectProps.TwoByteBrk = false;
+                project.UpdateCpuDef();
                 project.PrepForNew(fileData, Path.GetFileName(dataPathName));
                 // no platform symbols to load
             } else {
@@ -471,6 +490,13 @@ namespace SourceGen.Tests {
                 string extMsgs = project.LoadExternalFiles();
                 if (!string.IsNullOrEmpty(extMsgs)) {
                     ReportErrMsg(extMsgs);
+                    // keep going
+                }
+
+                if (project.ProjectProps.CpuType != cpuType) {
+                    ReportErrMsg("Mismatch CPU type for test " + testNum + ": project wants " +
+                        project.ProjectProps.CpuType);
+                    // keep going
                 }
             }
 
@@ -543,7 +569,7 @@ namespace SourceGen.Tests {
         /// <param name="testNum"></param>
         private void ScrubWorkDirectory(string workDir, int testNum) {
             string checkString = testNum.ToString();
-            if (checkString.Length != 4) {
+            if (checkString.Length != 5) {
                 Debug.Assert(false);
                 return;
             }

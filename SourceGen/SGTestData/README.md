@@ -14,18 +14,19 @@ set was generated for:
 
 ## Generator/Assembler Tests ##
 
-Files with names like "1000-nifty-test" are regression test data files
+Files with names like "10000-nifty-test" are regression test data files
 for the code generator.  The test harness identifies them by filename
-pattern: four digits, a hyphen, then one or more alphanumeric and
+pattern: five digits, a hyphen, then one or more alphanumeric and
 hyphens.  Files with a '.' or '_' are ignored.
 
-If the leading number is between 1000 and 1999, inclusive, the test file
-will be loaded as a new project.  A 65816 CPU and load address of $1000
-are assumed.  As with all new projects, the first byte will be hinted as
-a code entry point.  The entry flags are currently set to emulation mode,
-but tests should not rely on that.
+If the leading number is between 10000 and 19999, inclusive, the test file
+will be loaded as a new project.  A load address of $1000 is assumed.
+The CPU type is determined by the last digit: 0 for 6502, 1 for 65C02,
+and 2 for 65816.  Undocumented opcodes are enabled.  As with all new
+projects, the first byte will be hinted as a code entry point.  The entry
+flags are currently set to emulation mode, but tests should not rely on that.
 
-If the leading number is 2000 or greater, the test file will be loaded as
+If the leading number is 20000 or greater, the test file will be loaded as
 a saved project.  A file with the same name plus a ".dis65" extension will
 be opened as the project file.
 
@@ -50,8 +51,8 @@ the drop list to select which test is shown.
 
 The generated sources and assembled output is placed into a temporary
 directory inside SGTestData that is named after the test.  For example,
-test 2000-allops-value-6502 will have all of its generated output in a
-directory called "tmp2000".  If all parts of the test are successful, the
+test 10000-allops-value-6502 will have all of its generated output in a
+directory called "tmp10000".  If all parts of the test are successful, the
 directory will be removed.  If generation or assembly fails, or if you check
 the "retain output" box in the test harness, the directory and its contents
 will remain.  This allows you to examine the outputs when investigating
@@ -66,11 +67,11 @@ If you want to add or update a test, follow these steps:
 
  1. Make the changes to the test data file and test project file.
  2. Run the test harness.  The generation test will fail and leave output in
-    the tmpNNNN directory.  Make sure the assembly test is succeeding.
+    the tmpNNNNN directory.  Make sure the assembly test is succeeding.
  3. After verifying that the generated sources look correct, copy them
     into the Expected directory, replacing any existing copies.
  4. Run the test harness.  This should now report success, and will
-    remove the tmpNNNN directory.
+    remove the tmpNNNNN directory.
 
 Be sure to have the version of the cross-assembler identified at the top
 of this document configured.
