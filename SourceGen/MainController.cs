@@ -1559,7 +1559,7 @@ namespace SourceGen {
                             }
                             break;
                         case CodeListColumn.Opcode:
-                            HandleDoubleClickOnOpcode(line);
+                            JumpToOperandTarget(line, false);
                             break;
                         case CodeListColumn.Operand:
                             if (CanEditOperand()) {
@@ -1581,11 +1581,17 @@ namespace SourceGen {
             }
         }
 
-        private void HandleDoubleClickOnOpcode(LineListGen.Line line) {
+        /// <summary>
+        /// Jumps to the line referenced by the operand of the selected line.
+        /// </summary>
+        /// <param name="line">Selected line.</param>
+        /// <param name="testOnly">If set, don't actually do the goto.</param>
+        /// <returns>True if a jump is available for this line.</returns>
+        private bool JumpToOperandTarget(LineListGen.Line line, bool testOnly) {
             if (line.FileOffset < 0) {
                 // Double-click on project symbol EQUs and the file header comment are handled
                 // elsewhere.
-                return;
+                return false;
             }
 
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
@@ -1595,20 +1601,29 @@ namespace SourceGen {
             // (Resolve it as a numeric reference.)
             if (attr.OperandOffset >= 0) {
                 // Yup, find the line for that offset and jump to it.
-                GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
-                    GoToMode.JumpToCodeData, true);
+                if (!testOnly) {
+                    GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
+                        GoToMode.JumpToCodeData, true);
+                }
+                return true;
             } else if (dfd != null && dfd.HasSymbol) {
                 // Operand has a symbol, do a symbol lookup.
                 if (dfd.SymbolRef.IsVariable) {
-                    GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
+                    if (!testOnly) {
+                        GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
+                    }
+                    return true;
                 } else {
                     if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
                         if (sym.SymbolSource == Symbol.Source.User ||
                                 sym.SymbolSource == Symbol.Source.Auto) {
                             int labelOffset = mProject.FindLabelOffsetByName(dfd.SymbolRef.Label);
                             if (labelOffset >= 0) {
-                                GoToLocation(new NavStack.Location(labelOffset, 0, false),
-                                    GoToMode.JumpToCodeData, true);
+                                if (!testOnly) {
+                                    GoToLocation(new NavStack.Location(labelOffset, 0, false),
+                                        GoToMode.JumpToCodeData, true);
+                                }
+                                return true;
                             }
                         } else if (sym.SymbolSource == Symbol.Source.Platform ||
                                 sym.SymbolSource == Symbol.Source.Project) {
@@ -1616,9 +1631,11 @@ namespace SourceGen {
                             for (int i = 0; i < mProject.ActiveDefSymbolList.Count; i++) {
                                 if (mProject.ActiveDefSymbolList[i] == sym) {
                                     int offset = LineListGen.DefSymOffsetFromIndex(i);
-                                    GoToLocation(new NavStack.Location(offset, 0, false),
-                                        GoToMode.JumpToCodeData, true);
-                                    break;
+                                    if (!testOnly) {
+                                        GoToLocation(new NavStack.Location(offset, 0, false),
+                                            GoToMode.JumpToCodeData, true);
+                                    }
+                                    return true;
                                 }
                             }
                         } else {
@@ -1635,10 +1652,15 @@ namespace SourceGen {
                 // previous clause, but Address entries would not have been.)
                 int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
                 if (operandOffset >= 0) {
-                    GoToLocation(new NavStack.Location(operandOffset, 0, false),
-                        GoToMode.JumpToCodeData, true);
+                    if (!testOnly) {
+                        GoToLocation(new NavStack.Location(operandOffset, 0, false),
+                            GoToMode.JumpToCodeData, true);
+                    }
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public bool CanDeleteMlc() {
@@ -2704,6 +2726,10 @@ namespace SourceGen {
             // Update the selection.
             mMainWin.CodeListView_SelectRange(topLineIndex, lastLineIndex - topLineIndex);
 
+            // Set the focus to the first selected item.  The focus is used by the keyboard
+            // handler to decide what the up/down arrows select next.
+            mMainWin.CodeListView_SetSelectionFocus();
+
             if (doPush) {
                 // Update the back stack and associated controls.
                 mNavStack.Push(prevLoc);
@@ -2781,6 +2807,27 @@ namespace SourceGen {
 
                 lineIndex++;
             }
+        }
+
+        public bool CanJumpToOperand() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            LineListGen.Line.Type lineType = SelectionAnalysis.mLineType;
+            if (lineType != LineListGen.Line.Type.Code &&
+                    lineType != LineListGen.Line.Type.Data) {
+                return false;
+            }
+
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            Debug.Assert(selIndex >= 0);
+            return JumpToOperandTarget(CodeLineList[selIndex], true);
+        }
+
+        public void JumpToOperand() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            Debug.Assert(selIndex >= 0);
+            JumpToOperandTarget(CodeLineList[selIndex], false);
         }
 
         /// <summary>

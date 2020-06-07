@@ -881,6 +881,10 @@ namespace SourceGen.WpfGui {
             mIsSplitterBeingDragged = false;
         }
 
+        public void CodeListView_SetSelectionFocus() {
+            ItemContainerGenerator_StatusChanged(null, null);
+        }
+
         /// <summary>
         /// Returns the index of the line that's currently at the top of the control.
         /// </summary>
@@ -1089,9 +1093,12 @@ namespace SourceGen.WpfGui {
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
         }
 
+        private void CanJumpToOperand(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanJumpToOperand();
+        }
+
         private void CanSaveProject(object sender, CanExecuteRoutedEventArgs e) {
-            e.CanExecute = mMainCtrl != null && mMainCtrl.IsProjectOpen &&
-                !mMainCtrl.IsProjectReadOnly;
+            e.CanExecute = IsProjectOpen() && !mMainCtrl.IsProjectReadOnly;
         }
 
         private void CanToggleSingleByteFormat(object sender, CanExecuteRoutedEventArgs e) {
@@ -1256,6 +1263,10 @@ namespace SourceGen.WpfGui {
         private void HintAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("hint as inline data");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
+        }
+
+        private void JumpToOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.JumpToOperand();
         }
 
         private void NavigateBackwardCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

@@ -143,6 +143,11 @@ limitations under the License.
             <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
             <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
             <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
+            <RoutedUICommand x:Key="JumpToOperandCmd" Text="Jump to Operand">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+J</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="NavigateBackwardCmd" Text="Nav Backward">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Alt+Left</KeyGesture>
@@ -274,6 +279,8 @@ limitations under the License.
                         CanExecute="CanHintAsDataStart" Executed="HintAsDataStartCmd_Executed"/>
         <CommandBinding Command="{StaticResource HintAsInlineDataCmd}"
                         CanExecute="CanHintAsInlineData" Executed="HintAsInlineDataCmd_Executed"/>
+        <CommandBinding Command="{StaticResource JumpToOperandCmd}"
+                        CanExecute="CanJumpToOperand" Executed="JumpToOperandCmd_Executed"/>
         <CommandBinding Command="{StaticResource NavigateBackwardCmd}"
                         CanExecute="CanNavigateBackward" Executed="NavigateBackwardCmd_Executed"/>
         <CommandBinding Command="{StaticResource NavigateForwardCmd}"
@@ -379,6 +386,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource NavigateBackwardCmd}"/>
                 <MenuItem Command="{StaticResource GotoCmd}"/>
                 <MenuItem Command="{StaticResource GotoLastChangeCmd}"/>
+                <MenuItem Command="{StaticResource JumpToOperandCmd}"/>
                 <Separator/>
                 <MenuItem Command="Find"/>
                 <MenuItem Command="{StaticResource FindNextCmd}"/>
