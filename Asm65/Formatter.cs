@@ -535,12 +535,12 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Formats a value as decimal.
+        /// Formats a 32-bit integer value as unsigned decimal.
         /// </summary>
         /// <param name="value">Value to convert.</param>
         /// <returns>Formatted string.</returns>
         public string FormatDecimalValue(int value) {
-            return value.ToString();
+            return ((uint)value).ToString();
         }
 
         /// <summary>

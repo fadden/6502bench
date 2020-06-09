@@ -90,5 +90,20 @@ namespace CommonUtil {
             // all the bits to the right of it, then just count the 1s.
             return CountOneBits(IsolateLeastSignificantOne(val) - 1);
         }
+
+        /// <summary>
+        /// Sign-extends an integer value.
+        /// </summary>
+        /// <param name="val">Value to extend.</param>
+        /// <param name="byteLen">Number of significant bytes (1-4).</param>
+        /// <returns>Sign-extended value, or original value if byteLen is invalid.</returns>
+        public static int SignExtend(int val, int byteLen) {
+            if (byteLen < 1 || byteLen >= 4) {
+                // invalid, or nothing to do
+                return val;
+            }
+            int shiftCount = (4 - byteLen) * 8;
+            return (val << shiftCount) >> shiftCount;
+        }
     }
 }

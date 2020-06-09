@@ -1,4 +1,4 @@
-;Project file was edited for some ASCII operands.
+;Project file was edited to force ASCII formatting for some operands.
         .cpu    "65816"
         .enc    sg_hiascii
         .cdef   $20,$7e,$a0
@@ -9,75 +9,25 @@
         .xs
         clc
         xce
-        sep     #$30
-        lda     $01
-        lda     $0102
-        lda     $010203
-        lda     1
-        lda     258
-        lda     66051
-        lda     %00000001
-        lda     %0000000100000010
-        lda     %000000010000001000000011
-        bra     skipdata
-
-        .byte   $01
-        .word   $0201
-        .long   $030201
-        .dword  $04030201
-        .byte   1
-        .word   513
-        .long   197121
-        .dword  67305985
-        .byte   %00000001
-        .word   %0000001000000001
-        .long   %000000110000001000000001
-        .dword  %00000100000000110000001000000001
-
-skipdata lda    #'h'
-        lda     'h'
-        lda     @w'h'
-        lda     @l'h'
-        lda     #$1f
-        lda     #' '
-        lda     #'"'
-        lda     #$27
-        lda     #'~'
-        lda     #$7f
-        lda     #$80
-        lda     #$9f
-        lda     #' ' | $80
-        lda     #'"' | $80
-        lda     #$a7
-        lda     #'~' | $80
-        lda     #$ff
-        rep     #'0'
+        rep     #$30
         .al
         .xl
+        lda     #$1234
+        lda     #4660
+        lda     #4660
+        lda     #%0001001000110100
+        lda     #$fffe
+        lda     #65534
+        lda     #65534
+        lda     #%1111111111111110
+        lda     $fffefd
+        lda     16776957
+        lda     16776957
+        lda     %111111111111111011111101
         lda     #'h'
         lda     #'H' | $80
         lda     #$6868
+        lda     @l'h'
+        lda     @l'H' | $80
         rts
 
-_more_ascii .byte 'h'
-        .byte   $80
-        .word   $6868
-        .byte   $80
-        .word   skipdata
-        .long   skipdata
-        .byte   $10,$3f
-        .byte   <_more_ascii
-        .byte   >_more_ascii
-        .word   _more_ascii
-        .long   _more_ascii
-        .byte   $10,$70
-        .byte   '['
-        .byte   '{'
-        .byte   '|'
-        .byte   '}'
-        .byte   ','
-        .byte   '[' | $80
-        .byte   '{' | $80
-        .byte   '|' | $80
-        .byte   '}' | $80
-        .byte   ',' | $80
