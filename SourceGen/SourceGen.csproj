@@ -155,6 +155,9 @@
     <Compile Include="WpfGui\Export.xaml.cs">
       <DependentUpon>Export.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfGui\ExportVisualization.xaml.cs">
+      <DependentUpon>ExportVisualization.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\FindBox.xaml.cs">
       <DependentUpon>FindBox.xaml</DependentUpon>
     </Compile>
@@ -354,6 +357,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\Export.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\ExportVisualization.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

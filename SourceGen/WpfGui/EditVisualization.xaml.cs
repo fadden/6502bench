@@ -374,6 +374,24 @@ namespace SourceGen.WpfGui {
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
+            NewVis = PrepResultVis();
+            sLastVisIdent = NewVis.VisGenIdent;
+            DialogResult = true;
+        }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e) {
+            Visualization vis = PrepResultVis();
+            ExportVisualization dlg = new ExportVisualization(this, vis, mWireObj,
+                "vis" + mSetOffset.ToString("x6")); // tag may not be valid filename, use offset
+            dlg.ShowDialog();
+        }
+
+        /// <summary>
+        /// Generates the visualization that we will return as the result object, based on
+        /// the currents state of the controls.
+        /// </summary>
+        /// <returns>New Visualization or VisWireframeAnimation object.</returns>
+        private Visualization PrepResultVis() {
             VisualizationItem item = (VisualizationItem)visComboBox.SelectedItem;
             Debug.Assert(item != null);
 
@@ -384,25 +402,25 @@ namespace SourceGen.WpfGui {
 
             string trimTag = Visualization.TrimAndValidateTag(TagString, out bool isTagValid);
             Debug.Assert(isTagValid);
+            Visualization vis;
             if (isWireframe && IsWireframeAnimated) {
-                NewVis = new VisWireframeAnimation(trimTag, item.VisDescriptor.Ident, valueDict,
+                vis = new VisWireframeAnimation(trimTag, item.VisDescriptor.Ident, valueDict,
                     mOrigVis, mWireObj);
             } else {
-                NewVis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
+                vis = new Visualization(trimTag, item.VisDescriptor.Ident, valueDict, mOrigVis);
             }
 
             // Set the thumbnail image.
             if (isWireframe) {
                 Debug.Assert(mWireObj != null);
-                NewVis.CachedImage = Visualization.GenerateWireframeImage(mWireObj,
+                vis.CachedImage = Visualization.GenerateWireframeImage(mWireObj,
                     Visualization.THUMBNAIL_DIM, valueDict);
             } else {
                 Debug.Assert(mThumbnail != null);
-                NewVis.CachedImage = mThumbnail;
+                vis.CachedImage = mThumbnail;
             }
 
-            sLastVisIdent = NewVis.VisGenIdent;
-            DialogResult = true;
+            return vis;
         }
 
         private ReadOnlyDictionary<string, object> CreateVisGenParams(bool includeWire) {

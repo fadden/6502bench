@@ -17,10 +17,10 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace CommonWPF {
     /// <summary>
@@ -261,6 +261,40 @@ namespace CommonWPF {
             } catch (FormatException ex) {
                 Debug.WriteLine("RTB AppendText extension failed: " + ex);
             }
+        }
+    }
+
+    /// <summary>
+    /// BitmapSource extensions.
+    /// </summary>
+    public static class BitmapSourceExtensions {
+        /// <summary>
+        /// Creates a scaled copy of a BitmapSource.  Only scales up, using nearest-neighbor.
+        /// </summary>
+        public static BitmapSource CreateScaledCopy(this BitmapSource src, int scale) {
+            // Simple approach always does a "blurry" scale.
+            //return new TransformedBitmap(src, new ScaleTransform(scale, scale));
+
+            // Adapted from https://weblogs.asp.net/bleroy/resizing-images-from-the-server-using-wpf-wic-instead-of-gdi
+            // (found via https://stackoverflow.com/a/25570225/294248)
+            BitmapScalingMode scalingMode = BitmapScalingMode.NearestNeighbor;
+
+            int newWidth = (int)src.Width * scale;
+            int newHeight = (int)src.Height * scale;
+
+            var group = new DrawingGroup();
+            RenderOptions.SetBitmapScalingMode(group, scalingMode);
+            group.Children.Add(new ImageDrawing(src,
+                    new Rect(0, 0, newWidth, newHeight)));
+            var targetVisual = new DrawingVisual();
+            var targetContext = targetVisual.RenderOpen();
+            targetContext.DrawDrawing(group);
+            var target = new RenderTargetBitmap(
+                newWidth, newHeight, 96, 96, PixelFormats.Default);
+            targetContext.Close();
+            target.Render(targetVisual);
+            var targetFrame = BitmapFrame.Create(target);
+            return targetFrame;
         }
     }
 }

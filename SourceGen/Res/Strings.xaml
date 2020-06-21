@@ -89,6 +89,7 @@ limitations under the License.
     <system:String x:Key="str_FileFilterCs">C# Source Files (*.cs)|*.cs</system:String>
     <system:String x:Key="str_FileFilterCsv">CSV files (*.csv)|*.csv</system:String>
     <system:String x:Key="str_FileFilterDis65">SourceGen projects (*.dis65)|*.dis65</system:String>
+    <system:String x:Key="str_FileFilterGif">GIF images (*.gif)|*.gif</system:String>
     <system:String x:Key="str_FileFilterHtml">HTML files (*.html)|*.html</system:String>
     <system:String x:Key="str_FileFilterSgec">SGEC files (*.sgec)|*.sgec</system:String>
     <system:String x:Key="str_FileFilterSym65">SourceGen symbols (*.sym65)|*.sym65</system:String>
