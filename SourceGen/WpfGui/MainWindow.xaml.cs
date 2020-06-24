@@ -1142,6 +1142,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.ConcatenateFiles();
         }
 
+        private void ConvertOmfCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ConvertOmf();
+        }
+
         private void CreateLocalVariableTableCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.CreateLocalVariableTable();
         }

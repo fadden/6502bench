@@ -255,6 +255,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_OpenDataLoadFailedFmt");
         public static string OPEN_DATA_TOO_LARGE_FMT =
             (string)Application.Current.FindResource("str_OpenDataTooLargeFmt");
+        public static string OPEN_DATA_TOO_SMALL_FMT =
+            (string)Application.Current.FindResource("str_OpenDataTooSmallFmt");
         public static string OPEN_DATA_WRONG_CRC_FMT =
             (string)Application.Current.FindResource("str_OpenDataWrongCrcFmt");
         public static string OPEN_DATA_WRONG_LENGTH_FMT =

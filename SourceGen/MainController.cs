@@ -797,7 +797,7 @@ namespace SourceGen {
         /// </summary>
         /// <param name="dataFileName">Full pathname.</param>
         /// <returns>Data file contents.</returns>
-        private byte[] LoadDataFile(string dataFileName) {
+        private static byte[] LoadDataFile(string dataFileName) {
             byte[] fileData;
 
             using (FileStream fs = File.Open(dataFileName, FileMode.Open, FileAccess.Read)) {
@@ -4093,15 +4093,10 @@ namespace SourceGen {
         }
 
         public void ShowFileHexDump() {
-            OpenFileDialog fileDlg = new OpenFileDialog() {
-                Filter = Res.Strings.FILE_FILTER_ALL,
-                FilterIndex = 1
-            };
-            if (fileDlg.ShowDialog() != true) {
+            if (!OpenAnyFile(out string pathName)) {
                 return;
             }
-            string fileName = fileDlg.FileName;
-            FileInfo fi = new FileInfo(fileName);
+            FileInfo fi = new FileInfo(pathName);
             if (fi.Length > Tools.WpfGui.HexDumpViewer.MAX_LENGTH) {
                 string msg = string.Format(Res.Strings.OPEN_DATA_TOO_LARGE_FMT,
                     fi.Length / 1024, Tools.WpfGui.HexDumpViewer.MAX_LENGTH / 1024);
@@ -4111,7 +4106,7 @@ namespace SourceGen {
             }
             byte[] data;
             try {
-                data = File.ReadAllBytes(fileName);
+                data = File.ReadAllBytes(pathName);
             } catch (Exception ex) {
                 // not expecting this to happen
                 MessageBox.Show(ex.Message);
@@ -4121,7 +4116,7 @@ namespace SourceGen {
             // Create the dialog without an owner, and add it to the "unowned" list.
             Tools.WpfGui.HexDumpViewer dlg = new Tools.WpfGui.HexDumpViewer(null,
                 data, mFormatter);
-            dlg.SetFileName(Path.GetFileName(fileName));
+            dlg.SetFileName(Path.GetFileName(pathName));
             dlg.Closing += (sender, e) => {
                 Debug.WriteLine("Window " + dlg + " closed, removing from unowned list");
                 mUnownedWindows.Remove(dlg);
@@ -4137,18 +4132,66 @@ namespace SourceGen {
         }
 
         public void SliceFiles() {
+            if (!OpenAnyFile(out string pathName)) {
+                return;
+            }
+
+            Tools.WpfGui.FileSlicer slicer = new Tools.WpfGui.FileSlicer(this.mMainWin, pathName,
+                mFormatter);
+            slicer.ShowDialog();
+        }
+
+        public void ConvertOmf() {
+            if (!OpenAnyFile(out string pathName)) {
+                return;
+            }
+
+            // Load the file here, so basic problems like empty / oversized files can be
+            // reported immediately.
+
+            byte[] fileData = null;
+            using (FileStream fs = File.Open(pathName, FileMode.Open, FileAccess.Read)) {
+                string errMsg = null;
+
+                if (fs.Length == 0) {
+                    errMsg = Res.Strings.OPEN_DATA_EMPTY;
+                } else if (fs.Length < Tools.Omf.OmfFile.MIN_FILE_SIZE) {
+                    errMsg = string.Format(Res.Strings.OPEN_DATA_TOO_SMALL_FMT, fs.Length);
+                } else if (fs.Length > Tools.Omf.OmfFile.MAX_FILE_SIZE) {
+                    errMsg = string.Format(Res.Strings.OPEN_DATA_TOO_LARGE_FMT,
+                        fs.Length / 1024, Tools.Omf.OmfFile.MAX_FILE_SIZE / 1024);
+                }
+                if (errMsg == null) {
+                    fileData = new byte[fs.Length];
+                    int actual = fs.Read(fileData, 0, (int)fs.Length);
+                    if (actual != fs.Length) {
+                        errMsg = Res.Strings.OPEN_DATA_PARTIAL_READ;
+                    }
+                }
+
+                if (errMsg != null) {
+                    MessageBox.Show(errMsg, Res.Strings.ERR_FILE_GENERIC_CAPTION,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            Tools.Omf.WpfGui.OmfViewer ov =
+                new Tools.Omf.WpfGui.OmfViewer(this.mMainWin, pathName, fileData);
+            ov.ShowDialog();
+        }
+
+        private bool OpenAnyFile(out string pathName) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 1
             };
             if (fileDlg.ShowDialog() != true) {
-                return;
+                pathName = null;
+                return false;
             }
-            string pathName = Path.GetFullPath(fileDlg.FileName);
-
-            Tools.WpfGui.FileSlicer slicer = new Tools.WpfGui.FileSlicer(this.mMainWin, pathName,
-                mFormatter);
-            slicer.ShowDialog();
+            pathName = Path.GetFullPath(fileDlg.FileName);
+            return true;
         }
 
         #endregion Tools
@@ -4240,16 +4283,11 @@ namespace SourceGen {
         }
 
         public void Debug_ApplesoftToHtml() {
-            OpenFileDialog fileDlg = new OpenFileDialog() {
-                Filter = Res.Strings.FILE_FILTER_ALL,
-                FilterIndex = 1
-            };
-            if (fileDlg.ShowDialog() != true) {
+            if (!OpenAnyFile(out string basPathName)) {
                 return;
             }
 
             byte[] data;
-            string basPathName = Path.GetFullPath(fileDlg.FileName);
             try {
                 data = File.ReadAllBytes(basPathName);
             } catch (IOException ex) {
@@ -4326,6 +4364,7 @@ namespace SourceGen {
             ApplyUndoableChanges(cs);
         }
 
+        // Disable "analyze uncategorized data" for best results.
         public void Debug_ApplyPlatformSymbols() {
             ChangeSet cs = new ChangeSet(1);
 

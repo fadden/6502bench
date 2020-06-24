@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
 using Microsoft.Win32;
 
 using Asm65;
-using System.Text;
-using System.Windows.Media;
 
 namespace SourceGen.Tools.WpfGui {
     /// <summary>

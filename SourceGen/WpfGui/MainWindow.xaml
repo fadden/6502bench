@@ -64,6 +64,7 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="CloseCmd" Text="Close"/>
             <RoutedUICommand x:Key="ConcatenateFilesCmd" Text="Concatenate Files..."/>
+            <RoutedUICommand x:Key="ConvertOmfCmd" Text="Convert OMF..."/>
             <RoutedUICommand x:Key="CreateLocalVariableTableCmd" Text="Create Local Variable Table..."/>
             <RoutedUICommand x:Key="DeleteMlcCmd" Text="Delete Note/Long Comment">
                 <RoutedUICommand.InputGestures>
@@ -221,6 +222,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="CloseCmd_Executed"/>
         <CommandBinding Command="{StaticResource ConcatenateFilesCmd}"
                         Executed="ConcatenateFilesCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ConvertOmfCmd}"
+                        Executed="ConvertOmfCmd_Executed"/>
         <CommandBinding Command="{StaticResource CreateLocalVariableTableCmd}"
                         CanExecute="CanCreateLocalVariableTable" Executed="CreateLocalVariableTableCmd_Executed"/>
         <CommandBinding Command="{StaticResource DeleteMlcCmd}"
@@ -426,6 +429,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
                 <MenuItem Command="{StaticResource ConcatenateFilesCmd}"/>
                 <MenuItem Command="{StaticResource SliceFilesCmd}"/>
+                <MenuItem Command="{StaticResource ConvertOmfCmd}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="Help"/>

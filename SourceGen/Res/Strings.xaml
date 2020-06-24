@@ -137,6 +137,7 @@ limitations under the License.
     <system:String x:Key="str_OpenDataLoadFailedFmt">The file could not be opened: {0}.</system:String>
     <system:String x:Key="str_OpenDataPartialRead">Unable to read the entire file</system:String>
     <system:String x:Key="str_OpenDataTooLargeFmt">File is too large ({0:N0} KiB, max is {1:N0} KiB).</system:String>
+    <system:String x:Key="str_OpenDataTooSmallFmt">File is too small ({0} bytes).</system:String>
     <system:String x:Key="str_OpenDataWrongLengthFmt">The file is {0:N0} bytes long, but the project expected {1:N0}.</system:String>
     <system:String x:Key="str_OpenDataWrongCrcFmt">The file has CRC {0}, but the project expected {1}.</system:String>
     <system:String x:Key="str_OperationFailed">Failed</system:String>

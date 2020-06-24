@@ -85,6 +85,10 @@
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\ApplesoftToHtml.cs" />
+    <Compile Include="Tools\Omf\OmfFile.cs" />
+    <Compile Include="Tools\Omf\WpfGui\OmfViewer.xaml.cs">
+      <DependentUpon>OmfViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\VirtualHexDump.cs" />
     <Compile Include="Tools\WpfGui\FileConcatenator.xaml.cs">
       <DependentUpon>FileConcatenator.xaml</DependentUpon>
@@ -273,6 +277,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tests\WpfGui\GenTestRunner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\Omf\WpfGui\OmfViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
