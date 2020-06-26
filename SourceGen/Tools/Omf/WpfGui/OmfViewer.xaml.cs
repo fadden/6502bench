@@ -38,11 +38,41 @@ namespace SourceGen.Tools.Omf.WpfGui {
         }
 
         public class SegmentListItem {
-            public int SegNum { get; private set; }
+            private OmfSegment mOmfSeg;
 
-            // TODO: take OMFSegment obj
-            public SegmentListItem(int segNum) {
-                SegNum = segNum;
+            public int SegNum {
+                get {
+                    return mOmfSeg.SegNum;
+                }
+            }
+            public string Kind {
+                get {
+                    return mOmfSeg.Kind.ToString();
+                }
+            }
+            public string LoadName {
+                get {
+                    return mOmfSeg.LoadName;
+                }
+            }
+            public string SegName {
+                get {
+                    return mOmfSeg.SegName;
+                }
+            }
+            public int MemLength {
+                get {
+                    return mOmfSeg.Length;
+                }
+            }
+            public int FileLength {
+                get {
+                    return mOmfSeg.FileLength;
+                }
+            }
+
+            public SegmentListItem(OmfSegment omfSeg) {
+                mOmfSeg = omfSeg;
             }
         }
 
@@ -57,8 +87,12 @@ namespace SourceGen.Tools.Omf.WpfGui {
             mPathName = pathName;
             mFileData = data;
 
-            SegmentListItems.Add(new SegmentListItem(123));
-            SegmentListItems.Add(new SegmentListItem(456));
+            OmfFile omfFile = new OmfFile(data);
+            omfFile.Analyze();
+
+            foreach (OmfSegment omfSeg in omfFile.SegmentList) {
+                SegmentListItems.Add(new SegmentListItem(omfSeg));
+            }
         }
 
         private void SegmentList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {

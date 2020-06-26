@@ -61,22 +61,22 @@ limitations under the License.
             <DataGrid.Resources>
                 <!-- make the no-focus color the same as the in-focus color -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                                     Color="{x:Static SystemColors.HighlightColor}"/>
+                                 Color="{x:Static SystemColors.HighlightColor}"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
-                                     Color="{x:Static SystemColors.HighlightTextColor}"/>
+                                 Color="{x:Static SystemColors.HighlightTextColor}"/>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Num" Width="50" Binding="{Binding SegNum}"/>
-                <DataGridTextColumn Header="Type" Width="72" Binding="{Binding Value}"/>
-                <DataGridTextColumn Header="LoadName" Width="100" Binding="{Binding Type}"/>
-                <DataGridTextColumn Header="SegName" Width="100" Binding="{Binding Width}"/>
-                <DataGridTextColumn Header="File Size" Width="100" Binding="{Binding Comment}"/>
-                <DataGridTextColumn Header="Mem Size Size" Width="100" Binding="{Binding Comment}"/>
+                <DataGridTextColumn Header="SEGNUM" Width="50" Binding="{Binding SegNum}"/>
+                <DataGridTextColumn Header="KIND" Width="80" Binding="{Binding Kind}"/>
+                <DataGridTextColumn Header="LOADNAME" Width="100" Binding="{Binding LoadName}"/>
+                <DataGridTextColumn Header="SEGNAME" Width="100" Binding="{Binding SegName}"/>
+                <DataGridTextColumn Header="LENGTH" Width="80" Binding="{Binding MemLength}"/>
+                <DataGridTextColumn Header="File Length" Width="100" Binding="{Binding FileLength}"/>
             </DataGrid.Columns>
         </DataGrid>
 
         <TextBlock Grid.Row="3" Text="File notes:" Margin="0,8,0,0"/>
-        <TextBox Grid.Row="4" Margin="0,4,0,0" Height="50"
+        <TextBox Grid.Row="4" Margin="0,4,0,0" Height="60"
                  Text="Test&#x0d;stuff1&#x0d;stuff2&#x0d;stuff3"
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto">
         </TextBox>
