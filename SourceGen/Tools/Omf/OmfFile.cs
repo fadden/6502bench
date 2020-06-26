@@ -38,8 +38,8 @@ namespace SourceGen.Tools.Omf {
     ///   Appendix F describes OMF v2.1, and Chapter 8 has some useful information about
     ///   how the loader works (e.g. page 205).
     /// - "Undocumented Secrets of the Apple IIGS System Loader" by Neil Parker,
-    ///   http://nparker.llx.com/a2/loader.html . Among other things it documents ExpressLoad
-    ///   segments, something Apple apparently never did.
+    ///   http://nparker.llx.com/a2/loader.html .  Among other things it documents the
+    ///   contents of ExpressLoad segments, which I haven't found in an official reference.
     /// - Apple IIgs Tech Note #66, "ExpressLoad Philosophy".
     ///
     /// Related:
@@ -76,18 +76,19 @@ namespace SourceGen.Tools.Omf {
             Object,             // output of assembler/compiler, before linking
             Library,            // static code library
             RunTimeLibrary,     // dynamic shared library
+            Indeterminate,      // valid OMF, but type is indeterminate
             Foreign             // not OMF, or not IIgs OMF
         }
         public FileKind OmfFileKind { get; private set; }
 
         private bool mIsDamaged;
 
-        private string mDamageMsg = string.Empty;
-
         private List<OmfSegment> mSegmentList = new List<OmfSegment>();
         public List<OmfSegment> SegmentList {
             get { return mSegmentList; }
         }
+
+        public List<string> MessageList { get; private set; } = new List<string>();
 
 
         /// <summary>
@@ -105,7 +106,13 @@ namespace SourceGen.Tools.Omf {
             OmfSegment.ParseResult result = DoAnalyze(false);
             if (result == OmfSegment.ParseResult.IsLibrary ||
                     result == OmfSegment.ParseResult.Failure) {
-                DoAnalyze(true);
+                // Failed; try again as a library.
+                List<string> firstFail = new List<string>(MessageList);
+                result = DoAnalyze(true);
+                if (result == OmfSegment.ParseResult.Failure) {
+                    // Failed both ways.  Report the failures from the non-library attempt.
+                    MessageList = firstFail;
+                }
             }
         }
 
@@ -114,24 +121,32 @@ namespace SourceGen.Tools.Omf {
             int offset = 0;
             int len = mFileData.Length;
 
+            List<string> msgs = new List<string>();
+
             while (len > 0) {
-                OmfSegment.ParseResult result =
-                    OmfSegment.ParseSegment(mFileData, offset, parseAsLibrary, out OmfSegment seg);
-                if (result == OmfSegment.ParseResult.Failure) {
-                    // parsing failed; reject file or stop early
-                    if (first) {
-                        OmfFileKind = FileKind.Foreign;
-                    } else {
-                        mIsDamaged = true;
-                        mDamageMsg = string.Format("File may be damaged; ignoring last {0} bytes",
-                            mFileData.Length - offset);
-                    }
-                    return result;
-                } else if (result == OmfSegment.ParseResult.IsLibrary) {
+                OmfSegment.ParseResult result = OmfSegment.ParseSegment(mFileData, offset,
+                    parseAsLibrary, msgs, out OmfSegment seg);
+
+                MessageList.Clear();
+                foreach (string str in msgs) {
+                    MessageList.Add(str);
+                }
+
+                if (result == OmfSegment.ParseResult.IsLibrary) {
                     // Need to start over in library mode.
                     Debug.WriteLine("Restarting in library mode");
                     return result;
+                } else if (result == OmfSegment.ParseResult.Failure) {
+                    // Could be a library we failed to parse, could be a totally bad file.
+                    // If we were on the first segment, fail immediately so we can retry as
+                    // library.  If not, it's probably not a library (assuming the Library
+                    // Dictionary segment appears first), but rather a partially-bad OMF.
+                    if (first) {
+                        return result;
+                    }
+                    break;
                 }
+                first = false;
 
                 Debug.Assert(seg.FileLength > 0);
                 mSegmentList.Add(seg);

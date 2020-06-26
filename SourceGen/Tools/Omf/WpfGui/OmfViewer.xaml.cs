@@ -19,15 +19,19 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+
+using Asm65;
 
 namespace SourceGen.Tools.Omf.WpfGui {
     /// <summary>
     /// Apple IIgs OMF file viewer.
     /// </summary>
     public partial class OmfViewer : Window, INotifyPropertyChanged {
-        private string mPathName;
         private byte[] mFileData;
+        private OmfFile mOmfFile;
+        private Formatter mFormatter;
 
         //private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
 
@@ -38,65 +42,81 @@ namespace SourceGen.Tools.Omf.WpfGui {
         }
 
         public class SegmentListItem {
-            private OmfSegment mOmfSeg;
+            public OmfSegment OmfSeg { get; private set; }
 
             public int SegNum {
-                get {
-                    return mOmfSeg.SegNum;
-                }
+                get { return OmfSeg.SegNum; }
+            }
+            public string Version {
+                get { return OmfSegment.VersionToString(OmfSeg.Version); }
             }
             public string Kind {
-                get {
-                    return mOmfSeg.Kind.ToString();
-                }
+                get { return OmfSegment.KindToString(OmfSeg.Kind); }
             }
             public string LoadName {
-                get {
-                    return mOmfSeg.LoadName;
-                }
+                get { return OmfSeg.LoadName; }
             }
             public string SegName {
-                get {
-                    return mOmfSeg.SegName;
-                }
+                get { return OmfSeg.SegName; }
             }
-            public int MemLength {
-                get {
-                    return mOmfSeg.Length;
-                }
+            public int Length {
+                get { return OmfSeg.Length; }
             }
             public int FileLength {
-                get {
-                    return mOmfSeg.FileLength;
-                }
+                get { return OmfSeg.FileLength; }
             }
 
             public SegmentListItem(OmfSegment omfSeg) {
-                mOmfSeg = omfSeg;
+                OmfSeg = omfSeg;
+            }
+            public override string ToString() {
+                return "[SegmentListItem " + OmfSeg + "]";
             }
         }
 
         public List<SegmentListItem> SegmentListItems { get; private set; } = new List<SegmentListItem>();
 
+        private string mPathName;
+        public string PathName {
+            get { return mPathName; }
+            set { mPathName = value; OnPropertyChanged(); }
+        }
 
-        public OmfViewer(Window owner, string pathName, byte[] data) {
+        private string mMessageStrings;
+        public string MessageStrings {
+            get { return mMessageStrings; }
+            set { mMessageStrings = value; OnPropertyChanged(); }
+        }
+
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="owner">Parent window.</param>
+        /// <param name="pathName">Path to file on disk.  Only used for display.</param>
+        /// <param name="data">File contents.</param>
+        public OmfViewer(Window owner, string pathName, byte[] data, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
-            mPathName = pathName;
+            PathName = pathName;
             mFileData = data;
+            mFormatter = formatter;
 
-            OmfFile omfFile = new OmfFile(data);
-            omfFile.Analyze();
+            mOmfFile = new OmfFile(data);
+            mOmfFile.Analyze();
 
-            foreach (OmfSegment omfSeg in omfFile.SegmentList) {
+            foreach (OmfSegment omfSeg in mOmfFile.SegmentList) {
                 SegmentListItems.Add(new SegmentListItem(omfSeg));
             }
+            MessageStrings = string.Join("\r\n", mOmfFile.MessageList.ToArray());
         }
 
         private void SegmentList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            Debug.WriteLine("DCLICK");
+            SegmentListItem item = (SegmentListItem)((DataGrid)sender).SelectedItem;
+            OmfSegmentViewer dlg = new OmfSegmentViewer(this, mOmfFile, item.OmfSeg, mFormatter);
+            dlg.ShowDialog();
         }
     }
 }

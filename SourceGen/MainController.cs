@@ -4177,7 +4177,7 @@ namespace SourceGen {
             }
 
             Tools.Omf.WpfGui.OmfViewer ov =
-                new Tools.Omf.WpfGui.OmfViewer(this.mMainWin, pathName, fileData);
+                new Tools.Omf.WpfGui.OmfViewer(this.mMainWin, pathName, fileData, mFormatter);
             ov.ShowDialog();
         }
 

@@ -54,6 +54,7 @@
     </Compile>
     <Compile Include="Helper.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
+    <Compile Include="ListToStringConverter.cs" />
     <Compile Include="MultiKeyInputGesture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

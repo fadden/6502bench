@@ -41,12 +41,12 @@ limitations under the License.
         
         <DockPanel Grid.Row="0">
             <TextBlock DockPanel.Dock="Left" Text="File:" Margin="0,1,0,0"/>
-            <TextBox DockPanel.Dock="Left" IsReadOnly="True" Margin="8,0,0,0" Text="C:\\File\Name\Here"/>
+            <TextBox DockPanel.Dock="Left" IsReadOnly="True" Margin="8,0,0,0" Text="{Binding PathName}"/>
         </DockPanel>
 
         <TextBlock Grid.Row="1" Text="File is a {something}, with {N} segments" Margin="0,8,0,0"/>
 
-        <DataGrid Name="segmentList" Grid.Row="2" Height="200" Margin="0,8,0,0"
+        <DataGrid Name="segmentList" Grid.Row="2" Height="210" Margin="0,8,0,0"
                   IsReadOnly="True"
                   ItemsSource="{Binding SegmentListItems}"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -67,17 +67,17 @@ limitations under the License.
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="SEGNUM" Width="50" Binding="{Binding SegNum}"/>
-                <DataGridTextColumn Header="KIND" Width="80" Binding="{Binding Kind}"/>
-                <DataGridTextColumn Header="LOADNAME" Width="100" Binding="{Binding LoadName}"/>
-                <DataGridTextColumn Header="SEGNAME" Width="100" Binding="{Binding SegName}"/>
-                <DataGridTextColumn Header="LENGTH" Width="80" Binding="{Binding MemLength}"/>
-                <DataGridTextColumn Header="File Length" Width="100" Binding="{Binding FileLength}"/>
+                <DataGridTextColumn Header="VER" Width="40" Binding="{Binding Version}"/>
+                <DataGridTextColumn Header="KIND" Width="100" Binding="{Binding Kind}"/>
+                <DataGridTextColumn Header="LOADNAME" Width="80" Binding="{Binding LoadName}"/>
+                <DataGridTextColumn Header="SEGNAME" Width="130" Binding="{Binding SegName}"/>
+                <DataGridTextColumn Header="LENGTH" Width="80" Binding="{Binding Length}"/>
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="3" Text="File notes:" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="3" Text="Notes and errors:" Margin="0,8,0,0"/>
         <TextBox Grid.Row="4" Margin="0,4,0,0" Height="60"
-                 Text="Test&#x0d;stuff1&#x0d;stuff2&#x0d;stuff3"
+                 Text="{Binding MessageStrings}"
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto">
         </TextBox>
 
