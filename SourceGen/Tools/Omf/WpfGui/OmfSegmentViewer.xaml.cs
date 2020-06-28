@@ -26,7 +26,7 @@ namespace SourceGen.Tools.Omf.WpfGui {
     /// Apple IIgs OMF segment viewer.
     /// </summary>
     public partial class OmfSegmentViewer : Window, INotifyPropertyChanged {
-        private OmfFile mOmfFile;
+        //private OmfFile mOmfFile;
         private OmfSegment mOmfSeg;
         private Formatter mFormatter;
 
@@ -36,10 +36,16 @@ namespace SourceGen.Tools.Omf.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private string mFileOffsetLen;
-        public string FileOffsetLen {
-            get { return mFileOffsetLen; }
-            set { mFileOffsetLen = value; OnPropertyChanged(); }
+        private string mFileOffsetLenStr;
+        public string FileOffsetLenStr {
+            get { return mFileOffsetLenStr; }
+            set { mFileOffsetLenStr = value; OnPropertyChanged(); }
+        }
+
+        private string mRecordHeaderStr;
+        public string RecordHeaderStr {
+            get { return mRecordHeaderStr; }
+            set { mRecordHeaderStr = value; OnPropertyChanged(); }
         }
 
         public class HeaderItem {
@@ -55,12 +61,7 @@ namespace SourceGen.Tools.Omf.WpfGui {
         }
         public List<HeaderItem> HeaderItems { get; private set; } = new List<HeaderItem>();
 
-        public class RecordItem {
-            public string Type { get; private set; }
-            public string Len { get; private set; }
-            public string Value { get; private set; }
-        }
-        public List<RecordItem> RecordItems { get; private set; } = new List<RecordItem>();
+        public List<OmfRecord> RecordItems { get; private set; }
 
         public class RelocItem {
             public string Offset { get; private set; }
@@ -84,17 +85,22 @@ namespace SourceGen.Tools.Omf.WpfGui {
             Owner = owner;
             DataContext = this;
 
-            mOmfFile = omfFile;
+            //mOmfFile = omfFile;
             mOmfSeg = omfSeg;
             mFormatter = formatter;
 
             string fmt = (string)FindResource("str_FileOffsetLenFmt");
-            FileOffsetLen = string.Format(fmt,
+            FileOffsetLenStr = string.Format(fmt,
                 mFormatter.FormatOffset24(omfSeg.FileOffset),
                 omfSeg.FileLength,
                 mFormatter.FormatHexValue(omfSeg.FileLength, 4));
 
             GenerateHeaderItems();
+
+            RecordItems = omfSeg.Records;
+
+            fmt = (string)FindResource("str_RecordHeaderFmt");
+            RecordHeaderStr = string.Format(fmt, RecordItems.Count);
         }
 
         private void GenerateHeaderItems() {

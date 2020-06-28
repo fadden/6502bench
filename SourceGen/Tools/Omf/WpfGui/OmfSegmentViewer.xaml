@@ -30,6 +30,7 @@ limitations under the License.
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <system:String x:Key="str_FileOffsetLenFmt">File offset {0}, length {1} ({2})</system:String>
+        <system:String x:Key="str_RecordHeaderFmt">Records ({0}):</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -44,7 +45,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{Binding FileOffsetLen, FallbackValue=File Offset / Length}" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="0" Text="{Binding FileOffsetLenStr, FallbackValue=File Offset / Length}" Margin="0,8,0,0"/>
 
         <TextBlock Grid.Row="1" Text="Header fields:" Margin="0,8,0,0"/>
         <DataGrid Name="headerList" Grid.Row="2" Height="130" Margin="0,8,0,0"
@@ -73,7 +74,7 @@ limitations under the License.
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="3" Text="Records {N}:" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="3" Text="{Binding RecordHeaderStr, FallbackValue=Records (123):}" Margin="0,8,0,0"/>
         <DataGrid Name="recordList" Grid.Row="4" Height="130" Margin="0,8,0,0"
                   IsReadOnly="True"
                   ItemsSource="{Binding RecordItems}"
@@ -94,9 +95,9 @@ limitations under the License.
                                  Color="{x:Static SystemColors.HighlightTextColor}"/>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Type" Width="100" Binding="{Binding Type}"/>
-                <DataGridTextColumn Header="Len" Width="40" Binding="{Binding Len}"/>
-                <DataGridTextColumn Header="Value" Width="300" Binding="{Binding Value}"/>
+                <DataGridTextColumn Header="OpName" Width="80" Binding="{Binding OpName}"/>
+                <DataGridTextColumn Header="Length" Width="80" Binding="{Binding Length}"/>
+                <DataGridTextColumn Header="Value" Width="380" Binding="{Binding Value}"/>
             </DataGrid.Columns>
         </DataGrid>
 

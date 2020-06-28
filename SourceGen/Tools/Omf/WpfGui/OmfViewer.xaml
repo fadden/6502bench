@@ -75,7 +75,7 @@ limitations under the License.
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="3" Text="Notes and errors:" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="3" Text="Notes and error messages:" Margin="0,8,0,0"/>
         <TextBox Grid.Row="4" Margin="0,4,0,0" Height="60"
                  Text="{Binding MessageStrings}"
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto">

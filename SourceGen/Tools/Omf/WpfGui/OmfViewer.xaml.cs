@@ -105,7 +105,7 @@ namespace SourceGen.Tools.Omf.WpfGui {
             mFormatter = formatter;
 
             mOmfFile = new OmfFile(data);
-            mOmfFile.Analyze();
+            mOmfFile.Analyze(mFormatter);
 
             foreach (OmfSegment omfSeg in mOmfFile.SegmentList) {
                 SegmentListItems.Add(new SegmentListItem(omfSeg));

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using Asm65;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,14 +25,18 @@ namespace SourceGen.Tools.Omf {
     /// <remarks>
     /// OMF files are a series of segments.  There is no file header or identifying information.
     /// In some cases the length is expected to be a multiple of 512 bytes, in others it isn't.
+    /// Each segment is comprised of a header, followed by a series of records.
     ///
     /// There's no structural limitation on mixing and matching segments, whether different
     /// versions or different types.  The file format provides a structure in which various
     /// things may be stored, but does not provide a way to tell an observer what is contained
-    /// within (the ProDOS file type is supposed to do that).
+    /// within (the ProDOS file type is supposed to do that).  A given file may be a Load
+    /// file (handled by the System Loader), Object file (fed to a linker), Library file
+    /// (also fed to a linker), or Run-Time Library (used by both the linker and the loader).
     ///
     /// References:
-    /// - (OMF "v0" is documented in an Orca/M manual?)
+    /// - IIgs Orca/M 2.0 manual.  Appendix B documents OMF v0, v1, and v2.1 Load files.
+    ///   (This is included with Opus ][.)
     /// - "Apple IIgs Programmer's Workshop Reference".  Chapter 7, page 228, describes
     ///   OMF v1.0 and v2.0.
     /// - "Apple IIgs GS/OS Reference, for GS/OS System Software Version 5.0 and later".
@@ -50,22 +55,6 @@ namespace SourceGen.Tools.Omf {
         public const int MIN_FILE_SIZE = OmfSegment.MIN_HEADER_V0;
         public const int MAX_FILE_SIZE = (1 << 24) - 1;                 // cap at 16MB
 
-        // TODO:
-        // - has an overall file type (load, object, RTL)
-        //   - determine with a prioritized series of "could this be ____" checks
-        // - holds list of OmfSegment
-        // - has a list of warnings and errors that arose during parsing
-        // - holds on to byte[] with data
-        // OmfSegment:
-        // - header (common data, plus name/value dict with version-specific fields for display)
-        // - ref back to OmfFile for byte[] access?
-        // - list of OmfRecord
-        // - file-type-specific stuff can be generated and cached in second pass, e.g.
-        //   generate a full relocation dictionary for load files (can't do this until we
-        //   know the overall file type, which we can't know until all segments have been
-        //   processed a bit)
-
-        private byte[] mFileData;
 
         /// <summary>
         /// Overall file contents, determined by analysis.
@@ -81,6 +70,7 @@ namespace SourceGen.Tools.Omf {
         }
         public FileKind OmfFileKind { get; private set; }
 
+        private byte[] mFileData;
         private bool mIsDamaged;
 
         private List<OmfSegment> mSegmentList = new List<OmfSegment>();
@@ -102,13 +92,13 @@ namespace SourceGen.Tools.Omf {
             OmfFileKind = FileKind.Unknown;
         }
 
-        public void Analyze() {
-            OmfSegment.ParseResult result = DoAnalyze(false);
+        public void Analyze(Formatter formatter) {
+            OmfSegment.ParseResult result = DoAnalyze(formatter, false);
             if (result == OmfSegment.ParseResult.IsLibrary ||
                     result == OmfSegment.ParseResult.Failure) {
                 // Failed; try again as a library.
                 List<string> firstFail = new List<string>(MessageList);
-                result = DoAnalyze(true);
+                result = DoAnalyze(formatter, true);
                 if (result == OmfSegment.ParseResult.Failure) {
                     // Failed both ways.  Report the failures from the non-library attempt.
                     MessageList = firstFail;
@@ -116,7 +106,7 @@ namespace SourceGen.Tools.Omf {
             }
         }
 
-        private OmfSegment.ParseResult DoAnalyze(bool parseAsLibrary) {
+        private OmfSegment.ParseResult DoAnalyze(Formatter formatter, bool parseAsLibrary) {
             bool first = true;
             int offset = 0;
             int len = mFileData.Length;
@@ -124,8 +114,15 @@ namespace SourceGen.Tools.Omf {
             List<string> msgs = new List<string>();
 
             while (len > 0) {
-                OmfSegment.ParseResult result = OmfSegment.ParseSegment(mFileData, offset,
+                OmfSegment.ParseResult result = OmfSegment.ParseHeader(mFileData, offset,
                     parseAsLibrary, msgs, out OmfSegment seg);
+                if (result == OmfSegment.ParseResult.Success) {
+                    if (!seg.ParseBody(formatter, msgs)) {
+                        OmfSegment.AddErrorMsg(msgs, offset, "parsing of segment " +
+                            seg.SegNum + " '" + seg.SegName + "' incomplete");
+                        //result = OmfSegment.ParseResult.Failure;
+                    }
+                }
 
                 MessageList.Clear();
                 foreach (string str in msgs) {
@@ -149,6 +146,7 @@ namespace SourceGen.Tools.Omf {
                 first = false;
 
                 Debug.Assert(seg.FileLength > 0);
+
                 mSegmentList.Add(seg);
                 offset += seg.FileLength;
                 len -= seg.FileLength;
