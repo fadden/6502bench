@@ -91,8 +91,14 @@ namespace SourceGen.Tools.Omf {
         /// </summary>
         public List<NameValueNote> RawValues = new List<NameValueNote>();
 
+        /// <summary>
+        /// All known OMF versions.
+        /// </summary>
         public enum SegmentVersion { v0_0, v1_0, v2_0, v2_1 }
 
+        /// <summary>
+        /// All known segment kinds.
+        /// </summary>
         public enum SegmentKind {
             Code = 0x00,
             Data = 0x01,
@@ -155,6 +161,9 @@ namespace SourceGen.Tools.Omf {
         // "The BANKSIZE and align restrictions are enforced by the linker, and violations
         // of them are unlikely in a load file."
 
+        /// <summary>
+        /// Record list, from body of segment.
+        /// </summary>
         public List<OmfRecord> Records = new List<OmfRecord>();
 
 
@@ -231,11 +240,12 @@ namespace SourceGen.Tools.Omf {
             newSeg.LabLen = data[offset + 0x0d];
             int numLen = data[offset + 0x0e];
             newSeg.BankSize = RawData.GetWord(data, offset + 0x10, 4, false);
-            newSeg.Org = RawData.GetWord(data, offset + 0x18, 4, false);
-            newSeg.Align = RawData.GetWord(data, offset + 0x1c, 4, false);
-            int numSex = data[offset + 0x20];
-            int dispName;
+            int numSex, dispName;
             if (newSeg.Version == SegmentVersion.v0_0) {
+                newSeg.Org = RawData.GetWord(data, offset + 0x14, 4, false);
+                newSeg.Align = RawData.GetWord(data, offset + 0x18, 4, false);
+                numSex = data[offset + 0x1c];
+                // 7 unused bytes follow
                 dispName = 0x24;
                 if (newSeg.LabLen == 0) {
                     newSeg.DispData = dispName + data[offset + dispName];
@@ -243,7 +253,11 @@ namespace SourceGen.Tools.Omf {
                     newSeg.DispData = dispName + LOAD_NAME_LEN;
                 }
             } else {
-                newSeg.LcBank = data[offset + 0x21];
+                newSeg.BankSize = RawData.GetWord(data, offset + 0x10, 4, false);
+                newSeg.Org = RawData.GetWord(data, offset + 0x18, 4, false);
+                newSeg.Align = RawData.GetWord(data, offset + 0x1c, 4, false);
+                numSex = data[offset + 0x20];
+                newSeg.LcBank = data[offset + 0x21];    // v1.0 only
                 newSeg.SegNum = RawData.GetWord(data, offset + 0x22, 2, false);
                 newSeg.Entry = RawData.GetWord(data, offset + 0x24, 4, false);
                 dispName = RawData.GetWord(data, offset + 0x28, 2, false);
@@ -263,7 +277,9 @@ namespace SourceGen.Tools.Omf {
                 newSeg.TempOrg = RawData.GetWord(data, offset + 0x2c, 4, false);
             }
 
-            // Extract Kind and its attributes.
+            // Extract Kind and its attributes.  The Orca/M 2.0 manual refers to the 1-byte
+            // field in v0/v1 as "TYPE" and the 2-byte field as "KIND", but we're generally
+            // following the GS/OS reference nomenclature.
             int kindByte, kindWord;
             if (newSeg.Version <= SegmentVersion.v1_0) {
                 kindByte = data[offset + 0x0c];
@@ -457,8 +473,9 @@ namespace SourceGen.Tools.Omf {
                 newSeg.AddRaw("undefined", RawData.GetWord(data, offset + 0x14, 4, false), 4,
                     string.Empty);
             }
-            newSeg.AddRaw("ORG", newSeg.Org, 4, string.Empty);
-            newSeg.AddRaw("ALIGN", newSeg.Align, 4, string.Empty);
+            newSeg.AddRaw("ORG", newSeg.Org, 4, (newSeg.Org != 0 ? "" : "relocatable"));
+            newSeg.AddRaw("ALIGN", newSeg.Align, 4,
+                "expecting 0, $0100, or $010000");
             newSeg.AddRaw("NUMSEX", numSex, 1, "must be 0");
             if (newSeg.Version == SegmentVersion.v1_0) {
                 newSeg.AddRaw("LCBANK", newSeg.LcBank, 1, string.Empty);
@@ -497,8 +514,9 @@ namespace SourceGen.Tools.Omf {
                 }
 
                 if (omfRec.Op == OmfRecord.Opcode.END) {
-                    // v0/v1 pad to 512-byte block boundaries, so this is expected there, but v2.x
-                    // should be snug.  Doesn't have to be, but might indicate a parsing error.
+                    // v0/v1 pad to 512-byte block boundaries, so some slop is expected there,
+                    // but v2.x should be snug.  Doesn't have to be, but might indicate a
+                    // bug in the parser.
                     int remaining = (FileOffset + FileLength) - (offset + omfRec.Length);
                     Debug.Assert(remaining >= 0);
                     Debug.WriteLine("END record found, remaining space=" + remaining);
@@ -511,6 +529,55 @@ namespace SourceGen.Tools.Omf {
                 Records.Add(omfRec);
                 offset += omfRec.Length;
             }
+        }
+
+        /// <summary>
+        /// Tests to see whether the record collection is congruent with a Load file.
+        /// </summary>
+        public bool CheckRecords_LoadFile() {
+            bool constSection = true;
+            foreach (OmfRecord omfRec in Records) {
+                switch (omfRec.Op) {
+                    case OmfRecord.Opcode.LCONST:
+                    case OmfRecord.Opcode.DS:
+                        if (!constSection) {
+                            Debug.WriteLine("Found LCONST/DS past const section");
+                            return false;
+                        }
+                        break;
+                    case OmfRecord.Opcode.RELOC:
+                    case OmfRecord.Opcode.cRELOC:
+                    case OmfRecord.Opcode.INTERSEG:
+                    case OmfRecord.Opcode.cINTERSEG:
+                    case OmfRecord.Opcode.SUPER:
+                        constSection = false;
+                        break;
+                    default:
+                        // incompatible record
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Tests to see whether the record collection is congruent with an Object or Library file.
+        /// </summary>
+        public bool CheckRecords_ObjectOrLib() {
+            foreach (OmfRecord omfRec in Records) {
+                switch (omfRec.Op) {
+                    case OmfRecord.Opcode.RELOC:
+                    case OmfRecord.Opcode.cRELOC:
+                    case OmfRecord.Opcode.INTERSEG:
+                    case OmfRecord.Opcode.cINTERSEG:
+                    case OmfRecord.Opcode.SUPER:
+                    case OmfRecord.Opcode.ENTRY:
+                        return false;
+                    default:
+                        break;
+                }
+            }
+            return true;
         }
 
         //

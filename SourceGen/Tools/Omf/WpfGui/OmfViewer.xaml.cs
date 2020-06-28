@@ -82,6 +82,12 @@ namespace SourceGen.Tools.Omf.WpfGui {
             set { mPathName = value; OnPropertyChanged(); }
         }
 
+        private string mFileSummaryStr;
+        public string FileSummaryStr {
+            get { return mFileSummaryStr; }
+            set { mFileSummaryStr = value; OnPropertyChanged(); }
+        }
+
         private string mMessageStrings;
         public string MessageStrings {
             get { return mMessageStrings; }
@@ -106,6 +112,39 @@ namespace SourceGen.Tools.Omf.WpfGui {
 
             mOmfFile = new OmfFile(data);
             mOmfFile.Analyze(mFormatter);
+
+            string summary;
+            if (mOmfFile.OmfFileKind == OmfFile.FileKind.Foreign) {
+                summary = (string)FindResource("str_OmfFileNot");
+            } else {
+                string fileStr;
+                switch (mOmfFile.OmfFileKind) {
+                    case OmfFile.FileKind.Indeterminate:
+                        fileStr = (string)FindResource("str_OmfFileIndeterminateStr");
+                        break;
+                    case OmfFile.FileKind.Load:
+                        fileStr = (string)FindResource("str_OmfFileLoadStr");
+                        break;
+                    case OmfFile.FileKind.Object:
+                        fileStr = (string)FindResource("str_OmfFileObjectStr");
+                        break;
+                    case OmfFile.FileKind.Library:
+                        fileStr = (string)FindResource("str_OmfFileLibraryStr");
+                        break;
+                    default:
+                        fileStr = (string)FindResource("str_OmfFileUnknownStr");
+                        break;
+                }
+
+                string fmt;
+                if (mOmfFile.SegmentList.Count == 1) {
+                    fmt = (string)FindResource("str_OmfFileSummaryFmt");
+                } else {
+                    fmt = (string)FindResource("str_OmfFileSummaryPlFmt");
+                }
+                summary = string.Format(fmt, fileStr, mOmfFile.SegmentList.Count);
+            }
+            FileSummaryStr = summary;
 
             foreach (OmfSegment omfSeg in mOmfFile.SegmentList) {
                 SegmentListItems.Add(new SegmentListItem(omfSeg));

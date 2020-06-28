@@ -92,6 +92,9 @@ namespace SourceGen.Tools.Omf {
             OmfFileKind = FileKind.Unknown;
         }
 
+        /// <summary>
+        /// Analyzes the contents of an OMF file.
+        /// </summary>
         public void Analyze(Formatter formatter) {
             OmfSegment.ParseResult result = DoAnalyze(formatter, false);
             if (result == OmfSegment.ParseResult.IsLibrary ||
@@ -104,8 +107,14 @@ namespace SourceGen.Tools.Omf {
                     MessageList = firstFail;
                 }
             }
+
+            OmfFileKind = DetermineFileKind();
+            Debug.WriteLine("File kind is " + OmfFileKind);
         }
 
+        /// <summary>
+        /// Analyzes the contents of an OMF file as a library or non-library.
+        /// </summary>
         private OmfSegment.ParseResult DoAnalyze(Formatter formatter, bool parseAsLibrary) {
             bool first = true;
             int offset = 0;
@@ -155,6 +164,86 @@ namespace SourceGen.Tools.Omf {
 
             Debug.WriteLine("Num segments = " + mSegmentList.Count);
             return OmfSegment.ParseResult.Success;
+        }
+
+        /// <summary>
+        /// Analyzes the file to determine the file kind.
+        /// </summary>
+        private FileKind DetermineFileKind() {
+            if (mSegmentList.Count == 0) {
+                // Couldn't find a single valid segment, this is not OMF.
+                return FileKind.Foreign;
+            }
+
+            // The rules:
+            // * Load files may contain any kind of segment except LibraryDict.  Their
+            //   segments must be LCONST/DS followed by relocation records
+            //   (INTERSEG, cINTERSEG, RELOC, cRELOC, SUPER).
+            // * Object files have Code and Data segments, and may not contain relocation
+            //   records or ENTRY.
+            // * Library files are like Object files, but start with a LibraryDict segment.
+            // * Run-Time Library files have an initial segment with ENTRY records.  (These
+            //   are not supported because I've never actually seen one... the few files I've
+            //   found with the RTL filetype ($B4) did not have any ENTRY records.)
+
+            bool maybeLoad = true;
+            bool maybeObject = true;
+            bool maybeLibrary = true;
+
+            foreach (OmfSegment omfSeg in mSegmentList) {
+                switch (omfSeg.Kind) {
+                    case OmfSegment.SegmentKind.Code:
+                    case OmfSegment.SegmentKind.Data:
+                        // Allowed anywhere.
+                        break;
+                    case OmfSegment.SegmentKind.JumpTable:
+                    case OmfSegment.SegmentKind.PathName:
+                    case OmfSegment.SegmentKind.Init:
+                    case OmfSegment.SegmentKind.AbsoluteBank:
+                    case OmfSegment.SegmentKind.DpStack:
+                        maybeObject = maybeLibrary = false;
+                        break;
+                    case OmfSegment.SegmentKind.LibraryDict:
+                        maybeLoad = false;
+                        maybeObject = false;
+                        break;
+                    default:
+                        Debug.Assert(false, "Unexpected segment kind " + omfSeg.Kind);
+                        break;
+                }
+            }
+
+            //
+            // Initial screening complete.  Dig into the segment records to see if they're
+            // compatible.
+            //
+
+            if (maybeLoad) {
+                foreach (OmfSegment omfSeg in mSegmentList) {
+                    if (!omfSeg.CheckRecords_LoadFile()) {
+                        maybeLoad = false;
+                        break;
+                    }
+                }
+                if (maybeLoad) {
+                    return FileKind.Load;
+                }
+            }
+            if (maybeLibrary || maybeObject) {
+                foreach (OmfSegment omfSeg in mSegmentList) {
+                    if (!omfSeg.CheckRecords_ObjectOrLib()) {
+                        maybeLibrary = maybeObject = false;
+                        break;
+                    }
+                }
+                if (maybeObject) {
+                    return FileKind.Object;
+                } else {
+                    return FileKind.Library;
+                }
+            }
+
+            return FileKind.Indeterminate;
         }
     }
 }

@@ -48,7 +48,7 @@ limitations under the License.
         <TextBlock Grid.Row="0" Text="{Binding FileOffsetLenStr, FallbackValue=File Offset / Length}" Margin="0,8,0,0"/>
 
         <TextBlock Grid.Row="1" Text="Header fields:" Margin="0,8,0,0"/>
-        <DataGrid Name="headerList" Grid.Row="2" Height="130" Margin="0,8,0,0"
+        <DataGrid Name="headerList" Grid.Row="2" Height="145" Margin="0,8,0,0"
                   IsReadOnly="True"
                   ItemsSource="{Binding HeaderItems}"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -75,7 +75,7 @@ limitations under the License.
         </DataGrid>
 
         <TextBlock Grid.Row="3" Text="{Binding RecordHeaderStr, FallbackValue=Records (123):}" Margin="0,8,0,0"/>
-        <DataGrid Name="recordList" Grid.Row="4" Height="130" Margin="0,8,0,0"
+        <DataGrid Name="recordList" Grid.Row="4" Height="145" Margin="0,8,0,0"
                   IsReadOnly="True"
                   ItemsSource="{Binding RecordItems}"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -102,7 +102,7 @@ limitations under the License.
         </DataGrid>
 
         <TextBlock Grid.Row="5" Text="Relocation table (for Load file segment):" Margin="0,8,0,0"/>
-        <DataGrid Name="relocList" Grid.Row="6" Height="130" Margin="0,8,0,0"
+        <DataGrid Name="relocList" Grid.Row="6" Height="145" Margin="0,8,0,0"
                   IsReadOnly="True"
                   ItemsSource="{Binding RelocItems}"
                   FontFamily="{StaticResource GeneralMonoFont}"

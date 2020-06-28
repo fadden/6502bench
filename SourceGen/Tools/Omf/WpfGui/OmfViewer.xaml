@@ -20,6 +20,7 @@ limitations under the License.
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.Tools.Omf.WpfGui"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="OMF File Viewer"
         SizeToContent="Height" Width="600" ResizeMode="NoResize"
@@ -27,6 +28,16 @@ limitations under the License.
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <system:String x:Key="str_OmfFileUnknownStr">a ??? file</system:String>
+        <system:String x:Key="str_OmfFileLoadStr">a Load file</system:String>
+        <system:String x:Key="str_OmfFileObjectStr">an Object file</system:String>
+        <system:String x:Key="str_OmfFileLibraryStr">a Library file</system:String>
+        <system:String x:Key="str_OmfFileIndeterminateStr">a file of indeterminate type</system:String>
+
+        <system:String x:Key="str_OmfFileSummaryFmt">This is {0}, with {1} segment</system:String>
+        <system:String x:Key="str_OmfFileSummaryPlFmt">This is {0}, with {1} segments</system:String>
+        <system:String x:Key="str_OmfFileNot">This is not an Apple II OMF file</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -44,7 +55,7 @@ limitations under the License.
             <TextBox DockPanel.Dock="Left" IsReadOnly="True" Margin="8,0,0,0" Text="{Binding PathName}"/>
         </DockPanel>
 
-        <TextBlock Grid.Row="1" Text="File is a {something}, with {N} segments" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="1" Text="{Binding FileSummaryStr, FallbackValue=This be blah with N segments}" Margin="0,8,0,0"/>
 
         <DataGrid Name="segmentList" Grid.Row="2" Height="210" Margin="0,8,0,0"
                   IsReadOnly="True"
