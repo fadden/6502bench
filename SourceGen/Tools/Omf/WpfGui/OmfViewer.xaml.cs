@@ -29,7 +29,6 @@ namespace SourceGen.Tools.Omf.WpfGui {
     /// Apple IIgs OMF file viewer.
     /// </summary>
     public partial class OmfViewer : Window, INotifyPropertyChanged {
-        private byte[] mFileData;
         private OmfFile mOmfFile;
         private Formatter mFormatter;
 
@@ -63,7 +62,7 @@ namespace SourceGen.Tools.Omf.WpfGui {
                 get { return OmfSeg.Length; }
             }
             public int FileLength {
-                get { return OmfSeg.FileLength; }
+                get { return OmfSeg.RawFileLength; }
             }
 
             public SegmentListItem(OmfSegment omfSeg) {
@@ -101,13 +100,13 @@ namespace SourceGen.Tools.Omf.WpfGui {
         /// <param name="owner">Parent window.</param>
         /// <param name="pathName">Path to file on disk.  Only used for display.</param>
         /// <param name="data">File contents.</param>
+        /// <param name="formatter">Text formatter.</param>
         public OmfViewer(Window owner, string pathName, byte[] data, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             PathName = pathName;
-            mFileData = data;
             mFormatter = formatter;
 
             mOmfFile = new OmfFile(data);

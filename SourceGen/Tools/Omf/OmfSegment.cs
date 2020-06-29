@@ -72,6 +72,8 @@ namespace SourceGen.Tools.Omf {
         // Length of LOADNAME field.
         private const int LOAD_NAME_LEN = 10;
 
+        private const int DISK_BLOCK_SIZE = 512;
+
         public class NameValueNote {
             public string Name { get; private set; }
             public object Value { get; private set; }
@@ -132,7 +134,8 @@ namespace SourceGen.Tools.Omf {
         //
 
         public int FileOffset { get; private set; }
-        public int FileLength { get; private set; }     // from BLKCNT or BYTECNT
+        public int RawFileLength { get; private set; }  // from BLKCNT or BYTECNT
+        public int FileLength { get; private set; }     // last block may be short
 
         public int ResSpc { get; private set; }
         public int Length { get; private set; }
@@ -165,6 +168,11 @@ namespace SourceGen.Tools.Omf {
         /// Record list, from body of segment.
         /// </summary>
         public List<OmfRecord> Records = new List<OmfRecord>();
+
+        /// <summary>
+        /// Relocation list, for segments in Load files.
+        /// </summary>
+        public List<OmfReloc> Relocs = new List<OmfReloc>();
 
 
         // Constructor is private; use ParseHeader() to create an instance.
@@ -321,9 +329,11 @@ namespace SourceGen.Tools.Omf {
 
             // We've got the basic pieces.  Handle the block-vs-byte debacle.
             int segLen;
+            bool asBlocks = false;
             if (newSeg.Version == SegmentVersion.v0_0) {
                 // Always block count.
-                segLen = blkByteCnt * 512;
+                segLen = blkByteCnt * DISK_BLOCK_SIZE;
+                asBlocks = true;
             } else if (newSeg.Version >= SegmentVersion.v2_0) {
                 // Always byte count.
                 segLen = blkByteCnt;
@@ -332,17 +342,14 @@ namespace SourceGen.Tools.Omf {
                 // files by checking for a nonzero SegNum field, but there's no reliable way
                 // to tell the difference between Object and Library while looking at a segment
                 // in isolation.
-                //
-                // I have found a couple of examples (e.g. BRIDGE.S16 in Davex v1.23, SYSTEM:START
-                // on an old Paintworks GS disk) where the file's length is shy of a multiple
-                // of 512, so we ought to handle that.
                 if (parseAsLibrary) {
                     segLen = blkByteCnt;
                 } else {
-                    segLen = blkByteCnt * 512;
+                    segLen = blkByteCnt * DISK_BLOCK_SIZE;
+                    asBlocks = true;
                 }
             }
-            newSeg.FileLength = segLen;
+            newSeg.RawFileLength = newSeg.FileLength = segLen;
 
             //
             // Perform validity checks.  If any of these fail, we're probably reading something
@@ -359,11 +366,21 @@ namespace SourceGen.Tools.Omf {
                 return ParseResult.Failure;
             }
             if (offset + segLen > data.Length) {
-                // Segment is longer than the file.  (This can happen easily in a static lib if
-                // we're not parsing it as such.)
-                AddErrorMsg(msgs, offset, "segment file length exceeds EOF (segLen=" + segLen +
-                    ", remaining=" + (data.Length - offset) + ")");
-                return ParseResult.Failure;
+                if (asBlocks && offset + segLen - data.Length < DISK_BLOCK_SIZE) {
+                    // I have found a few examples (e.g. BRIDGE.S16 in Davex v1.23, SYSTEM:START
+                    // on an old Paintworks GS disk) where the file's length doesn't fill out
+                    // the last block in the file.  If we continue, and the segment actually
+                    // does pass EOF, we'll fail while reading the records.
+                    AddInfoMsg(msgs, offset,
+                        "file EOF is not a multiple of 512; last segment may be truncated");
+                    newSeg.FileLength = data.Length - offset;
+                } else {
+                    // Segment is longer than the file.  (This can happen easily in a static lib if
+                    // we're not parsing it as such.)
+                    AddErrorMsg(msgs, offset, "segment file length exceeds EOF (segLen=" + segLen +
+                        ", remaining=" + (data.Length - offset) + ")");
+                    return ParseResult.Failure;
+                }
             }
             if (dispName < expectedDispName || dispName > (segLen - LOAD_NAME_LEN)) {
                 AddErrorMsg(msgs, offset, "invalid DISPNAME " + dispName + " (expected " +
@@ -456,7 +473,8 @@ namespace SourceGen.Tools.Omf {
             } else {
                 newSeg.AddRaw("undefined", data[offset + 0x0c], 1, string.Empty);
             }
-            newSeg.AddRaw("LABLEN", newSeg.LabLen, 1, string.Empty);
+            newSeg.AddRaw("LABLEN", newSeg.LabLen, 1,
+                (newSeg.LabLen == 0 ? "variable length" : "fixed length"));
             newSeg.AddRaw("NUMLEN", numLen, 1, "must be 4");
             newSeg.AddRaw("VERSION", data[offset + 0x0f], 1, VersionToString(newSeg.Version));
             newSeg.AddRaw("BANKSIZE", newSeg.BankSize, 4, string.Empty);
@@ -474,8 +492,16 @@ namespace SourceGen.Tools.Omf {
                     string.Empty);
             }
             newSeg.AddRaw("ORG", newSeg.Org, 4, (newSeg.Org != 0 ? "" : "relocatable"));
-            newSeg.AddRaw("ALIGN", newSeg.Align, 4,
-                "expecting 0, $0100, or $010000");
+            // alignment is rounded up to page/bank
+            string alignStr;
+            if (newSeg.Align == 0) {
+                alignStr = "no alignment";
+            } else if (newSeg.Align <= 0x0100) {
+                alignStr = "align to page";
+            } else {
+                alignStr = "align to bank";
+            }
+            newSeg.AddRaw("ALIGN", newSeg.Align, 4, alignStr);
             newSeg.AddRaw("NUMSEX", numSex, 1, "must be 0");
             if (newSeg.Version == SegmentVersion.v1_0) {
                 newSeg.AddRaw("LCBANK", newSeg.LcBank, 1, string.Empty);
@@ -507,7 +533,7 @@ namespace SourceGen.Tools.Omf {
                     // Parsing failure.  Bail out.
                     return false;
                 }
-                if (offset + omfRec.Length > FileOffset + FileLength) {
+                if (offset + omfRec.Length > FileOffset + RawFileLength) {
                     // Overrun.
                     AddErrorMsg(msgs, offset, "record ran off end of file (" + omfRec + ")");
                     return false;
@@ -520,7 +546,8 @@ namespace SourceGen.Tools.Omf {
                     int remaining = (FileOffset + FileLength) - (offset + omfRec.Length);
                     Debug.Assert(remaining >= 0);
                     Debug.WriteLine("END record found, remaining space=" + remaining);
-                    if (remaining >= 512 || (Version >= SegmentVersion.v2_0 && remaining != 0)) {
+                    if (remaining >= DISK_BLOCK_SIZE ||
+                            (Version >= SegmentVersion.v2_0 && remaining != 0)) {
                         AddInfoMsg(msgs, offset, "found " + remaining + " bytes past END record");
                     }
                     return true;
@@ -578,6 +605,67 @@ namespace SourceGen.Tools.Omf {
                 }
             }
             return true;
+        }
+
+        public void GenerateRelocDict() {
+            Debug.Assert(CheckRecords_LoadFile());
+
+            foreach (OmfRecord omfRec in Records) {
+                switch (omfRec.Op) {
+                    case OmfRecord.Opcode.RELOC:
+                    case OmfRecord.Opcode.cRELOC:
+                    case OmfRecord.Opcode.INTERSEG:
+                    case OmfRecord.Opcode.cINTERSEG:
+                    case OmfRecord.Opcode.SUPER:
+                        OmfReloc.GenerateRelocs(this, omfRec, mFileData, Relocs);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private byte[] mConstData;
+
+        /// <summary>
+        /// Returns a reference to the unpacked constant data from the body of a Load segment
+        /// (i.e. the LCONST/DS part).
+        /// </summary>
+        public byte[] GetConstData() {
+            if (mConstData != null) {
+                return mConstData;
+            }
+
+            // We haven't generated this yet; do it now.  Start by determining the length.
+            int totalLen = 0;
+            foreach (OmfRecord omfRec in Records) {
+                if (omfRec.Op != OmfRecord.Opcode.LCONST && omfRec.Op != OmfRecord.Opcode.DS) {
+                    break;
+                }
+                // safe to assume NUMLEN=4, NUMSEX=0
+                totalLen += RawData.GetWord(mFileData, omfRec.FileOffset + 1, 4, false);
+            }
+
+            byte[] data = new byte[totalLen];
+
+            int bufOffset = 0;
+            foreach (OmfRecord omfRec in Records) {
+                if (omfRec.Op == OmfRecord.Opcode.DS) {
+                    int len = RawData.GetWord(mFileData, omfRec.FileOffset + 1, 4, false);
+                    bufOffset += len;   // new buffers are zero-filled
+                } else if (omfRec.Op == OmfRecord.Opcode.LCONST) {
+                    int len = RawData.GetWord(mFileData, omfRec.FileOffset + 1, 4, false);
+                    Array.Copy(mFileData, omfRec.FileOffset + 5, data, bufOffset, len);
+                    bufOffset += len;
+                } else {
+                    break;
+                }
+            }
+
+            Debug.Assert(bufOffset == totalLen);
+            Debug.WriteLine("Generated " + totalLen + " bytes of LCONST/DS data for " + this);
+            mConstData = data;
+            return data;
         }
 
         //

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Asm65;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+
+using Asm65;
 
 namespace SourceGen.Tools.Omf {
     /// <summary>
@@ -70,14 +71,19 @@ namespace SourceGen.Tools.Omf {
         }
         public FileKind OmfFileKind { get; private set; }
 
+        /// <summary>
+        /// File data.  Files must be loaded completely into memory.
+        /// </summary>
         private byte[] mFileData;
-        private bool mIsDamaged;
 
-        private List<OmfSegment> mSegmentList = new List<OmfSegment>();
-        public List<OmfSegment> SegmentList {
-            get { return mSegmentList; }
-        }
+        /// <summary>
+        /// List of segments.
+        /// </summary>
+        public List<OmfSegment> SegmentList { get; private set; } = new List<OmfSegment>();
 
+        /// <summary>
+        /// List of strings to show in the message window.
+        /// </summary>
         public List<string> MessageList { get; private set; } = new List<string>();
 
 
@@ -110,6 +116,10 @@ namespace SourceGen.Tools.Omf {
 
             OmfFileKind = DetermineFileKind();
             Debug.WriteLine("File kind is " + OmfFileKind);
+
+            if (OmfFileKind == FileKind.Load) {
+                GenerateRelocDicts();
+            }
         }
 
         /// <summary>
@@ -156,13 +166,13 @@ namespace SourceGen.Tools.Omf {
 
                 Debug.Assert(seg.FileLength > 0);
 
-                mSegmentList.Add(seg);
+                SegmentList.Add(seg);
                 offset += seg.FileLength;
                 len -= seg.FileLength;
                 Debug.Assert(len >= 0);
             }
 
-            Debug.WriteLine("Num segments = " + mSegmentList.Count);
+            Debug.WriteLine("Num segments = " + SegmentList.Count);
             return OmfSegment.ParseResult.Success;
         }
 
@@ -170,7 +180,7 @@ namespace SourceGen.Tools.Omf {
         /// Analyzes the file to determine the file kind.
         /// </summary>
         private FileKind DetermineFileKind() {
-            if (mSegmentList.Count == 0) {
+            if (SegmentList.Count == 0) {
                 // Couldn't find a single valid segment, this is not OMF.
                 return FileKind.Foreign;
             }
@@ -179,8 +189,8 @@ namespace SourceGen.Tools.Omf {
             // * Load files may contain any kind of segment except LibraryDict.  Their
             //   segments must be LCONST/DS followed by relocation records
             //   (INTERSEG, cINTERSEG, RELOC, cRELOC, SUPER).
-            // * Object files have Code and Data segments, and may not contain relocation
-            //   records or ENTRY.
+            // * Object files have Code, Data, and DP/Stack segments, and may not contain
+            //   relocation records or ENTRY.
             // * Library files are like Object files, but start with a LibraryDict segment.
             // * Run-Time Library files have an initial segment with ENTRY records.  (These
             //   are not supported because I've never actually seen one... the few files I've
@@ -190,17 +200,18 @@ namespace SourceGen.Tools.Omf {
             bool maybeObject = true;
             bool maybeLibrary = true;
 
-            foreach (OmfSegment omfSeg in mSegmentList) {
+            foreach (OmfSegment omfSeg in SegmentList) {
                 switch (omfSeg.Kind) {
                     case OmfSegment.SegmentKind.Code:
                     case OmfSegment.SegmentKind.Data:
+                    case OmfSegment.SegmentKind.DpStack:
                         // Allowed anywhere.
                         break;
                     case OmfSegment.SegmentKind.JumpTable:
                     case OmfSegment.SegmentKind.PathName:
                     case OmfSegment.SegmentKind.Init:
                     case OmfSegment.SegmentKind.AbsoluteBank:
-                    case OmfSegment.SegmentKind.DpStack:
+                        // Only allowed in Load.
                         maybeObject = maybeLibrary = false;
                         break;
                     case OmfSegment.SegmentKind.LibraryDict:
@@ -219,7 +230,7 @@ namespace SourceGen.Tools.Omf {
             //
 
             if (maybeLoad) {
-                foreach (OmfSegment omfSeg in mSegmentList) {
+                foreach (OmfSegment omfSeg in SegmentList) {
                     if (!omfSeg.CheckRecords_LoadFile()) {
                         maybeLoad = false;
                         break;
@@ -230,7 +241,7 @@ namespace SourceGen.Tools.Omf {
                 }
             }
             if (maybeLibrary || maybeObject) {
-                foreach (OmfSegment omfSeg in mSegmentList) {
+                foreach (OmfSegment omfSeg in SegmentList) {
                     if (!omfSeg.CheckRecords_ObjectOrLib()) {
                         maybeLibrary = maybeObject = false;
                         break;
@@ -244,6 +255,21 @@ namespace SourceGen.Tools.Omf {
             }
 
             return FileKind.Indeterminate;
+        }
+
+        /// <summary>
+        /// Generates relocation dictionaries for all code/data/init segments.
+        /// </summary>
+        private void GenerateRelocDicts() {
+            Debug.Assert(OmfFileKind == FileKind.Load);
+
+            foreach (OmfSegment omfSeg in SegmentList) {
+                if (omfSeg.Kind == OmfSegment.SegmentKind.Code ||
+                        omfSeg.Kind == OmfSegment.SegmentKind.Data ||
+                        omfSeg.Kind == OmfSegment.SegmentKind.Init) {
+                    omfSeg.GenerateRelocDict();
+                }
+            }
         }
     }
 }

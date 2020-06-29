@@ -87,6 +87,7 @@
     <Compile Include="Tools\ApplesoftToHtml.cs" />
     <Compile Include="Tools\Omf\OmfFile.cs" />
     <Compile Include="Tools\Omf\OmfRecord.cs" />
+    <Compile Include="Tools\Omf\OmfReloc.cs" />
     <Compile Include="Tools\Omf\OmfSegment.cs" />
     <Compile Include="Tools\Omf\WpfGui\OmfSegmentViewer.xaml.cs">
       <DependentUpon>OmfSegmentViewer.xaml</DependentUpon>

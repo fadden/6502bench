@@ -63,13 +63,46 @@ namespace SourceGen.Tools.Omf.WpfGui {
 
         public List<OmfRecord> RecordItems { get; private set; }
 
+        /// <summary>
+        /// Formatted version of OmfReloc object.
+        /// </summary>
         public class RelocItem {
-            public string Offset { get; private set; }
-            public string Reference { get; private set; }
             public string Width { get; private set; }
             public string Shift { get; private set; }
+            public string Offset { get; private set; }
+            public string RelOffset { get; private set; }
+            public string FileNum { get; private set; }
+            public string SegNum { get; private set; }
+            public string SuperType { get; private set; }
+
+            public OmfReloc RelocRef { get; private set; }
+
+            public RelocItem(OmfReloc reloc, Formatter formatter) {
+                RelocRef = reloc;
+
+                Width = reloc.Width.ToString();
+                if (reloc.Shift == 0) {
+                    Shift = string.Empty;
+                } else if (reloc.Shift < 0) {
+                    Shift = ">> " + -reloc.Shift;
+                } else {
+                    Shift = "<< " + reloc.Shift;
+                }
+                Offset = formatter.FormatHexValue(reloc.Offset, 4);
+                RelOffset = formatter.FormatHexValue(reloc.RelOffset, 4);
+                FileNum = reloc.FileNum < 0 ? string.Empty : reloc.FileNum.ToString();
+                SegNum = reloc.SegNum < 0 ? string.Empty : reloc.SegNum.ToString();
+                if (reloc.SuperType < 0) {
+                    SuperType = string.Empty;
+                } else if (reloc.SuperType <= 1) {
+                    SuperType = "RELOC" + (reloc.SuperType + 2);
+                } else {
+                    SuperType = "INTERSEG" + (reloc.SuperType - 1);
+                }
+            }
         }
-        public List<RelocItem> RelocItems { get; private set; } = new List<RelocItem>();
+        public List<RelocItem> RelocItems { get; private set; }
+        public bool HasRelocs { get { return RelocItems.Count != 0; } }
 
 
         /// <summary>
@@ -98,6 +131,13 @@ namespace SourceGen.Tools.Omf.WpfGui {
             GenerateHeaderItems();
 
             RecordItems = omfSeg.Records;
+            RelocItems = new List<RelocItem>(omfSeg.Relocs.Count);
+            foreach (OmfReloc omfRel in omfSeg.Relocs) {
+                RelocItems.Add(new RelocItem(omfRel, formatter));
+            }
+            RelocItems.Sort(delegate (RelocItem a, RelocItem b) {
+                return a.RelocRef.Offset - b.RelocRef.Offset;
+            });
 
             fmt = (string)FindResource("str_RecordHeaderFmt");
             RecordHeaderStr = string.Format(fmt, RecordItems.Count);

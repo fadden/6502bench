@@ -16,8 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Text;
+
 using Asm65;
 using CommonUtil;
 
@@ -27,6 +27,11 @@ namespace SourceGen.Tools.Omf {
     /// </summary>
     public class OmfRecord {
         private const int NUMLEN = 4;   // defined by NUMLEN field in header; always 4 for IIgs
+
+        /// <summary>
+        /// Offset of record start within file.
+        /// </summary>
+        public int FileOffset { get; private set; }
 
         /// <summary>
         /// Total length, in bytes, of this record.
@@ -114,6 +119,7 @@ namespace SourceGen.Tools.Omf {
                 OmfSegment.SegmentVersion version, int labLen, Formatter formatter,
                 List<string> msgs, out OmfRecord omfRec) {
             omfRec = new OmfRecord();
+            omfRec.FileOffset = offset;
             try {
                 return omfRec.DoParseRecord(data, offset, version, labLen, formatter, msgs);
             } catch (IndexOutOfRangeException ioore) {
@@ -299,9 +305,16 @@ namespace SourceGen.Tools.Omf {
                         break;
                     case Opcode.SUPER: {
                             int count = GetNum(data, ref offset, ref len);
-                            len += count;
+                            int type = data[offset];
+                            len += count;   // count includes type byte
                             Value = (count - 1) + " bytes, type=" +
-                                formatter.FormatHexValue(data[offset + NUMLEN], 2);
+                                formatter.FormatHexValue(type, 2);
+
+                            if (type > 37) {
+                                OmfSegment.AddErrorMsg(msgs, offset,
+                                    "found SUPER record with bogus type=$" + type.ToString("x2"));
+                                // the length field allows us to skip it, so keep going
+                            }
                         }
                         break;
                     case Opcode.General:

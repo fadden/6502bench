@@ -101,8 +101,10 @@ limitations under the License.
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="5" Text="Relocation table (for Load file segment):" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="5" Text="Relocation dictionary:" Margin="0,8,0,0"
+                   Visibility="{Binding HasRelocs, Converter={StaticResource BoolToVis}}"/>
         <DataGrid Name="relocList" Grid.Row="6" Height="145" Margin="0,8,0,0"
+                  Visibility="{Binding HasRelocs, Converter={StaticResource BoolToVis}}"
                   IsReadOnly="True"
                   ItemsSource="{Binding RelocItems}"
                   FontFamily="{StaticResource GeneralMonoFont}"
@@ -122,10 +124,13 @@ limitations under the License.
                                  Color="{x:Static SystemColors.HighlightTextColor}"/>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Offset" Width="100" Binding="{Binding Offset}"/>
-                <DataGridTextColumn Header="Reference" Width="120" Binding="{Binding Reference}"/>
-                <DataGridTextColumn Header="Width" Width="100" Binding="{Binding Width}"/>
-                <DataGridTextColumn Header="Shift" Width="280" Binding="{Binding Shift}"/>
+                <DataGridTextColumn Header="Bytes" Width="50" Binding="{Binding Width}"/>
+                <DataGridTextColumn Header="Offset" Width="70" Binding="{Binding Offset}"/>
+                <DataGridTextColumn Header="Rel Off" Width="70" Binding="{Binding RelOffset}"/>
+                <DataGridTextColumn Header="Shift" Width="50" Binding="{Binding Shift}"/>
+                <DataGridTextColumn Header="File Num" Width="70" Binding="{Binding FileNum}"/>
+                <DataGridTextColumn Header="Seg Num" Width="70" Binding="{Binding SegNum}"/>
+                <DataGridTextColumn Header="Super Type" Width="80" Binding="{Binding SuperType}"/>
             </DataGrid.Columns>
         </DataGrid>
 
