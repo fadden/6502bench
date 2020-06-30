@@ -302,9 +302,18 @@ namespace SourceGen.Tools.Omf {
                 if (ent == null) {
                     continue;
                 }
-                // Perform relocation.
-                if (!RelocSegment(ent, data, bufOffset)) {
-                    return false;
+
+                if (ent.Segment.Kind == OmfSegment.SegmentKind.JumpTable) {
+                    if (!RelocJumpTable(ent, data, bufOffset)) {
+                        // Could treat this as non-fatal, but it really ought to work.
+                        Debug.WriteLine("Jump Table reloc failed");
+                        return false;
+                    }
+                } else {
+                    // Perform relocation.
+                    if (!RelocSegment(ent, data, bufOffset)) {
+                        return false;
+                    }
                 }
 
                 // Add one or more address entries.  (Normally one, but data segments
@@ -415,6 +424,70 @@ namespace SourceGen.Tools.Omf {
                 }
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Edits the data file, essentially putting the jump table entries into the
+        /// "loaded" state.
+        /// </summary>
+        private bool RelocJumpTable(SegmentMapEntry ent, byte[] data, int bufOffset) {
+            const int ENTRY_LEN = 14;
+
+            byte[] srcData = ent.Segment.GetConstData();
+            Array.Copy(srcData, 0, data, bufOffset, srcData.Length);
+
+            // For no documented reason, jump tables start with 8 zero bytes.
+            for (int i = 0; i < 8; i++) {
+                if (data[bufOffset + i] != 0) {
+                    Debug.WriteLine("JumpTab: missing 8-byte header");
+                    return false;
+                }
+            }
+
+            for (int i = 8; i + 4 <= ent.Segment.Length; i += ENTRY_LEN) {
+                int userId = RawData.GetWord(data, bufOffset + i, 2, false);
+                int fileNum = RawData.GetWord(data, bufOffset + i + 2, 2, false);
+
+                if (fileNum == 0) {
+                    // A zero file number indicates end of table.
+                    Debug.WriteLine("JumpTab: found fileNum=0 at offset " + i + ", len=" +
+                        ent.Segment.Length);
+                    break;
+                } else if (fileNum != 1) {
+                    // External file, ignore entry.
+                    Debug.WriteLine("JumpTab: ignoring entry with FileNum=" + fileNum);
+                    continue;
+                } else if (i + ENTRY_LEN > ent.Segment.Length) {
+                    // Make sure the rest fits.
+                    Debug.WriteLine("JumpTab: overran buffer");
+                    return false;
+                }
+
+                // Note: segment ends right after FileNum, so don't try to read further
+                // until we've confirmed that FileNum != 0.
+
+                int segNum = RawData.GetWord(data, bufOffset + i + 4, 2, false);
+                int segOff = RawData.GetWord(data, bufOffset + i + 6, 4, false);
+
+                if (segNum < 0 || segNum >= mSegmentMap.Count || mSegmentMap[segNum] == null) {
+                    Debug.WriteLine("JumpTab: invalid SegNum=" + segNum);
+                    return false;
+                } else {
+                    if (data[bufOffset + i + 10] != 0x22) {
+                        Debug.WriteLine("JumpTab: did not find expected JSL at off=" + i);
+                        return false;
+                    }
+
+                    int addr = mSegmentMap[segNum].Address + segOff;
+                    data[bufOffset + i + 10] = 0x5c;    // JML
+                    data[bufOffset + i + 11] = (byte)addr;
+                    data[bufOffset + i + 12] = (byte)(addr >> 8);
+                    data[bufOffset + i + 13] = (byte)(addr >> 16);
+                    //Debug.WriteLine("JumpTab: off=" + i + " -> " +
+                    //    mFormatter.FormatAddress(addr, true));
+                }
+            }
             return true;
         }
 
