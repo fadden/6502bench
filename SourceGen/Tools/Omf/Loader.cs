@@ -305,19 +305,14 @@ namespace SourceGen.Tools.Omf {
                         return false;
                     }
 
-                    // Add an address entry.
-
-                    // TODO: need to add multiple address entries if this straddles a segment.
-
-                    int origAddr = proj.AddrMap.Get(bufOffset);
-                    UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
-                        origAddr, ent.Address);
-                    cs.Add(uc);
+                    // Add one or more address entries.  (Normally one, but data segments
+                    // can straddle multiple pages.)
+                    AddAddressEntries(proj, ent, bufOffset, cs);
 
                     // Add a comment identifying the segment.
                     string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
                         ent.Segment.SegNum, ent.Segment.SegName, ent.Segment.Kind);
-                    uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
+                    UndoableChange uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
                         new MultiLineComment(segCmt));
                     cs.Add(uc);
 
@@ -331,6 +326,33 @@ namespace SourceGen.Tools.Omf {
             mLoadedData = data;
             mNewProject = proj;
             return true;
+        }
+
+        private static void AddAddressEntries(DisasmProject proj, SegmentMapEntry ent,
+                int bufOffset, ChangeSet cs) {
+            int addr = ent.Address;
+            int segRem = ent.Segment.Length;
+
+            while (true) {
+                int origAddr = proj.AddrMap.Get(bufOffset);
+                UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
+                    origAddr, addr);
+                cs.Add(uc);
+
+                // Compare amount of space in this bank to amount left in segment.
+                int bankRem = 0x00010000 - (addr & 0xffff);
+                if (bankRem > segRem) {
+                    // All done, bail.
+                    break;
+                }
+
+                // Advance to start of next bank.
+                addr += bankRem;
+                Debug.Assert((addr & 0x0000ffff) == 0);
+                bufOffset += bankRem;
+                segRem -= bankRem;
+                Debug.WriteLine("Adding additional ORG at " + addr);
+            }
         }
 
         private bool RelocSegment(SegmentMapEntry ent, byte[] data, int bufOffset) {
@@ -376,6 +398,12 @@ namespace SourceGen.Tools.Omf {
                         data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
                         data[bufOffset + omfRel.Offset + 1] = (byte)(relocAddr >> 8);
                         data[bufOffset + omfRel.Offset + 2] = (byte)(relocAddr >> 16);
+                        break;
+                    case 4:
+                        data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
+                        data[bufOffset + omfRel.Offset + 1] = (byte)(relocAddr >> 8);
+                        data[bufOffset + omfRel.Offset + 2] = (byte)(relocAddr >> 16);
+                        data[bufOffset + omfRel.Offset + 3] = (byte)(relocAddr >> 24);
                         break;
                     default:
                         Debug.WriteLine("Invalid reloc width " + omfRel.Width);
