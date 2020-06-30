@@ -174,6 +174,31 @@ namespace SourceGen.Tools.Omf {
         /// </summary>
         public List<OmfReloc> Relocs = new List<OmfReloc>();
 
+        /// <summary>
+        /// True if this is an ExpressLoad segment.
+        /// </summary>
+        public bool IsExpressLoad {
+            get {
+                if (Kind != SegmentKind.Data) {
+                    return false;
+                }
+                if ((Attrs & SegmentAttribute.Dynamic) == 0) {
+                    return false;
+                }
+                // Should be case-insensitive?  I'm assuming it's not padded with spaces since
+                // it's longer than 10 chars.
+                if (!(SegName == EXPRESSLOAD || SegName == EXPRESSLOAD_OLD)) {
+                    return false;
+                }
+                if (SegNum != 1) {
+                    Debug.WriteLine("WEIRD: ~ExpressLoad not first segment");
+                }
+                return true;
+            }
+        }
+        private const string EXPRESSLOAD = "~ExpressLoad";
+        private const string EXPRESSLOAD_OLD = "ExpressLoad";
+
 
         // Constructor is private; use ParseHeader() to create an instance.
         private OmfSegment() { }

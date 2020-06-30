@@ -95,6 +95,7 @@ namespace SourceGen.Tools.Omf {
             Debug.Assert(fileData.Length >= MIN_FILE_SIZE && fileData.Length <= MAX_FILE_SIZE);
             mFileData = fileData;
 
+            // Set to Unknown until analysis completes.
             OmfFileKind = FileKind.Unknown;
         }
 

@@ -204,10 +204,19 @@ namespace SourceGen {
                     "': Unexpected contents '" + sdf.Contents + "'");
             }
 
-            foreach (SystemDef sd in sdf.Defs) {
-                Debug.WriteLine("### " + sd);
-            }
+            //foreach (SystemDef sd in sdf.Defs) {
+            //    Debug.WriteLine("### " + sd);
+            //}
             return sdf;
+        }
+
+        public SystemDef FindEntryByName(string name) {
+            foreach (SystemDef sd in Defs) {
+                if (sd.Name == name) {
+                    return sd;
+                }
+            }
+            return null;
         }
     }
 }

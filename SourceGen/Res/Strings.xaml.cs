@@ -241,6 +241,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_NoFilesAvailable");
         public static string NO_EXPORTED_SYMBOLS_FOUND =
             (string)Application.Current.FindResource("str_NoExportedSymbolsFound");
+        public static string OMF_SEG_COMMENT_FMT =
+            (string)Application.Current.FindResource("str_OmfSegCommentFmt");
         public static string OPEN_DATA_DOESNT_EXIST =
             (string)Application.Current.FindResource("str_OpenDataDoesntExist");
         public static string OPEN_DATA_EMPTY =
@@ -263,6 +265,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_OpenDataWrongLengthFmt");
         public static string OPERATION_FAILED =
             (string)Application.Current.FindResource("str_OperationFailed");
+        public static string OPERATION_SUCCEEDED =
+            (string)Application.Current.FindResource("str_OperationSucceeded");
         public static string PARENTHETICAL_NONE =
             (string)Application.Current.FindResource("str_ParentheticalNone");
         public static string PLUGIN_DIR_FAIL_FMT =

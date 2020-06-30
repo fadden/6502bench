@@ -85,6 +85,7 @@
       <DependentUpon>GenTestRunner.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\ApplesoftToHtml.cs" />
+    <Compile Include="Tools\Omf\Loader.cs" />
     <Compile Include="Tools\Omf\OmfFile.cs" />
     <Compile Include="Tools\Omf\OmfRecord.cs" />
     <Compile Include="Tools\Omf\OmfReloc.cs" />

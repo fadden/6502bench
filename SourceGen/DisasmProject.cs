@@ -288,7 +288,8 @@ namespace SourceGen {
         /// Prepares the DisasmProject for use as a new project.
         /// </summary>
         /// <param name="fileData">65xx data file contents.</param>
-        /// <param name="dataFileName">Data file's filename (not pathname).</param>
+        /// <param name="dataFileName">Data file's filename (not pathname).  Only used for
+        ///   cosmetic stuff, e.g. exporting to text; not stored in project.</param>
         public void PrepForNew(byte[] fileData, string dataFileName) {
             Debug.Assert(fileData.Length == FileDataLength);
 

@@ -130,6 +130,7 @@ limitations under the License.
     <system:String x:Key="str_MsgVisualizationIgnored">Visualization ignored</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_NoExportedSymbolsFound">No exported symbols found.</system:String>
+    <system:String x:Key="str_OmfSegCommentFmt" xml:space="preserve">&#x0d;Segment {0}: Kind={2}, SegName='{1}'&#x0d;&#x0d;</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
     <system:String x:Key="str_OpenDataEmpty">File is empty</system:String>
     <system:String x:Key="str_OpenDataFailCaption">Unable to load data file</system:String>
@@ -141,6 +142,7 @@ limitations under the License.
     <system:String x:Key="str_OpenDataWrongLengthFmt">The file is {0:N0} bytes long, but the project expected {1:N0}.</system:String>
     <system:String x:Key="str_OpenDataWrongCrcFmt">The file has CRC {0}, but the project expected {1}.</system:String>
     <system:String x:Key="str_OperationFailed">Failed</system:String>
+    <system:String x:Key="str_OperationSucceeded">Success!</system:String>
     <system:String x:Key="str_ParentheticalNone">(none)</system:String>
     <system:String x:Key="str_PluginDirFailFmt">Failed while preparing the plugin directory {0}</system:String>
     <system:String x:Key="str_PluginDirFailCaption">Failed Preparing Plugin Directory</system:String>

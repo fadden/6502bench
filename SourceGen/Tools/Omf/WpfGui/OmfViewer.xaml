@@ -38,6 +38,9 @@ limitations under the License.
         <system:String x:Key="str_OmfFileSummaryFmt">This is {0}, with {1} segment</system:String>
         <system:String x:Key="str_OmfFileSummaryPlFmt">This is {0}, with {1} segments</system:String>
         <system:String x:Key="str_OmfFileNot">This is not an Apple II OMF file</system:String>
+
+        <system:String x:Key="str_OmfLoaderFail">Unable to prepare data file for project.</system:String>
+        <system:String x:Key="str_OmfConvertSuccessful">Data file and project created.</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -93,7 +96,8 @@ limitations under the License.
         </TextBox>
 
         <DockPanel Grid.Row="5" LastChildFill="False" Margin="0,16,0,0">
-            <Button DockPanel.Dock="Left" Content="Convert to SourceGen Project" Padding="4,0"/>
+            <Button DockPanel.Dock="Left" Content="Generate SourceGen Project" Padding="4,0"
+                    IsEnabled="{Binding IsLoadFile}" Click="GenerateProject_Click"/>
             <Button DockPanel.Dock="Right" Content="Cancel" Width="70" IsCancel="True"/>
         </DockPanel>
     </Grid>

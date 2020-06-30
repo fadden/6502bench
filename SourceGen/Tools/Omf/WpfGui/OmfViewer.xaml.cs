@@ -17,10 +17,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Win32;
 
 using Asm65;
 
@@ -29,6 +31,8 @@ namespace SourceGen.Tools.Omf.WpfGui {
     /// Apple IIgs OMF file viewer.
     /// </summary>
     public partial class OmfViewer : Window, INotifyPropertyChanged {
+        private const string OUT_FILE_SUFFIX = "_ld";
+
         private OmfFile mOmfFile;
         private Formatter mFormatter;
 
@@ -93,6 +97,10 @@ namespace SourceGen.Tools.Omf.WpfGui {
             set { mMessageStrings = value; OnPropertyChanged(); }
         }
 
+        public bool IsLoadFile {
+            get { return mOmfFile.OmfFileKind == OmfFile.FileKind.Load; }
+        }
+
 
         /// <summary>
         /// Constructor.
@@ -155,6 +163,44 @@ namespace SourceGen.Tools.Omf.WpfGui {
             SegmentListItem item = (SegmentListItem)((DataGrid)sender).SelectedItem;
             OmfSegmentViewer dlg = new OmfSegmentViewer(this, mOmfFile, item.OmfSeg, mFormatter);
             dlg.ShowDialog();
+        }
+
+        private void GenerateProject_Click(object sender, RoutedEventArgs e) {
+            Loader loader = new Loader(mOmfFile);
+            if (!loader.Prepare()) {
+                // Unexpected.  If there's a valid reason for this, we need to add details
+                // to the error message.
+                string msg = (string)FindResource("str_OmfLoaderFail");
+                MessageBox.Show(msg, Res.Strings.OPERATION_FAILED);
+                return;
+            }
+
+            SaveFileDialog fileDlg = new SaveFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1,
+                ValidateNames = true,
+                AddExtension = true,
+                FileName = Path.GetFileName(PathName) + OUT_FILE_SUFFIX
+            };
+            if (fileDlg.ShowDialog() != true) {
+                Debug.WriteLine("Save canceled by user");
+                return;
+            }
+            string pathName = Path.GetFullPath(fileDlg.FileName);
+
+            if (!loader.WriteProjectFiles(pathName, pathName + ProjectFile.FILENAME_EXT,
+                    out string errorMessage)) {
+                MessageBox.Show(Res.Strings.ERR_PROJECT_SAVE_FAIL + ": " + errorMessage,
+                    Res.Strings.OPERATION_FAILED,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Success!  Show a message then close the dialog.
+            string smsg = (string)FindResource("str_OmfConvertSuccessful");
+            MessageBox.Show(smsg, Res.Strings.OPERATION_SUCCEEDED,
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            DialogResult = true;
         }
     }
 }
