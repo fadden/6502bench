@@ -243,6 +243,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_NoExportedSymbolsFound");
         public static string OMF_SEG_COMMENT_FMT =
             (string)Application.Current.FindResource("str_OmfSegCommentFmt");
+        public static string OMF_SEG_NOTE_FMT =
+            (string)Application.Current.FindResource("str_OmfSegNoteFmt");
         public static string OPEN_DATA_DOESNT_EXIST =
             (string)Application.Current.FindResource("str_OpenDataDoesntExist");
         public static string OPEN_DATA_EMPTY =

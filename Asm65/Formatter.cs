@@ -111,6 +111,43 @@ namespace Asm65 {
                 }
                 return em;
             }
+
+            // TODO: FormatConfig should be a class with properties so we can avoid this nonsense
+            public void Normalize() {
+                if (mForceDirectOperandPrefix == null) {
+                    mForceDirectOperandPrefix = string.Empty;
+                }
+                if (mForceAbsOpcodeSuffix == null) {
+                    mForceAbsOpcodeSuffix = string.Empty;
+                }
+                if (mForceAbsOperandPrefix == null) {
+                    mForceAbsOperandPrefix = string.Empty;
+                }
+                if (mForceDirectOpcodeSuffix == null) {
+                    mForceDirectOpcodeSuffix = string.Empty;
+                }
+                if (mForceLongOpcodeSuffix == null) {
+                    mForceLongOpcodeSuffix = string.Empty;
+                }
+                if (mForceLongOperandPrefix == null) {
+                    mForceLongOperandPrefix = string.Empty;
+                }
+                if (mLocalVariableLabelPrefix == null) {
+                    mLocalVariableLabelPrefix = string.Empty;
+                }
+                if (mNonUniqueLabelPrefix == null) {
+                    mNonUniqueLabelPrefix = string.Empty;
+                }
+                if (mEndOfLineCommentDelimiter == null) {
+                    mEndOfLineCommentDelimiter = string.Empty;
+                }
+                if (mFullLineCommentDelimiterBase == null) {
+                    mFullLineCommentDelimiterBase = string.Empty;
+                }
+                if (mBoxLineCommentDelimiter == null) {
+                    mBoxLineCommentDelimiter = string.Empty;
+                }
+            }
         }
 
         #region Text Delimiters
@@ -391,15 +428,8 @@ namespace Asm65 {
         /// </summary>
         public Formatter(FormatConfig config) {
             mFormatConfig = config;     // copy struct
-            if (mFormatConfig.mEndOfLineCommentDelimiter == null) {
-                mFormatConfig.mEndOfLineCommentDelimiter = string.Empty;
-            }
-            if (mFormatConfig.mFullLineCommentDelimiterBase == null) {
-                mFormatConfig.mFullLineCommentDelimiterBase = string.Empty;
-            }
-            if (mFormatConfig.mBoxLineCommentDelimiter == null) {
-                mFormatConfig.mBoxLineCommentDelimiter = string.Empty;
-            }
+
+            mFormatConfig.Normalize();
 
             if (string.IsNullOrEmpty(mFormatConfig.mNonUniqueLabelPrefix)) {
                 mFormatConfig.mNonUniqueLabelPrefix = "@";

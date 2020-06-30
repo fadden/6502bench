@@ -166,7 +166,7 @@ namespace SourceGen.Tools.Omf.WpfGui {
         }
 
         private void GenerateProject_Click(object sender, RoutedEventArgs e) {
-            Loader loader = new Loader(mOmfFile);
+            Loader loader = new Loader(mOmfFile, mFormatter);
             if (!loader.Prepare()) {
                 // Unexpected.  If there's a valid reason for this, we need to add details
                 // to the error message.

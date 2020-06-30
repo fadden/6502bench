@@ -17,7 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
+using Asm65;
 using CommonUtil;
 
 namespace SourceGen.Tools.Omf {
@@ -30,6 +32,7 @@ namespace SourceGen.Tools.Omf {
         private const string IIGS_SYSTEM_DEF = "Apple IIgs (GS/OS)";
 
         private OmfFile mOmfFile;
+        private Formatter mFormatter;
 
         private byte[] mLoadedData;
         private DisasmProject mNewProject;
@@ -50,10 +53,11 @@ namespace SourceGen.Tools.Omf {
         /// Constructor.
         /// </summary>
         /// <param name="omfFile">OMF file to load.</param>
-        public Loader(OmfFile omfFile) {
+        public Loader(OmfFile omfFile, Formatter formatter) {
             Debug.Assert(omfFile.OmfFileKind == OmfFile.FileKind.Load);
 
             mOmfFile = omfFile;
+            mFormatter = formatter;
         }
 
         /// <summary>
@@ -289,35 +293,32 @@ namespace SourceGen.Tools.Omf {
                 Debug.WriteLine("Failed to apply Apple IIgs system definition");
             }
 
-            // Add header comment.
-            string cmt = string.Format(Res.Strings.DEFAULT_HEADER_COMMENT_FMT, App.ProgramVersion);
-            proj.LongComments.Add(LineListGen.Line.HEADER_COMMENT_OFFSET,
-                new MultiLineComment(cmt));
-
             ChangeSet cs = new ChangeSet(mSegmentMap.Count * 2);
+            AddHeaderComment(proj, cs);
 
             // Load the segments, and add entries to the project.
             int bufOffset = 0;
             foreach (SegmentMapEntry ent in mSegmentMap) {
-                if (ent != null) {
-                    // Perform relocation.
-                    if (!RelocSegment(ent, data, bufOffset)) {
-                        return false;
-                    }
-
-                    // Add one or more address entries.  (Normally one, but data segments
-                    // can straddle multiple pages.)
-                    AddAddressEntries(proj, ent, bufOffset, cs);
-
-                    // Add a comment identifying the segment.
-                    string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
-                        ent.Segment.SegNum, ent.Segment.SegName, ent.Segment.Kind);
-                    UndoableChange uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
-                        new MultiLineComment(segCmt));
-                    cs.Add(uc);
-
-                    bufOffset += ent.Segment.Length;
+                if (ent == null) {
+                    continue;
                 }
+                // Perform relocation.
+                if (!RelocSegment(ent, data, bufOffset)) {
+                    return false;
+                }
+
+                // Add one or more address entries.  (Normally one, but data segments
+                // can straddle multiple pages.)
+                AddAddressEntries(proj, ent, bufOffset, cs);
+
+                // Add a note identifying the segment.
+                string segCmt = string.Format(Res.Strings.OMF_SEG_NOTE_FMT,
+                    ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.SegName);
+                UndoableChange uc = UndoableChange.CreateNoteChange(bufOffset, null,
+                    new MultiLineComment(segCmt));
+                cs.Add(uc);
+
+                bufOffset += ent.Segment.Length;
             }
 
             proj.PrepForNew(data, "new_proj");
@@ -328,44 +329,44 @@ namespace SourceGen.Tools.Omf {
             return true;
         }
 
-        private static void AddAddressEntries(DisasmProject proj, SegmentMapEntry ent,
-                int bufOffset, ChangeSet cs) {
-            int addr = ent.Address;
-            int segRem = ent.Segment.Length;
-
-            while (true) {
-                int origAddr = proj.AddrMap.Get(bufOffset);
-                UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
-                    origAddr, addr);
-                cs.Add(uc);
-
-                // Compare amount of space in this bank to amount left in segment.
-                int bankRem = 0x00010000 - (addr & 0xffff);
-                if (bankRem > segRem) {
-                    // All done, bail.
-                    break;
+        private void AddHeaderComment(DisasmProject proj, ChangeSet cs) {
+            // Add header comment.
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Format(Res.Strings.DEFAULT_HEADER_COMMENT_FMT,
+                App.ProgramVersion));
+            sb.AppendLine();
+            foreach (SegmentMapEntry ent in mSegmentMap) {
+                if (ent == null) {
+                    continue;
                 }
-
-                // Advance to start of next bank.
-                addr += bankRem;
-                Debug.Assert((addr & 0x0000ffff) == 0);
-                bufOffset += bankRem;
-                segRem -= bankRem;
-                Debug.WriteLine("Adding additional ORG at " + addr);
+                string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
+                    ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.SegName,
+                    mFormatter.FormatAddress(ent.Address, true));
+                sb.AppendLine(segCmt);
             }
+
+            UndoableChange uc = UndoableChange.CreateLongCommentChange(
+                LineListGen.Line.HEADER_COMMENT_OFFSET,
+                null, new MultiLineComment(sb.ToString()));
+            cs.Add(uc);
         }
 
+        /// <summary>
+        /// Edits the data file, changing values based on the relocation dictionary.
+        /// </summary>
         private bool RelocSegment(SegmentMapEntry ent, byte[] data, int bufOffset) {
-            //const int INVALID_RELOC = 0x00ffffff;
+            const int INVALID_ADDR = 0x00ffffff;
+
             byte[] srcData = ent.Segment.GetConstData();
             Array.Copy(srcData, 0, data, bufOffset, srcData.Length);
 
             foreach (OmfReloc omfRel in ent.Segment.Relocs) {
                 int relocAddr = omfRel.RelOffset;
                 if (omfRel.FileNum != -1 && omfRel.FileNum != 1) {
-                    // Some other file; not much we can do with this.
+                    // Some other file; not much we can do with this.  Drop in an obviously
+                    // invalid address and keep going.
                     Debug.WriteLine("Unable to process reloc with FileNum=" + omfRel.FileNum);
-                    return false;
+                    relocAddr = INVALID_ADDR;
                 } else if (omfRel.SegNum == -1) {
                     // Within this segment.
                     relocAddr += ent.Address;
@@ -373,6 +374,9 @@ namespace SourceGen.Tools.Omf {
                     // Find other segment.  This may fail if the file is damaged.
                     if (omfRel.SegNum < 0 || omfRel.SegNum >= mSegmentMap.Count ||
                             mSegmentMap[omfRel.SegNum] == null) {
+                        // Can't find the segment.  Unlike the file case, this was expected to
+                        // be something we could resolve with what we were given, so this is
+                        // a hard failure.
                         Debug.WriteLine("Reloc SegNum=" + omfRel.SegNum + " not in map");
                         return false;
                     } else {
@@ -412,6 +416,37 @@ namespace SourceGen.Tools.Omf {
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Adds one or more entries to the address map for the specified segment.
+        /// </summary>
+        private static void AddAddressEntries(DisasmProject proj, SegmentMapEntry ent,
+                int bufOffset, ChangeSet cs) {
+            int addr = ent.Address;
+            int segRem = ent.Segment.Length;
+
+            while (true) {
+                // Generate an ORG directive.
+                int origAddr = proj.AddrMap.Get(bufOffset);
+                UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
+                    origAddr, addr);
+                cs.Add(uc);
+
+                // Compare amount of space in this bank to amount left in segment.
+                int bankRem = 0x00010000 - (addr & 0xffff);
+                if (bankRem > segRem) {
+                    // All done, bail.
+                    break;
+                }
+
+                // Advance to start of next bank.
+                addr += bankRem;
+                Debug.Assert((addr & 0x0000ffff) == 0);
+                bufOffset += bankRem;
+                segRem -= bankRem;
+                Debug.WriteLine("Adding additional ORG at " + addr);
+            }
         }
     }
 }
