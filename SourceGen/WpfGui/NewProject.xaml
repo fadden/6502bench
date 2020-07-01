@@ -42,7 +42,7 @@ limitations under the License.
 
             <TextBlock Grid.Column="2" Grid.Row="0">Details:</TextBlock>
             <TextBox Name="systemDescr" Grid.Column="2" Grid.Row="1" Margin="0,2,0,0" IsReadOnly="True"
-                     ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto"/>
+                     TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Auto"/>
         </Grid>
 
         <GroupBox Header="Data File" Margin="0,4,0,0">

@@ -171,19 +171,6 @@
       }
     },
     {
-      "Name" : "Atari Arcade Cabinet",
-      "GroupName" : "Atari",
-      "Cpu" : "6502",
-      "Speed" : "1.512",
-      "Description" : "Atari arcade cabinet, e.g. Battlezone [placeholder].",
-      "SymbolFiles" : [
-      ],
-      "ExtensionScripts" : [
-      ],
-      "Parameters" : {
-      }
-    },
-    {
       "Name" : "Commodore 64 (PRG)",
       "GroupName" : "Commodore",
       "Cpu" : "6510",
