@@ -304,7 +304,7 @@ namespace SourceGen.Tools.Omf {
                 }
 
                 if (ent.Segment.Kind == OmfSegment.SegmentKind.JumpTable) {
-                    if (!RelocJumpTable(ent, data, bufOffset)) {
+                    if (!RelocJumpTable(ent, data, bufOffset, cs)) {
                         // Could treat this as non-fatal, but it really ought to work.
                         Debug.WriteLine("Jump Table reloc failed");
                         return false;
@@ -320,11 +320,19 @@ namespace SourceGen.Tools.Omf {
                 // can straddle multiple pages.)
                 AddAddressEntries(proj, ent, bufOffset, cs);
 
-                // Add a note identifying the segment.
-                string segCmt = string.Format(Res.Strings.OMF_SEG_NOTE_FMT,
-                    ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.SegName);
-                UndoableChange uc = UndoableChange.CreateNoteChange(bufOffset, null,
+                // Add a comment identifying the segment and its attributes.
+                string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
+                    ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.Attrs, ent.Segment.SegName);
+                UndoableChange uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
                     new MultiLineComment(segCmt));
+                cs.Add(uc);
+
+                // Add a note identifying the segment.
+                string segNote = string.Format(Res.Strings.OMF_SEG_NOTE_FMT,
+                    ent.Segment.SegNum, mFormatter.FormatAddress(ent.Address, true),
+                    ent.Segment.SegName);
+                uc = UndoableChange.CreateNoteChange(bufOffset, null,
+                    new MultiLineComment(segNote));
                 cs.Add(uc);
 
                 bufOffset += ent.Segment.Length;
@@ -348,7 +356,7 @@ namespace SourceGen.Tools.Omf {
                 if (ent == null) {
                     continue;
                 }
-                string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
+                string segCmt = string.Format(Res.Strings.OMF_SEG_HDR_COMMENT_FMT,
                     ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.SegName,
                     mFormatter.FormatAddress(ent.Address, true));
                 sb.AppendLine(segCmt);
@@ -431,7 +439,8 @@ namespace SourceGen.Tools.Omf {
         /// Edits the data file, essentially putting the jump table entries into the
         /// "loaded" state.
         /// </summary>
-        private bool RelocJumpTable(SegmentMapEntry ent, byte[] data, int bufOffset) {
+        private bool RelocJumpTable(SegmentMapEntry ent, byte[] data, int bufOffset,
+                ChangeSet cs) {
             const int ENTRY_LEN = 14;
 
             byte[] srcData = ent.Segment.GetConstData();
@@ -444,6 +453,9 @@ namespace SourceGen.Tools.Omf {
                     return false;
                 }
             }
+
+            TypedRangeSet newSet = new TypedRangeSet();
+            TypedRangeSet undoSet = new TypedRangeSet();
 
             for (int i = 8; i + 4 <= ent.Segment.Length; i += ENTRY_LEN) {
                 int userId = RawData.GetWord(data, bufOffset + i, 2, false);
@@ -473,21 +485,31 @@ namespace SourceGen.Tools.Omf {
                 if (segNum < 0 || segNum >= mSegmentMap.Count || mSegmentMap[segNum] == null) {
                     Debug.WriteLine("JumpTab: invalid SegNum=" + segNum);
                     return false;
-                } else {
-                    if (data[bufOffset + i + 10] != 0x22) {
-                        Debug.WriteLine("JumpTab: did not find expected JSL at off=" + i);
-                        return false;
-                    }
-
-                    int addr = mSegmentMap[segNum].Address + segOff;
-                    data[bufOffset + i + 10] = 0x5c;    // JML
-                    data[bufOffset + i + 11] = (byte)addr;
-                    data[bufOffset + i + 12] = (byte)(addr >> 8);
-                    data[bufOffset + i + 13] = (byte)(addr >> 16);
-                    //Debug.WriteLine("JumpTab: off=" + i + " -> " +
-                    //    mFormatter.FormatAddress(addr, true));
                 }
+                if (data[bufOffset + i + 10] != 0x22) {
+                    Debug.WriteLine("JumpTab: did not find expected JSL at off=" + i);
+                    return false;
+                }
+
+                int addr = mSegmentMap[segNum].Address + segOff;
+                int jmlOffset = bufOffset + i + 10;
+                data[jmlOffset] = 0x5c;    // JML
+                data[jmlOffset + 1] = (byte)addr;
+                data[jmlOffset + 2] = (byte)(addr >> 8);
+                data[jmlOffset + 3] = (byte)(addr >> 16);
+                //Debug.WriteLine("JumpTab: off=" + i + " -> " +
+                //    mFormatter.FormatAddress(addr, true));
+
+                // It seems to be fairly common for jump table entries to not be referenced
+                // from the program, which can leave whole dynamic segments unreferenced.  Set
+                // a code hint on the JML instruction.
+                undoSet.Add(jmlOffset, (int)CodeAnalysis.TypeHint.NoHint);
+                newSet.Add(jmlOffset, (int)CodeAnalysis.TypeHint.Code);
             }
+
+            UndoableChange uc = UndoableChange.CreateTypeHintChange(undoSet, newSet);
+            cs.Add(uc);
+
             return true;
         }
 
