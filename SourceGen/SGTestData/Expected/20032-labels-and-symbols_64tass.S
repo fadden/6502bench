@@ -34,15 +34,15 @@ start   clc
         lda     #>start
         lda     #`start
         pea     $feed
-        pea     0+(start & $ffff)
+        pea     start & $ffff
         pea     $0001
         pea     $3456
         pea     $0012
         pea     absh
-        pea     0+(start & $ffff)
-        pea     0+(start >> 16)
-        pea     0+(biggie & $ffff)
-        pea     0+(biggie >> 16)
+        pea     start & $ffff
+        pea     start >> 16
+        pea     biggie & $ffff
+        pea     biggie >> 16
         lda     zip+1
         lda     @wzip+1
         lda     @lzip+1
@@ -65,21 +65,21 @@ start   clc
         lda     #zip+16
         lda     #zip+64
         lda     #absl
-        lda     #(absl >> 8)
+        lda     #absl >> 8
         lda     #absl-$1000
         lda     #(absl >> 8)-16
-        lda     #(absl >> 16)
+        lda     #absl >> 16
         lda     #absh
-        lda     #(absh >> 8)
+        lda     #absh >> 8
         lda     #absh-$f000
         lda     #(absh >> 8)+16
         lda     #(absh >> 16)+1
-        lda     #(start & $ffff)
-        lda     #(start >> 8)
-        lda     #(start >> 16)
-        lda     #(biggie & $ffff)
-        lda     #(biggie >> 8)
-        lda     #(biggie >> 16)
+        lda     #start & $ffff
+        lda     #start >> 8
+        lda     #start >> 16
+        lda     #biggie & $ffff
+        lda     #biggie >> 8
+        lda     #biggie >> 16
         bra     _skipdata
 
         .byte   zip
@@ -90,32 +90,32 @@ start   clc
         .byte   `start
         .word   zip
         .word   absl
-        .word   0+(absl >> 8)
+        .word   absl >> 8
         .word   absl-$1000
         .word   0+(absl >> 8)-16
         .word   absh
-        .word   0+(absh >> 8)
+        .word   absh >> 8
         .word   absh-$f000
         .word   0+(absh >> 8)+16
-        .word   0+(start & $ffff)
-        .word   0+(start >> 8)
-        .word   0+(start >> 16)
+        .word   start & $ffff
+        .word   start >> 8
+        .word   start >> 16
         .word   0+(start & $ffff)+1
-        .word   0+(start >> 8)
-        .word   0+(start >> 16)
+        .word   start >> 8
+        .word   start >> 16
         .byte   $fe,$ed
         .long   zip
         .long   absh
-        .long   0+(absh >> 8)
+        .long   absh >> 8
         .long   start
-        .long   0+(start >> 8)
-        .long   0+(start >> 16)
+        .long   start >> 8
+        .long   start >> 16
         .dword  zip
         .dword  absh
-        .dword  0+(absh >> 8)
+        .dword  absh >> 8
         .dword  start-1
-        .dword  0+(start >> 8)
-        .dword  0+(start >> 16)
+        .dword  start >> 8
+        .dword  start >> 16
 
 _skipdata lda   #(biggie >> 16)-1
         mvn     #`biggie,#(`biggie)-17
@@ -207,7 +207,7 @@ _L118E  lda     #<thirty2+2
         .xl
         lda     #(thirty2 & $ffff)+3
         lda     #((thirty2 >> 8) & $ffff)+4
-        lda     #(thirty2 >> 16)
+        lda     #thirty2 >> 16
         rts
 
         .here

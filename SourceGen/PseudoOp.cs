@@ -705,8 +705,6 @@ namespace SourceGen {
             // just use the byte-select operators, for wider ops we get only as fancy as we
             // need to be.
 
-            int adjustment, symbolValue;
-
             // Start by remapping the label, if necessary.  The remapped label may have a
             // local-variable prefix character.
             string symLabel = sym.Label;
@@ -727,6 +725,7 @@ namespace SourceGen {
             if (operandLen == 1) {
                 // Use the byte-selection operator to get the right piece.  In 64tass the
                 // selection operator has a very low precedence, similar to Merlin 32.
+                int symbolValue;
                 string selOp;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16) & 0xff;
@@ -757,16 +756,18 @@ namespace SourceGen {
                     sb.Append(symLabel);
                     sb.Append(')');
                 } else {
-                    // no adjustment required
+                    // no adjustment required, or no byte-selection
                     sb.Append(selOp);
                     sb.Append(symLabel);
                 }
+                int adjustment = operandValue - symbolValue;
+                sb.Append(formatter.FormatAdjustment(adjustment));
             } else if (operandLen <= 4) {
                 // Operands and values should be 8/16/24 bit unsigned quantities.  32-bit
                 // support is really there so you can have a 24-bit pointer in a 32-bit hole.
                 // Might need to adjust this if 32-bit signed quantities become interesting.
                 uint mask = 0xffffffff >> ((4 - operandLen) * 8);
-                int rightShift;
+                int rightShift, symbolValue;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16);
                     rightShift = 16;
@@ -777,6 +778,7 @@ namespace SourceGen {
                     symbolValue = sym.Value;
                     rightShift = 0;
                 }
+                bool hasShift = (rightShift != 0);
 
                 if ((flags & FormatNumericOpFlags.IsPcRel) != 0) {
                     // PC-relative operands are funny, because an 8- or 16-bit value is always
@@ -809,45 +811,53 @@ namespace SourceGen {
                 }
 
                 operandValue = (int)(operandValue & mask);
+                int adjustment = operandValue - symbolValue;
 
-                // Generate one of:
-                //  label [+ adj]
-                //  (label >> rightShift) [+ adj]
-                //  (label & mask) [+ adj]
-                //  ((label >> rightShift) & mask) [+ adj]
+                // Possibilities:
+                //  label
+                //  label + adj
+                //  label >> rightShift
+                //  (label >> rightShift) + adj
+                //  label & mask
+                //  (label & mask) + adj
+                //  (label >> rightShift) & mask
+                //  ((label >> rightShift) & mask) + adj
 
-                if (rightShift != 0 || needMask) {
-                    if ((flags & FormatNumericOpFlags.HasHashPrefix) == 0) {
-                        sb.Append("0+");
-                    }
-                    if (rightShift != 0 && needMask) {
-                        sb.Append("((");
-                    } else {
-                        sb.Append("(");
-                    }
-                }
                 sb.Append(symLabel);
 
                 if (rightShift != 0) {
                     sb.Append(" >> ");
                     sb.Append(rightShift.ToString());
-                    sb.Append(')');
                 }
 
                 if (needMask) {
+                    if (rightShift != 0) {
+                        sb.Insert(0, '(');
+                        sb.Append(')');
+                    }
+
                     sb.Append(" & ");
                     sb.Append(formatter.FormatHexValue((int)mask, 2));
-                    sb.Append(')');
+                }
+
+                if (adjustment != 0) {
+                    if (needMask || rightShift != 0) {
+                        sb.Insert(0, '(');
+                        sb.Append(')');
+                    }
+
+                    sb.Append(formatter.FormatAdjustment(adjustment));
+                }
+
+                // Starting with a '(' makes it look like an indirect operand, so we need
+                // to prefix the expression with a no-op addition.
+                if (sb[0] == '(' && (flags & FormatNumericOpFlags.HasHashPrefix) == 0) {
+                    sb.Insert(0, "0+");
                 }
             } else {
                 Debug.Assert(false, "bad numeric len");
                 sb.Append("?????");
-                symbolValue = 0;
             }
-
-            adjustment = operandValue - symbolValue;
-
-            sb.Append(formatter.FormatAdjustment(adjustment));
         }
 
         /// <summary>
@@ -862,7 +872,7 @@ namespace SourceGen {
             // and divide.)  This means that, if we want to mask off the low 16 bits and add one
             // to a label, we can write "start & $ffff + 1" rather than "(start & $ffff) + 1".
             //
-            // This is particularly convenient for PEA, since "PEA (start & $ffff)" looks like
+            // This is particularly convenient for PEA, since "PEA (start & $ffff) + 1" looks like
             // we're trying to use a (non-existent) indirect form of PEA.  We can write things
             // in a simpler way.
 

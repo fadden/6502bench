@@ -39,23 +39,23 @@ start   lda     #zip
         !byte   >start
         !word   zip
         !word   absl
-        !word   0+(absl >> 8)
+        !word   absl >> 8
         !word   absl-$1000
         !word   0+(absl >> 8)-16
         !word   absh
-        !word   0+(absh >> 8)
+        !word   absh >> 8
         !word   absh-$f000
         !word   0+(absh >> 8)+16
         !word   start
-        !word   0+(start >> 8)
+        !word   start >> 8
         !word   start+1
-        !word   0+(start >> 8)
+        !word   start >> 8
         !byte   $fe,$ed
         !24     zip
         !24     absh
-        !24     0+(absh >> 8)
+        !24     absh >> 8
         !24     start
-        !24     0+(start >> 8)
+        !24     start >> 8
 
 @L23A3  jmp     @L1000_1
 
