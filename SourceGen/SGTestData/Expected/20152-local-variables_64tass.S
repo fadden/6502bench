@@ -1,6 +1,6 @@
 ;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
         .cpu    "65816"
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 CONST_ZERO =    $f0        ;project const
 

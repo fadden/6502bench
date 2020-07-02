@@ -1,8 +1,8 @@
 ;Project edited to mark some non-ASCII operands as ASCII.
         .cpu    "65816"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
         .as
@@ -12,88 +12,88 @@
         sep     #$30
         lda     #'A'
         lda     #'A' | $80
-        .enc    none
+        .enc    "none"
         lda     #'A'
-        .enc    screen
+        .enc    "screen"
         lda     #'A'
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         ldx     #'a'
         ldx     #'a' | $80
-        .enc    none
+        .enc    "none"
         ldx     #'a'
-        .enc    screen
+        .enc    "screen"
         ldx     #'a'
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         lda     #$7f
         lda     #$7f
-        .enc    none
+        .enc    "none"
         lda     #$7f
-        .enc    screen
+        .enc    "screen"
         lda     #$7f
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         lda     #$0d
         rep     #$30
         .al
         .xl
         lda     #'B'
         lda     #'B' | $80
-        .enc    none
+        .enc    "none"
         lda     #'B'
-        .enc    screen
+        .enc    "screen"
         lda     #'B'
         sep     #$30
         .as
         .xs
         rts
 
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .byte   'C'
         .byte   'C' | $80
-        .enc    none
+        .enc    "none"
         .byte   'C'
-        .enc    screen
+        .enc    "screen"
         .byte   'C'
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .word   'd'
         .word   'd' | $80
-        .enc    none
+        .enc    "none"
         .word   'd'
-        .enc    screen
+        .enc    "screen"
         .word   'd'
         .byte   $00,$45
         .byte   $00,$c5
         .byte   $00,$c5
         .byte   $00,$45
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "low ASCII str"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   "high ASCII str"
         .byte   $80
-        .enc    none
+        .enc    "none"
         .text   "PETSCII str"
         .byte   $80
-        .enc    screen
+        .enc    "screen"
         .text   "Screen Code str"
         .byte   $82
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   $07,"Low ASCII CRLF",$0d,$0a
         .byte   $82
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   $87,"High ASCII CRLF",$8d,$8a
         .byte   $82
-        .enc    none
+        .enc    "none"
         .text   $93,"PETSCII with ",$96,"control",$05," codes",$0d
         .byte   $83
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
         .text   "XYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         .byte   $83
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   " !",$a2,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
         .text   "XYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         .byte   $83
-        .enc    none
+        .enc    "none"
         .text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
         .text   "XYZ["
         .byte   $5c
@@ -107,7 +107,7 @@
         .byte   $7d
         .byte   $7e
         .byte   $83
-        .enc    screen
+        .enc    "screen"
         .text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
         .text   "XYZ["
         .byte   $1c
@@ -121,7 +121,7 @@
         .byte   $7d
         .byte   $7e
         .byte   $84
-        .enc    none
+        .enc    "none"
         .text   "IICSTEP esrever"
         .byte   $84
         .null   "null term PETSCII"
@@ -135,7 +135,7 @@
         .byte   $84
         .shift  "pet dci"
         .byte   $84
-        .enc    screen
+        .enc    "screen"
         .text   "edoC neercS esrever"
         .byte   $84
         .ptext  "Screen Code with length"
@@ -176,7 +176,7 @@
         .byte   $1b
         .byte   $1c
         .byte   $1d
-        .enc    none
+        .enc    "none"
         .text   $1e,$1f," !",$22,"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmno"
         .text   "pqrstuvwxyz["
         .byte   $5c

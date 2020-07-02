@@ -1,5 +1,5 @@
         .cpu    "6502"
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $2000
         jmp     L2100

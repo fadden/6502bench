@@ -280,12 +280,12 @@ namespace SourceGen.AsmGen {
 
             CheckAsciiFormats(out bool hasAscii, out bool hasHighAscii);
             if (hasHighAscii) {
-                OutputLine(string.Empty, ".enc", HIGH_ASCII_ENC_NAME, string.Empty);
+                OutputLine(string.Empty, ".enc", '"' + HIGH_ASCII_ENC_NAME + '"', string.Empty);
                 OutputLine(string.Empty, ".cdef", "$20,$7e,$a0", string.Empty);
                 mCurrentEncoding = CharEncoding.Encoding.HighAscii;
             }
             if (hasAscii) {
-                OutputLine(string.Empty, ".enc", ASCII_ENC_NAME, string.Empty);
+                OutputLine(string.Empty, ".enc", '"' + ASCII_ENC_NAME + '"', string.Empty);
                 OutputLine(string.Empty, ".cdef", "$20,$7e,$20", string.Empty);
                 mCurrentEncoding = CharEncoding.Encoding.Ascii;
             }
@@ -372,7 +372,7 @@ namespace SourceGen.AsmGen {
             if (newEnc != mCurrentEncoding) {
                 switch (newEnc) {
                     case CharEncoding.Encoding.Ascii:
-                        OutputLine(string.Empty, ".enc", ASCII_ENC_NAME, string.Empty);
+                        OutputLine(string.Empty, ".enc", '"' + ASCII_ENC_NAME + '"', string.Empty);
                         break;
                     case CharEncoding.Encoding.HighAscii:
                         // If this is a numeric operand (not string), and we're currently in
@@ -382,14 +382,15 @@ namespace SourceGen.AsmGen {
                         if (mCurrentEncoding == CharEncoding.Encoding.Ascii && !dfd.IsString) {
                             newEnc = mCurrentEncoding;
                         } else {
-                            OutputLine(string.Empty, ".enc", HIGH_ASCII_ENC_NAME, string.Empty);
+                            OutputLine(string.Empty, ".enc", '"' + HIGH_ASCII_ENC_NAME + '"',
+                                string.Empty);
                         }
                         break;
                     case CharEncoding.Encoding.C64Petscii:
-                        OutputLine(string.Empty, ".enc", "none", string.Empty);
+                        OutputLine(string.Empty, ".enc", "\"none\"", string.Empty);
                         break;
                     case CharEncoding.Encoding.C64ScreenCode:
-                        OutputLine(string.Empty, ".enc", "screen", string.Empty);
+                        OutputLine(string.Empty, ".enc", "\"screen\"", string.Empty);
                         break;
                     default:
                         Debug.Assert(false);

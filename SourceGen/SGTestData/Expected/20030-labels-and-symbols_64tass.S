@@ -1,7 +1,7 @@
 ;Project was edited to add a label in the middle of a dense hex region, and add
 ;a duplicate label.
         .cpu    "6502"
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 BMI1    =       $30        ;opcode mnemonic
 zip     =       $cd

@@ -1,24 +1,24 @@
 ;Project file was edited to get zero-length strings and reverse DCI.
         .cpu    "6502"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
         rts
 
         .text   "low ASCII str"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   "high ASCII str"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "'low'quoted",$22,"''text"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   $a2,"high",$a2,"quoted'",$a2,$a2,"text"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "01234567890123456789012345678901234567890123456789012345678901"
         .text   "234567890123456789"
         .byte   $80
@@ -50,19 +50,19 @@
         .text   "0123456789012345678901234567890123456789012345678901678901",$22
         .text   $22,$22
         .byte   $81
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   "**************************************************************"
         .byte   $80
         .text   "**************************************************************"
         .text   "**********************************"
         .byte   $81
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "ver IICSA wol"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   "ver IICSA hgih"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   ".eeht rof sllot ti ;sllot lleb eht mohw rof wonk ot dnes reven"
         .text   " erofereht dna ,dniknam ni devlovni ma I esuaceb ,em sehsinimi"
         .text   "d htaed snam ynA  .erew nwo eniht fo ro sdneirf yht fo ronam a"
@@ -75,16 +75,16 @@
         .byte   $80
         .null   "low ASCII strz"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .null   "high ASCII strz"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .null   "'low'quoted",$22,"''text"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .null   $a2,"high",$a2,"quoted'",$a2,$a2,"text"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "012345678901234567890123456789012345678901234567890123456789''"
         .text   "'",$00
         .byte   $80
@@ -95,16 +95,16 @@
         .byte   $80
         .ptext  "low ASCII str1"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .ptext  "high ASCII str1"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .ptext  "'low'quoted",$22,"''text"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .ptext  $a2,"high",$a2,"quoted'",$a2,$a2,"text"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   $3f,"0123456789012345678901234567890123456789012345678901234567"
         .text   "89'''"
         .byte   $80
@@ -115,16 +115,16 @@
         .byte   $80
         .text   $0e,$00,"low ASCII str2"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   $0f,$00,"high ASCII str2"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   $12,$00,"'low'quoted",$22,"''text"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .text   $13,$00,$a2,"high",$a2,"quoted'",$a2,$a2,"text"
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   $3f,$00,"012345678901234567890123456789012345678901234567890123"
         .text   "456789'''"
         .byte   $80
@@ -141,17 +141,17 @@
         .byte   $81
         .shift  "low ASCII dci"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .byte   $e8,$e9,$e7,$e8,$a0,$c1,$d3,$c3,$c9,$c9,$a0,$e4,$e3,$69
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .shift  "'low'quoted",$22,"''text"
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .byte   $a2,$e8,$e9,$e7,$e8,$a2,$f1,$f5,$ef,$f4,$e5,$e4,$a7,$a2,$a2,$f4
         .byte   $e5,$f8,$74
         .byte   $80
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "012345678901234567890123456789012345678901234567890123456789''"
         .text   $a7
         .byte   $80

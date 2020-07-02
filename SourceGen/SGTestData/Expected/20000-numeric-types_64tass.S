@@ -1,7 +1,7 @@
 ;Project file was edited to get all big-endian data types, and to have an
 ;incorrect .junk alignment directive.
         .cpu    "6502"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
 *       =       $1000
         bit     L1448

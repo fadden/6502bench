@@ -1,7 +1,7 @@
         .cpu    "65816"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 PrintInlineL1String = $011000
 PrintInlineL2String = $012000
@@ -66,7 +66,7 @@ data01  .word   4386
         .byte   $80
 data02  .word   _data03
         .byte   $80
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
 _data03 .text   "AllEight"
 
 NoCont  pla                ;split across address change
@@ -106,7 +106,7 @@ L1800   jsr     PrintInlineNullString
         .byte   $01
         .here
         .logical $1840
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .text   "string"
         .byte   $00
         .byte   $60

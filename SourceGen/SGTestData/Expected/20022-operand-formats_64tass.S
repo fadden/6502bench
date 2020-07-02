@@ -1,8 +1,8 @@
 ;Project file was edited to force ASCII formatting for some operands.
         .cpu    "65816"
-        .enc    sg_hiascii
+        .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
-        .enc    sg_ascii
+        .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
         .as
