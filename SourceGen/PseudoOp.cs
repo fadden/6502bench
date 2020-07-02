@@ -558,8 +558,9 @@ namespace SourceGen {
         public enum FormatNumericOpFlags {
             None                    = 0,
             IsPcRel                 = 1,        // opcode is PC relative, e.g. branch or PER
-            HasHashPrefix           = 1 << 1,   // operand has a leading '#', reducing ambiguity
-            OmitLabelPrefixSuffix   = 1 << 2,   // don't show annotation char or non-unique prefix
+            IsAbsolutePBR           = 1 << 1,   // operand implicitly uses 'K' on 65816 (JMP/JSR)
+            HasHashPrefix           = 1 << 2,   // operand has a leading '#', reducing ambiguity
+            OmitLabelPrefixSuffix   = 1 << 3,   // don't show annotation char or non-unique prefix
         }
 
         /// <summary>
@@ -784,6 +785,20 @@ namespace SourceGen {
                     // relevant to our computations.
                     operandValue &= 0xffff;
                     symbolValue &= 0xffff;
+                }
+
+                if ((flags & FormatNumericOpFlags.IsAbsolutePBR) != 0) {
+                    if ((operandValue & 0x00ff0000) == (symbolValue & 0x00ff0000)) {
+                        // JMP or JSR to something within the same bank.  We don't need to
+                        // mask the value.
+                        symbolValue &= 0xffff;
+                    } else {
+                        // This is an absolute JMP/JSR to an out-of-bank location, which is
+                        // bogus and should probably be prevented at a higher level.  We handle
+                        // it by altering the mask so an adjustment that covers the difference
+                        // in bank values is generated.
+                        mask = 0x00ffffff;
+                    }
                 }
 
                 bool needMask = false;

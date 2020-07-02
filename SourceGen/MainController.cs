@@ -1160,7 +1160,7 @@ namespace SourceGen {
         /// <param name="dataPathName">Full path to file.</param>
         /// <param name="proj">Project object.</param>
         /// <param name="cancel">Returns true if we want to cancel the attempt.</param>
-        /// <returns></returns>
+        /// <returns>File data.</returns>
         private byte[] FindValidDataFile(ref string dataPathName, DisasmProject proj,
                 out bool cancel) {
             FileInfo fi = new FileInfo(dataPathName);

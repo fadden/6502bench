@@ -43,13 +43,72 @@ high44:  beq     @L44FFCB
 @L2000:  bit     @L2000
          pea     dat44 & $ffff
          pea     dat44 >> 16
-         bne     @L200E
+         bne     skip
          jml     [lodat]
 
-@L200E:  nop
+skip:    nop
          jsr     j2
 j2:      jsr     j2+3
          jsr     j2-3
          jsl     longsym
-         rts
+         jml     bank54
+
+;         .segment "SEG004"
+         .org    $543210
+bank54:  cmp     bank54
+         bra     L54321C
+
+backchk: nop
+         nop
+L543218: rts
+
+backval: .faraddr backchk
+
+L54321C: lda     backchk
+         lda     f:fwdchk
+         lda     $543216
+         lda     $54327d
+         lda     backchk & $ffff +1
+         lda     backchk & $ffff -1
+         lda     fwdchk & $ffff +1
+         lda     fwdval & $ffff +2
+         nop
+         jsr     backchk & $ffff
+         jsr     backchk & $ffff +1
+         jsr     L543218 & $ffff
+         jsr     fwdchk & $ffff
+         jsr     fwdchk & $ffff +1
+         jsr     L54327F & $ffff
+         nop
+         ldx     #$00
+         jsr     (backval & $ffff,x)
+         jsr     (fwdval & $ffff,x)
+         jsr     @L54326E & $ffff
+         jsr     @L543271 & $ffff
+         jsr     @L543268 & $ffff
+         jsr     @L54326B & $ffff
+         jsr     @L543274 & $ffff
+         jsr     @L543277 & $ffff
+         bra     L543280
+
+@L543268: jmp    (backval & $ffff,x)
+
+@L54326B: jmp    (fwdval & $ffff,x)
+
+@L54326E: jmp    ($1008)
+
+@L543271: jmp    ($1008)
+
+@L543274: jml    [$1008]
+
+@L543277: jml    [$1008]
+
+fwdval:  .faraddr fwdchk
+
+fwdchk:  nop
+         nop
+L54327F: rts
+
+L543280: jsr     skip
+         rtl
 

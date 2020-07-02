@@ -36,13 +36,71 @@ high44   beq   :L44FFCB
 :L2000   bit   :L2000
          pea   dat44
          pea   ^dat44
-         bne   :L200E
+         bne   skip
          jml   [lodat]
 
-:L200E   nop
+skip     nop
          jsr   j2
 j2       jsr   j2+3
          jsr   j2-3
          jsl   longsym
-         rts
+         jml   bank54
+
+         org   $543210
+bank54   cmpl  bank54
+         bra   L54321C
+
+backchk  nop
+         nop
+L543218  rts
+
+backval  adr   backchk
+
+L54321C  ldal  backchk
+         ldal  fwdchk
+         ldal  $543216
+         ldal  $54327d
+         lda   backchk+1
+         lda   backchk-1
+         lda   fwdchk+1
+         lda   fwdval+2
+         nop
+         jsr   backchk
+         jsr   backchk+1
+         jsr   L543218
+         jsr   fwdchk
+         jsr   fwdchk+1
+         jsr   L54327F
+         nop
+         ldx   #$00
+         jsr   (backval,x)
+         jsr   (fwdval,x)
+         jsr   :L54326E
+         jsr   :L543271
+         jsr   :L543268
+         jsr   :L54326B
+         jsr   :L543274
+         jsr   :L543277
+         bra   L543280
+
+:L543268 jmp   (backval,x)
+
+:L54326B jmp   (fwdval,x)
+
+:L54326E jmp   ($1008)
+
+:L543271 jmp   ($1008)
+
+:L543274 jml   [$1008]
+
+:L543277 jml   [$1008]
+
+fwdval   adr   $54327d
+
+fwdchk   nop
+         nop
+L54327F  rts
+
+L543280  jsr   skip
+         rtl
 

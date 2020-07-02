@@ -201,6 +201,14 @@ namespace SourceGen.AsmGen {
                     wdis = OpDef.WidthDisambiguation.ForceDirect;
                 }
             }
+            if (wdis == OpDef.WidthDisambiguation.ForceLongMaybe &&
+                    gen.Quirks.SinglePassAssembler &&
+                    IsForwardLabelReference(gen, offset)) {
+                // Assemblers like cc65 can't tell if a symbol reference is Absolute or
+                // Long if they haven't seen the symbol yet.  Irrelevant for ACME, which
+                // doesn't currently handle 65816 outside bank 0.
+                wdis = OpDef.WidthDisambiguation.ForceLong;
+            }
 
             string opcodeStr = formatter.FormatOpcode(op, wdis);
 
@@ -227,6 +235,9 @@ namespace SourceGen.AsmGen {
             if ((opFlags & PseudoOp.FormatNumericOpFlags.IsPcRel) != 0) {
                 int branchDist = attr.Address - attr.OperandAddress;
                 isPcRelBankWrap = branchDist > 32767 || branchDist < -32768;
+            }
+            if (op.IsAbsolutePBR) {
+                opFlags |= PseudoOp.FormatNumericOpFlags.IsAbsolutePBR;
             }
 
             // 16-bit operands outside bank 0 need to include the bank when computing

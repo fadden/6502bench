@@ -253,6 +253,32 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// True if this is an absolute-address instruction whose operand is combined with
+        /// the Program Bank Register.
+        /// </summary>
+        /// <remarks>
+        /// As noted in Eyes & Lichty, the Absolute addressing mode uses the Data Bank Register
+        /// if locating data, or the Program Bank Register if transferring control.  When
+        /// we "LDA symbol" we can only care about the 16-bit value because we can't know what B
+        /// will hold at run time.  When we "JMP symbol" we can either (1) complain if it's in
+        /// a different bank, (2) complain if a bank is specified at all, or (3) just not care.
+        /// All three approaches are in use.
+        ///
+        /// This call is a way to know that the instruction is merged with the PBR rather than
+        /// the DBR.
+        /// </remarks>
+        public bool IsAbsolutePBR {
+            get {
+                // Too lazy to add new field.  Set for:
+                //  JSR abs
+                //  JMP abs
+                //  JMP (abs,X)
+                //  JSR (abs,X)
+                return Opcode == 0x20 || Opcode == 0x4c || Opcode == 0x7c || Opcode == 0xfc;
+            }
+        }
+
+        /// <summary>
         /// True if the operand's width is uniquely determined by the opcode mnemonic, even
         /// if the operation supports operands with varying widths.
         /// 

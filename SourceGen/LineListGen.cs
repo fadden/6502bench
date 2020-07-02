@@ -1240,6 +1240,9 @@ namespace SourceGen {
                     op.AddrMode == OpDef.AddressMode.ImmLongXY) {
                 opFlags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
             }
+            if (op.IsAbsolutePBR) {
+                opFlags |= PseudoOp.FormatNumericOpFlags.IsAbsolutePBR;
+            }
 
             // Use the OperandAddress when available.  This is important for relative branch
             // instructions and PER, where we want to show the target address rather than the
