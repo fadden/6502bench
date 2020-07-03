@@ -5,63 +5,101 @@
 
 *SYNOPSIS GS/OS public addresses and constants.
 
-inline_entry    @ $e100a8       ;GS/OS inline call entry point
-stack_entry     @ $e100b0       ;GS/OS stack call entry point
+gsos_inline_ent     @ $e100a8       ;GS/OS inline call entry point
+gsos_stack_ent      @ $e100b0       ;GS/OS stack call entry point
 
 *TAG AppleIIgs-GSOS-Functions
 
-; Class 1 GS/OS calls
-AddNotifyProc   = $2034
-BeginSession    = $201D
-BindInt         = $2031
-ChangePath      = $2004
-ClearBackupBit  = $200B
-Close           = $2014
-Create          = $2001
-DControl        = $202E
-DelNotifyProc   = $2035
-Destroy         = $2002
-DInfo           = $202C
-DRead           = $202F
-DRename         = $2036
-DStatus         = $202D
-DWrite          = $2030
-EndSession      = $201E
-EraseDisk       = $2025
-ExpandPath      = $200E
-Flush           = $2015
-Format          = $2024
-FSTSpecific     = $2033
-GetBootVol      = $2028
-GetDevNumber    = $2020
-GetDirEntry     = $201C
-GetEOF          = $2019
-GetFileInfo     = $2006
-GetFSTInfo      = $202B
-GetLevel        = $201B
-GetMark         = $2017
-GetName         = $2027
-GetPrefix       = $200A
-GetRefInfo      = $2039
-GetRefNum       = $2038
-GetStdRefNum    = $2037
-GetSysPrefs     = $200F
-GetVersion      = $202A
-NewLine         = $2011
-Null            = $200D
-Open            = $2010
-OSShutdown      = $2003
-Quit            = $2029
-Read            = $2012
-RestCache       = $2026
-SessionStatus   = $201F
-SetEOF          = $2018
-SetFileInfo     = $2005
-SetLevel        = $201A
-SetMark         = $2016
-SetPrefix       = $2009
-SetSysPrefs     = $200C
-UnbindInt       = $2032
-Volume          = $2008
-Write           = $2013
+; Class 0 ProDOS 16 calls.
+P16_ALLOC_INTERRUPT = $0031
+P16_CHANGE_PATH     = $0004
+P16_CLEAR_BACKUP_BIT = $000B
+P16_CLOSE           = $0014
+P16_CREATE          = $0001
+P16_DEALLOC_INTERTUPT = $0032
+P16_DESTROY         = $0002
+P16_D_INFO          = $002C
+P16_ERASE_DISK      = $0025
+P16_EXPAND_PATH     = $000E
+P16_FLUSH           = $0015
+P16_FORMAT          = $0024
+P16_GET_BOOT_VOL    = $0028
+P16_GET_DEV_NUM     = $0020
+P16_GET_DIR_ENTRY   = $001C
+P16_GET_EOF         = $0019
+P16_GET_FILE_INFO   = $0006
+P16_GET_LAST_DEV    = $0021
+P16_GET_LEVEL       = $001B
+P16_GET_MARK        = $0017
+P16_GET_NAME        = $0027
+P16_GET_PREFIX      = $000A
+P16_GET_VERSION     = $002A
+P16_NEWLINE         = $0011
+P16_OPEN            = $0010
+P16_QUIT            = $0029
+P16_READ            = $0012
+P16_READ_BLOCK      = $0022
+P16_SET_EOF         = $0018
+P16_SET_FILE_INFO   = $0005
+P16_SET_LEVEL       = $001A
+P16_SET_MARK        = $0016
+P16_SET_PREFIX      = $0009
+P16_VOLUME          = $0008
+P16_WRITE           = $0013
+P16_WRITE_BLOCK     = $0023
 
+; Class 1 GS/OS calls.  Names match the macros defined in Orca/M's M16.GSOS
+; (i.e. they all end with "GS" except for FSTSpecific).
+AddNotifyProcGS     = $2034
+BeginSessionGS      = $201D
+BindIntGS           = $2031
+ChangePathGS        = $2004
+ClearBackupBitGS    = $200B
+CloseGS             = $2014
+CreateGS            = $2001
+DControlGS          = $202E
+DelNotifyProcGS     = $2035
+DestroyGS           = $2002
+DInfoGS             = $202C
+DReadGS             = $202F
+DRenameGS           = $2036
+DStatusGS           = $202D
+DWriteGS            = $2030
+EndSessionGS        = $201E
+EraseDiskGS         = $2025
+ExpandPathGS        = $200E
+FlushGS             = $2015
+FormatGS            = $2024
+FSTSpecific         = $2033
+GetBootVolGS        = $2028
+GetDevNumberGS      = $2020
+GetDirEntryGS       = $201C
+GetEOFGS            = $2019
+GetFileInfoGS       = $2006
+GetFSTInfoGS        = $202B
+GetLevelGS          = $201B
+GetMarkGS           = $2017
+GetNameGS           = $2027
+GetPrefixGS         = $200A
+GetRefInfoGS        = $2039
+GetRefNumGS         = $2038
+GetStdRefNumGS      = $2037
+GetSysPrefsGS       = $200F
+GetVersionGS        = $202A
+NewLineGS           = $2011
+NullGS              = $200D
+OpenGS              = $2010
+OSShutdownGS        = $2003
+QuitGS              = $2029
+ReadGS              = $2012
+ResetCacheGS        = $2026
+SessionStatusGS     = $201F
+SetEOFGS            = $2018
+SetFileInfoGS       = $2005
+SetLevelGS          = $201A
+SetMarkGS           = $2016
+SetPrefixGS         = $2009
+SetSysPrefsGS       = $200C
+UnbindIntGS         = $2032
+VolumeGS            = $2008
+WriteGS             = $2013
