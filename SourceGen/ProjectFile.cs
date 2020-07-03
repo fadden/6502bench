@@ -53,7 +53,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 3;
+        public const int CONTENT_VERSION = 4;
 
         private static readonly bool ADD_CRLF = true;
 
@@ -417,6 +417,7 @@ namespace SourceGen {
         public List<SerVisualization> Visualizations { get; set; }
         public List<SerVisBitmapAnimation> VisualizationAnimations { get; set; }
         public Dictionary<string, SerVisualizationSet> VisualizationSets { get; set; }
+        public Dictionary<string, DisasmProject.RelocData> RelocList { get; set; }
 
         /// <summary>
         /// Serializes a DisasmProject into an augmented JSON string.
@@ -524,6 +525,15 @@ namespace SourceGen {
             }
 
             spf.ProjectProps = new SerProjectProperties(proj.ProjectProps);
+
+            if (proj.RelocList != null) {
+                // The objects can serialize directly, but the Dictionary key can't be an int.
+                spf.RelocList =
+                    new Dictionary<string, DisasmProject.RelocData>(proj.RelocList.Count);
+                foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in proj.RelocList) {
+                    spf.RelocList.Add(kvp.Key.ToString(), kvp.Value);
+                }
+            }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
             string cereal = ser.Serialize(spf);
@@ -831,6 +841,19 @@ namespace SourceGen {
                     Debug.WriteLine("WARNING: visDict still has " + visDict.Count + " entries");
                 }
             }
+
+            // Deserialize relocation data.  This was added in v1.7.
+            if (spf.RelocList != null) {
+                proj.RelocList = new Dictionary<int, DisasmProject.RelocData>();
+                foreach (KeyValuePair<string, DisasmProject.RelocData> kvp in spf.RelocList) {
+                    if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
+                            Res.Strings.PROJECT_FIELD_RELOC_DATA, report, out int intKey)) {
+                        continue;
+                    }
+                    proj.RelocList.Add(intKey, kvp.Value);
+                }
+            }
+
 
             return true;
         }

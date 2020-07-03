@@ -31,6 +31,7 @@ limitations under the License.
 
         <system:String x:Key="str_FileOffsetLenFmt">File offset {0}, length {1} ({2})</system:String>
         <system:String x:Key="str_RecordHeaderFmt">Records ({0}):</system:String>
+        <system:String x:Key="str_RelocHeaderFmt">Relocation dictionary ({0}):</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -59,7 +60,7 @@ limitations under the License.
                   HeadersVisibility="Column"
                   CanUserReorderColumns="False"
                   CanUserSortColumns="False"
-                  SelectionMode="Single">
+                  SelectionMode="Extended">
             <DataGrid.Resources>
                 <!-- make the no-focus color the same as the in-focus color -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
@@ -86,7 +87,7 @@ limitations under the License.
                   HeadersVisibility="Column"
                   CanUserReorderColumns="False"
                   CanUserSortColumns="False"
-                  SelectionMode="Single">
+                  SelectionMode="Extended">
             <DataGrid.Resources>
                 <!-- make the no-focus color the same as the in-focus color -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
@@ -101,7 +102,7 @@ limitations under the License.
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="5" Text="Relocation dictionary:" Margin="0,8,0,0"
+        <TextBlock Grid.Row="5" Text="{Binding RelocHeaderStr, FallbackValue=Relocation dictionary:}" Margin="0,8,0,0"
                    Visibility="{Binding HasRelocs, Converter={StaticResource BoolToVis}}"/>
         <DataGrid Name="relocList" Grid.Row="6" Height="145" Margin="0,8,0,0"
                   Visibility="{Binding HasRelocs, Converter={StaticResource BoolToVis}}"
@@ -115,7 +116,7 @@ limitations under the License.
                   HeadersVisibility="Column"
                   CanUserReorderColumns="False"
                   CanUserSortColumns="False"
-                  SelectionMode="Single">
+                  SelectionMode="Extended">
             <DataGrid.Resources>
                 <!-- make the no-focus color the same as the in-focus color -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"

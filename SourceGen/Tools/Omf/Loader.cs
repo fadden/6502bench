@@ -48,11 +48,15 @@ namespace SourceGen.Tools.Omf {
         }
         private List<SegmentMapEntry> mSegmentMap;
 
+        private Dictionary<int, DisasmProject.RelocData> mRelocData =
+            new Dictionary<int, DisasmProject.RelocData>();
+
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="omfFile">OMF file to load.</param>
+        /// <param name="formatter">Text formatter.</param>
         public Loader(OmfFile omfFile, Formatter formatter) {
             Debug.Assert(omfFile.OmfFileKind == OmfFile.FileKind.Load);
 
@@ -83,7 +87,7 @@ namespace SourceGen.Tools.Omf {
                 Debug.Assert(i == ent.Segment.SegNum);
             }
 
-            if (!GenerateOutput()) {
+            if (!GenerateDataAndProject()) {
                 mSegmentMap = null;
                 return false;
             }
@@ -258,7 +262,7 @@ namespace SourceGen.Tools.Omf {
             return true;
         }
 
-        private bool GenerateOutput() {
+        private bool GenerateDataAndProject() {
             // Sum up the segment lengths to get the total project size.
             int totalLen = 0;
             foreach (SegmentMapEntry ent in mSegmentMap) {
@@ -339,7 +343,8 @@ namespace SourceGen.Tools.Omf {
             }
 
             proj.PrepForNew(data, "new_proj");
-            proj.ApplyChanges(cs, false, out RangeSet unused);
+            proj.ApplyChanges(cs, false, out _);
+            proj.RelocList = mRelocData;
 
             mLoadedData = data;
             mNewProject = proj;
@@ -401,6 +406,10 @@ namespace SourceGen.Tools.Omf {
                     }
                 }
 
+                if (omfRel.Shift < -32 || omfRel.Shift > 32) {
+                    Debug.WriteLine("Invalid reloc shift " + omfRel.Shift);
+                    return false;
+                }
                 if (omfRel.Shift < 0) {
                     relocAddr >>= -omfRel.Shift;
                 } else if (omfRel.Shift > 0) {
@@ -430,6 +439,9 @@ namespace SourceGen.Tools.Omf {
                         Debug.WriteLine("Invalid reloc width " + omfRel.Width);
                         return false;
                 }
+
+                mRelocData.Add(bufOffset + omfRel.Offset,
+                    new DisasmProject.RelocData((byte)omfRel.Width, (byte)omfRel.Shift, relocAddr));
             }
 
             return true;
@@ -439,9 +451,16 @@ namespace SourceGen.Tools.Omf {
         /// Edits the data file, essentially putting the jump table entries into the
         /// "loaded" state.
         /// </summary>
+        /// <remarks>
+        /// We don't use ent.Segment.Relocs, as that is expected to be empty.
+        /// </remarks>
         private bool RelocJumpTable(SegmentMapEntry ent, byte[] data, int bufOffset,
                 ChangeSet cs) {
             const int ENTRY_LEN = 14;
+
+            if (ent.Segment.Relocs.Count != 0) {
+                Debug.WriteLine("WEIRD: jump table has reloc data?");
+            }
 
             byte[] srcData = ent.Segment.GetConstData();
             Array.Copy(srcData, 0, data, bufOffset, srcData.Length);
@@ -458,7 +477,7 @@ namespace SourceGen.Tools.Omf {
             TypedRangeSet undoSet = new TypedRangeSet();
 
             for (int i = 8; i + 4 <= ent.Segment.Length; i += ENTRY_LEN) {
-                int userId = RawData.GetWord(data, bufOffset + i, 2, false);
+                //int userId = RawData.GetWord(data, bufOffset + i, 2, false);
                 int fileNum = RawData.GetWord(data, bufOffset + i + 2, 2, false);
 
                 if (fileNum == 0) {
@@ -476,7 +495,7 @@ namespace SourceGen.Tools.Omf {
                     return false;
                 }
 
-                // Note: segment ends right after FileNum, so don't try to read further
+                // Note: segment might end right after FileNum, so don't try to read further
                 // until we've confirmed that FileNum != 0.
 
                 int segNum = RawData.GetWord(data, bufOffset + i + 4, 2, false);

@@ -48,6 +48,12 @@ namespace SourceGen.Tools.Omf.WpfGui {
             set { mRecordHeaderStr = value; OnPropertyChanged(); }
         }
 
+        private string mRelocHeaderStr;
+        public string RelocHeaderStr {
+            get { return mRelocHeaderStr; }
+            set { mRelocHeaderStr = value; OnPropertyChanged(); }
+        }
+
         public class HeaderItem {
             public string Name { get; private set; }
             public string Value { get; private set; }
@@ -141,6 +147,8 @@ namespace SourceGen.Tools.Omf.WpfGui {
 
             fmt = (string)FindResource("str_RecordHeaderFmt");
             RecordHeaderStr = string.Format(fmt, RecordItems.Count);
+            fmt = (string)FindResource("str_RelocHeaderFmt");
+            RelocHeaderStr = string.Format(fmt, RelocItems.Count);
         }
 
         private void GenerateHeaderItems() {

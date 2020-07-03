@@ -291,6 +291,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ProjectFieldNote");
         public static string PROJECT_FIELD_OPERAND_FORMAT =
             (string)Application.Current.FindResource("str_ProjectFieldOperandFormat");
+        public static string PROJECT_FIELD_RELOC_DATA =
+            (string)Application.Current.FindResource("str_ProjectFieldRelocData");
         public static string PROJECT_FIELD_STATUS_FLAGS =
             (string)Application.Current.FindResource("str_ProjectFieldStatusFlags");
         public static string PROJECT_FIELD_TYPE_HINT =

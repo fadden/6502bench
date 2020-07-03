@@ -119,6 +119,28 @@ namespace SourceGen {
         /// </summary>
         public ProjectProperties ProjectProps { get; private set; }
 
+        /// <summary>
+        /// "Cooked" form of relocation data (e.g. OmfReloc).  This does not contain the file
+        /// offset, as that's expected to be used as the dictionary key.
+        ///
+        /// Will be null unless the project was generated from a relocatable source.
+        /// </summary>
+        [Serializable]
+        public class RelocData {
+            public byte Width;      // width of area written by relocator
+            public byte Shift;      // amount to shift the value
+            public int Value;       // value used (unshifted, full width)
+
+            public RelocData() { }  // for deserialization
+
+            public RelocData(byte width, byte shift, int value) {
+                Width = width;
+                Shift = shift;
+                Value = value;
+            }
+        }
+        public Dictionary<int, RelocData> RelocList { get; set; }
+
         #endregion // data to save & restore
 
 
