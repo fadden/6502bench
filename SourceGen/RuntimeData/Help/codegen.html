@@ -172,6 +172,11 @@ code, but also needs to know how to handle the corner cases.</p>
   <li>For 65816, selecting the bank byte is done with the grave accent
     character ('`') rather than the caret ('^').  (There's a note in the
     docs to the effect that they plan to move to carets.)</li>
+  <li>Instructions whose argument is formed by combining with the
+    65816 Program Bank Register (16-bit JMP/JSR) must be specified
+    as 24-bit values for code that lives outside bank 0.  This is
+    true for both symbols and raw hex (e.g. <code>JSR $1234</code>
+    is invalid outside bank 0).</li>
   <li>The arguments to COP and BRK require immediate-mode syntax
     (<code>COP #$03</code> rather than <code>COP $03</code>).
   <li>For historical reasons, the default behavior of the assembler is to

@@ -633,6 +633,14 @@ namespace SourceGen {
                 case FormatDescriptor.SubType.None:
                 case FormatDescriptor.SubType.Hex:
                 case FormatDescriptor.SubType.Address:
+                    if ((formatter.ExpressionMode == Formatter.FormatConfig.ExpressionMode.Cc65 ||
+                                formatter.ExpressionMode == Formatter.FormatConfig.ExpressionMode.Merlin) &&
+                            (flags & FormatNumericOpFlags.IsAbsolutePBR) != 0) {
+                        // cc65 really doesn't like 24-bit values for JMP/JSR.  If it sees a
+                        // 24-bit hex constant it emits JML/JSL.  Merlin works either way, and
+                        // I think it looks better as a 16-bit value.
+                        operandValue &= 0xffff;
+                    }
                     return formatter.FormatHexValue(operandValue, hexMinLen);
                 case FormatDescriptor.SubType.Decimal:
                     return formatter.FormatDecimalValue(operandValue);

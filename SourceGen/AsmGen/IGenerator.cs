@@ -217,6 +217,12 @@ namespace SourceGen.AsmGen {
         public bool BlockMoveArgsReversed { get; set; }
 
         /// <summary>
+        /// Do we need to specify a 24-bit value for 16-bit absolute arguments that are
+        /// formed with the Program Bank Register (JMP/JSR)?
+        /// </summary>
+        public bool Need24BitsForAbsPBR { get; set; }
+
+        /// <summary>
         /// Does the assembler support a type of label whose value can be redefined to
         /// act as a local variable?
         /// </summary>

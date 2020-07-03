@@ -52,7 +52,7 @@ bank54   cmpl  bank54
 
 backchk  nop
          nop
-L543218  rts
+         rts
 
 backval  adr   backchk
 
@@ -67,10 +67,10 @@ L54321C  ldal  backchk
          nop
          jsr   backchk
          jsr   backchk+1
-         jsr   L543218
+         jsr   $3218
          jsr   fwdchk
          jsr   fwdchk+1
-         jsr   L54327F
+         jsr   $327f
          nop
          ldx   #$00
          jsr   (backval,x)
@@ -99,8 +99,18 @@ fwdval   adr   $54327d
 
 fwdchk   nop
          nop
-L54327F  rts
+         rts
 
 L543280  jsr   skip
+         nop
+         phk
+         plb
+         ldal  $544280
+         jsl   $544280
+         nop
+         lda   $4280
+         jsr   $4280
+         jsr   ($4280,x)
+         nop
          rtl
 

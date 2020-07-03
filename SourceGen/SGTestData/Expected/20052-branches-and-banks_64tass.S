@@ -58,7 +58,7 @@ bank54  cmp     bank54
 
 backchk nop
         nop
-L543218 rts
+        rts
 
 backval .long   backchk
 
@@ -73,10 +73,10 @@ L54321C lda     backchk
         nop
         jsr     backchk
         jsr     backchk+1
-        jsr     L543218
+        jsr     $543218
         jsr     fwdchk
         jsr     fwdchk+1
-        jsr     L54327F
+        jsr     $54327f
         nop
         ldx     #$00
         jsr     (backval,x)
@@ -105,9 +105,19 @@ fwdval  .long   fwdchk
 
 fwdchk  nop
         nop
-L54327F rts
+        rts
 
 L543280 jsr     skip+$540000
+        nop
+        phk
+        plb
+        lda     $544280
+        jsl     $544280
+        nop
+        lda     $4280
+        jsr     $544280
+        jsr     ($544280,x)
+        nop
         rtl
 
         .here

@@ -292,10 +292,10 @@ namespace SourceGen.AsmGen {
                     formattedOperand = hash + formatter.FormatHexValue(arg1, 2) + "," +
                         hash + formatter.FormatHexValue(arg2, 2);
                 } else {
-                    if (operandLen == 2) {
+                    if (operandLen == 2 && !(op.IsAbsolutePBR && gen.Quirks.Need24BitsForAbsPBR)) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",
                         // when outside bank zero.  The bank is included in the operand address,
-                        // but we don't want to show it here.
+                        // but we don't want to show it here.  We may need it for JSR/JMP though.
                         operandForSymbol &= 0xffff;
                     }
                     formattedOperand = formatter.FormatHexValue(operandForSymbol, operandLen * 2);
@@ -303,7 +303,8 @@ namespace SourceGen.AsmGen {
             }
             string operandStr = formatter.FormatOperand(op, formattedOperand, wdis);
 
-            if (gen.Quirks.StackIntOperandIsImmediate && op.AddrMode == OpDef.AddressMode.StackInt) {
+            if (gen.Quirks.StackIntOperandIsImmediate &&
+                    op.AddrMode == OpDef.AddressMode.StackInt) {
                 // COP $02 is standard, but some require COP #$02
                 operandStr = '#' + operandStr;
             }

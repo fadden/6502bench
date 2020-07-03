@@ -60,7 +60,7 @@ bank54:  cmp     bank54
 
 backchk: nop
          nop
-L543218: rts
+         rts
 
 backval: .faraddr backchk
 
@@ -75,10 +75,10 @@ L54321C: lda     backchk
          nop
          jsr     backchk & $ffff
          jsr     backchk & $ffff +1
-         jsr     L543218 & $ffff
+         jsr     $3218
          jsr     fwdchk & $ffff
          jsr     fwdchk & $ffff +1
-         jsr     L54327F & $ffff
+         jsr     $327f
          nop
          ldx     #$00
          jsr     (backval & $ffff,x)
@@ -107,8 +107,18 @@ fwdval:  .faraddr fwdchk
 
 fwdchk:  nop
          nop
-L54327F: rts
+         rts
 
 L543280: jsr     skip
+         nop
+         phk
+         plb
+         lda     $544280
+         jsl     $544280
+         nop
+         lda     $4280
+         jsr     $4280
+         jsr     ($4280,x)
+         nop
          rtl
 

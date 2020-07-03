@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":3,
-"FileDataLength":202,
-"FileDataCrc32":530517490,
+"_ContentVersion":4,
+"FileDataLength":224,
+"FileDataCrc32":2055368095,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -222,6 +222,12 @@
 "Label":"backchk",
 "Part":"Low"}},
 
+"133":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
 "139":{
 "Length":3,
 "Format":"NumericLE",
@@ -229,6 +235,12 @@
 "SymbolRef":{
 "Label":"fwdchk",
 "Part":"Low"}},
+
+"142":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
 
 "148":{
 "Length":3,
@@ -258,4 +270,6 @@
 "Visualizations":[],
 "VisualizationAnimations":[],
 "VisualizationSets":{
-}}
+},
+
+"RelocList":null}

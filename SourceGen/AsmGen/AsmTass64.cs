@@ -164,6 +164,7 @@ namespace SourceGen.AsmGen {
             Quirks = new AssemblerQuirks();
             Quirks.StackIntOperandIsImmediate = true;
             Quirks.LeadingUnderscoreSpecial = true;
+            Quirks.Need24BitsForAbsPBR = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
