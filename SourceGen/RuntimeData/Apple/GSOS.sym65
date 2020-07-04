@@ -1,7 +1,7 @@
 ; Copyright 2018 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
-; Source: GS/OS Reference Manual
+; Source: GS/OS Reference Manual and Orca/M 2.0 assembler manual.
 
 *SYNOPSIS GS/OS public addresses and constants.
 
@@ -103,3 +103,65 @@ SetSysPrefsGS       = $200C
 UnbindIntGS         = $2032
 VolumeGS            = $2008
 WriteGS             = $2013
+
+; Orca shell calls.  These are used just like GS/OS calls.  See chapter 24
+; in the Orca/M 2.0 manual and M16.Shell.
+OSH_ChangeVector    = $010C
+OSH_ConsoleOut      = $011A
+OSH_Direction       = $010F
+OSH_Error           = $0105
+OSH_Execute         = $010D
+OSH_ExpandDevices   = $0114
+OSH_Export          = $0116
+OSH_FastFile        = $010E
+OSH_GetCommand      = $011D
+OSH_GetIODevices    = $011C
+OSH_GetLang         = $0103
+OSH_GetLInfo        = $0101
+OSH_InitWildcard    = $0109
+OSH_Keypress        = $011E
+OSH_NextWildcard    = $010A
+OSH_PopVariables    = $0117
+OSH_PushVariables   = $0118
+OSH_ReadIndexed     = $0108
+OSH_ReadKey         = $011f
+OSH_ReadVariable    = $010B
+OSH_Redirect        = $0110
+OSH_Set             = $0106
+OSH_SetIODevices    = $011B
+OSH_SetLang         = $0104
+OSH_SetLInfo        = $0102
+OSH_SetStopFlag     = $0119
+OSH_Stop            = $0113
+OSH_UnsetVariable   = $0115
+OSH_Version         = $0107
+
+OSH_ChangeVectorGS  = $014C
+OSH_ConsoleOutGS    = $015A
+OSH_DirectionGS     = $014F
+OSH_ErrorGS         = $0145
+OSH_ExecuteGS       = $014D
+OSH_ExpandDevicesGS = $0154
+OSH_ExportGS        = $0156
+OSH_FastFileGS      = $014E
+OSH_GetCommandGS    = $015D
+OSH_GetIODevicesGS  = $015C
+OSH_GetLangGS       = $0143
+OSH_GetLInfoGS      = $0141
+OSH_InitWildcardGS  = $0149
+OSH_KeypressGS      = $015E
+OSH_NextWildcardGS  = $014A
+OSH_PopVariablesGS  = $0157
+OSH_PushVariablesGS = $0158
+OSH_ReadIndexedGS   = $0148
+OSH_ReadKeyGS       = $015f
+OSH_ReadVariableGS  = $014B
+OSH_RedirectGS      = $0150
+OSH_SetGS           = $0146
+OSH_SetIODevicesGS  = $015B
+OSH_SetLangGS       = $0144
+OSH_SetLInfoGS      = $0142
+OSH_SetStopFlagGS   = $0159
+OSH_StopGS          = $0153
+OSH_UnsetVariableGS = $0155
+OSH_VersionGS       = $0147
