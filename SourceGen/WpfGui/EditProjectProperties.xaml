@@ -103,6 +103,8 @@ limitations under the License.
                                       IsChecked="{Binding AnalyzeUncategorizedData}"/>
                             <CheckBox Margin="0,4,0,0" Content="Seek nearby targets"
                                       IsChecked="{Binding SeekNearbyTargets}"/>
+                            <CheckBox Margin="0,4,0,0" Content="Use relocation data (experimental)"
+                                      IsChecked="{Binding UseRelocData}" IsEnabled="{Binding IsRelocDataAvailable}"/>
                             <CheckBox Margin="0,4,0,0" Content="Smart PLP handling"
                                       IsChecked="{Binding SmartPlpHandling}"/>
 

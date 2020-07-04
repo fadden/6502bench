@@ -105,20 +105,22 @@ namespace SourceGen.WpfGui {
         /// Constructor.  Initial state is configured from an existing ProjectProperties object.
         /// </summary>
         /// <param name="owner">Parent window.</param>
-        /// <param name="props">Property holder to clone.</param>
+        /// <param name="project">Project object.</param>
         /// <param name="projectDir">Project directory, if known.</param>
         /// <param name="formatter">Text formatter.</param>
         /// <param name="initialTab">Tab to open initially.  Pass "Unknown" for default.</param>
-        public EditProjectProperties(Window owner, ProjectProperties props, string projectDir,
+        public EditProjectProperties(Window owner, DisasmProject project, string projectDir,
                 Formatter formatter, Tab initialTab) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
-            mWorkProps = new ProjectProperties(props);
+            mWorkProps = new ProjectProperties(project.ProjectProps);   // make a work copy
             mProjectDir = projectDir;
             mFormatter = formatter;
             mInitialTab = initialTab;
+
+            IsRelocDataAvailable = (project.RelocList.Count > 0);
 
             // Construct arrays used as item sources for combo boxes.
             CpuItems = new CpuItem[] {
@@ -340,6 +342,19 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
                 IsDirty = true;
             }
+        }
+        public bool UseRelocData {
+            get { return mWorkProps.AnalysisParams.UseRelocData; }
+            set {
+                mWorkProps.AnalysisParams.UseRelocData = value;
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        private bool mIsRelocDataAvailable;
+        public bool IsRelocDataAvailable {
+            get { return mIsRelocDataAvailable; }
+            set { mIsRelocDataAvailable = value; OnPropertyChanged(); }
         }
         public bool SmartPlpHandling {
             get { return mWorkProps.AnalysisParams.SmartPlpHandling; }

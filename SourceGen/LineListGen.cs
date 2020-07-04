@@ -1282,6 +1282,8 @@ namespace SourceGen {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",
                         // when outside bank zero.  The bank is included in the operand address,
                         // but we don't want to show it here.
+                        // (Some assemblers want the bank to be shown for JSR/JMP, but we don't
+                        // do that here.  See the corresponding code in AsmGen.GenCommon)
                         operandForSymbol &= 0xffff;
                     }
                     formattedOperand = mFormatter.FormatHexValue(operandForSymbol, operandLen * 2);

@@ -13,6 +13,7 @@
 <h1>6502bench SourceGen: Tools</h1>
 
 <h2><a name="instruction-chart">Instruction Chart</a></h2>
+
 <p>This opens a window with a summary of all 256 opcodes.  The CPU can
 be chosen from the pop-up list at the bottom.  Undocumented opcodes for
 6502/65C02 are shown in italics, and can be excluded from the list
@@ -83,6 +84,20 @@ length of the file, respectively.</p>
 <p>The hex dumps show the area just before and after the chunk to be
 sliced, allowing you to confirm the placement.</p>
 
+
+<h2><a name="omf-converter">OMF Converter</a></h2>
+
+<p>This tool allows you to view Apple IIgs Object Module Format
+binaries, and convert them for disassembly.  OMF files have multiple
+segments with relocatable code.  The conversion tool loads the OMF
+file the same way the GS/OS System Loader would, and creates a
+SourceGen project file for it with some basic attributes filled in.</p>
+
+<p>Only Load files may be converted (S16, PIF, etc).  Compiler object
+files and libraries contain unresolved references and are not supported.</p>
+
+<p>The generated binary file is not in OMF format and will not execute
+on an Apple IIgs.</p>
 
 </div>
 

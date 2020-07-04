@@ -174,6 +174,7 @@ namespace SourceGen {
         ///    bytes.</param>
         /// <param name="entryFlags">Status flags to use at code entry points.</param>
         /// <param name="scriptMan">Extension script manager.</param>
+        /// <param name="parms">Analysis parameters.</param>
         /// <param name="debugLog">Object that receives debug log messages.</param>
         public CodeAnalysis(byte[] data, CpuDef cpuDef, Anattrib[] anattribs,
                 AddressMap addrMap, TypeHint[] hints, StatusFlags[] statusFlagOverrides,

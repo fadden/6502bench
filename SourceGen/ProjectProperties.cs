@@ -28,9 +28,10 @@ namespace SourceGen {
     /// </summary>
     public class ProjectProperties {
         //
-        // NOTE:
+        // *** NOTE ***
         // If you add or modify a member, make sure to update the copy constructor and
         // add serialization code to ProjectFile.
+        // *** NOTE ***
         //
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace SourceGen {
             public TextScanMode DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
+            public bool UseRelocData { get; set; }
             public bool SmartPlpHandling { get; set; }
 
             public AnalysisParameters() {
@@ -59,6 +61,7 @@ namespace SourceGen {
                 DefaultTextScanMode = TextScanMode.LowHighAscii;
                 MinCharsForString = DataAnalysis.DEFAULT_MIN_STRING_LENGTH;
                 SeekNearbyTargets = true;
+                UseRelocData = true;
                 SmartPlpHandling = true;
             }
             public AnalysisParameters(AnalysisParameters src) {
@@ -66,6 +69,7 @@ namespace SourceGen {
                 DefaultTextScanMode = src.DefaultTextScanMode;
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
+                UseRelocData = src.UseRelocData;
                 SmartPlpHandling = src.SmartPlpHandling;
             }
         }

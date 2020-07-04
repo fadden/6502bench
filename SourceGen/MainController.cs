@@ -1597,17 +1597,10 @@ namespace SourceGen {
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
             FormatDescriptor dfd = attr.DataDescriptor;
 
-            // Does this have an operand with an in-file target offset?
-            // (Resolve it as a numeric reference.)
-            if (attr.OperandOffset >= 0) {
-                // Yup, find the line for that offset and jump to it.
-                if (!testOnly) {
-                    GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
-                        GoToMode.JumpToCodeData, true);
-                }
-                return true;
-            } else if (dfd != null && dfd.HasSymbol) {
-                // Operand has a symbol, do a symbol lookup.
+            if (dfd != null && dfd.HasSymbol) {
+                // Operand has a symbol, do a symbol lookup.  This is slower than a simple
+                // jump based on OperandOffset, but if we've incorporated reloc data then
+                // the jump will be wrong.
                 if (dfd.SymbolRef.IsVariable) {
                     if (!testOnly) {
                         GoToVarDefinition(line.FileOffset, dfd.SymbolRef, true);
@@ -1646,6 +1639,14 @@ namespace SourceGen {
                         Debug.WriteLine("Operand symbol not found: " + dfd.SymbolRef.Label);
                     }
                 }
+            } else if (attr.OperandOffset >= 0) {
+                // Operand has an in-file target offset.  We can resolve it as a numeric reference.
+                // Find the line for that offset and jump to it.
+                if (!testOnly) {
+                    GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
+                        GoToMode.JumpToCodeData, true);
+                }
+                return true;
             } else if (attr.IsDataStart || attr.IsInlineDataStart) {
                 // If it's an Address or Symbol, we can try to resolve
                 // the value.  (Symbols should have been resolved by the
@@ -2198,7 +2199,7 @@ namespace SourceGen {
             if (!string.IsNullOrEmpty(mProjectPathName)) {
                 projectDir = Path.GetDirectoryName(mProjectPathName);
             }
-            EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject.ProjectProps,
+            EditProjectProperties dlg = new EditProjectProperties(mMainWin, mProject,
                 projectDir, mFormatter, initialTab);
             dlg.ShowDialog();
             ProjectProperties newProps = dlg.NewProps;
@@ -3201,6 +3202,7 @@ namespace SourceGen {
             Debug.Assert(line.FileOffset >= 0);
 
             // Does this have an operand with an in-file target offset?
+            // TODO: may not work correctly with reloc data?
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
             if (attr.OperandOffset >= 0) {
                 return CodeLineList.FindCodeDataIndexByOffset(attr.OperandOffset);

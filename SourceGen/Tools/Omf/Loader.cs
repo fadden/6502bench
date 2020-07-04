@@ -344,7 +344,9 @@ namespace SourceGen.Tools.Omf {
 
             proj.PrepForNew(data, "new_proj");
             proj.ApplyChanges(cs, false, out _);
-            proj.RelocList = mRelocData;
+            foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in mRelocData) {
+                proj.RelocList.Add(kvp.Key, kvp.Value);
+            }
 
             mLoadedData = data;
             mNewProject = proj;
@@ -410,38 +412,39 @@ namespace SourceGen.Tools.Omf {
                     Debug.WriteLine("Invalid reloc shift " + omfRel.Shift);
                     return false;
                 }
+                int adjRelocAddr = relocAddr;
                 if (omfRel.Shift < 0) {
-                    relocAddr >>= -omfRel.Shift;
+                    adjRelocAddr >>= -omfRel.Shift;
                 } else if (omfRel.Shift > 0) {
-                    relocAddr <<= omfRel.Shift;
+                    adjRelocAddr <<= omfRel.Shift;
                 }
 
                 switch (omfRel.Width) {
                     case 1:
-                        data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
+                        data[bufOffset + omfRel.Offset] = (byte)(adjRelocAddr);
                         break;
                     case 2:
-                        data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
-                        data[bufOffset + omfRel.Offset + 1] = (byte)(relocAddr >> 8);
+                        data[bufOffset + omfRel.Offset] = (byte)(adjRelocAddr);
+                        data[bufOffset + omfRel.Offset + 1] = (byte)(adjRelocAddr >> 8);
                         break;
                     case 3:
-                        data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
-                        data[bufOffset + omfRel.Offset + 1] = (byte)(relocAddr >> 8);
-                        data[bufOffset + omfRel.Offset + 2] = (byte)(relocAddr >> 16);
+                        data[bufOffset + omfRel.Offset] = (byte)(adjRelocAddr);
+                        data[bufOffset + omfRel.Offset + 1] = (byte)(adjRelocAddr >> 8);
+                        data[bufOffset + omfRel.Offset + 2] = (byte)(adjRelocAddr >> 16);
                         break;
                     case 4:
-                        data[bufOffset + omfRel.Offset] = (byte)(relocAddr);
-                        data[bufOffset + omfRel.Offset + 1] = (byte)(relocAddr >> 8);
-                        data[bufOffset + omfRel.Offset + 2] = (byte)(relocAddr >> 16);
-                        data[bufOffset + omfRel.Offset + 3] = (byte)(relocAddr >> 24);
+                        data[bufOffset + omfRel.Offset] = (byte)(adjRelocAddr);
+                        data[bufOffset + omfRel.Offset + 1] = (byte)(adjRelocAddr >> 8);
+                        data[bufOffset + omfRel.Offset + 2] = (byte)(adjRelocAddr >> 16);
+                        data[bufOffset + omfRel.Offset + 3] = (byte)(adjRelocAddr >> 24);
                         break;
                     default:
                         Debug.WriteLine("Invalid reloc width " + omfRel.Width);
                         return false;
                 }
 
-                mRelocData.Add(bufOffset + omfRel.Offset,
-                    new DisasmProject.RelocData((byte)omfRel.Width, (byte)omfRel.Shift, relocAddr));
+                mRelocData.Add(bufOffset + omfRel.Offset, new DisasmProject.RelocData(
+                    (byte)omfRel.Width, (sbyte)omfRel.Shift, relocAddr));
             }
 
             return true;

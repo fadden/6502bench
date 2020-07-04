@@ -122,24 +122,26 @@ namespace SourceGen {
         /// <summary>
         /// "Cooked" form of relocation data (e.g. OmfReloc).  This does not contain the file
         /// offset, as that's expected to be used as the dictionary key.
-        ///
-        /// Will be null unless the project was generated from a relocatable source.
         /// </summary>
         [Serializable]
         public class RelocData {
-            public byte Width;      // width of area written by relocator
-            public byte Shift;      // amount to shift the value
+            public byte Width;      // width of area written by relocator (1-4 bytes)
+            public sbyte Shift;     // amount to shift the value (usually 0 or -16)
             public int Value;       // value used (unshifted, full width)
 
             public RelocData() { }  // for deserialization
 
-            public RelocData(byte width, byte shift, int value) {
+            public RelocData(byte width, sbyte shift, int value) {
                 Width = width;
                 Shift = shift;
                 Value = value;
             }
         }
-        public Dictionary<int, RelocData> RelocList { get; set; }
+        /// <summary>
+        /// List of relocation data.  Will be empty unless file was generated from a
+        /// relocatable source.
+        /// </summary>
+        public Dictionary<int, RelocData> RelocList { get; private set; }
 
         #endregion // data to save & restore
 
@@ -280,6 +282,7 @@ namespace SourceGen {
             LvTables = new SortedList<int, LocalVariableTable>();
             VisualizationSets = new SortedList<int, VisualizationSet>();
             ProjectProps = new ProjectProperties();
+            RelocList = new Dictionary<int, RelocData>();
 
             SymbolTable = new SymbolTable();
             PlatformSyms = new List<PlatformSymbols>();

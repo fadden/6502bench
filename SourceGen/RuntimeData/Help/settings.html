@@ -254,6 +254,10 @@ unless they match exactly.  Note that references into the middle of an
 instruction or formatted data area are always adjusted, regardless of
 how this is set.  This setting has no effect on local variables, and
 only enables a 1-byte backward search on project/platform symbols.</p>
+<p>The "use relocation data" checkbox is only available if the project
+was created from a relocatable source, e.g. by the OMF Converter tool.
+If checked, information from the relocation dictionary will be used to
+improve automatic operand formatting.</p>
 <p>If "smart PLP handling" is checked, the analyzer will try to use
 the processor status flags from a nearby <code>PHP</code> when a
 <code>PLP</code> is encountered.  If not enabled, all flags are set to

@@ -223,6 +223,7 @@ namespace SourceGen {
             public string DefaultTextScanMode { get; set; }
             public int MinCharsForString { get; set; }
             public bool SeekNearbyTargets { get; set; }
+            public bool UseRelocData { get; set; }
             public bool SmartPlpHandling { get; set; }
 
             public SerAnalysisParameters() { }
@@ -231,6 +232,7 @@ namespace SourceGen {
                 DefaultTextScanMode = src.DefaultTextScanMode.ToString();
                 MinCharsForString = src.MinCharsForString;
                 SeekNearbyTargets = src.SeekNearbyTargets;
+                UseRelocData = src.UseRelocData;
                 SmartPlpHandling = src.SmartPlpHandling;
             }
         }
@@ -526,13 +528,10 @@ namespace SourceGen {
 
             spf.ProjectProps = new SerProjectProperties(proj.ProjectProps);
 
-            if (proj.RelocList != null) {
-                // The objects can serialize directly, but the Dictionary key can't be an int.
-                spf.RelocList =
-                    new Dictionary<string, DisasmProject.RelocData>(proj.RelocList.Count);
-                foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in proj.RelocList) {
-                    spf.RelocList.Add(kvp.Key.ToString(), kvp.Value);
-                }
+            // The objects are serializable, but the Dictionary key can't be an int.
+            spf.RelocList = new Dictionary<string, DisasmProject.RelocData>(proj.RelocList.Count);
+            foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in proj.RelocList) {
+                spf.RelocList.Add(kvp.Key.ToString(), kvp.Value);
             }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
@@ -610,6 +609,8 @@ namespace SourceGen {
                 spf.ProjectProps.AnalysisParams.MinCharsForString;
             proj.ProjectProps.AnalysisParams.SeekNearbyTargets =
                 spf.ProjectProps.AnalysisParams.SeekNearbyTargets;
+            proj.ProjectProps.AnalysisParams.UseRelocData =
+                spf.ProjectProps.AnalysisParams.UseRelocData;
             if (spf._ContentVersion < 2) {
                 // This was made optional in v1.3.  Default it to true for older projects.
                 proj.ProjectProps.AnalysisParams.SmartPlpHandling = true;
@@ -844,7 +845,6 @@ namespace SourceGen {
 
             // Deserialize relocation data.  This was added in v1.7.
             if (spf.RelocList != null) {
-                proj.RelocList = new Dictionary<int, DisasmProject.RelocData>();
                 foreach (KeyValuePair<string, DisasmProject.RelocData> kvp in spf.RelocList) {
                     if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
                             Res.Strings.PROJECT_FIELD_RELOC_DATA, report, out int intKey)) {

@@ -80,6 +80,11 @@ namespace SourceGen {
         }
 
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="proj">Project to analyze.</param>
+        /// <param name="anattribs">Anattrib array.</param>
         public DataAnalysis(DisasmProject proj, Anattrib[] anattribs) {
             mProject = proj;
             mAnattribs = anattribs;
@@ -156,12 +161,42 @@ namespace SourceGen {
                             FormatDescriptor.SubType.Address);
                         continue;
                     }
+
+                    // Check for a relocation.  It'll be at offset+1 because it's on the operand,
+                    // not the opcode byte.
+                    if (mAnalysisParams.UseRelocData && mProject.RelocList.TryGetValue(offset + 1,
+                            out DisasmProject.RelocData reloc)) {
+                        if (reloc.Value != attr.OperandAddress) {
+                            // The relocation address differs from what the analyzer came up
+                            // with.  This may be because of incorrect assumptions about the
+                            // bank (assuming B==K) or because the partial address refers to
+                            // a location outside the file bounds.  Whatever the case, if the
+                            // address is different, attr.OperandOffset will also be different.
+                            int relOperandOffset = mProject.AddrMap.AddressToOffset(offset,
+                                reloc.Value);
+                            if (relOperandOffset >= 0 && relOperandOffset != attr.OperandOffset) {
+                                // Determined a different offset.  Use that instead.
+                                //Debug.WriteLine("REL +" + offset.ToString("x6") + " " +
+                                //    reloc.Value.ToString("x6") + " vs. " +
+                                //    attr.OperandAddress.ToString("x6"));
+                                WeakSymbolRef.Part part = WeakSymbolRef.Part.Low;
+                                if (reloc.Shift == -8) {
+                                    part = WeakSymbolRef.Part.High;
+                                } else if (reloc.Shift == -16) {
+                                    part = WeakSymbolRef.Part.Bank;
+                                }
+                                SetDataTarget(offset, attr.Length, relOperandOffset, part);
+                                continue;
+                            }
+                        }
+                    }
+
                     int operandOffset = attr.OperandOffset;
                     if (operandOffset >= 0) {
                         // This is an offset reference: a branch or data access instruction whose
                         // target is inside the file.  Create a FormatDescriptor for it, and
                         // generate a label at the target if one is not already present.
-                        SetDataTarget(offset, attr.Length, operandOffset);
+                        SetDataTarget(offset, attr.Length, operandOffset, WeakSymbolRef.Part.Low);
                     }
 
                     // We advance by a single byte, rather than .Length, in case there's
@@ -190,7 +225,8 @@ namespace SourceGen {
                         }
                         int operandOffset = mProject.AddrMap.AddressToOffset(offset, address);
                         if (operandOffset >= 0) {
-                            SetDataTarget(offset, dfd.Length, operandOffset);
+                            SetDataTarget(offset, dfd.Length, operandOffset,
+                                WeakSymbolRef.Part.Low);
                         }
                     }
 
@@ -269,7 +305,8 @@ namespace SourceGen {
         /// <param name="srcOffset">Offset of instruction or address data.</param>
         /// <param name="srcLen">Length of instruction or data item.</param>
         /// <param name="targetOffset">Offset of target.</param>
-        private void SetDataTarget(int srcOffset, int srcLen, int targetOffset) {
+        private void SetDataTarget(int srcOffset, int srcLen, int targetOffset,
+                WeakSymbolRef.Part part) {
             // NOTE: don't try to cache mAnattribs[targetOffset] -- we may be changing
             // targetOffset and/or altering the Anattrib entry, so grabbing a copy of the
             // struct may lead to problems.
@@ -359,8 +396,7 @@ namespace SourceGen {
                     ", adj=" + (origTargetOffset - targetOffset));
             }
             mAnattribs[srcOffset].DataDescriptor = FormatDescriptor.Create(srcLen,
-                new WeakSymbolRef(mAnattribs[targetOffset].Symbol.Label, WeakSymbolRef.Part.Low),
-                isBigEndian);
+                new WeakSymbolRef(mAnattribs[targetOffset].Symbol.Label, part), isBigEndian);
         }
 
         /// <summary>
