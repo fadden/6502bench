@@ -163,10 +163,11 @@ namespace SourceGen {
                     }
 
                     // Check for a relocation.  It'll be at offset+1 because it's on the operand,
-                    // not the opcode byte.
-                    if (mAnalysisParams.UseRelocData && mProject.RelocList.TryGetValue(offset + 1,
-                            out DisasmProject.RelocData reloc)) {
-                        if (reloc.Value != attr.OperandAddress) {
+                    // not the opcode byte.  (Make sure to check the length, or an RTS followed
+                    // by relocated data will freak out.)
+                    if (mAnalysisParams.UseRelocData) {
+                        if (attr.Length > 1 && mProject.RelocList.TryGetValue(offset + 1,
+                                out DisasmProject.RelocData reloc)) {
                             // The relocation address differs from what the analyzer came up
                             // with.  This may be because of incorrect assumptions about the
                             // bank (assuming B==K) or because the partial address refers to
@@ -174,28 +175,33 @@ namespace SourceGen {
                             // address is different, attr.OperandOffset will also be different.
                             int relOperandOffset = mProject.AddrMap.AddressToOffset(offset,
                                 reloc.Value);
-                            if (relOperandOffset >= 0 && relOperandOffset != attr.OperandOffset) {
+                            if (relOperandOffset >= 0) {
                                 // Determined a different offset.  Use that instead.
                                 //Debug.WriteLine("REL +" + offset.ToString("x6") + " " +
                                 //    reloc.Value.ToString("x6") + " vs. " +
                                 //    attr.OperandAddress.ToString("x6"));
-                                WeakSymbolRef.Part part = WeakSymbolRef.Part.Low;
-                                if (reloc.Shift == -8) {
-                                    part = WeakSymbolRef.Part.High;
-                                } else if (reloc.Shift == -16) {
-                                    part = WeakSymbolRef.Part.Bank;
-                                }
+                                WeakSymbolRef.Part part = ShiftToPart(reloc.Shift);
                                 SetDataTarget(offset, attr.Length, relOperandOffset, part);
                                 continue;
                             }
+                        }
+
+                        // No reloc for this instruction.  If it's a relative branch we need
+                        // to do the usual stuff, but if it's a PEA we want to treat it like
+                        // an immediate value.  The safest thing to do is blacklist PEA and
+                        // let everything else proceed like it does without reloc data enabled.
+                        OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[offset]);
+                        if (op == OpDef.OpPEA_StackAbs) {
+                            //Debug.WriteLine("NoPEA +" + offset.ToString("x6"));
+                            continue;
                         }
                     }
 
                     int operandOffset = attr.OperandOffset;
                     if (operandOffset >= 0) {
-                        // This is an offset reference: a branch or data access instruction whose
-                        // target is inside the file.  Create a FormatDescriptor for it, and
-                        // generate a label at the target if one is not already present.
+                        // This is an offset reference: a branch or data access instruction
+                        // whose target is inside the file.  Create a FormatDescriptor for it,
+                        // and generate a label at the target if one is not already present.
                         SetDataTarget(offset, attr.Length, operandOffset, WeakSymbolRef.Part.Low);
                     }
 
@@ -237,7 +243,40 @@ namespace SourceGen {
                     // There shouldn't be any data items inside other data items, so we
                     // can just skip forward.
                     offset += mAnattribs[offset].DataDescriptor.Length - 1;
+                } else if (mAnalysisParams.UseRelocData &&
+                        !attr.IsInstruction && !attr.IsData && !attr.IsInlineData &&
+                        mProject.RelocList.TryGetValue(offset,
+                            out DisasmProject.RelocData reloc)) {
+                    // Byte is unformatted, but there's relocation data here.  If the full
+                    // range of bytes is unformatted, create a symbolic reference.
+                    bool allClear = true;
+                    for (int i = 1; i < reloc.Width; i++) {
+                        if (mAnattribs[offset + i].DataDescriptor != null) {
+                            allClear = false;
+                            break;
+                        }
+                    }
+                    if (allClear) {
+                        int operandOffset = mProject.AddrMap.AddressToOffset(offset, reloc.Value);
+                        if (operandOffset >= 0) {
+                            //Debug.WriteLine("DREL +" + offset.ToString("x6") + " val=" +
+                            //    reloc.Value.ToString("x6") +
+                            //    " opOff=" + operandOffset.ToString("x6"));
+                            SetDataTarget(offset, reloc.Width, operandOffset,
+                                ShiftToPart(reloc.Shift));
+                        }
+                    }
                 }
+            }
+        }
+
+        private static WeakSymbolRef.Part ShiftToPart(int shift) {
+            if (shift == -16) {
+                return WeakSymbolRef.Part.Bank;
+            } else if (shift == -8) {
+                return WeakSymbolRef.Part.High;
+            } else {
+                return WeakSymbolRef.Part.Low;
             }
         }
 

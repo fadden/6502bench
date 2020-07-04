@@ -131,7 +131,7 @@ limitations under the License.
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>
     <system:String x:Key="str_NoExportedSymbolsFound">No exported symbols found.</system:String>
     <system:String x:Key="str_OmfSegCommentFmt">Segment {0:D2}: Kind={1}, Attrs={2}, Name='{3}'</system:String>
-    <system:String x:Key="str_OmfSegHdrCommentFmt">Segment {0:D2}: {3} {1,-9} Name='{2}'</system:String>
+    <system:String x:Key="str_OmfSegHdrCommentFmt">Segment {0:D2}: {3} {1,-9} Name='{2}', Length={4}</system:String>
     <system:String x:Key="str_OmfSegNoteFmt">Seg{0:D2}: {1} '{2}'</system:String>
     <system:String x:Key="str_OpenDataDoesntExist">The file doesn't exist.</system:String>
     <system:String x:Key="str_OpenDataEmpty">File is empty</system:String>

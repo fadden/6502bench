@@ -61,7 +61,7 @@ namespace SourceGen {
                 DefaultTextScanMode = TextScanMode.LowHighAscii;
                 MinCharsForString = DataAnalysis.DEFAULT_MIN_STRING_LENGTH;
                 SeekNearbyTargets = true;
-                UseRelocData = true;
+                UseRelocData = false;
                 SmartPlpHandling = true;
             }
             public AnalysisParameters(AnalysisParameters src) {

@@ -299,6 +299,7 @@ namespace SourceGen.Tools.Omf {
 
             ChangeSet cs = new ChangeSet(mSegmentMap.Count * 2);
             AddHeaderComment(proj, cs);
+            UndoableChange uc;
 
             // Load the segments, and add entries to the project.
             int bufOffset = 0;
@@ -327,7 +328,7 @@ namespace SourceGen.Tools.Omf {
                 // Add a comment identifying the segment and its attributes.
                 string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
                     ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.Attrs, ent.Segment.SegName);
-                UndoableChange uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
+                uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
                     new MultiLineComment(segCmt));
                 cs.Add(uc);
 
@@ -343,10 +344,18 @@ namespace SourceGen.Tools.Omf {
             }
 
             proj.PrepForNew(data, "new_proj");
-            proj.ApplyChanges(cs, false, out _);
             foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in mRelocData) {
                 proj.RelocList.Add(kvp.Key, kvp.Value);
             }
+
+            // Enable "use reloc" in the analysis parameters.
+            ProjectProperties newProps = new ProjectProperties(proj.ProjectProps);
+            newProps.AnalysisParams.UseRelocData = true;
+            uc = UndoableChange.CreateProjectPropertiesChange(proj.ProjectProps, newProps);
+            cs.Add(uc);
+
+            Debug.WriteLine("Applying " + cs.Count + " changes");
+            proj.ApplyChanges(cs, false, out _);
 
             mLoadedData = data;
             mNewProject = proj;
@@ -365,7 +374,7 @@ namespace SourceGen.Tools.Omf {
                 }
                 string segCmt = string.Format(Res.Strings.OMF_SEG_HDR_COMMENT_FMT,
                     ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.SegName,
-                    mFormatter.FormatAddress(ent.Address, true));
+                    mFormatter.FormatAddress(ent.Address, true), ent.Segment.Length);
                 sb.AppendLine(segCmt);
             }
 
