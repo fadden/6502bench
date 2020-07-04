@@ -93,13 +93,13 @@ _L543268 jmp    (backval,x)
 
 _L54326B jmp    (fwdval,x)
 
-_L54326E jmp    ($1008)
+_L54326E jmp    (lodat)
 
-_L543271 jmp    ($1008)
+_L543271 jmp    (lodat)
 
-_L543274 jml    [$1008]
+_L543274 jml    [lodat]
 
-_L543277 jml    [$1008]
+_L543277 jml    [lodat]
 
 fwdval  .long   fwdchk
 

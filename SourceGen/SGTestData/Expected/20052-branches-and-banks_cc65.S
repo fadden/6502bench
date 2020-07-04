@@ -95,13 +95,13 @@ L54321C: lda     backchk
 
 @L54326B: jmp    (fwdval & $ffff,x)
 
-@L54326E: jmp    ($1008)
+@L54326E: jmp    (lodat)
 
-@L543271: jmp    ($1008)
+@L543271: jmp    (lodat)
 
-@L543274: jml    [$1008]
+@L543274: jml    [lodat]
 
-@L543277: jml    [$1008]
+@L543277: jml    [lodat]
 
 fwdval:  .faraddr fwdchk
 

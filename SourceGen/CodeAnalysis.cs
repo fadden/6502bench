@@ -869,11 +869,11 @@ namespace SourceGen {
                 case OpDef.AddressMode.AbsIndexX:
                 case OpDef.AddressMode.AbsIndexY:
                 case OpDef.AddressMode.AbsIndexXInd:
-                case OpDef.AddressMode.AbsInd:
-                case OpDef.AddressMode.AbsIndLong:
                 case OpDef.AddressMode.StackAbs:
                     mAnattribs[offset].OperandAddress = operand | bank;
                     break;
+                case OpDef.AddressMode.AbsInd:              // JMP (addr), always bank 0
+                case OpDef.AddressMode.AbsIndLong:          // JMP [addr], always bank 0
                 case OpDef.AddressMode.DP:
                 case OpDef.AddressMode.DPIndexX:
                 case OpDef.AddressMode.DPIndexY:

@@ -354,6 +354,9 @@ namespace SourceGen.Tools.Omf {
             uc = UndoableChange.CreateProjectPropertiesChange(proj.ProjectProps, newProps);
             cs.Add(uc);
 
+            // TODO(someday): by default we apply a code hint to offset 0 of the first
+            // segment.  The placement should take the segment's ENTRY into account.
+
             Debug.WriteLine("Applying " + cs.Count + " changes");
             proj.ApplyChanges(cs, false, out _);
 
