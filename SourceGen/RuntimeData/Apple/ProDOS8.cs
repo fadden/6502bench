@@ -29,6 +29,9 @@ parm_block
 */
 
 namespace RuntimeData.Apple {
+    /// <summary>
+    /// Identify and format ProDOS-8 system calls.
+    /// </summary>
     public class ProDOS8 : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineJsr {
         private const string P8_MLI_TAG = "ProDOS8-MLI-Functions";   // tag used in .sym65 file
         private bool VERBOSE = false;

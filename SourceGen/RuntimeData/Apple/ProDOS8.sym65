@@ -4,6 +4,7 @@
 ; Sources:
 ;   Beneath Apple ProDOS
 ;   ProDOS 8 Technical Reference Manual
+;   NiftyList data file
 
 *SYNOPSIS ProDOS 8 public addresses and constants.
 
@@ -13,34 +14,34 @@
 ;
 *TAG ProDOS8-MLI-Functions 
 
-P8_ALLOC_INTERRUPT = $40
-P8_DEALLOC_INTERRUPT = $41
-P8_QUIT         = $65
+P8_ALLOC_INTERRUPT = $40        ;(2:IntNum/1,CodePtr)
+P8_DEALLOC_INTERRUPT = $41      ;(1:IntNum/1)
+P8_QUIT         = $65           ;(4:Type/1,Path,zz/1,zz)
 
-P8_READ_BLOCK   = $80
-P8_WRITE_BLOCK  = $81
-P8_GET_TIME     = $82
+P8_READ_BLOCK   = $80           ;(3:Unit/1,Buff,BlkNum)
+P8_WRITE_BLOCK  = $81           ;(3:Unit/1,Buff,BlkNum)
+P8_GET_TIME     = $82           ;()
 
-P8_CREATE       = $C0
-P8_DESTROY      = $C1
-P8_RENAME       = $C2
-P8_SET_FILE_INFO = $C3
-P8_GET_FILE_INFO = $C4
-P8_ONLINE       = $C5
-P8_SET_PREFIX   = $C6
-P8_GET_PREFIX   = $C7
-P8_OPEN         = $C8
-P8_NEWLINE      = $C9
-P8_READ         = $CA
-P8_WRITE        = $CB
-P8_CLOSE        = $CC
-P8_FLUSH        = $CD
-P8_SET_MARK     = $CE
-P8_GET_MARK     = $CF
-P8_SET_EOF      = $D0
-P8_GET_EOF      = $D1
-P8_SET_BUF      = $D2
-P8_GET_BUF      = $D3
+P8_CREATE       = $C0           ;(7:pn,acc/1,type/1,aux,stt/1,cD,cT)
+P8_DESTROY      = $C1           ;(1:pn)
+P8_RENAME       = $C2           ;(2:pn1,pn2)
+P8_SET_FILE_INFO = $C3          ;(7:pn,a/1,t/1,aux,nul/3,mD,mT)
+P8_GET_FILE_INFO = $C4          ;(10:pn,a/1,t/1,x,s/1,b,mDTcDT)
+P8_ONLINE       = $C5           ;(2:UnitNum/1,Buff)
+P8_SET_PREFIX   = $C6           ;(1:pn)
+P8_GET_PREFIX   = $C7           ;(1:Buff)
+P8_OPEN         = $C8           ;(3:pn,ioBuff,Ref/1)
+P8_NEWLINE      = $C9           ;(3:Ref/1,Mask/1,Char/1)
+P8_READ         = $CA           ;(4:Ref/1,Where,reqCount,xfrCount)
+P8_WRITE        = $CB           ;(4:Ref/1,Where,reqCount,xfrCount)
+P8_CLOSE        = $CC           ;(1:Ref/1)
+P8_FLUSH        = $CD           ;(1:Ref/1)
+P8_SET_MARK     = $CE           ;(2:Ref/1,Position/3)
+P8_GET_MARK     = $CF           ;(2:Ref/1,Position/3)
+P8_SET_EOF      = $D0           ;(2:Ref/1,Position/3)
+P8_GET_EOF      = $D1           ;(2:Ref/1,Position/3)
+P8_SET_BUF      = $D2           ;(2:Ref/1,ioBuff)
+P8_GET_BUF      = $D3           ;(2:Ref/1,ioBuff)
 
 *TAG
 
