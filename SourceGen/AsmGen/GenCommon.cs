@@ -87,8 +87,8 @@ namespace SourceGen.AsmGen {
                     // that in the ORG output handler.
                     if (proj.CpuDef.HasEmuFlag) {
                         StatusFlags curFlags = attr.StatusFlags;
-                        curFlags.M = attr.StatusFlags.ShortM ? 1 : 0;
-                        curFlags.X = attr.StatusFlags.ShortX ? 1 : 0;
+                        curFlags.M = attr.StatusFlags.IsShortM ? 1 : 0;
+                        curFlags.X = attr.StatusFlags.IsShortX ? 1 : 0;
                         if (curFlags.M != prevFlags.M || curFlags.X != prevFlags.X) {
                             // changed, output directive
                             gen.OutputRegWidthDirective(offset, prevFlags.M, prevFlags.X,
@@ -355,7 +355,7 @@ namespace SourceGen.AsmGen {
             // Assemblers like Merlin32 try to be helpful and track SEP/REP, but they do the
             // wrong thing if we're in emulation mode.  Force flags back to short.
             if (proj.CpuDef.HasEmuFlag && gen.Quirks.TracksSepRepNotEmu && op == OpDef.OpREP_Imm) {
-                if ((operand & 0x30) != 0 && attr.StatusFlags.E == 1) {
+                if ((operand & 0x30) != 0 && attr.StatusFlags.IsEmulationMode) {
                     gen.OutputRegWidthDirective(offset, 0, 0, 1, 1);
                 }
             }

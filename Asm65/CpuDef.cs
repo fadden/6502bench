@@ -281,25 +281,25 @@ namespace Asm65 {
             // appropriately.  So there's no ambiguity here even when there's ambiguity.  We
             // make a similar statement about the E flag.
             if ((mods & OpDef.CycleMod.OneIfM0) != 0) {
-                if (!flags.ShortM) {
+                if (!flags.IsShortM) {
                     cycles++;
                 }
                 mods &= ~OpDef.CycleMod.OneIfM0;
             }
             if ((mods & OpDef.CycleMod.TwoIfM0) != 0) {
-                if (!flags.ShortM) {
+                if (!flags.IsShortM) {
                     cycles += 2;
                 }
                 mods &= ~OpDef.CycleMod.TwoIfM0;
             }
             if ((mods & OpDef.CycleMod.OneIfX0) != 0) {
-                if (!flags.ShortX) {
+                if (!flags.IsShortX) {
                     cycles++;
                 }
                 mods &= ~OpDef.CycleMod.OneIfX0;
             }
             if ((mods & OpDef.CycleMod.OneIfE0) != 0) {
-                if (flags.E == 0) {
+                if (!flags.IsEmulationMode) {
                     cycles++;
                 }
                 mods &= ~OpDef.CycleMod.OneIfE0;
@@ -323,7 +323,7 @@ namespace Asm65 {
                 }
             }
             if ((mods & OpDef.CycleMod.OneIfBranchPage) != 0) {
-                if (branchCrossesPage && flags.E != 0) {
+                if (branchCrossesPage && flags.IsEmulationMode) {
                     cycles++;   // +1 unless we're in native mode on 65816
                 }
                 mods &= ~OpDef.CycleMod.OneIfBranchPage;

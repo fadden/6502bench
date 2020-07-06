@@ -132,6 +132,9 @@ namespace Asm65 {
             }
         }
 
+        /// <summary>
+        /// X (index register width) flag.  For an unambiguous value, use IsShortX.
+        /// </summary>
         public int X {
             get {
                 return mState.GetBit((int)FlagBits.X);
@@ -149,6 +152,9 @@ namespace Asm65 {
             }
         }
 
+        /// <summary>
+        /// M (accumulator width) flag.  For an unambiguous value, use IsShortM.
+        /// </summary>
         public int M {
             get {
                 return mState.GetBit((int)FlagBits.M);
@@ -200,6 +206,9 @@ namespace Asm65 {
             }
         }
 
+        /// <summary>
+        /// E (emulation) flag.  For an unambiguous value, use IsEmulationMode.
+        /// </summary>
         public int E {
             get {
                 return mState.GetBit((int)FlagBits.E);
@@ -225,7 +234,10 @@ namespace Asm65 {
         /// Returns true if the current processor status flags are configured for a short
         /// (8-bit) accumulator.
         /// </summary>
-        public bool ShortM {
+        /// <remarks>
+        /// This is where we decide how to treat ambiguous status flags.
+        /// </remarks>
+        public bool IsShortM {
             get {
                 // E==1 --> true (we're in emulation mode)
                 // E==0 || E==? : native / assumed native
@@ -239,10 +251,22 @@ namespace Asm65 {
         /// Returns true if the current processor status flags are configured for short
         /// (8-bit) X/Y registers.
         /// </summary>
-        public bool ShortX {
+        public bool IsShortX {
             get {
                 // (same logic as ShortM)
                 return (E == 1) || (X != 0);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current processor status flags are configured for execution
+        /// in native mode.
+        /// </summary>
+        public bool IsEmulationMode {
+            get {
+                // E==1 : emulation --> true
+                // E==0 || E==? : native / assumed native --> false
+                return E == 1;
             }
         }
 

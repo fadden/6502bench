@@ -928,8 +928,8 @@ namespace SourceGen {
                     if (attr.IsInstructionStart) {
                         prevFlags = attr.StatusFlags;
                         // Apply the same tweak here that we do to curFlags below.
-                        prevFlags.M = attr.StatusFlags.ShortM ? 1 : 0;
-                        prevFlags.X = attr.StatusFlags.ShortX ? 1 : 0;
+                        prevFlags.M = attr.StatusFlags.IsShortM ? 1 : 0;
+                        prevFlags.X = attr.StatusFlags.IsShortX ? 1 : 0;
                         Debug.WriteLine("GenerateLineList startOff=+" +
                             startOffset.ToString("x6") + " using initial flags from +" +
                             scanoff.ToString("x6") + ": " + prevFlags);
@@ -1017,8 +1017,8 @@ namespace SourceGen {
                         // assembler something.  So we tweak our local copy and propagate it.
                         string operandStr = string.Empty;
                         StatusFlags curFlags = attr.StatusFlags;
-                        curFlags.M = attr.StatusFlags.ShortM ? 1 : 0;
-                        curFlags.X = attr.StatusFlags.ShortX ? 1 : 0;
+                        curFlags.M = attr.StatusFlags.IsShortM ? 1 : 0;
+                        curFlags.X = attr.StatusFlags.IsShortX ? 1 : 0;
                         if (curFlags.M != prevFlags.M) {
                             operandStr = (curFlags.M == 0) ? "longm" : "shortm";
                         }

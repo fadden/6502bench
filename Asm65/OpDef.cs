@@ -518,10 +518,10 @@ namespace Asm65 {
                     return 4;
 
                 case AddressMode.ImmLongA:
-                    bool shortM = flags.ShortM;
+                    bool shortM = flags.IsShortM;
                     return shortM ? 2 : 3;
                 case AddressMode.ImmLongXY:
-                    bool shortX = flags.ShortX;
+                    bool shortX = flags.IsShortX;
                     return shortX ? 2 : 3;
 
                 default:
