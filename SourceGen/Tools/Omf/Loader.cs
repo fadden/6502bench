@@ -157,6 +157,9 @@ namespace SourceGen.Tools.Omf {
                     // would mean you can't set the "absolute bank" flag to position code or
                     // data in bank 0.  I'm going to assume that's intentional, since people
                     // (a) shouldn't be doing that, and (b) can use DP/Stack instead (?).
+                    //
+                    // It also means that "bank relative" can't be used to set the position
+                    // to zero, which is probably fine since you can do that with ALIGN=$10000.
                     continue;
                 }
 
@@ -195,15 +198,30 @@ namespace SourceGen.Tools.Omf {
 
                 int addr;
 
-                if (omfSeg.Org != 0) {
-                    // Specific address requested.
+                // We want to put the segment at a specific offset in an arbitrary bank
+                // if ORG is nonzero, the BankRel flag is set, and the AbsBank flag is clear.
+                bool bankRel = omfSeg.Org != 0 &&
+                    (omfSeg.Attrs & OmfSegment.SegmentAttribute.BankRel) != 0 &&
+                    (omfSeg.Attrs & OmfSegment.SegmentAttribute.AbsBank) == 0;
+                // We want to put the segment at an arbitrary offset in a specific bank
+                // if ORG is nonzero, the BankRel flag is clear, and the AbsBank flag is set.
+                bool fixedBank = omfSeg.Org != 0 &&
+                    (omfSeg.Attrs & OmfSegment.SegmentAttribute.BankRel) == 0 &&
+                    (omfSeg.Attrs & OmfSegment.SegmentAttribute.AbsBank) != 0;
+                // We want to put the segment at a specific offset and bank
+                // if ORG is nonzero, and BankRel and FixedBank are either both set or
+                // both clear.
+                bool fixedAddr = omfSeg.Org != 0 && (bankRel ^ fixedBank) == false;
+
+                if (fixedAddr || fixedBank) {
+                    // Specific bank requested.
                     addr = omfSeg.Org;
                     if ((omfSeg.Attrs & OmfSegment.SegmentAttribute.AbsBank) != 0) {
                         // just keep the bank
                         addr &= 0x00ff0000;
                     }
                 } else {
-                    // Find next available spot with enough space.
+                    // Find next available bank with enough space.
                     while (true) {
                         while (nextBank < 256 && inUse[nextBank]) {
                             nextBank++;
@@ -225,11 +243,20 @@ namespace SourceGen.Tools.Omf {
                     }
 
                     addr = nextBank << 16;
+                    if (bankRel) {
+                        // TODO(maybe): reject if incompatible with BANKSIZE
+                        addr |= omfSeg.Org & 0x0000ffff;
+                    }
 
                     // Advance nextBank.  We do this by identifying the last address touched,
-                    // and moving to the next bank.
+                    // then incrementing the bank number.
                     int lastAddr = addr + omfSeg.Length - 1;
                     nextBank = (lastAddr >> 16) + 1;
+                    if (nextBank >= 0x0100) {
+                        // Overflowed the 65816 address space.
+                        Debug.WriteLine("Bank exceeded $ff");
+                        return false;
+                    }
                 }
 
                 SegmentMapEntry ent = new SegmentMapEntry(omfSeg, addr);

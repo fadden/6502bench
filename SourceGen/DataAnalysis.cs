@@ -165,6 +165,8 @@ namespace SourceGen {
                     // Check for a relocation.  It'll be at offset+1 because it's on the operand,
                     // not the opcode byte.  (Make sure to check the length, or an RTS followed
                     // by relocated data will freak out.)
+                    // TODO(someday): this won't get the second byte of an MVN/MVP, which is fine
+                    // since we don't currently support two formats on one instruction.
                     if (mAnalysisParams.UseRelocData) {
                         if (attr.Length > 1 && mProject.RelocList.TryGetValue(offset + 1,
                                 out DisasmProject.RelocData reloc)) {
