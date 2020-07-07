@@ -225,6 +225,11 @@ namespace SourceGen {
                 return IsInlineData && DataDescriptor != null;
             }
         }
+        public bool IsUntyped {
+            get {
+                return !IsInstruction && !IsData && !IsInlineData;
+            }
+        }
 
         /// <summary>
         /// Get the target memory address for this byte.

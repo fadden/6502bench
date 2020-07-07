@@ -165,11 +165,16 @@ namespace SourceGen {
                     // Check for a relocation.  It'll be at offset+1 because it's on the operand,
                     // not the opcode byte.  (Make sure to check the length, or an RTS followed
                     // by relocated data will freak out.)
+                    //
+                    // We don't check for embedded instructions here.  If that did somehow happen,
+                    // it's probably intentional, so we should do the replacement.
+                    //
                     // TODO(someday): this won't get the second byte of an MVN/MVP, which is fine
                     // since we don't currently support two formats on one instruction.
                     if (mAnalysisParams.UseRelocData) {
                         if (attr.Length > 1 && mProject.RelocList.TryGetValue(offset + 1,
-                                out DisasmProject.RelocData reloc)) {
+                                    out DisasmProject.RelocData reloc) &&
+                                attr.Length > reloc.Width) {
                             // The relocation address differs from what the analyzer came up
                             // with.  This may be because of incorrect assumptions about the
                             // bank (assuming B==K) or because the partial address refers to
@@ -245,15 +250,15 @@ namespace SourceGen {
                     // There shouldn't be any data items inside other data items, so we
                     // can just skip forward.
                     offset += mAnattribs[offset].DataDescriptor.Length - 1;
-                } else if (mAnalysisParams.UseRelocData &&
-                        !attr.IsInstruction && !attr.IsData && !attr.IsInlineData &&
+                } else if (mAnalysisParams.UseRelocData && attr.IsUntyped &&
                         mProject.RelocList.TryGetValue(offset,
                             out DisasmProject.RelocData reloc)) {
                     // Byte is unformatted, but there's relocation data here.  If the full
                     // range of bytes is unformatted, create a symbolic reference.
                     bool allClear = true;
                     for (int i = 1; i < reloc.Width; i++) {
-                        if (mAnattribs[offset + i].DataDescriptor != null) {
+                        if (!mAnattribs[offset + i].IsUntyped ||
+                                mAnattribs[offset + i].DataDescriptor != null) {
                             allClear = false;
                             break;
                         }
@@ -382,6 +387,8 @@ namespace SourceGen {
                     // and offsets identified by users or scripts have been categorized.)
                     //
                     // ?? Can we use GetBaseOperandOffset(), which searches for IsStart?
+                    //
+                    // TODO(performance): we spend a significant amount of time in this loop.
                     int scanOffset = targetOffset;
                     while (--scanOffset >= 0) {
                         FormatDescriptor dfd = mAnattribs[scanOffset].DataDescriptor;

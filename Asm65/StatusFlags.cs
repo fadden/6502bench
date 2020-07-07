@@ -235,7 +235,10 @@ namespace Asm65 {
         /// (8-bit) accumulator.
         /// </summary>
         /// <remarks>
-        /// This is where we decide how to treat ambiguous status flags.
+        /// This is (mostly) where we decide how to treat ambiguous status flags.  We favor
+        /// short flags because, when we get it wrong, it tends to be easier to spot (e.g.
+        /// LDA #$00xx becomes LDA+BRK).  Mistakenly guessing "long" also tends to result in
+        /// instructions with other instructions embedded in them, which can be confusing.
         /// </remarks>
         public bool IsShortM {
             get {
