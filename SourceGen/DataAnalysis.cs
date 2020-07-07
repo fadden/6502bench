@@ -360,7 +360,7 @@ namespace SourceGen {
             // If the target offset has a symbol assigned, use it.  Otherwise, try to
             // find something nearby that might be more appropriate.
             int origTargetOffset = targetOffset;
-            if (mAnattribs[targetOffset].Symbol == null) {
+            if (mAnattribs[targetOffset].Symbol is null) {
                 if (mAnalysisParams.SeekNearbyTargets) {
                     targetOffset = FindAlternateTarget(srcOffset, targetOffset);
                 }
@@ -392,7 +392,7 @@ namespace SourceGen {
                     int scanOffset = targetOffset;
                     while (--scanOffset >= 0) {
                         FormatDescriptor dfd = mAnattribs[scanOffset].DataDescriptor;
-                        if (dfd != null) {
+                        if (!(dfd is null)) {
                             if (scanOffset + dfd.Length > targetOffset) {
                                 // Found a descriptor that encompasses target offset.  Adjust
                                 // target to point at the start of the region.
