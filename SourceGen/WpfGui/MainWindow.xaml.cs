@@ -1016,6 +1016,10 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditComment();
         }
 
+        private void CanEditDataBank(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditDataBank();
+        }
+
         private void CanEditLabel(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditLabel();
         }
@@ -1168,6 +1172,10 @@ namespace SourceGen.WpfGui {
 
         private void EditCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditComment();
+        }
+
+        private void EditDataBankCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditDataBank();
         }
 
         private void EditHeaderCommentCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

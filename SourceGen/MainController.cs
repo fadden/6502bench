@@ -1858,6 +1858,41 @@ namespace SourceGen {
             EditLongComment(LineListGen.Line.HEADER_COMMENT_OFFSET);
         }
 
+        public bool CanEditDataBank() {
+            if (mProject.CpuDef.HasAddr16) {
+                return false;   // only available for 65816
+            }
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code /*||
+                is data bank */);
+        }
+
+        public void EditDataBank() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+
+            CodeAnalysis.DbrValue curValue;
+            if (!mProject.DbrValues.TryGetValue(offset, out curValue)) {
+                curValue = CodeAnalysis.DbrValue.Unknown;
+            }
+
+            EditDataBank dlg = new EditDataBank(mMainWin, mProject.AddrMap, mFormatter, curValue);
+            if (dlg.ShowDialog() != true) {
+                return;
+            }
+
+            if (dlg.Result != curValue) {
+                Debug.WriteLine("Changing DBR at +" + offset.ToString("x6") + " to $" +
+                    ((int)(dlg.Result)).ToString("x2"));
+                UndoableChange uc =
+                    UndoableChange.CreateDataBankChange(offset, curValue, dlg.Result);
+                ChangeSet cs = new ChangeSet(uc);
+                ApplyUndoableChanges(cs);
+            }
+        }
+
         public bool CanEditLabel() {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
@@ -4095,7 +4130,7 @@ namespace SourceGen {
         }
 
         public void ShowFileHexDump() {
-            if (!OpenAnyFile(out string pathName)) {
+            if (!OpenAnyFile(null, out string pathName)) {
                 return;
             }
             FileInfo fi = new FileInfo(pathName);
@@ -4134,7 +4169,7 @@ namespace SourceGen {
         }
 
         public void SliceFiles() {
-            if (!OpenAnyFile(out string pathName)) {
+            if (!OpenAnyFile(null, out string pathName)) {
                 return;
             }
 
@@ -4144,7 +4179,7 @@ namespace SourceGen {
         }
 
         public void ConvertOmf() {
-            if (!OpenAnyFile(out string pathName)) {
+            if (!OpenAnyFile(Res.Strings.OMF_SELECT_FILE, out string pathName)) {
                 return;
             }
 
@@ -4183,11 +4218,14 @@ namespace SourceGen {
             ov.ShowDialog();
         }
 
-        private bool OpenAnyFile(out string pathName) {
+        private bool OpenAnyFile(string title, out string pathName) {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 1
             };
+            if (title != null) {
+                fileDlg.Title = title;
+            }
             if (fileDlg.ShowDialog() != true) {
                 pathName = null;
                 return false;
@@ -4285,7 +4323,7 @@ namespace SourceGen {
         }
 
         public void Debug_ApplesoftToHtml() {
-            if (!OpenAnyFile(out string basPathName)) {
+            if (!OpenAnyFile(null, out string basPathName)) {
                 return;
             }
 

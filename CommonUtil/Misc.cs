@@ -74,5 +74,35 @@ namespace CommonUtil {
                 Debug.WriteLine("Crashed while crashing");
             }
         }
+
+        /// <summary>
+        /// Clears an array to a specific value, similar to memset() in libc.  This is much
+        /// faster than setting array elements individually.
+        /// </summary>
+        /// <remarks>
+        /// From https://stackoverflow.com/a/18659408/294248
+        ///
+        /// Invokes Array.Copy() on overlapping elements.  Other approaches involve using
+        /// Buffer.BlockCopy or unsafe code.  Apparently .NET Core has an Array.Fill(), but
+        /// that doesn't exist in .NET Framework.
+        ///
+        /// We could get off the line a little faster by setting the first 16 or so elements in
+        /// a loop, bailing out if we finish early, so we don't start calling Array.Copy() until
+        /// it's actually faster to do so.  I don't expect to be calling this often or for
+        /// small arrays though.
+        /// </remarks>
+        /// <typeparam name="T">Array element type.</typeparam>
+        /// <param name="array">Array reference.</param>
+        /// <param name="elem">Initialization value.</param>
+        public static void Memset<T>(T[] array, T elem) {
+            //Array.Fill(array, elem);
+            int length = array.Length;
+            if (length == 0) return;
+            array[0] = elem;
+            int count;
+            for (count = 1; count <= length / 2; count *= 2)
+                Array.Copy(array, 0, array, count, count);
+            Array.Copy(array, 0, array, count, length - count);
+        }
     }
 }

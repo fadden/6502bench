@@ -247,6 +247,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_OmfSegHdrCommentFmt");
         public static string OMF_SEG_NOTE_FMT =
             (string)Application.Current.FindResource("str_OmfSegNoteFmt");
+        public static string OMF_SELECT_FILE =
+            (string)Application.Current.FindResource("str_OmfSelectFile");
         public static string OPEN_DATA_DOESNT_EXIST =
             (string)Application.Current.FindResource("str_OpenDataDoesntExist");
         public static string OPEN_DATA_EMPTY =

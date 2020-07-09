@@ -79,6 +79,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Semicolon</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="EditDataBankCmd" Text="Edit Data Bank..."/>
             <RoutedUICommand x:Key="EditHeaderCommentCmd" Text="Edit Header Comment..."/>
             <RoutedUICommand x:Key="EditOperandCmd" Text="Edit Operand...">
                 <RoutedUICommand.InputGestures>
@@ -236,6 +237,8 @@ limitations under the License.
                         Executed="EditAppSettingsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditCommentCmd}"
                         CanExecute="CanEditComment" Executed="EditCommentCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditDataBankCmd}"
+                        CanExecute="CanEditDataBank" Executed="EditDataBankCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditHeaderCommentCmd}"
                         CanExecute="IsProjectOpen" Executed="EditHeaderCommentCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditLabelCmd}"
@@ -402,6 +405,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditOperandCmd}"/>
                 <MenuItem Command="{StaticResource EditCommentCmd}" InputGestureText="Ctrl+;"/>
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
+                <MenuItem Command="{StaticResource EditDataBankCmd}"/>
                 <MenuItem Command="{StaticResource EditNoteCmd}"/>
                 <MenuItem Command="{StaticResource EditProjectSymbolCmd}"/>
                 <MenuItem Command="{StaticResource CreateLocalVariableTableCmd}"/>

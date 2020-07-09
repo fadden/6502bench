@@ -79,6 +79,9 @@ namespace SourceGen {
             // Adds, updates, or removes an AddressMap entry.
             SetAddress,
 
+            // Adds, updates, or removes a data bank register value.
+            SetDataBank,
+
             // Changes the type hint.
             SetTypeHint,
 
@@ -195,6 +198,30 @@ namespace SourceGen {
             uc.Offset = offset;
             uc.OldValue = oldAddress;
             uc.NewValue = newAddress;
+            uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
+            return uc;
+        }
+
+        /// <summary>
+        /// Creates an UndoableChange for a data bank register update.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns></returns>
+        public static UndoableChange CreateDataBankChange(int offset,
+                CodeAnalysis.DbrValue oldValue, CodeAnalysis.DbrValue newValue) {
+            if (oldValue == newValue) {
+                Debug.WriteLine("No-op DBR change at +" + offset.ToString("x6") + ": " + oldValue);
+            }
+            UndoableChange uc = new UndoableChange();
+            uc.Type = ChangeType.SetDataBank;
+            uc.Offset = offset;
+            uc.OldValue = oldValue;
+            uc.NewValue = newValue;
+            // We don't strictly need to re-analyze the code, since the current implementation
+            // handles it as a post-analysis fixup, but this lets us avoid having to compute the
+            // affected offsets.
             uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
             return uc;
         }

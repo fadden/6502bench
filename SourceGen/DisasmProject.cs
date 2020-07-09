@@ -75,6 +75,11 @@ namespace SourceGen {
         public string[] Comments { get; private set; }
 
         /// <summary>
+        /// Data Bank Register overrides.
+        /// </summary>
+        public Dictionary<int, CodeAnalysis.DbrValue> DbrValues { get; private set; }
+
+        /// <summary>
         /// Full line, possibly multi-line comments.
         /// </summary>
         public Dictionary<int, MultiLineComment> LongComments { get; private set; }
@@ -274,6 +279,7 @@ namespace SourceGen {
                 Comments[i] = string.Empty;
             }
 
+            DbrValues = new Dictionary<int, CodeAnalysis.DbrValue>();
             LongComments = new Dictionary<int, MultiLineComment>();
             Notes = new SortedList<int, MultiLineComment>();
 
@@ -807,6 +813,13 @@ namespace SourceGen {
                 ca.Analyze();
                 reanalysisTimer.EndTask("CodeAnalysis.Analyze");
 
+                if (!CpuDef.HasAddr16) {
+                    // 24-bit address space, so DBR matters
+                    reanalysisTimer.StartTask("CodeAnalysis.ApplyDataBankRegister");
+                    ca.ApplyDataBankRegister(DbrValues);
+                    reanalysisTimer.EndTask("CodeAnalysis.ApplyDataBankRegister");
+                }
+
                 // Save a copy of the current state.
                 mCodeOnlyAnattribs = new Anattrib[mAnattribs.Length];
                 Array.Copy(mAnattribs, mCodeOnlyAnattribs, mAnattribs.Length);
@@ -831,6 +844,8 @@ namespace SourceGen {
             DataAnalysis da = new DataAnalysis(this, mAnattribs);
             da.DebugLog = debugLog;
 
+            // Convert references to addresses into references to labels, generating labels
+            // as needed.
             reanalysisTimer.StartTask("DataAnalysis.AnalyzeDataTargets");
             da.AnalyzeDataTargets();
             reanalysisTimer.EndTask("DataAnalysis.AnalyzeDataTargets");
@@ -2097,6 +2112,27 @@ namespace SourceGen {
                             // Visualization generators in extension scripts could be chasing
                             // addresses.  Give them a chance to update.
                             ClearVisualizationCache();
+
+                            // ignore affectedOffsets
+                            Debug.Assert(uc.ReanalysisRequired ==
+                                UndoableChange.ReanalysisScope.CodeAndData);
+                        }
+                        break;
+                    case UndoableChange.ChangeType.SetDataBank: {
+                            // If there's no entry, treat it as an entry with value = Unknown.
+                            if (!DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue current)) {
+                                current = CodeAnalysis.DbrValue.Unknown;
+                            }
+                            if (current != (CodeAnalysis.DbrValue)oldValue) {
+                                Debug.WriteLine("GLITCH: old DBR value mismatch (" +
+                                    current + " vs " + oldValue + ")");
+                                Debug.Assert(false);
+                            }
+                            if ((CodeAnalysis.DbrValue)newValue == CodeAnalysis.DbrValue.Unknown) {
+                                DbrValues.Remove(offset);
+                            } else {
+                                DbrValues[offset] = (CodeAnalysis.DbrValue)newValue;
+                            }
 
                             // ignore affectedOffsets
                             Debug.Assert(uc.ReanalysisRequired ==

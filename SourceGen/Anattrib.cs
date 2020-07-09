@@ -36,6 +36,8 @@ namespace SourceGen {
             InlineData = 1 << 2,        // byte is inline data
             Data = 1 << 3,              // byte is data
 
+            UsesDataBankReg = 1 << 4,   // operand value should be merged with DBR
+
             EntryPoint = 1 << 8,        // external code branches here
             BranchTarget = 1 << 9,      // internal code branches here
             ExternalBranch = 1 << 10,   // this abs/rel branch lands outside input file
@@ -111,6 +113,18 @@ namespace SourceGen {
         public bool IsStart {
             get {
                 return IsInstructionStart || IsDataStart || IsInlineDataStart;
+            }
+        }
+        public bool UsesDataBankReg {
+            get {
+                return (mAttribFlags & AttribFlags.UsesDataBankReg) != 0;
+            }
+            set {
+                if (value) {
+                    mAttribFlags |= AttribFlags.UsesDataBankReg;
+                } else {
+                    mAttribFlags &= ~AttribFlags.UsesDataBankReg;
+                }
             }
         }
         public bool IsEntryPoint {

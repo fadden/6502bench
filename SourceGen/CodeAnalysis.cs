@@ -838,14 +838,17 @@ namespace SourceGen {
         /// The operand's address, and if applicable, the operand's file offset, are
         /// stored in the Anattrib array.
         /// 
+        /// Doesn't do anything with immediate data.
+        /// </summary>
+        /// <remarks>
         /// For PC-relative operands (e.g. branches) it's tempting to simply adjust the file
         /// offset by the specified amount and convert that to an address.  If the file
         /// has multiple ORGs, this can produce incorrect results.  We need to convert the
         /// opcode's offset to an address, adjust by the operand, and then find the file
         /// offset that corresponds to the target address.
-        /// 
-        /// Doesn't do anything with immediate data.
-        /// </summary>
+        ///
+        /// This is called once per instruction, on the analyzer's first visit.
+        /// </remarks>
         /// <param name="offset">Offset of the instruction opcode.</param>
         /// <param name="op">Opcode being handled. (Passed in because the caller has it
         ///   handy.)</param>
@@ -854,26 +857,36 @@ namespace SourceGen {
 
             int operand = op.GetOperand(mFileData, offset, mAnattribs[offset].StatusFlags);
 
-            // Add the bank to get a 24-bit address.  We're currently using the program bank
-            // (K) rather than the data bank (B), which is correct for absolute and relative
-            // branches but wrong for 16-bit data operations.  We currently have no way to
-            // know what the value of B is, so we use K because there's some small chance
-            // of it being correct.
-            // TODO(someday): figure out how to get the correct value for the B reg
+            // Add the bank to get a 24-bit address.  For some instructions the relevant bank
+            // is known, because the operand is merged with the Program Bank Register (K) or
+            // is always in bank 0.  For some we need the Data Bank Register (B).
+            //
+            // Instead of trying to track the B register during code analysis, we mark the
+            // relevant instructions now and fix them up later.  We can get away with this
+            // because the DBR is only applied to data-load instructions, which don't affect
+            // the flow of the analysis pass.  The value of B *is* affected by the analysis
+            // pass because a "smart PLB" handler needs to know where all the code is, so it's
+            // more efficient to figure it out later.
             int bank = mAnattribs[offset].Address & 0x7fff0000;
 
             // Extract target address.
             switch (op.AddrMode) {
                 // These might refer to a location in the file, or might be external.
-                case OpDef.AddressMode.Abs:
-                case OpDef.AddressMode.AbsIndexX:
-                case OpDef.AddressMode.AbsIndexY:
-                case OpDef.AddressMode.AbsIndexXInd:
-                case OpDef.AddressMode.StackAbs:
+                case OpDef.AddressMode.Abs:                 // uses DBR iff !IsAbsolutePBR
+                case OpDef.AddressMode.AbsIndexX:           // uses DBR
+                case OpDef.AddressMode.AbsIndexY:           // uses DBR
+                    if (!op.IsAbsolutePBR) {
+                        mAnattribs[offset].UsesDataBankReg = true;
+                    }
+                    // Merge the PBR even if we eventually want the DBR; less to fix later.
                     mAnattribs[offset].OperandAddress = operand | bank;
                     break;
-                case OpDef.AddressMode.AbsInd:              // JMP (addr), always bank 0
-                case OpDef.AddressMode.AbsIndLong:          // JMP [addr], always bank 0
+                case OpDef.AddressMode.StackAbs:            // assume PBR
+                case OpDef.AddressMode.AbsIndexXInd:        // JMP (addr,X); uses program bank
+                    mAnattribs[offset].OperandAddress = operand | bank;
+                    break;
+                case OpDef.AddressMode.AbsInd:              // JMP (addr); always bank 0
+                case OpDef.AddressMode.AbsIndLong:          // JMP [addr]; always bank 0
                 case OpDef.AddressMode.DP:
                 case OpDef.AddressMode.DPIndexX:
                 case OpDef.AddressMode.DPIndexY:
@@ -888,7 +901,7 @@ namespace SourceGen {
                     break;
                 case OpDef.AddressMode.AbsIndexXLong:
                 case OpDef.AddressMode.AbsLong:
-                    // 24-bit address, don't add bank
+                    // 24-bit address, don't alter bank
                     mAnattribs[offset].OperandAddress = operand;
                     break;
                 case OpDef.AddressMode.PCRel:   // rel operand; convert to absolute addr
@@ -1205,6 +1218,89 @@ namespace SourceGen {
                     return FormatDescriptor.SubType.C64Screen;
                 default:
                     throw new PluginException("Instr format rej: unknown sub type " + pluginSubType);
+            }
+        }
+
+        /// <summary>
+        /// Data Bank Register value.
+        /// </summary>
+        /// <remarks>
+        /// This is primarily a value from $00-ff, but we also want to encode the B=K special
+        /// mode.
+        /// </remarks>
+        public enum DbrValue : short {
+            // $00-ff is bank number
+            Unknown = -1,               // unknown / do-nothing
+            ProgramBankReg = -2         // set B=K
+        }
+
+        /// <summary>
+        /// Determines the value of the Data Bank Register (DBR, register 'B') for relevant
+        /// instructions, and updates the Anattrib OperandOffset value.
+        /// </summary>
+        public void ApplyDataBankRegister(Dictionary<int, DbrValue> userValues) {
+            Debug.Assert(!mCpuDef.HasAddr16);   // 65816 only
+
+            short[] bval = new short[mAnattribs.Length];
+
+            // Initialize all entries to "unknown".
+            Misc.Memset(bval, (short)DbrValue.Unknown);
+
+            // Set B=K every time we cross an address boundary and the program bank changes.
+            DbrValue prevBank = DbrValue.Unknown;
+            foreach (AddressMap.AddressMapEntry ent in mAddrMap) {
+                int mapBank = ent.Addr >> 16;
+                if (mapBank != (int)prevBank) {
+                    bval[ent.Offset] = (short)mapBank;
+                    prevBank = (DbrValue)mapBank;
+                }
+            }
+
+            // Apply the user-specified values.
+            foreach (KeyValuePair<int, DbrValue> kvp in userValues) {
+                bval[kvp.Key] = (short)kvp.Value;
+            }
+
+            // Run through the file, looking for PHK/PLB pairs.  When we find one, set an
+            // entry for the PLB instruction unless an entry already exists there.
+
+            // ? look for LDA #imm8 / PHA / PLB?
+
+            // ...
+
+
+            // Run through file, updating instructions as needed.
+            short curVal = (short)DbrValue.Unknown;
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                if (bval[offset] != (short)DbrValue.Unknown) {
+                    curVal = bval[offset];
+                }
+                if (!mAnattribs[offset].UsesDataBankReg) {
+                    continue;
+                }
+                Debug.Assert(mAnattribs[offset].IsInstructionStart);
+                Debug.Assert(curVal != (short)DbrValue.Unknown);
+
+                int bank;
+                if (curVal == (short)DbrValue.ProgramBankReg) {
+                    bank = mAnattribs[offset].Address >> 16;
+                } else {
+                    Debug.Assert(curVal >= 0 && curVal < 256);
+                    bank = curVal << 16;
+                }
+
+                int newAddr = (mAnattribs[offset].OperandAddress & 0x0000ffff) | bank;
+                int newOffset = mAddrMap.AddressToOffset(offset, newAddr);
+                if (newAddr != mAnattribs[offset].OperandAddress ||
+                        newOffset != mAnattribs[offset].OperandOffset) {
+                    Debug.WriteLine("DBR rewrite at +" + offset.ToString("x6") + ": $" +
+                        mAnattribs[offset].OperandAddress.ToString("x6") + "/+" +
+                        mAnattribs[offset].OperandOffset.ToString("x6") + " --> $" +
+                        newAddr.ToString("x6") + "/+" + newOffset.ToString("x6"));
+
+                    mAnattribs[offset].OperandAddress = newAddr;
+                    mAnattribs[offset].OperandOffset = newOffset;
+                }
             }
         }
     }
