@@ -350,6 +350,7 @@ namespace SourceGen {
                 case LineListGen.Line.Type.Data:
                 case LineListGen.Line.Type.EquDirective:
                 case LineListGen.Line.Type.RegWidthDirective:
+                case LineListGen.Line.Type.DataBankDirective:
                 case LineListGen.Line.Type.OrgDirective:
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {
@@ -710,6 +711,7 @@ namespace SourceGen {
                 case LineListGen.Line.Type.Data:
                 case LineListGen.Line.Type.EquDirective:
                 case LineListGen.Line.Type.RegWidthDirective:
+                case LineListGen.Line.Type.DataBankDirective:
                 case LineListGen.Line.Type.OrgDirective:
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {

@@ -758,6 +758,12 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="6" Grid.Row="5" Text="Data bank:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="dataBankTextBox" Grid.Column="7" Grid.Row="5"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
                     </Grid>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"

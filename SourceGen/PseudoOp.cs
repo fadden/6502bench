@@ -68,6 +68,7 @@ namespace SourceGen {
             public string VarDirective { get; private set; }
             public string OrgDirective { get; private set; }
             public string RegWidthDirective { get; private set; }
+            public string DataBankDirective { get; private set; }
 
             public string DefineData1 { get; private set; }
             public string DefineData2 { get; private set; }
@@ -118,6 +119,7 @@ namespace SourceGen {
                     a.VarDirective == b.VarDirective &&
                     a.OrgDirective == b.OrgDirective &&
                     a.RegWidthDirective == b.RegWidthDirective &&
+                    a.DataBankDirective == b.DataBankDirective &&
                     a.DefineData1 == b.DefineData1 &&
                     a.DefineData2 == b.DefineData2 &&
                     a.DefineData3 == b.DefineData3 &&
@@ -228,6 +230,7 @@ namespace SourceGen {
                 { "VarDirective", ".var" },
                 { "OrgDirective", ".org" },
                 { "RegWidthDirective", ".rwid" },
+                { "DataBankDirective", ".dbank" },
 
                 { "DefineData1", ".dd1" },
                 { "DefineData2", ".dd2" },

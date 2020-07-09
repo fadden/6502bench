@@ -549,8 +549,8 @@ namespace SourceGen {
 
             // We could output the value as a short, using DbrValue.AsShort, but it doesn't
             // save much space and could make life harder down the road.
-            spf.DbrValues = new Dictionary<string, SerDbrValue>(proj.DbrValues.Count);
-            foreach (KeyValuePair<int, CodeAnalysis.DbrValue> kvp in proj.DbrValues) {
+            spf.DbrValues = new Dictionary<string, SerDbrValue>(proj.DbrOverrides.Count);
+            foreach (KeyValuePair<int, CodeAnalysis.DbrValue> kvp in proj.DbrOverrides) {
                 spf.DbrValues.Add(kvp.Key.ToString(), new SerDbrValue(kvp.Value));
             }
 
@@ -883,7 +883,7 @@ namespace SourceGen {
                     }
                     CodeAnalysis.DbrValue newDbr = new CodeAnalysis.DbrValue(kvp.Value.FollowPbr,
                         kvp.Value.Bank, CodeAnalysis.DbrValue.Source.User);
-                    proj.DbrValues.Add(intKey, newDbr);
+                    proj.DbrOverrides.Add(intKey, newDbr);
                 }
             }
 

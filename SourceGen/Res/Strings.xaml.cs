@@ -43,6 +43,12 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AsmMismatchLengthFmt");
         public static string ASM_OUTPUT_NOT_FOUND =
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
+        public static string DATA_BANK_AUTO_FMT =
+            (string)Application.Current.FindResource("str_DataBankAutoFmt");
+        public static string DATA_BANK_USER_FMT =
+            (string)Application.Current.FindResource("str_DataBankUserFmt");
+        public static string DATA_BANK_USER_K =
+            (string)Application.Current.FindResource("str_DataBankUserK");
         public static string DEFAULT_HEADER_COMMENT_FMT =
             (string)Application.Current.FindResource("str_DefaultHeaderCommentFmt");
         public static string DEFAULT_ASCII_DELIM_PAT =

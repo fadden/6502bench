@@ -176,7 +176,10 @@ namespace SourceGen.WpfGui {
         /// <returns>DBR value, or null if invalid.</returns>
         private static CodeAnalysis.DbrValue StringToDbrValue(string valueStr) {
             valueStr = valueStr.Trim();
-            if (valueStr.Equals(PROG_BANK_STR, StringComparison.InvariantCultureIgnoreCase)) {
+            if (string.IsNullOrEmpty(valueStr)) {
+                return null;
+            } else if (valueStr.Equals(PROG_BANK_STR,
+                    StringComparison.InvariantCultureIgnoreCase)) {
                 return new CodeAnalysis.DbrValue(true, 0, CodeAnalysis.DbrValue.Source.User);
             } else {
                 if (!Number.TryParseIntHex(valueStr, out int val)) {

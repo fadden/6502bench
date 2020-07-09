@@ -1508,6 +1508,11 @@ namespace SourceGen {
                         EditStatusFlags();
                     }
                     break;
+                case LineListGen.Line.Type.DataBankDirective:
+                    if (CanEditDataBank()) {
+                        EditDataBank();
+                    }
+                    break;
                 case LineListGen.Line.Type.LongComment:
                     if (CanEditLongComment()) {
                         EditLongComment();
@@ -1559,7 +1564,14 @@ namespace SourceGen {
                             }
                             break;
                         case CodeListColumn.Opcode:
-                            JumpToOperandTarget(line, false);
+                            if (IsPlbInstruction(line) && CanEditDataBank()) {
+                            // Special handling for PLB instruction, so you can update the bank
+                            // value just be double-clicking on it.  Only used for PLBs without
+                            // user- or auto-assigned bank changes.
+                                EditDataBank();
+                            } else {
+                                JumpToOperandTarget(line, false);
+                            }
                             break;
                         case CodeListColumn.Operand:
                             if (CanEditOperand()) {
@@ -1571,7 +1583,6 @@ namespace SourceGen {
                                 EditComment();
                             }
                             break;
-
                     }
                     break;
 
@@ -1579,6 +1590,26 @@ namespace SourceGen {
                     Debug.WriteLine("Double-click: unhandled line type " + line.LineType);
                     break;
             }
+        }
+
+        private bool IsPlbInstruction(LineListGen.Line line) {
+            if (line.LineType != LineListGen.Line.Type.Code) {
+                return false;
+            }
+            int offset = line.FileOffset;
+            Anattrib attr = mProject.GetAnattrib(offset);
+
+            // should always be an instruction start since this is a code line
+            if (!attr.IsInstructionStart) {
+                Debug.Assert(false);
+                return false;
+            }
+
+            OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[offset]);
+            if (op != OpDef.OpPLB_StackPull) {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -1865,8 +1896,8 @@ namespace SourceGen {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
-            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code /*||
-                is data bank */);
+            return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
+                SelectionAnalysis.mLineType == LineListGen.Line.Type.DataBankDirective);
         }
 
         public void EditDataBank() {
@@ -1874,7 +1905,7 @@ namespace SourceGen {
             int offset = CodeLineList[selIndex].FileOffset;
 
             // Get current user-specified value, or null.
-            mProject.DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue curValue);
+            mProject.DbrOverrides.TryGetValue(offset, out CodeAnalysis.DbrValue curValue);
 
             EditDataBank dlg = new EditDataBank(mMainWin, mProject, mFormatter, curValue);
             if (dlg.ShowDialog() != true) {
@@ -3781,6 +3812,9 @@ namespace SourceGen {
                     break;
                 case LineListGen.Line.Type.RegWidthDirective:
                     lineTypeStr = "register width directive";
+                    break;
+                case LineListGen.Line.Type.DataBankDirective:
+                    lineTypeStr = "data bank directive";
                     break;
 
                 case LineListGen.Line.Type.LocalVariableTable:

@@ -119,10 +119,11 @@ namespace SourceGen {
                 OrgDirective            = 1 << 5,
                 EquDirective            = 1 << 6,
                 RegWidthDirective       = 1 << 7,
+                DataBankDirective       = 1 << 8,
 
                 // Additional metadata.
-                LocalVariableTable      = 1 << 8,
-                VisualizationSet        = 1 << 9,
+                LocalVariableTable      = 1 << 9,
+                VisualizationSet        = 1 << 10,
             }
 
             /// <summary>
@@ -516,6 +517,7 @@ namespace SourceGen {
                         break;
                     case Line.Type.OrgDirective:
                     case Line.Type.RegWidthDirective:
+                    case Line.Type.DataBankDirective:
                     case Line.Type.LongComment:
                     case Line.Type.Note:
                     // should have been done already
@@ -1006,7 +1008,9 @@ namespace SourceGen {
                 }
 
                 if (attr.IsInstructionStart) {
-                    // Generate reg width directive, if necessary.
+                    // Generate reg width directive, if necessary.  These are generated after the
+                    // SEP/REP/PLP instruction has taken effect, so we want it to appear *before*
+                    // the current instruction.
                     if (mProject.CpuDef.HasEmuFlag) {
                         // Changing from "ambiguous but assumed short" to "definitively short"
                         // merits a directive, notably at the start of the file.  The tricky
@@ -1042,6 +1046,34 @@ namespace SourceGen {
                             lines.Add(rwLine);
                         }
                         prevFlags = curFlags;
+                    }
+
+                    // Add data bank register change.  This is generally applied to a PLB
+                    // instruction, so we'd like it to appear on the line following the
+                    // instruction, but that looks funny for e.g. the auto-added B=K at the
+                    // start of each bank, and would be wrong if placed on a "LDA abs" line.
+                    // (We could handle PLB lines differently, but apparently inconsistent
+                    // behavior is unwise.)
+                    if (mProject.DbrChanges.TryGetValue(offset,
+                            out CodeAnalysis.DbrValue dbrValue)) {
+                        string operandStr;
+                        if (dbrValue.FollowPbr) {
+                            operandStr = Res.Strings.DATA_BANK_USER_K;
+                        } else {
+                            string fmt;
+                            if (dbrValue.ValueSource == CodeAnalysis.DbrValue.Source.Auto) {
+                                fmt = Res.Strings.DATA_BANK_AUTO_FMT;
+                            } else {
+                                fmt = Res.Strings.DATA_BANK_USER_FMT;
+                            }
+                            operandStr = string.Format(fmt,
+                                mFormatter.FormatHexValue(dbrValue.Bank, 2));
+                        }
+                        Line dbrLine = new Line(offset, 0, Line.Type.DataBankDirective);
+                        dbrLine.Parts = FormattedParts.CreateDirective(
+                            mFormatter.FormatPseudoOp(mPseudoOpNames.DataBankDirective),
+                            mFormatter.FormatPseudoOp(operandStr));
+                        lines.Add(dbrLine);
                     }
 
                     // Look for embedded instructions.

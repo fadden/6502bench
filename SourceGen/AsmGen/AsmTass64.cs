@@ -123,6 +123,7 @@ namespace SourceGen.AsmGen {
                 { "VarDirective", ".var" },
                 { "OrgDirective", ".logical" },
                 //RegWidthDirective         // .as, .al, .xs, .xl
+                //DataBankDirective
                 { "DefineData1", ".byte" },
                 { "DefineData2", ".word" },
                 { "DefineData3", ".long" },

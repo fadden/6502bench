@@ -1138,6 +1138,7 @@ namespace SourceGen.WpfGui {
                 new TextBoxPropertyMap(varDirectiveTextBox, "VarDirective"),
                 new TextBoxPropertyMap(orgDirectiveTextBox, "OrgDirective"),
                 new TextBoxPropertyMap(regWidthDirectiveTextBox, "RegWidthDirective"),
+                new TextBoxPropertyMap(dataBankTextBox, "DataBankDirective"),
                 new TextBoxPropertyMap(defineData1TextBox, "DefineData1"),
                 new TextBoxPropertyMap(defineData2TextBox, "DefineData2"),
                 new TextBoxPropertyMap(defineData3TextBox, "DefineData3"),

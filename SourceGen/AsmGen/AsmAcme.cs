@@ -109,6 +109,7 @@ namespace SourceGen.AsmGen {
                 //VarDirective
                 { "OrgDirective", "!pseudopc" },
                 //RegWidthDirective         // !al, !as, !rl, !rs
+                //DataBankDirective
                 { "DefineData1", "!byte" },
                 { "DefineData2", "!word" },
                 { "DefineData3", "!24" },

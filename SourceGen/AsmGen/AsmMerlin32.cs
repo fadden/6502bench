@@ -97,6 +97,7 @@ namespace SourceGen.AsmGen {
                 { "VarDirective", "equ" },
                 { "OrgDirective", "org" },
                 //RegWidthDirective
+                //DataBankDirective
                 { "DefineData1", "dfb" },
                 { "DefineData2", "dw" },
                 { "DefineData3", "adr" },

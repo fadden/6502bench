@@ -77,7 +77,7 @@ namespace SourceGen {
         /// <summary>
         /// Data Bank Register overrides.
         /// </summary>
-        public Dictionary<int, CodeAnalysis.DbrValue> DbrValues { get; private set; }
+        public Dictionary<int, CodeAnalysis.DbrValue> DbrOverrides { get; private set; }
 
         /// <summary>
         /// Full line, possibly multi-line comments.
@@ -195,6 +195,12 @@ namespace SourceGen {
         // before data analysis has begun.
         private Anattrib[] mCodeOnlyAnattribs;
 
+        /// <summary>
+        /// Changes to the Data Bank Register, by offset.  These can come from DbrOverrides
+        /// or be automatically generated.
+        /// </summary>
+        public Dictionary<int, CodeAnalysis.DbrValue> DbrChanges { get; private set; }
+
         // Symbol lists loaded from platform symbol files.  This is essentially a list
         // of lists, of symbols.
         private List<PlatformSymbols> PlatformSyms { get; set; }
@@ -279,7 +285,8 @@ namespace SourceGen {
                 Comments[i] = string.Empty;
             }
 
-            DbrValues = new Dictionary<int, CodeAnalysis.DbrValue>();
+            DbrOverrides = new Dictionary<int, CodeAnalysis.DbrValue>();
+            DbrChanges = new Dictionary<int, CodeAnalysis.DbrValue>();
             LongComments = new Dictionary<int, MultiLineComment>();
             Notes = new SortedList<int, MultiLineComment>();
 
@@ -816,7 +823,7 @@ namespace SourceGen {
                 if (!CpuDef.HasAddr16) {
                     // 24-bit address space, so DBR matters
                     reanalysisTimer.StartTask("CodeAnalysis.ApplyDataBankRegister");
-                    ca.ApplyDataBankRegister(DbrValues);
+                    ca.ApplyDataBankRegister(DbrOverrides, DbrChanges);
                     reanalysisTimer.EndTask("CodeAnalysis.ApplyDataBankRegister");
                 }
 
@@ -2120,16 +2127,16 @@ namespace SourceGen {
                         break;
                     case UndoableChange.ChangeType.SetDataBank: {
                             // If there's no entry, treat it as an entry with value = Unknown.
-                            DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue current);
+                            DbrOverrides.TryGetValue(offset, out CodeAnalysis.DbrValue current);
                             if (current != (CodeAnalysis.DbrValue)oldValue) {
                                 Debug.WriteLine("GLITCH: old DBR value mismatch (" +
                                     current + " vs " + oldValue + ")");
                                 Debug.Assert(false);
                             }
                             if (newValue == null) {
-                                DbrValues.Remove(offset);
+                                DbrOverrides.Remove(offset);
                             } else {
-                                DbrValues[offset] = (CodeAnalysis.DbrValue)newValue;
+                                DbrOverrides[offset] = (CodeAnalysis.DbrValue)newValue;
                             }
 
                             // ignore affectedOffsets

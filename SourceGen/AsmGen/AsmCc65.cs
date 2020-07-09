@@ -106,6 +106,7 @@ namespace SourceGen.AsmGen {
                 { "VarDirective", ".set" },
                 { "OrgDirective", ".org" },
                 //RegWidthDirective         // .a8, .a16, .i8, .i16
+                //DataBankDirective
                 { "DefineData1", ".byte" },
                 { "DefineData2", ".word" },
                 { "DefineData3", ".faraddr" },

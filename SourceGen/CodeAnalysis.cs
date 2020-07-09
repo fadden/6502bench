@@ -1238,7 +1238,7 @@ namespace SourceGen {
             /// </summary>
             public byte Bank { get; private set; }
 
-            public enum Source { Unknown = 0, User, Auto, Smart };
+            public enum Source { Unknown = 0, User, Auto };
             /// <summary>
             /// From whence this value originates.
             /// </summary>
@@ -1295,8 +1295,11 @@ namespace SourceGen {
         /// Determines the value of the Data Bank Register (DBR, register 'B') for relevant
         /// instructions, and updates the Anattrib OperandOffset value.
         /// </summary>
-        public void ApplyDataBankRegister(Dictionary<int, DbrValue> userValues) {
+        public void ApplyDataBankRegister(Dictionary<int, DbrValue> userValues,
+                Dictionary<int, DbrValue> dbrChanges) {
             Debug.Assert(!mCpuDef.HasAddr16);   // 65816 only
+
+            dbrChanges.Clear();
 
             short[] bval = new short[mAnattribs.Length];
 
@@ -1310,16 +1313,21 @@ namespace SourceGen {
                 if (mapBank != prevBank) {
                     bval[ent.Offset] = mapBank;
                     prevBank = mapBank;
+                    dbrChanges.Add(ent.Offset, new DbrValue(false, (byte)mapBank,
+                        DbrValue.Source.Auto));
                 }
             }
 
-            // Apply the user-specified values.
+            // Apply the user-specified values, overwriting existing values.
             foreach (KeyValuePair<int, DbrValue> kvp in userValues) {
+                dbrChanges[kvp.Key] = kvp.Value;
                 bval[kvp.Key] = kvp.Value.AsShort;
             }
 
             // Run through the file, looking for PHK/PLB pairs.  When we find one, set an
             // entry for the PLB instruction unless an entry already exists there.
+
+            // add to dbrChanges with "Auto" or "smart"
 
             // ? look for LDA #imm8 / PHA / PLB?
 
@@ -1327,7 +1335,7 @@ namespace SourceGen {
 
 
             // Run through file, updating instructions as needed.
-            short curVal = DbrValue.UNKNOWN;
+            short curVal = 0;
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 if (bval[offset] != DbrValue.UNKNOWN) {
                     curVal = bval[offset];
