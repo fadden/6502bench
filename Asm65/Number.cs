@@ -59,6 +59,33 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// Parses a hexadecimal integer.  Leading '$' or "0x" will be ignored.
+        ///
+        /// Trim whitespace before calling here.
+        /// </summary>
+        /// <param name="str">String to parse.</param>
+        /// <param name="val">Integer value of string.</param>
+        /// <returns>True if the parsing was successful.</returns>
+        public static bool TryParseIntHex(string str, out int val) {
+            if (str.Length == 0) {
+                val = 0;
+                return false;
+            }
+            if (str[0] == '$') {
+                str = str.Substring(1);
+            }
+            // leading "0x" will be handled by Convert
+
+            try {
+                val = Convert.ToInt32(str, 16);
+            } catch (Exception) {
+                val = 0;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Parses a long integer in a variety of formats (hex, decimal, binary).  We allow
         /// hex to be identified with a leading '$' as well as "0x".
         ///

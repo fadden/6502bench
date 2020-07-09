@@ -1224,15 +1224,72 @@ namespace SourceGen {
         /// <summary>
         /// Data Bank Register value.
         /// </summary>
-        /// <remarks>
-        /// This is primarily a value from $00-ff, but we also want to encode the B=K special
-        /// mode.
-        /// </remarks>
-        public enum DbrValue : short {
-            // $00-ff is bank number
-            Unknown = -1,               // unknown / do-nothing
-            ProgramBankReg = -2         // set B=K
+        public class DbrValue {
+            public const short UNKNOWN = -1;
+            public const short USE_PBR = -2;
+
+            /// <summary>
+            /// If true, ignore Bank, use Program Bank Register instead.
+            /// </summary>
+            public bool FollowPbr;
+
+            /// <summary>
+            /// Bank number (0-255).
+            /// </summary>
+            public byte Bank { get; private set; }
+
+            public enum Source { Unknown = 0, User, Auto, Smart };
+            /// <summary>
+            /// From whence this value originates.
+            /// </summary>
+            public Source ValueSource { get; private set; }
+
+            /// <summary>
+            /// Representation of the object state as a short integer.  0-255 specifies the
+            /// bank, while negative values are used for special conditions.
+            /// </summary>
+            public short AsShort {
+                get {
+                    if (FollowPbr) {
+                        return USE_PBR;
+                    } else {
+                        return Bank;
+                    }
+                }
+            }
+
+            public DbrValue(bool followPbr, byte bank, Source source) {
+                FollowPbr = followPbr;
+                Bank = bank;
+                ValueSource = source;
+            }
+
+            public override string ToString() {
+                return "DBR:" + (FollowPbr ? "K" : "$" + Bank.ToString("x2"));
+            }
+
+            public static bool operator ==(DbrValue a, DbrValue b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;    // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;   // one is null
+                }
+                // All fields must be equal.
+                return a.Bank == b.Bank && a.FollowPbr == b.FollowPbr &&
+                    a.ValueSource == b.ValueSource;
+            }
+            public static bool operator !=(DbrValue a, DbrValue b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is Symbol && this == (DbrValue)obj;
+            }
+            public override int GetHashCode() {
+                return Bank + (FollowPbr ? 0x100 : 0);
+            }
         }
+
 
         /// <summary>
         /// Determines the value of the Data Bank Register (DBR, register 'B') for relevant
@@ -1244,21 +1301,21 @@ namespace SourceGen {
             short[] bval = new short[mAnattribs.Length];
 
             // Initialize all entries to "unknown".
-            Misc.Memset(bval, (short)DbrValue.Unknown);
+            Misc.Memset(bval, DbrValue.UNKNOWN);
 
             // Set B=K every time we cross an address boundary and the program bank changes.
-            DbrValue prevBank = DbrValue.Unknown;
+            short prevBank = DbrValue.UNKNOWN;
             foreach (AddressMap.AddressMapEntry ent in mAddrMap) {
-                int mapBank = ent.Addr >> 16;
-                if (mapBank != (int)prevBank) {
-                    bval[ent.Offset] = (short)mapBank;
-                    prevBank = (DbrValue)mapBank;
+                short mapBank = (short)(ent.Addr >> 16);
+                if (mapBank != prevBank) {
+                    bval[ent.Offset] = mapBank;
+                    prevBank = mapBank;
                 }
             }
 
             // Apply the user-specified values.
             foreach (KeyValuePair<int, DbrValue> kvp in userValues) {
-                bval[kvp.Key] = (short)kvp.Value;
+                bval[kvp.Key] = kvp.Value.AsShort;
             }
 
             // Run through the file, looking for PHK/PLB pairs.  When we find one, set an
@@ -1270,19 +1327,19 @@ namespace SourceGen {
 
 
             // Run through file, updating instructions as needed.
-            short curVal = (short)DbrValue.Unknown;
+            short curVal = DbrValue.UNKNOWN;
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
-                if (bval[offset] != (short)DbrValue.Unknown) {
+                if (bval[offset] != DbrValue.UNKNOWN) {
                     curVal = bval[offset];
                 }
                 if (!mAnattribs[offset].UsesDataBankReg) {
                     continue;
                 }
                 Debug.Assert(mAnattribs[offset].IsInstructionStart);
-                Debug.Assert(curVal != (short)DbrValue.Unknown);
+                Debug.Assert(curVal != DbrValue.UNKNOWN);
 
                 int bank;
-                if (curVal == (short)DbrValue.ProgramBankReg) {
+                if (curVal == DbrValue.USE_PBR) {
                     bank = mAnattribs[offset].Address >> 16;
                 } else {
                     Debug.Assert(curVal >= 0 && curVal < 256);

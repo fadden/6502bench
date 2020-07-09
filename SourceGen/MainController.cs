@@ -1873,19 +1873,16 @@ namespace SourceGen {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
 
-            CodeAnalysis.DbrValue curValue;
-            if (!mProject.DbrValues.TryGetValue(offset, out curValue)) {
-                curValue = CodeAnalysis.DbrValue.Unknown;
-            }
+            // Get current user-specified value, or null.
+            mProject.DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue curValue);
 
-            EditDataBank dlg = new EditDataBank(mMainWin, mProject.AddrMap, mFormatter, curValue);
+            EditDataBank dlg = new EditDataBank(mMainWin, mProject, mFormatter, curValue);
             if (dlg.ShowDialog() != true) {
                 return;
             }
 
             if (dlg.Result != curValue) {
-                Debug.WriteLine("Changing DBR at +" + offset.ToString("x6") + " to $" +
-                    ((int)(dlg.Result)).ToString("x2"));
+                Debug.WriteLine("Changing DBR at +" + offset.ToString("x6") + " to $" + dlg.Result);
                 UndoableChange uc =
                     UndoableChange.CreateDataBankChange(offset, curValue, dlg.Result);
                 ChangeSet cs = new ChangeSet(uc);

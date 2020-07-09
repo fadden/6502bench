@@ -285,6 +285,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ProgressGeneratingFmt");
         public static string PROJECT_FIELD_COMMENT =
             (string)Application.Current.FindResource("str_ProjectFieldComment");
+        public static string PROJECT_FIELD_DBR_VALUE =
+            (string)Application.Current.FindResource("str_ProjectFieldDbrValue");
         public static string PROJECT_FIELD_LONG_COMMENT =
             (string)Application.Current.FindResource("str_ProjectFieldLongComment");
         public static string PROJECT_FIELD_LV_TABLE =

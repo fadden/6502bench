@@ -2120,15 +2120,13 @@ namespace SourceGen {
                         break;
                     case UndoableChange.ChangeType.SetDataBank: {
                             // If there's no entry, treat it as an entry with value = Unknown.
-                            if (!DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue current)) {
-                                current = CodeAnalysis.DbrValue.Unknown;
-                            }
+                            DbrValues.TryGetValue(offset, out CodeAnalysis.DbrValue current);
                             if (current != (CodeAnalysis.DbrValue)oldValue) {
                                 Debug.WriteLine("GLITCH: old DBR value mismatch (" +
                                     current + " vs " + oldValue + ")");
                                 Debug.Assert(false);
                             }
-                            if ((CodeAnalysis.DbrValue)newValue == CodeAnalysis.DbrValue.Unknown) {
+                            if (newValue == null) {
                                 DbrValues.Remove(offset);
                             } else {
                                 DbrValues[offset] = (CodeAnalysis.DbrValue)newValue;

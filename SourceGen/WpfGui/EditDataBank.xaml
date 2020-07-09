@@ -20,11 +20,16 @@ limitations under the License.
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Set Data Bank"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered">
+
+    <Window.Resources>
+        <system:String x:Key="str_OtherBank">(other)</system:String>
+    </Window.Resources>
 
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -33,25 +38,25 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Text="Enter bank:"/>
-            <TextBox Name="bankValueBox" Margin="8,1,0,0" Width="24" MaxLength="2"
-                     Text="{Binding DataBankStr, FallbackValue=88}"
+            <TextBlock Text="Data bank:"/>
+            <TextBox Name="bankValueBox" Margin="8,1,0,0" Width="30" MaxLength="3"
+                     Text="{Binding DataBankStr, UpdateSourceTrigger=PropertyChanged, FallbackValue=$00}"
                      FontFamily="{StaticResource GeneralMonoFont}"/>
         </StackPanel>
-        <TextBlock Grid.Row="1" Margin="0,4,0,0" Text="• Enter hex value, or 'K' to track PBR"/>
+        <TextBlock Grid.Row="1" Margin="0,4,0,0" Text="• Enter two-digit hex value, or 'K' to track PBR"/>
         <TextBlock Grid.Row="2" Margin="0,0,0,0" Text="• Leave blank to reset to default"/>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,16,0,0">
-            <TextBlock Text="Banks in use:" Margin="0,3,0,0"/>
-            <ComboBox Name="bankCombo" Margin="8,1,0,0" Width="200"
-                      FontFamily="{StaticResource GeneralMonoFont}"
-                      ItemsSource="{Binding BankLabels}" DisplayMemberPath="Label"/>
-        </StackPanel>
+        <TextBlock Grid.Row="3" Text="Alternatively, select from list of in-use banks:" Margin="0,16,0,0"/>
+        <ComboBox Grid.Row="4" Name="bankCombo" Margin="0,4,0,0"
+                  FontFamily="{StaticResource GeneralMonoFont}"
+                  ItemsSource="{Binding BankLabels}" DisplayMemberPath="Label"
+                  SelectionChanged="bankCombo_SelectionChanged"/>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
             <Button Content="OK" IsDefault="True" Width="70"
                     IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
             <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>

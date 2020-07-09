@@ -152,6 +152,7 @@ limitations under the License.
     <system:String x:Key="str_ProgressAssembling">Executing assembler...</system:String>
     <system:String x:Key="str_ProgressGeneratingFmt">Generating {0}...</system:String>
     <system:String x:Key="str_ProjectFieldComment">comment</system:String>
+    <system:String x:Key="str_ProjectFieldDbrValue">DBR value</system:String>
     <system:String x:Key="str_ProjectFieldLongComment">long comment</system:String>
     <system:String x:Key="str_ProjectFieldLvTable">local variable table</system:String>
     <system:String x:Key="str_ProjectFieldNote">note</system:String>

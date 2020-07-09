@@ -401,6 +401,18 @@ namespace SourceGen {
                 }
             }
         }
+        public class SerDbrValue {
+            // Skip the ValueSource property; should always be User in project file.
+            public bool FollowPbr;
+            public byte Bank;
+
+            public SerDbrValue() { }
+            public SerDbrValue(CodeAnalysis.DbrValue dbrValue) {
+                FollowPbr = dbrValue.FollowPbr;
+                Bank = dbrValue.Bank;
+                Debug.Assert(dbrValue.ValueSource == CodeAnalysis.DbrValue.Source.User);
+            }
+        }
 
         // Fields are serialized to/from JSON.  DO NOT change the field names.
         public int _ContentVersion { get; set; }
@@ -420,6 +432,7 @@ namespace SourceGen {
         public List<SerVisBitmapAnimation> VisualizationAnimations { get; set; }
         public Dictionary<string, SerVisualizationSet> VisualizationSets { get; set; }
         public Dictionary<string, DisasmProject.RelocData> RelocList { get; set; }
+        public Dictionary<string, SerDbrValue> DbrValues { get; set; }
 
         /// <summary>
         /// Serializes a DisasmProject into an augmented JSON string.
@@ -532,6 +545,13 @@ namespace SourceGen {
             spf.RelocList = new Dictionary<string, DisasmProject.RelocData>(proj.RelocList.Count);
             foreach (KeyValuePair<int, DisasmProject.RelocData> kvp in proj.RelocList) {
                 spf.RelocList.Add(kvp.Key.ToString(), kvp.Value);
+            }
+
+            // We could output the value as a short, using DbrValue.AsShort, but it doesn't
+            // save much space and could make life harder down the road.
+            spf.DbrValues = new Dictionary<string, SerDbrValue>(proj.DbrValues.Count);
+            foreach (KeyValuePair<int, CodeAnalysis.DbrValue> kvp in proj.DbrValues) {
+                spf.DbrValues.Add(kvp.Key.ToString(), new SerDbrValue(kvp.Value));
             }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
@@ -851,6 +871,19 @@ namespace SourceGen {
                         continue;
                     }
                     proj.RelocList.Add(intKey, kvp.Value);
+                }
+            }
+
+            // Deserialize data bank register values.  This was added in v1.7.
+            if (spf.DbrValues != null) {
+                foreach (KeyValuePair<string, SerDbrValue> kvp in spf.DbrValues) {
+                    if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
+                            Res.Strings.PROJECT_FIELD_DBR_VALUE, report, out int intKey)) {
+                        continue;
+                    }
+                    CodeAnalysis.DbrValue newDbr = new CodeAnalysis.DbrValue(kvp.Value.FollowPbr,
+                        kvp.Value.Bank, CodeAnalysis.DbrValue.Source.User);
+                    proj.DbrValues.Add(intKey, newDbr);
                 }
             }
 
