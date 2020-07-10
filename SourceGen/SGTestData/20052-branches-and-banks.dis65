@@ -14,7 +14,9 @@
 "DefaultTextScanMode":"LowHighAscii",
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
-"SmartPlpHandling":true},
+"UseRelocData":false,
+"SmartPlpHandling":true,
+"SmartPlbHandling":false},
 
 "PlatformSymbolFileIdentifiers":["PROJ:20050-branches-and-banks.sym65"],
 "ExtensionScriptFileIdentifiers":[],
@@ -272,4 +274,18 @@
 "VisualizationSets":{
 },
 
-"RelocList":null}
+"RelocList":{
+},
+
+"DbrValues":{
+"86":{
+"FollowPbr":true,
+"Bank":0},
+
+"11":{
+"FollowPbr":true,
+"Bank":0},
+
+"54":{
+"FollowPbr":true,
+"Bank":0}}}

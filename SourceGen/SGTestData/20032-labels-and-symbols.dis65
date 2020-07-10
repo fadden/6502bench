@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":3,
+"_ContentVersion":4,
 "FileDataLength":695,
 "FileDataCrc32":1242388944,
 "ProjectProps":{
@@ -14,7 +14,9 @@
 "DefaultTextScanMode":"LowHighAscii",
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
-"SmartPlpHandling":true},
+"UseRelocData":false,
+"SmartPlpHandling":true,
+"SmartPlbHandling":true},
 
 "PlatformSymbolFileIdentifiers":["PROJ:20030-labels-and-symbols.sym65",
 "RT:TestData/TestSyms.sym65"],
@@ -1163,4 +1165,12 @@
 "Visualizations":[],
 "VisualizationAnimations":[],
 "VisualizationSets":{
-}}
+},
+
+"RelocList":{
+},
+
+"DbrValues":{
+"279":{
+"FollowPbr":true,
+"Bank":0}}}

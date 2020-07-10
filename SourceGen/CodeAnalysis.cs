@@ -1383,6 +1383,11 @@ namespace SourceGen {
                 if (offset < 1) {
                     continue;
                 }
+                // TODO(maybe): strictly speaking this is incorrect, because we're not verifying
+                // that the previous bytes are at adjacent addresses in memory.  It's possible
+                // somebody did a PHA or PHK at the end of a chunk of code, then started
+                // assembling elsewhere with a PLB, and we'll mistakenly assign the wrong value.
+                // Seems unlikely, and the penalty for getting it "wrong" is slight.
                 if (!mAnattribs[offset - 1].IsInstructionStart) {
                     continue;
                 }
