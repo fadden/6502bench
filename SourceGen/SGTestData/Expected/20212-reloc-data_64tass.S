@@ -54,7 +54,27 @@ _L30057 pea     _L30045 >> 16
         .long   _L4FFE0
         .byte   $00
 
-_L3006D rts
+_L3006D phk
+        plb
+        lda     #$0000
+        asl     a
+        asl     a
+        tax
+        lda     @w_L30082 & $ffff,x
+        pha
+        lda     @w_L30080 & $ffff,x
+        pha
+        beq     _L30088
+        rts
+
+_L30080 .byte   $45
+        .byte   $00
+_L30082 .byte   $03
+        .byte   $00
+        .long   _L3006D
+        .byte   $00
+
+_L30088 rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
         .logical $04ffe0

@@ -53,7 +53,27 @@ L30000:  clc
          .faraddr @L4FFE0
          .byte   $00
 
-@L3006D: rts
+@L3006D: phk
+         plb
+         lda     #$0000
+         asl     A
+         asl     A
+         tax
+         lda     a:@L30082 & $ffff,x
+         pha
+         lda     a:@L30080 & $ffff,x
+         pha
+         beq     @L30088
+         rts
+
+@L30080: .byte   $45
+         .byte   $00
+@L30082: .byte   $03
+         .byte   $00
+         .faraddr @L3006D
+         .byte   $00
+
+@L30088: rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
 ;         .segment "SEG001"

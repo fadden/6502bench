@@ -77,4 +77,28 @@ check_pea
         adrl    ADDR_FFE0
 
 :skipdata
+
+; Check a situation where we block a relocation from being fully formed.
+; The access to addr_dat+2 and addr_dat cause labels to be auto-generated.
+; Because we access the high part first, there's no opportunity to find
+; a pre-existing label nearby.  If the reloc code generates a 3-byte or
+; 4-byte data item at addr_dat, the label at addr_dat+2 will be hidden.
+        phk
+        plb
+        lda     #$0000
+        asl     A
+        asl     A
+        tax
+        lda     addr_dat+2,X
+        pha
+        lda     addr_dat,X
+        pha
+        beq     :skip_ad
+        rts
+
+addr_dat
+        adrl    check_pea
+        adrl    :skipdata
+
+:skip_ad
         rts

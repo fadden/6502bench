@@ -254,11 +254,15 @@ namespace SourceGen {
                         mProject.RelocList.TryGetValue(offset,
                             out DisasmProject.RelocData reloc)) {
                     // Byte is unformatted, but there's relocation data here.  If the full
-                    // range of bytes is unformatted, create a symbolic reference.
+                    // range of bytes is unformatted and unlabeled, create a symbolic reference.
+                    // TODO: we can do better here when a multi-byte reloc has an auto-generated
+                    // label mid-way through: create multiple, smaller formats for the same sym.
+                    // Or don't generate auto labels until all reloc-based formats are placed.
                     bool allClear = true;
                     for (int i = 1; i < reloc.Width; i++) {
                         if (!mAnattribs[offset + i].IsUntyped ||
-                                mAnattribs[offset + i].DataDescriptor != null) {
+                                mAnattribs[offset + i].DataDescriptor != null ||
+                                mAnattribs[offset + i].Symbol != null) {
                             allClear = false;
                             break;
                         }

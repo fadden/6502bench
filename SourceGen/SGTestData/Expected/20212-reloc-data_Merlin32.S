@@ -48,7 +48,27 @@ L30000   clc
          adr   :L4FFE0
          dfb   $00
 
-:L3006D  rts
+:L3006D  phk
+         plb
+         lda   #$0000
+         asl   A
+         asl   A
+         tax
+         lda:  :L30082,x
+         pha
+         lda:  :L30080,x
+         pha
+         beq   :L30088
+         rts
+
+:L30080  dfb   $45
+         dfb   $00
+:L30082  dfb   $03
+         dfb   $00
+         adr   :L3006D
+         dfb   $00
+
+:L30088  rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
          org   $04ffe0
