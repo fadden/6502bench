@@ -1056,19 +1056,21 @@ namespace SourceGen {
                     // behavior is unwise.)
                     if (mProject.DbrChanges.TryGetValue(offset,
                             out CodeAnalysis.DbrValue dbrValue)) {
-                        string operandStr;
+                        string bankStr;
                         if (dbrValue.FollowPbr) {
-                            operandStr = Res.Strings.DATA_BANK_USER_K;
+                            bankStr = Res.Strings.DATA_BANK_K;
                         } else {
-                            string fmt;
-                            if (dbrValue.ValueSource == CodeAnalysis.DbrValue.Source.Auto) {
-                                fmt = Res.Strings.DATA_BANK_AUTO_FMT;
-                            } else {
-                                fmt = Res.Strings.DATA_BANK_USER_FMT;
-                            }
-                            operandStr = string.Format(fmt,
-                                mFormatter.FormatHexValue(dbrValue.Bank, 2));
+                            bankStr = mFormatter.FormatHexValue(dbrValue.Bank, 2);
                         }
+
+                        string fmt;
+                        if (dbrValue.ValueSource == CodeAnalysis.DbrValue.Source.Auto) {
+                            fmt = Res.Strings.DATA_BANK_AUTO_FMT;
+                        } else {
+                            fmt = Res.Strings.DATA_BANK_USER_FMT;
+                        }
+                        string operandStr = string.Format(fmt, bankStr);
+
                         Line dbrLine = new Line(offset, 0, Line.Type.DataBankDirective);
                         dbrLine.Parts = FormattedParts.CreateDirective(
                             mFormatter.FormatPseudoOp(mPseudoOpNames.DataBankDirective),

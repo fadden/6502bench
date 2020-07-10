@@ -225,6 +225,7 @@ namespace SourceGen {
             public bool SeekNearbyTargets { get; set; }
             public bool UseRelocData { get; set; }
             public bool SmartPlpHandling { get; set; }
+            public bool SmartPlbHandling { get; set; }
 
             public SerAnalysisParameters() { }
             public SerAnalysisParameters(ProjectProperties.AnalysisParameters src) {
@@ -234,6 +235,7 @@ namespace SourceGen {
                 SeekNearbyTargets = src.SeekNearbyTargets;
                 UseRelocData = src.UseRelocData;
                 SmartPlpHandling = src.SmartPlpHandling;
+                SmartPlbHandling = src.SmartPlbHandling;
             }
         }
         public class SerAddressMap {
@@ -632,11 +634,18 @@ namespace SourceGen {
             proj.ProjectProps.AnalysisParams.UseRelocData =
                 spf.ProjectProps.AnalysisParams.UseRelocData;
             if (spf._ContentVersion < 2) {
-                // This was made optional in v1.3.  Default it to true for older projects.
+                // This was made optional in v1.3 (#2).  Default it to true for older projects.
                 proj.ProjectProps.AnalysisParams.SmartPlpHandling = true;
             } else {
                 proj.ProjectProps.AnalysisParams.SmartPlpHandling =
                     spf.ProjectProps.AnalysisParams.SmartPlpHandling;
+            }
+            if (spf._ContentVersion < 4) {
+                // Introduced in v1.7 (#4).  Default it to true for older projects.
+                proj.ProjectProps.AnalysisParams.SmartPlbHandling = true;
+            } else {
+                proj.ProjectProps.AnalysisParams.SmartPlbHandling =
+                    spf.ProjectProps.AnalysisParams.SmartPlbHandling;
             }
 
             // Deserialize ProjectProperties: external file identifiers.

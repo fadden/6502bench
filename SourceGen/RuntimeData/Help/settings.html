@@ -262,6 +262,11 @@ improve automatic operand formatting.</p>
 the processor status flags from a nearby <code>PHP</code> when a
 <code>PLP</code> is encountered.  If not enabled, all flags are set to
 "indeterminate" following a <code>PLP</code>.</p>
+<p>If "smart PLB handling" is checked, the analyzer will watch for
+code patterns like <code>PLB</code> preceded by <code>PHK</code>,
+and generate appropriate Data Bank Register changes.  If not enabled,
+the DBR is set to the bank of the address of the start of the file,
+and does not change unless explicitly set.  Only useful for 65816 code.</p>
 
 <p>The "default text encoding" setting has two effects.  First, it
 specifies which character encoding to use when searching for strings in

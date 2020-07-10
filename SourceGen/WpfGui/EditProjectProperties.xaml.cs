@@ -364,6 +364,14 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
             }
         }
+        public bool SmartPlbHandling {
+            get { return mWorkProps.AnalysisParams.SmartPlbHandling; }
+            set {
+                mWorkProps.AnalysisParams.SmartPlbHandling = value;
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
 
         private void Loaded_General() {
             for (int i = 0; i < CpuItems.Length; i++) {

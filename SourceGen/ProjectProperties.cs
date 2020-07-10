@@ -54,6 +54,7 @@ namespace SourceGen {
             public bool SeekNearbyTargets { get; set; }
             public bool UseRelocData { get; set; }
             public bool SmartPlpHandling { get; set; }
+            public bool SmartPlbHandling { get; set; }
 
             public AnalysisParameters() {
                 // Set default values.
@@ -63,6 +64,7 @@ namespace SourceGen {
                 SeekNearbyTargets = true;
                 UseRelocData = false;
                 SmartPlpHandling = true;
+                SmartPlbHandling = true;
             }
             public AnalysisParameters(AnalysisParameters src) {
                 AnalyzeUncategorizedData = src.AnalyzeUncategorizedData;
@@ -71,6 +73,7 @@ namespace SourceGen {
                 SeekNearbyTargets = src.SeekNearbyTargets;
                 UseRelocData = src.UseRelocData;
                 SmartPlpHandling = src.SmartPlpHandling;
+                SmartPlbHandling = src.SmartPlbHandling;
             }
         }
 

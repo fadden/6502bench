@@ -107,6 +107,8 @@ limitations under the License.
                                       IsChecked="{Binding UseRelocData}" IsEnabled="{Binding IsRelocDataAvailable}"/>
                             <CheckBox Margin="0,4,0,0" Content="Smart PLP handling"
                                       IsChecked="{Binding SmartPlpHandling}"/>
+                            <CheckBox Margin="0,4,0,0" Content="Smart PLB handling"
+                                      IsChecked="{Binding SmartPlbHandling}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                 <TextBlock Margin="0,3,0,0" Text="Default text encoding:"/>

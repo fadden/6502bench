@@ -1295,47 +1295,34 @@ namespace SourceGen {
         /// Determines the value of the Data Bank Register (DBR, register 'B') for relevant
         /// instructions, and updates the Anattrib OperandOffset value.
         /// </summary>
+        /// <remarks>
+        /// This is of questionable value when we have reliable relocation data.  OTOH it's
+        /// pretty quick even on very large files.
+        /// </remarks>
         public void ApplyDataBankRegister(Dictionary<int, DbrValue> userValues,
                 Dictionary<int, DbrValue> dbrChanges) {
             Debug.Assert(!mCpuDef.HasAddr16);   // 65816 only
 
             dbrChanges.Clear();
 
-            short[] bval = new short[mAnattribs.Length];
-
-            // Initialize all entries to "unknown".
-            Misc.Memset(bval, DbrValue.UNKNOWN);
-
-            // Set B=K every time we cross an address boundary and the program bank changes.
-            short prevBank = DbrValue.UNKNOWN;
-            foreach (AddressMap.AddressMapEntry ent in mAddrMap) {
-                short mapBank = (short)(ent.Addr >> 16);
-                if (mapBank != prevBank) {
-                    bval[ent.Offset] = mapBank;
-                    prevBank = mapBank;
-                    dbrChanges.Add(ent.Offset, new DbrValue(false, (byte)mapBank,
-                        DbrValue.Source.Auto));
-                }
+            if (mAnalysisParameters.SmartPlbHandling) {
+                GenerateSmartPlbChanges(dbrChanges);
             }
 
-            // Apply the user-specified values, overwriting existing values.
+            // Apply the user-specified values, overwriting auto-generated values.
             foreach (KeyValuePair<int, DbrValue> kvp in userValues) {
                 dbrChanges[kvp.Key] = kvp.Value;
+            }
+
+            // Create an array for fast access.
+            short[] bval = new short[mAnattribs.Length];
+            Misc.Memset(bval, DbrValue.UNKNOWN);
+            foreach (KeyValuePair<int, DbrValue> kvp in dbrChanges) {
                 bval[kvp.Key] = kvp.Value.AsShort;
             }
 
-            // Run through the file, looking for PHK/PLB pairs.  When we find one, set an
-            // entry for the PLB instruction unless an entry already exists there.
-
-            // add to dbrChanges with "Auto" or "smart"
-
-            // ? look for LDA #imm8 / PHA / PLB?
-
-            // ...
-
-
             // Run through file, updating instructions as needed.
-            short curVal = 0;
+            short curVal = (byte)(mAddrMap.Get(0) >> 16);   // start with B=K
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 if (bval[offset] != DbrValue.UNKNOWN) {
                     curVal = bval[offset];
@@ -1358,13 +1345,63 @@ namespace SourceGen {
                 int newOffset = mAddrMap.AddressToOffset(offset, newAddr);
                 if (newAddr != mAnattribs[offset].OperandAddress ||
                         newOffset != mAnattribs[offset].OperandOffset) {
-                    Debug.WriteLine("DBR rewrite at +" + offset.ToString("x6") + ": $" +
-                        mAnattribs[offset].OperandAddress.ToString("x6") + "/+" +
-                        mAnattribs[offset].OperandOffset.ToString("x6") + " --> $" +
-                        newAddr.ToString("x6") + "/+" + newOffset.ToString("x6"));
+                    //Debug.WriteLine("DBR rewrite at +" + offset.ToString("x6") + ": $" +
+                    //    mAnattribs[offset].OperandAddress.ToString("x6") + "/+" +
+                    //    mAnattribs[offset].OperandOffset.ToString("x6") + " --> $" +
+                    //    newAddr.ToString("x6") + "/+" + newOffset.ToString("x6"));
 
                     mAnattribs[offset].OperandAddress = newAddr;
                     mAnattribs[offset].OperandOffset = newOffset;
+                }
+            }
+        }
+
+        private void GenerateSmartPlbChanges(Dictionary<int, DbrValue> dbrChanges) {
+#if false
+            // Set B=K every time we cross an address boundary and the program bank changes.
+            short prevBank = DbrValue.UNKNOWN;
+            foreach (AddressMap.AddressMapEntry ent in mAddrMap) {
+                short mapBank = (short)(ent.Addr >> 16);
+                if (mapBank != prevBank) {
+                    prevBank = mapBank;
+                    dbrChanges.Add(ent.Offset, new DbrValue(false, (byte)mapBank,
+                        DbrValue.Source.Auto));
+                }
+            }
+#endif
+
+            // Run through the file, looking for PLB.  If the preceding code was something
+            // we can reliably pull a value out of, create an entry for it.
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                if (!mAnattribs[offset].IsInstructionStart) {
+                    continue;
+                }
+                OpDef op = mCpuDef.GetOpDef(mFileData[offset]);
+                if (op != OpDef.OpPLB_StackPull) {
+                    continue;
+                }
+                if (offset < 1) {
+                    continue;
+                }
+                if (!mAnattribs[offset - 1].IsInstructionStart) {
+                    continue;
+                }
+                op = mCpuDef.GetOpDef(mFileData[offset - 1]);
+                if (op == OpDef.OpPHK_StackPush) {
+                    // output B=K
+                    dbrChanges.Add(offset, new DbrValue(true, 0, DbrValue.Source.Auto));
+                } else if (op == OpDef.OpPHA_StackPush && offset >= 4) {
+                    // check for LDA imm
+                    if (!mAnattribs[offset - 3].IsInstructionStart) {
+                        continue;
+                    }
+                    op = mCpuDef.GetOpDef(mFileData[offset - 3]);
+                    if (!(op == OpDef.OpLDA_ImmLongA || op == OpDef.OpLDA_Imm)) {
+                        continue;
+                    }
+
+                    byte bank = mFileData[offset - 2];
+                    dbrChanges.Add(offset, new DbrValue(false, bank, DbrValue.Source.Auto));
                 }
             }
         }
