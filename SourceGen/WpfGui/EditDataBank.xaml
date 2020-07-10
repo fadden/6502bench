@@ -22,7 +22,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Set Data Bank"
+        Title="Edit Data Bank Register"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered">

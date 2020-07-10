@@ -131,8 +131,8 @@ space, but it's not contiguous -- a branch that extends past the end will
 wrap around to the start of the 64KiB "bank".  For 16-bit instruction
 operands, the bank is identified for instruction and data addresses
 by the program bank register and the data bank register, respectively.
-The disassembler can't generally know the contents of the data bank
-register, which makes life a bit more interesting.</p>
+The disassembler can't always discern the value of the data bank
+register through static analysis, so some user input may be required.</p>
 
 <p>The 6502 has an 8-bit processor status register ("P") with a bunch of flags
 in it.  Some of the flags determine whether a conditional branch is taken
@@ -445,6 +445,35 @@ MYSTRING .STR    "hello"
 <p>Symbols that represent a memory address within a project are treated
 differently from those outside a project.  We refer to these as internal
 and external addresses, respectively.</p>
+
+
+<h3><a name="connecting-operands">Connecting Operands with Labels</a></h3>
+
+<p>Suppose you have the following code:</p>
+<pre>
+         LDA     $1234
+         JSR     $2345
+</pre>
+<p>If we put that in a source file, it will assemble correctly.
+However, if those addresses are part of the file, the code may break if
+changes are made and things assemble to different addresses.  It would
+be better to generate code that references labels, e.g.:</p>
+<pre>
+         LDA     my_data
+         JSR     nifty_func
+</pre>
+<p>SourceGen tries to establish labels for address operands automatically.
+How this works depends on whether the operand's address is inside the file or
+external, and whether there are existing labels at or near the target
+address.  The details are explored in the next few sections.</p>
+<p>On the 65816 this process is trickier, because addresses are 24 bits
+instead of 16.  For a control-transfer instruction like <code>JSR</code>,
+the high 8 bits come from the Program Bank Register (K).  For a data-access
+instruction like <code>LDA</code>, the high 8 bits come from the Data
+Bank Register (B).  The PBR value is determined by the address in which
+the code is executing, so it's easy to determine.  The DBR value can be
+set arbitrarily.  Sometimes it's easy to figure out, sometimes it has
+to be specified manually.</p>
 
 
 <h3><a name="internal-address-symbols">Internal Address Symbols</a></h3>
@@ -889,6 +918,8 @@ code generator figure out the implementation details.</p>
   <li>.RWID - specifies the width of the accumulator and index registers
     (65816 only).  Note this doesn't change the actual width, just tells
     the assembler that the width has changed.</li>
+  <li>.DBANK - specifies what value the Data Bank Register holds
+    (65816 only).  Used when matching operands to labels.</li>
   <li>.JUNK - indicates that the data in a range of bytes is irrelevant.
     (When generating sources, this will become .FILL or .BULK
     depending on the contents of the memory region and the assembler's

@@ -301,6 +301,57 @@ address chunk, the first chunk that includes that address is used, as
 it is with the <code>JMP $1000</code> at the start of the file.</p>
 
 
+<h2><a name="reloc-data">OMF Relocation Dictionaries</a></h2>
+
+<p>65816 code can be tricky to disassemble for a number of reasons.
+24-bit addresses are formed from 16-bit data-access operands by combining
+with the Data Bank Register, which often requires a bit of manual
+intervention.  But the problems go beyond that.  Consider the following
+bit of source code for the Apple IIgs:</p>
+<pre>
+rsrcmsg    pea   rsrcmsg2|-16
+           pea   rsrcmsg2
+           _WriteCString
+           lda   #buffer
+           sta   pArcRead+$04
+           lda   #buffer|-16
+           sta   pArcRead+$06
+</pre>
+<p>In both cases we're referencing a 24-bit address as two 16-bit values.
+Without context, the disassembler will treat the PEA instruction as two
+independent 16-bit addresses, and the immediate values as constants:</p>
+<pre>
+                               .dbank  $02
+02/317c: f4 02 00     L2317C   pea     L20002 & $ffff
+02/317f: f4 54 32              pea     L23254 & $ffff
+02/3182: a2 0c 20              ldx     #WriteCString
+02/3185: 22 00 00 e1           jsl     Toolbox
+02/3189: a9 00 00     L23189   lda     #$0000
+02/318c: 8d 78 3f              sta     L23F78 & $ffff
+02/318f: a9 03 00              lda     #$0003
+02/3192: 8d 7a 3f              sta     L23F78 & $ffff +2
+</pre>
+<p>Worse yet, those <code>STA</code> instruction operands would have been
+shown as hex values or incorrect labels if the DBR had been set incorrectly.
+However, if we have the relocation data, we know the full
+address from which the addresses were formed, and we can tell when
+immediate values are addresses rather than constants.  And we can do this
+even without setting the DBR.</p>
+<pre>
+02/317c: f4 02 00     L2317C   pea     L23254 >> 16
+02/317f: f4 54 32              pea     L23254 & $ffff
+02/3182: a2 0c 20              ldx     #WriteCString
+02/3185: 22 00 00 e1           jsl     Toolbox
+02/3189: a9 00 00     L23189   lda     #L30000 & $ffff
+02/318c: 8d 78 3f              sta     L23F78 & $ffff
+02/318f: a9 03 00              lda     #L30000 >> 16
+02/3192: 8d 7a 3f              sta     L23F78 & $ffff +2
+</pre>
+<p>This feature is still considered "experimental".  There are some
+issues with it, e.g. the cross-reference table may show an incorrect
+offset.</p>
+
+
 <h2><a name="debug">Debug Menu Options</a></h2>
 
 <p>The DEBUG menu is hidden by default in release builds, but can be

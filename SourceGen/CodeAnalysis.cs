@@ -1335,7 +1335,7 @@ namespace SourceGen {
 
                 int bank;
                 if (curVal == DbrValue.USE_PBR) {
-                    bank = mAnattribs[offset].Address >> 16;
+                    bank = mAnattribs[offset].Address & 0x00ff0000;
                 } else {
                     Debug.Assert(curVal >= 0 && curVal < 256);
                     bank = curVal << 16;

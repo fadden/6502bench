@@ -305,6 +305,28 @@ not associated with a file offset.  If you delete it, you can get it
 back by using Edit &gt; Edit Header Comment.</p>
 
 
+<h2><a name="data-bank">Edit Data Bank (65816 only)</a></h2>
+<p>Sets the Data Bank Register (DBR) value for 65816 code.  This is used
+when matching 16-bit address operands with labels.  The new value is
+in effect from the line where it's declared to the end of the file, even
+across bank boundaries.
+If you leave the text field blank, the directive will be removed.</p>
+<p>A hexadecimal value from $00 to $ff can be entered directly.  As
+with other address inputs, a leading '$' is not required.  Entering
+"K" will set the DBR to the current address, and will automatically
+update if you change the address to a different bank.</p>
+<p>The pop-up menu has a list of all banks that hold code or data.
+To make them easier to identify, each is shown with the label on the
+first address in the bank, if any.</p>
+<p>While you can override automatically-generated data bank change
+directives, you can't remove them individually.  You can disable
+automatic generation by un-checking "smart PLB handling" in the project
+properties.</p>
+<p>Because the directive is frequently associated with <code>PLB</code>
+instructions, double-clicking on a <code>PLB</code> opcode in the
+code list will open the editor.</p>
+
+
 <h2><a name="note">Edit Note</a></h2>
 <p>Notes are similar to long comments, in that they can be arbitrarily
 long and span multiple lines.  However, because they're never included
