@@ -137,30 +137,6 @@ LCBANK1         @ $C08B     ;RWx2 read/write RAM bank 1
 
 CLRROM          @ $CFFF     ;disable slot C8 ROM
 
-; Disk ][ I/O locations.
-;
-; A few things hard-code slot 6 for disk access, in which case addresses
-; like $C0E8 will work here.  It's far more common for code to use indexed
-; addressing like "LDA $C088,X", which clashes with the slot 0
-; definitions.  We define these symbols as constants so they're not
-; applied automatically but are available for use.
-IWM_PH0_OFF     = $C080     ;IWM phase 0 off
-IWM_PH0_ON      = $C081     ;IWM phase 0 on
-IWM_PH1_OFF     = $C082     ;IWM phase 1 off
-IWM_PH1_ON      = $C083     ;IWM phase 1 on
-IWM_PH2_OFF     = $C084     ;IWM phase 2 off
-IWM_PH2_ON      = $C085     ;IWM phase 2 on
-IWM_PH3_OFF     = $C086     ;IWM phase 3 off
-IWM_PH3_ON      = $C087     ;IWM phase 3 on
-IWM_MOTOR_OFF   = $C088     ;IWM motor off
-IWM_MOTOR_ON    = $C089     ;IWM motor on
-IWM_DRIVE_1     = $C08A     ;IWM select drive 1
-IWM_DRIVE_2     = $C08B     ;IWM select drive 2
-IWM_Q6_OFF      = $C08C     ;IWM read
-IWM_Q6_ON       = $C08D     ;IWM WP-sense
-IWM_Q7_OFF      = $C08E     ;IWM WP-sense/read
-IWM_Q7_ON       = $C08F     ;IWM write
-
 
 ; Not strictly I/O locations, but they're in the neighborhood.
 ROM_AUXMOVE     @ $C311

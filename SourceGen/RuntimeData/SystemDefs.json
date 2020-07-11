@@ -12,6 +12,7 @@
       "SymbolFiles" : [
         "RT:Apple/F8-ROM.sym65",
         "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/C08x-DiskII.sym65",
         "RT:Apple/ProDOS8.sym65"
       ],
       "ExtensionScripts" : [
@@ -31,6 +32,7 @@
       "SymbolFiles" : [
         "RT:Apple/F8-ROM.sym65",
         "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/C08x-DiskII.sym65",
         "RT:Apple/DOS33.sym65"
       ],
       "ExtensionScripts" : [
@@ -49,6 +51,7 @@
       "SymbolFiles" : [
         "RT:Apple/F8-ROM.sym65",
         "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/C08x-DiskII.sym65",
         "RT:Apple/ProDOS8.sym65",
         "RT:Apple/IIgs-ROM.sym65"
       ],
@@ -69,6 +72,7 @@
       "Description" : "Apple IIgs, configured for GS/OS.",
       "SymbolFiles" : [
         "RT:Apple/Cxxx-IO.sym65",
+        "RT:Apple/C08x-DiskII.sym65",
         "RT:Apple/IIgs-ROM.sym65",
         "RT:Apple/GSOS.sym65"
       ],

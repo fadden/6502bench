@@ -1,0 +1,35 @@
+; Copyright 2018 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+;
+; Sources:
+;   Various Apple II reference materials found online
+
+*SYNOPSIS C08x I/O locations for the Disk ][
+
+; Disk ][ I/O base address locations.
+;
+; A few things hard-code slot 6 for disk access, in which case addresses
+; like $C0E8 will work here.  It's far more common for code to use indexed
+; addressing like "LDA $C088,X", which clashes with the slot 0
+; definitions for the language card.  SourceGen doesn't distinguish
+; between direct and indexed access to a location when resolving platform
+; symbols, so you can have one or the other.
+;
+; Other peripherals may use a similar system of indexing, so it's useful
+; to have each in a separate file.
+IWM_PH0_OFF     @ $C080     ;IWM phase 0 off
+IWM_PH0_ON      @ $C081     ;IWM phase 0 on
+IWM_PH1_OFF     @ $C082     ;IWM phase 1 off
+IWM_PH1_ON      @ $C083     ;IWM phase 1 on
+IWM_PH2_OFF     @ $C084     ;IWM phase 2 off
+IWM_PH2_ON      @ $C085     ;IWM phase 2 on
+IWM_PH3_OFF     @ $C086     ;IWM phase 3 off
+IWM_PH3_ON      @ $C087     ;IWM phase 3 on
+IWM_MOTOR_OFF   @ $C088     ;IWM motor off
+IWM_MOTOR_ON    @ $C089     ;IWM motor on
+IWM_DRIVE_1     @ $C08A     ;IWM select drive 1
+IWM_DRIVE_2     @ $C08B     ;IWM select drive 2
+IWM_Q6_OFF      @ $C08C     ;IWM read
+IWM_Q6_ON       @ $C08D     ;IWM WP-sense
+IWM_Q7_OFF      @ $C08E     ;IWM WP-sense/read
+IWM_Q7_ON       @ $C08F     ;IWM write
