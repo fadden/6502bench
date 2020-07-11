@@ -20,14 +20,14 @@ project to the original.
    65816 sources, with a little bit of ProDOS 8 and IIgs toolbox usage.
    Demonstrates how extension scripts are used during analysis.
    [(Full project)](https://fadden.com/apple2/misc.html#zippy)
- * A2-HP-CDA: HardPressed Classic Desk Accessory.  This is 65816 code
-   in OMF loader format, which SourceGen doesn't support, so it's a little
-   rough.  (This is chiefly here to answer the question, "what does it look
-   like when you disassemble OMF binaries?")
+ * A2-HP-CDA: HardPressed Classic Desk Accessory.  This original binary is
+   in 65816 code in OMF loader format, which was then prepared with
+   SourceGen's OMF conversion tool.  (Try loading the "#b90100" file
+   into the disassembler to see why.)
    [(Full project)](https://fadden.com/apple2/hardpressed.html)
 
-(You may be wondering why some of the example files have filenames with
+You may be wondering why some of the example files have filenames with
 things like "#061d60" in them.  It's a method of preserving the file type
 for Apple II files used by some utilities.  The potential advantage for
 disassembly is that the file type often determines the load address,
-possibly removing some initial guesswork.)
+possibly removing some initial guesswork.
