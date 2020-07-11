@@ -8,6 +8,10 @@
 BANK2_START ENT
 start   ldal    start
         jsr     later
+
+        ldy     #BANK2_MOV_DST
+        ora     $3456
+        oral    $023456
         rtl
 
 BANK2_MOV_DST ENT

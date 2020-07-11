@@ -1221,6 +1221,8 @@ namespace SourceGen {
             }
         }
 
+        #region Data Bank Register management
+
         /// <summary>
         /// Data Bank Register value.
         /// </summary>
@@ -1410,5 +1412,6 @@ namespace SourceGen {
                 }
             }
         }
+        #endregion Data Bank Register management
     }
 }

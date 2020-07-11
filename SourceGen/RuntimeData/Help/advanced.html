@@ -303,6 +303,9 @@ it is with the <code>JMP $1000</code> at the start of the file.</p>
 
 <h2><a name="reloc-data">OMF Relocation Dictionaries</a></h2>
 
+<p><i>This feature is considered experimental.  Some features,
+like cross-reference tracking, may not work correctly with it.</i></p>
+
 <p>65816 code can be tricky to disassemble for a number of reasons.
 24-bit addresses are formed from 16-bit data-access operands by combining
 with the Data Bank Register, which often requires a bit of manual
@@ -347,9 +350,42 @@ even without setting the DBR.</p>
 02/318f: a9 03 00              lda     #L30000 >> 16
 02/3192: 8d 7a 3f              sta     L23F78 & $ffff +2
 </pre>
-<p>This feature is still considered "experimental".  There are some
-issues with it, e.g. the cross-reference table may show an incorrect
-offset.</p>
+<p>The absence of relocation data can be a useful signal as well.  For
+example, when pushing arguments for a toolbox call, the disassembler
+can tell the difference between addresses and constants without needing
+emulation or pattern-matching, because only the addresses get
+relocated.  Consider this bit of source code:</p>
+<pre>
+           lda   &lt;total_records
+           pha
+           pea   linebuf|-16
+           pea   linebuf+65
+           pea   $0005
+           pea   $0000
+           _Int2Dec
+</pre>
+<p>Without relocation data, it becomes:</p>
+<pre>
+02/0aa8: a5 42                 lda     $42
+02/0aaa: 48                    pha
+02/0aab: f4 02 00              pea     L20002 & $ffff
+02/0aae: f4 03 31              pea     L23103 & $ffff
+02/0ab1: f4 05 00              pea     L20005 & $ffff
+02/0ab4: f4 00 00              pea     L20000 & $ffff
+02/0ab7: a2 0b 26              ldx     #Int2Dec
+02/0aba: 22 00 00 e1           jsl     Toolbox
+</pre>
+<p>If we treat the non-relocated operands as constants:</p>
+<pre>
+02/0aa8: a5 42                 lda     $42
+02/0aaa: 48                    pha
+02/0aab: f4 02 00              pea     L230C2 >> 16
+02/0aae: f4 03 31              pea     L23103 & $ffff
+02/0ab1: f4 05 00              pea     $0005
+02/0ab4: f4 00 00              pea     $0000
+02/0ab7: a2 0b 26              ldx     #Int2Dec
+02/0aba: 22 00 00 e1           jsl     Toolbox
+</pre>
 
 
 <h2><a name="debug">Debug Menu Options</a></h2>

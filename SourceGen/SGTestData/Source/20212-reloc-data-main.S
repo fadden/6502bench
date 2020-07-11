@@ -12,6 +12,7 @@ BANK8_ADDR EXT
 BANK8_MOV_SRC EXT
 ADDR_FFE0 EXT
 
+; expected to start at $02/0000
         REL                     ;generate relocatable code
 
 start
@@ -55,6 +56,11 @@ start
         ldy     #BANK2_MOV_DST
         mvn     #^BANK8_MOV_SRC,#^BANK2_MOV_DST
         nop
+
+; Test whether we're finding symbols for 16-bit address operands
+; without reloc data.
+        lda:    $0000,y
+        sta:    $0002,y
 
 check_pea
         pea     $0000

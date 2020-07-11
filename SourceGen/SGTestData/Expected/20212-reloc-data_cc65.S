@@ -33,47 +33,49 @@ L30000:  clc
          nop
          lda     #$000f
          ldx     #@L80026 & $ffff
-         ldy     #@L2345E & $ffff
-         mvn     #^@L2345E+6,#^@L2345E
+         ldy     #@L23467 & $ffff
+         mvn     #^@L23467+6,#^@L23467
          nop
-@L30045: pea     $0000
+         lda     $0000,y
+         sta     $0002,y
+@L3004B: pea     $0000
          pea     $f000
          pea     @L80019 & $ffff
          pea     @L80019 >> 16
-         pea     @L30045 & $ffff
-         pea     @L30045 >> 8
-@L30057: pea     @L30045 >> 16
-         pea     @L30057 & $ffff
-         pea     $1045
+         pea     @L3004B & $ffff
+         pea     @L3004B >> 8
+@L3005D: pea     @L3004B >> 16
+         pea     @L3005D & $ffff
+         pea     $104b
          nop
-         jmp     @L3006D & $ffff
+         jmp     @L30073 & $ffff
 
          .word   @L4FFE0 & $ffff
          .faraddr @L4FFE0
          .faraddr @L4FFE0
          .byte   $00
 
-@L3006D: phk
+@L30073: phk
          plb
          lda     #$0000
          asl     A
          asl     A
          tax
-         lda     a:@L30082 & $ffff,x
+         lda     a:@L30088 & $ffff,x
          pha
-         lda     a:@L30080 & $ffff,x
+         lda     a:@L30086 & $ffff,x
          pha
-         beq     @L30088
+         beq     @L3008E
          rts
 
-@L30080: .byte   $45
+@L30086: .byte   $4b
          .byte   $00
-@L30082: .byte   $03
+@L30088: .byte   $03
          .byte   $00
-         .faraddr @L3006D
+         .faraddr @L30073
          .byte   $00
 
-@L30088: rts
+@L3008E: rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
 ;         .segment "SEG001"
@@ -122,12 +124,15 @@ L30000:  clc
          .a8
          .i8
 @L23456: lda     @L23456
-         jsr     @L2346E & $ffff
+         jsr     @L23477 & $ffff
+         ldy     #<@L23467
+         ora     $3456
+         ora     @L23456
          rtl
 
-@L2345E: .res    16,$00
+@L23467: .res    16,$00
 
-@L2346E: nop
+@L23477: nop
          rts
 
 ;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '

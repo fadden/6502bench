@@ -34,47 +34,49 @@ L30000  clc
         nop
         lda     #$000f
         ldx     #_L80026 & $ffff
-        ldy     #_L2345E & $ffff
-        mvn     #(`_L2345E)+6,#`_L2345E
+        ldy     #_L23467 & $ffff
+        mvn     #(`_L23467)+6,#`_L23467
         nop
-_L30045 pea     $0000
+        lda     $0000,y
+        sta     $0002,y
+_L3004B pea     $0000
         pea     $f000
         pea     _L80019 & $ffff
         pea     _L80019 >> 16
-        pea     _L30045 & $ffff
-        pea     _L30045 >> 8
-_L30057 pea     _L30045 >> 16
-        pea     _L30057 & $ffff
-        pea     $1045
+        pea     _L3004B & $ffff
+        pea     _L3004B >> 8
+_L3005D pea     _L3004B >> 16
+        pea     _L3005D & $ffff
+        pea     $104b
         nop
-        jmp     _L3006D
+        jmp     _L30073
 
         .word   _L4FFE0 & $ffff
         .long   _L4FFE0
         .long   _L4FFE0
         .byte   $00
 
-_L3006D phk
+_L30073 phk
         plb
         lda     #$0000
         asl     a
         asl     a
         tax
-        lda     @w_L30082 & $ffff,x
+        lda     @w_L30088 & $ffff,x
         pha
-        lda     @w_L30080 & $ffff,x
+        lda     @w_L30086 & $ffff,x
         pha
-        beq     _L30088
+        beq     _L3008E
         rts
 
-_L30080 .byte   $45
+_L30086 .byte   $4b
         .byte   $00
-_L30082 .byte   $03
+_L30088 .byte   $03
         .byte   $00
-        .long   _L3006D
+        .long   _L30073
         .byte   $00
 
-_L30088 rts
+_L3008E rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
         .logical $04ffe0
@@ -122,12 +124,15 @@ _L4FFE0 .long   _L4FFE0
         .as
         .xs
 _L23456 lda     _L23456
-        jsr     _L2346E
+        jsr     _L23477
+        ldy     #<_L23467
+        ora     $3456
+        ora     _L23456
         rtl
 
-_L2345E .fill   16,$00
+_L23467 .fill   16,$00
 
-_L2346E nop
+_L23477 nop
         rts
 
 ;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '

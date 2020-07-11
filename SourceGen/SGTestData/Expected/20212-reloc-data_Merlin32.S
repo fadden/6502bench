@@ -28,47 +28,49 @@ L30000   clc
          nop
          lda   #$000f
          ldx   #:L80026
-         ldy   #:L2345E
-         mvn   #^:L2345E+$60000,#^:L2345E
+         ldy   #:L23467
+         mvn   #^:L23467+$60000,#^:L23467
          nop
-:L30045  pea   $0000
+         lda   $0000,y
+         sta   $0002,y
+:L3004B  pea   $0000
          pea   $f000
          pea   :L80019
          pea   ^:L80019
-         pea   :L30045
-         pea   >:L30045
-:L30057  pea   ^:L30045
-         pea   :L30057
-         pea   $1045
+         pea   :L3004B
+         pea   >:L3004B
+:L3005D  pea   ^:L3004B
+         pea   :L3005D
+         pea   $104b
          nop
-         jmp   :L3006D
+         jmp   :L30073
 
          dw    :L4FFE0
          adr   :L4FFE0
          adr   :L4FFE0
          dfb   $00
 
-:L3006D  phk
+:L30073  phk
          plb
          lda   #$0000
          asl   A
          asl   A
          tax
-         lda:  :L30082,x
+         lda:  :L30088,x
          pha
-         lda:  :L30080,x
+         lda:  :L30086,x
          pha
-         beq   :L30088
+         beq   :L3008E
          rts
 
-:L30080  dfb   $45
+:L30086  dfb   $4b
          dfb   $00
-:L30082  dfb   $03
+:L30088  dfb   $03
          dfb   $00
-         adr   :L3006D
+         adr   :L30073
          dfb   $00
 
-:L30088  rts
+:L3008E  rts
 
 ;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
          org   $04ffe0
@@ -113,12 +115,15 @@ L30000   clc
          org   $023456
          mx    %11
 :L23456  ldal  :L23456
-         jsr   :L2346E
+         jsr   :L23477
+         ldy   #<:L23467
+         ora   $3456
+         oral  :L23456
          rtl
 
-:L2345E  ds    16
+:L23467  ds    16
 
-:L2346E  nop
+:L23477  nop
          rts
 
 ;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '

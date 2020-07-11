@@ -195,11 +195,25 @@ namespace SourceGen {
 
                         // No reloc for this instruction.  If it's a relative branch we need
                         // to do the usual stuff, but if it's a PEA we want to treat it like
-                        // an immediate value.  The safest thing to do is blacklist PEA and
-                        // let everything else proceed like it does without reloc data enabled.
+                        // an immediate value.  It should also be safe and useful to halt
+                        // processing for "LDA abs" and the like.
                         OpDef op = mProject.CpuDef.GetOpDef(mProject.FileData[offset]);
-                        if (op == OpDef.OpPEA_StackAbs) {
-                            //Debug.WriteLine("NoPEA +" + offset.ToString("x6"));
+                        bool stopHere = false;
+                        switch (op.AddrMode) {
+                            case OpDef.AddressMode.StackAbs:    // PEA
+                            case OpDef.AddressMode.Abs:         // technically just non-PBR
+                            case OpDef.AddressMode.AbsIndexX:
+                            case OpDef.AddressMode.AbsIndexY:
+                                stopHere = true;
+                                break;
+                            // AbsIndexXInd, AbsInd, AbsIndLong look like absolute addresses
+                            // but use the program bank or bank 0.  They're unambiguous even
+                            // without reloc data, so no need to block them.  That also goes
+                            // for long addressing: ideally they'd have reloc data, but even if
+                            // they don't, we might as well hook up a symbol because they can't
+                            // mean anything else.  (I think.)
+                        }
+                        if (stopHere) {
                             continue;
                         }
                     }

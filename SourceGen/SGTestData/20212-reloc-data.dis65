@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":4,
-"FileDataLength":282,
-"FileDataCrc32":-560719478,
+"FileDataLength":297,
+"FileDataCrc32":-2122893303,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -31,23 +31,23 @@
 "Addr":196608},
 
 {
-"Offset":137,
+"Offset":143,
 "Addr":327648},
 
 {
-"Offset":169,
+"Offset":175,
 "Addr":327680},
 
 {
-"Offset":189,
+"Offset":195,
 "Addr":144470},
 
 {
-"Offset":215,
+"Offset":230,
 "Addr":524288},
 
 {
-"Offset":269,
+"Offset":284,
 "Addr":393216}],
 "TypeHints":[{
 "Low":0,
@@ -66,25 +66,25 @@
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"137":{
+"143":{
 "Text":"Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name=\u0027PosFFE0   \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"189":{
+"195":{
 "Text":"Segment 04: Kind=Code; Attrs=NoSpecial; Name=\u0027Bank2     \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"215":{
+"230":{
 "Text":"Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name=\u0027Bank8     \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"269":{
+"284":{
 "Text":"Segment 06: Kind=Data; Attrs=0; Name=\u0027Filler    \u0027",
 "BoxMode":false,
 "MaxWidth":80,
@@ -97,25 +97,25 @@
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"137":{
+"143":{
 "Text":"Seg03: 04/ffe0 \u0027PosFFE0   \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"189":{
+"195":{
 "Text":"Seg04: 02/3456 \u0027Bank2     \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"215":{
+"230":{
 "Text":"Seg05: 08/0000 \u0027Bank8     \u0027",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
-"269":{
+"284":{
 "Text":"Seg06: 06/0000 \u0027Filler    \u0027",
 "BoxMode":false,
 "MaxWidth":80,
@@ -136,60 +136,60 @@
 },
 
 "RelocList":{
-"82":{
+"88":{
 "Width":2,
 "Shift":0,
-"Value":196677},
+"Value":196683},
 
-"91":{
+"97":{
 "Width":2,
 "Shift":0,
-"Value":196695},
+"Value":196701},
 
-"94":{
+"100":{
 "Width":2,
 "Shift":0,
-"Value":200773},
+"Value":200779},
 
-"98":{
+"104":{
 "Width":2,
 "Shift":0,
-"Value":196717},
+"Value":196723},
 
-"118":{
+"124":{
 "Width":2,
 "Shift":0,
-"Value":196738},
+"Value":196744},
 
-"122":{
+"128":{
 "Width":2,
 "Shift":0,
-"Value":196736},
+"Value":196742},
 
 "5":{
 "Width":3,
 "Shift":0,
 "Value":196608},
 
-"128":{
+"134":{
 "Width":3,
 "Shift":0,
-"Value":196677},
+"Value":196683},
 
-"132":{
+"138":{
 "Width":3,
 "Shift":0,
-"Value":196717},
+"Value":196723},
 
-"85":{
+"91":{
 "Width":2,
 "Shift":-8,
-"Value":196677},
+"Value":196683},
 
-"88":{
+"94":{
 "Width":1,
 "Shift":-16,
-"Value":196677},
+"Value":196683},
 
 "10":{
 "Width":3,
@@ -211,17 +211,17 @@
 "Shift":0,
 "Value":524313},
 
-"102":{
+"108":{
 "Width":3,
 "Shift":0,
 "Value":327648},
 
-"105":{
+"111":{
 "Width":3,
 "Shift":0,
 "Value":327648},
 
-"100":{
+"106":{
 "Width":2,
 "Shift":0,
 "Value":327648},
@@ -234,7 +234,7 @@
 "63":{
 "Width":2,
 "Shift":0,
-"Value":144478},
+"Value":144487},
 
 "35":{
 "Width":2,
@@ -251,7 +251,7 @@
 "Shift":0,
 "Value":524326},
 
-"76":{
+"82":{
 "Width":2,
 "Shift":0,
 "Value":524313},
@@ -299,49 +299,54 @@
 "66":{
 "Width":1,
 "Shift":-16,
-"Value":144478},
+"Value":144487},
 
 "67":{
 "Width":1,
 "Shift":-16,
 "Value":524326},
 
-"79":{
+"85":{
 "Width":1,
 "Shift":-16,
 "Value":524313},
 
-"137":{
+"143":{
 "Width":3,
 "Shift":0,
 "Value":327648},
 
-"194":{
+"200":{
 "Width":2,
 "Shift":0,
-"Value":144494},
+"Value":144503},
 
-"190":{
+"196":{
 "Width":3,
 "Shift":0,
 "Value":144470},
 
-"220":{
+"203":{
+"Width":1,
+"Shift":0,
+"Value":144487},
+
+"235":{
 "Width":2,
 "Shift":0,
 "Value":524313},
 
-"216":{
+"231":{
 "Width":3,
 "Shift":0,
 "Value":524288},
 
-"240":{
+"255":{
 "Width":3,
 "Shift":0,
 "Value":524313},
 
-"244":{
+"259":{
 "Width":3,
 "Shift":0,
 "Value":144470}},
