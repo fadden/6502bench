@@ -52,6 +52,7 @@
         "RT:Apple/F8-ROM.sym65",
         "RT:Apple/Cxxx-IO.sym65",
         "RT:Apple/C08x-DiskII.sym65",
+        "RT:Apple/E0Cxxx-IO.sym65",
         "RT:Apple/ProDOS8.sym65",
         "RT:Apple/IIgs-ROM.sym65"
       ],
@@ -73,6 +74,7 @@
       "SymbolFiles" : [
         "RT:Apple/Cxxx-IO.sym65",
         "RT:Apple/C08x-DiskII.sym65",
+        "RT:Apple/E0Cxxx-IO.sym65",
         "RT:Apple/IIgs-ROM.sym65",
         "RT:Apple/GSOS.sym65"
       ],
