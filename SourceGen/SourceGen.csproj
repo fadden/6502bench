@@ -79,6 +79,7 @@
     <Compile Include="FormattedOperandCache.cs" />
     <Compile Include="LocalVariableLookup.cs" />
     <Compile Include="MessageList.cs" />
+    <Compile Include="Sgec.cs" />
     <Compile Include="Tests\GenTest.cs" />
     <Compile Include="Tests\ProgressMessage.cs" />
     <Compile Include="Tests\WpfGui\GenTestRunner.xaml.cs">

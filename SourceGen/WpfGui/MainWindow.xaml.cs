@@ -1395,6 +1395,11 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ApplyPlatformSymbols();
         }
 
+        private void Debug_ExportEditCommandsCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ExportEditCommands();
+        }
+
         private void Debug_ExtensionScriptInfoCmd_Executed(object sender,
             ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ExtensionScriptInfo();

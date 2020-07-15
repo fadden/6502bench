@@ -4375,6 +4375,25 @@ namespace SourceGen {
             showTextDlg.ShowDialog();
         }
 
+        public void Debug_ExportEditCommands() {
+            SaveFileDialog fileDlg = new SaveFileDialog() {
+                Filter = Res.Strings.FILE_FILTER_SGEC + "|" + Res.Strings.FILE_FILTER_ALL,
+                FilterIndex = 1,
+                ValidateNames = true,
+                AddExtension = true,
+                FileName = Path.GetFileName(mDataPathName) + Sgec.SGEC_EXT
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+            string sgecPathName = Path.GetFullPath(fileDlg.FileName);
+            if (!Sgec.ExportToFile(sgecPathName, mProject, out string detailMsg)) {
+                MessageBox.Show("Failed: " + detailMsg);
+            } else {
+                MessageBox.Show("Success: " + detailMsg);
+            }
+        }
+
         public void Debug_ApplyEditCommands() {
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Res.Strings.FILE_FILTER_SGEC + "|" + Res.Strings.FILE_FILTER_ALL,
@@ -4385,54 +4404,14 @@ namespace SourceGen {
             }
 
             string sgecPathName = Path.GetFullPath(fileDlg.FileName);
-            string[] lines;
-            try {
-                lines = File.ReadAllLines(sgecPathName);
-            } catch (IOException ex) {
-                // not expecting this to happen
-                MessageBox.Show(ex.Message);
-                return;
-            }
 
             ChangeSet cs = new ChangeSet(1);
-
-            List<int> changed = new List<int>(lines.Length);
-
-            string setComment = "set-comment +";
-            foreach (string line in lines) {
-                if (!line.StartsWith(setComment)) {
-                    Debug.WriteLine("Ignoring " + line);
-                    continue;
-                }
-
-                int offset;
-                try {
-                    offset = Convert.ToInt32(line.Substring(setComment.Length, 6), 16);
-                } catch (Exception ex) {
-                    Debug.WriteLine("Failed on " + line);
-                    MessageBox.Show(ex.Message);
-                    return;
-                }
-
-                if (changed.Contains(offset)) {
-                    Debug.WriteLine("Skipping repeated entry +" + offset.ToString("X6"));
-                    continue;
-                }
-
-                string oldComment = mProject.Comments[offset];
-                string newComment = line.Substring(setComment.Length + 7);
-                if (!string.IsNullOrEmpty(oldComment)) {
-                    Debug.WriteLine("Replacing comment +" + offset.ToString("x6") +
-                        " '" + oldComment + "'");
-                }
-
-                UndoableChange uc = UndoableChange.CreateCommentChange(offset,
-                    oldComment, newComment);
-                cs.Add(uc);
-                changed.Add(offset);
+            if (!Sgec.ImportFromFile(sgecPathName, mProject, cs, out string detailMsg)) {
+                MessageBox.Show("Failed: " + detailMsg);
+            } else {
+                ApplyUndoableChanges(cs);
+                MessageBox.Show("Success: " + detailMsg);
             }
-
-            ApplyUndoableChanges(cs);
         }
 
         // Disable "analyze uncategorized data" for best results.
