@@ -4421,8 +4421,12 @@ namespace SourceGen {
             if (!Sgec.ImportFromFile(sgecPathName, mProject, cs, out string detailMsg)) {
                 MessageBox.Show("Failed: " + detailMsg);
             } else {
-                ApplyUndoableChanges(cs);
-                MessageBox.Show("Success: " + detailMsg);
+                if (cs.Count != 0) {
+                    ApplyUndoableChanges(cs);
+                    MessageBox.Show("Success: " + detailMsg);
+                } else {
+                    MessageBox.Show("Success; no changes were made.");
+                }
             }
         }
 

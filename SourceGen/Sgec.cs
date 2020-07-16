@@ -100,10 +100,12 @@ namespace SourceGen {
             int prevOffset = -1;
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
                 for (int offset = 0; offset < proj.FileDataLength; offset++) {
-                    if (!string.IsNullOrEmpty(proj.Comments[offset])) {
-                        sw.WriteLine(SET_COMMENT + " " +
+                    if (proj.Notes.TryGetValue(offset, out MultiLineComment nt)) {
+                        SerMultiLineComment serCom = new SerMultiLineComment(nt);
+                        string cereal = ser.Serialize(serCom);
+                        sw.WriteLine(SET_NOTE + " " +
                             PositionStr(offset, prevOffset, proj.AddrMap, relMode) + ':' +
-                            proj.Comments[offset]);
+                            cereal);
                         prevOffset = offset;
                         numItems++;
                     }
@@ -116,12 +118,10 @@ namespace SourceGen {
                         prevOffset = offset;
                         numItems++;
                     }
-                    if (proj.Notes.TryGetValue(offset, out MultiLineComment nt)) {
-                        SerMultiLineComment serCom = new SerMultiLineComment(nt);
-                        string cereal = ser.Serialize(serCom);
-                        sw.WriteLine(SET_NOTE + " " +
+                    if (!string.IsNullOrEmpty(proj.Comments[offset])) {
+                        sw.WriteLine(SET_COMMENT + " " +
                             PositionStr(offset, prevOffset, proj.AddrMap, relMode) + ':' +
-                            cereal);
+                            proj.Comments[offset]);
                         prevOffset = offset;
                         numItems++;
                     }
@@ -200,6 +200,14 @@ namespace SourceGen {
                 }
 
                 prevOffset = offset;
+
+                if (!proj.GetAnattrib(offset).IsStart) {
+                    // This causes problems when we try to do a LineListGen update, because
+                    // we specifically request it to do the modified offset, which happens to
+                    // be in the middle of an instruction, and it gets very confused.
+                    detailMsg = "Line " + lineNum + ": attempt to modify middle of instr/data item";
+                    return false;
+                }
 
                 string cmdStr = matches[0].Groups[GROUP_CMD].Value;
                 string valueStr = matches[0].Groups[GROUP_VALUE].Value;
