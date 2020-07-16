@@ -219,7 +219,7 @@ namespace SourceGen.WpfGui {
             GenerateImageFiles =
                 AppSettings.Global.GetBool(AppSettings.EXPORT_GENERATE_IMAGE_FILES, true);
 
-            int[] colWidths = new int[] { 9, 8, 11, 72 };   // 100-col output
+            int[] colWidths = new int[] { 16, 8, 18, 100 };   // wide output
             string colStr = AppSettings.Global.GetString(AppSettings.EXPORT_COL_WIDTHS, null);
             try {
                 if (!string.IsNullOrEmpty(colStr)) {
