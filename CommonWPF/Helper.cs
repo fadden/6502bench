@@ -78,5 +78,22 @@ namespace CommonWPF {
 
             return fmt.Width;
         }
+
+        /// <summary>
+        /// Converts a System.Windows.Media.Color value into 32-bit ARGB.
+        /// </summary>
+        public static int ColorToInt(Color color) {
+            return (color.A << 24) | (color.R << 16) | (color.G << 8) | color.B;
+        }
+
+        /// <summary>
+        /// Creates a System.Windows.Media.Color value from 32-bit ARGB.
+        /// </summary>
+        /// <param name="colorInt"></param>
+        /// <returns></returns>
+        public static Color ColorFromInt(int colorInt) {
+            return Color.FromArgb((byte)(colorInt >> 24), (byte)(colorInt >> 16),
+                (byte)(colorInt >> 8), (byte)colorInt);
+        }
     }
 }

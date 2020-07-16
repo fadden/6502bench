@@ -273,7 +273,7 @@ namespace SourceGen {
                 Text = mlc.Text;
                 BoxMode = mlc.BoxMode;
                 MaxWidth = mlc.MaxWidth;
-                BackgroundColor = ColorToInt(mlc.BackgroundColor);
+                BackgroundColor = CommonWPF.Helper.ColorToInt(mlc.BackgroundColor);
             }
         }
         public class SerSymbol {
@@ -730,7 +730,7 @@ namespace SourceGen {
                     continue;
                 }
                 proj.Notes[intKey] = new MultiLineComment(kvp.Value.Text,
-                    ColorFromInt(kvp.Value.BackgroundColor));
+                    CommonWPF.Helper.ColorFromInt(kvp.Value.BackgroundColor));
             }
 
             // Deserialize user-defined labels.
@@ -1260,15 +1260,6 @@ namespace SourceGen {
                         " (" + fieldName + ": " + intKey + ")");
                 return false;
             }
-        }
-
-        private static int ColorToInt(Color color) {
-            return (color.A << 24) | (color.R << 16) | (color.G << 8) | color.B;
-        }
-
-        private static Color ColorFromInt(int colorInt) {
-            return Color.FromArgb((byte)(colorInt >> 24), (byte)(colorInt >> 16),
-                (byte)(colorInt >> 8), (byte)colorInt);
         }
     }
 }

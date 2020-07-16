@@ -4387,7 +4387,19 @@ namespace SourceGen {
                 return;
             }
             string sgecPathName = Path.GetFullPath(fileDlg.FileName);
-            if (!Sgec.ExportToFile(sgecPathName, mProject, out string detailMsg)) {
+
+            MessageBoxResult res = MessageBox.Show("Use relative offsets?", "Question",
+                MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            bool resMode;
+            if (res == MessageBoxResult.Cancel) {
+                return;
+            } else if (res == MessageBoxResult.Yes) {
+                resMode = true;
+            } else {
+                resMode = false;
+            }
+
+            if (!Sgec.ExportToFile(sgecPathName, mProject, resMode, out string detailMsg)) {
                 MessageBox.Show("Failed: " + detailMsg);
             } else {
                 MessageBox.Show("Success: " + detailMsg);
