@@ -419,7 +419,17 @@ namespace SourceGen.WpfGui {
                 }
             } else {
                 bankOff = -1;       // use constant
-                bankConst = 0;      // always bank 0
+
+                // Set the constant bank value equal to whichever bank the table lives in.
+                // This is correct for "JMP (addr,X)".  We use the offset of the first item
+                // in the range set, which is a little awkward to get to.
+                int offset = 0;
+                foreach (TypedRangeSet.Tuple tup in mSelection) {
+                    offset = tup.Value;
+                    break;
+                }
+                int addr = mProject.AddrMap.OffsetToAddress(offset);
+                bankConst = (byte)(addr >> 16);
             }
 
             if (IsSplitTable) {
