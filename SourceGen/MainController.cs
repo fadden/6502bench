@@ -1425,7 +1425,7 @@ namespace SourceGen {
                     typeof(ClipLineFormat),
                     (int)ClipLineFormat.AssemblerSource);
 
-            int[] rightWidths = new int[] { 9, 8, 11, 100 };
+            int[] rightWidths = new int[] { 16, 8, 18, 100 };
 
             Exporter.ActiveColumnFlags colFlags = Exporter.ActiveColumnFlags.None;
             if (format == ClipLineFormat.Disassembly) {

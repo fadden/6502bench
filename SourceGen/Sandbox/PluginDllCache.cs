@@ -25,7 +25,7 @@ using PluginCommon;
 
 namespace SourceGen.Sandbox {
     /// <summary>
-    /// This manages the PluginDll directory, which holds the compiled form of the extension
+    /// This manages the PluginDllCache directory, which holds the compiled form of the extension
     /// scripts.  When a script is requested, this checks to see if the compiled form
     /// already exists.  If not, or the script source file is newer than the DLL file, the
     /// compiler is executed.
@@ -37,7 +37,7 @@ namespace SourceGen.Sandbox {
     /// the locks will be cleared when the AppDomain is unloaded.
     /// </summary>
     public static class PluginDllCache {
-        private const string PLUGIN_DIR_NAME = "PluginDll";
+        private const string PLUGIN_DIR_NAME = "PluginDllCache";
 
         /// <summary>
         /// List of assemblies for the CompilerParameters.ReferencedAssemblies argument.

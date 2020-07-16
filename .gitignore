@@ -5,7 +5,7 @@
 
 # 6502bench-specific stuff
 SourceGen/SourceGen-settings
-SourceGen/PluginDll
+SourceGen/PluginDllCache
 DIST_Debug
 DIST_release
 

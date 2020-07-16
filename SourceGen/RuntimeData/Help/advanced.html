@@ -210,9 +210,9 @@ While plugins can use CommonUtil directly, they should avoid doing so.  The
 APIs there are not guaranteed to be stable, so plugins that rely on them
 may break in a subsequent release of SourceGen.</p>
 
-<h4>PluginDll Directory</h4>
+<h4>PluginDllCache Directory</h4>
 
-<p>Extension scripts are compiled into .DLLs, and saved in the PluginDll
+<p>Extension scripts are compiled into .DLLs, and saved in the PluginDllCache
 directory, which lives next to the application executable and RuntimeData.
 If the extension script is the same age or older than the DLL, SourceGen
 will continue to use the existing DLL.</p>
@@ -224,6 +224,9 @@ would look like "PROJ_MyProject_MyScript.dll".</p>
 
 <p>The PluginCommon and CommonUtil DLLs will be copied into the directory, so
 that code in the sandbox has access to them.</p>
+
+<p>The contents of the directory are generated as needed, and can be deleted
+entirely whenever SourceGen isn't running.</p>
 
 <h4>Sandboxing</h4>
 
