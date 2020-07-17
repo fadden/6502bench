@@ -5,6 +5,7 @@
 ;   GS/OS Reference Manual
 ;   Orca/M 2.0 assembler manual
 ;   NiftyList data file
+;   Brutal Deluxe "GS/OS Internals"
 
 *SYNOPSIS GS/OS public addresses and constants.
 
@@ -170,3 +171,75 @@ SH_SetStopFlagGS    = $0159
 SH_StopGS           = $0153
 SH_UnsetVariableGS  = $0155
 SH_VersionGS        = $0147
+
+*TAG
+
+;
+; Error codes.
+;
+; Most of these are public, defined in the GS/OS Reference Manual.
+;
+E_NO_ERROR          = $00       ;successful operation
+E_BAD_SYSTEM_CALL   = $01       ;bad GS/OS call number
+E_FST_LOAD_FAIL     = $02
+E_INVALID_PCOUNT    = $04       ;parameter count out of range
+E_GSOS_ACTIVE       = $07       ;GS/OS is busy
+E_DEV_NOT_FOUND     = $10       ;device not found
+E_INVALID_DEV_NUM   = $11       ;invalid device number (request)
+E_DRVR_BAD_REQ      = $20       ;invalid request
+E_DRVR_BAD_CODE     = $21       ;invalid control or status code
+E_DRVR_BAD_PARM     = $22       ;bad call parameter
+E_DRVR_NOT_OPEN     = $23       ;character device not open
+E_DRVR_PRIOR_OPEN   = $24       ;character device already open
+E_IRQ_TABLE_FULL    = $25       ;interrupt table full
+E_DRVR_NO_RESRC     = $26       ;resources not available
+E_DRVR_IO_ERROR     = $27       ;I/O error
+E_DRVR_NO_DEV       = $28       ;no device connected
+E_DRVR_BUSY         = $29       ;driver is busy
+E_DRVR_WR_PROT      = $2b       ;device is write-protected
+E_DRVR_BAD_COUNT    = $2c       ;invalid byte count
+E_DRVR_BAD_BLOCK    = $2d       ;invalid block address
+E_DRVR_DISK_SW      = $2e       ;disk has been switched
+E_DRVR_OFF_LINE     = $2f       ;device off line or no media present
+E_BAD_PATH_SYNTAX   = $40       ;invalid pathname syntax
+E_INVALID_REF_NUM   = $43       ;invalid reference number
+E_PATH_NOT_FOUND    = $44       ;subdirectory does not exist
+E_VOL_NOT_FOUND     = $45       ;volume not found
+E_FILE_NOT_FOUND    = $46       ;file not found
+E_DUP_PATHNAME      = $47       ;create or rename with existing name
+E_VOLUME_FULL       = $48       ;volume full
+E_VOL_DIR_FULL      = $49       ;volume directory full
+E_VERSION_ERROR     = $4a       ;version error (incompatible file format)
+E_BAD_STORE_TYPE    = $4b       ;unsupported (or incorrect) storage type
+E_END_OF_FILE       = $4c       ;end-of-file encountered
+E_OUT_OF_RANGE      = $4d       ;position out of range
+E_INVALID_ACCESS    = $4e       ;access not allowed
+E_BUFF_TOO_SMALL    = $4f       ;buffer too small
+E_FILE_BUSY         = $50       ;file is already open
+E_DIR_ERROR         = $51       ;directory error
+E_UNKNOWN_VOL       = $52       ;unknown volume type
+E_PARM_RANGE_ERR    = $53       ;parameter out of range
+E_OUT_OF_MEM        = $54       ;out of memory
+E_DUP_VOLUME        = $57       ;duplicate volume name
+E_NOT_BLOCK_DEV     = $58       ;not a block device
+E_INVALID_LEVEL     = $59       ;specified level outside legal range
+E_DAMAGED_BITMAP    = $5a       ;block number too large
+E_BAD_PATH_NAMES    = $5b       ;invalid path names for ChangePath
+E_NOT_SYSTEM_FILE   = $5c       ;not an executable file
+E_OS_UNSUPPORTED    = $5d       ;operating system not supported
+E_STACK_OVERFLOW    = $5f       ;too many applications on stack
+E_DATA_UNAVAIL      = $60       ;data unavailable
+E_END_OF_DIR        = $61       ;end of directory has been reached
+E_INVALID_CLASS     = $62       ;invalid FST call class
+E_RES_NOT_FOUND     = $63       ;file does not contain required resource
+E_INVALID_FST_ID    = $64       ;FST ID is invalid
+E_INVALID_FST_OP    = $65
+E_FST_CAUTION       = $66
+E_DUP_DEVICE        = $67       ;device exists with same name as replacement name
+E_DEV_LIST_FULL     = $68
+E_SUP_LIST_FULL     = $69
+E_FST_ERROR         = $6a
+;
+E_RESOURCE_EXIST    = $70       ;cannot expand file, resource fork already exists
+E_RES_ADD_ERR       = $71       ;cannot add resource fork to this type of file
+E_NETWORK_ERROR     = $88
