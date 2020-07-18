@@ -208,7 +208,8 @@ limitations under the License.
             <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
             <RoutedUICommand x:Key="Debug_SourceGenerationTestsCmd" Text="Source Generation Tests..."/>
             <RoutedUICommand x:Key="Debug_ToggleCommentRulersCmd" Text="Show Comment Rulers"/>
-            <RoutedUICommand x:Key="Debug_ToggleKeepAliveHackCmd" Text="Use Keep-Alive Hack"/>
+            <RoutedUICommand x:Key="Debug_ToggleKeepAliveHackCmd" Text="Disable Keep-Alive Hack"/>
+            <RoutedUICommand x:Key="Debug_ToggleSecuritySandboxCmd" Text="Disable Security Sandbox"/>
 
             <CollectionViewSource x:Key="SymbolTableSource" Source="{Binding SymbolsList}"
                                   Filter="SymbolsList_Filter"/>
@@ -354,6 +355,8 @@ limitations under the License.
                         Executed="Debug_ToggleCommentRulersCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ToggleKeepAliveHackCmd}"
                         Executed="Debug_ToggleKeepAliveHackCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ToggleSecuritySandboxCmd}"
+                        Executed="Debug_ToggleSecuritySandboxCmd_Executed"/>
     </Window.CommandBindings>
     
     <DockPanel>
@@ -457,6 +460,9 @@ limitations under the License.
                 <Separator/>
                 <MenuItem Name="debugCommentRulersMenuItem"
                           Command="{StaticResource Debug_ToggleCommentRulersCmd}" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Name="debugSecuritySandboxMenuItem"
+                          Command="{StaticResource Debug_ToggleSecuritySandboxCmd}" IsCheckable="True"/>
                 <MenuItem Name="debugKeepAliveHackMenuItem"
                           Command="{StaticResource Debug_ToggleKeepAliveHackCmd}" IsCheckable="True"/>
                 <Separator/>

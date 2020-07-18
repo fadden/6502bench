@@ -1437,6 +1437,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ToggleKeepAliveHack();
         }
 
+        private void Debug_ToggleSecuritySandboxCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_ToggleSecuritySandbox();
+        }
+
         #endregion Command handlers
 
         #region Misc
@@ -1559,7 +1563,8 @@ namespace SourceGen.WpfGui {
         }
         private void DebugMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             debugCommentRulersMenuItem.IsChecked = MultiLineComment.DebugShowRuler;
-            debugKeepAliveHackMenuItem.IsChecked = Sandbox.ScriptManager.UseKeepAliveHack;
+            debugKeepAliveHackMenuItem.IsChecked = !Sandbox.ScriptManager.UseKeepAliveHack;
+            debugSecuritySandboxMenuItem.IsChecked = mMainCtrl.UseMainAppDomainForPlugins;
             debugAnalysisTimersMenuItem.IsChecked = mMainCtrl.IsDebugAnalysisTimersOpen;
             debugAnalyzerOutputMenuItem.IsChecked = mMainCtrl.IsDebugAnalyzerOutputOpen;
             debugUndoRedoHistoryMenuItem.IsChecked = mMainCtrl.IsDebugUndoRedoHistoryOpen;

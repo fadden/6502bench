@@ -189,9 +189,9 @@ namespace SourceGen {
 
         /// <summary>
         /// If true, plugins will execute in the main application's AppDomain instead of
-        /// the sandbox.
+        /// the sandbox (effectively disabling the security features).
         /// </summary>
-        private bool mUseMainAppDomainForPlugins = false;
+        public bool UseMainAppDomainForPlugins { get; private set; }
 
         /// <summary>
         /// Code list column numbers.
@@ -720,7 +720,7 @@ namespace SourceGen {
                     MessageBoxImage.Error);
                 return false;
             }
-            proj.UseMainAppDomainForPlugins = mUseMainAppDomainForPlugins;
+            proj.UseMainAppDomainForPlugins = UseMainAppDomainForPlugins;
             proj.Initialize(fileData.Length);
             proj.PrepForNew(fileData, Path.GetFileName(dataPathName));
 
@@ -1093,7 +1093,7 @@ namespace SourceGen {
             }
 
             DisasmProject newProject = new DisasmProject();
-            newProject.UseMainAppDomainForPlugins = mUseMainAppDomainForPlugins;
+            newProject.UseMainAppDomainForPlugins = UseMainAppDomainForPlugins;
 
             // Deserialize the project file.  I want to do this before loading the data file
             // in case we decide to store the data file name in the project (e.g. the data
@@ -4351,6 +4351,16 @@ namespace SourceGen {
 
         public void Debug_ToggleKeepAliveHack() {
             ScriptManager.UseKeepAliveHack = !ScriptManager.UseKeepAliveHack;
+            if (mProject != null) {
+                MessageBox.Show("Project must be closed and re-opened for change to take effect");
+            }
+        }
+
+        public void Debug_ToggleSecuritySandbox() {
+            UseMainAppDomainForPlugins = !UseMainAppDomainForPlugins;
+            if (mProject != null) {
+                MessageBox.Show("Project must be closed and re-opened for change to take effect");
+            }
         }
 
         public void Debug_ApplesoftToHtml() {
