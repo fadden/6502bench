@@ -243,3 +243,20 @@ E_FST_ERROR         = $6a
 E_RESOURCE_EXIST    = $70       ;cannot expand file, resource fork already exists
 E_RES_ADD_ERR       = $71       ;cannot add resource fork to this type of file
 E_NETWORK_ERROR     = $88
+
+;
+; File system IDs.
+;
+FSID_PRODOS         = $0001     ;ProDOS/SOS
+FSID_DOS33          = $0002
+FSID_DOS32          = $0003     ;DOS 3.2 or 3.1
+FSID_PASCAL         = $0004
+FSID_MFS            = $0005
+FSID_HFS            = $0006
+FSID_LISA           = $0007
+FSID_CPM            = $0008
+FSID_CHARACTER      = $0009
+FSID_MSDOS          = $000a
+FSID_HIGH_SIERRA    = $000b
+FSID_ISO_9660       = $000c
+FSID_APPLESHARE     = $000d
