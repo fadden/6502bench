@@ -1405,6 +1405,11 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ExtensionScriptInfo();
         }
 
+        private void Debug_RebootSecuritySandboxCmd_Executed(object sender,
+                ExecutedRoutedEventArgs e) {
+            mMainCtrl.Debug_RebootSecuritySandbox();
+        }
+
         private void Debug_RefreshCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_Refresh();
         }

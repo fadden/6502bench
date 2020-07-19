@@ -203,6 +203,7 @@ limitations under the License.
             <RoutedUICommand x:Key="Debug_ApplyPlatformSymbolsCmd" Text="Apply Platform Symbols"/>
             <RoutedUICommand x:Key="Debug_ExportEditCommandsCmd" Text="Export Edit Commands..."/>
             <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
+            <RoutedUICommand x:Key="Debug_RebootSecuritySandboxCmd" Text="Reboot Security Sandbox"/>
             <RoutedUICommand x:Key="Debug_ShowAnalysisTimersCmd" Text="Show Analysis Timers"/>
             <RoutedUICommand x:Key="Debug_ShowAnalyzerOutputCmd" Text="Show Analyzer Output"/>
             <RoutedUICommand x:Key="Debug_ShowUndoRedoHistoryCmd" Text="Show Undo/Redo History"/>
@@ -345,6 +346,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="Debug_ExportEditCommandsCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ExtensionScriptInfoCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ExtensionScriptInfoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_RebootSecuritySandboxCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_RebootSecuritySandboxCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowAnalysisTimersCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ShowAnalysisTimersCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ShowAnalyzerOutputCmd}"
@@ -465,6 +468,7 @@ limitations under the License.
                           Command="{StaticResource Debug_ToggleSecuritySandboxCmd}" IsCheckable="True"/>
                 <MenuItem Name="debugKeepAliveHackMenuItem"
                           Command="{StaticResource Debug_ToggleKeepAliveHackCmd}" IsCheckable="True"/>
+                <MenuItem Command="{StaticResource Debug_RebootSecuritySandboxCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource Debug_ApplesoftToHtmlCmd}"/>
                 <MenuItem Command="{StaticResource Debug_ExportEditCommandsCmd}"/>

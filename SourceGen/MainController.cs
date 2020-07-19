@@ -4417,6 +4417,7 @@ namespace SourceGen {
         }
 
         public void Debug_ApplyEditCommands() {
+            // Might want to suggest disabling Edit > Toggle Data Scan for some merges.
             OpenFileDialog fileDlg = new OpenFileDialog() {
                 Filter = Res.Strings.FILE_FILTER_SGEC + "|" + Res.Strings.FILE_FILTER_ALL,
                 FilterIndex = 1
@@ -4484,6 +4485,11 @@ namespace SourceGen {
             }
 
             ApplyUndoableChanges(cs);
+        }
+
+        public void Debug_RebootSecuritySandbox() {
+            Debug.Assert(mProject != null);
+            mProject.DebugRebootSandbox();
         }
 
         #endregion Debug features

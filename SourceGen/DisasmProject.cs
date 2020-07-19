@@ -29,7 +29,7 @@ namespace SourceGen {
     /// 
     /// This class does no file I/O or user interaction.
     /// </summary>
-    public class DisasmProject {
+    public class DisasmProject : IDisposable {
         // Arbitrary 1MB limit.  Could be increased to 16MB if performance is acceptable.
         public const int MAX_DATA_FILE_SIZE = 1 << 20;
 
@@ -320,6 +320,24 @@ namespace SourceGen {
                 mScriptManager.Cleanup();
                 mScriptManager = null;
             }
+        }
+
+        // IDisposable generic finalizer.
+        ~DisasmProject() {
+            Dispose(false);
+        }
+        // IDisposable generic Dispose() implementation.
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Confirms that Cleanup() was called.  This is just a behavior check; the
+        /// destructor is not required for correct behavior.
+        /// </summary>
+        protected virtual void Dispose(bool disposing) {
+            //Debug.WriteLine("DisasmProject Dispose(" + disposing + ")");
+            Debug.Assert(mScriptManager == null, "DisasmProject.Cleanup was not called");
         }
 
         /// <summary>
@@ -2620,6 +2638,10 @@ namespace SourceGen {
         }
         public void UnprepareScripts() {
             mScriptManager.UnprepareScripts();
+        }
+
+        public void DebugRebootSandbox() {
+            mScriptManager.RebootSandbox();
         }
 
         /// <summary>

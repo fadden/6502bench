@@ -76,9 +76,12 @@ namespace PluginCommon {
         /// <summary>
         /// Tests simple round-trip communication.  This may be called from an arbitrary thread.
         /// </summary>
+        /// <remarks>
+        /// This is used for keep-alives and health checks, so it may be called frequently.
+        /// </remarks>
         public int Ping(int val) {
-            Debug.WriteLine("PluginManager Ping tid=" + Thread.CurrentThread.ManagedThreadId +
-                " (id=" + AppDomain.CurrentDomain.Id + "): " + val);
+            //Debug.WriteLine("PluginManager Ping tid=" + Thread.CurrentThread.ManagedThreadId +
+            //    " (id=" + AppDomain.CurrentDomain.Id + "): " + val);
             int result = (int)(DateTime.Now - mLastPing).TotalSeconds;
             mLastPing = DateTime.Now;
             return result;

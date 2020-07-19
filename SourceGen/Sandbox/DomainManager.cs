@@ -53,7 +53,7 @@ namespace SourceGen.Sandbox {
         /// </summary>
         public PluginManager PluginMgr {
             get {
-                Debug.Assert(mPluginManager.CheckLease());
+                //Debug.Assert(mPluginManager.CheckLease());
                 return mPluginManager.Instance;
             }
         }
