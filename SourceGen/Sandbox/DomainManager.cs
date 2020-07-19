@@ -84,9 +84,10 @@ namespace SourceGen.Sandbox {
                     // waits for the currently-executing timer event to finish.  So wrap
                     // everything in try/catch.
                     try {
-                        mPluginManager.Instance.Ping(0);
-                        //Debug.WriteLine("KeepAlive tid=" +
-                        //    System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        int result = mPluginManager.Instance.Ping(1000);
+                        Debug.WriteLine("KeepAlive tid=" +
+                            System.Threading.Thread.CurrentThread.ManagedThreadId +
+                            " result=" + result);
                     } catch (Exception ex) {
                         Debug.WriteLine("Keep-alive timer failed: " + ex.Message);
                     }

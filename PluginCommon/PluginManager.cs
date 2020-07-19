@@ -39,12 +39,16 @@ namespace PluginCommon {
         /// </summary>
         private byte[] mFileData;
 
+        private DateTime mLastPing;
+
 
         /// <summary>
         /// Constructor, invoked from CreateInstanceAndUnwrap().
         /// </summary>
         public PluginManager() {
             Debug.WriteLine("PluginManager ctor (id=" + AppDomain.CurrentDomain.Id + ")");
+
+            mLastPing = DateTime.Now;
 
             // Seems to require [SecurityCritical]
             //Type lsc = Type.GetType("System.Runtime.Remoting.Lifetime.LifetimeServices");
@@ -75,7 +79,9 @@ namespace PluginCommon {
         public int Ping(int val) {
             Debug.WriteLine("PluginManager Ping tid=" + Thread.CurrentThread.ManagedThreadId +
                 " (id=" + AppDomain.CurrentDomain.Id + "): " + val);
-            return val + 1;
+            int result = (int)(DateTime.Now - mLastPing).TotalSeconds;
+            mLastPing = DateTime.Now;
+            return result;
         }
 
         /// <summary>
