@@ -2402,11 +2402,10 @@ namespace SourceGen {
 
                                 // TODO(someday): if the plugin failed to compile, we will have
                                 //   one or more error messages, which we are currently discarding
-                                //   because we can't create UI here.  We either need a "change
-                                //   messages" feature, or we need to pre-flight the plugin and
-                                //   report the failure elsewhere.  (We also want a manual
-                                //   "reload all external files and plugins" command, which might
-                                //   run through here.)
+                                //   because we can't create UI here.  We could either have a
+                                //   general "change msgs" parameter that gets passed around, or
+                                //   be lazy and just drop them in a "messages from last update"
+                                //   box.
                             }
                             if (needExtScriptReload) {
                                 ClearVisualizationCache();
@@ -2459,9 +2458,9 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Clears all visualization cached images.
+        /// Clears all cached visualization images.
         /// </summary>
-        private void ClearVisualizationCache() {
+        public void ClearVisualizationCache() {
             foreach (KeyValuePair<int, VisualizationSet> kvp in VisualizationSets) {
                 kvp.Value.RefreshNeeded();
             }

@@ -147,9 +147,8 @@ directory has a project-local symbol file, called "fdraw-exports".
 for which Amper-fdraw provides an Applesoft BASIC interface.)
 
 <p>NOTE: in the current version of SourceGen, changes to .sym65 files are
-not detected automatically.  Closing and re-opening the project
-(File &gt; Recent Projects, then select the first entry) will reload
-them.</p>
+not detected automatically.  Use File &gt; Reload External Files to
+import the changes.</p>
 
 
 <h2><a name="extension-scripts">Extension Scripts</a></h2>
@@ -183,7 +182,8 @@ additional package ("Roslyn"), so SourceGen does not support this.</p>
 are reported to the user.  If the project is already open, and a script
 is added to the project through the Project Properties editor, compiler
 messages are silently discarded.  (This also applies if you undo/redo across
-the property edit.)</p>
+the property edit.)  Use File &gt; Reload External Files to see the
+compiler messages.</p>
 
 <h4>Development</h4>
 
@@ -199,7 +199,8 @@ causes a .PDB file to be created.  While this can help with debugging,
 it can sometimes get in the way: if you edit the script source code and
 reload the project without restarting the app, SourceGen will recompile
 the script, but the old .PDB file will still be open by VisualStudio
-and you'll get error messages.</p>
+and you'll see some failure messages.  Exiting and restarting SourceGen
+will allow regeneration of the PDB files.</p>
 
 <p>Some commonly useful functions are defined in the
 <code>PluginCommon.Util</code> class, which is available to plugins.  These

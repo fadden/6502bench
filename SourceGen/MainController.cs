@@ -2700,6 +2700,26 @@ namespace SourceGen {
             }
         }
 
+        public void ReloadExternalFiles() {
+            string messages = mProject.LoadExternalFiles();
+            if (messages.Length != 0) {
+                // ProjectLoadIssues isn't quite the right dialog, but it'll do.  This is
+                // purely informative; no decision needs to be made.
+                ProjectLoadIssues dlg = new ProjectLoadIssues(mMainWin, messages,
+                    ProjectLoadIssues.Buttons.Continue);
+                dlg.ShowDialog();
+            }
+
+            // We only really need to do this if the set of extension scripts has changed.
+            // For an explicit reload we might as well just do it all the time.
+            mProject.ClearVisualizationCache();
+
+            // Update the project.
+            UndoableChange uc =
+                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
+            ApplyChanges(new ChangeSet(uc), false);
+        }
+
         public void Goto() {
             int index = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (index < 0) {
@@ -3569,8 +3589,51 @@ namespace SourceGen {
             return rs;
         }
 
-        #endregion Main window UI event handlers
+        public bool CanUndo() {
+            return (mProject != null && mProject.CanUndo);
+        }
 
+        /// <summary>
+        /// Handles Edit - Undo.
+        /// </summary>
+        public void UndoChanges() {
+            if (!mProject.CanUndo) {
+                Debug.Assert(false, "Nothing to undo");
+                return;
+            }
+            ChangeSet cs = mProject.PopUndoSet();
+            ApplyChanges(cs, true);
+            UpdateTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
+            }
+        }
+
+        public bool CanRedo() {
+            return (mProject != null && mProject.CanRedo);
+        }
+
+        /// <summary>
+        /// Handles Edit - Redo.
+        /// </summary>
+        public void RedoChanges() {
+            if (!mProject.CanRedo) {
+                Debug.Assert(false, "Nothing to redo");
+                return;
+            }
+            ChangeSet cs = mProject.PopRedoSet();
+            ApplyChanges(cs, false);
+            UpdateTitle();
+
+            // If the debug dialog is visible, update it.
+            if (mShowUndoRedoHistoryDialog != null) {
+                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
+            }
+        }
+
+        #endregion Main window UI event handlers
 
         #region References panel
 
@@ -3674,50 +3737,6 @@ namespace SourceGen {
                         formatter.FormatAdjustment(-xr.Adjustment));
 
                 mMainWin.ReferencesList.Add(rli);
-            }
-        }
-
-        public bool CanUndo() {
-            return (mProject != null && mProject.CanUndo);
-        }
-
-        /// <summary>
-        /// Handles Edit - Undo.
-        /// </summary>
-        public void UndoChanges() {
-            if (!mProject.CanUndo) {
-                Debug.Assert(false, "Nothing to undo");
-                return;
-            }
-            ChangeSet cs = mProject.PopUndoSet();
-            ApplyChanges(cs, true);
-            UpdateTitle();
-
-            // If the debug dialog is visible, update it.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
-            }
-        }
-
-        public bool CanRedo() {
-            return (mProject != null && mProject.CanRedo);
-        }
-
-        /// <summary>
-        /// Handles Edit - Redo.
-        /// </summary>
-        public void RedoChanges() {
-            if (!mProject.CanRedo) {
-                Debug.Assert(false, "Nothing to redo");
-                return;
-            }
-            ChangeSet cs = mProject.PopRedoSet();
-            ApplyChanges(cs, false);
-            UpdateTitle();
-
-            // If the debug dialog is visible, update it.
-            if (mShowUndoRedoHistoryDialog != null) {
-                mShowUndoRedoHistoryDialog.DisplayText = mProject.DebugGetUndoRedoHistory();
             }
         }
 

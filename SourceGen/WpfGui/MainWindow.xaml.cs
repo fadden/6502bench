@@ -1314,13 +1314,17 @@ namespace SourceGen.WpfGui {
             mMainCtrl.OpenRecentProject(recentIndex);
         }
 
+        private void RedoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.RedoChanges();
+        }
+
+        private void ReloadExternalFilesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ReloadExternalFiles();
+        }
+
         private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove hints");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
-        }
-
-        private void RedoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            mMainCtrl.RedoChanges();
         }
 
         private void SaveCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

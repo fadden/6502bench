@@ -164,7 +164,6 @@ limitations under the License.
             </RoutedUICommand>
             <RoutedUICommand x:Key="NewProjectCmd" Text="New"/>
             <RoutedUICommand x:Key="OpenCmd" Text="Open"/>
-            <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="RecentProjectCmd"/>
             <RoutedUICommand x:Key="RedoCmd" Text="Redo">
                 <RoutedUICommand.InputGestures>
@@ -172,6 +171,12 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+Z</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ReloadExternalFilesCmd" Text="Reload External Files">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Shift+R</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
+            <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
             <RoutedUICommand x:Key="SelectAllCmd" Text="Select All">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+A</KeyGesture>
@@ -300,12 +305,14 @@ limitations under the License.
                         Executed="OpenCmd_Executed"/>
         <CommandBinding Command="Properties"
                         CanExecute="IsProjectOpen" Executed="EditProjectPropertiesCmd_Executed"/>
-        <CommandBinding Command="{StaticResource RemoveHintsCmd}"
-                        CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="{StaticResource RecentProjectCmd}" x:Name="recentProjectCmd"
                         Executed="RecentProjectCmd_Executed"/>
         <CommandBinding Command="{StaticResource RedoCmd}"
                         CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ReloadExternalFilesCmd}"
+                        CanExecute="IsProjectOpen" Executed="ReloadExternalFilesCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RemoveHintsCmd}"
+                        CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
         <CommandBinding Command="Save"
                         CanExecute="CanSaveProject" Executed="SaveCmd_Executed"/>
         <CommandBinding Command="SaveAs"
@@ -371,13 +378,15 @@ limitations under the License.
                 <MenuItem Command="SaveAs"/>
                 <MenuItem Command="{StaticResource CloseCmd}"/>
                 <Separator/>
+                <MenuItem Name="recentProjectsMenu" Header="Recent Projects" SubmenuOpened="RecentProjectsMenu_SubmenuOpened">
+                    <MenuItem Header="(none)"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Command="{StaticResource AssembleCmd}"/>
                 <!--<MenuItem Command="Print"/>-->
                 <MenuItem Command="{StaticResource ExportCmd}"/>
                 <Separator/>
-                <MenuItem Name="recentProjectsMenu" Header="Recent Projects" SubmenuOpened="RecentProjectsMenu_SubmenuOpened">
-                    <MenuItem Header="(none)"/>
-                </MenuItem>
+                <MenuItem Command="{StaticResource ReloadExternalFilesCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource ExitCmd}" InputGestureText="Alt+F4"/>
             </MenuItem>
