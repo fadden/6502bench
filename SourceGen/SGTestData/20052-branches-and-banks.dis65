@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":4,
-"FileDataLength":224,
-"FileDataCrc32":2055368095,
+"FileDataLength":234,
+"FileDataCrc32":1224113674,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -15,7 +15,7 @@
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
 "UseRelocData":false,
-"SmartPlpHandling":true,
+"SmartPlpHandling":false,
 "SmartPlbHandling":false},
 
 "PlatformSymbolFileIdentifiers":["PROJ:20050-branches-and-banks.sym65"],

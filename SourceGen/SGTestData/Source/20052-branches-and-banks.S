@@ -130,4 +130,39 @@ fwdchk:
 
 nxt54b:
         jsr     skip                    ;EDIT: set to "skip" label
+        nop
+
+
+; Test the non-"smart" PLP affects on the M/X flags.
+; EDIT: disable "smart PLP" for this project
+        rep     #$30
+        .a16
+        .i16
+        php
+        lda     #$0000
+        sep     #$30
+        .a8
+        .i8
+        lda     #$00
+        plp                             ;smart->long, unsmart->short
+        lda     #$ea
+        nop
+
+        sep     #$30
+        .a8
+        .i8
+        php
+        lda     #$00
+        rep     #$30
+        .a16
+        .i16
+        lda     #$0000
+        plp                             ;smart->short, unsmart->long
+        lda     #$eaea
+
+        rep     #$30
+        .a16
+        .i16
+        nop
+
         rtl

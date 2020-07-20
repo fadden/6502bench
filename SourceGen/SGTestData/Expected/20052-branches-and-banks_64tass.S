@@ -109,14 +109,28 @@ fwdchk  nop
 
 L543280 jsr     skip+$540000
         nop
-        phk
-        plb
-        lda     $544280
-        jsl     $544280
+        rep     #$30
+        .al
+        .xl
+        php
+        lda     #$0000
+        sep     #$30
+        .as
+        .xs
+        lda     #$00
+        plp
+        lda     #$ea
         nop
-        lda     $4280
-        jsr     $544280
-        jsr     ($544280,x)
+        sep     #$30
+        php
+        lda     #$00
+        rep     #$30
+        .al
+        .xl
+        lda     #$0000
+        plp
+        lda     #$eaea
+        rep     #$30
         nop
         rtl
 

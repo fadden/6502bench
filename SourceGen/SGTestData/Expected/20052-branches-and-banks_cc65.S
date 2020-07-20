@@ -111,14 +111,28 @@ fwdchk:  nop
 
 L543280: jsr     skip
          nop
-         phk
-         plb
-         lda     $544280
-         jsl     $544280
+         rep     #$30
+         .a16
+         .i16
+         php
+         lda     #$0000
+         sep     #$30
+         .a8
+         .i8
+         lda     #$00
+         plp
+         lda     #$ea
          nop
-         lda     $4280
-         jsr     $4280
-         jsr     ($4280,x)
+         sep     #$30
+         php
+         lda     #$00
+         rep     #$30
+         .a16
+         .i16
+         lda     #$0000
+         plp
+         lda     #$eaea
+         rep     #$30
          nop
          rtl
 

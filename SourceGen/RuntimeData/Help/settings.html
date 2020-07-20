@@ -273,7 +273,8 @@ improve automatic operand formatting.</p>
 <p>If "smart PLP handling" is checked, the analyzer will try to use
 the processor status flags from a nearby <code>PHP</code> when a
 <code>PLP</code> is encountered.  If not enabled, all flags are set to
-"indeterminate" following a <code>PLP</code>.</p>
+"indeterminate" following a <code>PLP</code>, except for the M/X
+flags on the 65816, which are left unmodified.</p>
 <p>If "smart PLB handling" is checked, the analyzer will watch for
 code patterns like <code>PLB</code> preceded by <code>PHK</code>,
 and generate appropriate Data Bank Register changes.  If not enabled,

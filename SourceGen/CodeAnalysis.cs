@@ -804,12 +804,12 @@ namespace SourceGen {
             // it around like one.  The E-flag is always carried over from the previous
             // instruction.
 
-            int backOffsetLimit = plpOffset - 128;      // arbitrary 128-byte reach
-            if (backOffsetLimit < 0) {
-                backOffsetLimit = 0;
-            }
             StatusFlags flags = StatusFlags.AllIndeterminate;
             if (mAnalysisParameters.SmartPlpHandling) {
+                int backOffsetLimit = plpOffset - 128;      // arbitrary 128-byte reach
+                if (backOffsetLimit < 0) {
+                    backOffsetLimit = 0;
+                }
                 for (int offset = plpOffset - 1; offset >= backOffsetLimit; offset--) {
                     Anattrib attr = mAnattribs[offset];
                     if (!attr.IsInstructionStart || !attr.IsVisited) {
@@ -822,6 +822,15 @@ namespace SourceGen {
                         break;
                     }
                 }
+            }
+
+            if (flags == StatusFlags.AllIndeterminate &&
+                    (mCpuDef.Type == CpuDef.CpuType.Cpu65816 ||
+                        mCpuDef.Type == CpuDef.CpuType.Cpu65802)) {
+                // Having indeterminate M/X flags is really bad.  If "smart" handling failed or
+                // is disabled, copy flags from previous instruction.
+                flags.M = mAnattribs[plpOffset].StatusFlags.M;
+                flags.X = mAnattribs[plpOffset].StatusFlags.X;
             }
 
             // Transfer the 'E' flag.
