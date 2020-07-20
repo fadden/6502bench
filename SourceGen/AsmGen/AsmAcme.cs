@@ -37,7 +37,6 @@ namespace SourceGen.AsmGen {
         // makefile rules.  Since ".S" is pretty universal for assembly language sources,
         // I'm sticking with that.
         private const string ASM_FILE_SUFFIX = "_acme.S"; // must start with underscore
-        private const int MAX_OPERAND_LEN = 64;
         private const string CLOSE_PSEUDOPC = "} ;!pseudopc";
 
         // IGenerator
@@ -185,6 +184,7 @@ namespace SourceGen.AsmGen {
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
             config.mSuppressImpliedAcc = true;
 
+            config.mOperandWrapLen = 64;
             config.mForceDirectOpcodeSuffix = "+1";
             config.mForceAbsOpcodeSuffix = "+2";
             config.mForceLongOpcodeSuffix = "+3";
@@ -455,7 +455,7 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
+            int maxPerLine = formatter.OperandWrapLen / formatter.CharsPerDenseByte;
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
             for (int i = 0; i < length; i += maxPerLine) {
@@ -648,8 +648,7 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep,
-                MAX_OPERAND_LEN, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv);
             stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 

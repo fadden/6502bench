@@ -79,12 +79,11 @@ namespace Asm65 {
         /// <param name="formatter">Reference to text formatter.</param>
         /// <param name="delimiterDef">String delimiter values.</param>
         /// <param name="byteStyle">How to format raw byte data.</param>
-        /// <param name="maxOperandLen">Maximum line length.</param>
         /// <param name="charConv">Character conversion delegate.</param>
         public StringOpFormatter(Formatter formatter, Formatter.DelimiterDef delimiterDef,
-                RawOutputStyle byteStyle, int maxOperandLen, CharEncoding.Convert charConv) {
+                RawOutputStyle byteStyle, CharEncoding.Convert charConv) {
             mRawStyle = byteStyle;
-            mMaxOperandLen = maxOperandLen;
+            mMaxOperandLen = formatter.OperandWrapLen;
             CharConv = charConv;
 
             mDelimiterDef = delimiterDef;

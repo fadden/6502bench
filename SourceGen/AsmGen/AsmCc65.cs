@@ -32,7 +32,6 @@ namespace SourceGen.AsmGen {
     public class GenCc65 : IGenerator {
         private const string ASM_FILE_SUFFIX = "_cc65.S";       // must start with underscore
         private const string CFG_FILE_SUFFIX = "_cc65.cfg";     // ditto
-        private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
         public DisasmProject Project { get; private set; }
@@ -181,6 +180,7 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            config.mOperandWrapLen = 64;
             config.mForceDirectOpcodeSuffix = string.Empty;
             config.mForceAbsOpcodeSuffix = string.Empty;
             config.mForceLongOpcodeSuffix = string.Empty;
@@ -486,7 +486,7 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
+            int maxPerLine = formatter.OperandWrapLen / formatter.CharsPerDenseByte;
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
             for (int i = 0; i < length; i += maxPerLine) {
@@ -709,8 +709,7 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep,
-                MAX_OPERAND_LEN, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep, charConv);
             stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 

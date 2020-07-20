@@ -42,6 +42,10 @@ namespace Asm65 {
     /// fixed by keying off of the OpDef instead of OpDef.Opcode, but that's less convenient.)
     /// </summary>
     public class Formatter {
+        // Default wrap point for long operands.  This potentially affects both on-screen
+        // display and source code generation.
+        private const int DEFAULT_OPERAND_WRAP_LEN = 64;
+
         /// <summary>
         /// Various format configuration options.  Fill one of these out and pass it to
         /// the Formatter constructor.
@@ -79,6 +83,9 @@ namespace Asm65 {
             // delimiter patterns for single character constants
             public DelimiterSet mCharDelimiters;
             public DelimiterSet mStringDelimiters;
+
+            // point at which we wrap long operands; zero uses default
+            public int mOperandWrapLen;
 
             // miscellaneous
             public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
@@ -146,6 +153,10 @@ namespace Asm65 {
                 }
                 if (mBoxLineCommentDelimiter == null) {
                     mBoxLineCommentDelimiter = string.Empty;
+                }
+
+                if (mOperandWrapLen == 0) {
+                    mOperandWrapLen = DEFAULT_OPERAND_WRAP_LEN;
                 }
             }
         }
@@ -419,6 +430,13 @@ namespace Asm65 {
         /// </summary>
         public FormatConfig.ExpressionMode ExpressionMode {
             get { return mFormatConfig.mExpressionMode; }
+        }
+
+        /// <summary>
+        /// Point at which to wrap long operands, such as strings and dense hex.
+        /// </summary>
+        public int OperandWrapLen {
+            get { return mFormatConfig.mOperandWrapLen; }
         }
 
 

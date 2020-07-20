@@ -33,8 +33,6 @@ namespace SourceGen {
     /// multiple lines.
     /// </summary>
     public class PseudoOp {
-        private const int MAX_OPERAND_LEN = 64;
-
         /// <summary>
         /// One piece of the pseudo-instruction.
         /// </summary>
@@ -278,7 +276,7 @@ namespace SourceGen {
                     return 1;
                 case FormatDescriptor.Type.Dense: {
                         // no delimiter, two output bytes per input byte
-                        int maxLen = MAX_OPERAND_LEN;
+                        int maxLen = formatter.OperandWrapLen;
                         int textLen = dfd.Length * formatter.CharsPerDenseByte;
                         return (textLen + maxLen - 1) / maxLen;
                     }
@@ -367,7 +365,7 @@ namespace SourceGen {
                         }
                         break;
                     case FormatDescriptor.Type.Dense: {
-                            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
+                            int maxPerLine = formatter.OperandWrapLen / formatter.CharsPerDenseByte;
                             offset += subIndex * maxPerLine;
                             length -= subIndex * maxPerLine;
                             if (length > maxPerLine) {
@@ -547,7 +545,7 @@ namespace SourceGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(formatter, delDef,
-                StringOpFormatter.RawOutputStyle.CommaSep, MAX_OPERAND_LEN, charConv);
+                StringOpFormatter.RawOutputStyle.CommaSep, charConv);
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
                 dfd.Length - hiddenLeadingBytes - trailingBytes, 0, revMode);
 

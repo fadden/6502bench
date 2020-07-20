@@ -74,9 +74,9 @@ namespace SourceGen.WpfGui {
             Unknown = 0,
             CodeView,
             TextDelimiters,
-            AsmConfig,
             DisplayFormat,
-            PseudoOp
+            PseudoOp,
+            AsmConfig
         }
 
         /// <summary>
@@ -936,6 +936,25 @@ namespace SourceGen.WpfGui {
             };
         }
 
+        public class OperandWrapLenItem {
+            public int Len { get; private set; }
+
+            public OperandWrapLenItem(int len) {
+                Len = len;
+            }
+            public override string ToString() {
+                return Len.ToString();
+            }
+        }
+        private static OperandWrapLenItem[] sOperandWrapLenItems = {
+            new OperandWrapLenItem(64),
+            new OperandWrapLenItem(48),
+            new OperandWrapLenItem(32)
+        };
+        public OperandWrapLenItem[] OperandWrapLenItems {
+            get { return sOperandWrapLenItems; }
+        }
+
         public class DisplayFormatPreset {
             public const int ID_CUSTOM = -2;
             public const int ID_DEFAULT = -1;
@@ -1024,6 +1043,9 @@ namespace SourceGen.WpfGui {
             }
             SelectExpressionStyle(mode);
 
+            int wrapLen = mSettings.GetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 0);
+            SelectOperandWrapLen(wrapLen);
+
             // No need to set this to anything specific.
             UpdateDisplayFormatQuickCombo();
         }
@@ -1038,8 +1060,28 @@ namespace SourceGen.WpfGui {
                     return;
                 }
             }
-            Debug.Assert(false, "Expression mode " + mode + " not found");
+            Debug.Assert(false, "Expression mode " + mode + " not found in combo box");
             expressionStyleComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Changes the combo box to a matching wrap length.
+        /// </summary>
+        private void SelectOperandWrapLen(int wrapLen) {
+            if (wrapLen == 0) {
+                // Setting wasn't specified, use first entry in list.  For best results this
+                // should match Formatter.DEFAULT_OPERAND_WRAP_LEN.
+                operandWrapLenComboBox.SelectedIndex = 0;
+                return;
+            }
+            foreach (OperandWrapLenItem owli in OperandWrapLenItems) {
+                if (owli.Len == wrapLen) {
+                    operandWrapLenComboBox.SelectedItem = owli;
+                    return;
+                }
+            }
+            Debug.Assert(false, "Operand wrap len " + wrapLen + " not found in combo box");
+            operandWrapLenComboBox.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -1108,6 +1150,13 @@ namespace SourceGen.WpfGui {
             }
 
             mSettingDisplayFmtCombo = false;
+        }
+
+        private void OperandWrapLenComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
+            OperandWrapLenItem item = (OperandWrapLenItem)operandWrapLenComboBox.SelectedItem;
+            mSettings.SetInt(AppSettings.FMT_OPERAND_WRAP_LEN, item.Len);
+            IsDirty = true;
         }
 
         #endregion Display Format

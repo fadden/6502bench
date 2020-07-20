@@ -56,6 +56,7 @@ namespace SourceGen {
         public const string FMT_UPPER_OPERAND_XY = "fmt-upper-operand-xy";
         public const string FMT_ADD_SPACE_FULL_COMMENT = "fmt-add-space-full-comment";
         public const string FMT_SPACES_BETWEEN_BYTES = "fmt-spaces-between-bytes";
+        public const string FMT_OPERAND_WRAP_LEN = "fmt-operand-wrap-len";
 
         public const string FMT_OPCODE_SUFFIX_ABS = "fmt-opcode-suffix-abs";
         public const string FMT_OPCODE_SUFFIX_LONG = "fmt-opcode-suffix-long";

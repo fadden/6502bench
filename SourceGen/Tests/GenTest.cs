@@ -389,6 +389,7 @@ namespace SourceGen.Tests {
             settings.SetBool(AppSettings.FMT_UPPER_OPERAND_S, true);
             settings.SetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
             settings.SetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, false);
+            settings.SetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 64);
 
             // Don't show the assembler ident line.  You can make a case for this being
             // mandatory, since the generated code is only guaranteed to work with the

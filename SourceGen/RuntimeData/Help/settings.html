@@ -100,6 +100,65 @@ do not affect generated code, which must use the delimiter characters
 specified by the chosen assembler.</p>
 
 
+<h3><a name="appset-displayformat">Display Format</a></h3>
+
+<p>These options change the way the code list looks on screen.  They
+do not affect generated code.</p>
+
+<p>The
+<a href="intro.html#width-disambiguation">operand width disambiguator</a>
+strings are used when the width of an instruction operand is unclear.
+You may specify values for all of them or none of them.</p>
+
+<p>Different assemblers have different ways of forming expressions.
+Sometimes the rules allow expressions to be written simply, other times
+explicit grouping with parenthesis is required.  Select whichever style
+you are most comfortable with.</p>
+
+<p>Non-unique labels are identified with a prefix character, typically
+'@' or ':'.  The default is '@', but you can configure it to any character
+that isn't valid for the start of a label.  (64tass uses '_' for locals,
+but that's a valid label start character, and so isn't allowed here.)
+The setting affects label editing as well as display.</p>
+
+<p>If you would like your local variables to be shown with a prefix
+character, you can set it in the "local variable prefix" box.</p>
+
+<p>The "quick set" pop-up configures the fields on the left side of the
+tab to match the conventions of the specified assembler.  Select your
+preferred assembler in the combo box to set the fields.  The setting
+automatically switches to "custom" when you edit a field.
+(64tass and ACME use the "common"
+expression style, cc65 and Merlin 32 have their own unique styles.)</p>
+
+<p>The "comma-separated format for bulk data" determines whether large
+blocks of hex look like <code>ABC123</code> or
+<code>$AB,$C1,$23</code>.  The former reduces the number of lines
+required, the latter is more readable.</p>
+<p>Long operands, such as strings and bulk data, are wrapped to a new
+line after a certain number of characters.  Use the pop-up to configure
+the value.  Larger values can make the code easier to read, but smaller
+values allow you to shrink the width of the operand column in the
+on-screen listing, moving the comment field closer in.</p>
+
+
+<h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
+
+<p>These options change the way the code list looks on screen.  Assembler
+directives and data pseudo-opcodes will use these values.  This does
+not affect generated source code, which always matches the conventions
+of the target assembler.</p>
+
+<p>Enter the string you want to use for the various data formats.  If
+a field is left blank, a default value is used.</p>
+
+<p>The "quick set" pop-up configures the fields on this tab to match
+the conventions of the specified assembler.  Select your preferred assembler
+in the combo box to set the fields.  The setting automatically switches to
+"custom" when you edit a field.</p>
+
+
+
 <h3><a name="appset-asmconfig">Asm Config</a></h3>
 
 <p>These settings configure cross-assemblers and modify assembly source
@@ -148,53 +207,6 @@ passed to the assembler.  This can be very helpful if the source
 file is sent to other people, since it may not otherwise be obvious from
 the source file what the intended target assembler is, or what options
 are required to process the file correctly.</p>
-
-
-<h3><a name="appset-displayformat">Display Format</a></h3>
-
-<p>These options change the way the code list looks on screen.  They
-do not affect generated code.</p>
-
-<p>The
-<a href="intro.html#width-disambiguation">operand width disambiguator</a>
-strings are used when the width of an instruction operand is unclear.
-You may specify values for all of them or none of them.</p>
-
-<p>Different assemblers have different ways of forming expressions.
-Sometimes the rules allow expressions to be written simply, other times
-explicit grouping with parenthesis is required.  Select whichever style
-you are most comfortable with.</p>
-
-<p>Non-unique labels are identified with a prefix character, typically
-'@' or ':'.  The default is '@', but you can configure it to any character
-that isn't valid for the start of a label.  (64tass uses '_' for locals,
-but that's a valid label start character, and so isn't allowed here.)
-The setting affects label editing as well as display.</p>
-
-<p>If you would like your local variables to be shown with a prefix
-character, you can set it in the "local variable prefix" box.</p>
-
-<p>The "quick set" pop-up configures the fields on this tab to match
-the conventions of the specified assembler.  Select your preferred assembler
-in the combo box to set the fields.  The setting automatically switches to
-"custom" when you edit a field.  (64tass and ACME use the "common"
-expression style, cc65 and Merlin 32 have their own unique styles.)</p>
-
-
-<h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
-
-<p>These options change the way the code list looks on screen.  Assembler
-directives and data pseudo-opcodes will use these values.  This does
-not affect generated source code, which always matches the conventions
-of the target assembler.</p>
-
-<p>Enter the string you want to use for the various data formats.  If
-a field is left blank, a default value is used.</p>
-
-<p>The "quick set" pop-up configures the fields on this tab to match
-the conventions of the specified assembler.  Select your preferred assembler
-in the combo box to set the fields.  The setting automatically switches to
-"custom" when you edit a field.</p>
 
 
 <h2><a name="project-properties">Project Properties</a></h2>

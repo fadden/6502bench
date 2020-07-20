@@ -129,10 +129,10 @@ limitations under the License.
                      <GroupBox Grid.Column="2" Grid.Row="1" Header="Miscellaneous"
                               Margin="10,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Add spaces in bytes column" Margin="0,4"
-                                      IsChecked="{Binding SpacesBetweenBytes}"/>
                             <CheckBox Content="Use &quot;dark&quot; color scheme" Margin="0,4"
                                       IsChecked="{Binding DarkColorScheme}"/>
+                            <CheckBox Content="Add spaces in bytes column" Margin="0,4"
+                                      IsChecked="{Binding SpacesBetweenBytes}"/>
                         </StackPanel>
                     </GroupBox>
 
@@ -422,180 +422,120 @@ limitations under the License.
             </TabItem>
 
 
-            <TabItem Name="asmConfigTab" Header="Asm Config">
-                <StackPanel>
-                    <GroupBox Header="Assembler Configuration" Padding="2,4">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Column="0" Grid.Row="0" Text="Assembler:"
-                                       HorizontalAlignment="Right" Margin="0,5,4,0"/>
-                            <ComboBox Name="asmConfigComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True"
-                                      Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"
-                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"
-                                      SelectionChanged="AsmConfigComboBox_SelectionChanged"/>
-
-                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Executable:"
-                                       HorizontalAlignment="Right" Margin="0,0,4,0"/>
-                            <DockPanel Grid.Column="1" Grid.Row="1">
-                                <Button DockPanel.Dock="Right" Content="Browse..." Width="75"
-                                        Margin="8,0,0,8" Click="AsmExeBrowseButton_Click"/>
-                                <TextBox Name="asmExePathTextBox" DockPanel.Dock="Left" Margin="0,0,0,8"
-                                         Text="C:\something" TextChanged="AsmExePathTextBox_TextChanged"/>
-                            </DockPanel>
-
-                            <TextBlock Grid.Column="0" Grid.Row="2" Text="Column widths:"
-                                       HorizontalAlignment="Right" Margin="0,0,4,0"/>
-                            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
-                                <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0">
-                                    <TextBox.Text>
-                                        <Binding Path="AsmLabelColWidth" UpdateSourceTrigger="PropertyChanged">
-                                            <Binding.ValidationRules>
-                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0">
-                                    <TextBox.Text>
-                                        <Binding Path="AsmOpcodeColWidth" UpdateSourceTrigger="PropertyChanged">
-                                            <Binding.ValidationRules>
-                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0">
-                                    <TextBox.Text>
-                                        <Binding Path="AsmOperandColWidth" UpdateSourceTrigger="PropertyChanged">
-                                            <Binding.ValidationRules>
-                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0">
-                                    <TextBox.Text>
-                                        <Binding Path="AsmCommentColWidth" UpdateSourceTrigger="PropertyChanged">
-                                            <Binding.ValidationRules>
-                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock Text="(label, opcode, operand, comment)"/>
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-
-                    <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
-                    <CheckBox Content="Show cycle counts (also appears on screen)" Margin="4,8,0,0"
-                              IsChecked="{Binding ShowCycleCounts}"/>
-                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"
-                              IsChecked="{Binding LongLabelNewLine}"/>
-                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
-                              IsChecked="{Binding AddIdentComment}"/>
-                </StackPanel>
-            </TabItem>
-
-
             <TabItem Name="displayFormatTab" Header="Display Format">
-                <DockPanel LastChildFill="False">
-                    <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
-                               Text="Configure display format options. This does not affect source code generation."/>
-                    <GroupBox Header="Operand Width Disambiguator" Width="300" DockPanel.Dock="Top"
-                              HorizontalAlignment="Left" Margin="0,8,0,0" Padding="2,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="20"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
-                                       Text="Opcode suffix:" Margin="0,4,0,0"/>
-                            <TextBlock Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2"
-                                       Text="Operand prefix:" Margin="0,4,0,0"/>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Margin="4,0,0,0"
+                               Text="Configure opcode/operand display format options. This does not affect source code generation."/>
+                    <DockPanel Grid.Column="0" Grid.Row="1" LastChildFill="False">
+                        <GroupBox Header="Operand Width Disambiguator" Width="300" DockPanel.Dock="Top"
+                                  HorizontalAlignment="Left" Margin="0,8,0,0" Padding="2,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="0" Grid.Row="1" Text="16-bit:"
-                                       Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
-                                     FontFamily="{StaticResource GeneralMonoFont}"
-                                     Text="{Binding OpcodeSuffixAbs, UpdateSourceTrigger=PropertyChanged,
-                                        FallbackValue=.placeho}"/>
-                            <TextBlock Grid.Column="3" Grid.Row="1" Text="16-bit:"
-                                       Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="4" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
-                                     FontFamily="{StaticResource GeneralMonoFont}"
-                                     Text="{Binding OperandPrefixAbs, UpdateSourceTrigger=PropertyChanged,
-                                        FallbackValue=.placeho}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
+                                           Text="Opcode suffix:" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2"
+                                           Text="Operand prefix:" Margin="0,4,0,0"/>
 
-                            <TextBlock Grid.Column="0" Grid.Row="2" Text="24-bit:"
-                                       Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="1" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
-                                     FontFamily="{StaticResource GeneralMonoFont}"
-                                     Text="{Binding OpcodeSuffixLong, UpdateSourceTrigger=PropertyChanged,
-                                        FallbackValue=.placeho}"/>
-                            <TextBlock Grid.Column="3" Grid.Row="2" Text="24-bit:"
-                                       Margin="0,4,0,0"/>
-                            <TextBox Grid.Column="4" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
-                                     FontFamily="{StaticResource GeneralMonoFont}"
-                                     Text="{Binding OperandPrefixLong, UpdateSourceTrigger=PropertyChanged,
-                                        FallbackValue=.placeho}"/>
-                        </Grid>
-                    </GroupBox>
+                                <TextBlock Grid.Column="0" Grid.Row="1" Text="16-bit:"
+                                           Margin="0,4,0,0"/>
+                                <TextBox Grid.Column="1" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}"
+                                         Text="{Binding OpcodeSuffixAbs, UpdateSourceTrigger=PropertyChanged,
+                                            FallbackValue=.placeho}"/>
+                                <TextBlock Grid.Column="3" Grid.Row="1" Text="16-bit:"
+                                           Margin="0,4,0,0"/>
+                                <TextBox Grid.Column="4" Grid.Row="1" Margin="0,4,0,0" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}"
+                                         Text="{Binding OperandPrefixAbs, UpdateSourceTrigger=PropertyChanged,
+                                            FallbackValue=.placeho}"/>
 
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
-                        <TextBlock Text="Expression style:" Margin="0,3,0,0"/>
-                        <ComboBox Name="expressionStyleComboBox" Width="120" Margin="8,0,0,0"
-                                  ItemsSource="{Binding ExpressionStyleItems}" DisplayMemberPath="Name"
-                                  IsReadOnly="True"
-                                  SelectionChanged="ExpressionStyleComboBox_SelectionChanged"/>
-                    </StackPanel>
+                                <TextBlock Grid.Column="0" Grid.Row="2" Text="24-bit:"
+                                           Margin="0,4,0,0"/>
+                                <TextBox Grid.Column="1" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}"
+                                         Text="{Binding OpcodeSuffixLong, UpdateSourceTrigger=PropertyChanged,
+                                            FallbackValue=.placeho}"/>
+                                <TextBlock Grid.Column="3" Grid.Row="2" Text="24-bit:"
+                                           Margin="0,4,0,0"/>
+                                <TextBox Grid.Column="4" Grid.Row="2" Margin="0,4,0,0" MaxLength="8"
+                                         FontFamily="{StaticResource GeneralMonoFont}"
+                                         Text="{Binding OperandPrefixLong, UpdateSourceTrigger=PropertyChanged,
+                                            FallbackValue=.placeho}"/>
+                            </Grid>
+                        </GroupBox>
 
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,16,0,0">
-                        <TextBlock Text="Non-unique label prefix:"/>
-                        <TextBox Width="14" MaxLength="1" Margin="8,1,0,0"
-                                 Text="{Binding NonUniqueLabelPrefix, UpdateSourceTrigger=PropertyChanged,
-                                    FallbackValue=@}"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                    </StackPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
+                            <TextBlock Text="Expression style:" Margin="0,3,0,0"/>
+                            <ComboBox Name="expressionStyleComboBox" Width="120" Margin="8,0,0,0"
+                                      ItemsSource="{Binding ExpressionStyleItems}" DisplayMemberPath="Name"
+                                      IsReadOnly="True"
+                                      SelectionChanged="ExpressionStyleComboBox_SelectionChanged"/>
+                        </StackPanel>
 
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,4,0,0">
-                        <TextBlock Text="Local variable prefix:"/>
-                        <TextBox Width="66" MaxLength="8" Margin="8,1,0,0"
-                                 Text="{Binding LocalVarPrefix, UpdateSourceTrigger=PropertyChanged,
-                                    FallbackValue=.placeho}"
-                                 FontFamily="{StaticResource GeneralMonoFont}"/>
-                    </StackPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
+                            <TextBlock Text="Non-unique label prefix:"/>
+                            <TextBox Width="14" MaxLength="1" Margin="8,1,0,0"
+                                     Text="{Binding NonUniqueLabelPrefix, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=@}"
+                                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                        </StackPanel>
 
-                    <CheckBox DockPanel.Dock="Top" Margin="4,6,0,0"
-                              Content="Use comma-separated format for bulk data"
-                              IsChecked="{Binding CommaSeparatedBulkData}"/>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,4,0,0">
+                            <TextBlock Text="Local variable prefix:"/>
+                            <TextBox Width="66" MaxLength="8" Margin="8,1,0,0"
+                                     Text="{Binding LocalVarPrefix, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=.placeho}"
+                                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                        </StackPanel>
 
-                    <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              HorizontalAlignment="Right" Padding="2,4">
-                        <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
-                                  Width="170" IsReadOnly="True"
-                                  ItemsSource="{Binding DisplayPresets}" DisplayMemberPath="Name"
-                                  SelectionChanged="DisplayFmtQuickComboBox_SelectionChanged"/>
-                    </GroupBox>
-                </DockPanel>
+                        <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
+                                  HorizontalAlignment="Left" Padding="2,4">
+                            <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
+                                      Width="170" IsReadOnly="True"
+                                      ItemsSource="{Binding DisplayPresets}" DisplayMemberPath="Name"
+                                      SelectionChanged="DisplayFmtQuickComboBox_SelectionChanged"/>
+                        </GroupBox>
+                    </DockPanel>
+
+                    <Rectangle Grid.Column="1" Grid.Row="1" Margin="0,8,0,0"
+                               VerticalAlignment="Stretch" Fill="LightGray" Width="2"/>
+
+                    <DockPanel Grid.Column="2" Grid.Row="1" LastChildFill="False">
+                        <CheckBox DockPanel.Dock="Top" Margin="4,12,0,0"
+                                  Content="Use comma-separated format for bulk data"
+                                  IsChecked="{Binding CommaSeparatedBulkData}"/>
+
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
+                            <TextBlock Text="Wrap operands at" Margin="0,3,0,0"/>
+                            <ComboBox Name="operandWrapLenComboBox" Width="45" Margin="4,0,0,0"
+                                      ItemsSource="{Binding OperandWrapLenItems}" IsReadOnly="True"
+                                      SelectionChanged="OperandWrapLenComboBox_SelectionChanged"/>
+                            <TextBlock Text="characters" Margin="4,3,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
             </TabItem>
 
 
@@ -775,6 +715,92 @@ limitations under the License.
                     </GroupBox>
                 </DockPanel>
             </TabItem>
+
+
+            <TabItem Name="asmConfigTab" Header="Asm Config">
+                <StackPanel>
+                    <GroupBox Header="Assembler Configuration" Padding="2,4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column="0" Grid.Row="0" Text="Assembler:"
+                                       HorizontalAlignment="Right" Margin="0,5,4,0"/>
+                            <ComboBox Name="asmConfigComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True"
+                                      Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"
+                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"
+                                      SelectionChanged="AsmConfigComboBox_SelectionChanged"/>
+
+                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Executable:"
+                                       HorizontalAlignment="Right" Margin="0,0,4,0"/>
+                            <DockPanel Grid.Column="1" Grid.Row="1">
+                                <Button DockPanel.Dock="Right" Content="Browse..." Width="75"
+                                        Margin="8,0,0,8" Click="AsmExeBrowseButton_Click"/>
+                                <TextBox Name="asmExePathTextBox" DockPanel.Dock="Left" Margin="0,0,0,8"
+                                         Text="C:\something" TextChanged="AsmExePathTextBox_TextChanged"/>
+                            </DockPanel>
+
+                            <TextBlock Grid.Column="0" Grid.Row="2" Text="Column widths:"
+                                       HorizontalAlignment="Right" Margin="0,0,4,0"/>
+                            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
+                                <TextBox Name="asmLabelColWidthTextBox" Width="60" Margin="0,0,4,0">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmLabelColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBox Name="asmOpcodeColWidthTextBox" Width="60" Margin="0,0,4,0">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmOpcodeColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBox Name="asmOperandColWidthTextBox" Width="60" Margin="0,0,4,0">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmOperandColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBox Name="asmCommentColWidthTextBox" Width="60" Margin="0,0,8,0">
+                                    <TextBox.Text>
+                                        <Binding Path="AsmCommentColWidth" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <local:AsmColWidthRule ValidatesOnTargetUpdated="True"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Text="(label, opcode, operand, comment)"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
+                    <CheckBox Content="Show cycle counts (also appears on screen)" Margin="4,8,0,0"
+                              IsChecked="{Binding ShowCycleCounts}"/>
+                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"
+                              IsChecked="{Binding LongLabelNewLine}"/>
+                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
+                              IsChecked="{Binding AddIdentComment}"/>
+                </StackPanel>
+            </TabItem>
+
         </TabControl>
     </DockPanel>
 </Window>

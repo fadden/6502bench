@@ -32,7 +32,6 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class GenMerlin32 : IGenerator {
         private const string ASM_FILE_SUFFIX = "_Merlin32.S";   // must start with underscore
-        private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
         public DisasmProject Project { get; private set; }
@@ -155,6 +154,7 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
+            config.mOperandWrapLen = 64;
             config.mForceDirectOpcodeSuffix = string.Empty;
             config.mForceAbsOpcodeSuffix = ":";
             config.mForceLongOpcodeSuffix = "l";
@@ -333,7 +333,7 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
+            int maxPerLine = formatter.OperandWrapLen / formatter.CharsPerDenseByte;
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
             for (int i = 0; i < length; i += maxPerLine) {
@@ -607,7 +607,7 @@ namespace SourceGen.AsmGen {
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 new Formatter.DelimiterDef(delim),
-                StringOpFormatter.RawOutputStyle.DenseHex, MAX_OPERAND_LEN, charConv);
+                StringOpFormatter.RawOutputStyle.DenseHex, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high

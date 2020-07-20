@@ -45,7 +45,6 @@ namespace SourceGen.AsmGen {
         private const string ASM_FILE_SUFFIX = "_64tass.S"; // must start with underscore
         private const string ASCII_ENC_NAME = "sg_ascii";
         private const string HIGH_ASCII_ENC_NAME = "sg_hiascii";
-        private const int MAX_OPERAND_LEN = 64;
 
         // IGenerator
         public DisasmProject Project { get; private set; }
@@ -188,6 +187,7 @@ namespace SourceGen.AsmGen {
             config.mUpperOperandA = false;
             config.mUpperOperandS = false;
             config.mUpperOperandXY = false;
+            config.mOperandWrapLen = 64;
 
             config.mBankSelectBackQuote = true;
 
@@ -524,7 +524,7 @@ namespace SourceGen.AsmGen {
         private void OutputDenseHex(int offset, int length, string labelStr, string commentStr) {
             Formatter formatter = SourceFormatter;
             byte[] data = Project.FileData;
-            int maxPerLine = MAX_OPERAND_LEN / formatter.CharsPerDenseByte;
+            int maxPerLine = formatter.OperandWrapLen / formatter.CharsPerDenseByte;
 
             string opcodeStr = formatter.FormatPseudoOp(sDataOpNames.Dense);
             for (int i = 0; i < length; i += maxPerLine) {
@@ -744,8 +744,7 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep,
-                MAX_OPERAND_LEN, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high

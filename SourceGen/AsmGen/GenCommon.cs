@@ -425,6 +425,8 @@ namespace SourceGen.AsmGen {
                 settings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false);
             config.mAddSpaceLongComment =
                 settings.GetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
+            config.mOperandWrapLen =
+                settings.GetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 0);
 
             config.mForceAbsOpcodeSuffix =
                 settings.GetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, string.Empty);
