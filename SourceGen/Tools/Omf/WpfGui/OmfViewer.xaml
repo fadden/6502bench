@@ -51,6 +51,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <DockPanel Grid.Row="0">
@@ -95,10 +96,19 @@ limitations under the License.
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto">
         </TextBox>
 
-        <DockPanel Grid.Row="5" LastChildFill="False" Margin="0,16,0,0">
-            <Button DockPanel.Dock="Left" Content="Generate SourceGen Project" Padding="4,0"
-                    IsEnabled="{Binding IsLoadFile}" Click="GenerateProject_Click"/>
-            <Button DockPanel.Dock="Right" Content="Cancel" Width="70" IsCancel="True"/>
+        <GroupBox Grid.Row="5" Header="Generate SourceGen Project" Padding="2,0" Margin="0,8,0,0">
+            <StackPanel>
+                <CheckBox Content="Offset segment start by $0100" Margin="0,4,0,0"
+                          IsChecked="{Binding OffsetSegmentStart}"/>
+                <CheckBox Content="Add comments and notes for each segment" Margin="0,4,0,0"
+                          IsChecked="{Binding AddNotes}"/>
+                <Button Content="Generate" Width="100" Margin="0,8" HorizontalAlignment="Left"
+                        IsEnabled="{Binding IsLoadFile}" Click="GenerateProject_Click"/>
+            </StackPanel>
+        </GroupBox>
+
+        <DockPanel Grid.Row="6" LastChildFill="False" Margin="0,16,0,0">
+            <Button DockPanel.Dock="Right" Content="Close" Width="70" IsCancel="True"/>
         </DockPanel>
     </Grid>
 </Window>

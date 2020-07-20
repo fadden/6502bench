@@ -101,6 +101,22 @@ namespace SourceGen.Tools.Omf.WpfGui {
             get { return mOmfFile.OmfFileKind == OmfFile.FileKind.Load; }
         }
 
+        public bool OffsetSegmentStart {
+            get { return AppSettings.Global.GetBool(AppSettings.OMF_OFFSET_SEGMENT_START, true); }
+            set {
+                AppSettings.Global.SetBool(AppSettings.OMF_OFFSET_SEGMENT_START, value);
+                OnPropertyChanged();
+            }
+        }
+
+        public bool AddNotes {
+            get { return AppSettings.Global.GetBool(AppSettings.OMF_ADD_NOTES, false); }
+            set {
+                AppSettings.Global.SetBool(AppSettings.OMF_ADD_NOTES, value);
+                OnPropertyChanged();
+            }
+        }
+
 
         /// <summary>
         /// Constructor.
@@ -166,7 +182,15 @@ namespace SourceGen.Tools.Omf.WpfGui {
         }
 
         private void GenerateProject_Click(object sender, RoutedEventArgs e) {
-            Loader loader = new Loader(mOmfFile, mFormatter);
+            Loader.Flags flags = 0;
+            if (AddNotes) {
+                flags |= Loader.Flags.AddNotes;
+            }
+            if (OffsetSegmentStart) {
+                flags |= Loader.Flags.OffsetSegmentStart;
+            }
+
+            Loader loader = new Loader(mOmfFile, mFormatter, flags);
             if (!loader.Prepare()) {
                 // Unexpected.  If there's a valid reason for this, we need to add details
                 // to the error message.

@@ -19,6 +19,8 @@
 "SmartPlbHandling":true},
 
 "PlatformSymbolFileIdentifiers":["RT:Apple/Cxxx-IO.sym65",
+"RT:Apple/C08x-DiskII.sym65",
+"RT:Apple/E0Cxxx-IO.sym65",
 "RT:Apple/IIgs-ROM.sym65",
 "RT:Apple/GSOS.sym65"],
 "ExtensionScriptFileIdentifiers":["RT:Apple/GSOS.cs",
@@ -60,66 +62,10 @@
 },
 
 "LongComments":{
-"0":{
-"Text":"Segment 02: Kind=Code; Attrs=NoSpecial; Name=\u0027          \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"143":{
-"Text":"Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name=\u0027PosFFE0   \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"195":{
-"Text":"Segment 04: Kind=Code; Attrs=NoSpecial; Name=\u0027Bank2     \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"230":{
-"Text":"Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name=\u0027Bank8     \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"284":{
-"Text":"Segment 06: Kind=Data; Attrs=0; Name=\u0027Filler    \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0}},
+},
 
 "Notes":{
-"0":{
-"Text":"Seg02: 03/0000 \u0027          \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"143":{
-"Text":"Seg03: 04/ffe0 \u0027PosFFE0   \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"195":{
-"Text":"Seg04: 02/3456 \u0027Bank2     \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"230":{
-"Text":"Seg05: 08/0000 \u0027Bank8     \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0},
-
-"284":{
-"Text":"Seg06: 06/0000 \u0027Filler    \u0027",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0}},
+},
 
 "UserLabels":{
 },

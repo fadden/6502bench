@@ -31,8 +31,15 @@ namespace SourceGen.Tools.Omf {
     public class Loader {
         private const string IIGS_SYSTEM_DEF = "Apple IIgs (GS/OS)";
 
+        [Flags]
+        public enum Flags {
+            AddNotes            = 1 << 0,
+            OffsetSegmentStart  = 1 << 1,
+        }
+
         private OmfFile mOmfFile;
         private Formatter mFormatter;
+        private Flags mFlags;
 
         private byte[] mLoadedData;
         private DisasmProject mNewProject;
@@ -57,11 +64,12 @@ namespace SourceGen.Tools.Omf {
         /// </summary>
         /// <param name="omfFile">OMF file to load.</param>
         /// <param name="formatter">Text formatter.</param>
-        public Loader(OmfFile omfFile, Formatter formatter) {
+        public Loader(OmfFile omfFile, Formatter formatter, Flags flags) {
             Debug.Assert(omfFile.OmfFileKind == OmfFile.FileKind.Load);
 
             mOmfFile = omfFile;
             mFormatter = formatter;
+            mFlags = flags;
         }
 
         /// <summary>
@@ -259,6 +267,19 @@ namespace SourceGen.Tools.Omf {
                     }
                 }
 
+                // If possible, shift the address to xx/$0100.  This is useful because it means
+                // we won't have to put width disambiguators on any data accesses to $00xx
+                // locations.  We can't do this if the address is fixed, aligned to a 64K
+                // boundary, or is too large.
+                if ((mFlags & Flags.OffsetSegmentStart) != 0 && !fixedAddr && !bankRel &&
+                        omfSeg.Align <= 0x0100 && omfSeg.Length <= (65536-256)) {
+                    if ((addr & 0x0000ffff) == 0x0000) {
+                        addr |= 0x0100;
+                    } else {
+                        Debug.Assert(false, "Unexpected nonzero bank address found");
+                    }
+                }
+
                 SegmentMapEntry ent = new SegmentMapEntry(omfSeg, addr);
                 mSegmentMap.Add(ent);
             }
@@ -352,20 +373,22 @@ namespace SourceGen.Tools.Omf {
                 // can straddle multiple pages.)
                 AddAddressEntries(proj, ent, bufOffset, cs);
 
-                // Add a comment identifying the segment and its attributes.
-                string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
-                    ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.Attrs, ent.Segment.SegName);
-                uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
-                    new MultiLineComment(segCmt));
-                cs.Add(uc);
+                if ((mFlags & Flags.AddNotes) != 0) {
+                    // Add a comment identifying the segment and its attributes.
+                    string segCmt = string.Format(Res.Strings.OMF_SEG_COMMENT_FMT,
+                        ent.Segment.SegNum, ent.Segment.Kind, ent.Segment.Attrs, ent.Segment.SegName);
+                    uc = UndoableChange.CreateLongCommentChange(bufOffset, null,
+                        new MultiLineComment(segCmt));
+                    cs.Add(uc);
 
-                // Add a note identifying the segment.
-                string segNote = string.Format(Res.Strings.OMF_SEG_NOTE_FMT,
-                    ent.Segment.SegNum, mFormatter.FormatAddress(ent.Address, true),
-                    ent.Segment.SegName);
-                uc = UndoableChange.CreateNoteChange(bufOffset, null,
-                    new MultiLineComment(segNote));
-                cs.Add(uc);
+                    // Add a note identifying the segment.
+                    string segNote = string.Format(Res.Strings.OMF_SEG_NOTE_FMT,
+                        ent.Segment.SegNum, mFormatter.FormatAddress(ent.Address, true),
+                        ent.Segment.SegName);
+                    uc = UndoableChange.CreateNoteChange(bufOffset, null,
+                        new MultiLineComment(segNote));
+                    cs.Add(uc);
+                }
 
                 bufOffset += ent.Segment.Length;
             }

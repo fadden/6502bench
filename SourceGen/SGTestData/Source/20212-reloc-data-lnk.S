@@ -19,9 +19,9 @@
 ;    "PosFFE0" -> E0 FF 00
 ;    "Bank2"   -> 56 34 02
 ;    "Bank8"   -> 00 10 08
-; - Convert out.20212 to "20212-reloc-data" with OMF converter.
-; - The project file generally requires no edits, except to delete the
-;   header comment.  Leaving the segment-start comments in seems fine.
+; - Convert out.20212 to "20212-reloc-data" with OMF converter.  Disable
+;   "offset segment by $0100" and "add comments and notes".
+; - The project file requires no edits, except to delete the header comment.
 
         DSK     out.20212           ;output file name, must be ProDOS-compat
         TYP     $b3                 ;S16
