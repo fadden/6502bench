@@ -21,6 +21,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 
 using Asm65;
@@ -28,7 +29,6 @@ using CommonUtil;
 using CommonWPF;
 using SourceGen.Sandbox;
 using SourceGen.WpfGui;
-using System.Windows.Media;
 
 namespace SourceGen {
     /// <summary>
@@ -2718,6 +2718,11 @@ namespace SourceGen {
             UndoableChange uc =
                 UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.CodeAndData);
             ApplyChanges(new ChangeSet(uc), false);
+
+            // TODO(someday): this would really be better as a special-case dummy change
+            // that caused the "external files have changed" behavior in ApplyChanges() to fire.
+            // Before we can do that, though, we need a way to propagate the load errors and
+            // compiler warnings out for display.
         }
 
         public void Goto() {

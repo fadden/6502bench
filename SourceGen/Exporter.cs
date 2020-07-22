@@ -247,6 +247,8 @@ namespace SourceGen {
             sb.Append(IncludeNotes.ToString());
             sb.Append(";gfx=");
             sb.Append(GenerateImageFiles.ToString());
+            sb.Append(";opWrap=");
+            sb.Append(mFormatter.Config.mOperandWrapLen);
 
             // Not included: pseudo-op definitions; delimiter definitions
 

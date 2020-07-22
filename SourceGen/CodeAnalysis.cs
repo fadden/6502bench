@@ -43,6 +43,17 @@ namespace SourceGen {
         /// The hints are not used directly by the data analyzer, but the effects they
         /// have on the Anattrib array are.
         /// </summary>
+        /// <remarks>
+        /// This invokes methods in extension scripts to handle things like inline data
+        /// following a JSR.  The added cost is generally low, because the AppDomain security
+        /// sandbox doesn't add a lot of overhead.  Unfortunately this approach is deprecated
+        /// by Microsoft and may break or become unavailable.  If that happens, and we have to
+        /// switch to a sandbox approach with significant overhead, we will most likely want
+        /// to move the code analyzer itself into the sandbox.
+        ///
+        /// For this reason it's best to minimize direct interaction between the code here and
+        /// that elsewhere in the program.
+        /// </remarks>
         public enum TypeHint : sbyte {
             // No hint.  Default value populated in new arrays.
             NoHint = 0,
