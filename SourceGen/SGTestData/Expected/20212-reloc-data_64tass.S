@@ -1,7 +1,6 @@
         .cpu    "65816"
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
-;Segment 02: Kind=Code; Attrs=NoSpecial; Name='          '
 *       =       $030000
         .al
         .xl
@@ -78,7 +77,6 @@ _L30088 .byte   $03
 
 _L3008E rts
 
-;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
         .logical $04ffe0
 _L4FFE0 .long   _L4FFE0
         .byte   $00
@@ -118,7 +116,6 @@ _L4FFE0 .long   _L4FFE0
         .byte   $1f
         .text   " !",$22,"#$%&'()*+,-./"
 
-;Segment 04: Kind=Code; Attrs=NoSpecial; Name='Bank2     '
         .here
         .logical $023456
         .as
@@ -135,7 +132,6 @@ _L23467 .fill   16,$00
 _L23477 nop
         rts
 
-;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '
         .here
         .logical $080000
 _L80000 lda     _L80000
@@ -158,7 +154,6 @@ _L80019 .long   _L80019
         .byte   $00
 _L80026 .text   "This is a test."
         .byte   $00
-;Segment 06: Kind=Data; Attrs=0; Name='Filler    '
         .here
         .logical $060000
         .text   "hello, world!"

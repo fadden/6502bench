@@ -1,4 +1,3 @@
-;Segment 02: Kind=Code; Attrs=NoSpecial; Name='          '
          org   $030000
          mx    %00
 L30000   clc
@@ -72,7 +71,6 @@ L30000   clc
 
 :L3008E  rts
 
-;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
          org   $04ffe0
 :L4FFE0  adr   :L4FFE0
          dfb   $00
@@ -111,7 +109,6 @@ L30000   clc
          dfb   $1f
          asc   ' !"#$%&',27,'()*+,-./'
 
-;Segment 04: Kind=Code; Attrs=NoSpecial; Name='Bank2     '
          org   $023456
          mx    %11
 :L23456  ldal  :L23456
@@ -126,7 +123,6 @@ L30000   clc
 :L23477  nop
          rts
 
-;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '
          org   $080000
 :L80000  ldal  :L80000
          lda:  :L80019
@@ -148,6 +144,5 @@ L30000   clc
          dfb   $00
 :L80026  asc   'This is a test.'
          dfb   $00
-;Segment 06: Kind=Data; Attrs=0; Name='Filler    '
          org   $060000
          asc   'hello, world!'

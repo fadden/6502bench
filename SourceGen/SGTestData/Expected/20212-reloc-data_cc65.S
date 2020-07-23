@@ -1,5 +1,4 @@
          .setcpu "65816"
-;Segment 02: Kind=Code; Attrs=NoSpecial; Name='          '
 ;         .segment "SEG000"
          .org    $030000
          .a16
@@ -77,7 +76,6 @@ L30000:  clc
 
 @L3008E: rts
 
-;Segment 03: Kind=Data; Attrs=BankRel, Dynamic; Name='PosFFE0   '
 ;         .segment "SEG001"
          .org    $04ffe0
 @L4FFE0: .faraddr @L4FFE0
@@ -118,7 +116,6 @@ L30000:  clc
          .byte   $1f
          .byte   " !",$22,"#$%&'()*+,-./"
 
-;Segment 04: Kind=Code; Attrs=NoSpecial; Name='Bank2     '
 ;         .segment "SEG003"
          .org    $023456
          .a8
@@ -135,7 +132,6 @@ L30000:  clc
 @L23477: nop
          rts
 
-;Segment 05: Kind=Code; Attrs=AbsBank, Dynamic; Name='Bank8     '
 ;         .segment "SEG004"
          .org    $080000
 @L80000: lda     @L80000
@@ -158,7 +154,6 @@ L30000:  clc
          .byte   $00
 @L80026: .byte   "This is a test."
          .byte   $00
-;Segment 06: Kind=Data; Attrs=0; Name='Filler    '
 ;         .segment "SEG005"
          .org    $060000
          .byte   "hello, world!"
