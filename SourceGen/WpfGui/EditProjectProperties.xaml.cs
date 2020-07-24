@@ -40,6 +40,9 @@ namespace SourceGen.WpfGui {
     public partial class EditProjectProperties : Window, INotifyPropertyChanged {
         private const string NO_WIDTH_STR = "-";
 
+        private static double sWindowWidth = -1;
+        private static double sWindowHeight = -1;
+
         /// <summary>
         /// New set.  Updated when Apply or OK is hit.  This will be null if no changes have
         /// been applied.
@@ -65,10 +68,7 @@ namespace SourceGen.WpfGui {
         /// </remarks>
         public bool IsDirty {
             get { return mIsDirty; }
-            set {
-                mIsDirty = value;
-                OnPropertyChanged();
-            }
+            set { mIsDirty = value; OnPropertyChanged(); }
         }
         private bool mIsDirty;
 
@@ -161,6 +161,17 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
+            // Configure window size.  Initially we set it to MinWidth/MinHeight.  On subsequent
+            // visits we set it to the size it was the last time.
+            if (sWindowWidth < 0) {
+                sWindowWidth = Width = MinWidth;
+                sWindowHeight = Height = MinHeight;
+            } else {
+                Width = sWindowWidth;
+                Height = sWindowHeight;
+            }
+
+            // Configure controls and clear IsDirty.
             Loaded_General();
 
             LoadProjectSymbols();
@@ -200,6 +211,9 @@ namespace SourceGen.WpfGui {
                     e.Cancel = true;
                 }
             }
+
+            sWindowWidth = Width;
+            sWindowHeight = Height;
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e) {
