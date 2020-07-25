@@ -281,6 +281,10 @@ namespace SourceGen.WpfGui {
                 mShowCodeListView = value;
                 OnPropertyChanged("LaunchPanelVisibility");
                 OnPropertyChanged("CodeListVisibility");
+                if (value) {
+                    // Put the focus on the list view.  Doesn't select anything.
+                    codeListView.Focus();
+                }
             }
         }
         private bool mShowCodeListView;
