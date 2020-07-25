@@ -799,24 +799,30 @@ namespace SourceGen {
         /// <summary>
         /// Attempts to guess what the flags will be after a PLP instruction.
         /// </summary>
+        /// <remarks>
+        /// We're not tracking stack contents or register contents, so this just
+        /// generally won't work.  However, there's a lot of code that uses PHP to
+        /// save the current state and PLP to restore it, so if we can find a nearby
+        /// PHP we can just grab from that.
+        ///
+        /// Failing that, we mark all flags as "indeterminate" and let the user sort
+        /// out what it should be.  It's unlikely to matter except for M/X flags on
+        /// the 65816.
+        ///
+        /// The emulation flag is not part of the status register, even if we do carry
+        /// it around like one.  The E-flag is always carried over from the previous
+        /// instruction.
+        /// </remarks>
         /// <param name="plpOffset">Offset of PLP instruction.</param>
         /// <returns>Best guess at status flags.</returns>
         private StatusFlags GuessFlagsForPLP(int plpOffset) {
-            // We're not tracking stack contents or register contents, so this just
-            // generally won't work.  However, there's a lot of code that uses PHP to
-            // save the current state and PLP to restore it, so if we can find a nearby
-            // PHP we can just grab from that.
-            //
-            // Failing that, we mark all flags as "indeterminate" and let the user sort
-            // out what it should be.  It's unlikely to matter except for M/X flags on
-            // the 65816.
-            //
-            // The emulation flag is not part of the status register, even if we do carry
-            // it around like one.  The E-flag is always carried over from the previous
-            // instruction.
-
             StatusFlags flags = StatusFlags.AllIndeterminate;
             if (mAnalysisParameters.SmartPlpHandling) {
+                // TODO: this is broken.  In some cases we end up latching the result from the
+                // first visit only.  When the PHP instruction gets updated, the subsequent
+                // instructions are only re-evaluated if the flags have changed.  If we reach
+                // an instruction where the flags match, we stop looking forward, and might
+                // not re-visit the PLP.
                 int backOffsetLimit = plpOffset - 128;      // arbitrary 128-byte reach
                 if (backOffsetLimit < 0) {
                     backOffsetLimit = 0;

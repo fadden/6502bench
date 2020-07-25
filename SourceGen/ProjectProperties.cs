@@ -63,7 +63,7 @@ namespace SourceGen {
                 MinCharsForString = DataAnalysis.DEFAULT_MIN_STRING_LENGTH;
                 SeekNearbyTargets = true;
                 UseRelocData = false;
-                SmartPlpHandling = true;
+                SmartPlpHandling = false;
                 SmartPlbHandling = true;
             }
             public AnalysisParameters(AnalysisParameters src) {
