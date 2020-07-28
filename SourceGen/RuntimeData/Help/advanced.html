@@ -440,16 +440,17 @@ not help you debug 6502 projects.</p>
     SourceGen Edit Command format.  This is an experimental feature.</li>
   <li>Apply Edit Commands.  Reads a file in SourceGen Edit Command
     format and applies the commands.</li>
-  <li>Apply Platform Symbols.  An experimental feature for turning platform
-    symbols into address labels.  This will run through the list of all
-    symbols loaded from .sym65 files and find addresses that fall within
-    the bounds of the file.  If it finds an address that is the start
+  <li>Apply External Symbols.  An experimental feature for turning platform
+    and project symbols into address labels.  This will run through the list
+    of all symbols loaded from .sym65 files and find addresses that fall
+    within the bounds of the file.  If it finds an address that is the start
     of a code/data line and doesn't already have a user-supplied label,
     and the platform symbol's label isn't already defined elsewhere, the
     platform label will be applied.  Useful when disassembling ROM images
     or other code with an established set of public entry points.
     (Tip: disable "analyze uncategorized data" from the project
-    properties editor first.)</li>
+    properties editor first, as this will not set labels in the middle
+    of multi-byte data items.)</li>
 </ul>
 
 

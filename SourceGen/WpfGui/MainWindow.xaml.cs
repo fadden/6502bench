@@ -1398,9 +1398,9 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Debug_ApplyEditCommands();
         }
 
-        private void Debug_ApplyPlatformSymbolsCmd_Executed(object sender,
+        private void Debug_ApplyExternalSymbolsCmd_Executed(object sender,
                 ExecutedRoutedEventArgs e) {
-            mMainCtrl.Debug_ApplyPlatformSymbols();
+            mMainCtrl.Debug_ApplyExternalSymbols();
         }
 
         private void Debug_ExportEditCommandsCmd_Executed(object sender,

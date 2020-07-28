@@ -205,7 +205,7 @@ limitations under the License.
 
             <RoutedUICommand x:Key="Debug_ApplesoftToHtmlCmd" Text="Applesoft to HTML..."/>
             <RoutedUICommand x:Key="Debug_ApplyEditCommandsCmd" Text="Apply Edit Commands..."/>
-            <RoutedUICommand x:Key="Debug_ApplyPlatformSymbolsCmd" Text="Apply Platform Symbols"/>
+            <RoutedUICommand x:Key="Debug_ApplyExternalSymbolsCmd" Text="Apply External Symbols"/>
             <RoutedUICommand x:Key="Debug_ExportEditCommandsCmd" Text="Export Edit Commands..."/>
             <RoutedUICommand x:Key="Debug_ExtensionScriptInfoCmd" Text="Extension Script Info..."/>
             <RoutedUICommand x:Key="Debug_RebootSecuritySandboxCmd" Text="Reboot Security Sandbox"/>
@@ -347,8 +347,8 @@ limitations under the License.
                         Executed="Debug_ApplesoftToHtmlCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ApplyEditCommandsCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ApplyEditCommandsCmd_Executed"/>
-        <CommandBinding Command="{StaticResource Debug_ApplyPlatformSymbolsCmd}"
-                        CanExecute="IsProjectOpen" Executed="Debug_ApplyPlatformSymbolsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource Debug_ApplyExternalSymbolsCmd}"
+                        CanExecute="IsProjectOpen" Executed="Debug_ApplyExternalSymbolsCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ExportEditCommandsCmd}"
                         CanExecute="IsProjectOpen" Executed="Debug_ExportEditCommandsCmd_Executed"/>
         <CommandBinding Command="{StaticResource Debug_ExtensionScriptInfoCmd}"
@@ -482,7 +482,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource Debug_ApplesoftToHtmlCmd}"/>
                 <MenuItem Command="{StaticResource Debug_ExportEditCommandsCmd}"/>
                 <MenuItem Command="{StaticResource Debug_ApplyEditCommandsCmd}"/>
-                <MenuItem Command="{StaticResource Debug_ApplyPlatformSymbolsCmd}"/>
+                <MenuItem Command="{StaticResource Debug_ApplyExternalSymbolsCmd}"/>
             </MenuItem>
         </Menu>
 

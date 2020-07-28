@@ -828,6 +828,7 @@ namespace SourceGen {
         private void ApplyUndoableChanges(ChangeSet cs) {
             if (cs.Count == 0) {
                 Debug.WriteLine("ApplyUndoableChanges: change set is empty");
+                // Apply anyway to create an undoable non-event?
             }
             ApplyChanges(cs, false);
             mProject.PushChangeSet(cs);
@@ -4466,11 +4467,12 @@ namespace SourceGen {
         }
 
         // Disable "analyze uncategorized data" for best results.
-        public void Debug_ApplyPlatformSymbols() {
+        public void Debug_ApplyExternalSymbols() {
             ChangeSet cs = new ChangeSet(1);
 
             foreach (Symbol sym in mProject.SymbolTable) {
-                if (sym.SymbolSource != Symbol.Source.Platform) {
+                if (sym.SymbolSource != Symbol.Source.Platform &&
+                        sym.SymbolSource != Symbol.Source.Project) {
                     continue;
                 }
                 DefSymbol defSym = (DefSymbol)sym;
@@ -4508,7 +4510,12 @@ namespace SourceGen {
                 cs.Add(uc);
             }
 
-            ApplyUndoableChanges(cs);
+            if (cs.Count == 0) {
+                MessageBox.Show("No changes made.");
+            } else {
+                ApplyUndoableChanges(cs);
+                MessageBox.Show("Set " + cs.Count + " labels.");
+            }
         }
 
         public void Debug_RebootSecuritySandbox() {
