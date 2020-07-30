@@ -240,8 +240,8 @@ L105F   sep     #$80
         sec
         plp
         bcc     @L111B
+        brk
 
-        !byte   $00
         !byte   $00
 
 @L111B  sec

@@ -240,8 +240,8 @@ _L1113  clc
         sec
         plp
         bcc     _L111B
+        brk
 
-        .byte   $00
         .byte   $00
 
 _L111B  sec

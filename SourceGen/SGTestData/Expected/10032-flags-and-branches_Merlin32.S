@@ -235,8 +235,8 @@ L105F    sep   #$80
          sec
          plp
          bcc   :L111B
+         brk
 
-         dfb   $00
          dfb   $00
 
 :L111B   sec
