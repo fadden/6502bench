@@ -177,7 +177,9 @@ SH_VersionGS        = $0147
 ;
 ; Error codes.
 ;
-; Most of these are public, defined in the GS/OS Reference Manual.
+; Most of these are public, defined in the GS/OS Reference Manual and
+; the GS/OS Driver Reference.  In some case the names are slightly
+; different, e.g. "drvrNoDevice" vs. "DrvrNoDev".
 ;
 E_NO_ERROR          = $00       ;successful operation
 E_BAD_SYSTEM_CALL   = $01       ;bad GS/OS call number
@@ -209,7 +211,7 @@ E_FILE_NOT_FOUND    = $46       ;file not found
 E_DUP_PATHNAME      = $47       ;create or rename with existing name
 E_VOLUME_FULL       = $48       ;volume full
 E_VOL_DIR_FULL      = $49       ;volume directory full
-E_VERSION_ERROR     = $4a       ;version error (incompatible file format)
+E_BAD_FILE_FORMAT   = $4a       ;incompatible file format (a/k/a version error)
 E_BAD_STORE_TYPE    = $4b       ;unsupported (or incorrect) storage type
 E_END_OF_FILE       = $4c       ;end-of-file encountered
 E_OUT_OF_RANGE      = $4d       ;position out of range

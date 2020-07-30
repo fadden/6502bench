@@ -5,6 +5,9 @@
 
 *SYNOPSIS DOS 3.3 public addresses and constants.
 
+;
+; Page 3 entry points.
+;
 DOS_WRM         @ $03d0     ;DOS warmstart entry point
 DOS_CLD         @ $03d3     ;DOS coldstart entry point
 DOS_FM          @ $03d6     ;DOS file manager entry point
@@ -20,6 +23,10 @@ DOS_BOOT_SLOT   @ $05f8     ;disk controller boot slot
 DOS_FILE_LENGTH @ $aa60 2   ;range length for LOAD and BLOAD
 DOS_FILE_ADDRESS @ $aa72 2  ;address of last file loaded
 
+;
+; Some frequently-used addresses inside the DOS RWTS (Read/Write Track/Sector)
+; implementation.
+;
 RWTS_ENTRY      @ $b7b5     ;disable interrupts and call RWTS
 
 RWTS_PARAM_BLOCK @ $b7e8    ;RWTS parameter block
@@ -39,3 +46,41 @@ RWTS_ERR_CODE   @ $b7f5     ;err code (when carry set)
 RWTS_VOL_FOUND  @ $b7f6     ;volume number found
 RWTS_SLOT_FOUND @ $b7f7     ;slot number found
 RWTS_DRIVE_FOUND @ $b7f8    ;drive number found
+
+;
+; Offsets into the Volume Table of Contents (VTOC).
+;
+O_VTOC_CATTRK   = $01       ;track number of first catalog sector
+O_VTOC_CATSCT   = $02       ;sector number of first catalog sector
+O_VTOC_VERSION  = $03       ;version of DOS that created this VTOC
+O_VTOC_NUMTRK   = $34       ;number of tracks per disk
+O_VTOC_NUMSCT   = $35       ;number of sectors per track
+O_VTOC_NUMBYT   = $36       ;(2B) number of bytes per sector
+O_VTOC_INUSE    = $38       ;start of in-use bitmap
+
+;
+; Offsets into catalog sectors.
+;
+O_DOSCAT_NXTTRK = $01       ;track number of next catalog sector
+O_DOSCAT_NXTSCT = $02       ;sector number of next catalog sector
+O_DOSCAT_ENTRY  = $0b       ;offset of first File Descriptive Entry
+
+;
+; Catalog sector File Descriptive Entries.
+;
+O_DOSFDE_TRK    = $00       ;track of first track/sector list
+O_DOSFDE_SCT    = $01       ;sector of first track/sector list
+O_DOSFDE_TYPE   = $02       ;file type and lock flag
+O_DOSFDE_NAME   = $03       ;(30B) file name
+O_DOSFDE_LEN    = $21       ;length of file, in sectors
+DOSFDE_SIZE     = $23       ;size of an FDE entry
+
+DOS_MAX_NAME_LEN = 30       ;filenames are limited to 30 chars
+
+;
+; Track/sector list.
+;
+O_DOSTS_NXTTRK  = $01       ;track number of next T/S list sector
+O_DOSTS_NXTSCT  = $02       ;sector number of next T/S list sector
+O_DOSTS_SCTOFF  = $05       ;(2B) sector offset of first T/S entry
+O_DOSTS_LIST    = $0c       ;(244B) T/S pairs; entries may be zero
