@@ -2466,19 +2466,19 @@ namespace SourceGen {
             if (dlg.ShowDialog() == true) {
                 mFindString = dlg.TextToFind;
                 mFindStartIndex = -1;
-                FindText(dlg.IsBackward);
+                FindText(dlg.IsBackward, true);
             }
         }
 
         public void FindNext() {
-            FindText(false);
+            FindText(false, false);
         }
 
         public void FindPrevious() {
-            FindText(true);
+            FindText(true, false);
         }
 
-        private void FindText(bool goBackward) {
+        private void FindText(bool goBackward, bool pushLocation) {
             if (string.IsNullOrEmpty(mFindString)) {
                 return;
             }
@@ -2519,6 +2519,10 @@ namespace SourceGen {
                     StringComparison.InvariantCultureIgnoreCase);
                 if (matchPos >= 0) {
                     //Debug.WriteLine("Match " + index + ": " + searchStr);
+                    if (pushLocation) {
+                        mNavStack.Push(GetCurrentlySelectedLocation());
+                    }
+
                     mMainWin.CodeListView_EnsureVisible(index);
                     mMainWin.CodeListView_SelectRange(index, 1);
                     return;
