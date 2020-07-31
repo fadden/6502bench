@@ -355,7 +355,7 @@ separate ".STR" statements.</p>
 <h3>Generating Assembly Code</h3>
 
 <p>You can generate assembly source code from the disassembled data.
-Select File &gt; Assembler (or hit Ctrl+Shift+A) to open the source generation
+Select File &gt; Assemble (or hit Ctrl+Shift+A) to open the source generation
 and assembly dialog.</p>
 <p>Pick your favorite assembler from the drop list at the top right,
 then click "Generate".  An assembly source file will be generated in the
@@ -499,11 +499,15 @@ cycles but might take more.  That's because conditional branches take an
 extra cycle if the branch is taken.  The BNE on line $2061" shows 3 cycles,
 because we know that the branch is always taken and doesn't cross a page
 boundary.  (If you want to see why it's always taken,
-look at the value of the 'Z' flag in the "flags" column.  Lower-case 'z'
-means the zero-flag is clear.  You can see it got set on the
-<code>ORA #$80</code> line.)</p>
+look at the value of the 'Z' flag in the "flags" column, which indicates
+the state of the flags before the instruction on that line is executed.
+Lower-case 'z' means the zero-flag is clear, upper-case 'Z' means it's
+set.  The analyzer determined that the flag was clear for instructions
+following the <code>BEQ</code> because the branch wasn't taken.)</p>
+
 <p>The cycle-count comments are included in assembled output as well.  If
-you add an end-of-line comment, it appears after the cycle count.</p>
+you add an end-of-line comment, it appears after the cycle count.
+(Try it.)</p>
 <p>Hit Ctrl+S to save your project.  Make that a habit.</p>
 
 <h4>Inline Data</h4>
@@ -752,7 +756,7 @@ select the Extension Scripts tab, and click "Add Scripts from Project".
 Double-click on "VisTutorial5.cs", then click "OK".</p>
 
 <p>The address of the three bitmaps are helpfully identified by the
-load instructions at the top of the file.  Select the list at
+load instructions at the top of the file.  Select the line at
 address $100A, then Actions &gt; Create/Edit Visualization Set.  In
 the window that opens, click "New Visualization".</p>
 <p>We're going to ignore most of what's going on and just focus on the
@@ -766,8 +770,9 @@ We'll come back to row stride.</p>
 drawing code) that the image is 8x8, so change the value in the height
 field to 8.  As soon as you do, the preview window shows a big blue 'X'.
 (The 'X' is 7x7; the last row/column of pixels are transparent so adjacent
-images don't blend into each other.)</p>
-<p>Let's try doing it wrong.  Add a 0 to make the height 80.  You can see
+images don't bump into each other.)</p>
+<p>Let's try doing it wrong.  Add a '0' in the Height field to make the
+height 80.  You can see
 some additional bitmap data.  Add another 0 to make it 800.  Now you get
 a big red X, and the "Height" parameter is shown in red.  That's because
 the maximum value for the height is 512, as shown by "[1,512]" on the
@@ -809,8 +814,8 @@ the visualization set editor, then click "New Bitmap Animation".  This
 opens the Bitmap Animation Editor.</p>
 <p>Let's try it with our Tic-Tac-Toe board pieces.  From the list on the
 left, select the blue 'X' and click "Add", then click the 'O' and click
-"Add".  Below the list, set the frame delay to 500.  Near the bottom,
-click "Start / Stop.  This causes the animation to play in a loop.  You
+"Add".  Below the list, set the frame delay to 500 msec.  Near the bottom,
+click "Start / Stop".  This causes the animation to play in a loop.  You
 can use the controls to add and remove items, change their order, and change
 the animation speed.  You can add the grid to the animation set, but the
 preview scales the bitmaps up to full size, so it may not look the way
@@ -844,8 +849,8 @@ them on any code or data line.</p>
 but they do appear in code exported to HTML.  Bitmaps are converted to GIF
 images, and animations become animated GIFs.</p>
 
-<p>You can also create animated visualizations of wireframe objects,
-but that's not covered in this tutorial.</p>
+<p>You can also create animated visualizations of wireframe objects
+(vector graphics, 3D shapes), but that's not covered in this tutorial.</p>
 
 <hr/>
 
