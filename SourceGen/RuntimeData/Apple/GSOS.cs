@@ -190,8 +190,9 @@ namespace RuntimeData.Apple {
             //
             // "Class 1" GS/OS calls.
             //
-            // Some changes were made in System 6.0.  See "Programmer's Reference for
-            // System 6.0", by Mike Westerfield / Byteworks.
+            // Some changes were made since the GS/OS Reference was published for System 5.0.
+            // See "Programmer's Reference for System 6.0", by Mike Westerfield / Byteworks,
+            // and GS/OS tech note #13.
             //
             { 0x2034,   // AddNotifyProcGS
                 new Param[] { PARAM_COUNT, PROC_PTR }
@@ -249,8 +250,8 @@ namespace RuntimeData.Apple {
             { 0x200e,   // ExpandPathGS
                 new Param[] { PARAM_COUNT, STRING_PTR, STRING_PTR, MISC2 }
             },
-            { 0x2015,   // FlushGS
-                new Param[] { PARAM_COUNT, REF_NUM }
+            { 0x2015,   // FlushGS (see GS/OS tech note #13)
+                new Param[] { PARAM_COUNT, REF_NUM, MISC2 }
             },
             { 0x2024,   // FormatGS
                 new Param[] { PARAM_COUNT, STRING_PTR, STRING_PTR, MISC2, MISC2, MISC2, BUF_PTR }
