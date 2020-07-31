@@ -22,12 +22,13 @@ as well as many less-common ones.
 - Fully interactive point-and-click GUI.  Define labels, set addresses,
   add comments, and see the results immediately.  Add multi-line comments
   and have them word-wrapped automatically.  Create inline visualizations
-  of embedded graphics and animated sequences.
-- The disassembly engine traces code execution, automatically finding all
-  instructions reachable from a given starting point. Changes to the
-  processor status flags are tracked, allowing identification of branches
-  that are always/never taken, accurate cycle count listings, and correct
-  analysis of 65816 code with variable-width registers.
+  of embedded bitmaps and wireframe data, and define animated sequences.
+- Sophisticated static analysis.  The disassembly engine traces code
+  execution, automatically finding all instructions reachable from defined
+  entry points. Changes to the processor status flags are tracked,
+  allowing identification of branches that are always/never taken,
+  accurate cycle count listings, and easier analysis of 65816 code with
+  variable-width registers.
 - Easy generation of assembly source code for popular cross-assemblers
   (currently 64tass, ACME, cc65, and Merlin 32). Cross-assemblers can be
   invoked from the GUI to verify correctness.
@@ -35,9 +36,10 @@ as well as many less-common ones.
   points on several popular systems.
 - Project files are designed for sharing and collaboration.
 
-A demo video is [available on YouTube](https://youtu.be/dalISyBPQq8).
+Video demos of [basic features](https://youtu.be/dalISyBPQq8) and
+[visualizations](https://youtu.be/lSvEr5nCHbY) are available.
 
-#### Additional Features ####
+#### Features in Detail ####
 
 Analyzer:
 - Support for 6502, 65C02, and 65816, including undocumented opcodes.
@@ -69,8 +71,9 @@ User interface:
   function as color-coded bookmarks. Very useful for marking up a work in
   progress.  Similarly, symbols can be marked as uncertain by adding a
   '?' that is automatically stripped away during code generation.
-- Instruction summaries, including CPU cycles and flags modified, are shown
-  along with a description of the opcode's function.
+- Instruction reference data, such as CPU cycles and flags modified,
+  are shown along with a description of the opcode's function.  Very
+  useful when encountering rarely-used undocumented instructions.
 - Various aspects of the code display can be reconfigured, including
   upper/lower case, pseudo-opcode naming, and expression formats. These
   choices are not part of the project definition, so everyone can view a
@@ -83,22 +86,32 @@ Code generation:
 - Symbols may be exported from one project and imported into another to
   facilitate multi-binary disassembly.
 - Listings can be generated in HTML form for publication on the web.
-  Many aspects of the output format can be configured.
+  Many aspects of the output format can be configured.  Inline
+  visualizations are exported as GIF or animated GIF.
 
 Miscellaneous:
-- All data files are stored in text formats (primarily JSON).
+- All project data is stored in text formats (primarily JSON).
 - The project file includes nothing from the data file but a CRC. This may
   allow the project to be shared without violating copyrights (subject to
   local laws).
 - Handy tools: file slicer, file concatenator, CPU instruction reference
   chart, ASCII chart, file hex dump.
+- The OMF converter tool can be used to disassemble Apple IIgs executables.
 
 #### Limitations ####
 
-Support for 65816 code is largely complete, lacking only a way to specify
-the data bank register.  However, the current user interface tries to
-keep everything in a single list, which works poorly for large
-multi-bank binaries.
+While the 65816 CPU is fully supported, SourceGen can be awkward to use
+with the large binaries that the expanded architecture makes possible.  The
+disassembly is displayed in a single scrolling window, so projects for
+binaries larger than about 100KB become difficult to navigate.  There may
+also be performance issues at larger sizes.  SourceGen currently imposes an
+arbitrary 1MB limit on the data file.
+
+Generating output larger than 64KB requires some target-specific
+directives, e.g. for defining OMF segments for Apple IIgs executables.
+SourceGen does not currently support these.  While you can generate source
+for a binary larger than 64KB, most cross-assemblers will fail to assemble
+it without additional edits.
 
 To learn about other areas for improvement, visit the wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
@@ -125,7 +138,7 @@ SourceGen does not currently run on Linux or Mac OS X.  My understanding is
 that .NET apps don't work under WINE, so it can only be run on a full
 Windows system emulation.
 
-(SourceGen Versions 1.0 and 1.1 used the WinForms API, which has been
+(SourceGen versions 1.0 and 1.1 used the WinForms API, which has been
 implemented for Mono, but after encountering significant bugs that I wasn't
 able to work around I abandoned the approach and switched to WPF.  Besides
 working better under Windows, WPF uses a more modern approach (XAML) that
@@ -137,7 +150,7 @@ may ease the transition to a cross-platform GUI API like Avalonia.)
 The best way to get started is by working through the tutorial.  Launch
 SourceGen, hit F1 to open the user manual in your web browser, then look
 for the Tutorial link in the index.  Click it and follow the instructions
-there.
+there.  Note this is a "follow along" tutorial, not a "read it" tutorial.
 
 I strongly recommend doing this.  Some aspects of SourceGen are non-obvious.
 
