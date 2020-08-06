@@ -36,7 +36,9 @@ as well as many less-common ones.
   points on several popular systems.
 - Project files are designed for sharing and collaboration.
 
-Video demos of [basic features](https://youtu.be/dalISyBPQq8) and
+SourceGen has been used to disassemble software for the Apple II,
+NES (Nintendo Entertainment System), Atari 2600 VCS, Apple II, and coin-op
+aracde.  Video demos of [basic features](https://youtu.be/dalISyBPQq8) and
 [visualizations](https://youtu.be/lSvEr5nCHbY) are available.
 
 #### Features in Detail ####
