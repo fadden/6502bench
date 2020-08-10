@@ -4474,9 +4474,19 @@ namespace SourceGen {
         public void Debug_ApplyExternalSymbols() {
             ChangeSet cs = new ChangeSet(1);
 
+            MessageBoxResult result =
+                MessageBox.Show("Apply project symbols (in addition to platform symbols)?",
+                "Apply project symbols?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            bool doProject;
+            if (result == MessageBoxResult.Cancel) {
+                return;
+            } else {
+                doProject = (result == MessageBoxResult.Yes);
+            }
+
             foreach (Symbol sym in mProject.SymbolTable) {
                 if (sym.SymbolSource != Symbol.Source.Platform &&
-                        sym.SymbolSource != Symbol.Source.Project) {
+                        (!doProject || sym.SymbolSource != Symbol.Source.Project)) {
                     continue;
                 }
                 DefSymbol defSym = (DefSymbol)sym;
