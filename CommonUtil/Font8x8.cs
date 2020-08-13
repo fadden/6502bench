@@ -18,7 +18,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace CommonUtil {
+    /// <summary>
+    /// 8x8 monochrome cells.  The right and bottom edges of each cell are left blank,
+    /// so glyphs can be packed tightly.
+    /// </summary>
     public static class Font8x8 {
+        /// <summary>
+        /// Returns an 8-byte array for the specified character.  Each byte represents one
+        /// row.  The first byte holds the top row, and the most significant bit in each
+        /// byte is the leftmost pixel.
+        ///
+        /// If no glyph is defined, returns the Unicode REPLACEMENT CHARACTER glyph.
+        /// </summary>
+        /// <param name="ch">Requested character.</param>
+        /// <returns>Reference to int[8] with data (do not modify contents).</returns>
         public static int[] GetBitData(char ch) {
             if (sBitData == null) {
                 InitBitData();

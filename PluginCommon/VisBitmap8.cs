@@ -141,8 +141,11 @@ namespace PluginCommon {
         }
 
         /// <summary>
-        /// Draws an 8x8 character on the bitmap.
+        /// Draws an 8x8 character cell on the bitmap.
         /// </summary>
+        /// <remarks>
+        /// Might want a way to specify that the background shouldn't be drawn at all.
+        /// </remarks>
         /// <param name="vb">Bitma to draw on.</param>
         /// <param name="ch">Character to draw.</param>
         /// <param name="xc">X coord of upper-left pixel.</param>
@@ -168,5 +171,9 @@ namespace PluginCommon {
                 yc++;
             }
         }
+
+        // Character cell dimensions.
+        public static int CharWidth { get { return 8; } }
+        public static int CharHeight { get { return 8; } }
     }
 }
