@@ -41,6 +41,11 @@ namespace RuntimeData.Apple {
     /// CCBBBAAA.  AAA and BBB specify a direction (up/right/down/left) and whether or
     /// not to plot a point.  CC cannot specify whether to plot and cannot move up (a 00
     /// in CC means "do nothing").
+    ///
+    /// TODO: optionally render as it would on the hi-res screen.  Some shapes draw with
+    ///   HCOLOR=white but use alternating vertical lines to render multiple colors.
+    /// TODO: support ROT, using Applesoft-style ugly rotation handling.  Could also support
+    ///   SCALE but that's only interesting w.r.t. hi-res color changes.
     /// </remarks>
     public class VisShapeTable : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
         // IPlugin
@@ -52,6 +57,7 @@ namespace RuntimeData.Apple {
 
         // Visualization identifiers; DO NOT change or projects that use them will break.
         private const string VIS_GEN_SHAPE_TABLE = "apple2-shape-table";
+        private const string VIS_GEN_SHAPE_TABLE_SHAPE = "apple2-shape-table-shape";
 
         private const string P_OFFSET = "offset";
         private const string P_INDEX = "index";
@@ -64,6 +70,11 @@ namespace RuntimeData.Apple {
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Image index",
                         P_INDEX, typeof(int), 0, 256, 0, 0),
+                }),
+            new VisDescr(VIS_GEN_SHAPE_TABLE_SHAPE, "Apple II Shape Table Shape", VisDescr.VisType.Bitmap,
+                new VisParamDescr[] {
+                    new VisParamDescr("File offset (hex)",
+                        P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                 }),
         };
 
@@ -93,14 +104,16 @@ namespace RuntimeData.Apple {
                 ReadOnlyDictionary<string, object> parms) {
             switch (descr.Ident) {
                 case VIS_GEN_SHAPE_TABLE:
-                    return GenerateBitmap(parms);
+                    return GenerateBitmapFromTable(parms);
+                case VIS_GEN_SHAPE_TABLE_SHAPE:
+                    return GenerateBitmapFromShape(parms);
                 default:
                     mAppRef.ReportError("Unknown ident " + descr.Ident);
                     return null;
             }
         }
 
-        private IVisualization2d GenerateBitmap(ReadOnlyDictionary<string, object> parms) {
+        private IVisualization2d GenerateBitmapFromTable(ReadOnlyDictionary<string, object> parms) {
             int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
             int shapeIndex = Util.GetFromObjDict(parms, P_INDEX, 0);
 
@@ -123,8 +136,20 @@ namespace RuntimeData.Apple {
             }
 
             int shapeOffset = mFileData[offOffset] | (mFileData[offOffset + 1] << 8);
-            // can't know the length of the shape ahead of time; will need to check as we go
+            return GenerateBitmap(shapeOffset);
+        }
 
+        private IVisualization2d GenerateBitmapFromShape(ReadOnlyDictionary<string, object> parms) {
+            int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
+            if (offset < 0 || offset >= mFileData.Length) {
+                mAppRef.ReportError("Invalid parameter");
+                return null;
+            }
+            return GenerateBitmap(offset);
+        }
+
+        private IVisualization2d GenerateBitmap(int shapeOffset) {
+            // can't know the length of the shape ahead of time; will need to check as we go
             int xmin, xmax, ymin, ymax;
             xmin = ymin = 1000;
             xmax = ymax = -1000;

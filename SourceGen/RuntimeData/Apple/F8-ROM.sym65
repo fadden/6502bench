@@ -7,6 +7,7 @@
 
 *SYNOPSIS Symbols from the Apple II monitor ROM
 
+; zero page usage
 MON_WNDLEFT     @ $20       ;left column of scroll window
 MON_WNDWDTH     @ $21       ;width of scroll window
 MON_WNDTOP      @ $22       ;top of scroll window
@@ -43,6 +44,7 @@ MON_A5H         @ $45       ;general purpose
 MON_RNDL        @ $4E       ;low byte of KEYIN "random" value
 MON_RNDH        @ $4F       ;high byte of KEYIN "random" value
 
+; page 3 vectors
 MON_BRKV        @ $03F0  2  ;address of BRK handler
 MON_SOFTEVEC    @ $03F2  2  ;address of RESET handler
 MON_PWREDUP     @ $03F4     ;power-up RESET checksum
@@ -50,6 +52,7 @@ MON_USRADDR     @ $03F8  3  ;jump to function that handles monitor Ctrl-Y
 MON_NMIVEC      @ $03FB  3  ;jump to function that handles NMI
 MON_IRQADDR     @ $03FE  2  ;address of IRQ handler
 
+; monitor entry points
 MON_PLOT        @ $F800     ;lo-res plot at X=Y-reg, Y=Acc
 MON_PLOT1       @ $F80E     ;lo-res plot at X=Y-reg, Y per GBASL/H
 MON_HLINE       @ $F819     ;lo-res horiz line at Y=Acc with X from $2c
@@ -118,7 +121,7 @@ MON_NXTA1       @ $FCBA     ;increment A1; set carry if A1 >= A2 before inc
 MON_HEADR       @ $FCC9     ;write cassette sync
 MON_WRTAPE      @ $FCE5     ;casssette write
 MON_RD2BIT      @ $FCFA     ;cassette read
-MON_RDKEY       @ $FD0C     ;read key
+MON_RDKEY       @ $FD0C     ;read key from input device via $38-39
 MON_FD10        @ $FD10
 MON_RDKEY1      @ $FD18
 MON_KEYIN       @ $FD1B     ;get next key input from keyboard hardware
@@ -132,8 +135,8 @@ MON_CROUT       @ $FD8E     ;print a carriage return
 MON_PRA1        @ $FD92     ;print CR, then hex of A1H/A1L, then minus sign
 MON_PRBYTE      @ $FDDA     ;print Acc as two-digit hex number
 MON_PRHEX       @ $FDE3     ;print right nibble of Acc as single hex digit
-MON_COUT        @ $FDED     ;print Acc to output device
-MON_COUT1       @ $FDF0
+MON_COUT        @ $FDED     ;print Acc to output device via $36-37
+MON_COUT1       @ $FDF0     ;print Acc to screen
 MON_COUTZ       @ $FDF6
 MON_IDROUTINE   @ $FE1F
 MON_MOVE        @ $FE2C     ;move bytes from A1 to A4 until A1=A2
@@ -163,3 +166,8 @@ MON_GETNUM      @ $FFA7
 MON_NXTCHR      @ $FFAD     ;part of GETLN input loop
 MON_TOSUB       @ $FFBE
 MON_ZMODE       @ $FFC7
+
+; locations defined by the 6502
+MON_6502_NMI    @ $FFFA     ;6502 NMI vector
+MON_6502_RESET  @ $FFFC     ;6502 reset vector
+MON_6502_IRQ    @ $FFFE     ;6502 IRQ vector

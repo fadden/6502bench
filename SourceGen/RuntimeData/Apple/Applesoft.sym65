@@ -74,10 +74,42 @@ BAS_FRMEVL      @ $DD7B     ;eval expr at TXTPTR (num/str), result into FAC
 BAS_SYN_ERROR   @ $DEC9     ;throw SYNTAX ERROR
 BAS_CHKCOM      @ $DEBE     ;checks TXTPTR for comma
 BAS_ILLQ_ERROR  @ $E199     ;throw ILLEGAL QUANTITY ERROR
-BAS_GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
+BAS_GIVAYF      @ $E2F2     ;convert 16-bit (A,Y) to float, store in FAC
+BAS_SNGFLT      @ $E301     ;convert 8-bit int (Y) to FLOAT
 BAS_GETBYT      @ $E6F8     ;gets byte, in X/FACLO
-BAS_QINT        @ $EBF2     ;converts FP value in FAC to int in FAC+1..FAC+4
+BAS_GETADR      @ $E752     ;convert FAC to 2-byte integer in LINNUM
+BAS_FSUB        @ $E7A7     ;FAC = (Y,A) - FAC
+BAS_FADD        @ $E7BE     ;FAC = (Y,A) + FAC
+BAS_CON_ONE     @ $E913     ;constant value 1.0
+BAS_FMULT       @ $E97F     ;FAC = (Y,A) * FAC
+BAS_LOAD_ARG_FROM_YA @ $E9E3 ;unpack 5-byte val at (Y,A) into ARG
+BAS_MUL10       @ $EA39     ;multiply FAC by 10
+BAS_CON_TEN     @ $EA50     ;constant value 10.0
+BAS_FDIV        @ $EA66     ;FAC = (Y,A) / FAC
+BAS_LOAD_FAC_FROM_YA @ $EAF9 ;unpack 5-byte val at (Y,A) into FAC
+BAS_STORE_FAC_AT_YX_ROUNDED @ $EB2B ;round FAC, store at (Y,X)
+BAS_SIGN        @ $EB82     ;test FAC sign; <,=,> 0 -> A={-1,0,1}
+BAS_FLOAT       @ $EB93     ;convert value in A to float in FAC
+BAS_ABS         @ $EBAF     ;changes sign of FAC to +
+BAS_FCOMP       @ $EBB2     ;cmp (Y,A) with FAC; <,=,> -> A={1,0,-1}
+BAS_QINT        @ $EBF2     ;convert FAC to big-endian int in FAC+1..FAC+4
+BAS_INT         @ $EC23     ;FAC = floor(FAC)
+BAS_LINPRT      @ $ED24     ;print float at (A,X) as decimal integer
+BAS_PRINT_FAC   @ $ED2E     ;print FAC to screen
+BAS_CON_HALF    @ $EE64     ;constant value 0.5
+BAS_FPWRT       @ $EE97     ;compute exponentiation
+BAS_NEGOP       @ $EED0     ;negate value in FAC
+BAS_RND         @ $EFAE     ;generate random number
+BAS_CON_PI_HALF @ $F066     ;constant value PI/2
+BAS_CON_PI_DOUB @ $F06B     ;constant value PI*2
+BAS_QUARTER     @ $F070     ;constant value 0.25
+BAS_HGR         @ $F3E2     ;switch to hi-res mixed-mode and clear
+BAS_HPOSN       @ $F411     ;set hi-res position; horiz=(Y,X) vert=A
+BAS_HPLOT0      @ $F457     ;plot point; horiz=(Y,X), vert=A
+BAS_HGLIN       @ $F53A     ;draw line from last point to (A,X),Y
+BAS_DRAW0       @ $F601     ;draw a shape from addr (Y,X)
 BAS_HFNS        @ $F6B9     ;get hi-res x/y for hplot
+BAS_HCOLOR      @ $F6E9     ;set hi-res color
 
 ;
 ; Applesoft BASIC tokens.
