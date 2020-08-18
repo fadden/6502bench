@@ -168,6 +168,6 @@ MON_TOSUB       @ $FFBE
 MON_ZMODE       @ $FFC7
 
 ; locations defined by the 6502
-MON_6502_NMI    @ $FFFA     ;6502 NMI vector
-MON_6502_RESET  @ $FFFC     ;6502 reset vector
-MON_6502_IRQ    @ $FFFE     ;6502 IRQ vector
+MON_6502_NMI    @ $FFFA 2   ;6502 NMI vector
+MON_6502_RESET  @ $FFFC 2   ;6502 reset vector
+MON_6502_IRQ    @ $FFFE 2   ;6502 IRQ vector

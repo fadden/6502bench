@@ -196,7 +196,11 @@ namespace RuntimeData.Apple {
                 mAppRef.ReportError("Invalid column stride");
                 return null;
             }
-            if (rowStride < byteWidth * colStride - (colStride - 1) || rowStride > MAX_DIM) {
+            // This used to be limited to rowStride >= byteWidth * colStride - (colStride - 1),
+            // but that doesn't allow for a 2x8 bitmap in column-major order.  In that case
+            // you want a row stride of 1 (because each row starts 1 byte farther on) and a
+            // column stride of 8 (because each column is separated by 8 bytes).
+            if (rowStride < 1 || rowStride > MAX_DIM) {
                 mAppRef.ReportError("Invalid row stride");
                 return null;
             }
@@ -286,12 +290,17 @@ namespace RuntimeData.Apple {
                 return null;
             }
 
-            // Set the number of horizontal cells to 16 or 32 based on the number of elements.
+            // Set the number of horizontal cells.  For small counts we try to make it square,
+            // for larger counts we use a reasonable power of 2.
             int hcells;
             if (count > 128) {
                 hcells = 32;
-            } else {
+            } else if (count >= 64) {
                 hcells = 16;
+            } else if (count >= 32) {
+                hcells = 8;
+            } else {
+                hcells = (int)Math.Sqrt(count + 1);
             }
 
             int vcells = (count + hcells - 1) / hcells;
