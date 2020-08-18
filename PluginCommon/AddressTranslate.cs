@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 using System;
-
+using System.Runtime.Serialization;
 using CommonUtil;
 
 namespace PluginCommon {
@@ -93,8 +93,14 @@ namespace PluginCommon {
     /// <summary>
     /// Exception thrown by AddressTranslate's GetDataAtAddress().
     /// </summary>
+    [Serializable]
     public class AddressTranslateException : Exception {
         public AddressTranslateException() : base() { }
         public AddressTranslateException(string msg) : base(msg) { }
+
+        protected AddressTranslateException(SerializationInfo info, StreamingContext context) :
+                base(info, context) {
+            // base class handles everything
+        }
     }
 }
