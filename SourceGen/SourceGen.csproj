@@ -98,6 +98,9 @@
       <DependentUpon>OmfViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\VirtualHexDump.cs" />
+    <Compile Include="Tools\WpfGui\Apple2ScreenChart.xaml.cs">
+      <DependentUpon>Apple2ScreenChart.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tools\WpfGui\FileConcatenator.xaml.cs">
       <DependentUpon>FileConcatenator.xaml</DependentUpon>
     </Compile>
@@ -296,6 +299,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tools\Omf\WpfGui\OmfViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tools\WpfGui\Apple2ScreenChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

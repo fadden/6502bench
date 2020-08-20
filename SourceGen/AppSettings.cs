@@ -109,6 +109,9 @@ namespace SourceGen {
         public const string HEXD_ASCII_ONLY = "hexd-ascii-only";
         public const string HEXD_CHAR_CONV = "hexd-char-conv1";
 
+        // Apple II screen chart viewer settings.
+        public const string A2SC_MODE = "a2sc-mode";
+
         // ASCII chart viewer settings.
         public const string ASCCH_MODE = "ascch-mode1";
 

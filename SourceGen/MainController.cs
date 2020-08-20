@@ -96,6 +96,16 @@ namespace SourceGen {
         public bool IsAsciiChartOpen { get { return mAsciiChartDialog != null; } }
 
         /// <summary>
+        /// Apple II screen chart window.  Not tied to the project.
+        /// </summary>
+        private Tools.WpfGui.Apple2ScreenChart mApple2ScreenChartDialog;
+
+        /// <summary>
+        /// Returns true if the ASCII chart window is currently open.
+        /// </summary>
+        public bool IsApple2ScreenChartOpen { get { return mApple2ScreenChartDialog != null; } }
+
+        /// <summary>
         /// Instruction chart reference window.  Not tied to the project.
         /// </summary>
         private Tools.WpfGui.InstructionChart mInstructionChartDialog;
@@ -1315,6 +1325,7 @@ namespace SourceGen {
 
             // WPF won't exit until all windows are closed, so any unowned windows need
             // to be cleaned up here.
+            mApple2ScreenChartDialog?.Close();
             mAsciiChartDialog?.Close();
             mInstructionChartDialog?.Close();
             mHexDumpDialog?.Close();
@@ -4160,6 +4171,20 @@ namespace SourceGen {
         #endregion Info panel
 
         #region Tools
+
+        public void ToggleApple2ScreenChart() {
+            if (mApple2ScreenChartDialog == null) {
+                // Create without owner so it doesn't have to be in front of main window.
+                mApple2ScreenChartDialog = new Tools.WpfGui.Apple2ScreenChart(null, mFormatter);
+                mApple2ScreenChartDialog.Closing += (sender, e) => {
+                    Debug.WriteLine("Apple II screen chart closed");
+                    mApple2ScreenChartDialog = null;
+                };
+                mApple2ScreenChartDialog.Show();
+            } else {
+                mApple2ScreenChartDialog.Close();
+            }
+        }
 
         public void ToggleAsciiChart() {
             if (mAsciiChartDialog == null) {

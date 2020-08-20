@@ -1369,6 +1369,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.SliceFiles();
         }
 
+        private void ToggleApple2ScreenChartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ToggleApple2ScreenChart();
+        }
+
         private void ToggleAsciiChartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.ToggleAsciiChart();
         }
@@ -1571,6 +1575,7 @@ namespace SourceGen.WpfGui {
             toggleDataScanMenuItem.IsChecked = mMainCtrl.IsAnalyzeUncategorizedDataEnabled;
         }
         private void ToolsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
+            toggleApple2ScreenChartMenuItem.IsChecked = mMainCtrl.IsApple2ScreenChartOpen;
             toggleAsciiChartMenuItem.IsChecked = mMainCtrl.IsAsciiChartOpen;
             toggleInstructionChartMenuItem.IsChecked = mMainCtrl.IsInstructionChartOpen;
         }

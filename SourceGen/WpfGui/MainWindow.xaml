@@ -185,6 +185,7 @@ limitations under the License.
             <RoutedUICommand x:Key="ShowFileHexDumpCmd" Text="File Hex Dump..."/>
             <RoutedUICommand x:Key="ShowHexDumpCmd" Text="Show Hex Dump"/>
             <RoutedUICommand x:Key="SliceFilesCmd" Text="Slice Files..."/>
+            <RoutedUICommand x:Key="ToggleApple2ScreenChartCmd" Text="Apple II Screen Chart"/>
             <RoutedUICommand x:Key="ToggleAsciiChartCmd" Text="ASCII Chart"/>
             <RoutedUICommand x:Key="ToggleDataScanCmd" Text="Toggle Data Scan">
                 <RoutedUICommand.InputGestures>
@@ -326,6 +327,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="ShowHexDumpCmd_Executed"/>
         <CommandBinding Command="{StaticResource SliceFilesCmd}"
                         Executed="SliceFilesCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ToggleApple2ScreenChartCmd}"
+                        Executed="ToggleApple2ScreenChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleAsciiChartCmd}"
                         Executed="ToggleAsciiChartCmd_Executed"/>
         <CommandBinding Command="{StaticResource ToggleDataScanCmd}"
@@ -447,6 +450,8 @@ limitations under the License.
                           Command="{StaticResource ToggleInstructionChartCmd}" IsCheckable="True"/>
                 <MenuItem Name="toggleAsciiChartMenuItem"
                           Command="{StaticResource ToggleAsciiChartCmd}" IsCheckable="True"/>
+                <MenuItem Name="toggleApple2ScreenChartMenuItem"
+                          Command="{StaticResource ToggleApple2ScreenChartCmd}" IsCheckable="True"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource ShowFileHexDumpCmd}"/>
                 <MenuItem Command="{StaticResource ConcatenateFilesCmd}"/>
