@@ -124,14 +124,14 @@ SETIOUDIS       > $C07E     ;W disable IOU
 RDDHIRES        < $C07F     ;R status of double hi-res
 CLRIOUDIS       > $C07F     ;W enable IOU
 
-;                 $C080     ;RW read RAM bank 2, write off
+LCBANK2_RW      @ $C080     ;RW read RAM bank 2, write off
 ROMIN           @ $C081     ;RWx2 read ROM, write RAM bank 2
 ROMIN_RO        @ $C082     ;RW read ROM, no write
 LCBANK2         @ $C083     ;RWx2 read/write RAM bank 2
 ; C084-C087 repeats
-;                 $C088     ;RW read RAM bank 1, write off
-;                 $C089     ;RW read ROM, write RAM bank 1
-;                 $C08A     ;RW read ROM, no write
+LCBANK1_RW      @ $C088     ;RW read RAM bank 1, write off
+ROMIN1          @ $C089     ;RW read ROM, write RAM bank 1
+ROMIN1_RO       @ $C08A     ;RW read ROM, no write
 LCBANK1         @ $C08B     ;RWx2 read/write RAM bank 1
 ; C08C-C08F repeats
 

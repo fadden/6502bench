@@ -124,9 +124,13 @@ SETIOUDIS_GS    > $E0C07E   ;W disable IOU
 RDDHIRES_GS     < $E0C07F   ;R status of double hi-res
 CLRIOUDIS_GS    > $E0C07F   ;W enable IOU
 
+LCBANK2_RW_GS   @ $E0C080   ;RW read RAM bank 2, write off
 ROMIN_GS        @ $E0C081   ;RWx2 read ROM, write RAM bank 2
 ROMIN_RO_GS     @ $E0C082   ;RW read ROM, no write
 LCBANK2_GS      @ $E0C083   ;RWx2 read/write RAM bank 2
+LCBANK1_RW_GS   @ $E0C088   ;RW read RAM bank 1, write off
+ROMIN1_GS       @ $E0C089   ;RWx2 read ROM, write RAM bank 1
+ROMIN1_RO_GS    @ $E0C08A   ;RW read ROM, no write
 LCBANK1_GS      @ $E0C08B   ;RWx2 read/write RAM bank 1
 
 CLRROM_GS       @ $E0CFFF   ;disable slot C8 ROM

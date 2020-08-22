@@ -295,7 +295,7 @@ namespace RuntimeData.Apple {
             int hcells;
             if (count > 128) {
                 hcells = 32;
-            } else if (count >= 64) {
+            } else if (count > 64) {
                 hcells = 16;
             } else if (count >= 32) {
                 hcells = 8;
