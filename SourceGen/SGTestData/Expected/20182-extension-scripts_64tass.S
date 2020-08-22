@@ -91,9 +91,18 @@ Next1   jsr     L10BA
 
 _L10CF  sec
         jsr     L10BF
-        rts
+        clc
+        brk     #$02
+        .word   data02
+        bcc     _L10DE
+        bcs     _L10DE
 
-        .fill   300,$00
+        .byte   $00
+        .byte   $80
+
+_L10DE  rts
+
+        .fill   289,$00
 
         .logical $1800
 L1800   jsr     PrintInlineNullString

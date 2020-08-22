@@ -92,9 +92,18 @@ Next1:   jsr     L10BA
 
 @L10CF:  sec
          jsr     L10BF
-         rts
+         clc
+         brk     $02
+         .word   data02
+         bcc     @L10DE
+         bcs     @L10DE
 
-         .res    300,$00
+         .byte   $00
+         .byte   $80
+
+@L10DE:  rts
+
+         .res    289,$00
 
 ;         .segment "SEG001"
          .org    $1800

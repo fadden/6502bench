@@ -121,6 +121,18 @@ Next1   jsr     TestNC1
 PushThing
         sec
         jsr     TestNC2
+
+
+; Make sure flags get marked as indeterminate across inline BRK.
+; Also exercises formatting the same block twice.
+        clc
+        brk     $02
+        dw      data02
+        bcc     :BrkNext
+        bcs     :BrkNext
+        brk     $80
+:BrkNext
+
         rts
 
 

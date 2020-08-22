@@ -162,7 +162,8 @@ namespace Asm65 {
         /// will have the value TriState16.UNSPECIFIED.
         /// 
         /// This is not equivalent to the code flow status flag updater -- this just notes which
-        /// flags are modified directly by the instruction.
+        /// flags are modified directly by the instruction.  This is used for display in the
+        /// info window and instruction chart, not analysis.
         /// </summary>
         public StatusFlags FlagsAffected { get; private set; }
 
@@ -661,6 +662,10 @@ namespace Asm65 {
             // that RTS/RTLs back to here, but that's generally hard to do, especially
             // since this will often be used to call into external code.  The easiest
             // thing to do is scramble CZVN and leave IDXM alone.
+            //
+            // We also use this for BRK, because it either halts execution, in which
+            // case the flags don't matter, or it's performing some sort of special action
+            // (e.g. Apple /// SOS call) and the flags are altered.
             return FlagUpdater_NVZC(flags, immVal, ref condBranchTakenFlags);
         }
         private static StatusFlags FlagUpdater_Z(StatusFlags flags, int immVal,
@@ -1003,11 +1008,12 @@ namespace Asm65 {
             // The processor status flags have the 'B' flag set on 6502/65C02/65816 emu mode
             // when pushed onto the stack, but it doesn't affect the actual processor status
             // flag in the code executed next.
-            //
-            // We don't set a StatusFlagUpdater because the flags are only changed for the
-            // software break handler function.  If we could actually track this into that,
-            // we'd need to configure the flags appropriately based on CPU type.
-            FlagsAffected = FlagsAffected_DI
+            FlagsAffected = FlagsAffected_DI,
+            // We don't try to track execution into the software break routine, but we do
+            // handle operating system calls that return with the flags altered.  So if BRK
+            // does continue, we want to mark NVZC as indeterminate, just like we would for
+            // a general subroutine call.
+            StatusFlagUpdater = FlagUpdater_Subroutine
         };
         private static OpDef OpBRL = new OpDef() {
             Mnemonic = OpName.BRL,

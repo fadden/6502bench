@@ -89,9 +89,18 @@ Next1   jsr     L10BA
 
 @L10CF  sec
         jsr     L10BF
-        rts
+        clc
+        !byte   $00,$02
+        !word   data02
+        bcc     @L10DE
+        bcs     @L10DE
 
-        !fill   300,$00
+        !byte   $00
+        !byte   $80
+
+@L10DE  rts
+
+        !fill   289,$00
 
         } ;!pseudopc
         !pseudopc $1800 {

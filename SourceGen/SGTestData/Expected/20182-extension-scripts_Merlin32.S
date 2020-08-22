@@ -83,9 +83,18 @@ Next1    jsr   L10BA
 
 :L10CF   sec
          jsr   L10BF
-         rts
+         clc
+         brk   $02
+         dw    data02
+         bcc   :L10DE
+         bcs   :L10DE
 
-         ds    300
+         dfb   $00
+         dfb   $80
+
+:L10DE   rts
+
+         ds    289
 
          org   $1800
 L1800    jsr   PrintInlineNullString
