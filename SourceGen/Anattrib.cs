@@ -173,6 +173,9 @@ namespace SourceGen {
             }
         }
         public bool NoContinueScript {
+            get {
+                return (mAttribFlags & AttribFlags.NoContinueScript) != 0;
+            }
             set {
                 if (value) {
                     mAttribFlags |= AttribFlags.NoContinueScript;

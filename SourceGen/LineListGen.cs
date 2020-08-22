@@ -916,6 +916,7 @@ namespace SourceGen {
             //Debug.WriteLine("GenerateRange [+" + startOffset.ToString("x6") + ",+" +
             //    endOffset.ToString("x6") + "]");
 
+
             Debug.Assert(startOffset >= 0);
             Debug.Assert(endOffset >= startOffset);
 
@@ -948,6 +949,8 @@ namespace SourceGen {
             if (startOffset > 0) {
                 int baseOff = DataAnalysis.GetBaseOperandOffset(mProject, startOffset - 1);
                 if (mProject.GetAnattrib(baseOff).DoesNotContinue) {
+                    // TODO(someday): ideally the blank line would come after inline data
+                    //   that follows a no-continue JSR/JSL/BRK
                     addBlank = true;
                 }
             }

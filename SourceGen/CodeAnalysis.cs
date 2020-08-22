@@ -691,8 +691,11 @@ namespace SourceGen {
                     }
                 }
 
-                // On first visit, check for BRK inline call.
-                if (firstVisit) {
+                // On every visit, check for BRK inline call.  The default behavior for BRK
+                // is no-continue, the opposite of JSR/JSL.
+                // TODO: Ideally we'd have an explicit flag (maybe make NoContinueScript a
+                // tri-state) to avoid calling the plugin repeatedly.
+                //if (firstVisit) {
                     if (op == OpDef.OpBRK_Implied || op == OpDef.OpBRK_StackInt) {
                         bool noContinue = CheckForInlineCall(op, offset, !doContinue);
                         if (!noContinue) {
@@ -700,7 +703,7 @@ namespace SourceGen {
                             doContinue = true;
                         }
                     }
-                }
+                //}
 
                 mAnattribs[offset].NoContinue = !doContinue;
                 if (mAnattribs[offset].DoesNotContinue) {
@@ -734,6 +737,9 @@ namespace SourceGen {
                             break;
                         }
                     }
+                } else if (mAnattribs[offset].NoContinueScript) {
+                    // Wanted to stop last time.
+                    break;
                 }
 
                 // Are we about to walk into inline data?
@@ -982,6 +988,7 @@ namespace SourceGen {
 
         /// <summary>
         /// Queries script extensions to check to see if a JSR or JSL is actually an inline call.
+        /// The script may format things.
         /// </summary>
         /// <param name="op">Instruction being examined.</param>
         /// <param name="offset">File offset of start of instruction.</param>
