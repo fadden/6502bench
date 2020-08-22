@@ -2,9 +2,10 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Source: SOS programmer's guide
-;         SOS Reference Manual, Volume 2 (Apple 1982)
+;         SOS Reference Manual, Volume 1 & 2 (Apple 1982)
+;         Undocumented Apple /// SOS Features
 
-*SYNOPSIS Apple /// Sophisticated Operating System constants.
+*SYNOPSIS Apple III Sophisticated Operating System constants.
 
 ; SOS MLI function codes.
 *TAG SOS-MLI-Functions 
@@ -21,12 +22,12 @@ SOS_GET_FENCE     = $61
 SOS_SET_TIME      = $62
 SOS_GET_TIME      = $63
 SOS_GET_ANALOG    = $64
-; SOS ref: "TERMINATE"
+SOS_TERMINATE     = $65
 ; SOS ref: "No errors are possible. This is an excellent call for beginners."
-SOS_QUIT          = $65
 
-SOS_READBLOCK     = $80
-SOS_WRITEBLOCK    = $81
+; SOS ref does not describe D_READ and D_WRITE; see Undocumented Features doc.
+SOS_D_READ        = $80
+SOS_D_WRITE       = $81
 SOS_D_STATUS      = $82
 SOS_D_CONTROL     = $83
 SOS_GET_DEV_NUM   = $84
@@ -42,10 +43,8 @@ SOS_SET_PREFIX    = $C6
 SOS_GET_PREFIX    = $C7
 SOS_OPEN          = $C8
 SOS_NEWLINE       = $C9
-; SOS ref: "READ"
-SOS_READFILE      = $CA
-; SOS ref: "WRITE"
-SOS_WRITEFILE     = $CB
+SOS_READ          = $CA
+SOS_WRITE         = $CB
 SOS_CLOSE         = $CC
 SOS_FLUSH         = $CD
 SOS_SET_MARK      = $CE
@@ -54,3 +53,75 @@ SOS_SET_EOF       = $D0
 SOS_GET_EOF       = $D1
 SOS_SET_LEVEL     = $D2
 SOS_GET_LEVEL     = $D3
+
+*TAG
+
+;
+; SOS call error codes.
+;
+; $01-05: problem with form of call, parameters, or pointers
+; $10-2f: device call errors
+; $30-3f: problem with particular device
+; $40-5a: file call errors
+; $70-7f: utility call errors
+; $e0-ef: memory call errors
+;
+SOS_BADSCNUM      = $01
+SOS_BADCZPAGE     = $02
+SOS_BADXBYTE      = $03
+SOS_BADSCPCNT     = $04
+SOS_BADSCBNDS     = $05
+
+SOS_DNFERR        = $10
+SOS_BADDNUM       = $11
+SOS_BADREQCODE    = $20
+SOS_BADCTL        = $21
+SOS_BADCTLPARM    = $22
+SOS_NOTOPEN       = $23
+SOS_NORESC        = $25
+SOS_BADOP         = $26
+SOS_IOERR         = $27
+SOS_CRCERR        = $2a
+SOS_NOWRITE       = $2b
+SOS_BYTECNT       = $2c
+SOS_BLKNUM        = $2d
+SOS_DISKSW        = $2e
+
+SOS_BADPATH       = $40
+SOS_CFCBFULL      = $41
+SOS_FCBFULL       = $42
+SOS_BADREFNUM     = $43
+SOS_PNFERR        = $44
+SOS_VNFERR        = $45
+SOS_FNFERR        = $46
+SOS_DUPERR        = $47
+SOS_OVRERR        = $48
+SOS_DIRFULL       = $49
+SOS_CPTERR        = $4a
+SOS_TYPERR        = $4b
+SOS_EOFERR        = $4c
+SOS_POSNERR       = $4d
+SOS_ACCSERR       = $4e
+SOS_BTSERR        = $4f
+SOS_FILBUSY       = $50
+SOS_DIRERR        = $51
+SOS_NOTSOS        = $52
+SOS_BADLSTCNT     = $53
+SOS_OUTOFMEM      = $54
+SOS_BUFTBLFULL    = $55
+SOS_BADSYSBUF     = $56
+SOS_DUPVOL        = $57
+SOS_NOTBLKDEV     = $58
+SOS_LVLERR        = $59
+SOS_BITMAPADR     = $5a
+
+SOS_BADJMODE      = $70
+
+SOS_BADBKPG       = $e0
+SOS_SEGRQDN       = $e1
+SOS_SEGTBLFULL    = $e2
+SOS_BADSEGNUM     = $e3
+SOS_SEGNOTFND     = $e4
+SOS_BADSRCHMODE   = $e5
+SOS_BADCHGMODE    = $e6
+SOS_BADPGCNT      = $e7

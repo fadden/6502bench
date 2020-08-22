@@ -15,7 +15,6 @@
  */
 using System;
 using System.Collections.Generic;
-
 using PluginCommon;
 
 /*
@@ -69,7 +68,7 @@ namespace RuntimeData.Apple {
         private static Param MISC2 = new Param(DataType.NumericLE, DataSubType.Hex, 2);
         private static Param NULL3 = new Param(DataType.NumericLE, DataSubType.Hex, 3);
 
-        private Dictionary<int, Param[]> ParamDescrs = new Dictionary<int, Param[]>() {
+        private Dictionary<int, Param[]> mParamDescrs = new Dictionary<int, Param[]>() {
             { 0x40,     // ALLOC_INTERRUPT
                 new Param[] { PARAM_COUNT, MISC1, CODEPTR }
             },
@@ -193,8 +192,8 @@ namespace RuntimeData.Apple {
                 // match!
 
                 byte req = mFileData[offset + 3];
-                int blockAddr = Util.GetWord(mFileData, offset + 4, 2, false);
                 if (VERBOSE) {
+                    int blockAddr = Util.GetWord(mFileData, offset + 4, 2, false);
                     mAppRef.DebugLog("P8 MLI call detected at +" + offset.ToString("x6") +
                         ", cmd=$" + req.ToString("x2") + " addr=$" + blockAddr.ToString("x4"));
                 }
@@ -211,35 +210,41 @@ namespace RuntimeData.Apple {
                     DataSubType.Address, null);
 
                 Param[] parms;
-                if (ParamDescrs.TryGetValue(req, out parms)) {
-                    // Try to format the parameter block.  Start by figuring out how long it is.
-                    int blockLen = 0;
-                    foreach (Param parm in parms) {
-                        blockLen += parm.Length;
-                    }
-
-                    // Locate it and verify that the entire thing fits in the file.
-                    int blockOff = mAddrTrans.AddressToOffset(offset, blockAddr);
-                    if (Util.IsInBounds(mFileData, blockOff, blockLen)) {
-                        if (VERBOSE) {
-                            mAppRef.DebugLog("Formatting P8 block at +" + blockOff.ToString("x6"));
-                        }
-
-                        foreach (Param parm in parms) {
-                            // We could try to dereference pathname buffers to see if it's a
-                            // fixed value and not an empty buffer, but it's hard for us to
-                            // reliably tell the difference between a length-limited pathname
-                            // and junk.  If the length byte is bad, we run the risk of lumping
-                            // a bunch of stuff into the pathname buffer.
-                            mAppRef.SetInlineDataFormat(blockOff, parm.Length, parm.Type,
-                                parm.SubType, null);
-                            blockOff += parm.Length;
-                        }
-                    }
+                if (mParamDescrs.TryGetValue(req, out parms)) {
+                    FormatParameterBlock(offset, parms);
                 }
 
                 if (req == 0x65) {          // QUIT call
                     noContinue = true;
+                }
+            }
+        }
+
+        private void FormatParameterBlock(int offset, Param[] parms) {
+            int blockAddr = Util.GetWord(mFileData, offset + 4, 2, false);
+
+            // Try to format the parameter block.  Start by figuring out how long it is.
+            int blockLen = 0;
+            foreach (Param parm in parms) {
+                blockLen += parm.Length;
+            }
+
+            // Locate it and verify that the entire thing fits in the file.
+            int blockOff = mAddrTrans.AddressToOffset(offset, blockAddr);
+            if (Util.IsInBounds(mFileData, blockOff, blockLen)) {
+                if (VERBOSE) {
+                    mAppRef.DebugLog("Formatting P8 block at +" + blockOff.ToString("x6"));
+                }
+
+                foreach (Param parm in parms) {
+                    // We could try to dereference pathname buffers to see if it's a
+                    // fixed value and not an empty buffer, but it's hard for us to
+                    // reliably tell the difference between a length-limited pathname
+                    // and junk.  If the length byte is bad, we run the risk of lumping
+                    // a bunch of stuff into the pathname buffer.
+                    mAppRef.SetInlineDataFormat(blockOff, parm.Length, parm.Type,
+                        parm.SubType, null);
+                    blockOff += parm.Length;
                 }
             }
         }
