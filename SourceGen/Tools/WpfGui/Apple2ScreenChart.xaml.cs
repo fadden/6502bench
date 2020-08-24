@@ -31,6 +31,7 @@ namespace SourceGen.Tools.WpfGui {
     public partial class Apple2ScreenChart : Window {
         private const int NUM_HI_RES_ROWS = 192;
         private const int NUM_TEXT_ROWS = 24;
+        private const int NUM_TEXT_HOLES = 8;
         private Formatter mFormatter;
 
         private static int[] sHiResRowsByAddr = GenerateHiResRowsByAddr();
@@ -42,7 +43,7 @@ namespace SourceGen.Tools.WpfGui {
             HiRes2_L,
             HiRes1_A,
             HiRes2_A,
-            Text
+            TextWithHoles
         };
         public class ChartModeItem {
             public string Name { get; private set; }
@@ -68,7 +69,7 @@ namespace SourceGen.Tools.WpfGui {
                 new ChartModeItem((string)FindResource("str_HiRes2_L"), ChartMode.HiRes2_L),
                 new ChartModeItem((string)FindResource("str_HiRes1_A"), ChartMode.HiRes1_A),
                 new ChartModeItem((string)FindResource("str_HiRes2_A"), ChartMode.HiRes2_A),
-                new ChartModeItem((string)FindResource("str_Text"), ChartMode.Text),
+                new ChartModeItem((string)FindResource("str_TextWithHoles"), ChartMode.TextWithHoles),
             };
         }
 
@@ -122,7 +123,7 @@ namespace SourceGen.Tools.WpfGui {
                 case ChartMode.HiRes2_A:
                     text = DrawHiRes(0x4000, false);
                     break;
-                case ChartMode.Text:
+                case ChartMode.TextWithHoles:
                     text = DrawText();
                     break;
                 default:
@@ -161,8 +162,9 @@ namespace SourceGen.Tools.WpfGui {
             sb.Append(hdr);
             sb.Append(div);
             sb.Append(hdr);
-            sb.Append(eol);
             for (int i = 0; i < NUM_HI_RES_ROWS / 4; i++) {
+                sb.Append(eol);
+
                 DrawHiResEntry(baseAddr, byLine, i, sb);
                 sb.Append(div);
                 DrawHiResEntry(baseAddr, byLine, i + NUM_HI_RES_ROWS / 4, sb);
@@ -170,7 +172,6 @@ namespace SourceGen.Tools.WpfGui {
                 DrawHiResEntry(baseAddr, byLine, i + (NUM_HI_RES_ROWS * 2) / 4, sb);
                 sb.Append(div);
                 DrawHiResEntry(baseAddr, byLine, i + (NUM_HI_RES_ROWS * 3) / 4, sb);
-                sb.Append(eol);
             }
             return sb.ToString();
         }
@@ -226,26 +227,40 @@ namespace SourceGen.Tools.WpfGui {
             const string hdr2 = "Page1  Page2 Line";
 
             StringBuilder sb = new StringBuilder(
-                (hdr1.Length * 2 + div.Length * 1 + eol.Length) * NUM_TEXT_ROWS);
+                (hdr1.Length * 2 + div.Length * 1 + eol.Length) * (NUM_TEXT_ROWS + NUM_TEXT_HOLES));
 
+            sb.Append("     By Line     " + div + "   By Address" + eol);
             sb.Append(hdr1);
             sb.Append(div);
             sb.Append(hdr2);
-            sb.Append(eol);
-            for (int i = 0; i < NUM_TEXT_ROWS; i++) {
+            for (int i = 0; i < NUM_TEXT_ROWS + NUM_TEXT_HOLES; i++) {
                 const int base1 = 0x400;
                 const int base2 = 0x800;
 
+                sb.Append(eol);
+
+                int rowIndex = i < NUM_TEXT_ROWS ? i : NUM_TEXT_ROWS - i - 1;
                 int textRow = sTextRowsByAddr[i];
 
-                sb.AppendFormat(" {0,2:D}  {1}  {2}", i,
-                    mFormatter.FormatHexValue(TextRowToAddr(base1, i), 4),
-                    mFormatter.FormatHexValue(TextRowToAddr(base2, i), 4));
+                if (rowIndex >= 0) {
+                    sb.AppendFormat(" {0,2:D}  {1}  {2}", rowIndex,
+                        mFormatter.FormatHexValue(TextRowToAddr(base1, rowIndex), 4),
+                        mFormatter.FormatHexValue(TextRowToAddr(base2, rowIndex), 4));
+                } else {
+                    sb.AppendFormat(" H{0}  {1}  {2}", -rowIndex - 1,
+                        mFormatter.FormatHexValue(TextRowToAddr(base1, rowIndex), 4),
+                        mFormatter.FormatHexValue(TextRowToAddr(base2, rowIndex), 4));
+                }
                 sb.Append(div);
-                sb.AppendFormat("{1}  {2}   {0,2:D}", textRow,
-                    mFormatter.FormatHexValue(TextRowToAddr(base1, textRow), 4),
-                    mFormatter.FormatHexValue(TextRowToAddr(base2, textRow), 4));
-                sb.Append(eol);
+                if (textRow >= 0) {
+                    sb.AppendFormat("{1}  {2}   {0,2:D}", textRow,
+                        mFormatter.FormatHexValue(TextRowToAddr(base1, textRow), 4),
+                        mFormatter.FormatHexValue(TextRowToAddr(base2, textRow), 4));
+                } else {
+                    sb.AppendFormat("{1}  {2}   H{0}", -textRow - 1,
+                        mFormatter.FormatHexValue(TextRowToAddr(base1, textRow), 4),
+                        mFormatter.FormatHexValue(TextRowToAddr(base2, textRow), 4));
+                }
             }
             return sb.ToString();
         }
@@ -254,14 +269,19 @@ namespace SourceGen.Tools.WpfGui {
         /// Generates the address of a line on the text screen.
         /// </summary>
         /// <param name="baseAddr">Base address (0x0400 or 0x0800).</param>
-        /// <param name="row">Row number (0-23).</param>
+        /// <param name="row">Row number (0-23), or screen hole (-1 - -8).</param>
         /// <returns>Address of start of line.</returns>
         private static int TextRowToAddr(int baseAddr, int row) {
-            // If row is 000ABCDE, we want 0000ppCD EABAB000 (where p is $04/$08).
-            int high = (row & 0x06) >> 1;
-            int low = (row & 0x18) | ((row & 0x18) << 2) | ((row & 0x01) << 7);
-            int rowAddr = baseAddr + ((high << 8) | low);
-            return rowAddr;
+            if (row < 0) {
+                // Screen hole: $478, $4f8, ...
+                return baseAddr + (-row) * 128 - 8;
+            } else {
+                // If row is 000ABCDE, we want 0000ppCD EABAB000 (where p is $04/$08).
+                int high = (row & 0x06) >> 1;
+                int low = (row & 0x18) | ((row & 0x18) << 2) | ((row & 0x01) << 7);
+                int rowAddr = baseAddr + ((high << 8) | low);
+                return rowAddr;
+            }
         }
 
         /// <summary>
@@ -271,7 +291,7 @@ namespace SourceGen.Tools.WpfGui {
         /// <returns>List of rows, in memory order.</returns>
         private static int[] GenerateTextRowsByAddr() {
             SortedList<int, int> addrList = new SortedList<int, int>(NUM_TEXT_ROWS);
-            for (int i = 0; i < NUM_TEXT_ROWS; i++) {
+            for (int i = -NUM_TEXT_HOLES - 1; i < NUM_TEXT_ROWS; i++) {
                 addrList.Add(TextRowToAddr(0, i), i);
             }
 

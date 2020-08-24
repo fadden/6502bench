@@ -33,7 +33,7 @@ limitations under the License.
         <system:String x:Key="str_HiRes2_L">Hi-Res Graphics, page 2, by line</system:String>
         <system:String x:Key="str_HiRes1_A">Hi-Res Graphics, page 1, by address</system:String>
         <system:String x:Key="str_HiRes2_A">Hi-Res Graphics, page 2, by address</system:String>
-        <system:String x:Key="str_Text">Text Pages 1 &amp; 2</system:String>
+        <system:String x:Key="str_TextWithHoles">Text Pages 1 &amp; 2, with holes</system:String>
     </Window.Resources>
 
     <StackPanel Margin="8">

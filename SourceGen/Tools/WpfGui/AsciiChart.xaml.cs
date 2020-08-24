@@ -105,8 +105,9 @@ namespace SourceGen.Tools.WpfGui {
             sb.Append(hdr);
             sb.Append(div);
             sb.Append(hdr);
-            sb.Append(eol);
             for (int i = 0; i < 32; i++) {
+                sb.Append(eol);
+
                 DrawEntry(item.Mode, i, sb);
                 sb.Append(div);
                 DrawEntry(item.Mode, i + 32, sb);
@@ -114,8 +115,8 @@ namespace SourceGen.Tools.WpfGui {
                 DrawEntry(item.Mode, i + 64, sb);
                 sb.Append(div);
                 DrawEntry(item.Mode, i + 96, sb);
-                sb.Append(eol);
             }
+            sb.Append(eol);     // easier to read the '_' at the bottom
 
             chartTextBox.Text = sb.ToString();
             chartTextBox.SelectionStart = sb.Length;
