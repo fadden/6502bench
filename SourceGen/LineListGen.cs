@@ -437,7 +437,7 @@ namespace SourceGen {
 
             mLineList = new List<Line>();
             mFormattedLineCache = new FormattedOperandCache();
-            mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
+            mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS,
                 false);
             mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
 
@@ -454,7 +454,7 @@ namespace SourceGen {
             mDisplayList.Clear();
 
             // We probably just changed settings, so update this as well.
-            mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS,
+            mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS,
                 false);
         }
 

@@ -60,10 +60,17 @@ opcode, operand, and comment), like assembly source code does.  The
 "Disassembly" format adds the address and bytes on the left.  Use
 the "All Columns" format to get all columns.</p>
 
-<p>The "add spaces in bytes column" checkbox changes the format of the
-hex data in the code list "bytes" column from dense (<code>20edfd</code>)
-to spaced (<code>20 ed fd</code>).  This also affects the format of
-clipboard copies and exports.</p>
+<p>When "show cycle counts in comments" is checked, every instruction line
+will have an end-of-line comment that indicates the number of cycles
+required for that instruction.  If the cycle count can't be determined
+solely from a static analysis, e.g. an extra cycle is required if
+<code>LDA (dp),Y</code> crosses a page boundary, a '+' will be shown.
+In some cases the variability can be factored out if the state of
+certain status flags is known, e.g. 65C02 instructions that take longer
+in decimal mode won't be shown as variable if the analyzer can determine
+that D=0 or D=1.  This checkbox enables display in the on-screen list, but
+does not affect generated source code, which can be configured independently
+on the Asm Config tab.</p>
 
 <p>Check "use 'dark' color scheme" to change the main disassembly list
 to use white text on a black background, and mute the Note highlight
@@ -131,6 +138,11 @@ automatically switches to "custom" when you edit a field.
 (64tass and ACME use the "common"
 expression style, cc65 and Merlin 32 have their own unique styles.)</p>
 
+<p>The "add spaces in Bytes column" checkbox changes the format of the
+hex data in the code list "bytes" column from dense (<code>20edfd</code>)
+to spaced (<code>20 ed fd</code>).  This also affects the format of
+clipboard copies and exports.</p>
+
 <p>The "comma-separated format for bulk data" determines whether large
 blocks of hex look like <code>ABC123</code> or
 <code>$AB,$C1,$23</code>.  The former reduces the number of lines
@@ -183,16 +195,10 @@ not hard stops: if the contents of a field are too wide, the contents
 of the next column will be pushed over.  (The comment field width is
 not currently being used, but may be used to fold lines in the future.)</p>
 
-<p>When "show cycle counts" is checked, every instruction line will have
-an end-of-line comment that indicates the number of cycles required for
-that instruction.  This is shown in the code list and included in
-generated assembly output.  If the cycle count can't be determined solely
-from a static analysis, e.g. an extra cycle is required if
-<code>LDA (dp),Y</code> crosses a page boundary, a '+' will be shown.
-In some cases the variability can be factored out if the state of
-certain status flags is known, e.g. 65C02 instructions that take longer
-in decimal mode won't be shown as variable if the analyzer can determine
-that D=0 or D=1.</p>
+<p>When "show cycle counts in comments" is checked, cycle counts are
+inserted into end-of-line comments.  This works the same as the option
+in the Code View tab, but applies to generated source code rather than
+the on-screen display.</p>
 
 <p>If "put long labels on separate line" is checked, labels that are
 longer than the label column are placed on their own line.  This looks

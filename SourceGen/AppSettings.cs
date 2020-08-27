@@ -55,7 +55,6 @@ namespace SourceGen {
         public const string FMT_UPPER_OPERAND_S = "fmt-upper-operand-s";
         public const string FMT_UPPER_OPERAND_XY = "fmt-upper-operand-xy";
         public const string FMT_ADD_SPACE_FULL_COMMENT = "fmt-add-space-full-comment";
-        public const string FMT_SPACES_BETWEEN_BYTES = "fmt-spaces-between-bytes";
         public const string FMT_OPERAND_WRAP_LEN = "fmt-operand-wrap-len";
 
         public const string FMT_OPCODE_SUFFIX_ABS = "fmt-opcode-suffix-abs";
@@ -69,7 +68,9 @@ namespace SourceGen {
         public const string FMT_STRING_DELIM = "fmt-string-delim";
         public const string FMT_NON_UNIQUE_LABEL_PREFIX = "fmt-non-unique-label-prefix";
         public const string FMT_LOCAL_VARIABLE_PREFIX = "fmt-local-variable-prefix";
+        public const string FMT_SPACES_BETWEEN_BYTES = "fmt-spaces-between-bytes";
         public const string FMT_COMMA_SEP_BULK_DATA = "fmt-comma-sep-bulk-data";
+        public const string FMT_SHOW_CYCLE_COUNTS = "fmt-show-cycle-counts";
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 

@@ -490,8 +490,9 @@ to STRADDR.  The symbol parts in the operands at $203d and $2041 update
 automatically.</p>
 
 <p>Let's pause briefly to look at the cycle-count feature.  Use
-Edit &gt; Settings to open the app settings panel, then select the
-Asm Config tab.  Click the "Show cycle counts" checkbox, then click "OK".</p>
+Edit &gt; Settings to open the app settings panel.  In the "miscellaneous"
+group on the right side, click the "Show cycle counts in comments"
+checkbox, then click "OK".</p>
 <p>Every line with an instruction now has a cycle count on it.  The cycle
 counts are adjusted for everything SourceGen can figure out.  For example,
 the BEQ on line $205a shows "2+" cycles, meaning that it takes at least two
@@ -505,7 +506,7 @@ Lower-case 'z' means the zero-flag is clear, upper-case 'Z' means it's
 set.  The analyzer determined that the flag was clear for instructions
 following the <code>BEQ</code> because the branch wasn't taken.)</p>
 
-<p>The cycle-count comments are included in assembled output as well.  If
+<p>The cycle-count comments can be added to generated code as well.  If
 you add an end-of-line comment, it appears after the cycle count.
 (Try it.)</p>
 <p>Hit Ctrl+S to save your project.  Make that a habit.</p>

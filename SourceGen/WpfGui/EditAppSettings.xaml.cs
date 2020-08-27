@@ -275,7 +275,6 @@ namespace SourceGen.WpfGui {
                 clipboardFormatComboBox.SelectedIndex = clipIndex;
             }
 
-            SpacesBetweenBytes = mSettings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false);
             EnableDebugMenu = mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
         }
 
@@ -407,15 +406,14 @@ namespace SourceGen.WpfGui {
             IsDirty = true;
         }
 
-        public bool SpacesBetweenBytes {
-            get { return mSettings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false); }
+        public bool ShowCycleCountsScreen {
+            get { return mSettings.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false); }
             set {
-                mSettings.SetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, value);
+                mSettings.SetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, value);
                 OnPropertyChanged();
                 IsDirty = true;
             }
         }
-
         public bool DarkColorScheme {
             get { return mSettings.GetBool(AppSettings.SKIN_DARK_COLOR_SCHEME, false); }
             set {
@@ -625,7 +623,7 @@ namespace SourceGen.WpfGui {
         }
 
         // checkboxes
-        public bool ShowCycleCounts {
+        public bool ShowCycleCountsAsm {
             get { return mSettings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false); }
             set {
                 mSettings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, value);
@@ -656,13 +654,6 @@ namespace SourceGen.WpfGui {
                 Debug.Assert(mInitialAsmId == AssemblerInfo.Id.Unknown);
                 asmConfigComboBox.SelectedIndex = 0;
             }
-
-            ShowCycleCounts =
-                mSettings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
-            LongLabelNewLine =
-                mSettings.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
-            AddIdentComment =
-                mSettings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false);
         }
 
         /// <summary>
@@ -888,17 +879,23 @@ namespace SourceGen.WpfGui {
                 }
             }
         }
-        private bool mCommaSeparatedBulkData;
-        public bool CommaSeparatedBulkData {
-            get { return mCommaSeparatedBulkData; }
+
+        // These are not subject to the "quick set" feature.
+
+        public bool SpacesBetweenBytes {
+            get { return mSettings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false); }
             set {
-                if (mCommaSeparatedBulkData != value) {
-                    mCommaSeparatedBulkData = value;
-                    OnPropertyChanged();
-                    mSettings.SetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, value);
-                    UpdateDisplayFormatQuickCombo();
-                    IsDirty = true;
-                }
+                mSettings.SetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
+        public bool CommaSeparatedBulkData {
+            get { return mSettings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, true); }
+            set {
+                mSettings.SetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, value);
+                OnPropertyChanged();
+                IsDirty = true;
             }
         }
 
@@ -1033,8 +1030,6 @@ namespace SourceGen.WpfGui {
                 mSettings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
             LocalVarPrefix =
                 mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
-            CommaSeparatedBulkData =
-                mSettings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, false);
 
             string exprMode = mSettings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
             ExpressionMode mode;
