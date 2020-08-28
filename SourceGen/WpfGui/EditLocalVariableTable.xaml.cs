@@ -274,6 +274,12 @@ namespace SourceGen.WpfGui {
             DialogResult = true;
         }
 
+        private void Window_KeyEventHandler(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Return && Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
+                OkButton_Click(null, null);
+            }
+        }
+
         private void DeleteTableButton_Click(object sender, RoutedEventArgs e) {
             MessageBoxResult result = MessageBox.Show((string)FindResource("str_ConfirmDelete"),
                 (string)FindResource("str_ConfirmDeleteCaption"),

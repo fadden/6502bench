@@ -25,7 +25,8 @@ limitations under the License.
         Title="Edit Local Variable Table"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        PreviewKeyDown="Window_KeyEventHandler">
 
     <Window.Resources>
         <system:String x:Key="str_ConfirmDelete">Are you sure you want to delete the entire table?</system:String>
