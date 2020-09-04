@@ -259,6 +259,10 @@ data operand, and provides an indication of the nature of the reference:</p>
 <p>References from instructions that use indexed addressing
 (e.g. <code>LDA addr,Y</code>) will also show "idx" to indicate that
 the instruction is using the location as a base address.</p>
+<p>References from instructions that treat the address as a pointer
+(e.g. <code>LDA (dp),Y</code>) will show "ptr".  This makes it easy
+to identify the locations that are reading or writing through the
+pointer from those that are reading or writing the pointer itself.</p>
 <p>This will be prefixed with "Sym" or "Oth" to indicate whether or not
 the reference used the label at the current address.  To understand
 this, consider that addresses can be referenced in different ways.

@@ -1550,7 +1550,7 @@ namespace SourceGen {
 
                 XrefSet.XrefType xrefType = XrefSet.XrefType.Unknown;
                 OpDef.MemoryEffect accType = OpDef.MemoryEffect.Unknown;
-                bool isIndexedDirect = false;
+                XrefSet.Xref.AccessFlags accessFlags = XrefSet.Xref.AccessFlags.None;
                 if (attr.IsInstruction) {
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
                     if (op.IsSubroutineCall) {
@@ -1560,7 +1560,12 @@ namespace SourceGen {
                     } else {
                         xrefType = XrefSet.XrefType.MemAccessOp;
                         accType = op.MemEffect;
-                        isIndexedDirect = op.IsIndexedAccessInstruction;
+                    }
+                    if (op.IsIndexedAccessInstruction) {
+                        accessFlags |= XrefSet.Xref.AccessFlags.Indexed;
+                    }
+                    if (op.IsPointerAccessInstruction) {
+                        accessFlags |= XrefSet.Xref.AccessFlags.Pointer;
                     }
                 } else if (attr.IsData || attr.IsInlineData) {
                     xrefType = XrefSet.XrefType.RefFromData;
@@ -1589,7 +1594,7 @@ namespace SourceGen {
                             }
 
                             AddXref(symOffset, new XrefSet.Xref(offset, true, xrefType, accType,
-                                isIndexedDirect, adj));
+                                accessFlags, adj));
                             if (adj == 0) {
                                 hasZeroOffsetSym = true;
                             }
@@ -1601,7 +1606,7 @@ namespace SourceGen {
                                     adj = defSym.Value - operandOffset;
                                 }
                                 defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, accType,
-                                    isIndexedDirect, adj));
+                                    accessFlags, adj));
                             }
                         } else if (SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
                             // Is this a reference to a project/platform symbol?
@@ -1628,7 +1633,7 @@ namespace SourceGen {
                                     // to tweak the adjustment math appropriately.
                                 }
                                 defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, accType,
-                                    isIndexedDirect, adj));
+                                    accessFlags, adj));
                             } else {
                                 // Can get here if somebody creates an address operand symbol
                                 // that refers to a local variable.
@@ -1668,7 +1673,7 @@ namespace SourceGen {
                             Debug.WriteLine("HEY: found unlabeled addr ref at +" +
                                 offset.ToString("x6"));
                             AddXref(targetOffset, new XrefSet.Xref(offset, false, xrefType,
-                                accType, isIndexedDirect, 0));
+                                accType, accessFlags, 0));
                         }
                     }
 
@@ -1678,7 +1683,7 @@ namespace SourceGen {
                     // it for the label localizer and possibly the label refactorer.)
                     if (!hasZeroOffsetSym && attr.IsInstructionStart && attr.OperandOffset >= 0) {
                         AddXref(attr.OperandOffset, new XrefSet.Xref(offset, false, xrefType,
-                            accType, isIndexedDirect, 0));
+                            accType, accessFlags, 0));
                     }
                 }
 

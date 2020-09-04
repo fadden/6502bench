@@ -3741,14 +3741,19 @@ namespace SourceGen {
                                 typeStr = "??! ";
                                 break;
                         }
-                        if (xr.IsIndexedAccess) {
-                            idxStr = "idx ";
-                        }
                         break;
                     default:
                         Debug.Assert(false);
                         typeStr = "??? ";
                         break;
+                }
+
+                // "LDA (dp,X)" gets both of these
+                if (xr.IsIndexedAccess) {
+                    idxStr += "idx ";
+                }
+                if (xr.IsPointerAccess) {
+                    idxStr += "ptr ";
                 }
 
                 MainWindow.ReferencesListItem rli = new MainWindow.ReferencesListItem(xr.Offset,
@@ -3759,6 +3764,8 @@ namespace SourceGen {
 
                 mMainWin.ReferencesList.Add(rli);
             }
+
+            // TODO(maybe): set the selection to something, instead of just inheriting it?
         }
 
         #endregion References panel

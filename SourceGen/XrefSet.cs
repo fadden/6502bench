@@ -69,11 +69,24 @@ namespace SourceGen {
             /// </summary>
             public Asm65.OpDef.MemoryEffect AccType { get; private set; }
 
+            [Flags]
+            public enum AccessFlags {
+                None = 0,
+                Indexed = 1 << 0,
+                Pointer = 1 << 1
+            }
+
             /// <summary>
-            /// For Type==MemAccessOp, true if the instruction applies an index offset, to
+            /// For Type==MemAccessOp, true if the instruction applies an index offset to
             /// the operand, meaning the referenced address might not actually be accessed.
             /// </summary>
-            public bool IsIndexedAccess { get; private set; }
+            public AccessFlags Flags { get; private set; }
+            public bool IsIndexedAccess {
+                get { return (Flags & AccessFlags.Indexed) != 0; }
+            }
+            public bool IsPointerAccess {
+                get { return (Flags & AccessFlags.Pointer) != 0; }
+            }
 
             /// <summary>
             /// Adjustment to symbol.  For example, "LDA label+2" adds an xref entry to
@@ -82,18 +95,18 @@ namespace SourceGen {
             public int Adjustment { get; private set; }
 
             public Xref(int offset, bool isByName, XrefType type,
-                    Asm65.OpDef.MemoryEffect accType, bool isIndexedAccess, int adjustment) {
+                    Asm65.OpDef.MemoryEffect accType, AccessFlags accessFlags, int adjustment) {
                 Offset = offset;
                 IsByName = isByName;
                 Type = type;
                 AccType = accType;
-                IsIndexedAccess = isIndexedAccess;
+                Flags = accessFlags;
                 Adjustment = adjustment;
             }
 
             public override string ToString() {
                 return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsByName +
-                    " type=" + Type + " accType= " + AccType + " idx=" + IsIndexedAccess +
+                    " type=" + Type + " accType= " + AccType + " flags=" + Flags +
                     " adj=" + Adjustment;
             }
         }

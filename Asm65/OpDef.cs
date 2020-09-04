@@ -254,6 +254,23 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// True for instructions that dereference the operand.
+        /// </summary>
+        public bool IsPointerAccessInstruction {
+            get {
+                return AddrMode == AddressMode.DPIndexXInd ||
+                       AddrMode == AddressMode.DPInd ||
+                       AddrMode == AddressMode.DPIndLong ||
+                       AddrMode == AddressMode.DPIndIndexY ||
+                       AddrMode == AddressMode.DPIndIndexYLong ||
+                       // indirect JMP/JSR
+                       AddrMode == AddressMode.AbsInd ||
+                       AddrMode == AddressMode.AbsIndLong ||
+                       AddrMode == AddressMode.AbsIndexXInd;
+            }
+        }
+
+        /// <summary>
         /// True if this is an absolute-address instruction whose operand is combined with
         /// the Program Bank Register.
         /// </summary>
