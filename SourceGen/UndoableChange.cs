@@ -58,7 +58,8 @@ anything in the DisasmProject.
 *** When can we get away with only updating part of the display list (re-analysis=none)?
 - Changing a user label.  All lines that reference the label need to be updated in the
 display, but nothing in the analysis changes.  (This assumes we prevent you from renaming
-a label to be the same as an existing label, e.g. auto-generated labels.)
+a label to be the same as an existing label, e.g. auto-generated labels.)  This doesn't
+work quite right when broken symbolic references suddenly become un-broken, however.
 - Adding/removing/changing cosmetic items, like comments and notes.
 
 NOTE: all re-analysis requirements are symmetric for undo/redo.  Undoing a change requires
@@ -116,6 +117,9 @@ namespace SourceGen {
         /// <summary>
         /// Enum indicating what needs to be reanalyzed after a change.
         /// </summary>
+        /// <remarks>
+        /// These must be in ascending order of thoroughness.
+        /// </remarks>
         public enum ReanalysisScope {
             None = 0,
             DisplayOnly,
@@ -280,6 +284,24 @@ namespace SourceGen {
         /// <summary>
         /// Creates an UndoableChange for a label update.
         /// </summary>
+        /// <remarks>
+        /// TODO(maybe): this is a little broken when it comes to bad symbolic references.
+        ///
+        /// If you set an operand's symbol to a non-existent label "foo1", and then rename an
+        /// existing user from "bar1" to "foo1", the bad references become valid.  However, we
+        /// set the reanalysis mode to "None" here, which means the Message list and
+        /// cross-references aren't updated.  We can catch this easily during the update, in
+        /// the refactoring rename, and just change the reanalysis mode.
+        ///
+        /// However... in the above scenario, if you undo the change, we perform a refactoring
+        /// undo.  The reference to "foo1" becomes a reference to "bar1" instead of a broken
+        /// reference to "foo1".  This happens because we don't keep track of which references
+        /// were valid and which were previously broken.
+        ///
+        /// The fundamental problem is the refactoring rename done way deep down.  The proper
+        /// fix is probably to perform the refactoring at a higher level, and generate an
+        /// explicit change object for every symbol that is updated.
+        /// </remarks>
         /// <param name="offset">Affected offset.</param>
         /// <param name="oldSymbol">Current label.  May be null.</param>
         /// <param name="newSymbol">New label.  May be null.</param>

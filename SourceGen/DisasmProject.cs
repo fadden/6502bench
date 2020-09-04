@@ -1755,7 +1755,7 @@ namespace SourceGen {
                         mAnattribs[offset].Symbol = newSym;
                         SymbolTable.Remove(oldSym);
                         SymbolTable.Add(newSym);
-                        RefactorLabel(offset, oldSym.Label);
+                        RefactorLabel(offset, oldSym.Label, out bool unused);
                     }
                 }
             }
@@ -2244,7 +2244,16 @@ namespace SourceGen {
                                 if (oldValue != null) {
                                     // Update everything in Anattribs and OperandFormats that
                                     // referenced the old symbol.
-                                    RefactorLabel(offset, ((Symbol)oldValue).Label);
+                                    RefactorLabel(offset, ((Symbol)oldValue).Label,
+                                        out bool foundExisting);
+
+                                    // If we fixed one or more broken references, we need to do
+                                    // a deeper re-analysis.
+                                    if (foundExisting) {
+                                        Debug.WriteLine("Found existing broken ref to '" +
+                                            ((Symbol)newValue).Label + "'");
+                                        needReanalysis = UndoableChange.ReanalysisScope.DataOnly;
+                                    }
                                 }
 
                                 // Compute the affected offsets.  We have one special case to
@@ -2259,7 +2268,7 @@ namespace SourceGen {
                                         IsInProjectOrPlatformList((Symbol)newValue)) {
                                     Debug.WriteLine("Label change masked/unmasked " +
                                         "project/platform symbol");
-                                    needReanalysis |= UndoableChange.ReanalysisScope.DataOnly;
+                                    needReanalysis = UndoableChange.ReanalysisScope.DataOnly;
                                 } else {
                                     affectedOffsets.Add(offset);
 
@@ -2291,7 +2300,7 @@ namespace SourceGen {
                             if (mScriptManager.IsLabelSignificant((Symbol)oldValue,
                                     (Symbol)newValue)) {
                                 Debug.WriteLine("Plugin claims symbol is significant");
-                                needReanalysis |= UndoableChange.ReanalysisScope.CodeAndData;
+                                needReanalysis = UndoableChange.ReanalysisScope.CodeAndData;
                             }
                         }
                         break;
@@ -2456,7 +2465,9 @@ namespace SourceGen {
                     default:
                         break;
                 }
-                needReanalysis |= uc.ReanalysisRequired;
+                if (needReanalysis < uc.ReanalysisRequired) {
+                    needReanalysis = uc.ReanalysisRequired;
+                }
             }
 
             return needReanalysis;
@@ -2477,7 +2488,10 @@ namespace SourceGen {
         /// </summary>
         /// <param name="labelOffset">Offset with the just-renamed label.</param>
         /// <param name="oldLabel">Previous value.</param>
-        private void RefactorLabel(int labelOffset, string oldLabel) {
+        /// <param name="foundExisting">Set to true if we found an existing (broken) reference
+        ///   to the new label.</param>
+        private void RefactorLabel(int labelOffset, string oldLabel, out bool foundExisting) {
+            foundExisting = false;
             if (!mXrefs.TryGetValue(labelOffset, out XrefSet xrefs)) {
                 // This can happen if you add a label in a file section that nothing references,
                 // and then rename it.
@@ -2501,6 +2515,11 @@ namespace SourceGen {
                     // The auto-gen stuff would have created a symbol, but the user can
                     // override that and display as e.g. hex.
                     continue;
+                }
+                if (Label.LABEL_COMPARER.Equals(newLabel, dfd.SymbolRef.Label)) {
+                    // We found an existing, previously-broken reference to the new label.
+                    // Let the caller know.
+                    foundExisting = true;
                 }
                 if (!Label.LABEL_COMPARER.Equals(oldLabel, dfd.SymbolRef.Label)) {
                     // This can happen if the xref is based on the operand offset,
