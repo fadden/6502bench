@@ -129,7 +129,7 @@ limitations under the License.
                      <GroupBox Grid.Column="2" Grid.Row="1" Header="Miscellaneous"
                               Margin="10,0,0,0" Padding="2,4">
                         <StackPanel>
-                            <CheckBox Content="Show cycle counts in comments" Margin="0,4"
+                            <CheckBox Content="Show cycle counts for instructions" Margin="0,4"
                                       IsChecked="{Binding ShowCycleCountsScreen}"/>
                             <CheckBox Content="Use &quot;dark&quot; color scheme" Margin="0,4"
                                       IsChecked="{Binding DarkColorScheme}"/>

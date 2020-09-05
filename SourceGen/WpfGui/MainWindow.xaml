@@ -519,6 +519,9 @@ limitations under the License.
                 <Button Command="Copy" ToolTip="Copy to clipboard (Ctrl+C)">
                     <ContentControl Template="{StaticResource icon_CopyToClipboard}"/>
                 </Button>
+                <CheckBox IsChecked="{Binding DoShowCycleCounts}" ToolTip="Toggle display of cycle counts">
+                    <ContentControl Template="{StaticResource icon_DomainType}"/>
+                </CheckBox>
                 <Separator/>
                 <Button Command="Help" ToolTip="Help - open manual in browser (F1)">
                     <ContentControl Template="{StaticResource icon_F1Help}"/>

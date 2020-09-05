@@ -85,6 +85,23 @@ namespace SourceGen.WpfGui {
         private double mLongCommentWidth;
 
         /// <summary>
+        /// Property backing the "show cycle counts" button in the toolbar.
+        /// </summary>
+        public bool DoShowCycleCounts {
+            get { return AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false); }
+            set {
+                // We get called when app settings change, so we have to be a little careful to
+                // avoid an infinite loop.  We need to be called to keep the toolbar in sync.
+                bool curVal = AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false);
+                if (curVal != value) {
+                    AppSettings.Global.SetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, value);
+                    mMainCtrl.ApplyAppSettings();
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// Set to true if the DEBUG menu should be visible on the main menu strip.
         /// </summary>
         public bool ShowDebugMenu {

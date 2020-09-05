@@ -488,7 +488,7 @@ namespace SourceGen {
         /// Applies "actionable" settings to the ProjectView, pulling them out of the global
         /// settings object.  If a project is open, refreshes the display list and all sub-windows.
         /// </summary>
-        private void ApplyAppSettings() {
+        public void ApplyAppSettings() {
             Debug.WriteLine("ApplyAppSettings...");
             AppSettings settings = AppSettings.Global;
 
@@ -586,6 +586,10 @@ namespace SourceGen {
             // Enable the DEBUG menu if configured.
             mMainWin.ShowDebugMenu =
                 AppSettings.Global.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
+
+            // Refresh the toolbar checkbox.
+            mMainWin.DoShowCycleCounts =
+                AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false);
 
             // Finally, update the display list generator with all the fancy settings.
             if (CodeLineList != null) {
@@ -890,20 +894,22 @@ namespace SourceGen {
             }
             mReanalysisTimer.EndTask(refreshTaskStr);
 
+            mReanalysisTimer.StartTask("Restore selection and top position");
             DisplayListSelection newSel = savedSel.Restore(CodeLineList, out topItemIndex);
             //newSel.DebugDump();
 
             // Restore the selection.  The selection-changed event will cause updates to the
             // references, notes, and info panels.
-            mReanalysisTimer.StartTask("Restore selection and top position");
             mMainWin.CodeListView_SetSelection(newSel);
             mMainWin.CodeListView_SetTopIndex(topItemIndex);
             mReanalysisTimer.EndTask("Restore selection and top position");
 
             // Update the Notes and Symbols windows.  References should refresh automatically
             // when the selection is restored.
+            mReanalysisTimer.StartTask("Populate Notes and Symbols");
             PopulateNotesList();
             PopulateSymbolsList();
+            mReanalysisTimer.EndTask("Populate Notes and Symbols");
 
             mReanalysisTimer.EndTask("ProjectView.ApplyChanges()");
 
