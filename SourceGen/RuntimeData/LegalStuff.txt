@@ -12,6 +12,10 @@ Apache 2.0 license, unless otherwise noted in the source or accompanying
 documentation (e.g. some may be in the public domain).
 
 --------------------------------------------------------------------------------
+The toolbar uses icons from the Microsoft Visual Studio 2017 Image Library.
+https://www.microsoft.com/en-my/download/details.aspx?id=35825
+
+--------------------------------------------------------------------------------
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
