@@ -1601,10 +1601,9 @@ namespace SourceGen {
                         } else if (dfd.SymbolRef.IsVariable) {
                             DefSymbol defSym = lvLookup.GetSymbol(offset, dfd.SymbolRef);
                             if (defSym != null) {
-                                int adj = 0;
-                                if (operandOffset >= 0) {
-                                    adj = defSym.Value - operandOffset;
-                                }
+                                // The operand address and defSym value are both zero-page
+                                // locations, likely outside the file (so no OperandOffset).
+                                int adj = defSym.Value - attr.OperandAddress;
                                 defSym.Xrefs.Add(new XrefSet.Xref(offset, true, xrefType, accType,
                                     accessFlags, adj));
                             }
