@@ -117,6 +117,7 @@ namespace Asm65 {
         /// shorter than those in the CPU data sheet.
         /// </summary>
         private static Dictionary<string, string> sShort_enUS = new Dictionary<string, string>() {
+            // 65816 instructions.
             { OpName.ADC, "Add With Carry" },
             { OpName.AND, "AND Accumulator With Memory" },
             { OpName.ASL, "Shift Memory or Accumulator Left" },
@@ -236,6 +237,40 @@ namespace Asm65 {
 
             // WDC 65C02 undocumented
             { OpName.LDD, "Load and Discard" },
+
+            // Rockwell 65C02 extensions
+            { OpName.BBR0, "Branch on Bit Reset" },
+            { OpName.BBR1, "Branch on Bit Reset" },
+            { OpName.BBR2, "Branch on Bit Reset" },
+            { OpName.BBR3, "Branch on Bit Reset" },
+            { OpName.BBR4, "Branch on Bit Reset" },
+            { OpName.BBR5, "Branch on Bit Reset" },
+            { OpName.BBR6, "Branch on Bit Reset" },
+            { OpName.BBR7, "Branch on Bit Reset" },
+            { OpName.BBS0, "Branch on Bit Set" },
+            { OpName.BBS1, "Branch on Bit Set" },
+            { OpName.BBS2, "Branch on Bit Set" },
+            { OpName.BBS3, "Branch on Bit Set" },
+            { OpName.BBS4, "Branch on Bit Set" },
+            { OpName.BBS5, "Branch on Bit Set" },
+            { OpName.BBS6, "Branch on Bit Set" },
+            { OpName.BBS7, "Branch on Bit Set" },
+            { OpName.RMB0, "Reset Memory Bit" },
+            { OpName.RMB1, "Reset Memory Bit" },
+            { OpName.RMB2, "Reset Memory Bit" },
+            { OpName.RMB3, "Reset Memory Bit" },
+            { OpName.RMB4, "Reset Memory Bit" },
+            { OpName.RMB5, "Reset Memory Bit" },
+            { OpName.RMB6, "Reset Memory Bit" },
+            { OpName.RMB7, "Reset Memory Bit" },
+            { OpName.SMB0, "Set Memory Bit" },
+            { OpName.SMB1, "Set Memory Bit" },
+            { OpName.SMB2, "Set Memory Bit" },
+            { OpName.SMB3, "Set Memory Bit" },
+            { OpName.SMB4, "Set Memory Bit" },
+            { OpName.SMB5, "Set Memory Bit" },
+            { OpName.SMB6, "Set Memory Bit" },
+            { OpName.SMB7, "Set Memory Bit" },
         };
 
         /// <summary>
@@ -677,7 +712,53 @@ namespace Asm65 {
                 "Load and Discard.  Usually a no-op, but the activity on the address bus " +
                 "can affect memory-mapped I/O."
             },
+
+            //
+            // Rockwell 65C02 extensions.
+            //
+            { OpName.BBR0, BBR_DESC },
+            { OpName.BBR1, BBR_DESC },
+            { OpName.BBR2, BBR_DESC },
+            { OpName.BBR3, BBR_DESC },
+            { OpName.BBR4, BBR_DESC },
+            { OpName.BBR5, BBR_DESC },
+            { OpName.BBR6, BBR_DESC },
+            { OpName.BBR7, BBR_DESC },
+            { OpName.BBS0, BBS_DESC },
+            { OpName.BBS1, BBS_DESC },
+            { OpName.BBS2, BBS_DESC },
+            { OpName.BBS3, BBS_DESC },
+            { OpName.BBS4, BBS_DESC },
+            { OpName.BBS5, BBS_DESC },
+            { OpName.BBS6, BBS_DESC },
+            { OpName.BBS7, BBS_DESC },
+            { OpName.RMB0, RMB_DESC },
+            { OpName.RMB1, RMB_DESC },
+            { OpName.RMB2, RMB_DESC },
+            { OpName.RMB3, RMB_DESC },
+            { OpName.RMB4, RMB_DESC },
+            { OpName.RMB5, RMB_DESC },
+            { OpName.RMB6, RMB_DESC },
+            { OpName.RMB7, RMB_DESC },
+            { OpName.SMB0, SMB_DESC },
+            { OpName.SMB1, SMB_DESC },
+            { OpName.SMB2, SMB_DESC },
+            { OpName.SMB3, SMB_DESC },
+            { OpName.SMB4, SMB_DESC },
+            { OpName.SMB5, SMB_DESC },
+            { OpName.SMB6, SMB_DESC },
+            { OpName.SMB7, SMB_DESC },
         };
+
+        private static string BBR_DESC =
+            "Branches to a relative address if the specified bit in memory is zero.";
+        private static string BBS_DESC =
+            "Branches to a relative address if the specified bit in memory is one.";
+        private static string RMB_DESC =
+            "Clears a bit in memory.";
+        private static string SMB_DESC =
+            "Sets a bit in memory.";
+
 
         /// <summary>
         /// Address mode short descriptions, USA English.
@@ -702,6 +783,7 @@ namespace Asm65 {
             { OpDef.AddressMode.DPIndexX, "Direct Page Indexed X" },
             { OpDef.AddressMode.DPIndexXInd, "Direct Page Indexed X Indirect" },
             { OpDef.AddressMode.DPIndexY, "Direct Page Indexed Y" },
+            { OpDef.AddressMode.DPPCRel, "Direct Page / PC Relative" },
             { OpDef.AddressMode.Imm, "Immediate" },
             { OpDef.AddressMode.ImmLongA, "Immediate" },
             { OpDef.AddressMode.ImmLongXY, "Immediate" },

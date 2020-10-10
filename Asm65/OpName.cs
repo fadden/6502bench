@@ -21,9 +21,12 @@ namespace Asm65 {
     /// must be lower-case.
     /// </summary>
     public static class OpName {
-        // NOTE: these all happen to be three characters, but I don't think we want to
-        // guarantee that.  On the 65816 some mnemonics are extended (e.g. LDAL for LDA with
+        // NOTE: these are generally three characters, but the pattern breaks with the Rockwell
+        // extensions unless we want to show the bit index as a 3rd argument (which some
+        // assemblers do).  On the 65816 some mnemonics are extended (e.g. LDAL for LDA with
         // a 24-bit operand), but that's assembler-specific and handled elsewhere.
+        //
+        // Bottom line: don't assume these will be 3 characters.
         public const string Unknown = "???";
         public const string ADC = "adc";
         public const string AND = "and";
@@ -143,5 +146,39 @@ namespace Asm65 {
 
         // Undocumented 65C02 instructions.
         public const string LDD = "ldd";
+
+        // Rockwell extensions
+        public const string BBR0 = "bbr0";
+        public const string BBR1 = "bbr1";
+        public const string BBR2 = "bbr2";
+        public const string BBR3 = "bbr3";
+        public const string BBR4 = "bbr4";
+        public const string BBR5 = "bbr5";
+        public const string BBR6 = "bbr6";
+        public const string BBR7 = "bbr7";
+        public const string BBS0 = "bbs0";
+        public const string BBS1 = "bbs1";
+        public const string BBS2 = "bbs2";
+        public const string BBS3 = "bbs3";
+        public const string BBS4 = "bbs4";
+        public const string BBS5 = "bbs5";
+        public const string BBS6 = "bbs6";
+        public const string BBS7 = "bbs7";
+        public const string RMB0 = "rmb0";
+        public const string RMB1 = "rmb1";
+        public const string RMB2 = "rmb2";
+        public const string RMB3 = "rmb3";
+        public const string RMB4 = "rmb4";
+        public const string RMB5 = "rmb5";
+        public const string RMB6 = "rmb6";
+        public const string RMB7 = "rmb7";
+        public const string SMB0 = "smb0";
+        public const string SMB1 = "smb1";
+        public const string SMB2 = "smb2";
+        public const string SMB3 = "smb3";
+        public const string SMB4 = "smb4";
+        public const string SMB5 = "smb5";
+        public const string SMB6 = "smb6";
+        public const string SMB7 = "smb7";
     }
 }

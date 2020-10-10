@@ -235,17 +235,22 @@ you later hit Cancel, but the changes are not applied immediately.</p>
 <p>The choice of CPU determines the set of available instructions, as
 well as cycle costs and register widths.  There are many variations
 on the 6502, but from the perspective of a disassembler most can be
-treated as one of these three:</p>
+treated as one of these four:</p>
 <ol>
   <li>MOS 6502.  The original 8-bit instruction set.</li>
-  <li>WDC W65C02S.  Expanded the instruction set and smoothed
+  <li>WDC 65C02.  Expanded the instruction set and smoothed
     some rough edges.</li>
+  <li>WDC W65C02S.  An enhanced version of the 65C02, with some
+    additional instructions introduced by Rockwell (R65C02), as well
+    as WDC's STP and WAI instructions.  The Rockwell additions overlap
+    with 65816 instructions, so code that uses them will not work on
+    16-bit CPUs.</li>
   <li>WDC W65C816S.  Expanded instruction set, 24-bit address space,
     and 16-bit registers.</li>
 </ol>
-<p>The Rockwell R65C02, Hudson Soft HuC6280, and Commodore CSG 4510 / 65CE02
-have instruction sets that expand on the 6502/65C02, but aren't compatible
-with the 65816.  These are not yet supported by SourceGen.</p>
+<p>The Hudson Soft HuC6280 and Commodore CSG 4510 / 65CE02 are very
+similar, but they have additional instructions and some fundamental
+architectural changes.  These are not currently supported by SourceGen.</p>
 
 <p>If "enable undocumented instructions" is checked, some additional
 opcodes are recognized on the 6502 and 65C02.  These instructions are

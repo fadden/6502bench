@@ -38,7 +38,8 @@ limitations under the License.
 
         <!-- strings for combo boxes -->
         <system:String x:Key="str_6502">MOS 6502</system:String>
-        <system:String x:Key="str_65C02">WDC W65C02S</system:String>
+        <system:String x:Key="str_65C02">WDC 65C02</system:String>
+        <system:String x:Key="str_W65C02">WDC W65C02S</system:String>
         <system:String x:Key="str_65816">WDC W65C816S</system:String>
 
         <system:String x:Key="str_DisableStringScan">None (disabled)</system:String>

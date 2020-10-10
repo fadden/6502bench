@@ -126,6 +126,7 @@ namespace SourceGen.WpfGui {
             CpuItems = new CpuItem[] {
                 new CpuItem((string)FindResource("str_6502"), CpuDef.CpuType.Cpu6502),
                 new CpuItem((string)FindResource("str_65C02"), CpuDef.CpuType.Cpu65C02),
+                new CpuItem((string)FindResource("str_W65C02"), CpuDef.CpuType.CpuW65C02),
                 new CpuItem((string)FindResource("str_65816"), CpuDef.CpuType.Cpu65816),
             };
             DefaultTextScanModeItems = new DefaultTextScanMode[] {

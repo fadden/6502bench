@@ -74,6 +74,7 @@ namespace Asm65 {
             DPIndexX,           // OP dp,X          2
             DPIndexXInd,        // OP (dp,X)        2
             DPIndexY,           // OP dp,Y          2
+            DPPCRel,            // OP dp,label      3 (BBR/BBS)
             Imm,                // OP #const8       2
             ImmLongA,           // OP #const8/16    2 or 3, depending on 'm' flag
             ImmLongXY,          // OP #const8/16    2 or 3, depending on 'x' flag
@@ -526,6 +527,7 @@ namespace Asm65 {
                 case AddressMode.AbsInd:
                 case AddressMode.AbsIndLong:
                 case AddressMode.BlockMove:
+                case AddressMode.DPPCRel:
                 case AddressMode.PCRelLong:
                 case AddressMode.StackAbs:
                 case AddressMode.StackPCRelLong:
@@ -607,7 +609,7 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Get the raw operand value.
+        /// Gets the raw operand value.
         /// </summary>
         /// <param name="data">65xx code.</param>
         /// <param name="offset">Offset of opcode.</param>
@@ -3542,6 +3544,231 @@ namespace Asm65 {
         };
 
         #endregion Undocumented
+
+        #region Rockwell extensions
+
+        // ======================================================================================
+        // Rockwell extensions to the 65C02.
+        //
+        // These are declared separately because they overlap with 65816 instructions.  The
+        // 32 opcodes occupy the numbers $x7 and $xf.
+        //
+
+        private static OpDef OpBBR = new OpDef() {
+            Mnemonic = "???",
+            Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None
+        };
+        private static OpDef OpBBS = new OpDef() {
+            Mnemonic = "???",
+            Effect = FlowEffect.ConditionalBranch,
+            BaseMemEffect = MemoryEffect.None
+        };
+        private static OpDef OpRMB = new OpDef() {
+            Mnemonic = "???",
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite
+        };
+        private static OpDef OpSMB = new OpDef() {
+            Mnemonic = "???",
+            Effect = FlowEffect.Cont,
+            BaseMemEffect = MemoryEffect.ReadModifyWrite
+        };
+
+        public static readonly OpDef OpBBR0_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR0,
+            Opcode = 0x0f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR1_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR1,
+            Opcode = 0x1f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR2_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR2,
+            Opcode = 0x2f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR3_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR3,
+            Opcode = 0x3f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR4_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR4,
+            Opcode = 0x4f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR5_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR5,
+            Opcode = 0x5f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR6_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR6,
+            Opcode = 0x6f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBR7_DPPCRel = new OpDef(OpBBR) {
+            Mnemonic = OpName.BBR7,
+            Opcode = 0x7f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS0_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS0,
+            Opcode = 0x8f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS1_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS1,
+            Opcode = 0x9f,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS2_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS2,
+            Opcode = 0xaf,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS3_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS3,
+            Opcode = 0xbf,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS4_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS4,
+            Opcode = 0xcf,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS5_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS5,
+            Opcode = 0xdf,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS6_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS6,
+            Opcode = 0xef,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpBBS7_DPPCRel = new OpDef(OpBBS) {
+            Mnemonic = OpName.BBS7,
+            Opcode = 0xff,
+            AddrMode = AddressMode.DPPCRel,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB0_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB0,
+            Opcode = 0x07,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB1_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB1,
+            Opcode = 0x17,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB2_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB2,
+            Opcode = 0x27,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB3_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB3,
+            Opcode = 0x37,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB4_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB4,
+            Opcode = 0x47,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB5_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB5,
+            Opcode = 0x57,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB6_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB6,
+            Opcode = 0x67,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpRMB7_DP = new OpDef(OpRMB) {
+            Mnemonic = OpName.RMB7,
+            Opcode = 0x77,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB0_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB0,
+            Opcode = 0x87,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB1_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB1,
+            Opcode = 0x97,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB2_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB2,
+            Opcode = 0xa7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB3_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB3,
+            Opcode = 0xb7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB4_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB4,
+            Opcode = 0xc7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB5_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB5,
+            Opcode = 0xd7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB6_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB6,
+            Opcode = 0xe7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+        public static readonly OpDef OpSMB7_DP = new OpDef(OpSMB) {
+            Mnemonic = OpName.SMB7,
+            Opcode = 0xf7,
+            AddrMode = AddressMode.DP,
+            CycDef = 5
+        };
+
+        #endregion Rockwell extensions
 
 
         /// <summary>

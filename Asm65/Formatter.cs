@@ -805,6 +805,7 @@ namespace Asm65 {
                 case AddressMode.BlockMove:
                 case AddressMode.StackAbs:
                 case AddressMode.DP:
+                case AddressMode.DPPCRel:
                 case AddressMode.PCRel:
                 case AddressMode.PCRelLong:         // BRL
                 case AddressMode.StackInt:          // COP and two-byte BRK

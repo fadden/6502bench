@@ -85,6 +85,7 @@ namespace Asm65 {
 
             Cpu65C02,   // Apple //e
             Cpu65SC02,  // Atari Lynx
+            CpuW65C02,  // ?
 
             Cpu65802,   // ?
             Cpu65816,   // Apple IIgs
@@ -107,6 +108,7 @@ namespace Asm65 {
                 case "2A03":        return CpuType.Cpu2A03;
                 case "65C02":       return CpuType.Cpu65C02;
                 case "65SC02":      return CpuType.Cpu65SC02;
+                case "W65C02":      return CpuType.CpuW65C02;
                 case "65802":       return CpuType.Cpu65802;
                 case "65816":       return CpuType.Cpu65816;
                 case "5A22":        return CpuType.Cpu5A22;
@@ -131,6 +133,7 @@ namespace Asm65 {
                 case CpuType.Cpu2A03:   return "2A03";
                 case CpuType.Cpu65C02:  return "65C02";
                 case CpuType.Cpu65SC02: return "65SC02";
+                case CpuType.CpuW65C02: return "W65C02";
                 case CpuType.Cpu65802:  return "65802";
                 case CpuType.Cpu65816:  return "65816";
                 case CpuType.Cpu5A22:   return "5A22";
@@ -149,12 +152,14 @@ namespace Asm65 {
         public static CpuDef GetBestMatch(CpuType type, bool includeUndocumented,
                 bool twoByteBrk) {
             // Many 65xx variants boil down to a 6502, 65C02, or 65816, at least as far as
-            // a disassembler needs to know.  These do not, and would need full definitions:
+            // a disassembler needs to know.  WDC's W65C02 has the Rockwell extensions plus
+            // a couple more, so it works for the extended 65C02 variants.
+            //
+            // These don't strictly fit, and would need full definitions:
             //
             //  Hudson Soft HuC6280 (PC Engine / TurboGrafx)
             //  Commodore CSG 4510 / CSG 65CE02 (Amiga A2232 serial port; 4510 has one
             //   additional instruction, so use that as archetype)
-            //  Rockwell R65C02 (used in ???)
             //  Jeri's 65DTV02 (used in C64DTV single-chip computer); same as 6502 with
             //   some differences in illegal opcodes
             //  Eloraam 65EL02 (defined in a Minecraft-based emulator)
@@ -169,6 +174,9 @@ namespace Asm65 {
                 case CpuType.Cpu65C02:
                 case CpuType.Cpu65SC02:
                     cpuDef = Cpu65C02;
+                    break;
+                case CpuType.CpuW65C02:
+                    cpuDef = CpuW65C02;
                     break;
                 default:
                     // 6502, 6502B, 6502C, 6507, 6510, 8502, 2A03
@@ -349,6 +357,7 @@ namespace Asm65 {
         public static bool DebugValidate() {
             InternalValidate(Cpu6502);
             InternalValidate(Cpu65C02);
+            InternalValidate(CpuW65C02);
             InternalValidate(Cpu65816);
             Debug.WriteLine("CpuDefs okay");
             return true;
@@ -696,8 +705,8 @@ namespace Asm65 {
         };
 
 
-        // WDC's 65C02, with new opcodes and a handful of slightly strange NOPs.
-        private static CpuDef Cpu65C02 { get; } = new CpuDef("WDC W65C02S", (1 << 16) - 1, false) {
+        // Original 65C02, with new opcodes and a handful of slightly strange NOPs.
+        private static CpuDef Cpu65C02 { get; } = new CpuDef("WDC 65C02", (1 << 16) - 1, false) {
             Type = CpuType.Cpu65C02,
             mOpDefs = new OpDef[] {
                 OpDef.OpBRK_Implied,            // 0x00
@@ -956,6 +965,272 @@ namespace Asm65 {
                 OpDef.OpSBC_AbsIndexX,
                 OpDef.OpINC_AbsIndexX,
                 OpDef.GenerateUndoc(0xff, OpDef.OpNOP_65C02),
+            }
+        };
+
+
+        // WDC's W65C02, with the Rockwell extensions and STP/WAI.  I'm assuming that the
+        // behavior of the undocumented instructions remains unchanged, which is probably unwise
+        // but I have no information to the contrary.
+        private static CpuDef CpuW65C02 { get; } = new CpuDef("WDC W65C02S", (1 << 16) - 1, false) {
+            Type = CpuType.Cpu65C02,
+            mOpDefs = new OpDef[] {
+                OpDef.OpBRK_Implied,            // 0x00
+                OpDef.OpORA_DPIndexXInd,
+                OpDef.GenerateUndoc(0x02, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0x03, OpDef.OpNOP_65C02),
+                OpDef.OpTSB_DP,
+                OpDef.OpORA_DP,
+                OpDef.OpASL_DP,
+                OpDef.OpRMB0_DP,
+                OpDef.OpPHP_StackPush,          // 0x08
+                OpDef.OpORA_Imm,
+                OpDef.OpASL_Acc,
+                OpDef.GenerateUndoc(0x0b, OpDef.OpNOP_65C02),
+                OpDef.OpTSB_Abs,
+                OpDef.OpORA_Abs,
+                OpDef.OpASL_Abs,
+                OpDef.OpBBR0_DPPCRel,
+                OpDef.OpBPL_PCRel,              // 0x10
+                OpDef.OpORA_DPIndIndexY,
+                OpDef.OpORA_DPInd,
+                OpDef.GenerateUndoc(0x13, OpDef.OpNOP_65C02),
+                OpDef.OpTRB_DP,
+                OpDef.OpORA_DPIndexX,
+                OpDef.OpASL_DPIndexX,
+                OpDef.OpRMB1_DP,
+                OpDef.OpCLC_Implied,            // 0x18
+                OpDef.OpORA_AbsIndexY,
+                OpDef.OpINC_Acc,
+                OpDef.GenerateUndoc(0x1b, OpDef.OpNOP_65C02),
+                OpDef.OpTRB_Abs,
+                OpDef.OpORA_AbsIndexX,
+                OpDef.OpASL_AbsIndexX,
+                OpDef.OpBBR1_DPPCRel,
+                OpDef.OpJSR_Abs,                // 0x20
+                OpDef.OpAND_DPIndexXInd,
+                OpDef.GenerateUndoc(0x22, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0x23, OpDef.OpNOP_65C02),
+                OpDef.OpBIT_DP,
+                OpDef.OpAND_DP,
+                OpDef.OpROL_DP,
+                OpDef.OpRMB2_DP,
+                OpDef.OpPLP_StackPull,          // 0x28
+                OpDef.OpAND_Imm,
+                OpDef.OpROL_Acc,
+                OpDef.GenerateUndoc(0x2b, OpDef.OpNOP_65C02),
+                OpDef.OpBIT_Abs,
+                OpDef.OpAND_Abs,
+                OpDef.OpROL_Abs,
+                OpDef.OpBBR2_DPPCRel,
+                OpDef.OpBMI_PCRel,              // 0x30
+                OpDef.OpAND_DPIndIndexY,
+                OpDef.OpAND_DPInd,
+                OpDef.GenerateUndoc(0x33, OpDef.OpNOP_65C02),
+                OpDef.OpBIT_DPIndexX,
+                OpDef.OpAND_DPIndexX,
+                OpDef.OpROL_DPIndexX,
+                OpDef.OpRMB3_DP,
+                OpDef.OpSEC_Implied,            // 0x38
+                OpDef.OpAND_AbsIndexY,
+                OpDef.OpDEC_Acc,
+                OpDef.GenerateUndoc(0x3b, OpDef.OpNOP_65C02),
+                OpDef.OpBIT_AbsIndexX,
+                OpDef.OpAND_AbsIndexX,
+                OpDef.OpROL_AbsIndexX,
+                OpDef.OpBBR3_DPPCRel,
+                OpDef.OpRTI_StackRTI,           // 0x40
+                OpDef.OpEOR_DPIndexXInd,
+                OpDef.GenerateUndoc(0x42, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0x43, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0x44, OpDef.OpLDD_DP),
+                OpDef.OpEOR_DP,
+                OpDef.OpLSR_DP,
+                OpDef.OpRMB4_DP,
+                OpDef.OpPHA_StackPush,          // 0x48
+                OpDef.OpEOR_Imm,
+                OpDef.OpLSR_Acc,
+                OpDef.GenerateUndoc(0x4b, OpDef.OpNOP_65C02),
+                OpDef.OpJMP_Abs,
+                OpDef.OpEOR_Abs,
+                OpDef.OpLSR_Abs,
+                OpDef.OpBBR4_DPPCRel,
+                OpDef.OpBVC_PCRel,              // 0x50
+                OpDef.OpEOR_DPIndIndexY,
+                OpDef.OpEOR_DPInd,
+                OpDef.GenerateUndoc(0x53, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0x54, OpDef.OpLDD_DPIndexX),
+                OpDef.OpEOR_DPIndexX,
+                OpDef.OpLSR_DPIndexX,
+                OpDef.OpRMB5_DP,
+                OpDef.OpCLI_Implied,            // 0x58
+                OpDef.OpEOR_AbsIndexY,
+                OpDef.OpPHY_StackPush,
+                OpDef.GenerateUndoc(0x5b, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0x5c, OpDef.OpLDD_Weird),
+                OpDef.OpEOR_AbsIndexX,
+                OpDef.OpLSR_AbsIndexX,
+                OpDef.OpBBR5_DPPCRel,
+                OpDef.OpRTS_StackRTS,           // 0x60
+                OpDef.OpADC_DPIndexXInd,
+                OpDef.GenerateUndoc(0x62, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0x63, OpDef.OpNOP_65C02),
+                OpDef.OpSTZ_DP,
+                OpDef.OpADC_DP,
+                OpDef.OpROR_DP,
+                OpDef.OpRMB6_DP,
+                OpDef.OpPLA_StackPull,          // 0x68
+                OpDef.OpADC_Imm,
+                OpDef.OpROR_Acc,
+                OpDef.GenerateUndoc(0x6b, OpDef.OpNOP_65C02),
+                OpDef.OpJMP_AbsInd,
+                OpDef.OpADC_Abs,
+                OpDef.OpROR_Abs,
+                OpDef.OpBBR6_DPPCRel,
+                OpDef.OpBVS_PCRel,              // 0x70
+                OpDef.OpADC_DPIndIndexY,
+                OpDef.OpADC_DPInd,
+                OpDef.GenerateUndoc(0x73, OpDef.OpNOP_65C02),
+                OpDef.OpSTZ_DPIndexX,
+                OpDef.OpADC_DPIndexX,
+                OpDef.OpROR_DPIndexX,
+                OpDef.OpRMB7_DP,
+                OpDef.OpSEI_Implied,            // 0x78
+                OpDef.OpADC_AbsIndexY,
+                OpDef.OpPLY_StackPull,
+                OpDef.GenerateUndoc(0x7b, OpDef.OpNOP_65C02),
+                OpDef.OpJMP_AbsIndexXInd,
+                OpDef.OpADC_AbsIndexX,
+                OpDef.OpROR_AbsIndexX,
+                OpDef.OpBBR7_DPPCRel,
+                OpDef.OpBRA_PCRel,              // 0x80
+                OpDef.OpSTA_DPIndexXInd,
+                OpDef.GenerateUndoc(0x82, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0x83, OpDef.OpNOP_65C02),
+                OpDef.OpSTY_DP,
+                OpDef.OpSTA_DP,
+                OpDef.OpSTX_DP,
+                OpDef.OpSMB0_DP,
+                OpDef.OpDEY_Implied,            // 0x88
+                OpDef.OpBIT_Imm,
+                OpDef.OpTXA_Implied,
+                OpDef.GenerateUndoc(0x8b, OpDef.OpNOP_65C02),
+                OpDef.OpSTY_Abs,
+                OpDef.OpSTA_Abs,
+                OpDef.OpSTX_Abs,
+                OpDef.OpBBS0_DPPCRel,
+                OpDef.OpBCC_PCRel,              // 0x90
+                OpDef.OpSTA_DPIndIndexY,
+                OpDef.OpSTA_DPInd,
+                OpDef.GenerateUndoc(0x93, OpDef.OpNOP_65C02),
+                OpDef.OpSTY_DPIndexX,
+                OpDef.OpSTA_DPIndexX,
+                OpDef.OpSTX_DPIndexY,
+                OpDef.OpSMB1_DP,
+                OpDef.OpTYA_Implied,            // 0x98
+                OpDef.OpSTA_AbsIndexY,
+                OpDef.OpTXS_Implied,
+                OpDef.GenerateUndoc(0x9b, OpDef.OpNOP_65C02),
+                OpDef.OpSTZ_Abs,
+                OpDef.OpSTA_AbsIndexX,
+                OpDef.OpSTZ_AbsIndexX,
+                OpDef.OpBBS1_DPPCRel,
+                OpDef.OpLDY_Imm,                // 0xa0
+                OpDef.OpLDA_DPIndexXInd,
+                OpDef.OpLDX_Imm,
+                OpDef.GenerateUndoc(0xa3, OpDef.OpNOP_65C02),
+                OpDef.OpLDY_DP,
+                OpDef.OpLDA_DP,
+                OpDef.OpLDX_DP,
+                OpDef.OpSMB2_DP,
+                OpDef.OpTAY_Implied,            // 0xa8
+                OpDef.OpLDA_Imm,
+                OpDef.OpTAX_Implied,
+                OpDef.GenerateUndoc(0xab, OpDef.OpNOP_65C02),
+                OpDef.OpLDY_Abs,
+                OpDef.OpLDA_Abs,
+                OpDef.OpLDX_Abs,
+                OpDef.OpBBS2_DPPCRel,
+                OpDef.OpBCS_PCRel,              // 0xb0
+                OpDef.OpLDA_DPIndIndexY,
+                OpDef.OpLDA_DPInd,
+                OpDef.GenerateUndoc(0xb3, OpDef.OpNOP_65C02),
+                OpDef.OpLDY_DPIndexX,
+                OpDef.OpLDA_DPIndexX,
+                OpDef.OpLDX_DPIndexY,
+                OpDef.OpSMB3_DP,
+                OpDef.OpCLV_Implied,            // 0xb8
+                OpDef.OpLDA_AbsIndexY,
+                OpDef.OpTSX_Implied,
+                OpDef.GenerateUndoc(0xbb, OpDef.OpNOP_65C02),
+                OpDef.OpLDY_AbsIndexX,
+                OpDef.OpLDA_AbsIndexX,
+                OpDef.OpLDX_AbsIndexY,
+                OpDef.OpBBS3_DPPCRel,
+                OpDef.OpCPY_Imm,                // 0xc0
+                OpDef.OpCMP_DPIndexXInd,
+                OpDef.GenerateUndoc(0xc2, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0xc3, OpDef.OpNOP_65C02),
+                OpDef.OpCPY_DP,
+                OpDef.OpCMP_DP,
+                OpDef.OpDEC_DP,
+                OpDef.OpSMB4_DP,
+                OpDef.OpINY_Implied,            // 0xc8
+                OpDef.OpCMP_Imm,
+                OpDef.OpDEX_Implied,
+                OpDef.OpWAI_Implied,
+                OpDef.OpCPY_Abs,
+                OpDef.OpCMP_Abs,
+                OpDef.OpDEC_Abs,
+                OpDef.OpBBS4_DPPCRel,
+                OpDef.OpBNE_PCRel,              // 0xd0
+                OpDef.OpCMP_DPIndIndexY,
+                OpDef.OpCMP_DPInd,
+                OpDef.GenerateUndoc(0xd3, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0xd4, OpDef.OpLDD_DPIndexX),
+                OpDef.OpCMP_DPIndexX,
+                OpDef.OpDEC_DPIndexX,
+                OpDef.OpSMB5_DP,
+                OpDef.OpCLD_Implied,            // 0xd8
+                OpDef.OpCMP_AbsIndexY,
+                OpDef.OpPHX_StackPush,
+                OpDef.OpSTP_Implied,
+                OpDef.GenerateUndoc(0xdc, OpDef.OpLDD_Absolute),
+                OpDef.OpCMP_AbsIndexX,
+                OpDef.OpDEC_AbsIndexX,
+                OpDef.OpBBS5_DPPCRel,
+                OpDef.OpCPX_Imm,                // 0xe0
+                OpDef.OpSBC_DPIndexXInd,
+                OpDef.GenerateUndoc(0xe2, OpDef.OpLDD_Imm),
+                OpDef.GenerateUndoc(0xe3, OpDef.OpNOP_65C02),
+                OpDef.OpCPX_DP,
+                OpDef.OpSBC_DP,
+                OpDef.OpINC_DP,
+                OpDef.OpSMB6_DP,
+                OpDef.OpINX_Implied,            // 0xe8
+                OpDef.OpSBC_Imm,
+                OpDef.OpNOP_Implied,
+                OpDef.GenerateUndoc(0xeb, OpDef.OpNOP_65C02),
+                OpDef.OpCPX_Abs,
+                OpDef.OpSBC_Abs,
+                OpDef.OpINC_Abs,
+                OpDef.OpBBS6_DPPCRel,
+                OpDef.OpBEQ_PCRel,              // 0xf0
+                OpDef.OpSBC_DPIndIndexY,
+                OpDef.OpSBC_DPInd,
+                OpDef.GenerateUndoc(0xf3, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0xf4, OpDef.OpLDD_DPIndexX),
+                OpDef.OpSBC_DPIndexX,
+                OpDef.OpINC_DPIndexX,
+                OpDef.OpSMB7_DP,
+                OpDef.OpSED_Implied,            // 0xf8
+                OpDef.OpSBC_AbsIndexY,
+                OpDef.OpPLX_StackPull,
+                OpDef.GenerateUndoc(0xfb, OpDef.OpNOP_65C02),
+                OpDef.GenerateUndoc(0xfc, OpDef.OpLDD_Absolute),
+                OpDef.OpSBC_AbsIndexX,
+                OpDef.OpINC_AbsIndexX,
+                OpDef.OpBBS7_DPPCRel,
             }
         };
 

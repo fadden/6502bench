@@ -105,6 +105,7 @@ namespace SourceGen.Tools.WpfGui {
             CpuItems = new CpuItem[] {
                 new CpuItem((string)FindResource("str_6502"), CpuDef.CpuType.Cpu6502),
                 new CpuItem((string)FindResource("str_65C02"), CpuDef.CpuType.Cpu65C02),
+                new CpuItem((string)FindResource("str_W65C02"), CpuDef.CpuType.CpuW65C02),
                 new CpuItem((string)FindResource("str_65816"), CpuDef.CpuType.Cpu65816),
             };
         }
@@ -162,6 +163,8 @@ namespace SourceGen.Tools.WpfGui {
                 string sampleValue = "$12";
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     sampleValue = "#$12,#$34";
+                } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
+                    sampleValue = "$12,$1234";
                 } else if (opLen == 3) {
                     sampleValue = "$1234";
                 } else if (opLen == 4) {
