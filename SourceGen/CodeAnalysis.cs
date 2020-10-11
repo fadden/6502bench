@@ -941,6 +941,13 @@ namespace SourceGen {
                         Asm65.Helper.RelOffset8(mAnattribs[offset].Address,
                             (sbyte)operand) | bank;
                     break;
+                case OpDef.AddressMode.DPPCRel:
+                    // Like PCRel, but part of a 2-byte operand, so we use the 16-bit offset
+                    // function.  We totally ignore the DP byte.
+                    mAnattribs[offset].OperandAddress =
+                        Asm65.Helper.RelOffset16(mAnattribs[offset].Address,
+                            (sbyte)(operand << 8)) | bank;
+                    break;
                 case OpDef.AddressMode.PCRelLong:
                 case OpDef.AddressMode.StackPCRelLong:
                     mAnattribs[offset].OperandAddress =
@@ -950,7 +957,7 @@ namespace SourceGen {
                 default:
                     // Immediate, implied, accumulator, stack relative.  We can't do
                     // immediate yet because we won't necessarily have a final assessment
-                    // of the operand width.
+                    // of the operand width on the 16-bit CPUs.
                     Debug.Assert(mAnattribs[offset].OperandAddress == -1);
                     break;
             }
@@ -969,6 +976,7 @@ namespace SourceGen {
                         case OpDef.AddressMode.Abs:
                         case OpDef.AddressMode.AbsLong:
                         case OpDef.AddressMode.DP:
+                        case OpDef.AddressMode.DPPCRel:
                         case OpDef.AddressMode.PCRel:
                         case OpDef.AddressMode.PCRelLong:
                         case OpDef.AddressMode.StackPCRelLong:

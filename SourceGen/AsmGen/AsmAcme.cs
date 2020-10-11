@@ -283,6 +283,8 @@ namespace SourceGen.AsmGen {
                 cpuStr = "65816";
             } else if (cpuDef.Type == CpuDef.CpuType.Cpu65C02) {
                 cpuStr = "65c02";
+            } else if (cpuDef.Type == CpuDef.CpuType.CpuW65C02) {
+                cpuStr = "w65c02";
             } else if (cpuDef.Type == CpuDef.CpuType.Cpu6502 && cpuDef.HasUndocumented) {
                 cpuStr = "6510";
             } else {
@@ -295,7 +297,8 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public string ModifyOpcode(int offset, OpDef op) {
             if (op.IsUndocumented) {
-                if (Project.CpuDef.Type == CpuDef.CpuType.Cpu65C02) {
+                if (Project.CpuDef.Type == CpuDef.CpuType.Cpu65C02 ||
+                        Project.CpuDef.Type == CpuDef.CpuType.CpuW65C02) {
                     // none of the "LDD" stuff is handled
                     return null;
                 }

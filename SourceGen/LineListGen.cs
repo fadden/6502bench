@@ -1265,7 +1265,8 @@ namespace SourceGen {
             // Tweak branch instructions.  We want to show the absolute address rather
             // than the relative offset (which happens with the OperandAddress assignment
             // below), and 1-byte branches should always appear as a 4-byte hex value.
-            if (op.AddrMode == OpDef.AddressMode.PCRel) {
+            if (op.AddrMode == OpDef.AddressMode.PCRel ||
+                    op.AddrMode == OpDef.AddressMode.DPPCRel) {
                 Debug.Assert(attr.OperandAddress >= 0);
                 operandLen = 2;
                 opFlags = PseudoOp.FormatNumericOpFlags.IsPcRel;
@@ -1304,6 +1305,14 @@ namespace SourceGen {
                         null, attr.DataDescriptor, operand & 0xff, 1,
                         PseudoOp.FormatNumericOpFlags.None);
                     formattedOperand = '#' + opstr1 + "," + '#' + opstr2;
+                } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
+                    // Special handling for double-operand BBR/BBS.  The instruction generally
+                    // behaves like a branch, so format that first.
+                    string branchStr = PseudoOp.FormatNumericOperand(mFormatter,
+                        mProject.SymbolTable, mLvLookup, null, attr.DataDescriptor, offset,
+                        operandForSymbol, operandLen, opFlags);
+                    string dpStr = mFormatter.FormatHexValue(operand & 0xff, 2);
+                    formattedOperand = dpStr + "," + branchStr;
                 } else {
                     formattedOperand = PseudoOp.FormatNumericOperand(mFormatter,
                         mProject.SymbolTable, mLvLookup, null, attr.DataDescriptor, offset,
@@ -1314,6 +1323,9 @@ namespace SourceGen {
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     formattedOperand = '#' + mFormatter.FormatHexValue(operand >> 8, 2) + "," +
                         '#' + mFormatter.FormatHexValue(operand & 0xff, 2);
+                } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
+                    formattedOperand = mFormatter.FormatHexValue(operand & 0xff, 2) + "," +
+                        mFormatter.FormatHexValue(operandForSymbol, operandLen * 2);
                 } else {
                     if (operandLen == 2) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",

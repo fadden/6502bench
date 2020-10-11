@@ -380,6 +380,12 @@ namespace SourceGen.AsmGen {
             if (op.IsUndocumented) {
                 return null;
             }
+            if (Project.CpuDef.Type == CpuDef.CpuType.CpuW65C02) {
+                if ((op.Opcode & 0x0f) == 0x07 || (op.Opcode & 0x0f) == 0x0f) {
+                    // BBR, BBS, RMB, SMB not supported
+                    return null;
+                }
+            }
 
             // The assembler works correctly if the symbol is defined as a two-digit hex
             // value (e.g. "foo equ $80") but fails if it's four (e.g. "foo equ $0080").  We

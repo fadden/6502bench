@@ -220,7 +220,8 @@ namespace SourceGen.AsmGen {
             // Tweak branch instructions.  We want to show the absolute address rather
             // than the relative offset (which happens with the OperandAddress assignment
             // below), and 1-byte branches should always appear as a 4-byte hex value.
-            if (op.AddrMode == OpDef.AddressMode.PCRel) {
+            if (op.AddrMode == OpDef.AddressMode.PCRel ||
+                    op.AddrMode == OpDef.AddressMode.DPPCRel) {
                 Debug.Assert(attr.OperandAddress >= 0);
                 operandLen = 2;
                 opFlags |= PseudoOp.FormatNumericOpFlags.IsPcRel;
@@ -269,6 +270,14 @@ namespace SourceGen.AsmGen {
                     }
                     string hash = gen.Quirks.BlockMoveArgsNoHash ? "" : "#";
                     formattedOperand = hash + opstr1 + "," + hash + opstr2;
+                } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
+                    // Special handling for double-operand BBR/BBS.  The instruction generally
+                    // behaves like a branch, so format that first.
+                    string branchStr = PseudoOp.FormatNumericOperand(formatter,
+                        proj.SymbolTable, gen.Localizer.LabelMap, dfd,
+                        operandForSymbol, operandLen, opFlags);
+                    string dpStr = formatter.FormatHexValue(operand & 0xff, 2);
+                    formattedOperand = dpStr + "," + branchStr;
                 } else {
                     if (attr.DataDescriptor.IsStringOrCharacter) {
                         gen.UpdateCharacterEncoding(dfd);
@@ -291,6 +300,9 @@ namespace SourceGen.AsmGen {
                     string hash = gen.Quirks.BlockMoveArgsNoHash ? "" : "#";
                     formattedOperand = hash + formatter.FormatHexValue(arg1, 2) + "," +
                         hash + formatter.FormatHexValue(arg2, 2);
+                } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
+                    formattedOperand = formatter.FormatHexValue(operand & 0xff, 2) + "," +
+                        formatter.FormatHexValue(operandForSymbol, operandLen * 2);
                 } else {
                     if (operandLen == 2 && !(op.IsAbsolutePBR && gen.Quirks.Need24BitsForAbsPBR)) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",
@@ -307,6 +319,15 @@ namespace SourceGen.AsmGen {
                     op.AddrMode == OpDef.AddressMode.StackInt) {
                 // COP $02 is standard, but some require COP #$02
                 operandStr = '#' + operandStr;
+            }
+
+            // The BBR/BBS/RMB/SMB instructions include a bit index (0-7).  The standard way is
+            // to make it part of the mnemonic, but some assemblers make it an argument.
+            if (gen.Quirks.BitNumberIsArg && op.IsNumberedBitOp) {
+                // Easy way: do some string manipulation.
+                char bitIndex = opcodeStr[opcodeStr.Length - 1];
+                opcodeStr = opcodeStr.Substring(0, opcodeStr.Length - 1);
+                operandStr = bitIndex.ToString() + "," + operandStr;
             }
 
             string eolComment = proj.Comments[offset];

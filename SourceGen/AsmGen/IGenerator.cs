@@ -202,9 +202,10 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class AssemblerQuirks {
         /// <summary>
-        /// Does a leading underscore in a label have a special meaning?  (e.g. 64tass)
+        /// Does the assembler expect the bit index for BBR/BBS/RMB/SMB to be expressed as
+        /// a separate argument?
         /// </summary>
-        public bool LeadingUnderscoreSpecial { get; set; }
+        public bool BitNumberIsArg { get; set; }
 
         /// <summary>
         /// Are 8-bit constant args to MVN/MVP output without a leading '#'?
@@ -217,16 +218,15 @@ namespace SourceGen.AsmGen {
         public bool BlockMoveArgsReversed { get; set; }
 
         /// <summary>
+        /// Does a leading underscore in a label have a special meaning?  (e.g. 64tass)
+        /// </summary>
+        public bool LeadingUnderscoreSpecial { get; set; }
+
+        /// <summary>
         /// Do we need to specify a 24-bit value for 16-bit absolute arguments that are
         /// formed with the Program Bank Register (JMP/JSR)?
         /// </summary>
         public bool Need24BitsForAbsPBR { get; set; }
-
-        /// <summary>
-        /// Does the assembler support a type of label whose value can be redefined to
-        /// act as a local variable?
-        /// </summary>
-        public bool NoRedefinableSymbols { get; set; }
 
         /// <summary>
         /// Is the assembler unable to generate relative branches that wrap around banks?
@@ -235,9 +235,10 @@ namespace SourceGen.AsmGen {
         public bool NoPcRelBankWrap { get; set; }
 
         /// <summary>
-        /// Do 8-bit constant args to StackInt ops (BRK/COP) require a leading '#'?
+        /// Does the assembler support a type of label whose value can be redefined to
+        /// act as a local variable?
         /// </summary>
-        public bool StackIntOperandIsImmediate { get; set; }
+        public bool NoRedefinableSymbols { get; set; }
 
         /// <summary>
         /// Is the assembler implemented as a single pass?  (e.g. cc65)
@@ -249,6 +250,11 @@ namespace SourceGen.AsmGen {
         /// and not corrected when the actual width is determined?
         /// </summary>
         public bool SinglePassNoLabelCorrection { get; set; }
+
+        /// <summary>
+        /// Do 8-bit constant args to StackInt ops (BRK/COP) require a leading '#'?
+        /// </summary>
+        public bool StackIntOperandIsImmediate { get; set; }
 
         /// <summary>
         /// Does the assembler configure assembler widths based on SEP/REP, but doesn't

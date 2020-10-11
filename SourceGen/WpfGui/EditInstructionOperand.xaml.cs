@@ -352,7 +352,8 @@ namespace SourceGen.WpfGui {
             bool isPcRelative = false;
             bool isBlockMove = false;
             if (attr.OperandAddress >= 0) {
-                if (mOpDef.AddrMode == OpDef.AddressMode.PCRel) {
+                if (mOpDef.AddrMode == OpDef.AddressMode.PCRel ||
+                        mOpDef.AddrMode == OpDef.AddressMode.DPPCRel) {
                     previewHexDigits = 4;   // show branches as $xxxx even when on zero page
                     isPcRelative = true;
                 } else if (mOpDef.AddrMode == OpDef.AddressMode.PCRelLong ||

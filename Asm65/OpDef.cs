@@ -207,6 +207,11 @@ namespace Asm65 {
         public CycleMod CycleMods { get { return (CycleMod)(CycDef & ~0xff); } }
 
         /// <summary>
+        /// True if this is a numbered bit operation, i.e. BBR/BBS/RMB/SMB on the W65C02.
+        /// </summary>
+        public bool IsNumberedBitOp { get; private set; }
+
+        /// <summary>
         /// True if the instruction's address mode is a direct page access.
         /// </summary>
         public bool IsDirectPageInstruction {
@@ -221,6 +226,7 @@ namespace Asm65 {
                     case AddressMode.DPIndIndexYLong:
                     case AddressMode.DPIndLong:
                     case AddressMode.StackDPInd:
+                        // not currently handling DPPCRel as DP
                         return true;
                     default:
                         return false;
@@ -347,6 +353,7 @@ namespace Asm65 {
             this.Opcode = src.Opcode;
             this.AddrMode = src.AddrMode;
             this.IsUndocumented = src.IsUndocumented;
+            this.IsNumberedBitOp = src.IsNumberedBitOp;
             this.Mnemonic = src.Mnemonic;
             this.FlagsAffected = src.FlagsAffected;
             this.Effect = src.Effect;
@@ -578,7 +585,8 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Determines if a conditional branch is always taken, based on the status flags.
+        /// Determines if a conditional branch is always taken, based on the status flags.  Only
+        /// call here for branch instructions.
         /// </summary>
         /// <param name="op">Conditional branch instruction.</param>
         /// <param name="flags">Processor status flags.</param>
@@ -3559,21 +3567,25 @@ namespace Asm65 {
         //
 
         private static OpDef OpBBR = new OpDef() {
+            IsNumberedBitOp = true,
             Mnemonic = "???",
             Effect = FlowEffect.ConditionalBranch,
             BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpBBS = new OpDef() {
+            IsNumberedBitOp = true,
             Mnemonic = "???",
             Effect = FlowEffect.ConditionalBranch,
             BaseMemEffect = MemoryEffect.None
         };
         private static OpDef OpRMB = new OpDef() {
+            IsNumberedBitOp = true,
             Mnemonic = "???",
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.ReadModifyWrite
         };
         private static OpDef OpSMB = new OpDef() {
+            IsNumberedBitOp = true,
             Mnemonic = "???",
             Effect = FlowEffect.Cont,
             BaseMemEffect = MemoryEffect.ReadModifyWrite

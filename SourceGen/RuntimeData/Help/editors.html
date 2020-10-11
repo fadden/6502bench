@@ -103,6 +103,10 @@ SourceGen currently only allows you to set one format, which will be
 applied to both operands.  If you specify a symbol, the symbol will
 be used twice, adjusted if necessary.  (This limitation may be addressed
 in a future release.)</p>
+<p>The <code>BBR</code> and <code>BBS</code> instructions on the W65C02
+also have two operands: a direct page address, and a relative branch.
+In general the direct page address is ignored, so these are treated as
+branch instructions.</p>
 
 <p>The bottom part of the window has some shortcuts for working with
 address references and local variables.  These are primarily used to

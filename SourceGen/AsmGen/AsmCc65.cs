@@ -283,7 +283,8 @@ namespace SourceGen.AsmGen {
             string cpuStr;
             if (cpuDef.Type == CpuDef.CpuType.Cpu65816) {
                 cpuStr = "65816";
-            } else if (cpuDef.Type == CpuDef.CpuType.Cpu65C02) {
+            } else if (cpuDef.Type == CpuDef.CpuType.Cpu65C02 ||
+                    cpuDef.Type == CpuDef.CpuType.CpuW65C02) {
                 cpuStr = "65C02";
             } else if (cpuDef.Type == CpuDef.CpuType.Cpu6502 && cpuDef.HasUndocumented) {
                 cpuStr = "6502X";
