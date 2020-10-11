@@ -359,7 +359,7 @@ namespace Asm65 {
             InternalValidate(Cpu65C02);
             InternalValidate(CpuW65C02);
             InternalValidate(Cpu65816);
-            Debug.WriteLine("CpuDefs okay");
+            Debug.WriteLine("CpuDef: tests successful");
             return true;
         }
         private static void InternalValidate(CpuDef cdef) {
@@ -406,6 +406,7 @@ namespace Asm65 {
                                  OpDef.CycleMod.BlockMove;
                     break;
                 case CpuType.Cpu65C02:
+                case CpuType.CpuW65C02:
                     ignoreMask = OpDef.CycleMod.OneIfM0 |
                                  OpDef.CycleMod.TwoIfM0 |
                                  OpDef.CycleMod.OneIfX0 |
@@ -431,7 +432,7 @@ namespace Asm65 {
                 if ((mods & OpDef.CycleMod.OneIf65C02) != 0) {
                     // This isn't variable -- the instruction always takes one cycle longer
                     // on the 65C02.  (Applies to $6C, JMP (addr).)
-                    Debug.Assert(Type == CpuType.Cpu65C02);
+                    Debug.Assert(Type == CpuType.Cpu65C02 || Type == CpuType.CpuW65C02);
                     baseCycles++;
                     mods &= ~OpDef.CycleMod.OneIf65C02;
                 }
@@ -973,7 +974,7 @@ namespace Asm65 {
         // behavior of the undocumented instructions remains unchanged, which is probably unwise
         // but I have no information to the contrary.
         private static CpuDef CpuW65C02 { get; } = new CpuDef("WDC W65C02S", (1 << 16) - 1, false) {
-            Type = CpuType.Cpu65C02,
+            Type = CpuType.CpuW65C02,
             mOpDefs = new OpDef[] {
                 OpDef.OpBRK_Implied,            // 0x00
                 OpDef.OpORA_DPIndexXInd,

@@ -603,6 +603,10 @@ namespace Asm65 {
                 case 0xf0:      // BEQ
                     return FlagToBT(flags.Z, 1);
                 default:
+                    if ((op.Opcode & 0x0f) == 0x0f) {
+                        // assume W65C02 BBR/BBS
+                        return BranchTaken.Indeterminate;
+                    }
                     // Not a conditional branch.
                     throw new Exception("Not a conditional branch");
             }

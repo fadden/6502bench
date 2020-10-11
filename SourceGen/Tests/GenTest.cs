@@ -192,13 +192,14 @@ namespace SourceGen.Tests {
         /// <summary>
         /// Determines the desired CPU from the test case number.
         /// </summary>
-        /// <param name="testNum"></param>
-        /// <returns></returns>
+        /// <param name="testNum">Test number.</param>
+        /// <returns>CPU type enumeration value.</returns>
         private CpuDef.CpuType GetCpuTypeFromNum(int testNum) {
             switch (testNum % 10) {
                 case 0:     return CpuDef.CpuType.Cpu6502;
                 case 1:     return CpuDef.CpuType.Cpu65C02;
                 case 2:     return CpuDef.CpuType.Cpu65816;
+                case 3:     return CpuDef.CpuType.CpuW65C02;
                 default:    return CpuDef.CpuType.CpuUnknown;
             }
         }

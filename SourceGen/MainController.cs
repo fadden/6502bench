@@ -262,6 +262,7 @@ namespace SourceGen {
             Debug.Assert(CommonUtil.RangeSet.Test());
             Debug.Assert(CommonUtil.TypedRangeSet.Test());
             Debug.Assert(CommonUtil.Version.Test());
+            Debug.Assert(Asm65.CpuDef.DebugValidate());
 
             if (RuntimeDataAccess.GetDirectory() == null) {
                 MessageBox.Show(Res.Strings.RUNTIME_DIR_NOT_FOUND,

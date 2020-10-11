@@ -308,6 +308,19 @@
       }
     },
     {
+      "Name" : "Generic W65C02",
+      "GroupName" : "Generic",
+      "Cpu" : "W65C02",
+      "Speed" : "1",
+      "Description" : "Generic W65C02-based system (65C02 with Rockwell and WDC extensions).",
+      "SymbolFiles" : [
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+      }
+    },
+    {
       "Name" : "Generic 65816",
       "GroupName" : "Generic",
       "Cpu" : "65816",
