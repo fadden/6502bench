@@ -946,7 +946,7 @@ namespace SourceGen {
                     // function.  We totally ignore the DP byte.
                     mAnattribs[offset].OperandAddress =
                         Asm65.Helper.RelOffset16(mAnattribs[offset].Address,
-                            (sbyte)(operand << 8)) | bank;
+                            (sbyte)(operand >> 8)) | bank;
                     break;
                 case OpDef.AddressMode.PCRelLong:
                 case OpDef.AddressMode.StackPCRelLong:
