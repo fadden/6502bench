@@ -159,15 +159,21 @@ namespace SourceGen.Tools.WpfGui {
                     continue;
                 }
 
-                int opLen = op.GetLength(StatusFlags.AllIndeterminate);
+                int instrLen = op.GetLength(StatusFlags.AllIndeterminate);
+                if (op.AddrMode == OpDef.AddressMode.PCRel) {
+                    // Single-byte branch instructions are formatted with a 16-bit
+                    // absolute addres.
+                    instrLen = 3;
+                }
+
                 string sampleValue = "$12";
                 if (op.AddrMode == OpDef.AddressMode.BlockMove) {
                     sampleValue = "#$12,#$34";
                 } else if (op.AddrMode == OpDef.AddressMode.DPPCRel) {
                     sampleValue = "$12,$1234";
-                } else if (opLen == 3) {
+                } else if (instrLen == 3) {
                     sampleValue = "$1234";
-                } else if (opLen == 4) {
+                } else if (instrLen == 4) {
                     sampleValue = "$123456";
                 }
                 string instrSample = mFormatter.FormatMnemonic(op.Mnemonic,
