@@ -4071,17 +4071,17 @@ namespace SourceGen {
             //    " opOff=" + attr.OperandOffset.ToString("x4") + "\r\n");
 
             if (attr.IsHinted) {
-                sb.Append("\u2022 Hints: ");
+                sb.Append("\u2022 Analyzer Tags: ");
                 for (int i = 0; i < line.OffsetSpan; i++) {
                     switch (mProject.TypeHints[line.FileOffset + i]) {
                         case CodeAnalysis.TypeHint.Code:
-                            sb.Append("C");
+                            sb.Append("S");     // S)tart
                             break;
                         case CodeAnalysis.TypeHint.Data:
-                            sb.Append("D");
+                            sb.Append("E");     // E)nd
                             break;
                         case CodeAnalysis.TypeHint.InlineData:
-                            sb.Append("I");
+                            sb.Append("I");     // I)nline
                             break;
                         default:
                             break;

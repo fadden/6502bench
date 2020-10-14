@@ -112,11 +112,13 @@ assembler directive.</p>
     field to open the
     <a href="editors.html#flags">Edit Status Flag Override</a> dialog.</li>
   <li><b>Attributes</b>.  Some instructions and data items have
-    interesting attributes.  '@' indicates an entry point, 'H' means
-    one or more bytes has a hint, '#' means execution will not continue
-    to the following instruction, '>' is shown for branch targets, and
-    '!' appears when a conditional branch is never taken.  (This
-    column is rarely useful and can be hidden.)</li>
+    interesting attributes.
+    '@' indicates an entry point,
+    'T' means one or more bytes has an analyzer tag (code start/stop/skip),
+    '#' means execution will not continue to the following instruction,
+    '>' is shown for branch targets, and
+    '!' appears when a conditional branch is never taken.
+    (This column is rarely useful and can be hidden.)</li>
   <li><b>Label</b>.  If a label has been defined for this offset, by
     the user or generated automatically, it will appear here.  Also,
     full-line items like long comments and notes will start in this
@@ -198,11 +200,12 @@ enabled will depend on what you have selected in the main window.</p>
   <li><a href="visualization.html#vis-and-sets">Create/Edit Visualization Set</a>.
     Create a new visualization set or edit an existing set.</li>
 
-  <li><a href="#hints">Hinting</a> (Hint As Code Entry Point, Hint As
-    Data Start, Hint As Inline Data, Remove Hints).  Enabled when one or more
-    code and data lines are selected.  Remove Hints is only enabled when
-    at least one line has hints.  The keyboard shortcuts for hints are
-    two-key combinations.</li>
+  <li><a href="#atags">Analyzer Tags</a> (Tag Address As Code Start Point,
+    Tag Address As Code Stop Point, Tag Bytes As Inline Data,
+    Remove Analyzer Tags).
+    Enabled when one or more code and data lines are selected.  Remove
+    Analyzer Tags is only enabled when at least one line has tags.  The
+    keyboard shortcuts are two-key combinations.</li>
 
   <li><a href="#address-table">Format Address Table</a>.  Formats
     a series of bytes as parts of a table of addresses.</li>
@@ -343,13 +346,13 @@ especially handy for undocumented instructions.</p>
 <h3><a name="messages">Messages Window</a></h3>
 
 <p>Sometimes a change will invalidate an earlier change.  For example,
-suppose you hint an area as data, and format it as a string.
-Later on you hint it as code.  You now have a block of code with a
-string format record sitting in the middle of it.  SourceGen tries very
-hard not to throw away anything you've done, but it will ignore anything
-invalid.</p>
+suppose you add a code stop point, and format the data that follows
+as a string.  Later on you change it to a code start point.  You now have
+a block of executable code with a string format record sitting in the
+middle of it.  SourceGen tries very hard not to throw away anything
+you've done, but it will ignore anything invalid.</p>
 <p>If a problem like this is encountered, an entry is added to a list
-of messages displayed at the bottom of the window.  Each entry identifies
+of messages displayed at the bottom of the main window.  Each entry identifies
 the nature of the problem, the severity of the problem, the offset where
 it occurred, and what was done to resolve it.  The problem categories
 include:</p>
@@ -359,11 +362,12 @@ include:</p>
   <li>Unresolved weak ref: a reference to a non-existent symbol was found.</li>
   <li>Invalid offset or length: the offset or length in a format object
     had an invalid value.</li>
-  <li>Invalid descriptor: the format is inappropriate, e.g. formatting
-    an instruction as a string.</li>
+  <li>Invalid descriptor: the format descriptor is inappropriate,
+    e.g. formatting an instruction as a string.</li>
 </ul>
-<p>The "context" column will provide additional detail about the problem.
-In most cases, the offending item will be ignored.</p>
+<p>The "context" column will provide additional detail about the problem,
+and the "resolution" column will indicate how it's being handled.  In most
+cases, the offending item will be ignored.</p>
 <p>Double-clicking on an entry will jump to that offset.</p>
 <p>The message list will not appear if there are no messages.  You can
 hide the list by clicking on the "Hide" button to the left of the messages.
@@ -415,17 +419,20 @@ convenient.  You can use Alt+Left/Right Arrow, or
 Ctrl+- / Ctrl+Shift+-, as keyboard shortcuts.)</p>
 
 
-<h3><a name="hints">Adding and Removing Hints</a></h3>
+<h3><a name="atags">Adding and Removing Analyzer Tags</a></h3>
 
-<p>To add code entry or data hints, select the desired offsets and
-use Actions &gt; Hint As Code Entry Point or Hint As Data.  Because code
-hints mean "the code analyzer should start here", and data hints mean
-"the code analyzer should stop here", there is rarely any reason to hint
-multiple consecutive bytes.  For this reason, only the first byte on each
-selected line will be hinted.</p>
-<p>For inline data, you need to hint every byte, so every byte in every
-selected line is hinted when you select Hint As Inline Data.  Similarly,
-the Remove Hints menu item will remove hints from every byte.</p>
+<p><i>(Note: These were referred to as code/data "hints" in older
+versions of SourceGen.)</i></p>
+
+<p>To set code start or stop points, select the desired offsets and
+use Actions &gt; Tag Address As Code Start Point (or Stop Point).  Because
+these indicate a transition between code and data regions, there is rarely
+any need to tag multiple consecutive bytes.
+For this reason, only the first byte on each selected line will be tagged.</p>
+
+<p>For inline data, you need to cover the entire range, so every byte in every
+selected line is tagged when you select Tag Bytes As Inline Data.  Similarly,
+the Remove Analyzer Tags menu item will remove tags from every byte.</p>
 
 <p>If you're having a hard time selecting just the right bytes because
 the instructions are caught up in a multi-byte data item, such as an
@@ -433,7 +440,7 @@ auto-detected character string, you can disable uncategorized data analysis
 (the thing that creates the .STR and .FILL ops for you).  You can do this
 from the
 <a href="settings.html#project-properties">project properties</a> editor,
-or simply by hitting Ctrl+D.  Hit that, apply the hint, then hit it
+or simply by hitting Ctrl+D.  Hit that, tag the byte or bytes, then hit it
 again to re-enable the string &amp; fill analyzer.</p>
 <p>Another approach is to use the "Toggle Single-Byte Format"
 menu item to "flatten" the item.</p>
@@ -466,7 +473,7 @@ values are to be pushed onto the stack for an RTS call.</p>
 <p>While the .dd2 case is easy to format with the data operand editor,
 formatting addresses whose components are split into multiple tables can
 be tedious.  Even in the easy case, you may want to create labels and set
-code hints for each item.</p>
+code start points for each item.</p>
 
 <p>The Address Table Formatter helps you associate symbols with the
 addresses in the table.  It works for simple and "split" tables.</p>
@@ -503,9 +510,10 @@ is split into sections.</p>
   selection", which will just use whichever part you didn't specify for
   the low and high bytes.  If the table holds 16-bit addresses, you can
   use the "Constant" field to specify the data bank.</li>
-  <li>Options: if the table holds the addresses of instructions, check
-  the "Add code entry hint if needed" box to add a code entry point hint
-  to anything that isn't already marked as an instruction.</li>
+  <li>Options: if the table holds the addresses of executable code, check
+  the "Tag targets as code start points" box.  If the target address
+  hasn't been identified by the code analyzer through some other execution
+  path, it will be tagged as a code start point.</li>
   <li>Generated Addresses: this shows the full list of addresses that are
   generated with the current set of parameters.  Each address is shown with
   a file offset and a symbol.  If the address can't be mapped within the
@@ -530,11 +538,11 @@ memory.  The low bytes and high bytes could be on separate 256-byte
 pages.  You just need to have all of the data selected.</p>
 
 <p>It should be mentioned that SourceGen does not record the fact that the
-data in question is part of a table.  The formatting, labels, and code hints
-are applied as if you entered them all individually by hand.  The formatter
-is just significantly more convenient.  It also does everything as a single
-undoable action, so if it comes out looking wrong, just hit "undo" and
-try something else.</p>
+data in question is part of a table.  The formatting, labels, and code
+start point tags are applied as if you entered them all individually by
+hand.  The formatter is just significantly more convenient.  It also
+does everything as a single undoable action, so if it comes out looking
+wrong, just hit "undo" and try something else.</p>
 
 
 <h3><a name="toggle-single">Toggle Single-Byte Format</a></h3>

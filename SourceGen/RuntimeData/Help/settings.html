@@ -263,8 +263,9 @@ BRK instructions should be handled as if they have an operand.</p>
 
 <p>The entry flags determine the initial value for the processor status
 flag register.  Code that is unreachable internally (requiring a code
-entry point hint) will use this value.  This is chiefly of value for
-65816 code, where the initial value of the M/X/E flags is significant.</p>
+start point tag) will use this value.  This is chiefly of value for
+65816 code, where the initial value of the M/X/E flags has a significant
+impact on how instructions are disassembled.</p>
 
 <p>If "analyze uncategorized data" is checked, SourceGen will attempt to
 identify character strings and regions that are filled with a repeated

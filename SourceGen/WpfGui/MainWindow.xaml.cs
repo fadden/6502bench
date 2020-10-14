@@ -211,25 +211,25 @@ namespace SourceGen.WpfGui {
         private void AddMultiKeyGestures() {
             RoutedUICommand ruic;
 
-            ruic = (RoutedUICommand)FindResource("HintAsCodeEntryPointCmd");
+            ruic = (RoutedUICommand)FindResource("TagAsCodeStartPointCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.C, ModifierKeys.Control, "Ctrl+C")
                 }));
-            ruic = (RoutedUICommand)FindResource("HintAsDataStartCmd");
+            ruic = (RoutedUICommand)FindResource("TagAsCodeStopPointCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D")
                 }));
-            ruic = (RoutedUICommand)FindResource("HintAsInlineDataCmd");
+            ruic = (RoutedUICommand)FindResource("TagAsInlineDataCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
                       new KeyGesture(Key.I, ModifierKeys.Control, "Ctrl+I")
                 }));
-            ruic = (RoutedUICommand)FindResource("RemoveHintsCmd");
+            ruic = (RoutedUICommand)FindResource("RemoveAnalyzerTagsCmd");
             ruic.InputGestures.Add(
                 new MultiKeyInputGesture(new KeyGesture[] {
                       new KeyGesture(Key.H, ModifierKeys.Control, "Ctrl+H"),
@@ -1081,7 +1081,7 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanFormatAddressTable();
         }
 
-        private void CanHintAsCodeEntryPoint(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanTagAsCodeStartPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
@@ -1090,7 +1090,7 @@ namespace SourceGen.WpfGui {
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
-        private void CanHintAsDataStart(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanTagAsCodeStopPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
@@ -1099,7 +1099,7 @@ namespace SourceGen.WpfGui {
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
         }
-        private void CanHintAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanTagAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
@@ -1108,7 +1108,7 @@ namespace SourceGen.WpfGui {
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
                 (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
         }
-        private void CanRemoveHints(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanRemoveAnalyzerTags(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
                 e.CanExecute = false;
                 return;
@@ -1283,18 +1283,18 @@ namespace SourceGen.WpfGui {
             mMainCtrl.ShowHelp();
         }
 
-        private void HintAsCodeEntryPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            Debug.WriteLine("hint as code entry point");
+        private void TagAsCodeStartPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("tag as code start point");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Code, true);
         }
 
-        private void HintAsDataStartCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            Debug.WriteLine("hint as data start");
+        private void TagAsCodeStopPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("tag as code stop point");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Data, true);
         }
 
-        private void HintAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            Debug.WriteLine("hint as inline data");
+        private void TagAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("tag as inline data");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
         }
 
@@ -1343,8 +1343,8 @@ namespace SourceGen.WpfGui {
             mMainCtrl.ReloadExternalFiles();
         }
 
-        private void RemoveHintsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            Debug.WriteLine("remove hints");
+        private void RemoveAnalyzerTagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            Debug.WriteLine("remove atags");
             mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
         }
 

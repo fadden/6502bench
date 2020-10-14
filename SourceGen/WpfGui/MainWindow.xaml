@@ -142,9 +142,9 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="GotoLastChangeCmd" Text="Go to Last Change"/>
-            <RoutedUICommand x:Key="HintAsCodeEntryPointCmd" Text="Hint As Code Entry Point"/>
-            <RoutedUICommand x:Key="HintAsDataStartCmd" Text="Hint As Data Start"/>
-            <RoutedUICommand x:Key="HintAsInlineDataCmd" Text="Hint As Inline Data"/>
+            <RoutedUICommand x:Key="TagAsCodeStartPointCmd" Text="Tag Address As Code Start Point"/>
+            <RoutedUICommand x:Key="TagAsCodeStopPointCmd" Text="Tag Address As Code Stop Point"/>
+            <RoutedUICommand x:Key="TagAsInlineDataCmd" Text="Tag Bytes As Inline Data"/>
             <RoutedUICommand x:Key="JumpToOperandCmd" Text="Jump to Operand">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+J</KeyGesture>
@@ -176,7 +176,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+R</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="RemoveHintsCmd" Text="Remove Hints"/>
+            <RoutedUICommand x:Key="RemoveAnalyzerTagsCmd" Text="Remove Analyzer Tags"/>
             <RoutedUICommand x:Key="SelectAllCmd" Text="Select All">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+A</KeyGesture>
@@ -288,12 +288,12 @@ limitations under the License.
                         CanExecute="CanUndo" Executed="GotoLastChangeCmd_Executed"/>
         <CommandBinding Command="Help"
                         Executed="HelpCmd_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsCodeEntryPointCmd}"
-                        CanExecute="CanHintAsCodeEntryPoint" Executed="HintAsCodeEntryPointCmd_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsDataStartCmd}"
-                        CanExecute="CanHintAsDataStart" Executed="HintAsDataStartCmd_Executed"/>
-        <CommandBinding Command="{StaticResource HintAsInlineDataCmd}"
-                        CanExecute="CanHintAsInlineData" Executed="HintAsInlineDataCmd_Executed"/>
+        <CommandBinding Command="{StaticResource TagAsCodeStartPointCmd}"
+                        CanExecute="CanTagAsCodeStartPoint" Executed="TagAsCodeStartPointCmd_Executed"/>
+        <CommandBinding Command="{StaticResource TagAsCodeStopPointCmd}"
+                        CanExecute="CanTagAsCodeStopPoint" Executed="TagAsCodeStopPointCmd_Executed"/>
+        <CommandBinding Command="{StaticResource TagAsInlineDataCmd}"
+                        CanExecute="CanTagAsInlineData" Executed="TagAsInlineDataCmd_Executed"/>
         <CommandBinding Command="{StaticResource JumpToOperandCmd}"
                         CanExecute="CanJumpToOperand" Executed="JumpToOperandCmd_Executed"/>
         <CommandBinding Command="{StaticResource NavigateBackwardCmd}"
@@ -312,8 +312,8 @@ limitations under the License.
                         CanExecute="CanRedo" Executed="RedoCmd_Executed"/>
         <CommandBinding Command="{StaticResource ReloadExternalFilesCmd}"
                         CanExecute="IsProjectOpen" Executed="ReloadExternalFilesCmd_Executed"/>
-        <CommandBinding Command="{StaticResource RemoveHintsCmd}"
-                        CanExecute="CanRemoveHints" Executed="RemoveHintsCmd_Executed"/>
+        <CommandBinding Command="{StaticResource RemoveAnalyzerTagsCmd}"
+                        CanExecute="CanRemoveAnalyzerTags" Executed="RemoveAnalyzerTagsCmd_Executed"/>
         <CommandBinding Command="Save"
                         CanExecute="CanSaveProject" Executed="SaveCmd_Executed"/>
         <CommandBinding Command="SaveAs"
@@ -433,10 +433,10 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditLocalVariableTableCmd}"/>
                 <MenuItem Command="{StaticResource EditVisualizationSetCmd}"/>
                 <Separator/>
-                <MenuItem Command="{StaticResource HintAsCodeEntryPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>
-                <MenuItem Command="{StaticResource HintAsDataStartCmd}" InputGestureText="Ctrl+H, Ctrl+D"/>
-                <MenuItem Command="{StaticResource HintAsInlineDataCmd}" InputGestureText="Ctrl+H, Ctrl+I"/>
-                <MenuItem Command="{StaticResource RemoveHintsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
+                <MenuItem Command="{StaticResource TagAsCodeStartPointCmd}" InputGestureText="Ctrl+H, Ctrl+C"/>
+                <MenuItem Command="{StaticResource TagAsCodeStopPointCmd}" InputGestureText="Ctrl+H, Ctrl+D"/>
+                <MenuItem Command="{StaticResource TagAsInlineDataCmd}" InputGestureText="Ctrl+H, Ctrl+I"/>
+                <MenuItem Command="{StaticResource RemoveAnalyzerTagsCmd}" InputGestureText="Ctrl+H, Ctrl+R"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource FormatAddressTableCmd}"/>
                 <MenuItem Command="{StaticResource ToggleSingleByteFormatCmd}"/>

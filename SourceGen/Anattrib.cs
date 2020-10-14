@@ -381,7 +381,7 @@ namespace SourceGen {
             StringBuilder sb = new StringBuilder(5);
             char blank = '.';
             sb.Append(IsEntryPoint ? '@' : blank);
-            sb.Append(IsHinted ? 'H' : blank);
+            sb.Append(IsHinted ? 'T' : blank);
             sb.Append(DoesNotBranch ? '!' : blank);
             sb.Append(DoesNotContinue ? '#' : blank);
             sb.Append(IsBranchTarget ? '>' : blank);

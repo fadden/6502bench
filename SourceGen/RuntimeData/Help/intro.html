@@ -190,12 +190,13 @@ control codes are also allowed.</p>
 of execution.  Most of what a given instruction does isn't important;
 only its effect on the flow of execution matters.</p>
 
-<p>The code tracing has to start somewhere, so SourceGen uses "code entry
-point hints" to identify places where execution may begin.  By default,
-a hint is placed at the start of the file.  From there, the tracing process
-walks through the code, pursuing all branches.  In many cases, if you
-mark all external entry points, SourceGen will automatically find all
-executable code and separate it from variable storage and data areas.</p>
+<p>The code tracing has to start somewhere, so SourceGen uses "code start
+points" to identify places where execution may begin.  By default,
+the first byte of the file is tagged as a start point.  From there, the
+tracing process walks through the code, pursuing all branches.  In many
+cases, if you tag all external entry points, SourceGen will automatically
+find all executable code and separate it from variable storage and
+data areas.</p>
 
 <p>As noted earlier, tracking the processor status flags can make the
 analysis more accurate.  Identifying situations where a branch instruction
@@ -239,13 +240,13 @@ is launched, but may be manually deleted without harm.</p>
 <a href="advanced.html#extension-scripts">advanced topics</a> section.</p>
 
 
-<h3><a name="hints">Analyzer Hints</a></h3>
+<h3><a name="atags">Code Analyzer Stop, Start, and Skip</a></h3>
 
 <p>Sometimes SourceGen can't automatically find the start or end of an
 instruction stream, or gets confused by inline data.  These situations
-can be resolved by adding an appropriate hint.</p>
+can be resolved by adding analyzer tags.</p>
 
-<p><b>Code entry point hints</b> tell the analyzer to add the offset
+<p><b>Code start point</b> tags tell the analyzer to add the offset
 to the list of instruction start points.  Suppose you've got a code
 library that begins with jump vectors, like this:</p>
 <pre>
@@ -272,7 +273,7 @@ L1009    CLC
 <p>SourceGen doesn't see any code that jumps to $1003 or $1006, so it
 assumes those are data.  Further, the functions at those addresses may
 also be considered data unless some bit of code reachable from L1009
-calls into them.  If you add a code hint to $1003 and $1006,
+calls into them.  If you tag $1003 and $1006 as code start points,
 you'll get better results:</p>
 <pre>
          .ORG    $1000
@@ -282,9 +283,9 @@ you'll get better results:</p>
 L1009    CLC
 </pre>
 
-<p>Be careful that you only add hints to the instruction opcode.  If
-you applied hints to the full range of bytes from $1003 to $1008, you would
-end up with this:</p>
+<p>Be careful that you only tag the instruction opcode byte.  If
+you tagged each and every byte from $1003 to $1008, you would
+end up with a mess:</p>
 <pre>
          .ORG    $1000
          JMP     L1009
@@ -297,15 +298,15 @@ L1009    CLC
 
 <p>The exact set of instructions shown depends on your CPU configuration.
 The problem is that the bytes in the middle of the instruction have
-been marked as entry points, and SourceGen is treating them as
+been tagged as start points, so SourceGen is treating them as
 embedded instructions.  $EF and $12 aren't valid 6502 opcodes, so
-they're being ignored, but $10 is BPL and $30 is BMI.  Because hinting
+they're being ignored, but $10 is BPL and $30 is BMI.  Because tagging
 multiple consecutive bytes is rarely useful, SourceGen only applies code
-hints to the first byte in a selected line.</p>
+start tags to the first byte in a selected line.</p>
 
-<p><b>Data hints</b> tell the analyzer when it should stop.  For example,
-suppose address $ff00 is known to always be nonzero, and the code uses
-that fact to get a branch-always on the 6502:</p>
+<p><b>Code stop point</b> tags tell the analyzer when it should stop.  For
+example, suppose address $ff00 is known to always be nonzero, and the code
+uses that fact to get a branch-always on the 6502:</p>
 <pre>
          .ORG    $1000
          LDA     $ff00
@@ -313,17 +314,18 @@ that fact to get a branch-always on the 6502:</p>
          BRK     $11
 </pre>
 
-<p>By placing a data hint on the BRK, you're telling the analyzer that
-it should stop the current path of execution.  (Note that this example
-would actually be better solved by setting a status flag override on
-the BNE that sets Z=0, so the code tracer will know it's a branch-always
-and do the right thing.)  It's only necessary to place a hint on the
-very first (opcode) byte.  Placing a data hint in the middle of what
-SourceGen believes to be instruction will have no effect.</p>
-<p>As with code hints, only the first byte in each selected line will
-be hinted.</p>
+<p>By tagging the BRK as a code stop point, you're telling the analyzer that
+it should stop trying to execute code when it reaches that point.  (Note
+that this example would actually be better solved by setting a status flag
+override on the BNE that sets Z=0, so the code tracer will know it's a
+branch-always and just do the right thing.)  As with code start points,
+code stop points should only be placed on the opcode byte.  Placing a
+code stop point in the middle of what SourceGen believes to be instruction
+will have no effect.</p>
+<p>As with code start points, only the first byte in each selected line will
+be tagged.</p>
 
-<p><b>Inline data hints</b> identify bytes as being part of the
+<p><b>Inline data</b> tags identify bytes as being part of the
 instruction stream, but not instructions.  A simple example of this
 is the ProDOS 8 call interface on the Apple II, which looks like this:</p>
 <pre>
@@ -333,11 +335,13 @@ is the ProDOS 8 call interface on the Apple II, which looks like this:</p>
          BCS     BAD
 </pre>
 
-<p>The three bytes following the <code>JSR $bf00</code> should be hinted
-as inline data, so that the code analyzer skips them and continues the
-analysis at the <code>BCS</code>.  Because you need to hint <i>every</i> byte
-of inline data, all bytes in a selected line will receive hints.</p>
-<p>If code branches into a region that is marked as inline data, the
+<p>The three bytes following the <code>JSR $bf00</code> should be tagged
+as inline data, so that the code analyzer skips over them and continues the
+analysis at the <code>BCS</code> instruction.  You can think of these as
+"code skip" tags, but they're different from stop/start points, because
+every byte of inline data must be tagged.  When
+applying the tag, all bytes in a selected line will be modified.</p>
+<p>If code branches into a region that is tagged as inline data, the
 branch will be ignored.</p>
 
 
@@ -775,8 +779,8 @@ address of the byte before the target instruction, so we actually push
 $1006.</p>
 
 <p>The disassembler won't know that offset $1007 is code because nothing
-appears to reference it.  After adding a code hint at $1007, the project
-looks like this:</p>
+appears to reference it.  After tagging $1007 as a code start point, the
+project looks like this:</p>
 <pre>
          LDA     #$10
          PHA

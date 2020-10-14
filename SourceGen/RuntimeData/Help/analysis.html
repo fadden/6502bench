@@ -19,7 +19,7 @@ not necessary to understand this to use the program.</i></p>
 <h2><a name="analysis-process">Analysis Process</a></h2>
 
 <p>Analysis of the file data is a complex multi-step process.  Some
-changes to the project, such as adding a code entry point hint or
+changes to the project, such as adding a code start point or
 changing the CPU selection, require a full re-analysis of instructions
 and data.  Other changes, such as adding or removing a label, don't
 affect the code tracing and only require a re-analysis of the data areas.
@@ -279,7 +279,7 @@ out wrong more often than right.</p>
 </ul>
 <p>Sometimes the indirect jump targets are coming from a table of
 addresses in the file.  If so, these can be formatted as addresses,
-and then the target locations hinted as code entry points.</p>
+and then the target locations tagged as code entry points.</p>
 <p>The 65816 adds an additional twist: 16-bit data access instructions
 use the data bank register ("B") to determine which bank to load from.
 SourceGen can't determine what the value is, so it currently assumes
@@ -304,7 +304,7 @@ branch will be ignored.  If an extension script tries to flag bytes
 as inline data that have already been executed, the script will be
 ignored.  This can lead to a race condition in the analyzer if
 an extension script is doing the wrong thing.  (The race doesn't exist
-with inline data hints specified by the user, because those are applied
+with inline data tags specified by the user, because those are applied
 before code analysis starts.)</p>
 
 

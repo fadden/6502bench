@@ -115,7 +115,7 @@ limitations under the License.
 
             <GroupBox Header="Options">
                 <StackPanel>
-                    <CheckBox Content="Add code entry hint if needed" Margin="0,4,0,0"
+                    <CheckBox Content="Tag targets as code start points" Margin="0,4,0,0"
                               IsChecked="{Binding WantCodeHints}"/>
                 </StackPanel>
             </GroupBox>
