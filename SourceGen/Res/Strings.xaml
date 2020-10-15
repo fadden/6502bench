@@ -56,7 +56,7 @@ limitations under the License.
     <system:String x:Key="str_ErrBadSymbolLabel">Malformed label in symbol</system:String>
     <system:String x:Key="str_ErrBadSymbolSt">Unknown Source or Type in symbol</system:String>
     <system:String x:Key="str_ErrBadSymrefPart">Bad symbol reference part</system:String>
-    <system:String x:Key="str_ErrBadTypeHint">Analyzer tag not recognized</system:String>
+    <system:String x:Key="str_ErrBadAnalyzerTag">Analyzer tag not recognized</system:String>
     <system:String x:Key="str_ErrBadVisualizationFmt">Invalid visualization item: {0}</system:String>
     <system:String x:Key="str_ErrBadVisualizationSetFmt">Invalid visualization set at +{0:x6}</system:String>
     <system:String x:Key="str_ErrDirCreateFailedFmt">Unable to create directory {0}: {1}</system:String>
@@ -162,7 +162,7 @@ limitations under the License.
     <system:String x:Key="str_ProjectFieldOperandFormat">operand format</system:String>
     <system:String x:Key="str_ProjectFieldRelocData">reloc data</system:String>
     <system:String x:Key="str_ProjectFieldStatusFlags">status flag override</system:String>
-    <system:String x:Key="str_ProjectFieldTypeHint">analyzer tag</system:String>
+    <system:String x:Key="str_ProjectFieldAnalyzerTag">analyzer tag</system:String>
     <system:String x:Key="str_ProjectFieldUserLabel">user-defined label</system:String>
     <system:String x:Key="str_ProjectFromNewerApp">This project was created by a newer version of SourceGen. It may contain data that will be lost if the project is edited.</system:String>
     <!--<system:String x:Key="str_RecentProjectLinkFmt">#{0}: {1}</system:String>-->

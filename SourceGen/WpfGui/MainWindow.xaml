@@ -340,7 +340,7 @@ limitations under the License.
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
 
-        <!-- must come after code hint Ctrl+H Ctrl+C -->
+        <!-- must come after analyzer tag Ctrl+H Ctrl+C def -->
         <CommandBinding Command="Copy"
                         CanExecute="IsProjectOpen" Executed="CopyCmd_Executed"/>
 

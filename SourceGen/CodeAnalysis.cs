@@ -34,35 +34,38 @@ namespace SourceGen {
     /// See the comments at the top of UndoableChange for a list of things that can
     /// mandate code re-analysis.
     /// </summary>
+    /// <remarks>
+    /// This invokes methods in extension scripts to handle things like inline data
+    /// following a JSR.  The added cost is generally low, because the AppDomain security
+    /// sandbox doesn't add a lot of overhead.  Unfortunately this approach is deprecated
+    /// by Microsoft and may break or become unavailable.  If that happens, and we have to
+    /// switch to a sandbox approach with significant overhead, we will most likely want
+    /// to move the code analyzer itself into the sandbox.
+    ///
+    /// For this reason it's best to minimize direct interaction between the code here and
+    /// that elsewhere in the program.
+    /// </remarks>
     public class CodeAnalysis {
         /// <summary>
-        /// Type hints are specified by the user.  The identify a region as being code
-        /// or data.  The code analyzer will stop at data-hinted regions, and will
-        /// process any code-hinted regions during the dead-code pass.
-        /// 
-        /// The hints are not used directly by the data analyzer, but the effects they
+        /// Analyzer tags are specified by the user.  They identify an offset as being the
+        /// start or end of an executable code region, or part of an inline data block.
+        ///
+        /// The tags are not used directly by the data analyzer, but the effects they
         /// have on the Anattrib array are.
         /// </summary>
         /// <remarks>
-        /// This invokes methods in extension scripts to handle things like inline data
-        /// following a JSR.  The added cost is generally low, because the AppDomain security
-        /// sandbox doesn't add a lot of overhead.  Unfortunately this approach is deprecated
-        /// by Microsoft and may break or become unavailable.  If that happens, and we have to
-        /// switch to a sandbox approach with significant overhead, we will most likely want
-        /// to move the code analyzer itself into the sandbox.
-        ///
-        /// For this reason it's best to minimize direct interaction between the code here and
-        /// that elsewhere in the program.
+        /// THESE VALUES ARE SERIALIZED to the project data file.  They cannot be renamed
+        /// without writing a translator in ProjectFile.
         /// </remarks>
-        public enum TypeHint : sbyte {
-            // No hint.  Default value populated in new arrays.
-            NoHint = 0,
+        public enum AnalyzerTag : sbyte {
+            // No tag.  Default value populated in new arrays.
+            None = 0,
 
             // Byte is an instruction.  If the code analyzer doesn't find this
             // naturally, it will be scanned.
             Code,
 
-            // Byte is inline data.  Execution continues "through" the byte.
+            // Byte is inline data.  Execution skips over the byte.
             InlineData,
 
             // Byte is data.  Execution halts.
@@ -147,9 +150,9 @@ namespace SourceGen {
         private Anattrib[] mAnattribs;
 
         /// <summary>
-        /// Reference to type hint array, one hint per byte.
+        /// Reference to analyzer tag array, one entry per byte.
         /// </summary>
-        private TypeHint[] mTypeHints;
+        private AnalyzerTag[] mAnalyzerTags;
 
         /// <summary>
         /// Reference to status flag override array, one entry per byte.
@@ -180,7 +183,7 @@ namespace SourceGen {
         /// <param name="anattribs">Anattrib array.  Expected to be newly allocated, all
         ///   entries set to default values.</param>
         /// <param name="addrMap">Map of offsets to addresses.</param>
-        /// <param name="hints">Type hints, one per byte.</param>
+        /// <param name="atags">Analyzer tags, one per byte.</param>
         /// <param name="statusFlagOverrides">Status flag overrides for instruction-start
         ///    bytes.</param>
         /// <param name="entryFlags">Status flags to use at code entry points.</param>
@@ -188,14 +191,14 @@ namespace SourceGen {
         /// <param name="parms">Analysis parameters.</param>
         /// <param name="debugLog">Object that receives debug log messages.</param>
         public CodeAnalysis(byte[] data, CpuDef cpuDef, Anattrib[] anattribs,
-                AddressMap addrMap, TypeHint[] hints, StatusFlags[] statusFlagOverrides,
+                AddressMap addrMap, AnalyzerTag[] atags, StatusFlags[] statusFlagOverrides,
                 StatusFlags entryFlags, ProjectProperties.AnalysisParameters parms,
                 ScriptManager scriptMan, DebugLog debugLog) {
             mFileData = data;
             mCpuDef = cpuDef;
             mAnattribs = anattribs;
             mAddrMap = addrMap;
-            mTypeHints = hints;
+            mAnalyzerTags = atags;
             mStatusFlagOverrides = statusFlagOverrides;
             mEntryFlags = entryFlags;
             mScriptManager = scriptMan;
@@ -263,19 +266,19 @@ namespace SourceGen {
 
             SetAddresses();
 
-            // Set the "is data" and "is inline data" flags on anything that the user has
-            // flagged as being such.  This tells us to stop processing or skip over bytes
-            // as we work.  We don't need to flag code hints explicitly for analysis, but
-            // we want to be able to display the flags in the info window.
+            // Set values in the anattrib array based on the user-specified analyzer tags.
+            // This tells us to stop processing or skip over bytes as we work.  We set values
+            // for the code start tags so we can show them in the "info" window.
             //
             // The data recognizers may spot additional inline data offsets as we work.  This
             // can cause a race if it mis-identifies code that is also a branch target;
             // whichever marks the code first will win.
-            UnpackTypeHints();
+            UnpackAnalyzerTags();
 
-            // Find starting place, based on type hints.
+            // Find starting place, based on analyzer tags.
+            //
             // We only set the "visited" flag on the instruction start, so if the user
-            // puts a code hint in the middle of an instruction, we will find it and
+            // puts a code start in the middle of an instruction, we will find it and
             // treat it as an entry point.  (This is useful for embedded instructions
             // that are branched to by code we aren't able to detect.)
             int searchStart = FindFirstUnvisitedInstruction(0);
@@ -363,37 +366,36 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Sets the "is xxxxx" flags on type-hinted entries, so that the code analyzer
+        /// Sets the "is xxxxx" flags on analyzer-tagged entries, so that the code analyzer
         /// can find them easily.
         /// </summary>
-        private void UnpackTypeHints() {
-            Debug.Assert(mTypeHints.Length == mAnattribs.Length);
+        private void UnpackAnalyzerTags() {
+            Debug.Assert(mAnalyzerTags.Length == mAnattribs.Length);
             int offset = 0;
-            foreach (TypeHint hint in mTypeHints) {
-                switch (hint) {
-                    case TypeHint.Code:
+            foreach (AnalyzerTag atag in mAnalyzerTags) {
+                switch (atag) {
+                    case AnalyzerTag.Code:
                         // Set the IsInstruction flag to prevent inline data from being
                         // placed here.
                         OpDef op = mCpuDef.GetOpDef(mFileData[offset]);
                         if (op == OpDef.OpInvalid) {
-                            LogI(offset, "Ignoring code hint on illegal opcode");
+                            LogI(offset, "Ignoring code start tag on illegal opcode");
                         } else {
-                            mAnattribs[offset].IsHinted = true;
+                            mAnattribs[offset].HasAnalyzerTag = true;
                             mAnattribs[offset].IsInstruction = true;
                         }
                         break;
-                    case TypeHint.Data:
-                        // Tells the code analyzer to stop.  Does not define a data analyzer
-                        // "uncategorized data" boundary.
-                        mAnattribs[offset].IsHinted = true;
+                    case AnalyzerTag.Data:
+                        // Tells the code analyzer to stop.
+                        mAnattribs[offset].HasAnalyzerTag = true;
                         mAnattribs[offset].IsData = true;
                         break;
-                    case TypeHint.InlineData:
+                    case AnalyzerTag.InlineData:
                         // Tells the code analyzer to walk across these.
-                        mAnattribs[offset].IsHinted = true;
+                        mAnattribs[offset].HasAnalyzerTag = true;
                         mAnattribs[offset].IsInlineData = true;
                         break;
-                    case TypeHint.NoHint:
+                    case AnalyzerTag.None:
                         break;
                     default:
                         Debug.Assert(false);
@@ -404,21 +406,21 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Finds the first offset that is hinted as code but hasn't yet been visited.
-        /// 
+        /// Finds the first offset that is tagged as code start but hasn't yet been visited.
+        ///
         /// This might be in the middle of an already-visited instruction.
         /// </summary>
         /// <param name="start">Offset at which to start the search.</param>
         /// <returns>Offset found.</returns>
         private int FindFirstUnvisitedInstruction(int start) {
             for (int i = start; i < mAnattribs.Length; i++) {
-                if (mAnattribs[i].IsHinted && mTypeHints[i] == TypeHint.Code &&
+                if (mAnattribs[i].HasAnalyzerTag && mAnalyzerTags[i] == AnalyzerTag.Code &&
                         !mAnattribs[i].IsVisited) {
-                    LogD(i, "Unvisited code hint");
+                    LogD(i, "Unvisited code start tag");
                     if (mAnattribs[i].IsData || mAnattribs[i].IsInlineData) {
-                        // Maybe the user put a code hint on something that was
+                        // Maybe the user put a code start tag on something that was
                         // later recognized as inline data?  Shouldn't have been allowed.
-                        LogW(i, "Weird: code hint on data/inline");
+                        LogW(i, "Weird: code start tag on data/inline");
                         continue;
                     }
                     return i;
@@ -498,7 +500,7 @@ namespace SourceGen {
                 } else if (mAnattribs[offset].IsInlineData) {
                     // Generally this won't happen, because we ignore branches into inline data
                     // areas, we reject attempts to convert code to inline data, and we can't
-                    // start in an inline area because the hint is wrong.  However, it's possible
+                    // start in an inline area because the tag is wrong.  However, it's possible
                     // for a JSR to a new section to be registered, and then before we get to
                     // it an extension script formats the area as inline data.  In that case
                     // the inline data "wins", and we stop here.
@@ -545,8 +547,8 @@ namespace SourceGen {
                 // instruction, but bytes within the instruction are marked as data.  The
                 // easiest thing to do here is steamroll the data flags.
                 //
-                // (To cause this, hint a 3-byte instruction as data/inline-data, then
-                // hint the first byte of the instruction as code.)
+                // (To cause this, tag a 3-byte instruction as code-stop/inline-data, then
+                // tag the first byte of the instruction as code.)
                 mAnattribs[offset].IsInstructionStart = true;
                 mAnattribs[offset].Length = instrLen;
                 for (int i = offset; i < offset + instrLen; i++) {
@@ -1113,12 +1115,12 @@ namespace SourceGen {
             }
 
             // Don't allow formatting of any bytes that are identified as instructions or
-            // were hinted by the user as something other than inline data.  If the code
+            // were tagged by the user as something other than inline data.  If the code
             // analyzer comes crashing through later they'll just stomp on what we've done.
             for (int i = offset; i < offset + length; i++) {
-                if (mTypeHints[i] != TypeHint.NoHint && mTypeHints[i] != TypeHint.InlineData) {
-                    LogW(offset, "SIDF rej: already a hint at " + i.ToString("x6") +
-                        " (" + mTypeHints[i] + ")");
+                if (mAnalyzerTags[i] != AnalyzerTag.None && mAnalyzerTags[i] != AnalyzerTag.InlineData) {
+                    LogW(offset, "SIDF rej: already an atag at " + i.ToString("x6") +
+                        " (" + mAnalyzerTags[i] + ")");
                     return false;
                 }
                 if (mAnattribs[offset].IsInstruction) {

@@ -93,8 +93,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ErrBadSymbolSt");
         public static string ERR_BAD_SYMREF_PART =
             (string)Application.Current.FindResource("str_ErrBadSymrefPart");
-        public static string ERR_BAD_TYPE_HINT =
-            (string)Application.Current.FindResource("str_ErrBadTypeHint");
+        public static string ERR_BAD_ANALYZER_TAG =
+            (string)Application.Current.FindResource("str_ErrBadAnalyzerTag");
         public static string ERR_BAD_VISUALIZATION_FMT =
             (string)Application.Current.FindResource("str_ErrBadVisualizationFmt");
         public static string ERR_BAD_VISUALIZATION_SET_FMT =
@@ -305,8 +305,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ProjectFieldRelocData");
         public static string PROJECT_FIELD_STATUS_FLAGS =
             (string)Application.Current.FindResource("str_ProjectFieldStatusFlags");
-        public static string PROJECT_FIELD_TYPE_HINT =
-            (string)Application.Current.FindResource("str_ProjectFieldTypeHint");
+        public static string PROJECT_FIELD_ANALYZER_TAG =
+            (string)Application.Current.FindResource("str_ProjectFieldAnalyzerTag");
         public static string PROJECT_FIELD_USER_LABEL =
             (string)Application.Current.FindResource("str_ProjectFieldUserLabel");
         public static string PROJECT_FROM_NEWER_APP =

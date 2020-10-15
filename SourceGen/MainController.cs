@@ -2695,23 +2695,23 @@ namespace SourceGen {
                 cs.Add(uc);
             }
 
-            // Apply code hints.
-            if (dlg.WantCodeHints) {
+            // Apply analyzer tags.
+            if (dlg.WantCodeStartPoints) {
                 TypedRangeSet newSet = new TypedRangeSet();
                 TypedRangeSet undoSet = new TypedRangeSet();
 
                 foreach (int offset in dlg.AllTargetOffsets) {
                     if (!mProject.GetAnattrib(offset).IsInstruction) {
-                        CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
-                        if (oldType == CodeAnalysis.TypeHint.Code) {
+                        CodeAnalysis.AnalyzerTag oldType = mProject.AnalyzerTags[offset];
+                        if (oldType == CodeAnalysis.AnalyzerTag.Code) {
                             continue;       // already set
                         }
                         undoSet.Add(offset, (int)oldType);
-                        newSet.Add(offset, (int)CodeAnalysis.TypeHint.Code);
+                        newSet.Add(offset, (int)CodeAnalysis.AnalyzerTag.Code);
                     }
                 }
                 if (newSet.Count != 0) {
-                    cs.Add(UndoableChange.CreateTypeHintChange(undoSet, newSet));
+                    cs.Add(UndoableChange.CreateAnalyzerTagChange(undoSet, newSet));
                 }
             }
 
@@ -2990,7 +2990,7 @@ namespace SourceGen {
             } else if (uc.Type == UndoableChange.ChangeType.SetProjectProperties) {
                 // some chance it modified the EQU statements... jump there
                 offset = 0;
-            } else if (uc.Type == UndoableChange.ChangeType.SetTypeHint) {
+            } else if (uc.Type == UndoableChange.ChangeType.SetAnalyzerTag) {
                 TypedRangeSet newSet = (TypedRangeSet)uc.NewValue;
                 if (newSet.Count == 0) {
                     // unexpected
@@ -3141,14 +3141,14 @@ namespace SourceGen {
             public int mBlankLines;
             public int mControlLines;
 
-            public int mCodeHints;
-            public int mDataHints;
-            public int mInlineDataHints;
-            public int mNoHints;
+            public int mCodeStartTags;
+            public int mCodeStopTags;
+            public int mInlineDataTags;
+            public int mNoTags;
         };
 
         /// <summary>
-        /// Gathers a count of different line types and hints that are currently selected.
+        /// Gathers a count of different line types and atags that are currently selected.
         /// </summary>
         /// <param name="singleLineIndex">If a single line is selected, pass the index in.
         ///   Otherwise, pass -1 to traverse the entire line list.</param>
@@ -3156,9 +3156,9 @@ namespace SourceGen {
         private EntityCounts GatherEntityCounts(int singleLineIndex) {
             //DateTime startWhen = DateTime.Now;
             int codeLines, dataLines, blankLines, controlLines;
-            int codeHints, dataHints, inlineDataHints, noHints;
+            int codeStartTags, codeStopTags, inlineDataTags, noTags;
             codeLines = dataLines = blankLines = controlLines = 0;
-            codeHints = dataHints = inlineDataHints = noHints = 0;
+            codeStartTags = codeStopTags = inlineDataTags = noTags = 0;
 
             int startIndex, endIndex;
             if (singleLineIndex < 0) {
@@ -3189,15 +3189,15 @@ namespace SourceGen {
                         break;
                     default:
                         // These are only editable as single-line items.  We do allow mass
-                        // code hint selection to include them (they will be ignored).
+                        // atag selection to include them (they will be ignored).
                         // org, equ, rwid, long comment...
                         controlLines++;
                         break;
                 }
 
                 // A single line can span multiple offsets, each of which could have a
-                // different hint.  Note the code/data hints are only applied to the first
-                // byte of each selected line, so we're not quite in sync with that.
+                // different analyzer tag.  Note the code start/stop tags are only applied to the
+                // first byte of each selected line, so we're not quite in sync with that.
                 //
                 // For multi-line items, the OffsetSpan of the first item covers the entire
                 // item (it's the same for all Line instances), so we only want to do this for
@@ -3205,18 +3205,18 @@ namespace SourceGen {
                 if (line.SubLineIndex == 0) {
                     for (int offset = line.FileOffset; offset < line.FileOffset + line.OffsetSpan;
                             offset++) {
-                        switch (mProject.TypeHints[offset]) {
-                            case CodeAnalysis.TypeHint.Code:
-                                codeHints++;
+                        switch (mProject.AnalyzerTags[offset]) {
+                            case CodeAnalysis.AnalyzerTag.Code:
+                                codeStartTags++;
                                 break;
-                            case CodeAnalysis.TypeHint.Data:
-                                dataHints++;
+                            case CodeAnalysis.AnalyzerTag.Data:
+                                codeStopTags++;
                                 break;
-                            case CodeAnalysis.TypeHint.InlineData:
-                                inlineDataHints++;
+                            case CodeAnalysis.AnalyzerTag.InlineData:
+                                inlineDataTags++;
                                 break;
-                            case CodeAnalysis.TypeHint.NoHint:
-                                noHints++;
+                            case CodeAnalysis.AnalyzerTag.None:
+                                noTags++;
                                 break;
                             default:
                                 Debug.Assert(false);
@@ -3235,10 +3235,10 @@ namespace SourceGen {
                 mDataLines = dataLines,
                 mBlankLines = blankLines,
                 mControlLines = controlLines,
-                mCodeHints = codeHints,
-                mDataHints = dataHints,
-                mInlineDataHints = inlineDataHints,
-                mNoHints = noHints
+                mCodeStartTags = codeStartTags,
+                mCodeStopTags = codeStopTags,
+                mInlineDataTags = inlineDataTags,
+                mNoTags = noTags
             };
         }
 
@@ -3363,11 +3363,11 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Handles the four Actions &gt; edit hint commands.
+        /// Handles the four analyzer tag commands.
         /// </summary>
-        /// <param name="hint">Type of hint to apply.</param>
-        /// <param name="firstByteOnly">If set, only the first byte on each line is hinted.</param>
-        public void MarkAsType(CodeAnalysis.TypeHint hint, bool firstByteOnly) {
+        /// <param name="atag">Type of tag to apply.</param>
+        /// <param name="firstByteOnly">If set, only the first byte on each line is tagged.</param>
+        public void MarkAsType(CodeAnalysis.AnalyzerTag atag, bool firstByteOnly) {
             RangeSet sel;
 
             if (firstByteOnly) {
@@ -3375,7 +3375,7 @@ namespace SourceGen {
                 foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
                     int offset = CodeLineList[index].FileOffset;
                     if (offset >= 0) {
-                        // Not interested in the header stuff for hinting.
+                        // Ignore the header lines.
                         sel.Add(offset);
                     }
                 }
@@ -3391,20 +3391,20 @@ namespace SourceGen {
                     // header comment
                     continue;
                 }
-                CodeAnalysis.TypeHint oldType = mProject.TypeHints[offset];
-                if (oldType == hint) {
+                CodeAnalysis.AnalyzerTag oldType = mProject.AnalyzerTags[offset];
+                if (oldType == atag) {
                     // no change, don't add to set
                     continue;
                 }
                 undoSet.Add(offset, (int)oldType);
-                newSet.Add(offset, (int)hint);
+                newSet.Add(offset, (int)atag);
             }
             if (newSet.Count == 0) {
-                Debug.WriteLine("No changes found (" + hint + ", " + sel.Count + " offsets)");
+                Debug.WriteLine("No changes found (" + atag + ", " + sel.Count + " offsets)");
                 return;
             }
 
-            UndoableChange uc = UndoableChange.CreateTypeHintChange(undoSet, newSet);
+            UndoableChange uc = UndoableChange.CreateAnalyzerTagChange(undoSet, newSet);
             ChangeSet cs = new ChangeSet(uc);
 
             ApplyUndoableChanges(cs);
@@ -3534,7 +3534,7 @@ namespace SourceGen {
         /// We don't split based on existing data format items.  That would make it impossible
         /// to convert from (say) a collection of single bytes to a collection of double bytes
         /// or a string.  It should not be possible to select part of a formatted section,
-        /// unless the user has been playing weird games with type hints to get overlapping
+        /// unless the user has been playing weird games with analyzer tags to get overlapping
         /// format descriptors.
         ///
         /// The type values used in the TypedRangeSet may not be contiguous.  They're only
@@ -4070,17 +4070,17 @@ namespace SourceGen {
             //sb.Append("DEBUG: opAddr=" + attr.OperandAddress.ToString("x4") +
             //    " opOff=" + attr.OperandOffset.ToString("x4") + "\r\n");
 
-            if (attr.IsHinted) {
+            if (attr.HasAnalyzerTag) {
                 sb.Append("\u2022 Analyzer Tags: ");
                 for (int i = 0; i < line.OffsetSpan; i++) {
-                    switch (mProject.TypeHints[line.FileOffset + i]) {
-                        case CodeAnalysis.TypeHint.Code:
+                    switch (mProject.AnalyzerTags[line.FileOffset + i]) {
+                        case CodeAnalysis.AnalyzerTag.Code:
                             sb.Append("S");     // S)tart
                             break;
-                        case CodeAnalysis.TypeHint.Data:
+                        case CodeAnalysis.AnalyzerTag.Data:
                             sb.Append("E");     // E)nd
                             break;
-                        case CodeAnalysis.TypeHint.InlineData:
+                        case CodeAnalysis.AnalyzerTag.InlineData:
                             sb.Append("I");     // I)nline
                             break;
                         default:
@@ -4540,7 +4540,8 @@ namespace SourceGen {
                 }
 
                 // Make sure this is the start of an instruction or data item.  (If you
-                // haven't finished hinting code, it's best to disable the string/fill finder.)
+                // haven't finished tagging code start points, it's best to disable the
+                // string/fill finder.)
                 Anattrib attr = mProject.GetAnattrib(offset);
                 if (!attr.IsStart) {
                     Debug.WriteLine("Found match at non-start +" + offset.ToString("x6") +

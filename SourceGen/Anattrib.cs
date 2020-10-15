@@ -48,7 +48,7 @@ namespace SourceGen {
             Visited = 1 << 16,          // has the analyzer visited this byte?
             Changed = 1 << 17,          // set/cleared as the analyzer works
 
-            Hinted = 1 << 18,           // was this byte affected by a type hint?
+            ATagged = 1 << 18,          // was this byte affected by an analyzer tag?
         }
 
         // Flags indicating what type of data is here.  Use the following Is* properties
@@ -219,15 +219,15 @@ namespace SourceGen {
                 }
             }
         }
-        public bool IsHinted {
+        public bool HasAnalyzerTag {
             get {
-                return (mAttribFlags & AttribFlags.Hinted) != 0;
+                return (mAttribFlags & AttribFlags.ATagged) != 0;
             }
             set {
                 if (value) {
-                    mAttribFlags |= AttribFlags.Hinted;
+                    mAttribFlags |= AttribFlags.ATagged;
                 } else {
-                    mAttribFlags &= ~AttribFlags.Hinted;
+                    mAttribFlags &= ~AttribFlags.ATagged;
                 }
             }
         }
@@ -381,7 +381,7 @@ namespace SourceGen {
             StringBuilder sb = new StringBuilder(5);
             char blank = '.';
             sb.Append(IsEntryPoint ? '@' : blank);
-            sb.Append(IsHinted ? 'T' : blank);
+            sb.Append(HasAnalyzerTag ? 'T' : blank);
             sb.Append(DoesNotBranch ? '!' : blank);
             sb.Append(DoesNotContinue ? '#' : blank);
             sb.Append(IsBranchTarget ? '>' : blank);

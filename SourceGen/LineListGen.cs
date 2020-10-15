@@ -222,7 +222,7 @@ namespace SourceGen {
         /// multiple offsets, this seems like reasonable behavior.
         /// 
         /// We can't precisely restore the selection in terms of which file offsets
-        /// are selected.  If you select one byte and apply a code hint, we'll restore
+        /// are selected.  If you select one byte and apply an analyzer tag, we'll restore
         /// the selection to a line with 1-4 bytes.  This gets weird if you hit "undo",
         /// as you will then have 1-4 bytes selected rather than the original one.  It
         /// might be better to just clear the selection on "undo".
@@ -291,7 +291,7 @@ namespace SourceGen {
                         continue;
                     }
                     Line line = lineList[i];
-                    // Code hinting can transform code to data and vice-versa, so we
+                    // Code start/stop tags can transform code to data and vice-versa, so we
                     // want the tag to reflect the fact that both could exist.
                     Line.Type lineType = line.LineType;
                     if (lineType == Line.Type.Code || lineType == Line.Type.Data) {
@@ -317,7 +317,7 @@ namespace SourceGen {
                     // you do a sequence like:
                     // - Open a file that starts with a JMP followed by data.
                     // - Click on the blank line below the code, which has the code's offset,
-                    //   and select "remove hint".  This causes the blank line to vanish,
+                    //   and select "remove atags".  This causes the blank line to vanish,
                     //   so the Restore() won't select anything.
                     // - Click "undo".
                     Debug.WriteLine("NOTE: no selection found");

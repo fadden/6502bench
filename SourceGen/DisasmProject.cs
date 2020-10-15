@@ -60,9 +60,9 @@ namespace SourceGen {
         public AddressMap AddrMap { get; private set; }
 
         /// <summary>
-        /// Type hints.  Default value is "no hint".
+        /// Analyzer tags.  Default value is "none".
         /// </summary>
-        public CodeAnalysis.TypeHint[] TypeHints { get; private set; }
+        public CodeAnalysis.AnalyzerTag[] AnalyzerTags { get; private set; }
 
         /// <summary>
         /// Status flag overrides.  Default value is "all unspecified".
@@ -272,8 +272,8 @@ namespace SourceGen {
             AddrMap = new AddressMap(fileDataLen);
             AddrMap.Set(0, 0x1000);    // default load address to $1000; override later
 
-            // Default value is "no hint".
-            TypeHints = new CodeAnalysis.TypeHint[fileDataLen];
+            // Default value is "no tag".
+            AnalyzerTags = new CodeAnalysis.AnalyzerTag[fileDataLen];
 
             // Default value is "unspecified" for all bits.
             StatusFlagOverrides = new StatusFlags[fileDataLen];
@@ -358,7 +358,7 @@ namespace SourceGen {
 
             // Mark the first byte as code so we have something to do.  This may get
             // overridden later.
-            TypeHints[0] = CodeAnalysis.TypeHint.Code;
+            AnalyzerTags[0] = CodeAnalysis.AnalyzerTag.Code;
         }
 
         /// <summary>
@@ -401,8 +401,8 @@ namespace SourceGen {
                 AddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
-                TypeHints[0] = CodeAnalysis.TypeHint.NoHint;
-                TypeHints[2] = CodeAnalysis.TypeHint.Code;
+                AnalyzerTags[0] = CodeAnalysis.AnalyzerTag.None;
+                AnalyzerTags[2] = CodeAnalysis.AnalyzerTag.Code;
             } else {
                 int loadAddr = SystemDefaults.GetLoadAddress(sysDef);
                 AddrMap.Set(0, loadAddr);
@@ -832,7 +832,7 @@ namespace SourceGen {
                 reanalysisTimer.StartTask("CodeAnalysis.Analyze");
 
                 CodeAnalysis ca = new CodeAnalysis(mFileData, CpuDef, mAnattribs, AddrMap,
-                    TypeHints, StatusFlagOverrides, ProjectProps.EntryFlags,
+                    AnalyzerTags, StatusFlagOverrides, ProjectProps.EntryFlags,
                     ProjectProps.AnalysisParams, mScriptManager, debugLog);
 
                 ca.Analyze();
@@ -987,10 +987,10 @@ namespace SourceGen {
         /// </summary>
         /// <remarks>
         /// In an ideal world, this would be a trivial function.  In practice it's possible for
-        /// all sorts of weird edge cases to arise, e.g. if you hint something as data, apply
-        /// formats, and then hint it as code, many strange things are possible.  We don't want
-        /// to delete user data if it seems out of place, but we do want to ignore anything
-        /// that's going to confuse the source generator later on.
+        /// all sorts of weird edge cases to arise, e.g. if you put a code-stop flag, apply
+        /// formats, and then change it to code-start, many strange things are possible.  We
+        /// don't want to delete user data if it seems out of place, but we do want to ignore
+        /// anything that's going to confuse the source generator later on.
         ///
         /// Problem reports are written to a log (which is shown by the Analyzer Output
         /// window) and the Problems list.  Once the latter is better established we can
@@ -1253,8 +1253,8 @@ namespace SourceGen {
 
         /// <summary>
         /// Removes user labels from the symbol table if they're in the middle of an
-        /// instruction or multi-byte data area.  (Easy way to cause this: hint a 3-byte
-        /// instruction as data, add a label to the middle byte, remove hints.)
+        /// instruction or multi-byte data area.  (Easy way to cause this: tag a 3-byte
+        /// instruction as data, add a label to the middle byte, remove atags.)
         /// 
         /// Call this after the code and data analysis passes have completed.  Any
         /// references to the hidden labels will just fall through.  It will be possible
@@ -1527,9 +1527,9 @@ namespace SourceGen {
                     try {
                         labelList.Add(attr.Symbol.Label, offset);
                     } catch (ArgumentException ex) {
-                        // Duplicate UserLabel entries are stripped when projects are loaded,
-                        // but it might be possible to cause this by hiding/unhiding a
-                        // label (e.g. using hints to place it in the middle of an instruction).
+                        // Duplicate UserLabel entries are stripped when projects are loaded, but
+                        // it might be possible to cause this by hiding/unhiding a label (e.g.
+                        // using a code start tag to place it in the middle of an instruction).
                         // Just ignore the duplicate.
                         Debug.WriteLine("Xref ignoring duplicate label '" + attr.Symbol.Label +
                             "': " + ex.Message);
@@ -2166,9 +2166,9 @@ namespace SourceGen {
                                 UndoableChange.ReanalysisScope.CodeAndData);
                         }
                         break;
-                    case UndoableChange.ChangeType.SetTypeHint: {
+                    case UndoableChange.ChangeType.SetAnalyzerTag: {
                             // Always requires full code+data re-analysis.
-                            ApplyTypeHints((TypedRangeSet)oldValue, (TypedRangeSet)newValue);
+                            ApplyAnalyzerTags((TypedRangeSet)oldValue, (TypedRangeSet)newValue);
                             // ignore affectedOffsets
                             Debug.Assert(uc.ReanalysisRequired ==
                                 UndoableChange.ReanalysisScope.CodeAndData);
@@ -2558,24 +2558,20 @@ namespace SourceGen {
 
 
         /// <summary>
-        /// Applies the values in the set to the project hints.
+        /// Applies the values in the set to the project's atags.
         /// </summary>
         /// <param name="oldSet">Previous values; must match current contents.</param>
         /// <param name="newSet">Values to apply.</param>
-        private void ApplyTypeHints(TypedRangeSet oldSet, TypedRangeSet newSet) {
-            CodeAnalysis.TypeHint[] hints = TypeHints;
+        private void ApplyAnalyzerTags(TypedRangeSet oldSet, TypedRangeSet newSet) {
+            CodeAnalysis.AnalyzerTag[] atags = AnalyzerTags;
             foreach (TypedRangeSet.Tuple tuple in newSet) {
-                CodeAnalysis.TypeHint curType = hints[tuple.Value];
+                CodeAnalysis.AnalyzerTag curType = atags[tuple.Value];
                 if (!oldSet.GetType(tuple.Value, out int oldType) || oldType != (int)curType) {
                     Debug.WriteLine("Type mismatch at " + tuple.Value);
                     Debug.Assert(false);
                 }
 
-                //Debug.WriteLine("Set +" + tuple.Value.ToString("x6") + " to " +
-                //    (CodeAnalysis.TypeHint)tuple.Type + " (was " +
-                //    curType + ")");
-
-                hints[tuple.Value] = (CodeAnalysis.TypeHint)tuple.Type;
+                atags[tuple.Value] = (CodeAnalysis.AnalyzerTag)tuple.Type;
             }
         }
 

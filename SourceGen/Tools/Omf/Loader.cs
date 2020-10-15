@@ -404,7 +404,7 @@ namespace SourceGen.Tools.Omf {
             uc = UndoableChange.CreateProjectPropertiesChange(proj.ProjectProps, newProps);
             cs.Add(uc);
 
-            // TODO(someday): by default we apply a code hint to offset 0 of the first
+            // TODO(someday): by default we apply a code start tag to offset 0 of the first
             // segment.  The placement should take the segment's ENTRY into account.
 
             Debug.WriteLine("Applying " + cs.Count + " changes");
@@ -586,12 +586,12 @@ namespace SourceGen.Tools.Omf {
 
                 // It seems to be fairly common for jump table entries to not be referenced
                 // from the program, which can leave whole dynamic segments unreferenced.  Set
-                // a code hint on the JML instruction.
-                undoSet.Add(jmlOffset, (int)CodeAnalysis.TypeHint.NoHint);
-                newSet.Add(jmlOffset, (int)CodeAnalysis.TypeHint.Code);
+                // a code start tag on the JML instruction.
+                undoSet.Add(jmlOffset, (int)CodeAnalysis.AnalyzerTag.None);
+                newSet.Add(jmlOffset, (int)CodeAnalysis.AnalyzerTag.Code);
             }
 
-            UndoableChange uc = UndoableChange.CreateTypeHintChange(undoSet, newSet);
+            UndoableChange uc = UndoableChange.CreateAnalyzerTagChange(undoSet, newSet);
             cs.Add(uc);
 
             return true;

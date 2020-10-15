@@ -116,7 +116,7 @@ limitations under the License.
             <GroupBox Header="Options">
                 <StackPanel>
                     <CheckBox Content="Tag targets as code start points" Margin="0,4,0,0"
-                              IsChecked="{Binding WantCodeHints}"/>
+                              IsChecked="{Binding WantCodeStartPoints}"/>
                 </StackPanel>
             </GroupBox>
         </StackPanel>

@@ -1088,7 +1088,7 @@ namespace SourceGen.WpfGui {
             }
             MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
-                (counts.mDataHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
+                (counts.mCodeStopTags != 0 || counts.mInlineDataTags != 0 || counts.mNoTags != 0);
         }
         private void CanTagAsCodeStopPoint(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
@@ -1097,7 +1097,7 @@ namespace SourceGen.WpfGui {
             }
             MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
-                (counts.mCodeHints != 0 || counts.mInlineDataHints != 0 || counts.mNoHints != 0);
+                (counts.mCodeStartTags != 0 || counts.mInlineDataTags != 0 || counts.mNoTags != 0);
         }
         private void CanTagAsInlineData(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
@@ -1106,7 +1106,7 @@ namespace SourceGen.WpfGui {
             }
             MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
-                (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mNoHints != 0);
+                (counts.mCodeStartTags != 0 || counts.mCodeStopTags != 0 || counts.mNoTags != 0);
         }
         private void CanRemoveAnalyzerTags(object sender, CanExecuteRoutedEventArgs e) {
             if (!IsProjectOpen()) {
@@ -1115,7 +1115,7 @@ namespace SourceGen.WpfGui {
             }
             MainController.EntityCounts counts = mMainCtrl.SelectionAnalysis.mEntityCounts;
             e.CanExecute = (counts.mDataLines > 0 || counts.mCodeLines > 0) &&
-                (counts.mCodeHints != 0 || counts.mDataHints != 0 || counts.mInlineDataHints != 0);
+                (counts.mCodeStartTags != 0 || counts.mCodeStopTags != 0 || counts.mInlineDataTags != 0);
         }
 
         private void CanJumpToOperand(object sender, CanExecuteRoutedEventArgs e) {
@@ -1285,17 +1285,17 @@ namespace SourceGen.WpfGui {
 
         private void TagAsCodeStartPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("tag as code start point");
-            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Code, true);
+            mMainCtrl.MarkAsType(CodeAnalysis.AnalyzerTag.Code, true);
         }
 
         private void TagAsCodeStopPointCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("tag as code stop point");
-            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.Data, true);
+            mMainCtrl.MarkAsType(CodeAnalysis.AnalyzerTag.Data, true);
         }
 
         private void TagAsInlineDataCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("tag as inline data");
-            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.InlineData, false);
+            mMainCtrl.MarkAsType(CodeAnalysis.AnalyzerTag.InlineData, false);
         }
 
         private void JumpToOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
@@ -1345,7 +1345,7 @@ namespace SourceGen.WpfGui {
 
         private void RemoveAnalyzerTagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             Debug.WriteLine("remove atags");
-            mMainCtrl.MarkAsType(CodeAnalysis.TypeHint.NoHint, false);
+            mMainCtrl.MarkAsType(CodeAnalysis.AnalyzerTag.None, false);
         }
 
         private void SaveCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

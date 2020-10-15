@@ -64,16 +64,16 @@ namespace SourceGen.WpfGui {
         private bool mIsSplitTable;
 
         /// <summary>
-        /// If set, caller will add code entry hints to targets.
+        /// If set, caller will add code start points to targets.
         /// </summary>
-        public bool WantCodeHints {
-            get { return mWantCodeHints; }
+        public bool WantCodeStartPoints {
+            get { return mWantCodeStartPoints; }
             set {
-                mWantCodeHints = value;
+                mWantCodeStartPoints = value;
                 OnPropertyChanged();
             }
         }
-        private bool mWantCodeHints;
+        private bool mWantCodeStartPoints;
 
         /// <summary>
         /// Set to true to make the "incompatible with selection" message visible.

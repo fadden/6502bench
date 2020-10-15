@@ -459,20 +459,20 @@ namespace SourceGen {
                 spf.AddressMap.Add(new SerAddressMap(ent));
             }
 
-            // Reduce TypeHints to a collection of ranges.  Output the type enum as a string
-            // so we're not tied to a specific value.
+            // Reduce analyzer tags (formerly known as "type hints") to a collection of ranges.
+            // Output the type enum as a string so we're not tied to a specific numeric value.
             spf.TypeHints = new List<SerTypeHintRange>();
             TypedRangeSet trs = new TypedRangeSet();
-            for (int i = 0; i < proj.TypeHints.Length; i++) {
-                trs.Add(i, (int)proj.TypeHints[i]);
+            for (int i = 0; i < proj.AnalyzerTags.Length; i++) {
+                trs.Add(i, (int)proj.AnalyzerTags[i]);
             }
             IEnumerator<TypedRangeSet.TypedRange> iter = trs.RangeListIterator;
             while (iter.MoveNext()) {
-                if (iter.Current.Type == (int)CodeAnalysis.TypeHint.NoHint) {
+                if (iter.Current.Type == (int)CodeAnalysis.AnalyzerTag.None) {
                     continue;
                 }
                 spf.TypeHints.Add(new SerTypeHintRange(iter.Current.Low, iter.Current.High,
-                    ((CodeAnalysis.TypeHint)iter.Current.Type).ToString()));
+                    ((CodeAnalysis.AnalyzerTag)iter.Current.Type).ToString()));
             }
 
             // Convert StatusFlagOverrides to serializable form.  Just write the state out
@@ -672,26 +672,27 @@ namespace SourceGen {
                 proj.AddrMap.Set(addr.Offset, addr.Addr);
             }
 
-            // Deserialize type hints.  Default value in new array as NoHint, so we don't
-            // need to write those.  They should not have been recorded in the file.
+            // Deserialize analyzer tags (formerly known as "type hints").  The default value
+            // for new array entries is None, so we don't need to write those.  They should not
+            // have been recorded in the file.
             foreach (SerTypeHintRange range in spf.TypeHints) {
                 if (range.Low < 0 || range.High >= spf.FileDataLength || range.Low > range.High) {
                     report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_RANGE +
-                        ": " + Res.Strings.PROJECT_FIELD_TYPE_HINT +
+                        ": " + Res.Strings.PROJECT_FIELD_ANALYZER_TAG +
                         " +" + range.Low.ToString("x6") + " - +" + range.High.ToString("x6"));
                     continue;
                 }
-                CodeAnalysis.TypeHint hint;
+                CodeAnalysis.AnalyzerTag hint;
                 try {
-                    hint = (CodeAnalysis.TypeHint) Enum.Parse(
-                        typeof(CodeAnalysis.TypeHint), range.Hint);
+                    hint = (CodeAnalysis.AnalyzerTag) Enum.Parse(
+                        typeof(CodeAnalysis.AnalyzerTag), range.Hint);
                 } catch (ArgumentException) {
-                    report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_TYPE_HINT +
+                    report.Add(FileLoadItem.Type.Warning, Res.Strings.ERR_BAD_ANALYZER_TAG +
                         ": " + range.Hint);
                     continue;
                 }
                 for (int i = range.Low; i <= range.High; i++) {
-                    proj.TypeHints[i] = hint;
+                    proj.AnalyzerTags[i] = hint;
                 }
             }
 

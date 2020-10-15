@@ -619,7 +619,7 @@ namespace SourceGen.WpfGui {
             }
 
             // NOTE: it's entirely possible to have a weird format (e.g. string) if the
-            // instruction used to be hinted as data.  Handle it gracefully.
+            // instruction used to be tagged as code-stop.  Handle it gracefully.
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.NumericLE:
                     switch (dfd.FormatSubType) {

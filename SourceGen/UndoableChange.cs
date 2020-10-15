@@ -23,8 +23,8 @@ using CommonUtil;
 *** When is a full (code+data) re-analysis required?
 - Adding/removing/changing an address change (ORG directive).  This has a significant impact
 on the code analyzer, as blocks of code may become reachable or unreachable.
-- Adding/removing/changing a type hint.  These can affect whether a given offset is treated
-as code, which can have a dramatic effect on code analysis (consider the offset 0 code hint).
+- Adding/removing/changing an analyzer tag.  These can affect whether a given offset is treated
+as executable code, which can have a dramatic effect on code analysis.
 - Adding/removing/changing a status flag override.  This can affect whether a branch is
 always taken or never taken, and the M/X flags affect instruction interpretation.  (It may
 be possible to do an "incremental" code analysis here, working from the point of the change
@@ -83,8 +83,8 @@ namespace SourceGen {
             // Adds, updates, or removes a data bank register value.
             SetDataBank,
 
-            // Changes the type hint.
-            SetTypeHint,
+            // Changes the analyzer tag.
+            SetAnalyzerTag,
 
             // Adds, updates, or removes a processor status flag override.
             SetStatusFlagOverride,
@@ -133,8 +133,8 @@ namespace SourceGen {
         public ChangeType Type { get; private set; }
 
         /// <summary>
-        /// The "root offset".  For example, changing the type hint for a 4-byte
-        /// instruction from code to data will actually affect 4 offsets, but we
+        /// The "root offset".  For example, changing the analyzer tag for a 4-byte
+        /// instruction from "start" to "stop" will actually affect 4 offsets, but we
         /// only need to specify the root item.
         /// </summary>
         public int Offset { get; private set; }
@@ -162,7 +162,7 @@ namespace SourceGen {
             get {
                 switch (Type) {
                     case ChangeType.Dummy:
-                    case ChangeType.SetTypeHint:
+                    case ChangeType.SetAnalyzerTag:
                     case ChangeType.SetProjectProperties:
                         return false;
                     default:
@@ -231,27 +231,27 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Creates an UndoableChange for a type hint update.  Rather than adding a
+        /// Creates an UndoableChange for an analyzer tag update.  Rather than adding a
         /// separate UndoableChange for each affected offset -- which could span the
         /// entire file -- we use range sets to record the before/after state.
         /// </summary>
         /// <param name="undoSet">Current values.</param>
         /// <param name="newSet">New values.</param>
         /// <returns>Change record.</returns>
-        public static UndoableChange CreateTypeHintChange(TypedRangeSet undoSet,
+        public static UndoableChange CreateAnalyzerTagChange(TypedRangeSet undoSet,
                 TypedRangeSet newSet) {
             Debug.Assert(undoSet != null && newSet != null);
             if (newSet.Count == 0) {
-                Debug.WriteLine("Empty hint change?");
+                Debug.WriteLine("Empty atag change?");
             }
             UndoableChange uc = new UndoableChange();
-            uc.Type = ChangeType.SetTypeHint;
+            uc.Type = ChangeType.SetAnalyzerTag;
             uc.Offset = -1;
             uc.OldValue = undoSet;
             uc.NewValue = newSet;
-            // Any hint change can affect whether something is treated as code.
+            // Any analyzer tag change can affect whether something is treated as code.
             // Either we're deliberately setting it as code or non-code, or we're
-            // setting it to "no hint", which means the code analyzer gets
+            // setting it to "none", which means the code analyzer gets
             // to make the decision now.  This requires a full code+data re-analysis.
             uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
             return uc;
