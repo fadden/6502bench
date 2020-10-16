@@ -29,6 +29,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AbbrevConstant");
         public static string ABBREV_STACK_RELATIVE =
             (string)Application.Current.FindResource("str_AbbrevStackRelative");
+        public static string ANALYZER_TAG_MULTI_CHK =
+            (string)Application.Current.FindResource("str_AnalyzerTagMultiChk");
         public static string ASM_LATEST_VERSION =
             (string)Application.Current.FindResource("str_AsmLatestVersion");
         public static string ASM_MATCH_FAILURE =
@@ -43,6 +45,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AsmMismatchLengthFmt");
         public static string ASM_OUTPUT_NOT_FOUND =
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
+        public static string CONFIRMATION_NEEDED =
+            (string)Application.Current.FindResource("str_ConfirmationNeeded");
         public static string DATA_BANK_AUTO_FMT =
             (string)Application.Current.FindResource("str_DataBankAutoFmt");
         public static string DATA_BANK_USER_FMT =

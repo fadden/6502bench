@@ -24,6 +24,7 @@ limitations under the License.
     <system:String x:Key="str_AbbrevAddress">Addr</system:String>
     <system:String x:Key="str_AbbrevConstant">Const</system:String>
     <system:String x:Key="str_AbbrevStackRelative">StkRl</system:String>
+    <system:String x:Key="str_AnalyzerTagMultiChk">Setting start/stop tags on multiple consecutive bytes is rarely a good idea. Continue?</system:String>
     <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
     <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
     <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>
@@ -34,6 +35,7 @@ limitations under the License.
     <system:String x:Key="str_ClipformatAllColumns">All Columns</system:String>
     <system:String x:Key="str_ClipformatAssemblerSource">Assembler Source</system:String>
     <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>
+    <system:String x:Key="str_ConfirmationNeeded">Confirmation Needed</system:String>
     <system:String x:Key="str_DataBankAutoFmt">{0} (auto)</system:String>
     <system:String x:Key="str_DataBankUserFmt">{0}</system:String>
     <system:String x:Key="str_DataBankK">K</system:String>

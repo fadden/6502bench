@@ -379,6 +379,9 @@ namespace SourceGen {
                         // placed here.
                         OpDef op = mCpuDef.GetOpDef(mFileData[offset]);
                         if (op == OpDef.OpInvalid) {
+                            // Might want to set the "has tag" value anyway, since it won't
+                            // appear in the "Info" window if we don't.  Or maybe we need a
+                            // message about "invisible" code start tags?
                             LogI(offset, "Ignoring code start tag on illegal opcode");
                         } else {
                             mAnattribs[offset].HasAnalyzerTag = true;

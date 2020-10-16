@@ -3379,7 +3379,19 @@ namespace SourceGen {
                         sel.Add(offset);
                     }
                 }
+
+                // "first byte only" is used for code start/stop tags, which should only be
+                // placed at the start of a region.
+                if (sel.Count > 1) {
+                    MessageBoxResult result = MessageBox.Show(Res.Strings.ANALYZER_TAG_MULTI_CHK,
+                        Res.Strings.CONFIRMATION_NEEDED,
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Cancel) {
+                        return;
+                    }
+                }
             } else {
+                // Inline data or none.  Select all bytes.
                 sel = OffsetSetFromSelected();
             }
 
