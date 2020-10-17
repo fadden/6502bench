@@ -59,7 +59,13 @@ namespace SourceGen.AsmGen {
         public AssemblerQuirks Quirks { get; private set; }
 
         // IGenerator
-        public LabelLocalizer Localizer { get { return mLocalizer; } }
+        public LabelLocalizer Localizer { get; private set; }
+
+        public int StartOffset {
+            get {
+                return mHasPrgHeader ? 2 : 0;
+            }
+        }
 
         /// <summary>
         /// Working directory, i.e. where we write our output file(s).
@@ -82,14 +88,14 @@ namespace SourceGen.AsmGen {
         private string mFileNameBase;
 
         /// <summary>
+        /// True if the first two bytes look like the header of a PRG file.
+        /// </summary>
+        private bool mHasPrgHeader;
+
+        /// <summary>
         /// StringBuilder to use when composing a line.  Held here to reduce allocations.
         /// </summary>
         private StringBuilder mLineBuilder = new StringBuilder(100);
-
-        /// <summary>
-        /// Label localization helper.
-        /// </summary>
-        private LabelLocalizer mLocalizer;
 
         /// <summary>
         /// Stream to send the output to.
@@ -176,6 +182,8 @@ namespace SourceGen.AsmGen {
             AssemblerConfig config = AssemblerConfig.GetConfig(settings,
                 AssemblerInfo.Id.Tass64);
             mColumnWidths = (int[])config.ColumnWidths.Clone();
+
+            mHasPrgHeader = HasPrgHeader(project);
         }
 
         /// <summary>
@@ -207,7 +215,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public List<string> GenerateSource(BackgroundWorker worker) {
+        public GenerationResults GenerateSource(BackgroundWorker worker) {
             List<string> pathNames = new List<string>(1);
 
             string fileName = mFileNameBase + ASM_FILE_SUFFIX;
@@ -233,10 +241,14 @@ namespace SourceGen.AsmGen {
             string msg = string.Format(Res.Strings.PROGRESS_GENERATING_FMT, pathName);
             worker.ReportProgress(0, msg);
 
-            mLocalizer = new LabelLocalizer(Project);
-            mLocalizer.LocalPrefix = "_";
-            mLocalizer.QuirkNoOpcodeMnemonics = true;
-            mLocalizer.Analyze();
+            Localizer = new LabelLocalizer(Project);
+            Localizer.LocalPrefix = "_";
+            Localizer.QuirkNoOpcodeMnemonics = true;
+            Localizer.Analyze();
+
+            string extraOptions = string.Empty +
+                (Project.FileDataLength > 65536 ? AsmTass64.LONG_ADDRESS : string.Empty) +
+                (mHasPrgHeader ? string.Empty : AsmTass64.NOSTART);
 
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
@@ -245,7 +257,7 @@ namespace SourceGen.AsmGen {
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                        "64tass", V1_53, AsmTass64.OPTIONS));
+                        "64tass", V1_53, AsmTass64.BASE_OPTIONS + extraOptions));
                 }
 
                 GenCommon.Generate(this, sw, worker);
@@ -257,7 +269,7 @@ namespace SourceGen.AsmGen {
             }
             mOutStream = null;
 
-            return pathNames;
+            return new GenerationResults(pathNames, extraOptions);
         }
 
         // IGenerator
@@ -328,6 +340,36 @@ namespace SourceGen.AsmGen {
                     offset += attr.Length;
                 }
             }
+        }
+
+        private static bool HasPrgHeader(DisasmProject project) {
+            if (project.FileDataLength < 3 || project.FileDataLength > 65536) {
+                return false;
+            }
+            Anattrib attr0 = project.GetAnattrib(0);
+            Anattrib attr1 = project.GetAnattrib(1);
+            if (!(attr0.IsDataStart && attr1.IsData)) {
+                Debug.WriteLine("PRG test: 0/1 not data");
+                return false;
+            }
+            if (attr0.Length != 2) {
+                Debug.WriteLine("PRG test: 0/1 not 16-bit value");
+                return false;
+            }
+            if (attr0.Symbol != null || attr1.Symbol != null) {
+                Debug.WriteLine("PRG test: 0/1 has label");
+                return false;
+            }
+            // See if the address at offset 2 matches the value at 0/1.
+            int value01 = project.FileData[0] | (project.FileData[1] << 8);
+            int addr2 = project.AddrMap.OffsetToAddress(2);
+            if (value01 != addr2) {
+                Debug.WriteLine("PRG test: 0/1 value is " + value01.ToString("x4") +
+                    ", address at 2 is " + addr2);
+                return false;
+            }
+
+            return true;
         }
 
         // IGenerator
@@ -432,7 +474,7 @@ namespace SourceGen.AsmGen {
 
             string labelStr = string.Empty;
             if (attr.Symbol != null) {
-                labelStr = mLocalizer.ConvLabel(attr.Symbol.Label);
+                labelStr = Localizer.ConvLabel(attr.Symbol.Label);
             }
 
             string commentStr = SourceFormatter.FormatEolComment(Project.Comments[offset]);
@@ -459,7 +501,7 @@ namespace SourceGen.AsmGen {
                     operand = RawData.GetWord(data, offset, length, false);
                     UpdateCharacterEncoding(dfd);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                        mLocalizer.LabelMap, dfd, operand, length,
+                        Localizer.LabelMap, dfd, operand, length,
                         PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
                     break;
                 case FormatDescriptor.Type.NumericBE:
@@ -471,7 +513,7 @@ namespace SourceGen.AsmGen {
                         UpdateCharacterEncoding(dfd);
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                            mLocalizer.LabelMap, dfd, operand, length,
+                            Localizer.LabelMap, dfd, operand, length,
                             PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
                     }
                     break;
@@ -600,7 +642,7 @@ namespace SourceGen.AsmGen {
             // Any subsequent ORG changes are made to the program counter, and take the form
             // of a pair of ops (.logical <addr> to open, .here to end).  Omitting the .here
             // causes an error.
-            if (offset == 0) {
+            if (offset == StartOffset) {
                 // Set the "compile offset" to the initial address.
                 OutputLine("*", "=", SourceFormatter.FormatHexValue(Project.AddrMap.Get(0), 4),
                     string.Empty);
@@ -818,13 +860,18 @@ namespace SourceGen.AsmGen {
         // default "none" encoding from "raw" to something that converts characters to
         // PETSCII, so if you want to output strings in another format (such as ASCII) an
         // explicit encoding must be specified.
-        public const string OPTIONS = "--ascii --case-sensitive --nostart --long-address -Wall";
+        public const string BASE_OPTIONS = "--ascii --case-sensitive -Wall";
+        public const string LONG_ADDRESS = " --long-address";
+        public const string NOSTART = " --nostart";
 
         // Paths from generator.
         private List<string> mPathNames;
 
         // Directory to make current before executing assembler.
         private string mWorkDirectory;
+
+        // Additional options specified by the source generator.
+        private string mExtraOptions;
 
 
         // IAssembler
@@ -875,13 +922,10 @@ namespace SourceGen.AsmGen {
         }
 
         // IAssembler
-        public void Configure(List<string> pathNames, string workDirectory) {
-            // Clone pathNames, in case the caller decides to modify the original.
-            mPathNames = new List<string>(pathNames.Count);
-            foreach (string str in pathNames) {
-                mPathNames.Add(str);
-            }
-
+        public void Configure(GenerationResults results, string workDirectory) {
+            // Clone path names, in case the caller decides to modify the original.
+            mPathNames = CommonUtil.Container.CopyStringList(results.PathNames);
+            mExtraOptions = results.ExtraOptions;
             mWorkDirectory = workDirectory;
         }
 
@@ -911,7 +955,8 @@ namespace SourceGen.AsmGen {
             // Wrap pathname in quotes in case it has spaces.
             // (Do we need to shell-escape quotes in the pathName?)
             ShellCommand cmd = new ShellCommand(config.ExecutablePath,
-                OPTIONS + " \"" + pathName + "\"" + " -o \"" + outFileName + "\"",
+                BASE_OPTIONS + mExtraOptions +
+                    " \"" + pathName + "\"" + " -o \"" + outFileName + "\"",
                 mWorkDirectory, null);
             cmd.Execute();
 

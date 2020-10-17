@@ -1,13 +1,13 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":4,
-"FileDataLength":203,
-"FileDataCrc32":-2143569845,
+"FileDataLength":194,
+"FileDataCrc32":452364300,
 "ProjectProps":{
-"CpuName":"65816",
+"CpuName":"6502",
 "IncludeUndocumentedInstr":false,
 "TwoByteBrk":false,
-"EntryFlags":33489103,
+"EntryFlags":32702671,
 "AutoLabelStyle":"Simple",
 "AnalysisParams":{
 "AnalyzeUncategorizedData":true,
@@ -15,7 +15,7 @@
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
 "UseRelocData":false,
-"SmartPlpHandling":true,
+"SmartPlpHandling":false,
 "SmartPlbHandling":true},
 
 "PlatformSymbolFileIdentifiers":[],
@@ -25,88 +25,93 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":135168},
+"Addr":4096},
 
 {
-"Offset":13,
-"Addr":135424},
+"Offset":2,
+"Addr":4096},
 
 {
-"Offset":27,
-"Addr":135424},
+"Offset":11,
+"Addr":4352},
 
 {
-"Offset":42,
-"Addr":135424},
+"Offset":23,
+"Addr":4352},
 
 {
-"Offset":56,
-"Addr":139264},
+"Offset":35,
+"Addr":4352},
 
 {
-"Offset":63,
-"Addr":139296},
+"Offset":47,
+"Addr":8192},
 
 {
-"Offset":72,
-"Addr":139392},
+"Offset":54,
+"Addr":8224},
 
 {
-"Offset":104,
-"Addr":139520},
+"Offset":62,
+"Addr":8320},
 
 {
-"Offset":109,
-"Addr":141312},
+"Offset":94,
+"Addr":8448},
 
 {
-"Offset":125,
-"Addr":141344},
+"Offset":99,
+"Addr":10240},
 
 {
-"Offset":143,
-"Addr":143360},
+"Offset":115,
+"Addr":10272},
 
 {
-"Offset":157,
-"Addr":143616},
+"Offset":133,
+"Addr":12288},
 
 {
-"Offset":180,
-"Addr":143744},
+"Offset":147,
+"Addr":12544},
 
 {
-"Offset":198,
-"Addr":143872}],
+"Offset":170,
+"Addr":12672},
+
+{
+"Offset":189,
+"Addr":12800}],
 "TypeHints":[{
-"Low":0,
-"High":0,
+"Low":2,
+"High":2,
 "Hint":"Code"},
 
 {
-"Low":27,
-"High":27,
+"Low":23,
+"High":23,
 "Hint":"Code"},
 
 {
-"Low":42,
-"High":42,
+"Low":35,
+"High":35,
 "Hint":"Code"},
 
 {
-"Low":178,
-"High":180,
+"Low":168,
+"High":169,
 "Hint":"InlineData"},
 
 {
-"Low":201,
-"High":202,
+"Low":192,
+"High":193,
 "Hint":"InlineData"}],
 "StatusFlagOverrides":{
 },
 
 "Comments":{
-},
+"0":"PRG-style header",
+"193":"execution continues off end of file"},
 
 "LongComments":{
 },
@@ -115,42 +120,40 @@
 },
 
 "UserLabels":{
-"71":{
-"Label":"offend",
-"Value":139304,
-"Source":"User",
-"Type":"LocalOrGlobalAddr",
-"LabelAnno":"None"},
-
-"155":{
+"145":{
 "Label":"ulabel",
-"Value":143372,
+"Value":12300,
 "Source":"User",
-"Type":"LocalOrGlobalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"158":{
+"148":{
 "Label":"fwd",
-"Value":143617,
+"Value":12545,
 "Source":"User",
-"Type":"LocalOrGlobalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"196":{
+"187":{
 "Label":"label1",
-"Value":143760,
+"Value":12689,
 "Source":"User",
-"Type":"LocalOrGlobalAddr",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"61":{
+"Label":"offend",
+"Value":8231,
+"Source":"User",
+"Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
-"191":{
-"Length":3,
+"0":{
+"Length":2,
 "Format":"NumericLE",
-"SubFormat":"Symbol",
-"SymbolRef":{
-"Label":"label1",
-"Part":"Low"}}},
+"SubFormat":"None",
+"SymbolRef":null}},
 
 "LvTables":{
 },

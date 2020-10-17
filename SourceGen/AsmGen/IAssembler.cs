@@ -44,12 +44,12 @@ namespace SourceGen.AsmGen {
         AssemblerVersion QueryVersion();
 
         /// <summary>
-        /// Configures the object.  Pass in the list of pathnames returned by IGenerator.Run(),
+        /// Configures the object.  Pass in the result object from IGenerator.GenerateSource(),
         /// and the working directory to use for the shell command.
         /// </summary>
-        /// <param name="pathNames">Assembler source pathnames.</param>
+        /// <param name="pathNames">Source generation results.</param>
         /// <param name="workDirectory">Working directory for shell command.</param>
-        void Configure(List<string> pathNames, string workDirectory);
+        void Configure(GenerationResults results, string workDirectory);
 
         /// <summary>
         /// Executes the assembler.  Must call Configure() first.  Executed on background thread.

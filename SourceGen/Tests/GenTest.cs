@@ -269,7 +269,7 @@ namespace SourceGen.Tests {
                 timer.StartTask("Generate Source");
                 gen.Configure(project, workDir, fileName,
                     AssemblerVersionCache.GetVersion(asmId), settings);
-                List<string> genPathNames = gen.GenerateSource(mWorker);
+                GenerationResults genResults = gen.GenerateSource(mWorker);
                 timer.EndTask("Generate Source");
                 if (mWorker.CancellationPending) {
                     // The generator will stop early if a cancellation is requested.  If we
@@ -280,7 +280,7 @@ namespace SourceGen.Tests {
 
                 ReportProgress(" verify...");
                 timer.StartTask("Compare Source to Expected");
-                bool match = CompareGeneratedToExpected(pathName, genPathNames);
+                bool match = CompareGeneratedToExpected(pathName, genResults.PathNames);
                 timer.EndTask("Compare Source to Expected");
                 if (match) {
                     ReportSuccess();
@@ -304,7 +304,7 @@ namespace SourceGen.Tests {
                 }
 
                 timer.StartTask("Assemble Source");
-                asm.Configure(genPathNames, workDir);
+                asm.Configure(genResults, workDir);
                 AssemblerResults asmResults = asm.RunAssembler(mWorker);
                 timer.EndTask("Assemble Source");
                 if (asmResults == null) {

@@ -2,13 +2,11 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Assembler: Merlin 32
-; 65816 version
+; 6502 version
+
+        dw      $1000       ;PRG-style header
 
         org     $1000
-        clc
-        xce
-        sep     #$ff        ;set all flags
-        mx      %11
         jsr     one
         jsr     three_p     ;should land inside one
         jmp     nextthing
@@ -18,15 +16,14 @@ one     bit     one
 one_p   lda     #$11
         ldx     #$11
         ldy     #$11
-        per     one_p
-        bra     one_p
+        clv
+        bvc     one_p
 
         org     $1100
 two     bit     two
         lda     #$22
 two_p   ldx     #$22
         ldy     #$22
-        per     two_p
         jmp     two_p
 
         org     $1100
@@ -34,20 +31,20 @@ three   bit     three
         lda     #$33
         ldx     #$33
 three_p ldy     #$33
-        per     three_p
-        bra     three_p
+        sec
+        bcs     three_p
 
 
         org     $2000
 nextthing
         bit     nextthing
         beq     :fwd-8          ;should just appear as hex since it's outside
-        bra     :fwd            ;BRA across org segments
+        bne     :fwd            ;BNE across org segments (always)
 
         org     $2020
 :fwd    bit     :fwd
         beq     offend          ;branch off the end of the address area into dead space
-        brl     endcheck        ; (which wouldn't be dead without the org)
+        bne     endcheck        ; (which wouldn't be dead without the org)
         nop
 offend
 
@@ -83,7 +80,7 @@ pastdata
         lda     #$44
         ldx     #$44
         ldy     #$44
-        brl     :fwd
+        jmp     :fwd
         dfb     $00             ;put user label here or next inst
 :datend dfb     $01
 
@@ -108,10 +105,13 @@ pastdata
         lda     label1
         lda     label2          ;EDIT: set operand to sym=label1
         lda     label3          ;EDIT: set operand to sym=label1
-        bra     label3
+        clv
+        bvc     label3
 label1  nop
 label2  nop
         org     $3200
 label3  bit     label3
 
         dfb     $00,$01         ;EDIT: mark as inline data to test execution off end
+
+; add nothing here -- execution should run off end

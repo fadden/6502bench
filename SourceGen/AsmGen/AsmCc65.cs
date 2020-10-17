@@ -48,6 +48,9 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public LabelLocalizer Localizer { get { return mLocalizer; } }
 
+        // IGenerator
+        public int StartOffset { get { return 0; } }
+
         /// <summary>
         /// Working directory, i.e. where we write our output file(s).
         /// </summary>
@@ -202,7 +205,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public List<string> GenerateSource(BackgroundWorker worker) {
+        public GenerationResults GenerateSource(BackgroundWorker worker) {
             List<string> pathNames = new List<string>(1);
 
             string pathName = Path.Combine(mWorkDirectory, mFileNameBase + ASM_FILE_SUFFIX);
@@ -251,7 +254,7 @@ namespace SourceGen.AsmGen {
             }
             mOutStream = null;
 
-            return pathNames;
+            return new GenerationResults(pathNames, string.Empty);
         }
 
         private void GenerateLinkerScript(StreamWriter sw) {
@@ -832,13 +835,9 @@ namespace SourceGen.AsmGen {
         }
 
         // IAssembler
-        public void Configure(List<string> pathNames, string workDirectory) {
+        public void Configure(GenerationResults results, string workDirectory) {
             // Clone pathNames, in case the caller decides to modify the original.
-            mPathNames = new List<string>(pathNames.Count);
-            foreach (string str in pathNames) {
-                mPathNames.Add(str);
-            }
-
+            mPathNames = CommonUtil.Container.CopyStringList(results.PathNames);
             mWorkDirectory = workDirectory;
         }
 

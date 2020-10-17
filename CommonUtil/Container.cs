@@ -39,6 +39,19 @@ namespace CommonUtil {
         }
 
         /// <summary>
+        /// Makes a deep copy of a string list.
+        /// </summary>
+        /// <param name="src">String list to copy.</param>
+        /// <returns>New string list.</returns>
+        public static List<string> CopyStringList(IList<string> src) {
+            List<string> dst = new List<string>(src.Count);
+            foreach (string str in src) {
+                dst.Add(str);
+            }
+            return dst;
+        }
+
+        /// <summary>
         /// Compares two Dictionaries to see if their contents are equal.  Key and value types
         /// must have correctly-implemented equality checks.  (I contend this works incorrectly
         /// for float -- 5.0f is equal to the integer 5.)

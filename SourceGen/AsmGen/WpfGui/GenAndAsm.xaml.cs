@@ -82,7 +82,7 @@ namespace SourceGen.AsmGen.WpfGui {
         /// <summary>
         /// Results from last source generation.
         /// </summary>
-        private List<string> mGenerationResults;
+        private GenerationResults mGenerationResults;
 
         /// <summary>
         /// Holds an item for the pick-your-assembler combox box.
@@ -250,7 +250,7 @@ namespace SourceGen.AsmGen.WpfGui {
 
         private class GenWorker : WorkProgress.IWorker {
             IGenerator mGenerator;
-            public List<string> Results { get; private set; }
+            public GenerationResults Results { get; private set; }
 
             public GenWorker(IGenerator gen) {
                 mGenerator = gen;
@@ -261,7 +261,7 @@ namespace SourceGen.AsmGen.WpfGui {
                 return mGenerator.GenerateSource(worker);
             }
             public void RunWorkerCompleted(object results) {
-                Results = (List<string>)results;
+                Results = (GenerationResults)results;
             }
         }
 
@@ -279,17 +279,16 @@ namespace SourceGen.AsmGen.WpfGui {
             dlg.ShowDialog();
             //Debug.WriteLine("Dialog returned: " + dlg.DialogResult);
 
-            List<string> pathNames = gw.Results;
-
-            if (pathNames == null) {
+            GenerationResults res = gw.Results;
+            if (res == null) {
                 // error or cancelation; errors already reported
                 return;
             }
 
             ResetElements();
-            mGenerationResults = pathNames;
+            mGenerationResults = res;
             previewFileComboBox.Items.Clear();
-            foreach (string str in pathNames) {
+            foreach (string str in res.PathNames) {
                 previewFileComboBox.Items.Add(new ComboPath(str));
             }
             previewFileComboBox.SelectedIndex = 0;      // should trigger update

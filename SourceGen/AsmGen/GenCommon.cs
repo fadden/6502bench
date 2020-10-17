@@ -35,7 +35,7 @@ namespace SourceGen.AsmGen {
         public static void Generate(IGenerator gen, StreamWriter sw, BackgroundWorker worker) {
             DisasmProject proj = gen.Project;
             Formatter formatter = gen.SourceFormatter;
-            int offset = 0;
+            int offset = gen.StartOffset;
 
             bool doAddCycles = gen.Settings.GetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
@@ -220,6 +220,8 @@ namespace SourceGen.AsmGen {
             // Tweak branch instructions.  We want to show the absolute address rather
             // than the relative offset (which happens with the OperandAddress assignment
             // below), and 1-byte branches should always appear as a 4-byte hex value.
+            // Unless we're outside bank 0 on 65816, in which case most assemblers require
+            // them to be 6-byte hex values.
             if (op.AddrMode == OpDef.AddressMode.PCRel ||
                     op.AddrMode == OpDef.AddressMode.DPPCRel) {
                 Debug.Assert(attr.OperandAddress >= 0);
@@ -304,10 +306,12 @@ namespace SourceGen.AsmGen {
                     formattedOperand = formatter.FormatHexValue(operand & 0xff, 2) + "," +
                         formatter.FormatHexValue(operandForSymbol, operandLen * 2);
                 } else {
-                    if (operandLen == 2 && !(op.IsAbsolutePBR && gen.Quirks.Need24BitsForAbsPBR)) {
+                    if (operandLen == 2 && !(op.IsAbsolutePBR && gen.Quirks.Need24BitsForAbsPBR) &&
+                            (opFlags & PseudoOp.FormatNumericOpFlags.IsPcRel) == 0) {
                         // This is necessary for 16-bit operands, like "LDA abs" and "PEA val",
                         // when outside bank zero.  The bank is included in the operand address,
-                        // but we don't want to show it here.  We may need it for JSR/JMP though.
+                        // but we don't want to show it here.  We may need it for JSR/JMP though,
+                        // and the bank is required for relative branch instructions.
                         operandForSymbol &= 0xffff;
                     }
                     formattedOperand = formatter.FormatHexValue(operandForSymbol, operandLen * 2);

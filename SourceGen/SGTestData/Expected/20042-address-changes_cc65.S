@@ -1,88 +1,88 @@
          .setcpu "65816"
 ;         .segment "SEG000"
-         .org    $1000
+         .org    $021000
          .a8
          .i8
          clc
          xce
          sep     #$ff
-         jsr     L1100
-         jsr     L1107
-         jmp     L2000
+         jsr     L21100 & $ffff
+         jsr     L21107 & $ffff
+         jmp     L22000 & $ffff
 
 ;         .segment "SEG001"
-         .org    $1100
-L1100:   bit     L1100
-L1103:   lda     #$11
+         .org    $021100
+L21100:  bit     L21100 & $ffff
+L21103:  lda     #$11
          ldx     #$11
-L1107:   ldy     #$11
-         per     L1103
-         bra     L1103
+L21107:  ldy     #$11
+         per     L21103
+         bra     L21103
 
 ;         .segment "SEG002"
-         .org    $1100
-@L1100_0: bit    @L1100_0
+         .org    $021100
+@L21100_0: bit   @L21100_0 & $ffff
          lda     #$22
-@L1105:  ldx     #$22
+@L21105: ldx     #$22
          ldy     #$22
-         per     @L1105
-         jmp     @L1105
+         per     @L21105
+         jmp     @L21105 & $ffff
 
 ;         .segment "SEG003"
-         .org    $1100
-@L1100_1: bit    @L1100_1
+         .org    $021100
+@L21100_1: bit   @L21100_1 & $ffff
          lda     #$33
          ldx     #$33
-@L1107_0: ldy    #$33
-         per     @L1107_0
-         bra     @L1107_0
+@L21107_0: ldy   #$33
+         per     @L21107_0
+         bra     @L21107_0
 
 ;         .segment "SEG004"
-         .org    $2000
-L2000:   bit     L2000
-         beq     $2018
-         bra     @L2020
+         .org    $022000
+L22000:  bit     L22000 & $ffff
+         beq     $022018
+         bra     @L22020
 
 ;         .segment "SEG005"
-         .org    $2020
-@L2020:  bit     @L2020
-         beq     $2029
-         brl     @L2080
+         .org    $022020
+@L22020: bit     @L22020 & $ffff
+         beq     $022029
+         brl     @L22080
 
 @offend: nop
 ;         .segment "SEG006"
-         .org    $2080
-@L2080:  bit     @L2080
-         lda     @offend
-         jsr     @offend
+         .org    $022080
+@L22080: bit     @L22080 & $ffff
+         lda     @offend & $ffff
+         jsr     @offend & $ffff
          lda     $2029
          jsr     $2029
-         lda     @L2080-1
-         jsr     @L2080-1
-         lda     @L2080
-         jsr     @L2080
+         lda     @L22080 & $ffff -1
+         jsr     @L22080 & $ffff -1
+         lda     @L22080 & $ffff
+         jsr     @L22080 & $ffff
          lda     $00
-         beq     @L2100
+         beq     @L22100
          .byte   $ad
 
 ;         .segment "SEG007"
-         .org    $2100
-@L2100:  nop
+         .org    $022100
+@L22100: nop
          nop
-         jmp     @L3000
+         jmp     @L23000 & $ffff
 
 ;         .segment "SEG008"
-         .org    $2800
+         .org    $022800
          .byte   $00
          .byte   $28
          .res    14,$00
 ;         .segment "SEG009"
-         .org    $2820
+         .org    $022820
          .res    18,$00
 
 ;         .segment "SEG010"
-         .org    $3000
-@L3000:  bit     @L3000
+         .org    $023000
+@L23000: bit     @L23000 & $ffff
          lda     #$44
          ldx     #$44
          ldy     #$44
@@ -91,34 +91,34 @@ L2000:   bit     L2000
 @ulabel: .byte   $00
          .byte   $01
 ;         .segment "SEG011"
-         .org    $3100
+         .org    $023100
          .byte   $02
 
-@fwd:    bit     @fwd
-         lda     @ulabel
-         lda     @ulabel+1
+@fwd:    bit     @fwd & $ffff
+         lda     @ulabel & $ffff
+         lda     @ulabel & $ffff +1
          lda     $300e
          lda     $300f
-         lda     @fwd-1
-         beq     @L3182
+         lda     @fwd & $ffff -1
+         beq     @L23182
          .byte   $ea
          .byte   $ea
 ;         .segment "SEG012"
-         .org    $3180
+         .org    $023180
          .byte   $00
          .byte   $01
 
-@L3182:  bit     @L3182
-         lda     @label1
-         lda     @label1+1
-         lda     @label1+112
-         bra     @L3200
+@L23182: bit     @L23182 & $ffff
+         lda     @label1 & $ffff
+         lda     @label1 & $ffff +1
+         lda     @label1 & $ffff +112
+         bra     @L23200
 
 @label1: .byte   $ea
          .byte   $ea
 
 ;         .segment "SEG013"
-         .org    $3200
-@L3200:  bit     @L3200
+         .org    $023200
+@L23200: bit     @L23200 & $ffff
          .byte   $00
          .byte   $01
