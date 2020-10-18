@@ -7,7 +7,7 @@
 SourceGen/SourceGen-settings
 SourceGen/PluginDllCache
 DIST_Debug
-DIST_release
+DIST_Release
 
 
 # User-specific files

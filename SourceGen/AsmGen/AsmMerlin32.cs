@@ -31,7 +31,7 @@ namespace SourceGen.AsmGen {
     /// (https://www.brutaldeluxe.fr/products/crossdevtools/merlin/).
     /// </summary>
     public class GenMerlin32 : IGenerator {
-        private const string ASM_FILE_SUFFIX = "_Merlin32.S";   // must start with underscore
+        private const string ASM_FILE_SUFFIX = "_merlin32.S";   // must start with underscore
 
         // IGenerator
         public DisasmProject Project { get; private set; }
