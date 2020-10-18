@@ -1,8 +1,6 @@
-         .setcpu "65816"
+         .setcpu "6502X"
 ;         .segment "SEG000"
          .org    $1000
-         .a8
-         .i8
          lda     L10AC
          ora     L10BC
          rts

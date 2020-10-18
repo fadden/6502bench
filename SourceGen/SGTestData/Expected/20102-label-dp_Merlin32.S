@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.1.0-dev1
          org   $1000
          sec
          xce

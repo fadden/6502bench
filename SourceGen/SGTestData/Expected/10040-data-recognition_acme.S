@@ -1,7 +1,5 @@
-        !cpu    65816
+        !cpu    6510
 *       =       $1000
-        !as
-        !rs
         lda     L10AC
         ora     L10BC
         rts

@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.1.0-dev1
         !cpu    65816
 *       =       $0000
         !pseudopc $1000 {

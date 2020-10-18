@@ -1,9 +1,7 @@
-        .cpu    "65816"
+        .cpu    "6502i"
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
-        .as
-        .xs
         lda     L10AC
         ora     L10BC
         rts

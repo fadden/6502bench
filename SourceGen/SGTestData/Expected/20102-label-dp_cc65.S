@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.1.0-dev1
          .setcpu "65816"
 ;         .segment "SEG000"
          .org    $1000
