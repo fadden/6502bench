@@ -92,7 +92,7 @@ namespace MakeDist {
 
         // We want all of the regression test binaries, plus the .sym65, .dis65, and .cs,
         // but nothing with an underscore in the part before the extension.
-        private const string TestCasePattern = @"^\d\d\d\d-[A-Za-z0-9-]+(\..*)?$";
+        private const string TestCasePattern = @"^\d\d\d\d\d-[A-Za-z0-9-]+(\..*)?$";
         private static Regex sTestCaseRegex = new Regex(TestCasePattern);
 
 
