@@ -32,7 +32,7 @@ does create the possibility that two different users might get different
 results when opening the same project file with different versions of
 SourceGen, but these effects are expected to be minor.</p>
 
-<p>The analyzer has the following steps (see the <code>Analyze</code>
+<p>The analyzer performs the following steps (see the <code>Analyze</code>
 method in <code>DisasmProject.cs</code>):</p>
 <ul>
   <li>Reset the symbol table.</li>
@@ -249,24 +249,19 @@ performed, we assume a transition to emulation mode (E=1).</p>
     value of the flag, but we know what the value will be at both
     addresses.</li>
 </ol>
-<p>Self-modifying code can render spoil any of these, possibly requiring a
+<p>Self-modifying code can spoil any of these, possibly requiring a
 status flag override to get correct disassembly.</p>
 
 <p>The instruction that is most likely to cause problems is <code>PLP</code>,
 which pulls the processor status flags off of the stack.  SourceGen
 doesn't try to track stack contents, so it can't know what values may
 be pulled.  In many cases the <code>PLP</code> appears not long after a
-<code>PHP</code>, so SourceGen will scan backward through the file to
-find the nearest <code>PHP</code>, and use the status flags from that.  If
-no <code>PHP</code> can be found, then all
-flags are set to "indeterminate".  (The boot loader in the Apple II 5.25"
-floppy disk controller is an example where SourceGen gets it wrong. The
-code does <code>CLC</code>/<code>PHP</code>, followed a bit later by the
-<code>PLP</code>, but it's actually using the stack to pass the carry
-flag around.  Flagging the carry bit as indeterminate with a status flag
-override on the instruction following the PLP fixes things.)  The
-"smart" behavior can be disabled in the project properties if it's coming
-out wrong more often than right.</p>
+<code>PHP</code>, so SourceGen can scan backward through the file to
+find the nearest <code>PHP</code>, and use the status flags from that.
+In practice this doesn't work well, but the "smart" behavior can be
+enabled from the project properties if desired.  Otherwise, a
+<code>PLP</code> causes all flags to be set to "indeterminate", except
+for the M/X flags on the 65816 which are left unmodified.</p>
 
 <p>Some other things that the code analyzer can't recognize automatically:</p>
 <ul>
@@ -280,11 +275,11 @@ out wrong more often than right.</p>
 <p>Sometimes the indirect jump targets are coming from a table of
 addresses in the file.  If so, these can be formatted as addresses,
 and then the target locations tagged as code entry points.</p>
-<p>The 65816 adds an additional twist: 16-bit data access instructions
-use the data bank register ("B") to determine which bank to load from.
-SourceGen can't determine what the value is, so it currently assumes
-that it's equal to the program bank register ("K").  Handling this
-correctly will require improvements to the user interface.</p>
+<p>The 65816 adds an additional twist: some instructions combine their
+operands with the Data Bank Register ("B") to form a 24-bit address.
+SourceGen can't automatically determine what the register holds, so it
+assumes that it's equal to the program bank register ("K"), and provides
+a way to override the value.</p>
 
 
 <h3><a name="extension-scripts">Extension Scripts</a></h3>

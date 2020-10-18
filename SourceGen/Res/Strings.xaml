@@ -121,6 +121,7 @@ limitations under the License.
     <system:String x:Key="str_InvalidFormatWordSelUnevenFmt">Unable to format as word: each selected region must have an even number of bytes ({0} region(s) are selected).</system:String>
     <system:String x:Key="str_LocalVariableTableClear">• Clear variables</system:String>
     <system:String x:Key="str_LocalVariableTableEmpty">• Empty variable table</system:String>
+    <system:String x:Key="str_LoadAddress">load address</system:String>
     <system:String x:Key="str_MsgBankOverrun">Address bank overrun</system:String>
     <system:String x:Key="str_MsgBankOverrunDetailFmt">Bank boundary crossed at offset {0}</system:String>
     <system:String x:Key="str_MsgFormatDescriptorIgnored">Format ignored</system:String>

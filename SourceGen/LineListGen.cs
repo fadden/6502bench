@@ -905,7 +905,7 @@ namespace SourceGen {
         /// Complicated items, such as word-wrapped long comments, may be generated now
         /// and saved off.
         /// 
-        /// This still needs a formatter arg even when no text is rendered because some
+        /// This still needs a formatter even when no text is rendered because some
         /// options, like maximum per-line operand length, might affect how many lines
         /// are generated.
         /// </summary>
@@ -1154,6 +1154,11 @@ namespace SourceGen {
             // of an instruction or data item.
             foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
                 if (ent.Offset < startOffset || ent.Offset > endOffset) {
+                    continue;
+                }
+                if (ent.Offset == 0 && AsmGen.GenCommon.HasPrgHeader(mProject)) {
+                    // Suppress the ORG at offset zero.  We know there's another one
+                    // at offset +000002, and that it matches the value at +0/1.
                     continue;
                 }
                 int index = FindLineByOffset(lines, ent.Offset);

@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 
 using Asm65;
+using CommonUtil;
 
 namespace SourceGen.AsmGen {
     public class GenCommon {
@@ -498,6 +499,47 @@ namespace SourceGen.AsmGen {
             //Debug.WriteLine(dfd.FormatSubType + " at +" + offset.ToString("x6") +
             //    "(" + alignToAddr.ToString("x4") + "): " + result);
             return result;
+        }
+
+        /// <summary>
+        /// Determines whether the project appears to have a PRG header.
+        /// </summary>
+        /// <param name="project">Project to check.</param>
+        /// <returns>True if we think we found a PRG header.</returns>
+        public static bool HasPrgHeader(DisasmProject project) {
+            if (project.FileDataLength < 3 || project.FileDataLength > 65536) {
+                //Debug.WriteLine("PRG test: incompatible file length");
+                return false;
+            }
+            Anattrib attr0 = project.GetAnattrib(0);
+            Anattrib attr1 = project.GetAnattrib(1);
+            if (!(attr0.IsDataStart && attr1.IsData)) {
+                //Debug.WriteLine("PRG test: +0/1 not data");
+                return false;
+            }
+            if (attr0.Length != 2) {
+                //Debug.WriteLine("PRG test: +0/1 not 16-bit value");
+                return false;
+            }
+            if (attr0.Symbol != null || attr1.Symbol != null) {
+                //Debug.WriteLine("PRG test: +0/1 has label");
+                return false;
+            }
+            // Confirm there's an address map entry at offset 2.
+            if (project.AddrMap.Get(2) == AddressMap.NO_ENTRY_ADDR) {
+                //Debug.WriteLine("PRG test: no ORG at +2");
+                return false;
+            }
+            // See if the address at offset 2 matches the value at 0/1.
+            int value01 = project.FileData[0] | (project.FileData[1] << 8);
+            int addr2 = project.AddrMap.OffsetToAddress(2);
+            if (value01 != addr2) {
+                //Debug.WriteLine("PRG test: +0/1 value is " + value01.ToString("x4") +
+                //    ", address at +2 is " + addr2);
+                return false;
+            }
+
+            return true;
         }
     }
 }

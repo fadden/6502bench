@@ -388,19 +388,19 @@ namespace SourceGen {
 
             // Configure the load address.
             if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
-                // First two bytes are the load address, code starts at offset +000002.  We
-                // need to put the load address into the stream, but don't want it to get
-                // picked up as an address for something else.  So we set it to the same
-                // address as the start of the file.  The overlapping-address code should do
-                // the right thing with it.
-                //
-                // Updated after adding the "load address" report to the address edit dialog.
-                // We don't want the two-byte offset.
+                // First two bytes are the load address, with the actual file data starting
+                // at +000002.  We need to assign an address to the bytes, but don't want them
+                // to be referenced as an address by something else.  One approach is to use
+                // the load address, and rely on the multi-address code to keep them distinct,
+                // but that throws off the "load address" display in the set-address dialog.
+                // So we just give it an offset of (start - 2) and leave it to the user to
+                // update if necessary.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                AddrMap.Set(0, loadAddr - 2);
+                AddrMap.Set(0, loadAddr < 2 ? 0 : loadAddr - 2);
                 AddrMap.Set(2, loadAddr);
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
+                Comments[0] = Res.Strings.LOAD_ADDRESS;
                 AnalyzerTags[0] = CodeAnalysis.AnalyzerTag.None;
                 AnalyzerTags[2] = CodeAnalysis.AnalyzerTag.Code;
             } else {

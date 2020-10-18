@@ -183,7 +183,7 @@ namespace SourceGen.AsmGen {
                 AssemblerInfo.Id.Tass64);
             mColumnWidths = (int[])config.ColumnWidths.Clone();
 
-            mHasPrgHeader = HasPrgHeader(project);
+            mHasPrgHeader = GenCommon.HasPrgHeader(project);
         }
 
         /// <summary>
@@ -340,36 +340,6 @@ namespace SourceGen.AsmGen {
                     offset += attr.Length;
                 }
             }
-        }
-
-        private static bool HasPrgHeader(DisasmProject project) {
-            if (project.FileDataLength < 3 || project.FileDataLength > 65536) {
-                return false;
-            }
-            Anattrib attr0 = project.GetAnattrib(0);
-            Anattrib attr1 = project.GetAnattrib(1);
-            if (!(attr0.IsDataStart && attr1.IsData)) {
-                Debug.WriteLine("PRG test: 0/1 not data");
-                return false;
-            }
-            if (attr0.Length != 2) {
-                Debug.WriteLine("PRG test: 0/1 not 16-bit value");
-                return false;
-            }
-            if (attr0.Symbol != null || attr1.Symbol != null) {
-                Debug.WriteLine("PRG test: 0/1 has label");
-                return false;
-            }
-            // See if the address at offset 2 matches the value at 0/1.
-            int value01 = project.FileData[0] | (project.FileData[1] << 8);
-            int addr2 = project.AddrMap.OffsetToAddress(2);
-            if (value01 != addr2) {
-                Debug.WriteLine("PRG test: 0/1 value is " + value01.ToString("x4") +
-                    ", address at 2 is " + addr2);
-                return false;
-            }
-
-            return true;
         }
 
         // IGenerator
@@ -642,10 +612,12 @@ namespace SourceGen.AsmGen {
             // Any subsequent ORG changes are made to the program counter, and take the form
             // of a pair of ops (.logical <addr> to open, .here to end).  Omitting the .here
             // causes an error.
+            Debug.Assert(offset >= StartOffset);
             if (offset == StartOffset) {
                 // Set the "compile offset" to the initial address.
-                OutputLine("*", "=", SourceFormatter.FormatHexValue(Project.AddrMap.Get(0), 4),
-                    string.Empty);
+                OutputLine("*", "=",
+                    SourceFormatter.FormatHexValue(Project.AddrMap.Get(StartOffset), 4),
+                        string.Empty);
             } else {
                 if (mNeedHereOp) {
                     OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(HERE_PSEUDO_OP),
