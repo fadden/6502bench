@@ -1,12 +1,7 @@
-;Project edited to mark some non-ASCII operands as ASCII.
-         .setcpu "65816"
+;Projected edited to format non-char operands as chars.
+         .setcpu "6502"
 ;         .segment "SEG000"
          .org    $1000
-         .a8
-         .i8
-         clc
-         xce
-         sep     #$30
          lda     #'A'
          lda     #'A' | $80
          lda     #$c1
@@ -15,22 +10,12 @@
          ldx     #'a' | $80
          ldx     #$41
          ldx     #$01
-         lda     #$7f
+         lda     #$7f       ;inappropriate format should be ignored
          lda     #$7f
          lda     #$7f
          lda     #$7f
          lda     #$0d
-         rep     #$30
-         .a16
-         .i16
-         lda     #'B'
-         lda     #'B' | $80
-         lda     #$c2
-         lda     #$42
-         sep     #$30
-         .a8
-         .i8
-         rts
+         jmp     L144B
 
          .byte   'C'
          .byte   'C' | $80
@@ -86,7 +71,10 @@
          .byte   $60
          .byte   $41,$42,$43,$44,$45,$46,$47,$48,$49,$4a,$4b,$4c,$4d,$4e,$4f,$50
          .byte   $51,$52,$53,$54,$55,$56,$57,$58,$59,$5a
-         .byte   "{|}~"
+         .byte   $7b
+         .byte   $7c
+         .byte   $7d
+         .byte   $7e
          .byte   $83
          .byte   $20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$2a,$2b,$2c,$2d,$2e,$2f
          .byte   $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3a,$3b,$3c,$3d,$3e,$3f
@@ -99,7 +87,10 @@
          .byte   $40
          .byte   $01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f,$10
          .byte   $11,$12,$13,$14,$15,$16,$17,$18,$19,$1a
-         .byte   "{|}~"
+         .byte   $7b
+         .byte   $7c
+         .byte   $7d
+         .byte   $7e
          .byte   $84
          .byte   $c9,$c9,$c3,$d3,$d4,$c5,$d0,$20,$45,$53,$52,$45,$56,$45,$52
          .byte   $84
@@ -124,6 +115,9 @@
          .byte   $05,$04,$0f,$43,$20,$0e,$05,$05,$12,$03,$53,$20,$05,$13,$12,$05
          .byte   $16,$05,$12
          .byte   $84
+         .byte   $0e,$15,$0c,$0c,$2d,$14,$05,$12,$0d,$20,$13,$03,$12,$05,$05,$0e
+         .byte   $20,$03,$0f,$04,$05,$3f,$00
+         .byte   $84
          .byte   $17,$53,$03,$12,$05,$05,$0e,$20,$43,$0f,$04,$05,$20,$17,$09,$14
          .byte   $08,$20,$0c,$05,$0e,$07,$14,$08
          .byte   $84
@@ -133,7 +127,6 @@
          .byte   $53,$03,$12,$05,$05,$0e,$20,$43,$0f,$04,$05,$20,$44,$43,$c9
          .byte   $84
          .byte   $85
-;$00-ff block
          .byte   $00
          .byte   $01
          .byte   $02
@@ -201,99 +194,13 @@
          .byte   $9d
          .byte   $9e
          .byte   $9f
-         .byte   $a0
-         .byte   $a1
-         .byte   $a2
-         .byte   $a3
-         .byte   $a4
-         .byte   $a5
-         .byte   $a6
-         .byte   $a7
-         .byte   $a8
-         .byte   $a9
-         .byte   $aa
-         .byte   $ab
-         .byte   $ac
-         .byte   $ad
-         .byte   $ae
-         .byte   $af
-         .byte   $b0
-         .byte   $b1
-         .byte   $b2
-         .byte   $b3
-         .byte   $b4
-         .byte   $b5
-         .byte   $b6
-         .byte   $b7
-         .byte   $b8
-         .byte   $b9
-         .byte   $ba
-         .byte   $bb
-         .byte   $bc
-         .byte   $bd
-         .byte   $be
-         .byte   $bf
-         .byte   $c0
-         .byte   $c1
-         .byte   $c2
-         .byte   $c3
-         .byte   $c4
-         .byte   $c5
-         .byte   $c6
-         .byte   $c7
-         .byte   $c8
-         .byte   $c9
-         .byte   $ca
-         .byte   $cb
-         .byte   $cc
-         .byte   $cd
-         .byte   $ce
-         .byte   $cf
-         .byte   $d0
-         .byte   $d1
-         .byte   $d2
-         .byte   $d3
-         .byte   $d4
-         .byte   $d5
-         .byte   $d6
-         .byte   $d7
-         .byte   $d8
-         .byte   $d9
-         .byte   $da
-         .byte   $db
-         .byte   $dc
-         .byte   $dd
-         .byte   $de
-         .byte   $df
-         .byte   $e0
-         .byte   $e1
-         .byte   $e2
-         .byte   $e3
-         .byte   $e4
-         .byte   $e5
-         .byte   $e6
-         .byte   $e7
-         .byte   $e8
-         .byte   $e9
-         .byte   $ea
-         .byte   $eb
-         .byte   $ec
-         .byte   $ed
-         .byte   $ee
-         .byte   $ef
-         .byte   $f0
-         .byte   $f1
-         .byte   $f2
-         .byte   $f3
-         .byte   $f4
-         .byte   $f5
-         .byte   $f6
-         .byte   $f7
-         .byte   $f8
-         .byte   $f9
-         .byte   $fa
-         .byte   $fb
-         .byte   $fc
-         .byte   $fd
-         .byte   $fe
+         .byte   $a0,$a1,$a2,$a3,$a4,$a5,$a6,$a7,$a8,$a9,$aa,$ab,$ac,$ad,$ae,$af
+         .byte   $b0,$b1,$b2,$b3,$b4,$b5,$b6,$b7,$b8,$b9,$ba,$bb,$bc,$bd,$be,$bf
+         .byte   $c0,$c1,$c2,$c3,$c4,$c5,$c6,$c7,$c8,$c9,$ca,$cb,$cc,$cd,$ce,$cf
+         .byte   $d0,$d1,$d2,$d3,$d4,$d5,$d6,$d7,$d8,$d9,$da,$db,$dc,$dd,$de,$df
+         .byte   $e0,$e1,$e2,$e3,$e4,$e5,$e6,$e7,$e8,$e9,$ea,$eb,$ec,$ed,$ee,$ef
+         .byte   $f0,$f1,$f2,$f3,$f4,$f5,$f6,$f7,$f8,$f9,$fa,$fb,$fc,$fd,$fe
          .byte   $ff
+
+L144B:   rts
+

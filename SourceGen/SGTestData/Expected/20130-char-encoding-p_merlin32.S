@@ -1,8 +1,5 @@
-;Project edited to mark some non-ASCII operands as ASCII.
+;Projected edited to format non-char operands as chars.
          org   $1000
-         clc
-         xce
-         sep   #$30
          lda   #'A'
          lda   #"A"
          lda   #$c1
@@ -11,20 +8,12 @@
          ldx   #"a"
          ldx   #$41
          ldx   #$01
-         lda   #$7f
+         lda   #$7f       ;inappropriate format should be ignored
          lda   #$7f
          lda   #$7f
          lda   #$7f
          lda   #$0d
-         rep   #$30
-         mx    %00
-         lda   #'B'
-         lda   #"B"
-         lda   #$c2
-         lda   #$42
-         sep   #$30
-         mx    %11
-         rts
+         jmp   L144B
 
          dfb   'C'
          dfb   "C"
@@ -66,7 +55,10 @@
          dfb   $5f
          dfb   $60
          hex   4142434445464748494a4b4c4d4e4f505152535455565758595a
-         asc   '{|}~'
+         dfb   $7b
+         dfb   $7c
+         dfb   $7d
+         dfb   $7e
          dfb   $83
          hex   202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f
          hex   004142434445464748494a4b4c4d4e4f505152535455565758595a1b
@@ -76,7 +68,10 @@
          dfb   $1f
          dfb   $40
          hex   0102030405060708090a0b0c0d0e0f101112131415161718191a
-         asc   '{|}~'
+         dfb   $7b
+         dfb   $7c
+         dfb   $7d
+         dfb   $7e
          dfb   $84
          hex   c9c9c3d3d4c5d02045535245564552
          dfb   $84
@@ -94,6 +89,8 @@
          dfb   $84
          hex   05040f43200e05051203532005131205160512
          dfb   $84
+         hex   0e150c0c2d1405120d2013031205050e20030f04053f00
+         dfb   $84
          hex   1753031205050e20430f04052017091408200c050e071408
          dfb   $84
          hex   180053031205050e20430f04052017091408200c050e07140832
@@ -101,7 +98,6 @@
          hex   53031205050e20430f0405204443c9
          dfb   $84
          dfb   $85
-;$00-ff block
          dfb   $00
          dfb   $01
          dfb   $02
@@ -132,10 +128,43 @@
          dfb   $1b
          dfb   $1c
          dfb   $1d
-         dfb   $1e
-         dfb   $1f
-         asc   ' !"#$%&',27,'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWX'
-         asc   'YZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+         hex   1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d
+         hex   3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b
+         dfb   $5c
+         dfb   $5d
+         dfb   $5e
+         dfb   $5f
+         dfb   $60
+         dfb   $61
+         dfb   $62
+         dfb   $63
+         dfb   $64
+         dfb   $65
+         dfb   $66
+         dfb   $67
+         dfb   $68
+         dfb   $69
+         dfb   $6a
+         dfb   $6b
+         dfb   $6c
+         dfb   $6d
+         dfb   $6e
+         dfb   $6f
+         dfb   $70
+         dfb   $71
+         dfb   $72
+         dfb   $73
+         dfb   $74
+         dfb   $75
+         dfb   $76
+         dfb   $77
+         dfb   $78
+         dfb   $79
+         dfb   $7a
+         dfb   $7b
+         dfb   $7c
+         dfb   $7d
+         dfb   $7e
          dfb   $7f
          dfb   $80
          dfb   $81
@@ -158,14 +187,7 @@
          dfb   $92
          dfb   $93
          dfb   $94
-         dfb   $95
-         dfb   $96
-         dfb   $97
-         dfb   $98
-         dfb   $99
-         dfb   $9a
-         dfb   $9b
-         dfb   $9c
+         hex   95969798999a9b9c
          dfb   $9d
          dfb   $9e
          dfb   $9f
@@ -202,32 +224,7 @@
          dfb   $be
          dfb   $bf
          dfb   $c0
-         dfb   $c1
-         dfb   $c2
-         dfb   $c3
-         dfb   $c4
-         dfb   $c5
-         dfb   $c6
-         dfb   $c7
-         dfb   $c8
-         dfb   $c9
-         dfb   $ca
-         dfb   $cb
-         dfb   $cc
-         dfb   $cd
-         dfb   $ce
-         dfb   $cf
-         dfb   $d0
-         dfb   $d1
-         dfb   $d2
-         dfb   $d3
-         dfb   $d4
-         dfb   $d5
-         dfb   $d6
-         dfb   $d7
-         dfb   $d8
-         dfb   $d9
-         dfb   $da
+         hex   c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9da
          dfb   $db
          dfb   $dc
          dfb   $dd
@@ -265,3 +262,6 @@
          dfb   $fd
          dfb   $fe
          dfb   $ff
+
+L144B    rts
+

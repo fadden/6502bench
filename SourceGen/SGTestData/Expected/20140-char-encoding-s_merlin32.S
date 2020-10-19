@@ -1,8 +1,5 @@
-;Project edited to mark some non-ASCII operands as ASCII.
+;Projected edited to format non-char operands as chars.
          org   $1000
-         clc
-         xce
-         sep   #$30
          lda   #'A'
          lda   #"A"
          lda   #$c1
@@ -11,20 +8,12 @@
          ldx   #"a"
          ldx   #$41
          ldx   #$01
-         lda   #$7f
+         lda   #$7f       ;inappropriate format should be ignored
          lda   #$7f
          lda   #$7f
          lda   #$7f
          lda   #$0d
-         rep   #$30
-         mx    %00
-         lda   #'B'
-         lda   #"B"
-         lda   #$c2
-         lda   #$42
-         sep   #$30
-         mx    %11
-         rts
+         jmp   L144B
 
          dfb   'C'
          dfb   "C"
@@ -100,6 +89,8 @@
          dfb   $84
          hex   05040f43200e05051203532005131205160512
          dfb   $84
+         hex   0e150c0c2d1405120d2013031205050e20030f04053f00
+         dfb   $84
          hex   1753031205050e20430f04052017091408200c050e071408
          dfb   $84
          hex   180053031205050e20430f04052017091408200c050e07140832
@@ -107,7 +98,6 @@
          hex   53031205050e20430f0405204443c9
          dfb   $84
          dfb   $85
-;$00-ff block
          hex   000102030405060708090a0b0c0d0e0f101112131415161718191a1b
          dfb   $1c
          dfb   $1d
@@ -281,3 +271,6 @@
          dfb   $fd
          dfb   $fe
          dfb   $ff
+
+L144B    rts
+

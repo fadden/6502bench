@@ -1,15 +1,10 @@
-;Project edited to mark some non-ASCII operands as ASCII.
-        .cpu    "65816"
+;Projected edited to format non-char operands as chars.
+        .cpu    "6502"
         .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
-        .as
-        .xs
-        clc
-        xce
-        sep     #$30
         lda     #'A'
         lda     #'A' | $80
         .enc    "none"
@@ -24,7 +19,7 @@
         .enc    "screen"
         ldx     #'a'
         .enc    "sg_ascii"
-        lda     #$7f
+        lda     #$7f       ;inappropriate format should be ignored
         lda     #$7f
         .enc    "none"
         lda     #$7f
@@ -32,21 +27,8 @@
         lda     #$7f
         .enc    "sg_ascii"
         lda     #$0d
-        rep     #$30
-        .al
-        .xl
-        lda     #'B'
-        lda     #'B' | $80
-        .enc    "none"
-        lda     #'B'
-        .enc    "screen"
-        lda     #'B'
-        sep     #$30
-        .as
-        .xs
-        rts
+        jmp     L144B
 
-        .enc    "sg_ascii"
         .byte   'C'
         .byte   'C' | $80
         .enc    "none"
@@ -138,6 +120,8 @@
         .enc    "screen"
         .text   "edoC neercS esrever"
         .byte   $84
+        .text   "null-term screen code?@"
+        .byte   $84
         .ptext  "Screen Code with length"
         .byte   $84
         .text   $18,$00,"Screen Code with length2"
@@ -145,7 +129,6 @@
         .shift  "Screen Code DCI"
         .byte   $84
         .byte   $85
-;$00-ff block
         .text   "@abcdefghijklmnopqrstuvwxyz["
         .byte   $1c
         .byte   $1d
@@ -319,3 +302,6 @@
         .byte   $fd
         .byte   $fe
         .byte   $ff
+
+L144B   rts
+

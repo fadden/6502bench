@@ -1,11 +1,6 @@
-;Project edited to mark some non-ASCII operands as ASCII.
-        !cpu    65816
+;Projected edited to format non-char operands as chars.
+        !cpu    6502
 *       =       $1000
-        !as
-        !rs
-        clc
-        xce
-        sep     #$30
         lda     #'A'
         lda     #'A' | $80
         lda     #$c1
@@ -14,22 +9,12 @@
         ldx     #'a' | $80
         ldx     #$41
         ldx     #$01
-        lda     #$7f
+        lda     #$7f       ;inappropriate format should be ignored
         lda     #$7f
         lda     #$7f
         lda     #$7f
         lda     #$0d
-        rep     #$30
-        !al
-        !rl
-        lda     #'B'
-        lda     #'B' | $80
-        lda     #$c2
-        lda     #$42
-        sep     #$30
-        !as
-        !rs
-        rts
+        jmp     L144B
 
         !byte   'C'
         !byte   'C' | $80
@@ -107,6 +92,8 @@
         !byte   $84
         !scr    "edoC neercS esrever"
         !byte   $84
+        !scr    "null-term screen code?@"
+        !byte   $84
         !scr    $17,"Screen Code with length"
         !byte   $84
         !scr    $18,$00,"Screen Code with length2"
@@ -114,7 +101,6 @@
         !scr    "Screen Code DC",$c9
         !byte   $84
         !byte   $85
-;$00-ff block
         !byte   $00
         !byte   $01
         !byte   $02
@@ -279,3 +265,6 @@
         !byte   $fd
         !byte   $fe
         !byte   $ff
+
+L144B   rts
+

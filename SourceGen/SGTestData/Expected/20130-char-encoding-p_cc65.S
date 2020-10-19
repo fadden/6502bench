@@ -1,12 +1,7 @@
-;Project edited to mark some non-ASCII operands as ASCII.
-         .setcpu "65816"
+;Projected edited to format non-char operands as chars.
+         .setcpu "6502"
 ;         .segment "SEG000"
          .org    $1000
-         .a8
-         .i8
-         clc
-         xce
-         sep     #$30
          lda     #'A'
          lda     #'A' | $80
          lda     #$c1
@@ -15,22 +10,12 @@
          ldx     #'a' | $80
          ldx     #$41
          ldx     #$01
-         lda     #$7f
+         lda     #$7f       ;inappropriate format should be ignored
          lda     #$7f
          lda     #$7f
          lda     #$7f
          lda     #$0d
-         rep     #$30
-         .a16
-         .i16
-         lda     #'B'
-         lda     #'B' | $80
-         lda     #$c2
-         lda     #$42
-         sep     #$30
-         .a8
-         .i8
-         rts
+         jmp     L144B
 
          .byte   'C'
          .byte   'C' | $80
@@ -130,6 +115,9 @@
          .byte   $05,$04,$0f,$43,$20,$0e,$05,$05,$12,$03,$53,$20,$05,$13,$12,$05
          .byte   $16,$05,$12
          .byte   $84
+         .byte   $0e,$15,$0c,$0c,$2d,$14,$05,$12,$0d,$20,$13,$03,$12,$05,$05,$0e
+         .byte   $20,$03,$0f,$04,$05,$3f,$00
+         .byte   $84
          .byte   $17,$53,$03,$12,$05,$05,$0e,$20,$43,$0f,$04,$05,$20,$17,$09,$14
          .byte   $08,$20,$0c,$05,$0e,$07,$14,$08
          .byte   $84
@@ -139,7 +127,6 @@
          .byte   $53,$03,$12,$05,$05,$0e,$20,$43,$0f,$04,$05,$20,$44,$43,$c9
          .byte   $84
          .byte   $85
-;$00-ff block
          .byte   $00
          .byte   $01
          .byte   $02
@@ -307,3 +294,6 @@
          .byte   $fd
          .byte   $fe
          .byte   $ff
+
+L144B:   rts
+

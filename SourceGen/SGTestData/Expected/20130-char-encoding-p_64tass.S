@@ -1,15 +1,10 @@
-;Project edited to mark some non-ASCII operands as ASCII.
-        .cpu    "65816"
+;Projected edited to format non-char operands as chars.
+        .cpu    "6502"
         .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
 *       =       $1000
-        .as
-        .xs
-        clc
-        xce
-        sep     #$30
         lda     #'A'
         lda     #'A' | $80
         .enc    "none"
@@ -24,7 +19,7 @@
         .enc    "screen"
         ldx     #'a'
         .enc    "sg_ascii"
-        lda     #$7f
+        lda     #$7f       ;inappropriate format should be ignored
         lda     #$7f
         .enc    "none"
         lda     #$7f
@@ -32,21 +27,8 @@
         lda     #$7f
         .enc    "sg_ascii"
         lda     #$0d
-        rep     #$30
-        .al
-        .xl
-        lda     #'B'
-        lda     #'B' | $80
-        .enc    "none"
-        lda     #'B'
-        .enc    "screen"
-        lda     #'B'
-        sep     #$30
-        .as
-        .xs
-        rts
+        jmp     L144B
 
-        .enc    "sg_ascii"
         .byte   'C'
         .byte   'C' | $80
         .enc    "none"
@@ -102,8 +84,10 @@
         .byte   $5f
         .byte   $60
         .text   "abcdefghijklmnopqrstuvwxyz"
-        .enc    "sg_ascii"
-        .text   "{|}~"
+        .byte   $7b
+        .byte   $7c
+        .byte   $7d
+        .byte   $7e
         .byte   $83
         .enc    "screen"
         .text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
@@ -114,8 +98,10 @@
         .byte   $1f
         .byte   $40
         .text   "abcdefghijklmnopqrstuvwxyz"
-        .enc    "sg_ascii"
-        .text   "{|}~"
+        .byte   $7b
+        .byte   $7c
+        .byte   $7d
+        .byte   $7e
         .byte   $84
         .enc    "none"
         .text   "IICSTEP esrever"
@@ -134,6 +120,8 @@
         .enc    "screen"
         .text   "edoC neercS esrever"
         .byte   $84
+        .text   "null-term screen code?@"
+        .byte   $84
         .ptext  "Screen Code with length"
         .byte   $84
         .text   $18,$00,"Screen Code with length2"
@@ -141,7 +129,6 @@
         .shift  "Screen Code DCI"
         .byte   $84
         .byte   $85
-;$00-ff block
         .byte   $00
         .byte   $01
         .byte   $02
@@ -172,11 +159,44 @@
         .byte   $1b
         .byte   $1c
         .byte   $1d
-        .byte   $1e
-        .byte   $1f
-        .enc    "sg_ascii"
-        .text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
-        .text   "XYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+        .enc    "none"
+        .text   $1e,$1f," !",$22,"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmno"
+        .text   "pqrstuvwxyz["
+        .byte   $5c
+        .byte   $5d
+        .byte   $5e
+        .byte   $5f
+        .byte   $60
+        .byte   $61
+        .byte   $62
+        .byte   $63
+        .byte   $64
+        .byte   $65
+        .byte   $66
+        .byte   $67
+        .byte   $68
+        .byte   $69
+        .byte   $6a
+        .byte   $6b
+        .byte   $6c
+        .byte   $6d
+        .byte   $6e
+        .byte   $6f
+        .byte   $70
+        .byte   $71
+        .byte   $72
+        .byte   $73
+        .byte   $74
+        .byte   $75
+        .byte   $76
+        .byte   $77
+        .byte   $78
+        .byte   $79
+        .byte   $7a
+        .byte   $7b
+        .byte   $7c
+        .byte   $7d
+        .byte   $7e
         .byte   $7f
         .byte   $80
         .byte   $81
@@ -199,14 +219,7 @@
         .byte   $92
         .byte   $93
         .byte   $94
-        .byte   $95
-        .byte   $96
-        .byte   $97
-        .byte   $98
-        .byte   $99
-        .byte   $9a
-        .byte   $9b
-        .byte   $9c
+        .text   $95,$96,$97,$98,$99,$9a,$9b,$9c
         .byte   $9d
         .byte   $9e
         .byte   $9f
@@ -243,32 +256,7 @@
         .byte   $be
         .byte   $bf
         .byte   $c0
-        .byte   $c1
-        .byte   $c2
-        .byte   $c3
-        .byte   $c4
-        .byte   $c5
-        .byte   $c6
-        .byte   $c7
-        .byte   $c8
-        .byte   $c9
-        .byte   $ca
-        .byte   $cb
-        .byte   $cc
-        .byte   $cd
-        .byte   $ce
-        .byte   $cf
-        .byte   $d0
-        .byte   $d1
-        .byte   $d2
-        .byte   $d3
-        .byte   $d4
-        .byte   $d5
-        .byte   $d6
-        .byte   $d7
-        .byte   $d8
-        .byte   $d9
-        .byte   $da
+        .text   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .byte   $db
         .byte   $dc
         .byte   $dd
@@ -306,3 +294,6 @@
         .byte   $fd
         .byte   $fe
         .byte   $ff
+
+L144B   rts
+
