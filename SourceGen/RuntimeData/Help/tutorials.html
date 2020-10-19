@@ -397,24 +397,27 @@ wrong here.  This particular file begins with <code>00 20</code>, which
 could be a load address (some C64 binaries look like this).  So let's start
 with that assumption.</p>
 <p>Click on the first line of code at address $1000, and select
-Actions &gt; Remove Analyzer Tags.  The $20 got absorbed into a string.  The
+Actions &gt; Remove Analyzer Tags.  This removes the tag that tells the
+code analyzer to start scanning for instructions at that point.  (By
+default, a code start point is placed on the first byte of a new project.)
+Note the $20 is now part of a string directive.  The
 string is making it hard to manipulate the next few bytes, so let's fix
 that by selecting Edit &gt; Toggle Data Scan (Ctrl+D).  This turns off
-the feature that looks for strings and .FILL regions, so now each
-uncategorized byte is on its own line.</p>
+the feature that automatically generates strings and .FILL directives,
+so now each uncategorized byte is on its own line.</p>
 <p>You could select the first two lines and use Actions &gt; Edit Operand
 to format them as a 16-bit little-endian hex value, but there's a shortcut:
-select only the first line of code, then Actions &gt; Format As Word (Ctrl+W).
+select the first line, then Actions &gt; Format As Word (Ctrl+W).
 It automatically grabbed the following byte and combined them.  Since we
 believe $2000 is the load address for everything that follows, click on
 the line with address $1002, select Actions &gt; Set Address, and
 enter "2000".  With that line still selected, use
 Actions &gt; Tag Address As Code Start Point (Ctrl+H then Ctrl+C) to
-identify it as code.</p>
-<p>That looks better, but it's branching off the bottom of the screen
-(unless you have a really tall screen or small fonts) because of all the
-intervening data.  Use Edit &gt; Toggle Data Scan to turn the
-string-finder back on.</p>
+tell the analyzer to start looking for code there.</p>
+<p>That looks better, but the branch destination is off the bottom of the
+screen (unless you have a really tall screen or small fonts) because of
+all the intervening data.  Use Edit &gt; Toggle Data Scan to turn the
+string-finder back on.  Now it's easier to read.</p>
 
 <p>There are four strings starting at address $2004, each of which is
 followed by $00.  These look like null-terminated strings, so let's make
