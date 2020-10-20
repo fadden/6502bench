@@ -2,9 +2,9 @@
 {
 "_ContentVersion":4,
 "FileDataLength":151,
-"FileDataCrc32":-814797830,
+"FileDataCrc32":-1030691121,
 "ProjectProps":{
-"CpuName":"65816",
+"CpuName":"6502",
 "IncludeUndocumentedInstr":false,
 "TwoByteBrk":false,
 "EntryFlags":32702671,
@@ -154,7 +154,11 @@
 "BackgroundColor":0}},
 
 "Notes":{
-},
+"0":{
+"Text":"Should add a variable that conflicts with an auto-label.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-256}},
 
 "UserLabels":{
 "87":{

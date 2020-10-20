@@ -2,7 +2,7 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Assembler: Merlin 32
-; 65816 version
+; 6502 version
 
         org     $1000
 
@@ -17,8 +17,8 @@ PTR_2   equ     $f8             ;used to test uniqifier later on
         lda     (PROJ_ONE),y
         sta     $03             ;undefined yet
         ldx     $04             ;undefined yet
-        lda     CONST_ZERO,S    ;explicitly set symbol
-        sta     CONST_ONE,S     ;leave as default (hex)
+        lda     #CONST_ZERO
+        ora     #CONST_ONE
 
 ; TABLE - test redefinition of project symbol values
 ]VAR_ZERO equ   $00             ;2b
@@ -30,11 +30,11 @@ PTR_2   equ     $f8             ;used to test uniqifier later on
         lda     (PROJ_ONE),y    ;should become ]VAR_ZERO+1
         sta     $03             ;should become ]VAR_THREE
         ldx     $04             ;undefined yet
-        lda     CONST_ZERO,S    ;should become ]CONST_ZERO
-        sta     CONST_ONE,S     ;leave as default (hex)
+        lda     #CONST_ZERO
+        ora     #CONST_ONE
 
         eor     $00             ;explicitly format as decimal
-        ora     $f0,S           ;explicitly format as decimal
+        ora     $f0             ;explicitly format as decimal
 
 ; TABLE - test redefinition of symbol labels
 ]PROJ_ZERO equ  $10             ;EDIT: rename to PROJ_ZERO
@@ -82,8 +82,8 @@ PTR_2   equ     $f8             ;used to test uniqifier later on
         lda     ]PTR0
         ldx     ]PTR0+1
         ldy     ]PTR0+2         ;should be hex
-        lda     (]CONST0,S),y
-        sta     (]CONST0+3,S),y
+        lda     #]CONST0
+        ora     #]CONST0+3
 
 ; test redefinition of name
 
@@ -145,7 +145,8 @@ PTR_1   nop
 DPCODE  nop
         lda     DPCODE          ;should be DPNOP
         lda     |DPCODE         ;should be DPCODE
-        lda     >DPCODE         ;should be DPCODE
+        nop
+        ora     |DPCODE         ;should be DPCODE
 
 ; Local label test.  ca65 v2.18 erases cheap local label scope when it
 ; encounters a constant or .set.
