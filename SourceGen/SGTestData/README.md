@@ -23,7 +23,7 @@ If the leading number is between 10000 and 19999, inclusive, the test file
 will be loaded as a new project.  A load address of $1000 is assumed.
 The CPU type is determined by the last digit: 0 for 6502, 1 for 65C02,
 2 for 65816, and 3 for W65C02.  Undocumented opcodes are enabled.  As with
-all new projects, the first byte will be hinted as a code entry point.  The
+all new projects, the first byte will be tagged as a code start point.  The
 entry flags are currently set to emulation mode, but tests should not rely
 on that.
 

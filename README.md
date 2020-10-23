@@ -44,7 +44,8 @@ and [visualizations](https://youtu.be/lSvEr5nCHbY) are available.
 #### Features in Detail ####
 
 Analyzer:
-- Support for 6502, 65C02, and 65816, including undocumented opcodes.
+- Support for 6502, 65C02, and 65816, including undocumented opcodes
+  and the W65C02 extensions.
 - Hinting mechanism allows manual identification of code, data, and inline
   data.
 - Editable labels are generated for every branch destination and data target.
@@ -115,7 +116,11 @@ SourceGen does not currently support these.  While you can generate source
 for a binary larger than 64KB, most cross-assemblers will fail to assemble
 it without additional edits.
 
-To learn about other areas for improvement, visit the wiki section for the
+The zero-page argument for the Rockwell BBR/BBS instructions cannot be
+formatted.
+
+To learn about other areas for potential future development, visit the
+wiki section for the
 [current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
 To learn about the past, check the

@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 using PluginCommon;
 
-namespace RuntimeData.Test2011 {
-    public class Test2011 : MarshalByRefObject, IPlugin, IPlugin_InlineJsr {
+namespace RuntimeData.Test20070 {
+    public class Test20070 : MarshalByRefObject, IPlugin, IPlugin_InlineJsr {
         private IApplication mAppRef;
         private byte[] mFileData;
 
         public string Identifier {
             get {
-                return "Test 2011-hinting";
+                return "Test 20070-hinting";
             }
         }
 
@@ -21,7 +21,7 @@ namespace RuntimeData.Test2011 {
             mAppRef = appRef;
             mFileData = fileData;
 
-            mAppRef.DebugLog("Test2011(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
+            mAppRef.DebugLog("Test20070(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
         public void Unprepare() {

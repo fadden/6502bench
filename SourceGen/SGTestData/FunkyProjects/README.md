@@ -12,15 +12,15 @@ prompted to do so).
 The files are:
 
  * Simple.dis65 : A trivial but correct project.
+ * Simple-BadATag.dis65 : An analyzer tag claims to cover a range outside
+   the file bounds.  The program should tell you that it's discarding the
+   bad tags and continuing.
  * Simple-BadCRC.dis65 : The data file CRC stored in the project file does
    not match the data file contents.  The program should tell you this and
    offer to let you locate the correct file.
  * Simple-BadDescLen.dis65 : An operand format descriptor covers a range
    off the end of the file.  THe program should tell you that it's discarding
    the bad format and continuing.
- * Simple-BadHint.dis65 : A hint claims to cover a range outside the file
-   bounds.  The program should tell you that it's discarding the bad hint
-   and continuing.
  * Simple-BadJSON.dis65 : Garbage has been inserted into the JSON data
    stream.  The project load should fail with an appropriate message.
  * Simple-BadLen.dis65 : The data file length stored in the project file
