@@ -1,0 +1,30 @@
+; Copyright 2020 faddenSoft. All Rights Reserved.
+; See the LICENSE.txt file for distribution terms (Apache 2.0).
+
+*SYNOPSIS Symbol set for test 20172-external-symbols
+
+; map 00/Cxxx and 01/Cxxx to 00/Cxxx
+*MULTI_MASK $fef000 $00c000 $000fff
+
+;addr_00     @   $00/c030
+;addr_01     @   $01/c030
+loaddr      @   $c030
+
+; map e0/Cxxx and e1/Cxxx to e0/Cxxx
+*MULTI_MASK $fef000 $e0c000 $000fff
+
+;addr_e0     @   $e0/c030
+;addr_e1     @   $e1/c030
+hiaddr      @   $e0c030
+
+; clear multi-mask
+*MULTI_MASK
+
+addr_02     @   $02/c030
+addr_03     @   $03/c030
+addr_e2     @   $e2/c030
+addr_e3     @   $e3/c030
+
+oth_00      @   $00/1234
+oth_01      @   $01/1234
+oth_02      @   $02/1234

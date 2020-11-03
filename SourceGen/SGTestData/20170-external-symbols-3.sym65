@@ -1,7 +1,7 @@
 ; Copyright 2019 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 
-*SYNOPSIS Symbol set 3 for test 2021-external-symbols
+*SYNOPSIS Symbol set 3 for test 20170-external-symbols
 
 ; override 3rd
 SameName3   @   $2022

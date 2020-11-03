@@ -283,7 +283,7 @@ namespace SourceGen {
                 out string badMaskMsg) {
             Debug.Assert(line.StartsWith(MULTI_MASK_CMD));
             const int MIN = 0;
-            const int MAX = 0x00ffff;
+            const int MAX = 0x00ffffff;
 
             badMaskMsg = Res.Strings.ERR_INVALID_MULTI_MASK;
             multiMask = null;
