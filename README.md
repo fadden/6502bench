@@ -46,8 +46,8 @@ and [visualizations](https://youtu.be/lSvEr5nCHbY) are available.
 Analyzer:
 - Support for 6502, 65C02, and 65816, including undocumented opcodes
   and the W65C02 extensions.
-- Hinting mechanism allows manual identification of code, data, and inline
-  data.
+- Code tagging mechanism allows manual identification of code start/stop
+  points and inline data.
 - Editable labels are generated for every branch destination and data target.
 - Automatic detection and classification of character strings and runs of
   identical bytes.
