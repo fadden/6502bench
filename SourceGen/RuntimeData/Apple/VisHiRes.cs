@@ -283,7 +283,7 @@ namespace RuntimeData.Apple {
             }
 
             int lastOffset = offset + (cellStride * (count - 1)) +
-                rowStride * itemHeight - (colStride - 1) - 1;
+                rowStride * (itemHeight - (colStride - 1) - 1);
             if (lastOffset >= mFileData.Length) {
                 mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
