@@ -64,9 +64,9 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("Height",
                         P_HEIGHT, typeof(int), 1, 1024, 0, 1),
                     new VisParamDescr("Column stride (bytes)",
-                        P_COL_STRIDE, typeof(int), 0, 1024, 0, 0),
+                        P_COL_STRIDE, typeof(int), 0, 4096, 0, 0),
                     new VisParamDescr("Row stride (bytes)",
-                        P_ROW_STRIDE, typeof(int), 0, 1024, 0, 0),
+                        P_ROW_STRIDE, typeof(int), 0, 4096, 0, 0),
                     new VisParamDescr("Color",
                         P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                     new VisParamDescr("First col odd",
@@ -88,13 +88,13 @@ namespace RuntimeData.Apple {
                     new VisParamDescr("Cell height",
                         P_ITEM_HEIGHT, typeof(int), 1, 192, 0, 1),
                     new VisParamDescr("Column stride (bytes)",
-                        P_COL_STRIDE, typeof(int), 0, 1024, 0, 0),
+                        P_COL_STRIDE, typeof(int), 0, 4096, 0, 0),
                     new VisParamDescr("Row stride (bytes)",
-                        P_ROW_STRIDE, typeof(int), 0, 1024, 0, 0),
+                        P_ROW_STRIDE, typeof(int), 0, 4096, 0, 0),
                     new VisParamDescr("Cell stride (bytes)",
                         P_CELL_STRIDE, typeof(int), 0, 4096, 0, 0),
                     new VisParamDescr("Number of items",
-                        P_COUNT, typeof(int), 1, 1024, 0, 64),
+                        P_COUNT, typeof(int), 1, 4096, 0, 64),
                     new VisParamDescr("Color",
                         P_IS_COLOR, typeof(bool), 0, 0, 0, true),
                     new VisParamDescr("First col odd",
@@ -205,11 +205,14 @@ namespace RuntimeData.Apple {
                 return null;
             }
 
-            int lastOffset = offset + rowStride * height - (colStride - 1) - 1;
+            int lastOffset = offset + rowStride * (height - 1) +
+                colStride * (byteWidth - 1);
             if (lastOffset >= mFileData.Length) {
                 mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
                 return null;
+            //} else {
+            //    mAppRef.DebugLog("last offset=+" + lastOffset.ToString("x6"));
             }
 
             VisBitmap8 vb = new VisBitmap8(byteWidth * 7, height);
@@ -283,11 +286,15 @@ namespace RuntimeData.Apple {
             }
 
             int lastOffset = offset + (cellStride * (count - 1)) +
-                rowStride * itemHeight - (colStride - 1) - 1;
+                rowStride * (itemHeight - 1) +
+                colStride * (itemByteWidth - 1);
             if (lastOffset >= mFileData.Length) {
                 mAppRef.ReportError("Bitmap runs off end of file (last offset +" +
                     lastOffset.ToString("x6") + ")");
                 return null;
+            //} else {
+            //    mAppRef.DebugLog("lastOffset=+" + lastOffset.ToString("x6") +
+            //        ", len=" + mFileData.Length.ToString("x6"));
             }
 
             // Set the number of horizontal cells.  For small counts we try to make it square,

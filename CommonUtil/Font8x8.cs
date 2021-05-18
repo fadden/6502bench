@@ -23,6 +23,8 @@ namespace CommonUtil {
     /// so glyphs can be packed tightly.
     /// </summary>
     public static class Font8x8 {
+        private static List<int[]> sBitData;
+
         /// <summary>
         /// Returns an 8-byte array for the specified character.  Each byte represents one
         /// row.  The first byte holds the top row, and the most significant bit in each
@@ -41,6 +43,11 @@ namespace CommonUtil {
             return sBitData[index];
         }
 
+        /// <summary>
+        /// Maps a character value to an index into sFontData.
+        /// </summary>
+        /// <param name="ch">Character to find.</param>
+        /// <returns>Index of character's glyph, or index of REPLACEMENT CHARACTER.</returns>
         private static int MapChar(char ch) {
             if (ch == ' ') {
                 return 1;
@@ -52,8 +59,6 @@ namespace CommonUtil {
                 return 0;
             }
         }
-
-        private static List<int[]> sBitData;
 
         /// <summary>
         /// Converts the easy-to-edit string data into easy-to-process bitmaps.
@@ -170,7 +175,7 @@ namespace CommonUtil {
             "#.....#." +
             ".#####.." +
             "........",
-            // ' '
+            // '7'
             "#######." +
             "......#." +
             ".....#.." +
@@ -179,7 +184,7 @@ namespace CommonUtil {
             "..#....." +
             ".#......" +
             "........",
-            // ' '
+            // '8'
             ".#####.." +
             "#.....#." +
             "#.....#." +
