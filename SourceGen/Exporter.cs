@@ -673,7 +673,7 @@ namespace SourceGen {
                     string trimLabel = Symbol.TrimAndValidateLabel(parts.Label,
                         mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
                         out bool unused2, out bool unused3, out Symbol.LabelAnnotation unusedAnno);
-                    anchorLabel = "<a name=\"" + LABEL_LINK_PREFIX + trimLabel +
+                    anchorLabel = "<a id=\"" + LABEL_LINK_PREFIX + trimLabel +
                         "\">" + parts.Label + "</a>";
                 }
             }
