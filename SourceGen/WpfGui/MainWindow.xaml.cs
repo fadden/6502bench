@@ -94,6 +94,13 @@ namespace SourceGen.WpfGui {
                 // avoid an infinite loop.  We need to be called to keep the toolbar in sync.
                 bool curVal = AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false);
                 if (curVal != value) {
+                    // TODO: this works around a bug where, if you change the column widths and
+                    // then click the toolbar button, the widths revert.  The basic problem is
+                    // that we don't pull the widths into the settings object until we try to
+                    // save the settings file, so ApplyAppSettings() is restoring the values from
+                    // the AppSettings object.  Need to fix this more robustly.
+                    CaptureColumnWidths();
+
                     AppSettings.Global.SetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, value);
                     mMainCtrl.ApplyAppSettings();
                 }
@@ -181,15 +188,16 @@ namespace SourceGen.WpfGui {
             heightDesc.AddValueChanged(leftPanel.RowDefinitions[0], GridSizeChanged);
             heightDesc.AddValueChanged(rightPanel.RowDefinitions[0], GridSizeChanged);
 
-            // Add events that fire when column headers change size.  We want this for
-            // the DataGrids and the main ListView.
+            // Add events that fire when column headers change size.  Set this up for
+            // the DataGrids in the side windows.
             PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(
                 DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
             AddColumnWidthChangeCallback(pd, referencesGrid);
             AddColumnWidthChangeCallback(pd, notesGrid);
             AddColumnWidthChangeCallback(pd, symbolsGrid);
 
-            // Same for the ListView.  cf. https://stackoverflow.com/a/56694219/294248
+            // Also set this up for the column headers in the main ListView.
+            // cf. https://stackoverflow.com/a/56694219/294248
             pd = DependencyPropertyDescriptor.FromProperty(
                 GridViewColumn.WidthProperty, typeof(GridViewColumn));
             AddColumnWidthChangeCallback(pd, (GridView)codeListView.View);
