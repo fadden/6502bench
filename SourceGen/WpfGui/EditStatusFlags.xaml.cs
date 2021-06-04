@@ -38,6 +38,8 @@ namespace SourceGen.WpfGui {
 
         public EditStatusFlags(Window owner, StatusFlags flagValue, bool hasEmuFlag) {
             InitializeComponent();
+            Owner = owner;
+            DataContext = this;
 
             FlagValue = flagValue;
             mHasEmuFlag = hasEmuFlag;
