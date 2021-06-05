@@ -279,7 +279,7 @@ to create labels that serve the same purpose.</p>
 unique.  You can change these attributes when you edit the label.  Up near the
 top of the file, at address $1002, double-click on the label ("L1002").
 Change the label to "LOOP" and click the "non-unique local" button.
-Click OK.</p>
+Click "OK".</p>
 <p>The label at line $1002 (and the operand on line $100B) should now
 be "@LOOP".  By default, '@' is used to indicate non-unique labels,
 though you can change it to a different character in the application
@@ -288,7 +288,7 @@ settings.</p>
 you type "MAIN" or "IS_OK" with Global selected you'll get an error,
 but if you type "@LOOP" it will be accepted.  Note the "non-unique local"
 button is selected automatically if you start a label with '@' (or
-whatever character you have configured).  Click OK.</p>
+whatever character you have configured).  Click "OK".</p>
 <p>You now have two lines with the same label.  The assembly source
 generator may "promote" them to globals or rename them if your chosen
 assembler requires it.</p>
@@ -530,10 +530,10 @@ the very last byte of the inline data, because RTS jumps to address + 1).</p>
 <p>To format the data, we first need to tell SourceGen that there's data
 in line with the code.  Select the line at address $206E, then
 shift-click the line at address $2077.  Use
-Actions > Tag Bytes As Inline Data.</p>
+Actions &gt; Tag Bytes As Inline Data.</p>
 <p>The data turns to single-byte values, and we now see the code
 continuing at address $2078.  We can format the data as a string by
-using Actions > Edit Operand, setting the Character Encoding to "Low or
+using Actions &gt; Edit Operand, setting the Character Encoding to "Low or
 High ASCII", and choosing "null-terminated strings".</p>
 
 <p>That's pretty straightforward, but this could quickly become tedious if
@@ -623,7 +623,7 @@ More code appears, but not much -- if you scroll down you'll see that most
 of the file is still data.  The code at $1d70 searches through a table at
 $1d88 for a match with the contents of the accumulator.  If it finds a match,
 it loads bytes from tables at $1da6 and $1d97, pushes them on the stack,
-and the JMPs away.  This code is pushing a return address onto the stack.
+and then JMPs away.  This code is pushing a return address onto the stack.
 When the code at <code>BAS_CHRGET</code> returns, it'll return to that
 address.  Because of a quirk of the 6502 architecture, the address pushed
 must be the desired address minus one.</p>
@@ -673,7 +673,7 @@ label, apply the label to the low and high bytes in the table, add a
 code start point tag -- but did several of them at once.</p>
 
 <p>We don't want to save this project, so select File &gt; Close.  When
-SourceGen asks for confirmation, click Discard & Continue.</p>
+SourceGen asks for confirmation, click Discard &amp; Continue.</p>
 
 <hr/>
 
@@ -690,15 +690,15 @@ inline data.  We're going to do it a faster way.  For this tutorial,
 start a new project with "Generic 6502", and in the SourceGen
 Examples/Tutorial directory select "Tutorial4".</p>
 <p>We'll need to load scripts from the project directory, so we have to
-save the project.  File > Save, use the default name ("Tutorial4.dis65").</p>
+save the project.  File &gt; Save, use the default name ("Tutorial4.dis65").</p>
 
 <p>Take a look at the disassembly listing.  The file starts with a JSR
 followed by a string that begins with a small number.  This appears to be
 a string with a leading length byte.  We want to load a script that
-can handle that, so use Edit > Project Properties, select the
+can handle that, so use Edit &gt; Project Properties, select the
 Extension Scripts tab, and click "Add Scripts from Project".  The file
 browser opens in the project directory.  Select the file
-"InlineL1String.cs", click Open, then OK.</p>
+"InlineL1String.cs", click "Open", then "OK".</p>
 <p>Nothing happened.  If you look at the script with an editor (and you
 know some C#), you'll see that it's looking for a JSR to a function called
 "PrintInlineL1String".  So let's give it one.</p>
