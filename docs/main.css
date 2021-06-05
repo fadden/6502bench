@@ -1,0 +1,18 @@
+/*  
+ * Overall look and feel.
+ */ 
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0px;
+    margin: 0px;
+}   
+#content {
+    /* top right bottom left */
+    margin: 20px 10px 10px 10px;
+    /*position: relative;*/
+}
+#footer {
+    /* top right bottom left */
+    margin: 20px 10px 10px 10px;
+    /*position: relative;*/
+}
