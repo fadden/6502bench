@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Digging Deeper - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-digging-deeper -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-digging-deeper").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Digging Deeper</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>This tutorial will walk you through some of the fancier things SourceGen
+        can do.  We assume you've already finished the basic features tutorial,
+        and know how to create projects and move around in them.</p>
+        <p>Start a new project.  Select <samp>Generic 6502</samp>.  For the
+        data file, navigate to the Examples directory, then from the Tutorial
+        directory select "Tutorial2".</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-tutorial-top.png" alt="t2-tutorial-top"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Looking at the code list, the first thing you'll notice is that we
+        immediately ran into a
+        <code>BRK</code>, which is a pretty reliable sign that we're not in
+        a code section.  This particular file begins with <code>00 20</code>, which
+        could be a load address (e.g. some C64 binaries look like this).  So let's start
+        with that assumption.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>As discussed in the introductory material, SourceGen separates code
+        from data by tracing all possible execution paths from declared entry
+        points.  The generic profiles mark the first byte of the file as an entry
+        point, but that's wrong here.  We want to change the entry point to
+        be after the 16-bit load address, at offset +000002.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-1000-edit1.png" alt="t2-1000-edit1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Click on the first line of code at address $1000, and select
+        <samp>Actions &gt; Remove Analyzer Tags</samp>
+        (<kbd class="key">Ctrl+H</kbd> <kbd class="key">Ctrl+R</kbd>).
+        This removes the "code entry point" tag.
+        Unfortunately the $20 is still auto-detected as being part of a string
+        directive.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-1000-edit2.png" alt="t2-1000-edit2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The string is making it hard to manipulate the next few bytes,
+        so let's fix that by selecting <samp>Edit &gt; Toggle Data Scan</samp>
+        (<kbd class="key">Ctrl+D</kbd>).  This turns off the feature that
+        automatically generates string and <code>.FILL</code> directives,
+        so now each uncategorized byte is on its own line.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-1000-fmt-word.png" alt="t2-1000-fmt-word"/>
+    </div>
+    <div class="grid-item-text">
+        <p>You could select the first two lines and use
+        <samp>Actions &gt; Edit Operand</samp> to format them as a 16-bit
+        little-endian hex value, but there's a shortcut: select the first
+        line with data (address $1000), then <samp>Actions &gt; Format As Word</samp>
+        (<kbd class="key">Ctrl+W</kbd>).
+        It automatically grabbed the following byte and combined them.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-1000-setcode.png" alt="t2-1000-setcode"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Since we believe $2000 is the load address for everything that follows,
+        click on the line with address $1002, select
+        <samp>Actions &gt; Set Address</samp>, and enter "2000".  With that line
+        still selected, use <samp>Actions &gt; Tag Address As Code Start Point</samp>
+        (<kbd class="key">Ctrl+H</kbd> <kbd class="key">Ctrl+C</kbd>) to
+        tell the analyzer to start looking for code there.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-1000-ready.png" alt="t2-1000-ready"/>
+    </div>
+    <div class="grid-item-text">
+        <p>That looks better, but the branch destination ($203D) is off the bottom of the
+        screen (unless you have a really tall screen or small fonts) because of
+        all the intervening data.  Use <samp>Edit &gt; Toggle Data Scan</samp>
+        (<kbd class="key">Ctrl+D</kbd>)
+        to turn the string-finder back on.  Now it's easier to read.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

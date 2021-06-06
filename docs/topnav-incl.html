@@ -1,0 +1,23 @@
+<!-- top navigation bar contents -->
+<nav>
+    <a id="topnav-home" href="/">HOME</a>
+    <a id="topnav-sgtutorial" href="/sgtutorial">SourceGen Tutorial</a>
+    <a id="topnav-menuicon" href="javascript:void(0);" class="icon" onclick="toggleSidenav()">
+        <i class="fa fa-bars"></i>
+    </a>
+</nav>
+<script>
+    // If page has no sidenav, don't show the sidenav toggle button.
+    if (document.getElementById("sidenav") == undefined) {
+        $("#topnav-menuicon").hide();
+    }
+
+    // Sidenav toggle function.
+    //
+    // Use a jQuery function to toggle the sidenav bar.  The initial state
+    // is undefined / inherited, so it will pop in and out as the screen
+    // resizes around the "large" breakpoint.
+    function toggleSidenav() {
+        $("#sidenav").toggle("fast");
+    }
+</script>

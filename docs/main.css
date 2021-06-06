@@ -1,18 +1,311 @@
-/*  
+/*
+Responsive web design layout for 6502bench site.
+
+All pages define elements with these IDs:
+  masthead (site logo / title)
+  topnav (top items, menu button) (consider "sticky" navbar?); contents
+    reduce to home/menu for XS
+  sidenav (large: float on left; medium/small: "collapsed sidepanel" or toggle)
+  main (80% for large, 100% for medium/small)
+  footer (with prev/next)
+
+"main" section of tutorial pages:
+  2-column grid for large/medium, 1-column grid for small/XS
+*/
+
+* {
+    box-sizing: border-box;
+}
+
+/*
  * Overall look and feel.
- */ 
+ */
+html {
+    /* always show scrollbar, so centered masthead doesn't shift */
+    overflow-y: scroll;
+}
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
     padding: 0px;
     margin: 0px;
-}   
-#content {
-    /* top right bottom left */
-    margin: 20px 10px 10px 10px;
-    /*position: relative;*/
+    background-color: #ffffff;
 }
+/*code {
+    font-size: 125%;
+}*/
+
+/*
+ * Display of keyboard shortcuts in the <kbd> element.
+ */
+kbd.key {
+    border-radius: 5px;
+    padding: 0px 2px 0;
+    border: 1px solid black;
+    background-color: #f7f7f7;
+}
+
+/*
+ * ==========================================================================
+ * Extra small devices (phones) - DEFAULT:
+ * - Main content grid is single-column.
+ * - For top nav, show only the first link and menu icon.
+ */
+
+/*
+ * Masthead.
+ */
+#masthead {
+    /* background-color: #202020;
+    color: #ffffff; */
+    background-color: #e0e0e0;
+    color: #101010;
+    position: relative;
+}
+#masthead .masthead-title {
+    text-align: center;
+    font-size: 4em;
+    font-weight: bolder;
+    padding: 10px;
+    margin: 0px;
+}
+#masthead .masthead-titleZZZ {
+    /* place text */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    bottom: 0;
+    background: rgb(0, 0, 0);   /* fallback color */
+    background: rgba(0, 0, 0, 0.5); /* black, 50% opacity */
+    color: #f1f1f1;
+    width: 100%;
+    padding: 20px;
+}
+#masthead img {
+    /* fill space with image */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    width: 100%;
+    height: auto;
+}
+
+/*
+ * Top navigation bar.  Home on the left, primary links next to it,
+ * sidenav menu icon on the right for smaller screens.
+ */
+#topnav {
+    border-style: none;
+    border-width: thin;
+    padding: 10px;
+    background-color: #5f5f5f;
+}
+
+/* inline-block seems to help keep the text and icon consistent when
+   expanding and collapsing (vs. inline) */
+#topnav a {display:inline-block;}
+#topnav a:not(:first-child) {display:none;}
+#topnav a.icon {
+    float: right;
+    display: block;
+}
+#topnav button {
+    float: right;
+    display: block;
+    color: #ffffff;
+    background-color: #5f5f5f;
+    text-decoration: none;
+    padding: .2em 1em .2em 1em;
+}
+
+#topnav nav {
+    text-align: left;
+    padding: 0px;
+}
+#topnav nav a {
+    color: #ffffff;
+    background-color: #5f5f5f;
+    padding: .2em 1em .2em 1em;
+    text-decoration: none;
+}
+#topnav nav a:hover {
+    border-style: none;
+    color: #ffffff;
+    background-color: #000000;
+}
+
+#topnav nav a.active {
+    color: #8bc349;
+}
+
+/*
+ * Side navigation bar.  Always visible on large screens, pops out when
+ * the hamburger icon is clicked on smaller screens.
+ */
+#sidenav {
+    display: none;
+    width: 180px;
+    margin: 0 8px 0 0;
+    padding: 5px;
+}
+#sidenav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+#sidenav li {
+    padding: 0 0px 1px 0;      /* top right bottom left */
+}
+#sidenav ul ul li {
+    padding: 0 0 1px 10px;      /* top right bottom left */
+}
+#sidenav a {
+    color: #ffffff;
+    display: block;
+    background-color: #5f5f5f;
+    padding: 5px 5px 5px 8px;   /* top right bottom left */
+    text-decoration: none;
+}
+#sidenav a:hover {
+    color: #ffffff;
+    background-color: #000000;
+}
+#sidenav .active a {
+    color: #8bc349;
+}
+
+/*
+ * Main content area.
+ */
+#main {
+    margin: 8px;
+    display: block;
+}
+
+/*
+ * Grid layout for tutorial.  Each grid has two items, forming a {text,image}
+ * pair, either of which may be absent.  The document is a series of grids.
+ *
+ * We can have images come before or after the related text by adjusting
+ * the grid-row values.
+ */
+.grid-container {
+    display: grid;
+    grid-template-rows: auto auto;
+    /*margin-bottom: 4px;*/
+}
+
+.grid-item-text {
+    /* background-color: #e0e0ff; */
+    grid-row: 1;
+}
+.grid-item-text p {
+    /* items in grids don't collapse margins */
+    /* cf. https://stackoverflow.com/q/18963421/294248 */
+    margin-block-start: 0;
+}
+
+.grid-item-image {
+    /* background-color: #ffe0e0; */
+    grid-row: 2;
+    justify-self: center;   /* center narrow images, mostly for 1-col layout */
+}
+.grid-item-image img {
+    width: 100%;
+    height: auto;
+    /* don't expand image beyond original size */
+    max-height: max-content;
+    max-width: max-content;
+    border: 1px solid #e0e0e0;
+    margin-top: 5px;    /* align closer to top of text */
+}
+
+/*
+ * Previous/next buttons.
+ */
+#prevnext {
+    /* clear: both; */
+    margin: 8px;
+    margin-top: 30px;
+    text-align: center;
+}
+
+#prevnext a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+    color: black;
+}
+#prevnext a:hover {
+    background-color: #ddd;
+}
+
+/*
+ * Footer.
+ */
 #footer {
-    /* top right bottom left */
-    margin: 20px 10px 10px 10px;
-    /*position: relative;*/
+    /* top margin gets eaten up by sidenav on short pages */
+    clear: both;
+    margin: 8px;
+}
+
+/*
+ * ==========================================================================
+ * Small devices (portrait tablets, large phones):
+ * - For top nav, want to show all links in the top nav bar, as well
+ *   as the menu icon.
+ */
+@media only screen and (min-width: 600px) {
+    #topnav a:not(:first-child) {display:inline-block;}
+}
+
+/*
+ * ==========================================================================
+ * Medium devices (landscape tablets):
+ * - Switch to two-column layout, text on the left, image on the right.
+ */
+@media only screen and (min-width: 768px) {
+    .grid-container {
+        grid-template-columns: 50% 50%;
+        grid-template-rows: initial;
+        grid-column-gap: 8px;
+    }
+    .grid-item-text {
+        grid-row: 1;
+        grid-column: 1;
+    }
+    .grid-item-image {
+        grid-row: 1;
+        grid-column: 2;
+    }
+}
+
+/*
+ * ==========================================================================
+ * Large devices (laptops/desktops):
+ * - Show sidenav on the side.
+ * - Don't show menu icon in the topnav bar.
+ */
+ @media only screen and (min-width: 992px) {
+    #sidenav {
+        display: block;
+        float: left;
+    }
+
+    #main {
+        /* make room for sidenav */
+        margin-left: 188px;
+    }
+    #main.no-sidenav {
+        /* ...or not */
+        margin-left: 8px;
+    }
+
+    #topnav a.icon {
+        display: none;
+    }
 }

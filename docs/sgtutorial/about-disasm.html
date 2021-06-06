@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>About Disassembly - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-about-disasm -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-about-disasm").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>About Disassembly</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+		<p>Well-written assembly-language source code has meaningful
+        comments and labels, so that humans can read and understand it.
+        For example:</p>
+<pre>
+          .org  $2000
+          sec                         ;set carry
+          ror   A                     ;shift into high bit
+          bmi   CopyData              ;branch always
+
+          .asciiz "first string"
+          .asciiz "another string"
+          .asciiz "string the third"
+          .asciiz "last string"
+
+CopyData  lda   #&lt;addrs               ;get pointer into
+          sta   ptr                   ; address table
+          lda   #&gt;addrs
+          sta   ptr+1
+</pre>
+
+        <p>Computers operate at a much lower level, so a piece of software
+        called an <i>assembler</i> is used to convert the source code to
+        object code that the CPU can execute.
+        Object code looks more like this:</p>
+<pre>
+38 6a 30 39 66 69 72 73 74 20 73 74 72 69 6e 67
+00 61 6e 6f 74 68 65 72 20 73 74 72 69 6e 67 00
+73 74 72 69 6e 67 20 74 68 65 20 74 68 69 72 64
+00 6c 61 73 74 20 73 74 72 69 6e 67 00 a9 63 85
+02 a9 20 85 03
+</pre>
+
+		<p>This arrangement works perfectly well until somebody needs to
+        modify the software and nobody can find the original sources.
+        <i>Disassembly</i> is the act of taking a raw hex
+        dump and converting it to source code.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t0-bad-disasm.png" alt="t0-bad-disasm"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Disassembling a blob of data can be tricky.  A simple
+        disassembler can format instructions, but can't generally tell
+        the difference between instructions and data.  Many 6502 programs
+        intermix code and data freely, so simply dumping everything as
+        an instruction stream can result in sections with nonsensical output.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>One way to separate code from data is to try to execute all
+        possible data paths.  There are a number of reasons why it's difficult
+        or impossible to do this perfectly, but you can get pretty good
+        results by identifying execution entry points and just walking through
+        the code.  When a conditional branch is encountered, both paths are
+        traversed.  When all code has been traced, every byte that hasn't
+        been visited is either
+        data used by the program, or dead space not used by anything.</p>
+
+        <p>The process can be improved by keeping track of the flags in the
+        6502 status register.  For example, in the code fragment shown
+        earlier, <code>BMI</code> conditional branch instruction is used.
+        A simple tracing algorithm would both follow the branch and fall
+        through to the following instruction.  However, the code that precedes
+        the <code>BMI</code> ensures that the branch is always taken, so a
+        clever disassembler would only trace that path.</p>
+
+        <p>(The situation is worse on the 65816, because the length of
+        certain instructions is determined by the values of the processor
+        status flags.)</p>
+
+        <p>Once the instructions and data are separated and formatted
+        nicely, it's still up to a human to figure out what it all means.
+        Comments and meaningful labels are needed to make sense of it.
+        These should be added to the disassembly listing.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t0-sourcegen.png" alt="t0-sourcegen"/>
+    </div>
+    <div class="grid-item-text">
+        <p>SourceGen performs the instruction tracing, and makes it easy
+        to format operands and add labels and comments.
+        When the disassembled code is ready, SourceGen can generate source code
+        for a variety of modern cross-assemblers, and produce HTML listings
+        with embedded graphic visualizations.</p>
+    </div>
+</div>
+
+
+</div> <!-- grid-container -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

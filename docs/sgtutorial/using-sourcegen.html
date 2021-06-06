@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Using SourceGen - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-using-sourcegen -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-using-sourcegen").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Using SourceGen</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>This first section covers the basics of working with SourceGen: how to
+        move around, make edits, generate code, and so on.
+        SourceGen has some unusual features, so it's worth reading through this
+        even if you've used other disassemblers.</p>
+
+        <p>You can't do anything useful until you open an existing project or
+        create a new one, so we'll start there.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>A SourceGen project is always associated with a data file, which
+        holds part or all of the program being disassembled.
+        For simplicity, the project is given the same name as the data file, with
+        <code>.dis65</code> on the end.
+        No part of the data file is included in the project file, so you need
+        to keep both files in the same place.
+        If the program you're disassembling was split into more than one data
+        file, you'll need a separate project file for each.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-fresh-install.png" alt="t1-fresh-install"/>
+    </div>
+    <div class="grid-item-text">
+        <p>To start a new project, launch SourceGen, and click on the
+        "Start New Project" button on
+        the initial screen, or use <samp>File &gt; New</samp>.  This opens the "New Project"
+        window, which lets you specify the target system and data file.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-new-project.png" alt="t1-new-project"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Choosing a target system, such as Apple //e or Commodore 64, will
+        create a project configured with the appropriate CPU and options.
+        If nothing in the list matches the file you want to work on,
+        there are "generic" entries for each
+        of the primary CPU varieties (6502, 65C02, W65C02, and 65816).  If
+        you're unsure, just take your best guess.  It's easy to change things after the
+        project has been started.</p>
+        <p>The area on the right side of the window has a list of the files, scripts,
+        and optional features that will be enabled for the
+        selected system.  The various items here will be explained in more
+        detail later on.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-new-tutorial1.png" alt="t1-new-tutorial1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>For this tutorial, we're going to use "<samp>Generic 6502</samp>",
+        near the bottom of the list.</p>
+        <p>The other thing we need to do here is select the data file to be
+        disassembled.  Click <samp>Select File</samp>, navigate to the <samp>Examples</samp>
+        directory in the SourceGen installation directory, open <samp>Tutorial</samp>,
+        and select <samp>Tutorial1</samp>.
+        <p>Click <samp>OK</samp> to create the project.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The first thing you should do after creating a new project is save it.
+        Some features create or load files from the directory where the project
+        file lives, so we want to establish that.  Use <samp>File &gt; Save</samp>
+        or <kbd class="key">Ctrl+S</kbd> to save it, with the default name
+        (<kbd>Tutorial1.dis65</kbd>), in the directory where the data file lives.</p>
+        <p>(It's okay to create the project in the installation directory.  You
+        don't need to work off of a copy of the data file; SourceGen doesn't modify
+        it, so you don't have to worry about trashing the example data.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-settings.png" alt="t1-settings"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The disassembly display can be tailored to your personal
+		preferences.  Use <samp>Edit &gt; Settings</samp> to open the
+		settings editor.  You can change fonts, upper/lower case, text
+		delimiters, line wrapping, pseudo-op names, and more.  There
+		are "quick set" buttons on some screens that allow you to make the
+		output resemble various popular assemblers.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+		<p>All app settings are local to your system, and do not affect
+		the project in any way.  If somebody else opens the same project,
+		they may see entirely different pseudo-ops and upper-case choices,
+        based on their own personal preferences.
+		(The settings that affect projects are accessed through a
+		different screen, via <samp>Edit &gt; Project Properties</samp>.)</p>
+
+        <p>For now, you can leave everything set to default values.</p>
+    </div>
+</div>
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Generating Code - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-generating-code -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-generating-code").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Generating Code</h2>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-asmgen-dlg.png" alt="t1-asmgen-dlg"/>
+    </div>
+    <div class="grid-item-text">
+        <p>You can generate assembly source code from the disassembled data.
+        Select <samp>File &gt; Assemble</samp> (or hit <kbd class="key">Ctrl+Shift+A</kbd>)
+        to open the source generation and assembly dialog.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-asmgen-preview.png" alt="t1-asmgen-preview"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Pick your favorite assembler from the drop list at the top right,
+        then click <samp>Generate</samp>.  An assembly source file will be generated in the
+        directory where your project files lives, named after a combination of the
+        project name and the assembler name.  A preview of the assembled code
+        appears in the top window.  (It's called a "preview" because it has line numbers
+        added and is cut off after a certain limit.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-asmgen-asmout.png" alt="t1-asmgen-asmout"/>
+    </div>
+    <div class="grid-item-text">
+        <p>If you have a cross-assembler installed and configured, you can run
+        it by clicking <samp>Run Assembler</samp>.  The output from the assembler will appear
+        in the lower window, along with an indication of whether the assembled
+        file matches the original.  (Unless there are bugs in SourceGen or the assembler,
+        it should always match exactly.)</p>
+
+        <p>Click <samp>Close</samp> to close the window.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>If you want to output source code for display on a web site or
+        posting in an online forum, you have a couple of options.  The easiest
+        way to do this is to select the lines and use <samp>Edit &gt; Copy</samp>
+        to copy them to the system clipboard, and then simply paste it elsewhere.
+        The format will match what's on the screen, and will not be tailored to
+        any specific assembler.  The set of columns included in the copy can be
+        configured in the application settings editor, e.g. you can limit it to
+        just the columns typically found in source code.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-export-dlg.png" alt="t1-export-dlg"/>
+    </div>
+    <div class="grid-item-text">
+        <p>To export some or all of the project as text or HTML, use
+        <samp>File &gt; Export</samp> (<kbd class="key">Ctrl+Shift+E</kbd>).
+        This is an easy way to share a disassembly listing with people who
+        don't have access to SourceGen.  The feature is primarily useful in
+        situations where you want to show the disassembly data (Address
+        and Bytes), or want to embed visualizations (explained later).</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-index -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-index").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h1>SourceGen Tutorial</h1>
+
+<p>This tutorial demonstrates many of the features of SourceGen.  It will not
+teach you 6502 assembly language, nor reveal any tricks for working with a
+specific system.</p>
+
+<p>The tutorial is divided into four broad sections:</p>
+<ul>
+    <li><a href="about-disasm.html">About Disassembly</a>: start here if you're
+    unclear how "disassembling" works.  Or is.</li>
+    <li><a href="using-sourcegen.html">Using SourceGen</a>: start here if you're
+    familiar with disassembly.  This shows how to create a project, move around in
+    the file, make edits, and generate assembly source.</li>
+    <li><a href="deeper-subjects.html">Deeper Subjects</a>: some less-common
+    situations you may run into are discussed, along with some advanced features.</li>
+    <li><a href="advanced-topics.html">Advanced Topics</a>: a quick look at
+    some optional but very handy features.</li>
+</ul>
+
+<p>The tutorials work best if you follow along.</p>
+
+<p>The 6502bench software distribution comes with a full manual.  Launch
+SourceGen and hit <kbd class="key">F1</kbd> to access it.
+<!--
+You can see the tip-of-tree documentation via a
+<a href="https://htmlpreview.github.io/?https://github.com/fadden/6502bench/blob/master/SourceGen/RuntimeData/Help/index.html">htmlpreview</a>
+URL.
+-->
+</p>
+
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Inline Data - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-inline-data -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-inline-data").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Inline Data</h2>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-206b.png" alt="t2-206b"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Consider the code at address $206B.  It's a <code>JSR</code> followed by some
+        ASCII text, then a $00 byte, and then what might be code.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-20ab-1.png" alt="t2-20ab-1"/>
+        <br/>
+        ...
+        <br/>
+        <img src="images/t2-20ab-2.png" alt="t2-20ab-2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Double-click on the <code>JSR</code> opcode
+        to jump to $20AB to see the function.  It pulls the
+        call address off the stack, and uses it as a pointer.  When it encounters
+        a zero byte, it breaks out of the loop, pushes the adjusted pointer
+        value back onto the stack, and returns.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>This is an example of "inline data", where a function uses the return
+        address to get a pointer to data.  The return address is adjusted to
+        point past the inline data before returning (technically, it points at
+        the very last byte of the inline data, because
+        <code>RTS</code> jumps to address + 1).</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-inline-tag.png" alt="t2-inline-tag"/>
+    </div>
+    <div class="grid-item-text">
+        <p>To format the data, we first need to tell SourceGen that there's data
+        in line with the code.  Select the line at address $206E, then
+        shift-click the line at address $2077.  Use
+        <samp>Actions &gt; Tag Bytes As Inline Data</samp>
+        (<kbd class="key">Ctrl+H</kbd><kbd class="key">Ctrl+I</kbd>).</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-inline-after.png" alt="t2-inline-after"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The data turns to single-byte values, and we now see the code
+        continuing at address $2078.  We can format the data as a string by
+        using <samp>Actions &gt; Edit Operand</samp>,
+        setting the Character Encoding to <samp>Low or High ASCII</samp>,
+        and selecting <samp>null-terminated strings</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>That's pretty straightforward, but this could quickly become tedious if
+        there were a lot of these.  SourceGen allows you to define scripts to
+        automate common formatting tasks.  This is covered in the "Extension
+        Scripts" tutorial.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

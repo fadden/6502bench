@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Labels &amp; Symbols - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-labels-symbols -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-labels-symbols").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Labels &amp; Symbols</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Suppose you want to call some code at address $1000. CPUs
+        fundamentally deal with numeric values, so the machine code to
+        call it would be <code>JSR $1000</code>.  Humans tend to work better with
+        words, so associating a meaningful symbol with address $1000
+        can greatly improve the readability of the code: something like
+        <code>JSR DrawSprite</code> is far more helpful for human readers.
+        Further, once the code has been disassembled to source code, using symbols
+        instead of fixed addresses makes it easier to alter the program or re-use
+        the code.</p>
+
+        <p>When the target address of instructions like <code>JSR</code> and
+        <code>LDA</code> falls within the scope of the data file, SourceGen classifies
+        the reference as <i>internal</i>, and automatically adds a generic
+        symbolic label (e.g. <code>L1000</code>).  This can be edited if desired.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-edit-label.png" alt="t1-edit-label"/>
+    </div>
+    <div class="grid-item-text">
+        <p>On the line at address $2000, select
+        <samp>Actions &gt; Edit Label</samp>, or double-click on the label
+        "<code>L2000</code>".  Change the label to "<kbd>MAIN</kbd>", and hit
+        <kbd class="key">Enter</kbd>.  The label changes on that line,
+        and on the two lines that refer to address $2000.
+        (If you're not sure which lines refer to address $2000,
+        select line $2000 and check the list in the References window.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Sometimes the target address falls outside the data file.  Examples
+        include calls to ROM routines, use of zero-page storage, and access to
+        memory-mapped I/O locations.  SourceGen classifies these as <i>external</i>,
+        and does not generate a symbol.  In an assembler source file, symbols
+        for these would be expressed as equates (e.g. <code>FOO = $8000</code>),
+        usually at the top of the file or in an "include file".  SourceGen
+        allows you to specify symbols for addresses and numeric constants within
+        the project ("<i>project symbols</i>"), or in a symbol file that can be
+        included in multiple projects ("<i>platform symbols</i>").  The SourceGen
+        distribution includes platform symbol files with ROM addresses for
+        several common systems.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-pre-sym-2000.png" alt="t1-pre-sym-2000"/>
+    </div>
+    <div class="grid-item-text">
+        <p>For an example, consider the code at address $2000, which is
+        <code>LDA $3000</code>.  We want to assign the symbol "INPUT" to address
+        $3000, but we can't do that by editing a label because it's not inside
+        the file bounds.  We can open the project symbol editor from the project
+        properties editor, or we can use a shortcut.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-edit-sym-2000.png" alt="t1-edit-sym-2000"/>
+    </div>
+    <div class="grid-item-text">
+        <p>With the line at $2000 selected, use <samp>Actions &gt; Edit Operand</samp>,
+        or double-click on the value in the <samp>Operand</samp> column
+        ("<code>$3000</code>").  This opens the
+        Edit Instruction Operand dialog.  In the bottom left, click
+        <samp>Create Project Symbol</samp>.  Set the <samp>Label</samp> field to
+        "<kbd>INPUT</kbd>", and
+        click <samp>OK</samp>, then <samp>OK</samp> in the operand editor.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-edit-2000-done.png" alt="t1-edit-2000-done"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The instruction at $2000 now uses the symbol "<samp>INPUT</samp>"
+        as its operand.  If you scroll to the top of the file, you will see a
+        "<code>.EQ</code>" line for the symbol.</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<h4>Numeric v. Symbolic</h4>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>When SourceGen sees a reference to an address, such as the operand of an
+        absolute <code>JSR</code> or <code>LDA</code>, it recognizes it
+        as a <i>numeric reference</i>.  You can edit the instruction's operand
+        to use a symbol instead, changing to a <i>symbolic reference</i>.
+        Sometimes the way these are handled can be confusing.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-before.png" alt="t1-sym-2005-before"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's use the branch statement at $2005 to illustrate the difference.
+        It performs a branch to $2009, which was automatically assigned the
+        label "<samp>L2009</samp>".</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-labeled.png" alt="t1-sym-2005-labeled"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Edit the label at $2009 (double-click on "<samp>L2009</samp>" there),
+        and change it to "<kbd>IN_RANGE</kbd>".  Line $2005 changes to match.
+        This works because SourceGen
+        is auto-formatting line $2005's operand based on the label it finds when it
+        chases the numeric reference to $2009.
+        The Info window shows this as <code>Format (auto): symbol "IN_RANGE"</code>.</p>
+        <p>Use <samp>Edit &gt; Undo</samp> to revert the label change.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-edit.png" alt="t1-sym-2005-edit"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Edit the instruction operand at $2005 (double-click on
+        "<samp>L2009</samp>" there).  Change the format to <samp>Symbol</samp>,
+        and type "<kbd>IN_RANGE</kbd>" in the symbol box.
+        The preview shows <samp>BCC IN_RANGE (?)</samp>, which hints at a
+        problem.  Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-nosym.png" alt="t1-sym-2005-nosym"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Some things changed, but not the things we wanted.  Line $2005 now
+        says <code>BCC $2009</code>, instead of <code>BCC L2009</code>, and the
+        label at $2009 has disappeared entirely.  What went wrong?</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The problem is that we edited the operand to use a symbol that isn't
+        defined anywhere.  Because "IN_RANGE" isn't defined, the operand was
+        given the default format, and displayed as a hex value.
+        The numeric reference to $2009 was replaced by the symbol, and nothing
+        else refers to that address,
+        so SourceGen no longer had any reason to put an auto-generated label
+        on line $2009, which is why that disappeared.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-msg-window.png" alt="t1-sym-2005-msg-window"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The missing symbol is called out in a message window that popped up
+        at the bottom of the code list window.  The message window only appears
+        when there are messages to read.  You can hide the window with the
+        <samp>Hide</samp> button, and make it re-appear with the button in the
+        bottom right of the main window that currently says <samp>1 message</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-explicit.png" alt="t1-sym-2005-explicit"/>
+    </div>
+    <div class="grid-item-text">
+        <p>We can resolve this issue by providing the desired symbol.  As you
+        did earlier, edit the label on line $2009 (double-click in the label column)
+        and set it to "<kbd>IN_RANGE</kbd>".  When you do, the operand on line $2005
+        is updated appropriately.
+        If you select line $2005, the Info window shows the format as
+        <samp>Format: symbol "IN_RANGE"</samp>, indicating that the symbol
+        was set explicitly rather than automatically.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-sym-2005-adjust.png" alt="t1-sym-2005-adjust"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Symbolic references always link to the symbol, even when the symbol
+        doesn't match the numeric reference.  To see this, remove the label from
+        line $2009 by undoing that change with <samp>Edit &gt; Undo</samp>,
+        so the symbol is again undefined.  Now set the label on the following line,
+        $200A, to "<kbd>IN_RANGE</kbd>".</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Line $2005 now says "<code>BCC IN_RANGE-1</code>".  Earlier you set
+        the operand to be a symbolic reference to "<samp>IN_RANGE</samp>", but the symbol
+        doesn't quite match, so SourceGen automatically adjusted the operand by
+        one byte to point to the correct address.  Generally speaking, SourceGen
+        will do its best to use the symbols that you tell it to, and will adjust the
+        symbolic references so that the code assembles correctly.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Edit the label on line $200A, and change it to "<kbd>NIFTY</kbd>".
+        Note how the reference on line $2005 also changed.  This is an example
+        of a "refactoring rename": when you changed the label, SourceGen
+        automatically found everything that referred to it and updated it.
+        If you edit the operand on line $2005, you can confirm that the
+        symbol has changed.</p>
+
+        <p>(If you want to clean this up before continuing on to the next
+        section, put the label back on line $2009.)</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<h4>Non-Unique Label</h4>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+		<p>Most assemblers have a notion of "local" labels, which go out of
+		scope when a non-local (global) label is encountered.  The actual
+		definition of "local" is assembler-specific, but SourceGen allows you
+		to create labels that serve the same purpose.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-local-loop-edit.png" alt="t1-local-loop-edit"/>
+    </div>
+    <div class="grid-item-text">
+		<p>By default, newly-created labels have global scope and must be
+		unique.  You can change these attributes when you edit the label.  Up near the
+		top of the file, at address $1002, double-click on the label ("L1002").
+		Change the label to "<kbd>LOOP</kbd>" and click the "non-unique local"
+        radio button.
+		Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-local-loop1.png" alt="t1-local-loop1"/>
+    </div>
+    <div class="grid-item-text">
+		<p>The label at line $1002 (and the operand on line $100B) should now
+		be "<samp>@LOOP</samp>".  By default, '@' is used to indicate non-unique labels,
+		though you can change it to a different character in the application
+		settings.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-local-loop2.png" alt="t1-local-loop2"/>
+    </div>
+    <div class="grid-item-text">
+		<p>At address $2019, double-click to edit the label ("<samp>L2019</samp>").  If
+		you type "<kbd>MAIN</kbd>" or "<kbd>IS_OK</kbd>" with Global selected you'll
+        get an error, but if you type "<kbd>@LOOP</kbd>" it will be accepted.  Note
+        the "non-unique local" radio
+		button is selected automatically if you start a label with '@' (or
+		whatever character you have configured).  Click <samp>OK</samp>.</p>
+		<p>You now have two lines with the same label.  In some cases the
+        assembly source generator need to may "promote" them to globals, or
+        rename them to make them unique, depending on what your preferred assembler
+        allows.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>String Formatting - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-string-formatting -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-string-formatting").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>String Formatting</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Programs can encode strings, such as human-readable text or
+        filenames, in a variety of ways.  Assemblers generally support one
+        or more of these.  SourceGen allows you to choose from a number of
+        different formats, and automatically generates appropriate assembler
+        directives.</p>
+        <p>The most popular formats are null-terminated (string data followed
+        by $00), length-delimited (first byte or two holds the string length),
+        and dextral character inverted (the high bit on the last byte is
+        flipped).  Sometimes strings are stored in reverse, so the output
+        routine can decrement a register to zero.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-str-null-term-start.png" alt="t2-str-null-term-start"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Looking at the Tutorial2 code, there are four strings starting
+        at address $2004, each of which is followed by $00.  These look like
+        null-terminated strings, so let's make it official.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-str-null-term-bad.png" alt="t2-str-null-term-bad"/>
+    </div>
+    <div class="grid-item-text">
+        <p>First, let's do it wrong.  Click on the line with
+        address $2004 to select it.  Hold the shift key down, then double-click
+        on the operand field of the line with address $2031 (i.e. double-click on
+        the words "<samp>last string</samp>").</p>
+        <p>The Edit Data Operand dialog opens, but the null-terminated strings
+        option is not available.  This is because we didn't include the null byte
+        on the last string.  To be recognized as one of the "special" string types,
+        every selected string must match the expected pattern.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-str-null-term-good.png" alt="t2-str-null-term-good"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Cancel out of the dialog.  Hold the shift key down, and double-click
+        on the operand on line $203C (<code>$00</code>).
+        With all 57 bytes selected,
+        you should now see "<samp>Null-terminated strings (4)</samp>" as an available
+        option (make sure the Character Encoding pop-up is set to
+        "<samp>Low or High ASCII</samp>").  Click on that, then click <samp>OK</samp>.
+        The strings are now shown as <samp>.ZSTR</samp> operands.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

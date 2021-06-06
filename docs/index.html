@@ -1,145 +1,171 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="main.css" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
 
     <title>6502bench Tools</title>
 </head>
 
 <body>
-<div id="content">
-<h1>6502bench SourceGen</h1>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-home -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-home").addClass("active")
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="main" class="no-sidenav">
 
 <p>6502bench is a code development "workbench" for the 65xx family
 of processors, including the 6502, 65C02, and 65802/65816.  It currently
 features one tool, the SourceGen disassembler.</p>
 
+<p><strong>SourceGen</strong> is an industrial-strength disassembler for 6502,
+65C02, and 65816 programs.  It runs on Windows 7 or later.</p>
+
 <p>Quick links:</p>
 <ul>
-  <li>Watch a 9-minute video of
-    <a href="https://youtu.be/dalISyBPQq8">basic product features</a> (from v1.0)</li>
-  <li>See an 8-minute
-    <a href="https://youtu.be/lSvEr5nCHbY">demonstration of visualizers</a>
-    in a disassembly of the Apple II game <i>Space Eggs</i></li>
-  <li>Download source &amp; binaries for the latest version
-    <a href="https://github.com/fadden/6502bench/releases/">from the Releases page</a></li>
-  <li>Check out the
-    <a href="https://github.com/fadden/6502bench/">GitHub project</a></li>
-  <li>SourceGen has been used to disassemble software for the Apple II,
-    NES (Nintendo Entertainment System), Atari 2600 VCS, and coin-op arcade
-    systems.  Visit 6502disassembly.com to see some
-    <a href="https://6502disassembly.com/">disassembly project examples</a>.</li>
+    <li>Watch a 9-minute
+        <a href="https://youtu.be/dalISyBPQq8">product introduction video</a> (from v1.0).</li>
+    <li>See an 8-minute
+        <a href="https://youtu.be/lSvEr5nCHbY">demonstration of visualizers</a>
+        in a disassembly of the Apple II game <i>Space Eggs</i>.</li>
+    <li>Download source &amp; binaries for the latest version
+        <a href="https://github.com/fadden/6502bench/releases/">from the Releases page</a>.</li>
+    <li>Check out the
+        <a href="https://github.com/fadden/6502bench/">GitHub project</a>.</li>
+    <li>SourceGen has been used to disassemble software for the Apple II,
+        NES (Nintendo Entertainment System), Atari 2600 VCS, and coin-op arcade
+        systems.  Visit 6502disassembly.com to see some
+        <a href="https://6502disassembly.com/">disassembly project examples</a>.</li>
 </ul>
 
-<hr/>
-
-<p><strong>SourceGen</strong> is an industrial-strength disassembler for 6502,
-65C02, and 65816 programs.  It runs on Windows 7 or later.  Key features include:</p>
+<p>Key features include:</p>
 <ul>
-  <li>Fully interactive point-and-click GUI. Define labels, set addresses,
-  add comments, and see the results immediately. Add multi-line comments
-  and have them word-wrapped automatically. Create inline visualizations of
-  embedded bitmaps and wireframe data, and define animated sequences.</li>
-  <li>Sophisticated static analysis.  The disassembly engine traces code
-  execution, automatically finding all instructions reachable from a given
-  starting point.  Changes to the processor status flags are tracked,
-  allowing identification of branches that are always/never taken,
-  accurate cycle count listings, and easier analysis of 65816 code with
-  variable-width registers.</li>
-  <li>Easy generation of assembly source code in popular formats (currently
-  64tass, ACME, cc65, and Merlin 32).  Cross-assemblers can be invoked from the GUI to
-  verify correctness.</li>
-  <li>Symbols and constants are provided for ROM and operating system entry
-  points on several popular systems (Apple, Atari, Commodore, others).</li>
-  <li>Project files are designed for sharing and collaboration.</li>
+    <li>Fully interactive point-and-click GUI. Define labels, set addresses,
+    add comments, and see the results immediately. Add multi-line comments
+    and have them word-wrapped automatically. Create inline visualizations of
+    embedded bitmaps and wireframe data, and define animated sequences.</li>
+    <li>Sophisticated static analysis.  The disassembly engine traces code
+    execution, automatically finding all instructions reachable from a given
+    starting point.  Changes to the processor status flags are tracked,
+    allowing identification of branches that are always/never taken,
+    accurate cycle count listings, and easier analysis of 65816 code with
+    variable-width registers.</li>
+    <li>Easy generation of assembly source code in popular formats (currently
+    64tass, ACME, cc65, and Merlin 32).  Cross-assemblers can be invoked from the GUI to
+    verify correctness.</li>
+    <li>Symbols and constants are provided for ROM and operating system entry
+    points on several popular systems (Apple, Atari, Commodore, others).</li>
+    <li>Project files are designed for sharing and collaboration.</li>
 </ul>
 
 <p>
-<a href="images/screenshot-15-mainwin.png"><img border="2" src="images/screenshot-15-mainwin-small.png" alt="Main Window Screenshot" width="320" height="180"/></a>
-<a href="images/screenshot-15-asmwin.png"><img border="2" src="images/screenshot-15-asmwin-small.png" alt="Gen/Asm Dialog Screenshot" width="320" height="180"/></a>
-<a href="images/screenshot-15-vis.png"><img border="2" src="images/screenshot-15-vis-small.png" alt="Gen/Asm Dialog Screenshot" width="320" height="180"/></a>
+    <a href="images/screenshot-15-mainwin.png"><img border="2" src="images/screenshot-15-mainwin-small.png" alt="Main Window Screenshot" width="320" height="180"/></a>
+    <a href="images/screenshot-15-asmwin.png"><img border="2" src="images/screenshot-15-asmwin-small.png" alt="Gen/Asm Dialog Screenshot" width="320" height="180"/></a>
+    <a href="images/screenshot-15-vis.png"><img border="2" src="images/screenshot-15-vis-small.png" alt="Gen/Asm Dialog Screenshot" width="320" height="180"/></a>
 </p>
 
 <h4>Features in Detail:</h4>
 <ul>
-  <li>Analyzer:
-  <ul>
-    <li>Support for 6502, 65C02, and 65816, including undocumented
-    opcodes and the W65C02 extensions.</li>
-    <li>Code tagging mechanism allows manual identification of code start/stop
-    points and inline data.</li>
-    <li>Editable labels are generated for every branch destination and data
-    target.</li>
-    <li>Automatic detection and classification of character strings and runs
-    of identical bytes.</li>
-    <li>Symbol files for ROM entry points, operating system constants, and
-    other platform-specific data are stored in plain text files loaded at runtime.</li>
-    <li>Extension scripts can be defined that automatically reformat code and
-    identify inline data that follows a JSR, JSL, or BRK.</li>
-  </ul></li>
-  <li>User interface:
-  <ul>
-    <li>"Infinite" undo/redo of all operations.</li>
-    <li>Cross-reference tables are generated for every branch and data target
-    address, as well as for external platform symbols.</li>
-    <li>Instruction operand formats (hex, decimal, binary, character, symbol) can
-    be set for individual instructions.  References to nearby symbols are
-    offset, allowing simple expressions like "addr + 1".</li>
-    <li>Data areas can be formatted in various formats, including individual
-    bytes, 16-bit and 24-bit words, addresses, or strings.
-    Multiple character encodings are supported, including ASCII, high ASCII,
-    C64 PETSCII, and C64 screen codes.</li>
-    <li>Zero-page variables can be given different labels at different points
-    in the program.</li>
-    <li>Multi-line comments can be "boxed" for an authentic retro feel.</li>
-    <li>Notes can be added that aren't included in generated output.  These
-    also function as color-coded bookmarks. Very useful for marking up a
-    work in progress.  Similarly, symbols can be marked as uncertain by
-    adding a '?' that is automatically stripped away during code generation.</li>
-    <li>Instruction reference data, such as CPU cycles and flags modified, are
-    shown along with a description of the opcode's function.  Very useful when
-    encountering rarely-used undocumented instructions.</li>
-    <li>Various aspects of the code display can be reconfigured, including
-    upper/lower case, pseudo-opcode naming, and expression formats.  These
-    choices are not part of the project definition, so everyone can view a
-    project according to their own personal preferences.</li>
-  </ul></li>
-  <li>Code generation:
-  <ul>
-    <li>Labels can be global or local. Use non-unique labels like "@Loop"
-    for clarity.  Labels will be promoted from local to global or renamed to
-    be unique as required by each assembler.</li>
-    <li>Symbols may be exported from one project and imported into another
-    to facilitate multi-binary disassembly.</li>
-    <li>Listings can be generated in HTML form for publication on the web. Many
-    aspects of the output format can be configured.  Inline visualizations
-    are exported as GIF or animated GIF.</li>
-  </ul></li>
-  <li>Miscellaneous:
-  <ul>
-    <li>All project data is stored in text formats (primarily JSON).</li>
-    <li>The project file includes nothing from the data file but a CRC.  This
-    may allow the project to be shared without violating copyrights (subject
-    to local laws).</li>
-    <li>Handy tools: file slicer, file concatenator, CPU instruction reference
-    chart, ASCII chart, file hex dump.</li>
-    <li>The OMF converter tool can be used to disassemble Apple IIgs executables.</li>
-  </ul></li>
+    <li>Analyzer:
+        <ul>
+            <li>Support for 6502, 65C02, and 65816, including undocumented
+            opcodes and the W65C02 extensions.</li>
+            <li>Code tagging mechanism allows manual identification of code start/stop
+            points and inline data.</li>
+            <li>Editable labels are generated for every branch destination and data
+            target.</li>
+            <li>Automatic detection and classification of character strings and runs
+            of identical bytes.</li>
+            <li>Symbol files for ROM entry points, operating system constants, and
+            other platform-specific data are stored in plain text files loaded at runtime.</li>
+            <li>Extension scripts can be defined that automatically reformat code and
+            identify inline data that follows a JSR, JSL, or BRK.</li>
+        </ul></li>
+    <li>User interface:
+        <ul>
+            <li>"Infinite" undo/redo of all operations.</li>
+            <li>Cross-reference tables are generated for every branch and data target
+            address, as well as for external platform symbols.</li>
+            <li>Instruction operand formats (hex, decimal, binary, character, symbol) can
+            be set for individual instructions.  References to nearby symbols are
+            offset, allowing simple expressions like "addr + 1".</li>
+            <li>Data areas can be formatted in various formats, including individual
+            bytes, 16-bit and 24-bit words, addresses, or strings.
+            Multiple character encodings are supported, including ASCII, high ASCII,
+            C64 PETSCII, and C64 screen codes.</li>
+            <li>Zero-page variables can be given different labels at different points
+            in the program.</li>
+            <li>Multi-line comments can be "boxed" for an authentic retro feel.</li>
+            <li>Notes can be added that aren't included in generated output.  These
+            also function as color-coded bookmarks. Very useful for marking up a
+            work in progress.  Similarly, symbols can be marked as uncertain by
+            adding a '?' that is automatically stripped away during code generation.</li>
+            <li>Instruction reference data, such as CPU cycles and flags modified, are
+            shown along with a description of the opcode's function.  Very useful when
+            encountering rarely-used undocumented instructions.</li>
+            <li>Various aspects of the code display can be reconfigured, including
+            upper/lower case, pseudo-opcode naming, and expression formats.  These
+            choices are not part of the project definition, so everyone can view a
+            project according to their own personal preferences.</li>
+        </ul></li>
+    <li>Code generation:
+        <ul>
+        <li>Labels can be global or local. Use non-unique labels like "@Loop"
+        for clarity.  Labels will be promoted from local to global or renamed to
+        be unique as required by each assembler.</li>
+        <li>Symbols may be exported from one project and imported into another
+        to facilitate multi-binary disassembly.</li>
+        <li>Listings can be generated in HTML form for publication on the web. Many
+        aspects of the output format can be configured.  Inline visualizations
+        are exported as GIF or animated GIF.</li>
+        </ul></li>
+    <li>Miscellaneous:
+        <ul>
+        <li>All project data is stored in text formats (primarily JSON).</li>
+        <li>The project file includes nothing from the data file but a CRC.  This
+        may allow the project to be shared without violating copyrights (subject
+        to local laws).</li>
+        <li>Handy tools: file slicer, file concatenator, CPU instruction reference
+        chart, ASCII chart, file hex dump.</li>
+        <li>The OMF converter tool can be used to disassemble Apple IIgs executables.</li>
+        </ul></li>
 </ul>
 
-<p>SourceGen is written in C# .NET, using the (free to download) Visual
+<hr/>
+
+<p>6502bench is written in C# .NET, using the (free to download) Visual
 Studio Community 2019 IDE as the primary development environment.
 The user interface uses the Windows Presentation Foundation (WPF) API.
-The full source code for the project is available on GitHub, licensed under Apache 2.0.</p>
+6502bench is an open-source project, licensed under Apache 2.0.
+The full source code is available on
+<a href="https://github.com/fadden/6502bench/">GitHub</a>.</p>
 
 </div>
 
 <div id="footer">
-<hr/>
-<p>Copyright 2020 faddenSoft</p>
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
 </div>
+
 </body>
 </html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Local Variables - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-local-variables -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-local-variables").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Local Variables</h2>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-203d-start.png" alt="t2-203d-start"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's move on to the code at $203D.  It starts by storing a couple of
+        values into direct page address $02/03.  This appears to be setting up a
+        pointer to $2063, which is a data area inside the file.  So let's make it
+        official.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-203d-edit1.png" alt="t2-203d-edit1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line at address $2063, and use
+        <samp>Actions &gt; Edit Label</samp> to
+        give it the label "<kbd>XDATA?</kbd>".  The question mark on the end is there to
+        remind us that we're not entirely sure what this is.  Now edit the
+        operand on line $203D, and set it to the symbol "<kbd>XDATA</kbd>",
+        with the part "low".  The question mark isn't really part of the label,
+        so you don't need to type it here.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-203d-after-edit2.png" alt="t2-203d-after-edit2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Edit the operand on line $2041,
+        and set it to "<kbd>XDATA</kbd>" with the part "high".  (The symbol text box
+        gets focus immediately, so you can start typing the symbol name as soon
+        as the dialog opens; you don't need to click around first.)  If all
+        went well, the operands should now read <code>LDA #&lt;XDATA?</code>
+        and <code>LDA #&gt;XDATA?</code>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-create-ptr-entry.png" alt="t2-create-ptr-entry"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's give the pointer a name.  Select line $203D, and use
+        <samp>Actions &gt; Create Local Variable Table</samp>
+        to create an empty table.  Click <samp>New Symbol</samp> on the right side.
+        Leave the Address button selected.  Set the Label field to "<kbd>PTR1</kbd>",
+        the Value field to "$02", and the width to "2" (it's a 2-byte pointer).
+        Click "OK" to create the entry, and then
+        "OK" to update the table.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-after-ptr-entry.png" alt="t2-after-ptr-entry"/>
+    </div>
+    <div class="grid-item-text">
+        <p>There's now a <code>.VAR</code> statement
+        (similar to a <code>.EQU</code>) above line $203D,
+        and the stores to $02/$03 have changed to
+        "<samp>PTR1</samp>" and "<samp>PTR1+1</samp>".</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-20a7.png" alt="t2-20a7"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Double-click on the <code>JSR</code> opcode on line $2045 to jump to
+        <samp>L20A7</samp>.
+        The code here just loads a value from $3000 into the accumulator
+        and returns, so not much to see here.  Hit the back-arrow in the
+        toolbar to jump back to the <code>JSR</code>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-2048.png" alt="t2-2048"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The next bit of code masks the accumulator so it holds a value between
+        0 and 3, then doubles it and uses it as an index into <code>PTR1</code>.
+        We know <code>PTR1</code> points to <code>XDATA</code>,
+        which looks like it has some 16-bit addresses.  The
+        values loaded are stored in two more zero-page locations, $04-05.
+        Let's make these a pointer as well.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-204e-lv.png" alt="t2-204e-lv"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Double-click the operand on line $204E ("<samp>$04</samp>"),
+        and click <samp>Create Local Variable</samp>.  Set the Label
+        to "<kbd>PTR2</kbd>" and the width to 2.  Click <samp>OK</samp>
+        to create the symbol, then <samp>OK</samp>
+        to close the operand editor, which should still be set to Default format --
+        we didn't actually edit the operand, we just used the operand edit
+        dialog as a convenient way to create a local variable table entry.  All
+        accesses to $04/$05 now use <code>PTR2</code>, and there's a new entry in the local
+        variable table we created earlier.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-2055.png" alt="t2-2055"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The next section of code, at $2055, copies bytes from <code>PTR2</code>
+        to $0400, stopping when it hits a zero byte.
+        It looks like this is copying null-terminated strings.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-fmt-xdata.png" alt="t2-fmt-xdata"/>
+    </div>
+    <div class="grid-item-text">
+        <p>This confirms our idea that <code>XDATA</code> holds 16-bit addresses,
+        so let's format it.  Select lines $2063 to $2066, and
+        <samp>Actions &gt; Edit Operand</samp>.
+        The editor window should say "<samp>8 bytes selected</samp>" at the top.
+        Click the <samp>16-bit words, little-endian</samp> radio button,
+        and then in the <samp>Display As</samp> box, click <samp>Address</samp>.
+        Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-fmt-xdata-done.png" alt="t2-fmt-xdata-done"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The values at <code>XDATA</code> should now be four
+        <code>.DD2</code> 16-bit addresses.
+        If you scroll up, you'll see that the <code>.ZSTR</code> strings
+        near the top now have labels that match the operands in <code>XDATA</code>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Now that we know what <code>XDATA</code> holds, let's rename it.
+        Change the label to <kbd>STRADDR</kbd>.  The symbol parts in the
+        operands at $203D and $2041 update automatically.</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-enable-counts.png" alt="t2-enable-counts"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's take a quick look at the cycle-count feature.  Use
+        <samp>Edit &gt; Settings</samp> to open the app settings panel.
+        In the <samp>Miscellaneous</samp> group on the right side, click the
+        <samp>Show cycle counts for instructions</samp> checkbox, then click
+        <samp>OK</samp>.  (There's also a toolbar button for this.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-show-cycle-counts.png" alt="t2-show-cycle-counts"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Every line with an instruction now has a cycle count on it.  The cycle
+        counts are adjusted for everything SourceGen can figure out.  For example,
+        the <code>BEQ</code> on line $205A shows "2+" cycles, meaning that
+        it takes at least two cycles but might take more.  That's because
+        conditional branches take an
+        extra cycle if the branch is taken.  The <code>BNE</code> on line
+        $2061 shows 3 cycles, because we know that the branch is always
+        taken and doesn't cross a page boundary.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>(If you want to see why it's always taken,
+        look at the value of the 'Z' flag in the "flags" column, which indicates
+        the state of the flags before the instruction on that line is executed.
+        Lower-case 'z' means the zero-flag is clear (0), upper-case 'Z' means it's
+        set (1).  The analyzer determined that the flag was clear for instructions
+        following the <code>BEQ</code> because we're on the branch-not-taken path.
+        The following instruction, <code>ORA #$80</code>, cleared the 'Z' flag and
+        set the 'N' flag, so a <code>BMI</code> would also be an always-taken branch.)</p>
+
+        <p>The cycle-count comments can be added to generated source code as well.</p>
+        <p>If you add an end-of-line comment, it appears after the cycle count.
+        (Try it.)</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

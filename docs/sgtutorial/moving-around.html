@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Moving Around - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-starting-project -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-moving-around").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Moving Around</h2>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-fullscreen.png" alt="t1-fullscreen"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The display is divided into five main areas:</p>
+        <ol>
+            <li>Code listing.  Disassembled code and data is shown here.</li>
+            <li>References.  Shows a list of the places in the file that
+            reference the currently selected line.</li>
+            <li>Notes.  A list of notes in the project.  Useful as bookmarks.</li>
+            <li>Symbols.  All known symbols.  The buttons at the top allow you
+            to filter out symbol types that you're not interested in.</li>
+            <li>Info.  Information about the selected line.  For code, this
+            will have a summary of the instruction.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The center code list window is divided into rows, one per line of disassembled
+        code or data.  This is a standard "list view" control, so you can select a
+        row by left-clicking anywhere in it.  Use <kbd class="key">Ctrl</kbd>+click
+        to toggle the selection on individual lines, and
+        <kbd class="key">Shift</kbd>+click to select a range of lines.  You can move
+        the selection around with the up/down arrow keys and
+        <kbd class="key">PgUp</kbd>/<kbd class="key">PgDn</kbd>.  Scroll the window
+        with the mouse wheel, or by dragging the scroll bar thumb.</p>
+        <p>Each row is divided into nine columns. You can adjust the column
+        widths by clicking and dragging the column dividers in the header</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-all-columns.png" alt="t1-all-columns"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The columns on the right side of the window are similar to
+        what you'd find in assembly source code: label, opcode, operand,
+        comment. The columns on the left are what you'd find in a disassembly
+        (file offset, address, raw bytes), plus some information about
+        processor status flags and line attributes that may or may not be
+        useful to you. If you find any of these distracting, collapse the
+        column.  (Many of the screen shots captured here will omit the
+        "Attr" column for the sake of compactness.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-click-1002.png" alt="t1-click-1002"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Click on the fourth line down, which has address 1002. The
+        line has a label, "L1002", and is performing an indexed load from
+        L1017. Both of these labels were automatically generated, and are
+        named for the address at which they appear. When you clicked on
+        the line, a few things happened:</p>
+        <ul>
+            <li>The line was highlighted in the system selection color (usually
+            blue).</li>
+            <li>Address 1017 and label L1017 were highlighted.  When you select
+            a line with an operand that targets an in-file address, the target
+            address is highlighted.</li>
+            <li>An entry appeared in the References window.  This tells you that the
+            only reference to L1002 is a branch from address $100B.</li>
+            <li>The Info window filled with a bunch of text that describes the
+            line format and some details about the LDA instruction.</li>
+        </ul>
+        <p>Click some other lines, such as address $100B and $1014.  Note how the
+        highlights and contents of other windows change.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-click-1017.png" alt="t1-click-1017"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Click on L1002 again, then double-click on the opcode ("LDA").  The
+        selection jumps to L1017.  When an operand references an in-file address,
+        double-clicking on the opcode will take you to it.  (Double-clicking on
+        the operand itself opens a format editor; more on that later.)</p>
+        <p>With line L1017 selected, double-click on the line that appears in the
+        References window.  Note the selection jumps to L1002.  You can immediately
+        jump to any reference.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-symbol-filters.png" alt="t1-symbol-filters"/>
+    </div>
+    <div class="grid-item-text">
+        <p>At the top of the Symbols window on the right side of the screen is a
+        row of buttons.  Make sure "Auto" and "Addr" are selected.  You should see
+        three labels in the window (L1002, L1014, L1017).  Double-click on "L1014"
+        in the Symbols list.  The selection jumps to the appropriate line.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Select Navigate &gt; Find.  Type "hello", and hit Enter.  The selection will
+        move to address $100E, which is a string that says "hello!".  You can use
+        Navigate &gt; Find Next to try to find the next occurrence (there isn't one).  You
+        can search for any text that appears in the rightmost columns (label, opcode,
+        operand, comment).</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-goto-box.png" alt="t1-goto-box"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select Navigate &gt; Go To.  You can enter a label, address, or file offset.
+        Enter "100b" to set the selection to the line at address $100B.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-toolbar.png" alt="t1-toolbar"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Near the top-left of the SourceGen window is a set of toolbar icons.
+        Click the curly left-pointing arrow, and watch the selection move.  Click
+        it again.  Then click the curly right-arrow a couple of times.  Whenever
+        you jump around in the file by using the Go To feature, or by double-clicking
+        on opcodes or lines in the side windows, the locations are added to a
+        navigation history.  The arrows let you move forward and backward
+        through it.</p>
+    </div>
+</div>
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

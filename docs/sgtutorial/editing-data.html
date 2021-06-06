@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Editing Data - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-editing-data -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-editing-data").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Editing Data</h2>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-stringblob.png" alt="t1-data-stringblob"/>
+    </div>
+    <div class="grid-item-text">
+        <p>There's some string and numeric data down at the bottom of the file.  The
+        final string appears to be multiple strings stuck together.  (You may need
+        to increase the width of the Operand column to see the whole thing.)  Notice
+        that the opcode for the very last line is '+', which means the operand
+        is a continuation of the previous line.  Long data items can span multiple
+        lines, split every 64 characters (including delimiters), but they are
+        still single items: selecting any part selects the whole.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-editdlg-1.png" alt="t1-data-editdlg-1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the last line in the file, then <samp>Actions &gt; Edit Operand</samp>.
+        You'll notice that this dialog is much different from the one you got when editing
+        the operand of an instruction.  At the top it will say "<samp>65 bytes
+        selected</samp>".  You can format this as a single 65-byte string, as 65 individual
+        items, or various things in between.  For now, select <samp>Single bytes</samp>,
+        and then on the right, select <samp>ASCII (low or high) character</samp>.
+        Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-edited-1.png" alt="t1-data-edited-1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Each character is now on its own line.  The selection still spans the
+        same set of addresses.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-editdlg-2.png" alt="t1-data-editdlg-2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select address $203D on its own, then Actions &gt; Edit Label.  Set the
+        label to "<kbd>STR1</kbd>".  Move up a bit and select address $2030, then scroll to
+        the bottom and shift-click address $2070.  Select
+        <samp>Actions &gt; Edit Operand</samp>.
+        At the top it should now say, "<samp>65 bytes selected in 2 groups</samp>".
+        There are two groups because the presence of a label split the data into
+        two separate regions.  From the <samp>Character encoding</samp> pop-up down
+        in the "String" section, make sure <samp>Low or High ASCII</samp> encoding
+        is selected, then select the <samp>Mixed character and non-character</samp>
+        string type and click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-edited-2.png" alt="t1-data-edited-2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>We now have two <code>.STR</code> lines, one for <samp>"string zero  "</samp>,
+        and one with the "<samp>STR1</samp>" label and the rest of the string data.
+        This is okay,
+        but it's not really what we want.  The code at $200B appears to be loading
+        a 16-bit address from data at $2025, so we want to use that if we can.</p>
+        <p>Select <samp>Edit &gt; Undo</samp> three times.  You should be back to the
+        state where there's a single <code>.STR</code> line at the bottom of
+        the file, split across two lines with a '+'.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-string-bytes.png" alt="t1-data-string-bytes"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line at $2026.  This is currently formatted as a string,
+        but that appears to be incorrect, so let's format it as individual bytes
+        instead.  There's an easy way to do that: use
+        <samp>Actions &gt; Toggle Single-Byte Format</samp>
+        (or hit <kbd class="key">Ctrl+B</kbd>).</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The data starting at $2025 appears to be 16-bit little-endian
+        addresses that point into the table of strings, so let's format
+        them appropriately.</p>
+        <!--
+        <p>Double-click the operand column on line $2025 ("$30") to open
+        the operand data format editor.  Because you only have one byte selected,
+        most of the options are disabled.  This won't do what we want, so
+        click <samp>Cancel</samp>.</p>
+        -->
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-editdlg-3.png" alt="t1-data-editdlg-3"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line at $2025, then shift-click the line at $202E.  Right-click
+        and select <samp>Edit Operand</samp>.  If you selected the correct set of bytes,
+        the top line in the dialog should now say, "<samp>10 bytes selected</samp>".
+        Because 10 is a multiple of two, the 16-bit formats are enabled.  It's not a multiple
+        of 3 or 4, so the 24-bit and 32-bit options are not enabled.  Click the
+        <samp>16-bit words, little-endian</samp> radio button, then over to the right,
+        click the <samp>Address</samp> radio button.  Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-data-edited-3.png" alt="t1-data-edited-3"/>
+    </div>
+    <div class="grid-item-text">
+        <p>We just told SourceGen that those 10 bytes are actually five 16-bit numeric
+        references.  SourceGen determined that the addresses are contained in the
+        file, and generated labels for each of them.  Labels only work if they're
+        on their own line, so the long string was automatically split into five
+        separate <code>.STR</code> statements.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Note we didn't explicitly format the string data.  We formatted
+        the addresses at $2025, which placed labels at the start of the strings,
+        but the strings themselves were automatically detected and formatted
+        by SourceGen.  By default, SourceGen looks for ASCII strings, but this
+        can be changed in the project properties.  You can even disable the
+        string auto-detection entirely if you want.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

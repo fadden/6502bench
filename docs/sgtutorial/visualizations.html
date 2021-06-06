@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Visualizations - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-visualizations -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-visualizations").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Visualizations</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Many programs contain a significant amount of graphical data.  This is
+        especially true for games, where the space used for bitmaps is often
+        larger than the space required for the code.  When disassembling a program
+        it can be very helpful to be able to see the contents of the data
+        regions in graphical form.</p>
+
+        <p>Start a new project with the <samp>Generic 6502</samp> profile,
+        and from the SourceGen Tutorial directory select "Tutorial5".
+        We'll need to load an extension script from
+        the project directory, so immediately save the project, using the
+        default name ("Tutorial5.dis65").</p>
+
+        <p>Normally a project will give you some sort of hint as to the data
+        format, e.g. the graphics might be a platform-specific sprite.  For
+        non-standard formats you can glean dimensions from the drawing code.  For
+        the purposes of this tutorial we're just using a simple monochrome bitmap
+        format, with 8 pixels per byte, and we'll know that our images are for
+        a Tic-Tac-Toe game.  The 'X' and the 'O' are 8x8, the game board is 40x40.
+        The bitmaps are sprites with transparency, so pixels are either solid
+        or transparent.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-add-vis.png" alt="t5-add-vis"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The first thing we need to do is load an extension script that can
+        decode this format.  The SourceGen "RuntimeData" directory has a few,
+        but for this tutorial we're using a custom one.  Select
+        <samp>Edit &gt; Project Properties</samp>, select the
+        <samp>Extension Scripts</samp> tab, and click
+        <samp>Add Scripts from Project</samp>.
+        Double-click on "<samp>VisTutorial5.cs</samp>",
+        then click </samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-new-vis.png" alt="t5-new-vis"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The addresses of the three bitmaps are helpfully identified by the
+        load instructions at the top of the file.  Select the line at
+        address $100A, then
+        <samp>Actions &gt; Create/Edit Visualization Set</samp>.  In
+        the window that opens, click <samp>New Visualization</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>We're going to ignore most of what's going on and just focus on the
+        list of parameters at the bottom.  The file offset indicates where in
+        the file the bitmap starts; note this is an offset, not an address
+        (that way, if you change the address, your visualizations don't break).
+        This is followed by the bitmap's width in bytes, and the bitmap's height.
+        Because we have 8 pixels per byte, we're currently showing an 8x1 image.
+        We'll come back to row stride.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-set-height-8.png" alt="t5-set-height-8"/>
+    </div>
+    <div class="grid-item-text">
+        <p>We happen to know (by playing the game and/or reading the fictitious
+        drawing code) that the image is 8x8, so change the value in the
+        <samp>Height</samp>
+        field to 8.  As soon as you do, the preview window shows a big blue 'X'.
+        (The 'X' is 7x7; the last row/column of pixels are transparent so adjacent
+        images don't bump into each other.)</p>
+    </div>
+</div>
+
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-set-height-80.png" alt="t5-set-height-80"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's try doing it wrong.  Add a '0' in the <samp>Height</samp>
+        field to make the
+        height 80.  You can see some additional bitmap data.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-set-height-800.png" alt="t5-set-height-800"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Add another 0 to make it 800.  Now you get
+        a big red X, and the <samp>Height</samp> parameter is shown in red.
+        That's because the maximum value for the height is 512, as shown
+        by "<samp>[1,512]</samp>" on the right.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-addvis1.png" alt="t5-addvis1"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Change it back to 8, and hit <samp>OK</samp>.
+        Hit <samp>OK</samp> in the <samp>Edit Visualization Set</samp>
+        window as well.  You should now see the blue 'X' in the code listing
+        above line $100A.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-addvis2.png" alt="t5-addvis2"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Repeat the process at line $1012: select the line, create a visualization
+        set, create a new visualization.  The height will default to 8 because
+        that's what you used last time, so you shouldn't have to
+        make any changes to the initial values.
+        Click <samp>OK</samp> in both dialogs to close them.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-101a-mess.png" alt="t5-101a-mess"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Repeat the process at line $101A, but this time the image is 40x40
+        rather than 8x8.  Set the width to 5, and the height to 40.  This makes
+        a mess.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-101a-good.png" alt="t5-101a-good"/>
+    </div>
+    <div class="grid-item-text">
+        <p>In this case, the bitmap data is 5 bytes wide, but the data is stored
+        as 8 bytes per row.  This is known as the "stride" or "pitch" of the row.
+        To tell the visualizer to skip the last 3 bytes on each row, set the
+        <samp>Row stride (bytes)</samp> field to 8.
+        Now we have a proper Tic-Tac-Toe grid.
+        Note that it fills the preview window just as the 'X' and 'O' did, even
+        though it's 5x as large.  The preview window scales everything up.  Hit
+        <samp>OK</samp> twice to create the visualization.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-fmt-dense.png" alt="t5-fmt-dense"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's format the bitmap data.  Select line $101A, then shift-click the
+        last line in the file ($1159).  <samp>Actions &gt; Edit Operand</samp>.  Select
+        <samp>Densely-packed bytes</samp>, and click <samp>OK</samp>.
+        This is perhaps a little too
+        dense.  Open the operand editor again, but this time select the
+        densely-packed bytes sub-option <samp>...with a limit</samp>, and set the limit
+        to 8 bytes per line.  Instead of one very dense statement spread across
+        a few lines, you get one line of source code per row of bitmap.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>To change whether or not commas appear between bytes in the operand,
+        open <samp>Edit &gt; Settings</samp>, select the
+        <samp>Display Format</samp> tab, and check
+        <samp>Use comma-separated format for bulk data</samp>.
+        This trades off compactness for ease of reading.</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<h4>Bitmap Animations</h4>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-bitmap-anim-editor.png" alt="t5-bitmap-anim-editor"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Some bitmaps represent individual frames in an animated sequence.
+        You can convert those as well.  Double-click on the blue 'X' to open
+        the visualization set editor, then click "New Bitmap Animation".  This
+        opens the Bitmap Animation Editor.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-xo-anim.png" alt="t5-xo-anim"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's try it with our Tic-Tac-Toe board pieces.  From the list
+        on the left, select the blue 'X' and click <samp>Add</samp>, then
+        click the 'O' and click <samp>Add</samp>.  Below the list, set the
+        frame delay to 500 msec.  Near the bottom, click
+        <samp>Start / Stop</samp>.  This causes the animation to play in a loop.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>You can use the controls to add and remove items, change their order, and change
+        the animation speed.  You can add the grid bitmap to the animation set, but the
+        preview scales the bitmaps up to full size, so it may not look the way
+        you expect.</p>
+        <p>Hit <samp>OK</samp> to save the animation, then
+        <samp>OK</samp> to update the visualization set.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-list-xanim.png" alt="t5-list-xanim"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The code list now shows two entries in the line: the first is the 'X'
+        bitmap, the second is the animation, which is shown as the initial frame
+        with a blue triangle superimposed.  (If you go back into the editor and
+        reverse the order of the frames, the list will show the 'O' instead.)
+        You can have as many bitmaps and animations on a line as you want.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>If you have a lot of bitmaps it can be helpful to give them meaningful
+        names, so that they're easy to identify and sort together in the list.
+        The <samp>Tag</samp> field at the top of the editor windows lets you
+        give things names.  Tags must be unique.</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<h4>Other Notes</h4>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The visualization editor is intended to be very dynamic, showing the
+        results of parameter changes immediately.  This can be helpful if you're
+        not exactly sure what the size or format of a bitmap is.  Just keep
+        tweaking values until it looks right.</p>
+
+        <p>Visualization generators are defined by extension scripts.  If you're
+        disassembling a program with a totally custom way of storing graphics,
+        you can write a totally custom visualizer and distribute it with the
+        project.  Because the file offset is a parameter, you're not limited to
+        placing visualizations at the start of the graphic data -- you can put
+        them on any code or data line.</p>
+
+        <p>Visualizations have no effect on assembly source code generation,
+        but they do appear in code exported to HTML.  Bitmaps are converted to GIF
+        images, and animations become animated GIFs.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t5-wireframe-sample.png" alt="t5-wireframe-sample"/>
+    </div>
+    <div class="grid-item-text">
+        <p>You can also create animated visualizations of wireframe objects
+        (vector graphics, 3D shapes), but that's not covered in this tutorial.</p>
+    </div>
+</div>
+
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>

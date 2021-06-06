@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/main.css"/>
+
+    <title>Address Tables - SourceGen Tutorial</title>
+</head>
+
+<body>
+
+<div id="masthead">
+    <!-- START: /masthead-incl.html -->
+    <script>$("#masthead").load("/masthead-incl.html");</script>
+    <!-- END: /masthead-incl.html -->
+</div>
+    
+<div id="topnav">
+    <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
+    <script>
+        // Load global topnav content, and mark current page active.
+        $("#topnav").load("/topnav-incl.html", function() {
+            $("#topnav-sgtutorial").addClass("active");
+        });
+    </script>
+    <!-- END: /topnav-incl.html -->
+</div>
+
+<div id="sidenav">
+    <!-- START: /sidenav-incl.html active:#sidenav-address-tables -->
+    <script>
+        // Load local sidenav content, and mark current page active.
+        $("#sidenav").load("sidenav-incl.html", function() {
+            $("#sidenav-address-tables").addClass("active");
+        });
+    </script>
+    <!-- END: /sidenav-incl.html -->
+</div>
+
+<div id="main">
+
+<h2>Address Tables</h2>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>Code often contains tables of addresses to code or data.
+        Formatting them one at a time can be tedious, so SourceGen
+        provides a faster way.  For this tutorial we'll start by labeling
+        and tagging a single entry by hand, then do the rest in one shot.</p>
+
+        <p>Start a new project.  Select the Apple //e platform, click
+        <samp>Select File</samp> and navigate to the 6502bench Examples directory.
+        In the "A2-Amper-fdraw" directory, select the file "AMPERFDRAW#061d60"
+        (just ignore the existing .dis65 file).
+        Click <samp>OK</samp> to create the project.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-initial.png" alt="t3-initial"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Not a lot to see here -- just half a dozen lines of loads and stores,
+        then nothing but data.
+        This particular program interfaces with Applesoft BASIC, so we can make it
+        a bit more meaningful by loading an additional platform
+        symbol file.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-a2-props.png" alt="t3-a2-props"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select <samp>Edit &gt; Project Properties</samp>, then the
+        <samp>Symbol Files</samp> tab.  Click <samp>Add Symbol Files from Runtime</samp>.
+        The file browser starts in the "RuntimeData" directory.
+        Open the "Apple" folder, then select "Applesoft.sym65",
+        and click <samp>Open</samp>.  Click <samp>OK</samp> to close
+        the project properties window.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-amperv.png" alt="t3-amperv"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The <code>STA</code> instructions now reference <code>BAS_AMPERV</code>,
+        which is noted as a code vector.  We can see the code setting up a jump
+        (opcode $4C) to $1D70.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-1d70.png" alt="t3-1d70"/>
+    </div>
+    <div class="grid-item-text">
+        <p>As it happens, the start address of the code
+        is $1D60 -- the last four digits of the filename -- so let's make that
+        change.  Double-click the initial <code>.ORG</code> statement,
+        and change it from $2000 to $1D60.  We can now see that $1D70 starts
+        right after this initial chunk of code.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-1d70-code.png" alt="t3-1d70-code"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line with address $1D70, then
+        <samp>Actions &gt; Tag Address As Code Start Point</samp>.
+        More code appears, but not much -- if you scroll down you'll see that most
+        of the file is still data.</p>
+
+        <p>The code at $1D70 searches through a table at
+        $1D88 for a match with the contents of the accumulator.  If it finds a match,
+        it loads bytes from tables at $1DA6 and $1D97, pushes them on the stack,
+        and then <code>JMP</code>s away.  This code is pushing a return address onto the stack.
+        When the code at <code>BAS_CHRGET</code> returns, it'll return to that
+        address.  Because of a quirk of the 6502 architecture, the address pushed
+        must be the desired address minus one.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-1d97.png" alt="t3-1d97"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The first byte in the first address table at $1D97 (which
+        has the auto-label <code>L1D97</code>) is $B4.
+        The first byte in the second table is $1D.  So the first
+        address we want is $1DB4 + 1 = $1DB5.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-1d97-edit.png" alt="t3-1d97-edit.png"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line at $1DB5, and use
+        <samp>Actions &gt; Tag Address As Code Start Point</samp>.
+        More code appears, but again it's only a few lines.  Let's dress this one
+        up a bit.  Set a label on the code at $1DB5 called "<kbd>FUNC</kbd>".
+        Then, at $1D97, edit the data item (double-click on "<samp>$B4</samp>"),
+        click <samp>Single bytes</samp>, then type "<kbd>FUNC</kbd>"
+        (note the text field gets focus immediately, and the radio button
+        automatically switches to <samp>symbolic reference</samp> when you start typing).
+        Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-1d97-post.png" alt="t3-1d97-post.png"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The operand at $1D97 should now say <code>&lt;FUNC-1</code>.
+        Repeat the process at $1DA6, this time clicking the <samp>High</samp>
+        part radio button below the symbol entry text box,
+        to make the operand there say <code>&gt;FUNC</code>.  (If it says
+        <code>&lt;FUNC-152</code>, you forgot to select the high part.)</p>
+
+        <p>We've now changed the first entry in the address table to a
+        symbolic reference, which is helps someone reading the code to
+        understand what is being referenced.  You could repeat these
+        steps (tag as code, set label, change address bytes to symbols)
+        for the remaining items, but there's an easier way.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-format-dialog.png" alt="t3-format-dialog"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Click on the line at address $1D97, then shift-click the line at
+        address $1DA9 (which should be <code>.FILL 12,$1e</code>).  Select
+        <samp>Actions &gt; Format Address Table</samp>.</p>
+
+        <p>Contrary to first impressions, this imposing dialog does not allow you
+        to launch objects into orbit.  There are a variety of common ways to
+        structure an address table, all of which are handled here.  You can
+        configure the various parameters and see the effects as you make
+        each change.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-format-cfg.png" alt="t3-format-cfg"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The message at the top should indicate that there are 30 bytes
+        selected.  In <samp>Address Characteristics</samp>, click the
+        <samp>Parts are split across sub-tables</samp> checkbox and the
+        <samp>Adjusted for RTS/RTL</samp> checkbox.
+        As soon as you do, the first line of the <samp>Generated Addresses</samp>
+        list should show the symbol "<code>FUNC</code>".
+        The rest of the addresses will look like
+        "<code>(+) T1DD0</code>".  The "(+)" means that a label was not found at
+        that location, so a new global label will be generated automatically.</p>
+
+        <p>Down near the bottom, check the
+        <samp>Tag targets as code start points</samp> checkbox.
+        Because we saw the table contents being pushed onto the stack for
+        <code>RTS</code>, we know that they're all code entry points.</p>
+        <p>Click <samp>OK</samp>.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t3-format-done.png" alt="t3-format-done"/>
+    </div>
+    <div class="grid-item-text">
+        <p>The table of address bytes at $1D97 should now all be
+        references to symbols -- 15 low parts followed by 15 high parts.  If you
+        scroll down, you should see nothing but instructions until you get to the
+        last dozen bytes at the end of the file.  (If this isn't the case, use
+        <samp>Edit &gt; Undo</samp>, then work through the steps again.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>The formatter did the same series of actions you went through earlier,
+        <!-- set a
+        label, apply the label to the low and high bytes in the table, add a
+        code start point tag -->
+        but applied them to multiple locations in one shot.  The next step in
+        the disassembly process would be to rename the "Tnnnn" labels to
+        something more meaninful.</p>
+
+        <p>We don't want to save this project, so select
+        <samp>File &gt; Close</samp>.  When SourceGen asks for confirmation,
+        click <samp>Discard &amp; Continue</samp>.</p>
+    </div>
+</div>
+
+
+</div> <!-- #main -->
+
+<div id="prevnext">
+    <a href="#" class="btn-previous">&laquo; Previous</a>
+    <a href="#" class="btn-next">Next &raquo;</a>
+</div>
+
+<div id="footer">
+    <!-- START: /footer-incl.html -->
+    <script>$("#footer").load("/footer-incl.html");</script>
+    <!-- END: /footer-incl.html -->
+</div>
+
+</body>
+</html>
