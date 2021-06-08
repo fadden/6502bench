@@ -135,8 +135,8 @@ automatically in the directory where the .EXE lives.
 
 You need to have Microsoft .NET Framework v4.6.2 or later installed.  Most
 people will already have this.  If SourceGen doesn't seem to want to start,
-download the latest version (currently v4.7.2)
-[directly from Microsoft](https://www.microsoft.com/net/download/dotnet-framework-runtime).
+download the latest version (currently v4.8)
+[directly from Microsoft](https://dotnet.microsoft.com/download/dotnet-framework/net48).
 The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
 the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
 installer was able to get the 4.6.2 installer to work.)
@@ -154,18 +154,14 @@ may ease the transition to a cross-platform GUI API like Avalonia.)
 
 ## Getting Started ##
 
-The best way to get started is by working through the tutorial.  Launch
-SourceGen, hit F1 to open the user manual in your web browser, then look
-for the Tutorial link in the index.  Click it and follow the instructions
-there.  Note this is a "follow along" tutorial, not a "read it" tutorial.
+The best way to get started is by working through the tutorial, available
+on the [web site](https://6502bench.com/sgtutorial/).  I strongly recommend
+doing this, as some aspects of SourceGen are non-obvious.
 
-I strongly recommend doing this.  Some aspects of SourceGen are non-obvious.
-
-The tutorial is one of several examples included in the SourceGen
-distribution.  The other directories contain project and data files for
-completed disassembly projects alongside the original source code, allowing
-a direct comparison between how the code was written and how SourceGen can
-display it.
+Several examples of completed projects are included in the SourceGen
+distribution.  Most of these are alongside the original source code,
+allowing a direct comparison between how the code was written and how
+SourceGen can format and display it.
 
 
 ## About the Code ##

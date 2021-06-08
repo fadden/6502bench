@@ -156,10 +156,10 @@ kbd.key {
     margin: 0;
 }
 #sidenav li {
-    padding: 0 0px 1px 0;      /* top right bottom left */
+    padding: 0 0 1px 0;      /* top right bottom left */
 }
 #sidenav ul ul li {
-    padding: 0 0 1px 10px;      /* top right bottom left */
+    padding: 1px 0 0 10px;      /* top right bottom left */
 }
 #sidenav a {
     color: #ffffff;
