@@ -49,7 +49,7 @@ limitations under the License.
                     BorderThickness="0" HorizontalAlignment="Left"
                     Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                     Click="WebSiteButton_Click"/>
-            <TextBlock Text="Copyright 2020 faddenSoft" Margin="0,0,0,0"/>
+            <TextBlock Text="Copyright 2021 faddenSoft" Margin="0,0,0,0"/>
             <TextBlock Text="Created by Andy McFadden"/>
         </StackPanel>
 
