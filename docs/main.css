@@ -103,13 +103,19 @@ kbd.key {
     background-color: #5f5f5f;
 }
 
-/* inline-block seems to help keep the text and icon consistent when
-   expanding and collapsing (vs. inline) */
+/*
+ * Show nothing but HOME initially.  Expand the set as the screen widens.
+ * inline-block seems to help keep the text and icon consistent when
+ * expanding and collapsing (vs. inline).
+ */
 #topnav a {display:inline-block;}
 #topnav a:not(:first-child) {display:none;}
 #topnav a.icon {
     float: right;
     display: block;
+}
+.no-sidenav #topnav a.icon {
+    display: none;      /* no sidenav, no icon */
 }
 #topnav button {
     float: right;
@@ -300,7 +306,7 @@ kbd.key {
         /* make room for sidenav */
         margin-left: 188px;
     }
-    #main.no-sidenav {
+    .no-sidenav #main {
         /* ...or not */
         margin-left: 8px;
     }
