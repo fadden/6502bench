@@ -178,7 +178,7 @@ kbd.key {
     color: #ffffff;
     background-color: #000000;
 }
-#sidenav .active a {
+#sidenav li.active > a {
     color: #8bc349;
 }
 
