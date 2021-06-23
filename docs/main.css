@@ -107,9 +107,11 @@ kbd.key {
  * Show nothing but HOME initially.  Expand the set as the screen widens.
  * inline-block seems to help keep the text and icon consistent when
  * expanding and collapsing (vs. inline).
+ *
+ * DISABLED -- we don't have all that many items, so it's just annoying.
  */
 #topnav a {display:inline-block;}
-#topnav a:not(:first-child) {display:none;}
+/*#topnav a:not(:first-child) {display:none;}*/
 #topnav a.icon {
     float: right;
     display: block;
