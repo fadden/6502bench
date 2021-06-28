@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- START: /head-incl.html -->
+    <!-- common head elements -->
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
         integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="/main.css"/>
+    <link rel="stylesheet" href="../main.css"/>
+    <!-- END: /head-incl.html -->
 
     <title>Using SourceGen - SourceGen Tutorial</title>
 </head>
@@ -16,64 +19,64 @@
 
 <div id="masthead">
     <!-- START: /masthead-incl.html -->
-<!--<div class="masthead-title" style="background-image: url('images/screenshot-mainwin.png');">-->
-<div class="masthead-title">
-    6502bench
-</div>
+    <!--<div class="masthead-title" style="background-image: url('images/screenshot-mainwin.png');">-->
+    <div class="masthead-title">
+        6502bench
+    </div>
     <!-- END: /masthead-incl.html -->
 </div>
 
 <div id="topnav">
     <!-- START: /topnav-incl.html active:#topnav-sgtutorial -->
-<!-- top navigation bar contents -->
-<nav>
-    <a id="topnav-home" href="/">HOME</a>
-    <a id="topnav-sgtutorial" class="active" href="/sgtutorial">SourceGen Tutorial</a>
-    <a id="topnav-menuicon" href="javascript:void(0);" class="icon" onclick="toggleSidenav()">
-        <i class="fa fa-bars"></i>
-    </a>
-</nav>
-<script>
-    // Sidenav toggle function.
-    //
-    // Use a jQuery function to toggle the sidenav bar.  The initial state
-    // is undefined / inherited, so it will pop in and out as the screen
-    // resizes around the "large" breakpoint.
-    function toggleSidenav() {
-        $("#sidenav").toggle("fast");
-    }
-</script>
+    <!-- top navigation bar contents -->
+    <nav>
+        <a id="topnav-home" href=".././">HOME</a>
+        <a id="topnav-sgtutorial" class="active" href="../sgtutorial">SourceGen Tutorial</a>
+        <a id="topnav-menuicon" href="javascript:void(0);" class="icon" onclick="toggleSidenav()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </nav>
+    <script>
+        // Sidenav toggle function.
+        //
+        // Use a jQuery function to toggle the sidenav bar.  The initial state
+        // is undefined / inherited, so it will pop in and out as the screen
+        // resizes around the "large" breakpoint.
+        function toggleSidenav() {
+            $("#sidenav").toggle("fast");
+        }
+    </script>
     <!-- END: /topnav-incl.html -->
 </div>
 
 <div id="sidenav">
     <!-- START: sidenav-incl.html active:#sidenav-using-sourcegen -->
-<!-- side navigation bar contents -->
-<ul>
-    <li id="sidenav-index"><a href="./">Introduction</a></li>
-    <li id="sidenav-about-disasm"><a href="about-disasm.html">About Disassembly</a></li>
-    <li id="sidenav-using-sourcegen" class="active"><a href="using-sourcegen.html">Using SourceGen</a>
+    <!-- side navigation bar contents -->
     <ul>
-        <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
-        <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
-        <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
-        <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
-        <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
-    </ul></li>
-    <li id="sidenav-digging-deeper"><a href="digging-deeper.html">Digging Deeper</a>
-    <ul>
-        <li id="sidenav-string-formatting"><a href="string-formatting.html">String Formatting</a></li>
-        <li id="sidenav-local-variables"><a href="local-variables.html">Local Variables</a></li>
-        <li id="sidenav-inline-data"><a href="inline-data.html">Inline Data</a></li>
-        <li id="sidenav-odds-ends"><a href="odds-ends.html">Odds &amp; Ends</a></li>
-    </ul></li>
-    <li id="sidenav-advanced-topics"><a href="advanced-topics.html">Advanced Topics</a>
-    <ul>
-        <li id="sidenav-address-tables"><a href="address-tables.html">Address Tables</a></li>
-        <li id="sidenav-extension-scripts"><a href="extension-scripts.html">Extension Scripts</a></li>
-        <li id="sidenav-visualizations"><a href="visualizations.html">Visualizations</a></li>
-    </ul></li>
-</ul>
+        <li id="sidenav-index"><a href="./">Introduction</a></li>
+        <li id="sidenav-about-disasm"><a href="about-disasm.html">About Disassembly</a></li>
+        <li id="sidenav-using-sourcegen" class="active"><a href="using-sourcegen.html">Using SourceGen</a>
+        <ul>
+            <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
+            <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
+            <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
+            <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
+        </ul></li>
+        <li id="sidenav-digging-deeper"><a href="digging-deeper.html">Digging Deeper</a>
+        <ul>
+            <li id="sidenav-string-formatting"><a href="string-formatting.html">String Formatting</a></li>
+            <li id="sidenav-local-variables"><a href="local-variables.html">Local Variables</a></li>
+            <li id="sidenav-inline-data"><a href="inline-data.html">Inline Data</a></li>
+            <li id="sidenav-odds-ends"><a href="odds-ends.html">Odds &amp; Ends</a></li>
+        </ul></li>
+        <li id="sidenav-advanced-topics"><a href="advanced-topics.html">Advanced Topics</a>
+        <ul>
+            <li id="sidenav-address-tables"><a href="address-tables.html">Address Tables</a></li>
+            <li id="sidenav-extension-scripts"><a href="extension-scripts.html">Extension Scripts</a></li>
+            <li id="sidenav-visualizations"><a href="visualizations.html">Visualizations</a></li>
+        </ul></li>
+    </ul>
     <!-- END: sidenav-incl.html -->
 </div>
 
@@ -201,15 +204,15 @@
 
 <div id="footer">
     <!-- START: /footer-incl.html -->
-<hr/>
-<p>Copyright 2021 faddenSoft</p>
-<!-- <p id="screen-size"></p>
-<script>
-    var w = window.innerWidth;
-    var h = window.innerHeight;
-    var x = document.getElementById("screen-size");
-    x.innerHTML = "DEBUG: initial window size " + w + "x" + h;
-</script> -->
+    <hr/>
+    <p>Copyright 2021 faddenSoft</p>
+    <!-- <p id="screen-size"></p>
+    <script>
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var x = document.getElementById("screen-size");
+        x.innerHTML = "DEBUG: initial window size " + w + "x" + h;
+    </script> -->
     <!-- END: /footer-incl.html -->
 </div>
 

@@ -15,7 +15,7 @@
 #
 #
 # Run this from the top-level directory.  Provide a list of all HTML files
-# on the command line.
+# on the command line, using relative paths.
 #
 # If the name of the file to include (specified on the START line) begins
 # with '/', the file will be loaded from the top-level directory, i.e. the
@@ -113,11 +113,24 @@ def copyFromIncl(inFileName, tag, activeId, outFile):
         # file is in same directory as input file
         inclFileName = os.path.join(os.path.dirname(inFileName), tag)
 
+    print("== replacing section with " + inclFileName)
+
     try:
         with open(inclFileName, "r") as inFile:
             fileData = inFile.read()
     except IOError as err:
         raise LocalError(err)
+
+    # Create a relative path for ${ROOT}, which is defined as the directory
+    # in which we're running.
+    # TODO: make this work correctly for absolute paths?
+    if inFileName[0] == '/':
+        raise LocalError("Not a relative path: " + inFileName)
+    tmpPair = os.path.split(inFileName)
+    rootRel = ""
+    while tmpPair[0]:
+        rootRel += "../"
+        tmpPair = os.path.split(tmpPair[0])
 
     if activeId:
         # Given an HTML block like <li id="sidenav-moving-around">, insert
@@ -131,6 +144,13 @@ def copyFromIncl(inFileName, tag, activeId, outFile):
         else:
             fileData = newData
 
+    # Replace ${ROOT} with relative path to root directory.
+    newData = re.sub("\${ROOT}\/", rootRel, fileData)
+    if newData != fileData:
+        #print("== ${ROOT}=" + rootRel + " in " + inclFileName)
+        fileData = newData
+
+    # Copy data to output file.
     outFile.write(fileData)
 
 
