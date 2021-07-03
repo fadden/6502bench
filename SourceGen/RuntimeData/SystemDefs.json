@@ -270,6 +270,22 @@
       }
     },
     {
+      "Name" : "Oric Atmos",
+      "GroupName" : "Oric",
+      "Cpu" : "6502",
+      "Speed" : "1",
+      "Description" : "Oric",
+      "SymbolFiles" : [
+        "RT:Oric/ATMOS-ROM.sym65",
+        "RT:Oric/ATMOS-IO.sym65"
+      ],
+      "ExtensionScripts" : [
+      ],
+      "Parameters" : {
+        "load-address":"0x500"
+      }
+    }, 
+    {
       "Name" : "Generic 6502",
       "GroupName" : "Generic",
       "Cpu" : "6502",
