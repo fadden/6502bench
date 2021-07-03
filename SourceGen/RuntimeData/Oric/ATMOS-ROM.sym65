@@ -1,4 +1,5 @@
 ; 2021 didierv from dmaconcept / CEO Member.
+; Version 1.01 of the file, debugging some errors
 ;
 ; Sources:
 ; Various Oric reference materials found online
@@ -178,7 +179,7 @@ FLAG_INV    @ $0271     ; Cursor invert flag.
 ; $0274,$0275 Cursor timer.
 ; $0276,$0277 Spare counter, also used by WAIT (and printer in V1.0).
 ; $0278,$0279 Address of second line on screen (V1.1).
-: $027A,$027B Address of first line on screen (V1.1).
+; $027A,$027B Address of first line on screen (V1.1).
 ; $027C,$027D Number of characters normally used in screen scrolling (V1.1) = 26 rows x 40 columns = 1,040 bytes (#0410)
 ; $027E Number of rows of text available (V1.1).
 ; $027F-$028F Name of program to be loaded off cassette (V1.1).
@@ -250,7 +251,7 @@ CSAVE 			@ $E909
 CURMOV 			@ $F0FD
 CURSET 			@ $F0C8
 DATA 			@ $CA3C
-DEF FN 			@ $D4BA
+DEF_FN 			@ $D4BA
 DIM 			@ $D17E
 DOKE 			@ $D967
 DRAW 			@ $F110
@@ -303,8 +304,8 @@ TRON 			@ $CD16
 UNTIL 			@ $DAA1
 WAIT 			@ $D958
 ZAP 			@ $FAE1
-! 				@ $CD13
-& 				@ $DADB
+SYMBOL_EXC  	@ $CD13         ; ! pour lancement de commandes
+SYMBOL_AMP		@ $DADB         ; & pour lancement de commandes
 
 ; Some others ROM calls
 
