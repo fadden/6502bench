@@ -1,0 +1,328 @@
+; 2021 didierv from dmaconcept / CEO Member.
+; Version 1.01 of the file, debugging some errors
+;
+; Sources:
+; Various Oric reference materials found online
+; Reference to Oric Atmos Rom 1.1
+; Oric a nu from Fabrice Broche
+; Oric Advanced User Guide from Leycester Whewell
+; The Rom disassembly
+
+*SYNOPSIS Oric Atmos model.
+
+; ---------------------------------------------------------------------------
+; Zero page
+
+BASIC_BUF       @   $35
+CHARGOT         @   $E8
+TXTPTR          @   $E9
+
+PTRSCR			@	$0C 	;	Indirect pointer for screen and Hex number construction area
+PTRSCR_H		@	$0D	
+PTRSCR2			@	$0E		;	Indirect pointer for the screen.
+PTRSCR2_H		@	$0F 
+PTRHRS			@	$10		;	Address of hires cursor.
+PTRHRS_H		@ 	$11
+PTRTXT			@	$12		; 	Address of text cursor.
+PTRTXT_H		@	$13
+WORKSPACE		@	$14		;	Expression workspace.
+FLG_CTRL_C		@	$17 	;	Set to 1 if ‘CTRL C’ pressed, otherwise 0.
+PTRTOKEN		@ 	$18		;	Tokenising pointer.
+PTRTOKEN_H		@	$19
+PRT_READY		@	$1A		;	Jump location to print 'Ready'. ($CBEB)
+PTR_DOKE   		@	$1D		;	Pointer for Doke
+ADR_CURSOR		@	$1F		;	Temp Calculation of cursor address.
+PTR_USR			@	$21		;	Jump location for USR command.
+WK_EXPRESS		@	$24		; 	Expression workspace.
+TMP_STORAGE		@	$27		;	Temporary storage — often for characters being printed.
+FLG_STRING		@	$28		;	Set to #FF if dealing with strings.
+FLG_INTEGER     @   $29     ;   Bit 7 is set if using integer variable.
+FLG_DATA        @   $2A     ;   Garbage collection flag or flag for skipping through DATA statements.
+FLG_INTEGER2    @   $2B     ;   Bit 7 when set inhibits the use of integers. Bit 6 when set indicates STORE or RECALL commands in use.
+FLG_REDO        @   $2C     ;   Zero if REDOing input FROM START.
+
+; $2D Temporary storage for expression evaluator.
+; $2E CTRL O flag. 0 if output to screen enabled.
+; $2F Next byte to/from cassette.
+; $30 Cursor position for Basic printout.
+; $31 ; Screen line width +13
+; $32 8 - multiple line width.
+; $33,$34 Integer values to/from main floating point accumulator.
+; $35-$84 Input buffer. (79 bytes)
+; $35-$48 Name of program required for CLOAD (V1.0 only).
+; $49-$5D Name of program just loaded (V1.0 only).
+; $5F,$60 Start address of data to/from tape (V1.0 only).
+; $61,$62 End address of data to/from tape (V1.0 only).
+; $63 1 when using AUTO else 0 (V1.0 only).
+; $64 0 for Basic, 1 for machine code (V1.0 only).
+; $67 Tape speed - 0 fast, 1 slow (V1.0 only).
+; $85 String block stack pointer.
+; $86,$87 Address of top active string in memory.
+; $88-$90 Temporary string stack.
+; $91,$92 String address pointer.
+; $93,$94 General memory pointer.
+; $95—$99 Work area for multiply and divide routines.
+; $9A,$9B Start of Basic pointer.
+; $9C,$9D End of Basic pointer.
+
+; $9E,$9F End of variables pointer.
+; $A0,$A1 End of Arrays pointer.
+; $A2,$A3 Bottom of string area pointer.
+; $A4,$A5 Work pointer for allocating strings.
+; $A6,$A7 Himem.
+; $A8,$A9 Current line number, top byte is #FF if in command mode.
+; $AA,$AB Previous line number.
+; $AC,$AD Last line start address.
+; $AE,$AF Temporary copy of line number.
+; $B0,$B1 Data pointer.
+; $B2,$B3 Data pointer.
+; $B4,$B5 Last variable name accessed.
+; $B6,$B7 Address of last variable value accessed.
+; $B8,$B9 Destination pointer for temporary assignment of variable.
+; $BA Temporary storage for expression evaluator.
+; $BD—$C1 Temporary storage of floating point accumulator.
+; $BD,$BE FN (function) pointer.
+; $BF,$C0 String pointer.
+; $C2 String pointer size, used in Garbage Collection.
+; $C3—$C5 Jump location to evaluate numeric functions.
+; ($C5 also used as a temporary store of the rounding byte for mathematical operations).
+; $C6—$CA Temporary storage of floating point accumulator.
+; $C7,$C8 Pointer.
+; $C9,$CA Pointer.
+; $CB—$CF Temporary storage of floating point accumulator.
+; $CE,$CF Pointer for STORE.
+; $D0 Exponent of main floating point accumulator.
+; $D1—$D4 Mantissa of main floating point accumulator.
+; $D5 Sign of mantissa for main FPA when unpacked.
+; $D6 Series evaluation counter.
+; $D7 Sign extend byte.
+; $D8 Exponent of work floating point accumulator.
+; $D9—$DC Mantissa of work floating point accumulator.
+; $DD Sign of mantissa for work FPA when unpacked.
+; $DE,$DF String pointer.
+; $DE Holds Exclusive OR of sign byte of both FPAs.
+; $DF Rounding byte for calculations.
+; $E0,$E1 Array and string workspace.
+; $E2—$F2 Routine to step through program to find next non space char. (See $EC9C of disassembly).
+; $E9,$EA Position pointer in program.
+; $FA—$FE Copy of floating point number used by RND.
+; $FF Used in number to string conversion
+
+; ---------------------------------------------------------------------------
+; Page 1 
+
+; ---------------------------------------------------------------------------
+; Page 2
+
+MODEKEY         @ $0209     ; Key status (#38 - Default, #A2 - CONTROL, #A4 - Left SHIFT, #A5 - FUNCTION (Atm), #A7 - Right SHIFT)
+CAPSLOCK        @ $020C     ; $7F = not locked, $FF = locked
+
+PTR_SCR1    @   $0200       ; Pointer for screen handling (adress)
+PTR_SCR2    @   $0202       ; Pointer for screen handling (adress)
+WORK_HIRES  @   $0204       ; 4 Work bytes for Hires routines
+KEY_DOWN    @   $0208       ; Key address if pressed. (#38 if no key pressed)
+KEY_COLUMN  @   $020A       ; Saved key column for repeat.
+KEY_TMP         @   $020B   ; Temporary set by keyboard routines
+KEY_COUNTER     @   $020E   ; Repeat counter for keyboard.
+
+KEY_TMP_REPEAT  @   $0210   ; Temporary store of row of key being tested for repeat.
+KEY_TMP_STROBE  @   $0211   ; Temporary store of keyboard row during strobe routine.
+; $0212 Holds FB code in hires commands.
+PATTERN_DATA    @ $0213     ; Pattern data for hires screen.
+; $0214 Temporary copy of pattern byte for drawing lines.
+; $0215 Holds position of pixel in byte corresponding to position of cursor on hires screen.
+; $0216,$0217 Temporary store of hires X and Y cursor positions.
+; $0218 Temporary store for content of $215.
+HIRES_CURSOR_X  @ $0219     ; Hires cursor X coordinate.
+HIRES_CURSOR_Y  @ $021A     ; Hires cursor Y coordinate.
+HIRES_FLAG      @ $021F     ; 0 - LORES, 1 - HIRES.
+FLAG_48K        @ $0220     ; 0 - 48K Oric, 1 - 16K Oric.
+; $0228-$022A Jump to IRQ routine (V1.0).
+; $022B-$022D Jump to NMI routine (V1.0).
+
+JMP_PR_CHR      @ $0238   ; Jump to PRINT CHARACTER on screen (V1.1).
+JMP_GET_KEY     @ $023B   ; Jump to GET KEY routine (V1.1).
+JMP_PRT_BYT     @ $023E   ; Jump to SEND BYTE TO PRINTER (V1.1).
+; $0241-$0243 Jump to PRINT TO STATUS LINE (V1.1).
+; $0244-$0246 Jump to IRQ routine (V1.1).
+; $0247-$0249 Jump to NMI routine (V1.1).
+; $024A—$024C RTI instruction which can be intercepted by a jump (V1.1)
+
+FLAG_TAPE   @ $024D     ; Tape speed, 0 - fast, 1 - slow (V1.1).
+KB_DELAY    @ $024E     ; Keyboard initial repeat delay (V1.1).
+KB_DELAY_R  @ $024F     ; Keyboard successive repeat delay (V1.1).
+; $0251 Cursor enable in CTRL routines (V1.1).
+; $0252 ELSE pending flag, 1 - On, 0 - Off (V1.1).
+; $0256 Printer width (V1.1).
+; $0257 Screen width (V1.1).
+; $0258 Printer cursor position (V1.1).
+; $0259 Screen cursor position (V1.1).
+; $025A Cassette JOIN flag, off when 0 (V1.1).
+; $025B Cassette VERIFY flag, off when 0 (V1.1).
+; $025C Cassette verify error counter (V1.1) (2 bytes)
+; $025E,$025F Contains 1 byte messages printed to status line.
+; $0260 Used by GRAB command.
+; $0261,$0262 Indirect jump for CTRL character routine.
+; $0263,$0264 Temporary storage.
+; $0265 Current cursor state indicator, 0 - Off, 1 - On.
+; $0268 Cursor row number (Status line is row 0)
+; $0269 Cursor column position.
+; $026A Flag byte
+
+COLOR_PAPER @ $026B     ; Paper colour (+16).
+COLOR_INK   @ $026C     ; Ink colour.
+; $026D,$026E Start address of screen memory.
+; $026F Number of text lines available on screen (V1.0).
+FLAG_CURSOR @ $0270     ; Cursor on/off flag.
+FLAG_INV    @ $0271     ; Cursor invert flag.
+; $0272,$0273 Keyboard timer.
+; $0274,$0275 Cursor timer.
+; $0276,$0277 Spare counter, also used by WAIT (and printer in V1.0).
+; $0278,$0279 Address of second line on screen (V1.1).
+; $027A,$027B Address of first line on screen (V1.1).
+; $027C,$027D Number of characters normally used in screen scrolling (V1.1) = 26 rows x 40 columns = 1,040 bytes (#0410)
+; $027E Number of rows of text available (V1.1).
+; $027F-$028F Name of program to be loaded off cassette (V1.1).
+; $0290-$0292
+; $0293-$02A3 Name of file just loaded off cassette (V1.1).
+; $02A4-$02A8
+; $02A9,$02AA Start address of data to / from cassette (V1.1).
+; $02AB,$02AC End address of data to / from cassette (V1.1).
+FLAG_AUTO   @ $02AD     ; Auto indicator, 0 is off (V1.1).
+FLAG_TYPE   @ $02AE     ; Program type.
+; $02AF Array type, copy of $28 (V1.1).
+; $02B0 Array type, copy of $29 (V1.1).
+; $02B1 Bit 7 set to 1 if format error.
+; $02C0 Screen status (0 – GRAB, 2 – TEXT, 3 – HIRES)
+; $02C1,$02C2 Character set start address in HIRES mode (V1.1).
+; $02C3 Cursor movement in HIRES (0 – Absolute, 1 – Relative)
+KEY_LAST    @ $02DF     ; Latest key from keyboard. Bit 7 set if valid.
+; $02E0 Non zero if error in Sound / Graphics routines.
+PARAM_M1    @ $02E1     ; $02E1-$02E2 First parameter location for the sound and graphics commands, including INK & PAPER. (Lower byte of integer is at $02E1).
+PARAM_M2    @ $02E3     ; $02E3-$02E4 Second parameter location for the sound and graphics commands. (Lower byte of integer is at $02E3).
+PARAM_M3    @ $02E5     ; $02E5-$02E6 Third parameter location for the sound and graphics commands. (Lower byte of integer is at $02E5).
+PARAM_M4    @ $027E     ; $02E7,$02E8 Fourth parameter location which is only used by MUSIC and PLAY. (Lower byte of integer is at $02E7).
+; $02F1 Bit 7 set to 1 if printer enabled.
+; $02F2 Bit 7 is EDIT flag, set to 1 when on.
+; $02F4 TRACE flag, set if bit 7 is set.
+; $02F5,$02F6 Indirect jump for '!' routine.
+; $02F8 Temporary row indicator for PLOT.
+; $02FB-$02FD Jump to '&' routine.
+
+PATTERN         @ $0213
+IRQVec          @ $0245        	; "fast" interrupt vector
+TAP_SPEED		@ $024D			; Tape speed (0=fast, 1= slow)
+TAP_NAME		@ $024F			; Tape name max 16 car, terminated by 0
+TAP_JOINFLAG    @ $025A        	; 0 = don't joiu, $4A = join BASIC programs
+TAP_VERIFYFLAG  @ $025B        	; 0 = load, 1 = verify
+TAP_ERRORS		@ $025C			; count of verify errors (2 bytes)
+CURS_Y          @ $0268
+CURS_X          @ $0269
+STATUS          @ $026A
+BACKGRND        @ $026B
+FOREGRND        @ $026C
+TIMER3          @ $0276
+CFILE_NAME      @ $027F
+CFOUND_NAME     @ $0293
+FILESTART       @ $02A9
+FILEEND         @ $02AB
+TAP_AUTORUN     @ $02AD        	; $00 = only load, $C7 = autorun
+TAP_LANGFLAG    @ $02AE        	; $00 = BASIC, $80 = machine code
+TAP_LOADERR     @ $02B1			; 0 = No errors during loading
+KEYBUF          @ $02DF
+PARMERR         @ $02E0
+PARAM1          @ $02E1        	; & $02E2 
+PARAM2          @ $02E3        	; & $02E4 
+PARAM3          @ $02E5        	; & $02E6 
+PARAM4			@ $02E7			; & $02E8 
+BANGVEC         @ $02F5
+
+; Rom 1.1 Entries
+; Routines call from Basic
+
+CALL 			@ $E946
+CHAR 			@ $F12D
+CIRCLE 			@ $F37F
+CLEAR 			@ $C70D
+CLOAD 			@ $E85B
+CONT 			@ $C9AD
+CLS 			@ $CCCE         ; Clear Screen
+CSAVE 			@ $E909
+CURMOV 			@ $F0FD
+CURSET 			@ $F0C8
+DATA 			@ $CA3C
+DEF_FN 			@ $D4BA
+DIM 			@ $D17E
+DOKE 			@ $D967
+DRAW 			@ $F110
+EDIT 			@ $C692
+END 			@ $C973
+EXPLODE 		@ $FACB
+FILL 			@ $F2C8
+FOR 			@ $C855
+GET 			@ $CD46
+GOSUB 			@ $C9C8
+GOTO 			@ $C9E5
+GRAB 			@ $E8E7
+HIMEM 			@ $EBCE
+HIRES 			@ $EC33         ; Mode Hires
+IF 				@ $CA70
+INK 			@ $F21D
+INPUT 			@ $CD55
+LET 			@ $CB1C
+LIST 			@ $C748
+LLIST 			@ $C7FD
+LORES 			@ $D9DE
+LPRINT 			@ $C809
+MUSIC 			@ $FC18
+NEW 			@ $C6EE
+ON 				@ $CAC2
+PAPER 			@ $F204
+PATTERN 		@ $F11D
+PING 			@ $FA9F
+PLAY 			@ $FBD0
+PLOT 			@ $DA51
+POINT 			@ $F1C8
+POKE 			@ $D94F
+POP 			@ $CA12
+PRINT 			@ $CBAB
+PULL 			@ $DAA1
+READ 			@ $CD89
+RECALL 			@ $E9D1
+RELEASE 		@ $EC0C
+REM 			@ $CA99
+RESTORE 		@ $C952
+RETURN 			@ $CA12
+RUN 			@ $C9BD
+SHOOT 			@ $FAB5
+SOUND 			@ $FD40
+STOP 			@ $C971
+STORE 			@ $E987
+TEXT 			@ $EC21         ; Mode Text
+TROFF 			@ $CD10
+TRON 			@ $CD16
+UNTIL 			@ $DAA1
+WAIT 			@ $D958
+ZAP 			@ $FAE1
+SYMBOL_EXC  	@ $CD13         ; ! pour lancement de commandes
+SYMBOL_AMP		@ $DADB         ; & pour lancement de commandes
+
+; Some others ROM calls
+
+ROM_GETLINE         @ $C592
+ROM_INK             @ $F210
+ROM_VDU             @ $F77C     ; Print char X
+ROM_STOUT           @ $F865     ; Print message on A,Y and position X (must be 0 at end)
+ROM_GTORKB          @ $EB78     ; Last key pressed in X. IRQ must be on
+ROM_INTER_OFF		@ $E76A
+ROM_INTER_ON		@ $E93D
+
+ROM_TICK            @ $FB14     ; Sound used for key pressed
+ROM_TOCK            @ $FB2A     ; Sound used for CTRL key pressed
+ROM_PLAY            @ $FBD0     ; Same as basic call PLAY
+ROM_MUSIC           @ $FC18     ; Same as basic call MUSIC
+ROM_SOUND           @ $FB40     ; Same as basic call SOUND
+
+COLDSTART           @ $F88F     ; Full init
+WARMSTART           @ $F8B2     ; Reset
+ROM_INIT            @ $ECCC     ; Init var page 0 and 2

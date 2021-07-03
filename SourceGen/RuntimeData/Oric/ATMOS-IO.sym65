@@ -1,0 +1,65 @@
+; 2021 didierv from dmaconcept / CEO member. 
+; Version 1.00 of the file
+;
+; Sources:
+; Various Oric reference materials found online
+; Reference to Oric Atmos Rom 1.1
+; Oric a nu from Fabrice Broche
+; Oric Advanced User Guide from Leycester Whewell
+
+*SYNOPSIS Symbols from the I/O area, on Oric Atmos model.
+
+; ---------------------------------------------------------------------------
+; General structure
+
+PTR_BASIC       @ $0501         ; Début de la zone Basic (1281)
+PTR_TXT_CHR1    @ $B400         ; Adresse du charset en mode Txt (46080)
+PTR_TXT_CHR2    @ $B800         ; Adresse du charset alt en mode Txt (47104)
+PTR_TXT         @ $BB80         ; 1st byte text screen (48000)
+PTR_HR_CHR1     @ $9800         ; Adresse du charset en mode Hires (38912)
+PTR_HR_CHR2     @ $9B00         ; Adresse du charset alt en mode Hires (39680)
+PRR_HIRES		@ $A000         ; 1st byte hires screen 200*40 + 3 text lines (40960)
+
+; ---------------------------------------------------------------------------
+; Zero page
+
+; ---------------------------------------------------------------------------
+; Page 1 
+
+; ---------------------------------------------------------------------------
+; Page 2
+
+; ---------------------------------------------------------------------------
+; Page 3 I/O Locations
+; 6522
+; Versatile Interface Adapter
+
+PRB     		@ $300			; Port Register B
+PRA				@ $301			; Port Register A with handcheck
+DDRB			@ $302			; Data Direction Register B
+DDRA			@ $303			; Data Direction Register A
+T1				@ $304			; OMS Timer 1
+T1L 			@ $305			; OPS Timer 1 Latch
+T1TIMER			@ $306
+T1TIMERL		@ $307
+T2				@ $308			; OMS Timer 2
+T2L				@ $309          ; OPS Timer 2 Latch
+SR				@ $30A			; Shift Register
+ACR				@ $30B			; Auxiliary Control Register
+PCR				@ $30C			; Peripheral Control Register CA1, CA2, CB1 et CB2
+IFR				@ $30D			; Interrupt Flags Register
+IER				@ $30E			; Interrupt Enable Register
+PRA2			@ $30F			; Port Register A without handshaking
+
+; ---------------------------------------------------------------------------
+; 6502 Vectors
+
+NMIVECT     @ $FFFA             ; $0247
+NMIVECTH    @ $FFFB
+RSTVECT     @ $FFFC             ; $F88F
+RSTVECTH    @ $FFFD
+IRQVECT     @ $FFFE             ; $0244
+IRQVECTH    @ $FFFF
+
+
+
