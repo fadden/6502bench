@@ -44,7 +44,7 @@ namespace SourceGen {
         ///   NAME {@,=,<,>} VALUE [& MASK] [WIDTH] [;COMMENT]
         ///
         /// Regex output groups are:
-        /// 1. NAME
+        /// 1. NAME (2+ alphanumeric or underscore, cannot start with number)
         /// 2. type/direction char
         /// 3. VALUE (can be any non-whitespace)
         /// 4. optional: WIDTH (can be any non-whitespace)
@@ -54,7 +54,7 @@ namespace SourceGen {
         /// If you want to make sense of this, I highly recommend https://regex101.com/ .
         /// </remarks>
         private const string SYMBOL_PATTERN =
-            @"^([A-Za-z0-9_]+)\s*([@=<>])\s*([^\s;]+)\s*([^\s;]+)?\s*(;.*)?$";
+            @"^([A-Za-z_][A-Za-z0-9_]+)\s*([@=<>])\s*([^\s;]+)\s*([^\s;]+)?\s*(;.*)?$";
         private static Regex sNameValueRegex = new Regex(SYMBOL_PATTERN);
         private const int GROUP_NAME = 1;
         private const int GROUP_TYPE = 2;
@@ -63,7 +63,8 @@ namespace SourceGen {
         private const int GROUP_COMMENT = 5;
 
         /// <summary>
-        /// Regex pattern for mask definition in platform symbol file.
+        /// Regex pattern for mask definition in platform symbol file.  This mostly just
+        /// performs tokenization.  Syntax and validity checking is done later.
         ///
         /// Looks like:
         ///   CMP_MASK CMP_VALUE ADDR_MASK [;COMMENT]
@@ -158,6 +159,8 @@ namespace SourceGen {
                 } else {
                     MatchCollection matches = sNameValueRegex.Matches(line);
                     if (matches.Count == 1) {
+                        // Our label regex is the same as Asm65.Label's definition; no need
+                        // for further validation on the label.
                         string label = matches[0].Groups[GROUP_NAME].Value;
                         char typeAndDir = matches[0].Groups[GROUP_TYPE].Value[0];
                         bool isConst = (typeAndDir == '=');
