@@ -24,6 +24,8 @@
 #
 # (Tested with Python v3.8.5)
 #
+# Copyright 2021 Andy McFadden.
+#
 
 import filecmp
 import os.path
@@ -104,33 +106,63 @@ def editFile(inFileName, outFileName):
 
 
 def copyFromIncl(inFileName, tag, activeId, outFile):
-    """ Copy incl file, substituting active ID if appropriate. """
+    """
+    Copy include file in, substituting active ID and path variables when
+    appropriate.
+      inFileName: relative path to file we're working on
+      tag: name of file to include (absolute or relative to inFileName)
+      activeID: ID to mark as active
+      outFile: file object to write data to
+    """
 
+    inFileDir = os.path.dirname(inFileName)
     if tag[0] == '/':
         # file is in top-level (current) directory
         inclFileName = tag[1:]
     else:
         # file is in same directory as input file
-        inclFileName = os.path.join(os.path.dirname(inFileName), tag)
+        inclFileName = os.path.join(inFileDir, tag)
 
     print("== replacing section with " + inclFileName)
 
     try:
-        with open(inclFileName, "r") as inFile:
+        # Use utf-8-sig to skip over Byte Order Marks (BOM).
+        with open(inclFileName, "r", encoding="utf-8-sig") as inFile:
             fileData = inFile.read()
     except IOError as err:
         raise LocalError(err)
 
     # Create a relative path for ${ROOT}, which is defined as the directory
-    # in which we're running.
+    # in which we're running.  The path gets us from the input file's
+    # directory back to the root.
     # TODO: make this work correctly for absolute paths?
     if inFileName[0] == '/':
         raise LocalError("Not a relative path: " + inFileName)
     tmpPair = os.path.split(inFileName)
     rootRel = ""
     while tmpPair[0]:
-        rootRel += "../"
+        if tmpPair[0] != ".":
+            # ignore leading "./", which you get from find+xargs
+            rootRel += "../"
         tmpPair = os.path.split(tmpPair[0])
+
+    # TODO: consider having a ${LOCAL} ...
+    # Create a relative path for ${LOCAL}, which is defined as the directory
+    # from which the input file was loaded.  The path gets us from the input
+    # file's directory back to the included file's directory
+    #
+    # Suppose we're working on foo/bar/index.html, which includes
+    # ../incl-sidenav.html (i.e. foo/incl-sidenav.html).  We want references
+    # to map ${LOCAL}/bar/glob.html to "glob.html", and
+    # ${LOCAL}/splat/index.html to "../splat/index.html".  For now, we always
+    # use a local offset, so it's actually "../bar/glob.html".  This is a step
+    # up from ${ROOT}, which would be "../../foo/bar/glob.html", but not as
+    # clever as we could be.
+    #
+    # What we really want to do is extract the string that follows ${ROOT}
+    # from the input file and compute the minimal path, but that requires
+    # more effort than a simple variable substitution.  ${LOCAL} would be a
+    # half-step, and probably not worth the effort.
 
     if activeId:
         # Given an HTML block like <li id="sidenav-moving-around">, insert

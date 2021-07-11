@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- START: /head-incl.html -->
+    <!-- START: /incl-head.html -->
     <!-- common head elements -->
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -10,7 +10,7 @@
         integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="main.css"/>
-    <!-- END: /head-incl.html -->
+    <!-- END: /incl-head.html -->
 
     <style>
         img {
@@ -24,17 +24,17 @@
 
 <body class="no-sidenav">
 
+<!-- START: /incl-masthead.html -->
 <div id="masthead">
-    <!-- START: /masthead-incl.html -->
     <!--<div class="masthead-title" style="background-image: url('images/screenshot-mainwin.png');">-->
     <div class="masthead-title">
         6502bench
     </div>
-    <!-- END: /masthead-incl.html -->
 </div>
+<!-- END: /incl-masthead.html -->
 
+<!-- START: /incl-topnav.html active:#topnav-home -->
 <div id="topnav">
-    <!-- START: /topnav-incl.html active:#topnav-home -->
     <!-- top navigation bar contents -->
     <nav>
         <a id="topnav-home" class="active" href="./">HOME</a>
@@ -53,8 +53,8 @@
             $("#sidenav").toggle("fast");
         }
     </script>
-    <!-- END: /topnav-incl.html -->
 </div>
+<!-- END: /incl-topnav.html -->
 
 <div id="main">
 
@@ -188,8 +188,8 @@ The full source code is available on
 
 </div>
 
+<!-- START: /incl-footer.html -->
 <div id="footer">
-    <!-- START: /footer-incl.html -->
     <hr/>
     <p>Copyright 2021 faddenSoft</p>
     <!-- <p id="screen-size"></p>
@@ -199,8 +199,8 @@ The full source code is available on
         var x = document.getElementById("screen-size");
         x.innerHTML = "DEBUG: initial window size " + w + "x" + h;
     </script> -->
-    <!-- END: /footer-incl.html -->
 </div>
+<!-- END: /incl-footer.html -->
 
 </body>
 </html>
