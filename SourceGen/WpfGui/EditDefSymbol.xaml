@@ -75,7 +75,7 @@ limitations under the License.
             <TextBox Name="valueTextBox" Margin="0,1,0,0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                      FontFamily="{StaticResource GeneralMonoFont}"
                      IsReadOnly="{Binding ReadOnlyValueAndType}"/>
-            <TextBlock Name="varValueRangeLabel" Text="• Value between 0-255, including width" Margin="0,4,0,0"
+            <TextBlock Name="varValueRangeLabel" Text="• Value between 0-255, &lt;= 256 with width" Margin="0,4,0,0"
                        Visibility="{Binding IsVariable, Converter={StaticResource BoolToVis}}"/>
             <TextBlock Name="addrValueRangeLabel" Text="• Address between 00/0000 - ff/ffff, incl. width" Margin="0,4,0,0"
                        Visibility="{Binding IsNotVariable, Converter={StaticResource BoolToVis}}"/>

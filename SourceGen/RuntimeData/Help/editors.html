@@ -397,8 +397,8 @@ delete the table, click the "Delete Table" button.</p>
 variable has a name, a value, a width, and an optional comment.  The
 standard naming rules for symbols apply.  Variables are only used for
 zero-page and stack-relative operands, so all values must fall in the
-range 0-255, with their width factored in.  So the maximum address for
-a two-byte pointer is $fe.</p>
+range 0-255.  The width may extend one byte past the end (to address $0100)
+to allow 16-bit accesses to $ff (particularly useful on 65816).</p>
 <p>You can move a table to any offset that is the start of an instruction
 and doesn't already have a local variable table present.  Click the
 "Move Table" button and enter the new offset in hex.  You can also click

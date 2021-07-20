@@ -29,6 +29,9 @@ namespace SourceGen.WpfGui {
     /// Symbol edit dialog.
     /// </summary>
     public partial class EditDefSymbol : Window, INotifyPropertyChanged {
+        // 256-byte zero page, +1 for 16-bit access at $ff.
+        private const int MAX_VAR_WIDTH = 257;
+
         /// <summary>
         /// Result; will be set non-null on OK.
         /// </summary>
@@ -200,7 +203,7 @@ namespace SourceGen.WpfGui {
             int maxWidth;
             if (isVariable) {
                 ConstantLabel = (string)FindResource("str_VariableConstant");
-                maxWidth = 256;
+                maxWidth = MAX_VAR_WIDTH;
             } else {
                 ConstantLabel = (string)FindResource("str_ProjectConstant");
                 maxWidth = 65536;
@@ -309,17 +312,20 @@ namespace SourceGen.WpfGui {
                 widthValid = mIsWidthOptional;
             } else if (!Asm65.Number.TryParseInt(VarWidth, out thisWidth, out int unusedBase) ||
                     thisWidth < DefSymbol.MIN_WIDTH || thisWidth > DefSymbol.MAX_WIDTH ||
-                    (IsVariable && thisWidth > 256)) {
+                    (IsVariable && thisWidth > MAX_VAR_WIDTH)) {
                 // All widths must be between 1 and 65536.  For a variable, the full thing must
-                // fit on zero page without wrapping.  We test for 256 here so that we highlight
-                // the "bad width" label, rather than the "it doesn't fit on the page" label.
+                // fit on zero page, except on 65816 where a 16-bit access at $ff can extend
+                // off the end of the direct page.
+                //
+                // We test the variable width here so that we highlight the "width limit" label,
+                // rather than the "value range" label.
                 widthValid = false;
             }
 
             bool valueRangeValid = true;
             if (IsVariable && valueValid && widthValid) {
-                // $ff with width 1 is okay, $ff with width 2 is not
-                if (thisValue < 0 || thisValue + thisWidth > 256) {
+                // $ff with width 1 is okay, $ff with width 2 is okay on 65816, width=3 is bad
+                if (thisValue < 0 || thisValue + thisWidth > MAX_VAR_WIDTH) {
                     valueRangeValid = false;
                 }
             } else if (IsAddress && valueValid) {
