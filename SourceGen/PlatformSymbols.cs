@@ -41,7 +41,7 @@ namespace SourceGen {
         /// and mask may be hex, decimal, or binary; these are simply tokenized by regex.
         ///
         /// Looks like:
-        ///   NAME {@,=,<,>} VALUE [& MASK] [WIDTH] [;COMMENT]
+        ///   NAME {@,=,<,>} VALUE [WIDTH] [;COMMENT]
         ///
         /// Regex output groups are:
         /// 1. NAME (2+ alphanumeric or underscore, cannot start with number)

@@ -224,6 +224,76 @@ DPCODE  nop
 .SPLITTER =     $80
         ldx     $5678
         beq     @SPLIT2
+        nop
+        clc
+        xce
+        rep     #$30
+        !al
+        !rl
+        pea     STRING >> 16
+        pea     STRING
+        jsl     STRLEN
+        sec
+        xce
+        !as
+        !rs
+        jmp     L00E6
+
+STRING  !text   "testing"
+        !byte   $00
+
+        !zone   Z0000b2
+.NH0    =       $00        ;not hidden
+.NH1    =       $01        ;not hidden
+.PTR0   =       $10
+.CONST0 =       $10
+.PTR_C  =       $1d
+.PTR_D  =       $21
+.VAL0   =       $30
+.VAL14  =       $31
+.VAL5   =       $35
+.SPLITTER =     $80
+.LEN    =       $f2
+.PTR    =       $f4
+.ARG    =       $fd
+        !al
+        !rl
+STRLEN  phd
+        tsc
+        sec
+        sbc     #$00f7
+        tcd
+        adc     #$00f0
+        tcs
+        stz     .LEN
+@L00C1  ldx     .ARG+2
+        lda     .ARG
+        inc     .ARG
+        bne     @L00CB
+        inc     .ARG+2
+@L00CB  sta     .PTR
+        stx     .PTR+2
+        lda     [.PTR]
+        and     #$00ff
+        beq     @L00DA
+        inc     .LEN
+        bra     @L00C1
+
+@L00DA  lda     .LEN
+        tay
+        tdc
+        clc
+        adc     #$00f7
+        tcs
+        tya
+        pld
+        rtl
+
+        !as
+        !rs
+L00E6   bit     .ARG+2
+        bit+2   $00ff
+        bit     $0100
         rts
 
         } ;!pseudopc

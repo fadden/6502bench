@@ -155,4 +155,92 @@ LOCAL1  lda     #$2c            ;EDIT: format as ASCII
 LOCAL2  lda     $2c             ;EDIT: format as ASCII
         ldx     $5678           ;put empty variable table here
         beq     LOCAL2
+
+; Test C-style call frame (issue #96).
+        nop
+        clc
+        xce
+        rep     #$30
+        pea     ^STRING
+        pea     STRING
+        jsl     STRLEN
+        sec
+        xce
+
+        jmp     AFTER_STRLEN
+
+STRING  asc     'testing',00
+
+; C sample, for something like:
+
+; int strlen(const char* arg) {
+;    len = 0;
+;    while (*arg++ != '\0')
+;        len++;
+;    return len;
+; }
+;
+; Assume SP at $2000 before call.  On entry:
+;  $2000  string-$00
+;  $1fff  string-bank
+;  $1ffe  string-hi
+;  $1ffd  string-lo
+;  $1ffc  ret-bank
+;  $1ffb  ret-hi
+;  $1ffa  ret-lo
+;  S=$1ff9
+;
+; After call frame set up:
+;  $1ff9  saved-D-hi
+;  $1ff8  saved-D-lo
+; S=$1ff7 before SBC/ADC
+;  $1ff7  (ptr-$00)
+;  $1ff6  (ptr-bank)
+;  $1ff5  (ptr-hi)
+;  $1ff4  (ptr-lo)
+;  $1ff3  (len-hi)
+;  $1ff2  (len-lo)
+;
+; D=$1f00
+; S=$1ff1
+;
+]LEN    equ     $f2             ;2 bytes
+]PTR    equ     $f4             ;4 bytes
+]ARG    equ     $fd             ;4 bytes; spans [$fd,$100]
+
+        mx      %00
+STRLEN  phd
+        tsc
+        sec
+        sbc     #$00f7
+        tcd
+        adc     #$00f0          ;note carry set
+        tcs
+        stz     ]LEN
+:Loop   ldx     ]ARG+2
+        lda     ]ARG
+        inc     ]ARG
+        bne     :NoInc
+        inc     ]ARG+2
+:NoInc  sta     ]PTR
+        stx     ]PTR+2
+        lda     []PTR]
+        and     #$00ff
+        beq     :Ret
+        inc     ]LEN
+        bra     :Loop
+:Ret    lda     ]LEN
+        tay
+        tdc
+        clc
+        adc     #$00f7
+        tcs
+        tya
+        pld
+        rtl
+
+AFTER_STRLEN
+        bit     $ff
+        bit:    $00ff
+        bit     $0100
         rts

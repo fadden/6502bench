@@ -114,5 +114,64 @@ SPLITTER .set    $80
 @SPLIT2: lda     ','
          ldx     $5678
          beq     @SPLIT2
+         nop
+         clc
+         xce
+         rep     #$30
+         .a16
+         .i16
+         pea     STRING >> 16
+         pea     STRING
+         jsl     STRLEN
+         sec
+         xce
+         .a8
+         .i8
+         jmp     L00E6
+
+STRING:  .byte   "testing"
+         .byte   $00
+
+LEN      .set    $f2
+PTR      .set    $f4
+ARG      .set    $fd
+         .a16
+         .i16
+STRLEN:  phd
+         tsc
+         sec
+         sbc     #$00f7
+         tcd
+         adc     #$00f0
+         tcs
+         stz     LEN
+@L00C1:  ldx     ARG+2
+         lda     ARG
+         inc     ARG
+         bne     @L00CB
+         inc     ARG+2
+@L00CB:  sta     PTR
+         stx     PTR+2
+         lda     [PTR]
+         and     #$00ff
+         beq     @L00DA
+         inc     LEN
+         bra     @L00C1
+
+@L00DA:  lda     LEN
+         tay
+         tdc
+         clc
+         adc     #$00f7
+         tcs
+         tya
+         pld
+         rtl
+
+         .a8
+         .i8
+L00E6:   bit     ARG+2
+         bit     a:$00ff
+         bit     $0100
          rts
 

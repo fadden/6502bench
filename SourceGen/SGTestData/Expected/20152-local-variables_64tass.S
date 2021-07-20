@@ -114,6 +114,65 @@ SPLITTER .var   $80
 _SPLIT2 lda     ','
         ldx     $5678
         beq     _SPLIT2
+        nop
+        clc
+        xce
+        rep     #$30
+        .al
+        .xl
+        pea     STRING >> 16
+        pea     STRING
+        jsl     STRLEN
+        sec
+        xce
+        .as
+        .xs
+        jmp     L00E6
+
+STRING  .text   "testing"
+        .byte   $00
+
+LEN     .var    $f2
+PTR     .var    $f4
+ARG     .var    $fd
+        .al
+        .xl
+STRLEN  phd
+        tsc
+        sec
+        sbc     #$00f7
+        tcd
+        adc     #$00f0
+        tcs
+        stz     LEN
+_L00C1  ldx     ARG+2
+        lda     ARG
+        inc     ARG
+        bne     _L00CB
+        inc     ARG+2
+_L00CB  sta     PTR
+        stx     PTR+2
+        lda     [PTR]
+        and     #$00ff
+        beq     _L00DA
+        inc     LEN
+        bra     _L00C1
+
+_L00DA  lda     LEN
+        tay
+        tdc
+        clc
+        adc     #$00f7
+        tcs
+        tya
+        pld
+        rtl
+
+        .as
+        .xs
+L00E6   bit     ARG+2
+        bit     @w$00ff
+        bit     $0100
         rts
 
         .here

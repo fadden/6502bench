@@ -1181,6 +1181,17 @@ namespace SourceGen {
         /// <returns>File data.</returns>
         private byte[] FindValidDataFile(ref string dataPathName, DisasmProject proj,
                 out bool cancel) {
+            // TODO(someday):
+            // It would be nice to "fix" the length and CRC if they don't match while we're
+            // making manual edits to test files.  We can pass "can fix" to the ChooseDataFile
+            // dialog, and have it return a "want fix" if they click on the "fix" button, and
+            // only enable this if the DEBUG menu is enabled.  It's a little ugly but mostly
+            // works.  One issue that must be handled is that "proj" has sized a bunch of data
+            // structures based on the expected file length, and will blow up if the actual
+            // length is different.  So we really need to check both len/crc here, and if
+            // all broken things are fixable, return the "do fix" back to the caller so
+            // it can re-generate the DisasmProject object with the corrected length.
+
             FileInfo fi = new FileInfo(dataPathName);
             if (!fi.Exists) {
                 Debug.WriteLine("File '" + dataPathName + "' doesn't exist");
