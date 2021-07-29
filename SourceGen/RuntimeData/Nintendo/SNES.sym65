@@ -1,0 +1,237 @@
+; 6502bench SNES CPU, PPU registers symbol
+; Reference:
+;   Super Nintendo Entertainment System Development Manual
+;   Registers | Super Famicom Development Wiki
+;     https://wiki.superfamicom.org/registers
+; Copyright 2021 absindx
+;   Follow the original license. (Apache 2.0)
+
+*SYNOPSIS Super NES registers
+
+*MULTI_MASK
+
+; PPU registers (Address Bus B)
+
+INIDISP         @ $2100 ;W B--- FFFF  Initial settings for screen
+OBJSEL          @ $2101 ;W SSSN NAAA  Object size & Object data area designation
+OAMADDL         @ $2102 ;W AAAA AAAA  Address for accessing OAM (Low)
+OAMADDH         @ $2103 ;W P--- ---A  Address for accessing OAM (High)
+OAMDATA         @ $2104 ;W DDDD DDDD  Data for OAM write
+BGMODE          @ $2105 ;W SSSS PMMM  BG mode & Character size settings
+MOSAIC          @ $2106 ;W MMMM EEEE  Size & Screen designation for mosaic display
+BG1SC           @ $2107 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-1)
+BG2SC           @ $2108 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-2)
+BG3SC           @ $2109 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-3)
+BG4SC           @ $210A ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-4)
+BG12NBA         @ $210B ;W 2222 1111  BG character data area designation (BG-1, 2)
+BG34NBA         @ $210C ;W 4444 3333  BG character data area designation (BG-3, 4)
+BG1HOFS         @ $210D ;WW XXXX XXXX, ---X XXXX  H scroll value designation for BG-1
+BG1VOFS         @ $210E ;WW XXXX XXXX, ---X XXXX  V scroll value designation for BG-1
+BG2HOFS         @ $210F ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-2
+BG2VOFS         @ $2110 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-2
+BG3HOFS         @ $2111 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-3
+BG3VOFS         @ $2112 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-3
+BG4HOFS         @ $2113 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-4
+BG4VOFS         @ $2114 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-4
+VMAINC          @ $2115 ;W T--- GGII  VRAM address increment value designation
+VMADDL          @ $2116 ;W AAAA AAAA  Address for VRAM read and write (Low)
+VMADDH          @ $2117 ;W AAAA AAAA  Address for VRAM read and write (High)
+VMDATAL         @ $2118 ;W AAAA AAAA  Data for VRAM write (Low)
+VMDATAH         @ $2119 ;W AAAA AAAA  Data for VRAM write (High)
+M7SEL           @ $211A ;W SS-- --VH  Initial setting in screen Mode-7
+M7A             @ $211B ;WW AAAA AAAA, AAAA AAAA  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter A (Low, High)
+M7B             @ $211C ;WW BBBB BBBB, BBBB BBBB  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter B (Low, High)
+M7C             @ $211D ;WW CCCC CCCC, CCCC CCCC  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter C (Low, High)
+M7D             @ $211E ;WW DDDD DDDD, DDDD DDDD  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter D (Low, High)
+M7X             @ $211F ;WW XXXX XXXX, ---X XXXX  Rotation/Enlargement/Reduction in Mode-7, Center position X0 (Low, High)
+M7Y             @ $2120 ;WW YYYY YYYY, ---Y YYYY  Rotation/Enlargement/Reduction in Mode-7, Center position Y0 (Low, High)
+CGADD           @ $2121 ;W AAAA AAAA  Address for CG-RAM read and write
+CGDATA          @ $2122 ;WW DDDD DDDD, -DDD DDDD  Data for CG-RAM write
+W12SEL          @ $2123 ;W EIEI EIEI  Window mask settings (BG-1, 2)
+W34SEL          @ $2124 ;W EIEI EIEI  Window mask settings (BG-3, 4)
+WOBJSEL         @ $2125 ;W EIEI EIEI  Window mask settings (OBJ, Color)
+WH0             @ $2126 ;W PPPP PPPP  Window position designation (Window-1 left position)
+WH1             @ $2127 ;W PPPP PPPP  Window position designation (Window-1 right position)
+WH2             @ $2128 ;W PPPP PPPP  Window position designation (Window-2 left position)
+WH3             @ $2129 ;W PPPP PPPP  Window position designation (Window-2 right position)
+WBGLOG          @ $212A ;W 4433 2211  Mask logic settings for Window-1 & 2 on each screen
+WOBJLOG         @ $212B ;W ---- CCOO  Mask logic settings for Window-1 & 2 on each screen
+TM              @ $212C ;W ---O 4321  Main screen designation
+TS              @ $212D ;W ---O 4321  Sub screen designation
+TMW             @ $212E ;W ---O 4321  Window mask designation for main screen
+TSW             @ $212F ;W ---O 4321  Window mask designation for sub screen
+CGSWSEL         @ $2130 ;W MMSS --CD  Initial settings for fixed color addition on screen addition
+CGADSUB         @ $2131 ;W SEBO 4321  Addition/Subtraction & Subtraction designation for each BG screen OBJ & Background color
+COLDATA         @ $2132 ;W BGRD DDDD  Fixed color data for fixed color addition/subtraction
+SETINI          @ $2133 ;W SI-- PBOI  Screen initial setting
+MPYL            @ $2134 ;R MMMM MMMM  Multiplication result (Low)
+MPYM            @ $2135 ;R MMMM MMMM  Multiplication result (Middle)
+MPYH            @ $2136 ;R MMMM MMMM  Multiplication result (High)
+SLHV            @ $2137 ;- SSSS SSSS  Software latch for H/V counter
+OAMDATA         @ $2138 ;RR DDDD DDDD, DDDD DDDD  Read data from OAM
+VMDATAL         @ $2139 ;R DDDD DDDD  Read data from VRAM (Low)
+VMDATAH         @ $213A ;R DDDD DDDD  Read data from VRAM (High)
+CGDATA          @ $213B ;RR DDDD DDDD, -DDD DDDD  Read data from CG-RAM
+OPHCT           @ $213C ;RR HHHH HHHH, ---- ---H  H counter data by external or software latch
+OPVCT           @ $213D ;RR VVVV VVVV, ---- ---V  V counter data by external or software latch
+STAT77          @ $213E ;R TRM- VVVV  PPU status flag & Version number (5C77)
+STAT78          @ $213F ;R FL-D VVVV  PPU status flag & Version number (5C78)
+APUIO0          @ $2140 ;RW DDDD DDDD  Communication port with APU
+APUIO1          @ $2141 ;RW DDDD DDDD  Communication port with APU
+APUIO2          @ $2142 ;RW DDDD DDDD  Communication port with APU
+APUIO3          @ $2143 ;RW DDDD DDDD  Communication port with APU
+WMDATA          @ $2180 ;RW DDDD DDDD  DATA to consecutively read from and write to WRAM
+WMADDL          @ $2181 ;W AAAA AAAA  Address to consecutively read and write WRAM (Low)
+WMADDM          @ $2182 ;W AAAA AAAA  Address to consecutively read and write WRAM (Middle)
+WMADDH          @ $2183 ;W ---- ---A  Address to consecutively read and write WRAM (High)
+
+; CPU registers (Internal)
+
+NMITIMEN        @ $4200 ;W N-VH ---C  Enable flag for V-Blank, Timer interrupt & Standard controller read
+WRIO            @ $4201 ;W DDDD DDDD  Programmable I/O port (Out port)
+WRMPYA          @ $4202 ;W AAAA AAAA  Multiplicand by multiplication
+WRMPYB          @ $4203 ;W BBBB BBBB  Multiplier by multiplication
+WRDIVL          @ $4204 ;W CCCC CCCC  Dividend by divide (Low)
+WRDIVH          @ $4205 ;W CCCC CCCC  Dividend by divide (High)
+WRDIVB          @ $4206 ;W BBBB BBBB  Divisor by divide
+HTIMEL          @ $4207 ;W HHHH HHHH  H-count timer settings (Low)
+HTIMEH          @ $4208 ;W ---- ---H  H-count timer settings (High)
+VTIMEL          @ $4209 ;W VVVV VVVV  V-count timer settings (Low)
+VTIMEH          @ $420A ;W ---- ---V  V-count timer settings (High)
+MDMAEN          @ $420B ;W 7654 3210  Channel designation for general purpose DMA & Trigger (start)
+HDMAEN          @ $420C ;W 7654 3210  Channel designation for H-DMA
+MEMSEL          @ $420D ;W ---- ---A  Access cycle designation in memory [2] area
+RDNMI           @ $4210 ;R N--- VVVV  NMI flag by V-Blank & Version number
+TIMEUP          @ $4211 ;R T--- ----  IRQ flag by H/V count timer
+HVBJOY          @ $4212 ;R VH-- ---C  H/V Blank flag & Standard controller enable flag
+RDIO            @ $4213 ;R DDDD DDDD  Programmable I/O port (In port)
+RDDIVL          @ $4214 ;R AAAA AAAA  Quotient of divide result (Low)
+RDDIVH          @ $4215 ;R AAAA AAAA  Quotient of divide result (High)
+RDMPYL          @ $4216 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (Low)
+RDMPYH          @ $4217 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (High)
+STDCNTRL1L      @ $4218 ;R AXLR ----  Data for standard controller 1 (Low)
+STDCNTRL1H      @ $4219 ;R BYST UDLR  Data for standard controller 1 (High)
+STDCNTRL2L      @ $421A ;R AXLR ----  Data for standard controller 2 (Low)
+STDCNTRL2H      @ $421B ;R BYST UDLR  Data for standard controller 2 (High)
+STDCNTRL3L      @ $421C ;R AXLR ----  Data for standard controller 3 (Low)
+STDCNTRL3H      @ $421D ;R BYST UDLR  Data for standard controller 3 (High)
+STDCNTRL4L      @ $421E ;R AXLR ----  Data for standard controller 4 (Low)
+STDCNTRL4H      @ $421F ;R BYST UDLR  Data for standard controller 4 (High)
+
+
+
+; Old Style Joypad Registers
+
+JOYSER0         @ $4016 ;R:---- --31 W:---- -xxL
+JOYSER1         @ $4017 ;R ---- --42
+
+
+
+; DMA / HDMA Registers
+
+DMAP0           @ $4300 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 0)
+BBAD0           @ $4301 ;RW AAAA AAAA  B-bus address for DMA (Channel 0)
+A1T0L           @ $4302 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 0)
+A1T0H           @ $4303 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 0)
+A1B0            @ $4304 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 0)
+DAS0L           @ $4305 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 0)
+DAS0H           @ $4306 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 0)
+DASB0           @ $4307 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 0)
+A2A0L           @ $4308 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 0)
+A2A0H           @ $4309 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 0)
+NTLR0           @ $430A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 0)
+;DMAUNKNOWN00   @ $430B ;RW ???? ????  Unknown (Channel 0)
+;DMAUNKNOWN01   @ $430F ;RW ???? ????  Unknown (Channel 0)
+DMAP1           @ $4310 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 1)
+BBAD1           @ $4311 ;RW AAAA AAAA  B-bus address for DMA (Channel 1)
+A1T1L           @ $4312 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 1)
+A1T1H           @ $4313 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 1)
+A1B1            @ $4314 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 1)
+DAS1L           @ $4315 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 1)
+DAS1H           @ $4316 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 1)
+DASB1           @ $4317 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 1)
+A2A1L           @ $4318 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 1)
+A2A1H           @ $4319 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 1)
+NTLR1           @ $431A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 1)
+;DMAUNKNOWN10   @ $431B ;RW ???? ????  Unknown (Channel 1)
+;DMAUNKNOWN11   @ $431F ;RW ???? ????  Unknown (Channel 1)
+DMAP2           @ $4320 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 2)
+BBAD2           @ $4321 ;RW AAAA AAAA  B-bus address for DMA (Channel 2)
+A1T2L           @ $4322 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 2)
+A1T2H           @ $4323 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 2)
+A1B2            @ $4324 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 2)
+DAS2L           @ $4325 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 2)
+DAS2H           @ $4326 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 2)
+DASB2           @ $4327 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 2)
+A2A2L           @ $4328 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 2)
+A2A2H           @ $4329 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 2)
+NTLR2           @ $432A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 2)
+;DMAUNKNOWN20   @ $432B ;RW ???? ????  Unknown (Channel 2)
+;DMAUNKNOWN21   @ $432F ;RW ???? ????  Unknown (Channel 2)
+DMAP3           @ $4330 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 3)
+BBAD3           @ $4331 ;RW AAAA AAAA  B-bus address for DMA (Channel 3)
+A1T3L           @ $4332 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 3)
+A1T3H           @ $4333 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 3)
+A1B3            @ $4334 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 3)
+DAS3L           @ $4335 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 3)
+DAS3H           @ $4336 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 3)
+DASB3           @ $4337 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 3)
+A2A3L           @ $4338 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 3)
+A2A3H           @ $4339 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 3)
+NTLR3           @ $433A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 3)
+;DMAUNKNOWN30   @ $433B ;RW ???? ????  Unknown (Channel 3)
+;DMAUNKNOWN31   @ $433F ;RW ???? ????  Unknown (Channel 3)
+DMAP4           @ $4340 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 4)
+BBAD4           @ $4341 ;RW AAAA AAAA  B-bus address for DMA (Channel 4)
+A1T4L           @ $4342 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 4)
+A1T4H           @ $4343 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 4)
+A1B4            @ $4344 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 4)
+DAS4L           @ $4345 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 4)
+DAS4H           @ $4346 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 4)
+DASB4           @ $4347 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 4)
+A2A4L           @ $4348 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 4)
+A2A4H           @ $4349 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 4)
+NTLR4           @ $434A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 4)
+;DMAUNKNOWN40   @ $434B ;RW ???? ????  Unknown (Channel 4)
+;DMAUNKNOWN41   @ $434F ;RW ???? ????  Unknown (Channel 4)
+DMAP5           @ $4350 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 5)
+BBAD5           @ $4351 ;RW AAAA AAAA  B-bus address for DMA (Channel 5)
+A1T5L           @ $4352 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 5)
+A1T5H           @ $4353 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 5)
+A1B5            @ $4354 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 5)
+DAS5L           @ $4355 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 5)
+DAS5H           @ $4356 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 5)
+DASB5           @ $4357 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 5)
+A2A5L           @ $4358 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 5)
+A2A5H           @ $4359 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 5)
+NTLR5           @ $435A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 5)
+;DMAUNKNOWN50   @ $435B ;RW ???? ????  Unknown (Channel 5)
+;DMAUNKNOWN51   @ $435F ;RW ???? ????  Unknown (Channel 5)
+DMAP6           @ $4360 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 6)
+BBAD6           @ $4361 ;RW AAAA AAAA  B-bus address for DMA (Channel 6)
+A1T6L           @ $4362 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 6)
+A1T6H           @ $4363 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 6)
+A1B6            @ $4364 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 6)
+DAS6L           @ $4365 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 6)
+DAS6H           @ $4366 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 6)
+DASB6           @ $4367 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 6)
+A2A6L           @ $4368 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 6)
+A2A6H           @ $4369 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 6)
+NTLR6           @ $436A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 6)
+;DMAUNKNOWN60   @ $436B ;RW ???? ????  Unknown (Channel 6)
+;DMAUNKNOWN61   @ $436F ;RW ???? ????  Unknown (Channel 6)
+DMAP7           @ $4370 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 7)
+BBAD7           @ $4371 ;RW AAAA AAAA  B-bus address for DMA (Channel 7)
+A1T7L           @ $4372 ;RW AAAA AAAA  Table address of A-bus for DMA (Low) (Channel 7)
+A1T7H           @ $4373 ;RW AAAA AAAA  Table address of A-bus for DMA (High) (Channel 7)
+A1B7            @ $4374 ;RW BBBB BBBB  Table address of A-bus for DMA (Bank) (Channel 7)
+DAS7L           @ $4375 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (Low) (Channel 7)
+DAS7H           @ $4376 ;RW AAAA AAAA  Data address store by H-DMA & Number of byte to be transferred settings by general purpose DMA (High) (Channel 7)
+DASB7           @ $4377 ;RW BBBB BBBB  Data address store by H-DMA (Bank) (Channel 7)
+A2A7L           @ $4378 ;RW AAAA AAAA  Table address of A-bus by DMA (Low) (Channel 7)
+A2A7H           @ $4379 ;RW AAAA AAAA  Table address of A-bus by DMA (High) (Channel 7)
+NTLR7           @ $437A ;RW CLLL LLLL  The number of lines to be transferred by H-DMA (Channel 7)
+;DMAUNKNOWN70   @ $437B ;RW ???? ????  Unknown (Channel 7)
+;DMAUNKNOWN71   @ $437F ;RW ???? ????  Unknown (Channel 7)
+
+

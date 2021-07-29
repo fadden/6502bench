@@ -261,12 +261,14 @@
       "GroupName" : "Nintendo",
       "Cpu" : "5A22",
       "Speed" : "3.58",
-      "Description" : "Super Nintendo Entertainment System [placeholder].",
+      "Description" : "Super Nintendo Entertainment System.",
       "SymbolFiles" : [
+        "RT:Nintendo/SNES.sym65"
       ],
       "ExtensionScripts" : [
       ],
       "Parameters" : {
+        "entry-flags":"native-long"
       }
     },
     {
