@@ -263,6 +263,7 @@
       "Speed" : "3.58",
       "Description" : "Super Nintendo Entertainment System [placeholder].",
       "SymbolFiles" : [
+        "RT:Nintendo/SNES.sym65"
       ],
       "ExtensionScripts" : [
       ],
