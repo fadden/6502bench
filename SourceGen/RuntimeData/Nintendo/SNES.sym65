@@ -8,9 +8,9 @@
 
 *SYNOPSIS Super NES registers
 
-; PPU registers (Address Bus B)
-
 *MULTI_MASK
+
+; PPU registers (Address Bus B)
 
 INIDISP         @ $2100 ;W B--- FFFF  Initial settings for screen
 OBJSEL          @ $2101 ;W SSSN NAAA  Object size & Object data area designation
@@ -87,8 +87,6 @@ WMADDH          @ $2183 ;W ---- ---A  Address to consecutively read and write WR
 
 ; CPU registers (Internal)
 
-*MULTI_MASK
-
 NMITIMEN        @ $4200 ;W N-VH ---C  Enable flag for V-Blank, Timer interrupt & Standard controller read
 WRIO            @ $4201 ;W DDDD DDDD  Programmable I/O port (Out port)
 WRMPYA          @ $4202 ;W AAAA AAAA  Multiplicand by multiplication
@@ -124,16 +122,12 @@ STDCNTRL4H      @ $421F ;R BYST UDLR  Data for standard controller 4 (High)
 
 ; Old Style Joypad Registers
 
-*MULTI_MASK
-
 JOYSER0         @ $4016 ;R:---- --31 W:---- -xxL
 JOYSER1         @ $4017 ;R ---- --42
 
 
 
 ; DMA / HDMA Registers
-
-*MULTI_MASK
 
 DMAP0           @ $4300 ;RW DT-I FDDD  Parameter for DMA transfer (Channel 0)
 BBAD0           @ $4301 ;RW AAAA AAAA  B-bus address for DMA (Channel 0)
