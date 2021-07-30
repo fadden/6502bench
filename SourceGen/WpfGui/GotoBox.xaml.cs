@@ -167,8 +167,10 @@ namespace SourceGen.WpfGui {
             if (labelOffset >= 0) {
                 TargetOffset = labelOffset;
             } else if (Address.ParseAddress(input, 1 << 24, out int addr)) {
-                // could be a valid address; check against address map
-                int offset = mProject.AddrMap.AddressToOffset(0, addr);
+                // Could be a valid address; check against address map.  Use the provided
+                // initial offset so we stay within current segment if there are overlapping
+                // address ranges.
+                int offset = mProject.AddrMap.AddressToOffset(mInitialOffset, addr);
                 if (offset >= 0) {
                     TargetOffset = offset;
                 }
