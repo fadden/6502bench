@@ -2,6 +2,7 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Assembler: cc65
+; (cl65 --target none -C <cfg>.cfg <src>.S)
 ;
 ; For the 65816 we want to exercise some additional things.
 
@@ -129,6 +130,9 @@ fwdchk:
         rts
 
 nxt54b:
+; Do odd thing: JSR to address in bank $00 from bank $54.
+; Most assemblers just accept this because it's a JSR to
+; a 16-bit address.
         jsr     skip                    ;EDIT: set to "skip" label
         nop
 
@@ -163,6 +167,10 @@ nxt54b:
         rep     #$30
         .a16
         .i16
+        nop
+
+; try a 16-bit JSR with no symbol
+        jsr     $edcb
         nop
 
         rtl

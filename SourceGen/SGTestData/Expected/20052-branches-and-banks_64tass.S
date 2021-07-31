@@ -132,6 +132,8 @@ L543280 jsr     skip+$540000
         lda     #$eaea
         rep     #$30
         nop
+        jsr     $54edcb
+        nop
         rtl
 
         .here

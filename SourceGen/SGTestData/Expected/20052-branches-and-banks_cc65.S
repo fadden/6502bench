@@ -134,5 +134,7 @@ L543280: jsr     skip
          lda     #$eaea
          rep     #$30
          nop
+         jsr     $edcb
+         nop
          rtl
 

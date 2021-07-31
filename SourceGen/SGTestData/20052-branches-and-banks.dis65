@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":4,
-"FileDataLength":234,
-"FileDataCrc32":1224113674,
+"FileDataLength":238,
+"FileDataCrc32":2077431201,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
