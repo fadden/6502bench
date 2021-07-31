@@ -7,7 +7,7 @@ different from the one used to generate the expected output.  The current
 set was generated for:
 
  * 64tass v1.53.1515
- * ACME v0.96.4
+ * ACME v0.97
  * cc65 v2.18
  * Merlin 32 v1.0
 
