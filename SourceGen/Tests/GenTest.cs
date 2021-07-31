@@ -155,6 +155,8 @@ namespace SourceGen.Tests {
                 ReportProgress(successCount + " of " + testCases.Count + " tests passed\r\n");
             }
 
+            PrintAsmVersions();
+
             return mResults;
         }
 
@@ -317,6 +319,7 @@ namespace SourceGen.Tests {
                     ReportErrMsg("assembler returned code=" + asmResults.ExitCode);
                     ReportFailure();
                     didFail = true;
+                    results.AsmResults = asmResults;
                     continue;
                 }
 
@@ -371,6 +374,17 @@ namespace SourceGen.Tests {
 
             project.Cleanup();
             return !didFail;
+        }
+
+        private void PrintAsmVersions() {
+            ReportProgress("\nTested assemblers:");
+            IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
+            while (iter.MoveNext()) {
+                AssemblerInfo info = iter.Current;
+                AssemblerVersion version = AssemblerVersionCache.GetVersion(info.AssemblerId);
+                ReportProgress("  " + info.Name + " v" + version.VersionStr);
+            }
+            ReportProgress("\n");
         }
 
         /// <summary>

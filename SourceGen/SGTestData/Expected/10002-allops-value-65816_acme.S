@@ -87,7 +87,7 @@ L101F   ora     ($ff,x)
 L10AB   eor     ($ff,x)
         !byte   $42,$ff
         eor     $ff,S
-        mvp     $fe,$ff
+        mvp     #$fe,#$ff
         eor     $ff
         lsr     $ff
         eor     [$ff]
@@ -104,7 +104,7 @@ L10AB   eor     ($ff,x)
 @L10CE  eor     ($ff),y
         eor     ($ff)
         eor     ($ff,S),y
-        mvn     $fe,$ff
+        mvn     #$fe,#$ff
         eor     $ff,x
         lsr     $ff,x
         eor     [$ff],y

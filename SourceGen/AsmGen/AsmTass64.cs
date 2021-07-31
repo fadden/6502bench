@@ -762,7 +762,8 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv,
+                false);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high

@@ -103,6 +103,12 @@ namespace SourceGen.AsmGen {
         // Set if we're inside a "pseudopc" block, which will need to be closed.
         private bool mInPseudoPcBlock;
 
+        // v0.97 started treating '\' in constants as an escape character.
+        private bool mBackslashEscapes = true;
+
+        // Interesting versions.
+        private static CommonUtil.Version V0_97 = new CommonUtil.Version(0, 97);
+
 
         // Pseudo-op string constants.
         private static PseudoOp.PseudoOpNames sDataOpNames =
@@ -150,6 +156,14 @@ namespace SourceGen.AsmGen {
 
             Project = project;
 
+            if (asmVersion != null) {
+                // Use the actual version.
+                mAsmVersion = asmVersion.Version;
+            } else {
+                // No assembler installed.  Use v0.97.
+                mAsmVersion = V0_97;
+            }
+
             // ACME isn't a single-pass assembler, but the code that determines label widths
             // only runs in the first pass and doesn't get corrected.  So unlike cc65, which
             // generates correct zero-page acceses once the label's value is known, ACME
@@ -168,7 +182,10 @@ namespace SourceGen.AsmGen {
             Quirks = new AssemblerQuirks();
             Quirks.SinglePassAssembler = true;
             Quirks.SinglePassNoLabelCorrection = true;
-            Quirks.BlockMoveArgsNoHash = true;
+            if (mAsmVersion < V0_97) {
+                Quirks.BlockMoveArgsNoHash = true;
+                mBackslashEscapes = false;
+            }
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
@@ -654,7 +671,8 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep, charConv,
+                mBackslashEscapes);
             stropf.FeedBytes(data, offset, dfd.Length, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 

@@ -545,7 +545,7 @@ namespace SourceGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(formatter, delDef,
-                StringOpFormatter.RawOutputStyle.CommaSep, charConv);
+                StringOpFormatter.RawOutputStyle.CommaSep, charConv, false);
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
                 dfd.Length - hiddenLeadingBytes - trailingBytes, 0, revMode);
 

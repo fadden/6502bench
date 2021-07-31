@@ -88,7 +88,7 @@ L101F   ora     (L0080,x)
 L10AB   eor     (L0080,x)
         !byte   $42,$80
         eor     $80,S
-        mvp     $84,$83
+        mvp     #$84,#$83
         eor+1   L0080
         lsr+1   L0080
         eor     [L0080]
@@ -105,7 +105,7 @@ L10AB   eor     (L0080,x)
 @L10CE  eor     (L0080),y
         eor     (L0080)
         eor     ($80,S),y
-        mvn     $84,$83
+        mvn     #$84,#$83
         eor+1   L0080,x
         lsr+1   L0080,x
         eor     [L0080],y

@@ -23,40 +23,6 @@ your web site, you can "export" the formatted code as text or HTML.
 This is explained in more detail <a href="#export-source">below</a>.
 
 
-<h2><a name="supported">Supported Assemblers</a></h2>
-
-<p>SourceGen currently supports the following cross-assemblers:</p>
-<ul>
-  <li><a href="#64tass">64tass</a></li>
-  <li><a href="#acme">ACME</a></li>
-  <li><a href="#cc65">cc65</a></li>
-  <li><a href="#merlin32">Merlin 32</a></li>
-</ul>
-
-<h3><a name="version">Version-Specific Code Generation</a></h3>
-
-<p>Code generation must be tailored to the specific version of the
-assembler.  This is most easily understood with an example.</p>
-<p>If the code has a statement like <code>MVN #$01,#$02</code>, the
-assembler is expected to output <code>54 02 01</code>, with the arguments
-reversed.  cc65 v2.17 got it backward; the behavior was fixed in v2.18.  The
-bug means we can't generate the same <code>MVN</code>/<code>MVP</code>
-instructions for both versions of the assembler.</p>
-<p>Having version-dependent source code is a bad idea.  If we generated
-reversed operands (<code>MVN #$02,#$01</code>), we'd get the correct
-output with v2.17, but the wrong output for v2.18.  Unambiguous code can
-be generated for all versions of the assembler by just outputting raw hex
-bytes, but that's ugly and annoying, so we don't want to be stuck doing
-that forever.  We want to detect which version of the assembler is in
-use, and output actual <code>MVN</code>/<code>MVP</code> instructions
-when producing code for newer versions of the assembler.</p>
-<p>When you configure a cross-assembler, SourceGen runs the executable with
-version query args, and extracts the version information from the output
-stream.  This is used by the generator to ensure that the output will compile.
-If no assembler is configured, SourceGen will produce code optimized
-for the latest version of the assembler.</p>
-
-
 <h2><a name="generate">Generating Source Code</a></h2>
 
 <p>Cross assemblers tend to generate additional files, either compiler
@@ -149,7 +115,41 @@ SourceGen.  However, SourceGen can generally work around assembler bugs,
 so any failure is an opportunity for improvement.</p>
 
 
-<h2><a name="quirks">Assembler-Specific Bugs &amp; Quirks</a></h2>
+<h2><a name="supported">Supported Assemblers</a></h2>
+
+<p>SourceGen currently supports the following cross-assemblers:</p>
+<ul>
+  <li><a href="#64tass">64tass</a></li>
+  <li><a href="#acme">ACME</a></li>
+  <li><a href="#cc65">cc65</a></li>
+  <li><a href="#merlin32">Merlin 32</a></li>
+</ul>
+
+<h3><a name="version">Version-Specific Code Generation</a></h3>
+
+<p>Code generation must be tailored to the specific version of the
+assembler.  This is most easily understood with an example.</p>
+<p>If the code has a statement like <code>MVN #$01,#$02</code>, the
+assembler is expected to output <code>54 02 01</code>, with the arguments
+reversed.  cc65 v2.17 got it backward; the behavior was fixed in v2.18.  The
+bug means we can't generate the same <code>MVN</code>/<code>MVP</code>
+instructions for both versions of the assembler.</p>
+<p>Having version-dependent source code is a bad idea.  If we generated
+reversed operands (<code>MVN #$02,#$01</code>), we'd get the correct
+output with v2.17, but the wrong output for v2.18.  Unambiguous code can
+be generated for all versions of the assembler by just outputting raw hex
+bytes, but that's ugly and annoying, so we don't want to be stuck doing
+that forever.  We want to detect which version of the assembler is in
+use, and output actual <code>MVN</code>/<code>MVP</code> instructions
+when producing code for newer versions of the assembler.</p>
+<p>When you configure a cross-assembler, SourceGen runs the executable with
+version query args, and extracts the version information from the output
+stream.  This is used by the generator to ensure that the output will compile.
+If no assembler is configured, SourceGen will produce code optimized
+for the latest version of the assembler.</p>
+
+
+<h3><a name="quirks">Assembler-Specific Bugs &amp; Quirks</a></h3>
 
 <p>This is a list of bugs and quirky behavior in cross-assemblers that
 SourceGen works around when generating code.</p>
@@ -166,14 +166,15 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <h3><a name="64tass">64tass</a></h3>
 
-<p>Code is generated for 64tass v1.53.1515 or later.
+<p>Tested versions: v1.53.1515, v1.54.1900
 <a href="https://sourceforge.net/projects/tass64/">[web site]</a></p>
 
 <p>Bugs:</p>
 <ul>
-  <li>Undocumented opcode <code>SHA (ZP),Y</code> ($93) is not supported;
+  <li>[Fixed in v1.54.2176?]
+    Undocumented opcode <code>SHA (ZP),Y</code> ($93) is not supported;
     the assembler appears to be expecting <code>SHA ABS,X</code> instead.</li>
-  <li>WDM is not supported.</li>
+  <li>[Fixed in v1.54.2176?] WDM is not supported.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -217,7 +218,7 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <h3><a name="acme">ACME</a></h3>
 
-<p>Code is generated for ACME v0.96.4 or later.
+<p>Tested versions: v0.96.4
 <a href="https://sourceforge.net/projects/acme-crossass/">[web site]</a></p>
 
 <p>Bugs:</p>
@@ -243,7 +244,8 @@ code, but also needs to know how to handle the corner cases.</p>
     <code>ASR</code> instead.</li>
   <li>Does not allow the accumulator to be specified explicitly as an
     operand, e.g. you can't write <code>LSR A</code>.</li>
-  <li>Syntax for <code>MVN</code>/<code>MVP</code> doesn't allow '#'
+  <li>[Fixed in v0.97.]
+    Syntax for <code>MVN</code>/<code>MVP</code> doesn't allow '#'
     before 8-bit operands.</li>
   <li>Officially, the preferred file extension for ACME source code is ".a",
     but this is already used on UNIX systems for static libraries (which
@@ -255,7 +257,7 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <h3><a name="cc65">cc65</a></h3>
 
-<p>Code is generated for cc65 v2.17 or v2.18.
+<p>Tested versions: v2.17, v2.18
 <a href="https://cc65.github.io/">[web site]</a></p>
 
 <p>Bugs:</p>
@@ -297,7 +299,7 @@ code, but also needs to know how to handle the corner cases.</p>
 
 <h3><a name="merlin32">Merlin 32</a></h3>
 
-<p>Code is generated for Merlin 32 v1.0.
+<p>Tested Versions: v1.0
 <a href="https://www.brutaldeluxe.fr/products/crossdevtools/merlin/">[web site]</a>
 <a href="https://github.com/apple2accumulator/merlin32/issues">[bug tracker]</a>
 </p>

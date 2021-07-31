@@ -45,7 +45,7 @@
         !pet    $93,"PETSCII with ",$96,"control",$05," codes",$0d
         !byte   $83
         !text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
-        !text   "XYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+        !text   "XYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         !byte   $83
         !hex    a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf
         !hex    c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf
@@ -134,7 +134,7 @@
         !byte   $1e
         !byte   $1f
         !text   " !",$22,"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW"
-        !text   "XYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+        !text   "XYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         !byte   $7f
         !byte   $80
         !byte   $81

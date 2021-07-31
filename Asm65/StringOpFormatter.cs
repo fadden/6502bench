@@ -43,6 +43,7 @@ namespace Asm65 {
 
         private Formatter.DelimiterDef mDelimiterDef;
         private RawOutputStyle mRawStyle;
+        private bool mBackslashEscapes;
         private int mMaxOperandLen;
 
         // Reference to array with 16 hex digits.  (May be upper or lower case.)
@@ -80,15 +81,18 @@ namespace Asm65 {
         /// <param name="delimiterDef">String delimiter values.</param>
         /// <param name="byteStyle">How to format raw byte data.</param>
         /// <param name="charConv">Character conversion delegate.</param>
+        /// <param name="backslashEscapes">True if "\" must be escaped with "\\".</param>
         public StringOpFormatter(Formatter formatter, Formatter.DelimiterDef delimiterDef,
-                RawOutputStyle byteStyle, CharEncoding.Convert charConv) {
-            mRawStyle = byteStyle;
-            mMaxOperandLen = formatter.OperandWrapLen;
-            CharConv = charConv;
-
+                RawOutputStyle byteStyle, CharEncoding.Convert charConv,
+                bool backslashEscapes) {
             mDelimiterDef = delimiterDef;
-            mBuffer = new char[mMaxOperandLen];
+            mRawStyle = byteStyle;
+            CharConv = charConv;
+            mBackslashEscapes = backslashEscapes;
+
+            mMaxOperandLen = formatter.OperandWrapLen;
             mHexChars = formatter.HexDigits;
+            mBuffer = new char[mMaxOperandLen];
             Lines = new List<string>();
 
             // suffix not used, so we don't expect it to be set to something
@@ -113,7 +117,7 @@ namespace Asm65 {
         /// isn't printable, the raw character value will be written as a byte instead.
         /// </summary>
         /// <param name="rawCh">Raw character value.</param>
-        public void WriteChar(byte rawCh) {
+        private void WriteChar(byte rawCh) {
             Debug.Assert(mState != State.Finished);
 
             char ch = CharConv(rawCh);
@@ -160,7 +164,7 @@ namespace Asm65 {
         /// Write a hex value into the buffer.
         /// </summary>
         /// <param name="val">Value to add.</param>
-        public void WriteByte(byte val) {
+        private void WriteByte(byte val) {
             Debug.Assert(mState != State.Finished);
 
             HasEscapedText = true;
@@ -271,17 +275,26 @@ namespace Asm65 {
                     }
                     for (int off = endOffset - 1; off >= chunkOffset; off--) {
                         WriteChar(data[off]);
+                        if (data[off] == '\\' && mBackslashEscapes) {
+                            WriteChar(data[off]);
+                        }
                     }
                 }
             } else if (revMode == ReverseMode.FullReverse) {
                 for (; offset < strEndOffset; offset++) {
                     int posn = startOffset + (strEndOffset - offset) - 1;
                     WriteChar(data[posn]);
+                    if (data[posn] == '\\' && mBackslashEscapes) {
+                        WriteChar(data[posn]);
+                    }
                 }
             } else {
                 Debug.Assert(revMode == ReverseMode.Forward);
                 for (; offset < strEndOffset; offset++) {
                     WriteChar(data[offset]);
+                    if (data[offset] == '\\' && mBackslashEscapes) {
+                        WriteChar(data[offset]);
+                    }
                 }
             }
 

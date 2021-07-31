@@ -713,7 +713,8 @@ namespace SourceGen.AsmGen {
             }
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
-                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep, charConv);
+                Formatter.DOUBLE_QUOTE_DELIM, StringOpFormatter.RawOutputStyle.CommaSep, charConv,
+                false);
             stropf.FeedBytes(data, offset, dfd.Length - trailingBytes, leadingBytes,
                 StringOpFormatter.ReverseMode.Forward);
 

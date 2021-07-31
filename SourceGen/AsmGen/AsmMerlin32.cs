@@ -616,7 +616,7 @@ namespace SourceGen.AsmGen {
 
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 new Formatter.DelimiterDef(delim),
-                StringOpFormatter.RawOutputStyle.DenseHex, charConv);
+                StringOpFormatter.RawOutputStyle.DenseHex, charConv, false);
             if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
                 // DCI is awkward because the character encoding flips on the last byte.  Rather
                 // than clutter up StringOpFormatter for this rare item, we just accept low/high
