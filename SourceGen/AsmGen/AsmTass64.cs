@@ -168,6 +168,12 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
+            if (asmVersion != null) {
+                mAsmVersion = asmVersion.Version;       // Use the actual version.
+            } else {
+                mAsmVersion = V1_53;                    // No assembler installed, use default.
+            }
+
             Quirks.StackIntOperandIsImmediate = true;
             Quirks.LeadingUnderscoreSpecial = true;
             Quirks.Need24BitsForAbsPBR = true;
@@ -257,7 +263,7 @@ namespace SourceGen.AsmGen {
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                        "64tass", V1_53, AsmTass64.BASE_OPTIONS + extraOptions));
+                        "64tass", mAsmVersion, AsmTass64.BASE_OPTIONS + extraOptions));
                 }
 
                 GenCommon.Generate(this, sw, worker);

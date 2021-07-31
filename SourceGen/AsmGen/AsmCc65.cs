@@ -147,12 +147,9 @@ namespace SourceGen.AsmGen {
             Project = project;
             Quirks = new AssemblerQuirks();
             if (asmVersion != null) {
-                // Use the actual version.  If it's > 2.17 we'll try to take advantage of
-                // bug fixes.
-                mAsmVersion = asmVersion.Version;
+                mAsmVersion = asmVersion.Version;       // Use the actual version.
             } else {
-                // No assembler installed.  Use 2.18.
-                mAsmVersion = V2_18;
+                mAsmVersion = V2_18;                    // No assembler installed, use default.
             }
 
             if (mAsmVersion <= V2_17) {
@@ -235,18 +232,9 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    //if (mAsmVersion.IsValid && mAsmVersion <= V2_17) {
-                    //    OutputLine(SourceFormatter.FullLineCommentDelimiter +
-                    //        string.Format(Properties.Resources.GENERATED_FOR_VERSION,
-                    //        "cc65", mAsmVersion.ToString()));
-                    //} else {
-                    //    OutputLine(SourceFormatter.FullLineCommentDelimiter +
-                    //        string.Format(Properties.Resources.GENERATED_FOR_LATEST, "cc65"));
-                    //}
-
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                        "cc65", V2_18,
+                        "cc65", mAsmVersion,
                         AsmCc65.OPTIONS + " -C " + Path.GetFileName(cfgName)));
                 }
 

@@ -99,15 +99,13 @@ namespace SourceGen.AsmGen {
 
         // Version we're coded against.
         private static CommonUtil.Version V0_96_4 = new CommonUtil.Version(0, 96, 4);
+        private static CommonUtil.Version V0_97 = new CommonUtil.Version(0, 97);
 
         // Set if we're inside a "pseudopc" block, which will need to be closed.
         private bool mInPseudoPcBlock;
 
         // v0.97 started treating '\' in constants as an escape character.
         private bool mBackslashEscapes = true;
-
-        // Interesting versions.
-        private static CommonUtil.Version V0_97 = new CommonUtil.Version(0, 97);
 
 
         // Pseudo-op string constants.
@@ -155,13 +153,11 @@ namespace SourceGen.AsmGen {
             Debug.Assert(!string.IsNullOrEmpty(fileNameBase));
 
             Project = project;
-
+            Quirks = new AssemblerQuirks();
             if (asmVersion != null) {
-                // Use the actual version.
-                mAsmVersion = asmVersion.Version;
+                mAsmVersion = asmVersion.Version;       // Use the actual version.
             } else {
-                // No assembler installed.  Use v0.97.
-                mAsmVersion = V0_97;
+                mAsmVersion = V0_97;                    // No assembler installed, use default.
             }
 
             // ACME isn't a single-pass assembler, but the code that determines label widths
@@ -179,7 +175,6 @@ namespace SourceGen.AsmGen {
             //         lda     zero
             //         rts
             //         }
-            Quirks = new AssemblerQuirks();
             Quirks.SinglePassAssembler = true;
             Quirks.SinglePassNoLabelCorrection = true;
             if (mAsmVersion < V0_97) {
@@ -256,7 +251,7 @@ namespace SourceGen.AsmGen {
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                        "acme", V0_96_4, AsmAcme.OPTIONS));
+                        "acme", mAsmVersion, AsmAcme.OPTIONS));
                 }
 
                 if (HasNonZeroBankCode()) {

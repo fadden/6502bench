@@ -91,6 +91,9 @@ namespace SourceGen.AsmGen {
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
 
+        // Interesting versions.
+        private static CommonUtil.Version V1_0 = new CommonUtil.Version(1, 0);
+
 
         // Pseudo-op string constants.
         private static PseudoOp.PseudoOpNames sDataOpNames =
@@ -139,6 +142,12 @@ namespace SourceGen.AsmGen {
 
             Project = project;
             Quirks = new AssemblerQuirks();
+            if (asmVersion != null) {
+                mAsmVersion = asmVersion.Version;       // Use the actual version.
+            } else {
+                mAsmVersion = V1_0;                     // No assembler installed, use default.
+            }
+
             Quirks.NoPcRelBankWrap = true;
             Quirks.TracksSepRepNotEmu = true;
 
@@ -207,7 +216,7 @@ namespace SourceGen.AsmGen {
                     // No version-specific stuff yet.  We're generating code for v1.0.
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
-                            "Merlin 32", new CommonUtil.Version(1, 0), string.Empty));
+                            "Merlin 32", mAsmVersion, string.Empty));
                 }
 
                 GenCommon.Generate(this, sw, worker);
