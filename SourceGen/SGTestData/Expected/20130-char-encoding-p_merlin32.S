@@ -263,5 +263,43 @@
          dfb   $fe
          dfb   $ff
 
-L144B    rts
+L144B    nop
+         jmp   :L14DA
+
+         asc   'ASCII escapes \: \\ \r \n \" \',27,' \t'
+         dfb   $80
+         hex   d0c5d4d3c3c9c9204553434150455320
+         dfb   $5c
+         hex   3a20
+         dfb   $5c
+         dfb   $5c
+         dfb   $20
+         dfb   $5c
+         hex   5220
+         dfb   $5c
+         hex   4e20
+         dfb   $5c
+         hex   2220
+         dfb   $5c
+         hex   2720
+         dfb   $5c
+         dfb   $54
+         dfb   $80
+         hex   5343522005
+         dfb   $13
+         dfb   $03
+         dfb   $01
+         dfb   $10
+         dfb   $05
+         dfb   $13
+         hex   201c3a201c1c201c12201c
+         dfb   $0e
+         hex   201c22201c27201c
+         dfb   $14
+         dfb   $80
+         asc   "HIGH escapes \: \\ \r \n \0 \' \t"
+         dfb   $80
+
+:L14DA   nop
+         rts
 

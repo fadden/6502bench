@@ -303,5 +303,54 @@
         .byte   $fe
         .byte   $ff
 
-L144B   rts
+L144B   nop
+        jmp     _L14DA
+
+        .enc    "sg_ascii"
+        .text   "ASCII escapes \: \\ \r \n \",$22," \' \t"
+        .byte   $80
+        .enc    "none"
+        .text   "PETSCII escapes "
+        .byte   $5c
+        .text   ": "
+        .byte   $5c
+        .byte   $5c
+        .byte   ' '
+        .byte   $5c
+        .text   "r "
+        .byte   $5c
+        .text   "n "
+        .byte   $5c
+        .text   $22," "
+        .byte   $5c
+        .text   "' "
+        .byte   $5c
+        .byte   't'
+        .byte   $80
+        .enc    "screen"
+        .text   "SCR escapes "
+        .byte   $1c
+        .text   ": "
+        .byte   $1c
+        .byte   $1c
+        .byte   ' '
+        .byte   $1c
+        .text   "r "
+        .byte   $1c
+        .text   "n "
+        .byte   $1c
+        .byte   $22
+        .byte   ' '
+        .byte   $1c
+        .byte   $27
+        .byte   ' '
+        .byte   $1c
+        .byte   't'
+        .byte   $80
+        .enc    "sg_hiascii"
+        .text   "HIGH escapes \: \\ \r \n \0 \' \t"
+        .byte   $80
+
+_L14DA  nop
+        rts
 

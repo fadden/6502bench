@@ -295,5 +295,43 @@
          .byte   $fe
          .byte   $ff
 
-L144B:   rts
+L144B:   nop
+         jmp     @L14DA
+
+         .byte   "ASCII escapes \: \\ \r \n \",$22," \' \t"
+         .byte   $80
+         .byte   $d0,$c5,$d4,$d3,$c3,$c9,$c9,$20,$45,$53,$43,$41,$50,$45,$53,$20
+         .byte   $5c
+         .byte   $3a,$20
+         .byte   $5c
+         .byte   $5c
+         .byte   $20
+         .byte   $5c
+         .byte   $52,$20
+         .byte   $5c
+         .byte   $4e,$20
+         .byte   $5c
+         .byte   $22,$20
+         .byte   $5c
+         .byte   $27,$20
+         .byte   $5c
+         .byte   $54
+         .byte   $80
+         .byte   $53,$43,$52,$20,$05
+         .byte   $13
+         .byte   $03
+         .byte   $01
+         .byte   $10
+         .byte   $05
+         .byte   $13
+         .byte   $20,$1c,$3a,$20,$1c,$1c,$20,$1c,$12,$20,$1c
+         .byte   $0e
+         .byte   $20,$1c,$22,$20,$1c,$27,$20,$1c
+         .byte   $14
+         .byte   $80
+         HiAscii "HIGH escapes \: \\ \r \n \0 \' \t"
+         .byte   $80
+
+@L14DA:  nop
+         rts
 

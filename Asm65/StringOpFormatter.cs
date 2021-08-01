@@ -117,7 +117,7 @@ namespace Asm65 {
         /// isn't printable, the raw character value will be written as a byte instead.
         /// </summary>
         /// <param name="rawCh">Raw character value.</param>
-        private void WriteChar(byte rawCh) {
+        private void WriteChar(byte rawCh, bool recurOkay = true) {
             Debug.Assert(mState != State.Finished);
 
             char ch = CharConv(rawCh);
@@ -126,6 +126,9 @@ namespace Asm65 {
                 // Must write it as a byte.
                 WriteByte(rawCh);
                 return;
+            } else if (ch == '\\' && recurOkay && mBackslashEscapes) {
+                // Recursively output two '\' instead of just one.
+                WriteChar(rawCh, false);
             }
 
             // If we're at the start of a line, add delimiter, then new char.
@@ -212,7 +215,7 @@ namespace Asm65 {
         /// <summary>
         /// Tells the object to flush any pending data to the output.
         /// </summary>
-        public void Finish() {
+        private void Finish() {
             Flush();
         }
 
@@ -275,26 +278,17 @@ namespace Asm65 {
                     }
                     for (int off = endOffset - 1; off >= chunkOffset; off--) {
                         WriteChar(data[off]);
-                        if (data[off] == '\\' && mBackslashEscapes) {
-                            WriteChar(data[off]);
-                        }
                     }
                 }
             } else if (revMode == ReverseMode.FullReverse) {
                 for (; offset < strEndOffset; offset++) {
                     int posn = startOffset + (strEndOffset - offset) - 1;
                     WriteChar(data[posn]);
-                    if (data[posn] == '\\' && mBackslashEscapes) {
-                        WriteChar(data[posn]);
-                    }
                 }
             } else {
                 Debug.Assert(revMode == ReverseMode.Forward);
                 for (; offset < strEndOffset; offset++) {
                     WriteChar(data[offset]);
-                    if (data[offset] == '\\' && mBackslashEscapes) {
-                        WriteChar(data[offset]);
-                    }
                 }
             }
 

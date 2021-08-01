@@ -275,5 +275,52 @@
         !byte   $fe
         !byte   $ff
 
-L144B   rts
+L144B   nop
+        jmp     @L14DA
+
+        !text   "ASCII escapes \\: \\\\ \\r \\n \\",$22," \\' \\t"
+        !byte   $80
+        !pet    "PETSCII escapes "
+        !byte   $5c
+        !pet    ": "
+        !byte   $5c
+        !byte   $5c
+        !byte   $20
+        !byte   $5c
+        !pet    "r "
+        !byte   $5c
+        !pet    "n "
+        !byte   $5c
+        !pet    $22," "
+        !byte   $5c
+        !pet    "' "
+        !byte   $5c
+        !byte   $54
+        !byte   $80
+        !scr    "SCR escapes "
+        !byte   $1c
+        !scr    ": "
+        !byte   $1c
+        !byte   $1c
+        !byte   $20
+        !byte   $1c
+        !scr    "r "
+        !byte   $1c
+        !scr    "n "
+        !byte   $1c
+        !byte   $22
+        !byte   $20
+        !byte   $1c
+        !byte   $27
+        !byte   $20
+        !byte   $1c
+        !byte   $14
+        !byte   $80
+        !xor    $80 {
+        !text   "HIGH escapes \\: \\\\ \\r \\n \\0 \\' \\t"
+        }
+        !byte   $80
+
+@L14DA  nop
+        rts
 

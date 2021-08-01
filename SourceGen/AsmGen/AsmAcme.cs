@@ -674,6 +674,7 @@ namespace SourceGen.AsmGen {
             if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii && stropf.HasEscapedText) {
                 // Can't !xor the output, because while it works for string data it
                 // also flips the high bits on the unprintable bytes we output as raw hex.
+                // We'd need to tell the string formatter to flip the high bit on the byte.
                 OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
                 return;
             }

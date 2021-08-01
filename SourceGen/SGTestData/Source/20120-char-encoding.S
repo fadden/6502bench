@@ -144,5 +144,20 @@ allbytes
         !hex    e0e1e2e3e4e5e6e7e8e9eaebecedeeef
         !hex    f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
 
-end
+end     nop
+        jmp     skip_bs
+
+        !text   "ASCII escapes \: \\ \r \n \",$22," \",$27," \t"
+        !byte   $80
+        !pet    "PETSCII escapes \: \\ \r \n \",$22," \",$27," \t"
+        !byte   $80
+        !scr    "SCR escapes \: \\ \r \n \",$22," \",$27," \t"
+        !byte   $80
+        !xor $80 {
+; Can't include string delimiter due to code gen limitation.  Do "\0" instead.
+            !text   "HIGH escapes \: \\ \r \n \",$30," \",$27," \t"
+        }
+        !byte   $80
+
+skip_bs nop
         rts
