@@ -1031,8 +1031,6 @@ namespace SourceGen {
         /// Counts the number of null-terminated strings in the buffer.
         /// 
         /// Zero-length strings are allowed but not included in the count.
-        /// 
-        /// If any bad data is found, the scan aborts and returns -1.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
@@ -1070,10 +1068,10 @@ namespace SourceGen {
                             return -1;
                         }
                     }
-                    if (!charTest(val)) {
-                        // Not a matching character, fail.
-                        return -1;
-                    }
+                    //if (!charTest(val)) {
+                    //    // Not a matching character, fail.
+                    //    return -1;
+                    //}
                     stringLen++;
                 }
             }
@@ -1120,10 +1118,10 @@ namespace SourceGen {
                         // Mixed ASCII, fail.
                         return -1;
                     }
-                    if (!charTest(val)) {
-                        // Not a matching character, fail.
-                        return -1;
-                    }
+                    //if (!charTest(val)) {
+                    //    // Not a matching character, fail.
+                    //    return -1;
+                    //}
                 }
             }
 
@@ -1175,10 +1173,10 @@ namespace SourceGen {
                         // Mixed ASCII, fail.
                         return -1;
                     }
-                    if (!charTest(val)) {
-                        // Not a matching character, fail.
-                        return -1;
-                    }
+                    //if (!charTest(val)) {
+                    //    // Not a matching character, fail.
+                    //    return -1;
+                    //}
                 }
             }
 
@@ -1226,15 +1224,16 @@ namespace SourceGen {
                     stringLen++;
                 }
 
-                if (!charTest((byte)(val & 0x7f))) {
-                    // Not a matching character, fail.
-                    return -1;
-                }
+                //if (!charTest((byte)(val & 0x7f))) {
+                //    // Not a matching character, fail.
+                //    return -1;
+                //}
             }
 
             return stringCount;
         }
 
+#if false
         /// <summary>
         /// Counts strings in reverse Dextral Character Inverted format, meaning the string is
         /// stored in reverse order in memory, and the high bit on the first (last) byte is
@@ -1280,6 +1279,7 @@ namespace SourceGen {
 
             return stringCount;
         }
+#endif
 
         /// <summary>
         /// Verifies that the string data is what is expected.  Does not attempt to check
