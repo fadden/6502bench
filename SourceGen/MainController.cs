@@ -2712,7 +2712,11 @@ namespace SourceGen {
                 TypedRangeSet undoSet = new TypedRangeSet();
 
                 foreach (int offset in dlg.AllTargetOffsets) {
-                    if (!mProject.GetAnattrib(offset).IsInstruction) {
+                    // We don't need to add a "code start" tag if this is already the
+                    // start of an instruction.  We do need to add one if it's the *middle*
+                    // of an instruction, e.g. the table points inside a "BIT abs".  So we
+                    // test against IsInstructionStart, not IsInstruction.
+                    if (!mProject.GetAnattrib(offset).IsInstructionStart) {
                         CodeAnalysis.AnalyzerTag oldType = mProject.AnalyzerTags[offset];
                         if (oldType == CodeAnalysis.AnalyzerTag.Code) {
                             continue;       // already set
