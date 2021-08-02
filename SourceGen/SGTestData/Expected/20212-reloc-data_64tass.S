@@ -1,7 +1,7 @@
         .cpu    "65816"
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
-*       =       $030000
+        .logical $030000
         .al
         .xl
 L30000  clc
@@ -77,6 +77,7 @@ _L30088 .byte   $03
 
 _L3008E rts
 
+        .here
         .logical $04ffe0
 _L4FFE0 .long   _L4FFE0
         .byte   $00

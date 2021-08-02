@@ -13,7 +13,7 @@ thirty2 =       $12345678  ;32-bit constant test
 plataddr =      $3000      ;address only in platform file
 projalsa =      $3200      ;same val as projalso
 
-*       =       $012345
+        .logical $012345
         .as
         .xs
 start   clc
@@ -127,6 +127,7 @@ _skipdata lda   #(biggie >> 16)-1
 
 _nextchunk jml  _L1000_1
 
+        .here
         .logical $1000
 _L1000_1 nop
 _L1000  nop

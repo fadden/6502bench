@@ -1,5 +1,5 @@
         .cpu    "65816"
-*       =       $021000
+        .logical $021000
         .as
         .xs
         clc
@@ -9,6 +9,7 @@
         jsr     L21107
         jmp     L22000
 
+        .here
         .logical $021100
 L21100  bit     L21100 & $ffff
 L21103  lda     #$11

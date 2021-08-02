@@ -113,13 +113,20 @@ namespace SourceGen.AsmGen {
         private CharEncoding.Encoding mCurrentEncoding;
 
         /// <summary>
+        /// Output mode; determines how ORG is handled.
+        /// </summary>
+        private enum TassOutputMode {
+            Unknown = 0, Loadable = 1, Streamable = 2
+        }
+        private TassOutputMode mOutputMode;
+
+        /// <summary>
         /// Holds detected version of configured assembler.
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
 
         // Version we're coded against.
         private static CommonUtil.Version V1_53 = new CommonUtil.Version(1, 53, 1515);
-
 
         // Pseudo-op string constants.
         private static PseudoOp.PseudoOpNames sDataOpNames =
@@ -189,7 +196,37 @@ namespace SourceGen.AsmGen {
                 AssemblerInfo.Id.Tass64);
             mColumnWidths = (int[])config.ColumnWidths.Clone();
 
-            mHasPrgHeader = GenCommon.HasPrgHeader(project);
+            // 64tass emulates a loader on a 64K system.  The address you specify with
+            // "* = <addr>" tells the loader where the code lives.  If the project runs off the
+            // end of memory, you get a warning message and an output file that has the last
+            // part as the first part, because the loader wraps around.
+            //
+            // If (start_addr + total_len) doesn't fit without wrapping, we want to start
+            // the code with "* = 0" (or omit it entirely) and use ".logical" for the first.
+            // chunk.  This allows us to generate the full 64K.  Note that 65816 code that
+            // starts outside bank 0 will always fail this test.
+            //
+            // Thus there are two modes: "loadable" and "streamable".  We could output everything
+            // as streamable but that's kind of ugly and prevents the PRG optimization.
+            //
+            // If the file has more than 64K of data in it, we need to add "--long-address" to
+            // the command-line arguments.
+
+            // Get start address.  If this is a PRG file, the start address is the address
+            // of offset +000002.
+            bool hasPrgHeader = GenCommon.HasPrgHeader(project);
+            int offAdj = hasPrgHeader ? 2 : 0;
+            int startAddr = project.AddrMap.Get(offAdj);
+            if (startAddr + project.FileDataLength - offAdj > 65536) {
+                // Does not fit into memory at load address.
+                mOutputMode = TassOutputMode.Streamable;
+                mHasPrgHeader = false;
+            } else {
+                mOutputMode = TassOutputMode.Loadable;
+                mHasPrgHeader = hasPrgHeader;
+            }
+            //Debug.WriteLine("startAddr=$" + startAddr.ToString("x6") +
+            //    " outputMode=" + mOutputMode + " hasPrg=" + mHasPrgHeader);
         }
 
         /// <summary>
@@ -252,8 +289,9 @@ namespace SourceGen.AsmGen {
             Localizer.QuirkNoOpcodeMnemonics = true;
             Localizer.Analyze();
 
+            bool needLongAddress = Project.FileDataLength > 65536 + (mHasPrgHeader ? 2 : 0);
             string extraOptions = string.Empty +
-                (Project.FileDataLength > 65536 ? AsmTass64.LONG_ADDRESS : string.Empty) +
+                (needLongAddress ? AsmTass64.LONG_ADDRESS : string.Empty) +
                 (mHasPrgHeader ? string.Empty : AsmTass64.NOSTART);
 
             // Use UTF-8 encoding, without a byte-order mark.
@@ -612,14 +650,18 @@ namespace SourceGen.AsmGen {
             // 64tass separates the "compile offset", which determines where the output fits
             // into the generated binary, and "program counter", which determines the code
             // the assembler generates.  Since we need to explicitly specify every byte in
-            // the output file, the compile offset isn't very useful.  We want to set it once
-            // before the first line of code, then leave it alone.
+            // the output file, having a distinct compile offset isn't very useful.  We want
+            // to set it once before the first line of code, then leave it alone.
             //
             // Any subsequent ORG changes are made to the program counter, and take the form
             // of a pair of ops (.logical <addr> to open, .here to end).  Omitting the .here
             // causes an error.
+            //
+            // If this is a "streamable" file, meaning it won't actually load into 64K of RAM
+            // without wrapping around, then we skip the "* = addr" (same as "* = 0") and just
+            // start with ".logical" segments.
             Debug.Assert(offset >= StartOffset);
-            if (offset == StartOffset) {
+            if (offset == StartOffset && mOutputMode == TassOutputMode.Loadable) {
                 // Set the "compile offset" to the initial address.
                 OutputLine("*", "=",
                     SourceFormatter.FormatHexValue(Project.AddrMap.Get(StartOffset), 4),

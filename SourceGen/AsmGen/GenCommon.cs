@@ -507,7 +507,9 @@ namespace SourceGen.AsmGen {
         /// <param name="project">Project to check.</param>
         /// <returns>True if we think we found a PRG header.</returns>
         public static bool HasPrgHeader(DisasmProject project) {
-            if (project.FileDataLength < 3 || project.FileDataLength > 65536) {
+            if (project.FileDataLength < 3 || project.FileDataLength > 65536+2) {
+                // Must fit in 64KB of memory.  A 65538-byte file will work if the
+                // first two bytes are the PRG header (and it starts at address zero).
                 //Debug.WriteLine("PRG test: incompatible file length");
                 return false;
             }
@@ -538,6 +540,8 @@ namespace SourceGen.AsmGen {
                 //    ", address at +2 is " + addr2);
                 return false;
             }
+
+            // TODO? confirm project fits in 64K of memory
 
             return true;
         }

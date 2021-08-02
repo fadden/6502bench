@@ -134,9 +134,13 @@ namespace SourceGen.Tests {
             DateTime startWhen = DateTime.Now;
 
             int successCount = 0;
+            int asmFailCount = 0;
             foreach (string pathName in testCases) {
-                if (GenerateAndAssemble(pathName)) {
+                if (GenerateAndAssemble(pathName, out bool someAsmFailed)) {
                     successCount++;
+                }
+                if (someAsmFailed) {
+                    asmFailCount++;
                 }
 
                 if (worker.CancellationPending) {
@@ -152,7 +156,9 @@ namespace SourceGen.Tests {
                     " tests passed in {0:N3} sec\r\n",
                     (endWhen - startWhen).TotalSeconds), Colors.Green);
             } else {
-                ReportProgress(successCount + " of " + testCases.Count + " tests passed\r\n");
+                ReportProgress(successCount + " of " + testCases.Count + " tests passed\r\n",
+                    Colors.OrangeRed);
+                ReportProgress(asmFailCount + " tests reported assembler failures\r\n");
             }
 
             PrintAsmVersions();
@@ -215,8 +221,14 @@ namespace SourceGen.Tests {
         /// does not count as a failure.
         /// </summary>
         /// <param name="pathName">Full path to test case.</param>
+        /// <param name="someAsmFailed">Set to true if one or more assemblers reported an error,
+        ///   or the assembled binary did not match.  Useful when running the tests against an
+        ///   older version of an assembler for which the generated code does not match the
+        ///   expected text, but we can still evaluate correctness.</param>
         /// <returns>True if all assemblers worked as expected.</returns>
-        private bool GenerateAndAssemble(string pathName) {
+        private bool GenerateAndAssemble(string pathName, out bool someAsmFailed) {
+            someAsmFailed = false;
+
             ReportProgress(Path.GetFileName(pathName) + "...\r\n");
 
             // Create DisasmProject object, either as a new project for a plain data file,
@@ -243,6 +255,7 @@ namespace SourceGen.Tests {
 
             // Iterate through all known assemblers.
             bool didFail = false;
+            int numAsmFailures = 0;
             foreach (AssemblerInfo.Id asmId in
                     (AssemblerInfo.Id[])Enum.GetValues(typeof(AssemblerInfo.Id))) {
                 if (asmId == AssemblerInfo.Id.Unknown) {
@@ -315,15 +328,14 @@ namespace SourceGen.Tests {
                     didFail = true;
                     continue;
                 }
+                results.AsmResults = asmResults;
+                numAsmFailures++;       // assume failure until the end
                 if (asmResults.ExitCode != 0) {
                     ReportErrMsg("assembler returned code=" + asmResults.ExitCode);
                     ReportFailure();
                     didFail = true;
-                    results.AsmResults = asmResults;
                     continue;
                 }
-
-                results.AsmResults = asmResults;
 
                 ReportProgress(" verify...");
                 timer.StartTask("Compare Binary to Expected");
@@ -354,6 +366,7 @@ namespace SourceGen.Tests {
 
                 // Victory!
                 results.AssembleOkay = true;
+                numAsmFailures--;
                 ReportSuccess();
 
                 timer.EndTask("Full Test Duration");
@@ -373,6 +386,8 @@ namespace SourceGen.Tests {
             }
 
             project.Cleanup();
+
+            someAsmFailed = (numAsmFailures != 0);
             return !didFail;
         }
 
