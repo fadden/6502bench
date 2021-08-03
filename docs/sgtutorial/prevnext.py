@@ -30,6 +30,7 @@ gFileList = [
     "address-tables.html",
     "extension-scripts.html",
     "visualizations.html",
+    "suggestions.html",
 ]
 
 class LocalError(Exception):

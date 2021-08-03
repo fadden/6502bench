@@ -22,6 +22,8 @@
 # one where this command was run.  If not, the file will be read from the
 # directory where the HTML file lives.
 #
+#  find . -name '*.html' -print0 | xargs -0 ./block-repl.py
+#
 # (Tested with Python v3.8.5)
 #
 # Copyright 2021 Andy McFadden.

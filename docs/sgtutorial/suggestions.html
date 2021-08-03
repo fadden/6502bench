@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="../main.css"/>
     <!-- END: /incl-head.html -->
 
-    <title>Advanced Topics - SourceGen Tutorial</title>
+    <title>Suggestions - SourceGen Tutorial</title>
 </head>
 
 <body>
@@ -49,7 +49,7 @@
 </div>
 <!-- END: /incl-topnav.html -->
 
-<!-- START: incl-sidenav.html active:#sidenav-advanced-topics -->
+<!-- START: incl-sidenav.html active:#sidenav-suggestions -->
 <div id="sidenav">
     <!-- side navigation bar contents -->
     <ul>
@@ -70,43 +70,54 @@
             <li id="sidenav-inline-data"><a href="inline-data.html">Inline Data</a></li>
             <li id="sidenav-odds-ends"><a href="odds-ends.html">Odds &amp; Ends</a></li>
         </ul></li>
-        <li id="sidenav-advanced-topics" class="active"><a href="advanced-topics.html">Advanced Topics</a>
+        <li id="sidenav-advanced-topics"><a href="advanced-topics.html">Advanced Topics</a>
         <ul>
             <li id="sidenav-address-tables"><a href="address-tables.html">Address Tables</a></li>
             <li id="sidenav-extension-scripts"><a href="extension-scripts.html">Extension Scripts</a></li>
             <li id="sidenav-visualizations"><a href="visualizations.html">Visualizations</a></li>
         </ul></li>
-        <li id="sidenav-suggestions"><a href="suggestions.html">Suggestions</a></li>
+        <li id="sidenav-suggestions" class="active"><a href="suggestions.html">Suggestions</a></li>
     </ul>
 </div>
 <!-- END: incl-sidenav.html -->
 
 <div id="main">
 
-<h2>Advanced Topics</h2>
+<h2>A Few Suggestions</h2>
 
-<p>This section has tutorials for three subjects:</p>
+<p>The hardest step in a journey is often the first.  Here are a few
+suggestions to help you on your way.</p>
 
 <ul>
-    <li><a href="address-tables.html">Address Tables</a>: how to format
-    a table of code or data addresses easily.</li>
-    <li><a href="extension-scripts.html">Extension Scripts</a>: an introduction
-    to scripts that automate formatting of inline data.</li>
-    <li><a href="visualizations.html">Visualizations</a>: converting graphical
-    data to bitmap or wireframe images that can be embedded into the
-    disassembly listing.</li>
+    <li>Start with a small project (&lt; 1KB).  If you haven't
+    disassembled code before, this is the time to play with different
+    conventions, like whether to use MixedCase or underscore_separated
+    or SCREAMING_CAPS for labels.</li>
+    <li>Use the program thoroughly.  Understand all of what it does.</li>
+    <li>Begin each project by separating code from data.  Identify external
+    entry points, format tables of addresses, and find JSRs that are
+    followed by inline data.  Write an extension script to handle the
+    inlines so you won't keep tripping over them.  If parts of the program
+    are relocated to a different address, set the appropriate address
+    overrides.  Progress will be easier once you get code, data, and junk
+    identified and arranged in memory.</li>
+    <li>Start with easily identifiable pieces.  If a chunk of code is reading
+    from the keyboard, you can make reasonable guesses about the purpose of
+    the code that interacts with it.
+    The start of the program is often the hardest place to start, because it
+    usually just initializes a bunch of stuff you haven't identified.</li>
+    <li>Expect to figure out little pieces.  Use what you learn from these
+    to figure out other little pieces.  It's a jigsaw puzzle, not a book.</li>
+    <li>Don't get discouraged if there's a ton of code that you can't make
+    sense of.  It won't at first.  Keep chipping away.</li>
+    <li>Read <a href="https://6502disassembly.com/on-disassembly.html">On Disassembly</a>
+    for additional thoughts.</li>
 </ul>
-
-<p>These features are not essential, but they can make your life easier.
-All of the tutorials assume you are already familiar with SourceGen.</p>
-
-<p>&nbsp;</p>
 
 </div> <!-- #main -->
 
 <div id="prevnext">
-    <a href="odds-ends.html" class="btn-previous">&laquo; Previous</a>
-    <a href="address-tables.html" class="btn-next">Next &raquo;</a>
+    <a href="visualizations.html" class="btn-previous">&laquo; Previous</a>
 </div>
 
 <!-- START: /incl-footer.html -->
