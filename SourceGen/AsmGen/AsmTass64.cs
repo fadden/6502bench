@@ -797,7 +797,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.StringDci:
                     opcodeStr = sDataOpNames.StrDci;
-                    if ((Project.FileData[offset] & 0x80) != 0) {
+                    if ((Project.FileData[offset + dfd.Length - 1] & 0x80) == 0) {
                         // ".shift" directive only works for strings where the low bit starts
                         // clear and ends high.
                         OutputNoJoy(offset, dfd.Length, labelStr, commentStr);

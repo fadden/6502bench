@@ -247,5 +247,35 @@ L144B:   nop
          .byte   $80
 
 @L14DA:  nop
+         jmp     @L1511
+
+         .byte   $86
+         .byte   "Hell",$ef
+         .byte   "H",$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+         .byte   $c8,$e5,$ec,$ec,$6f
+         .byte   $c8,$49
+         .byte   'X'
+         .byte   '!'
+         .byte   $86
+         .byte   $48,$45,$4c,$4c,$cf
+         .byte   $48,$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+         .byte   $c8,$c5,$cc,$cc,$4f
+         .byte   $c8,$49
+         .byte   $58
+         .byte   $21
+         .byte   $86
+         .byte   $48,$05,$0c,$0c,$8f
+         .byte   $48,$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+
+@L1511:  nop
          rts
 

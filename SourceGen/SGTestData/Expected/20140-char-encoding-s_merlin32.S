@@ -317,5 +317,35 @@ L144B    nop
          dfb   $80
 
 :L14DA   nop
+         jmp   :L1511
+
+         dfb   $86
+         dci   'Hello'
+         dci   'HI'
+         dci   'X'
+         dci   '!'
+         dfb   $86
+         dci   "Hello"
+         dci   "HI"
+         dfb   'X'
+         dfb   '!'
+         dfb   $86
+         hex   48454c4ccf
+         hex   48c9
+         hex   d8
+         hex   a1
+         dfb   $86
+         hex   c8c5cccc4f
+         hex   c849
+         dfb   $58
+         dfb   $21
+         dfb   $86
+         hex   48050c0c8f
+         hex   48c9
+         hex   d8
+         hex   a1
+         dfb   $86
+
+:L1511   nop
          rts
 

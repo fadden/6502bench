@@ -1187,8 +1187,13 @@ namespace SourceGen {
         /// Counts strings in Dextral Character Inverted format, meaning the high bit on the
         /// last byte is the opposite of the preceding.
         /// 
-        /// Each string must be at least two bytes.  To reduce false-positives, we require
-        /// that all strings have the same hi/lo pattern.
+        /// To reduce false-positives, we require that all strings have the same hi/lo pattern.
+        ///
+        /// Single-character strings are allowed for C64 PETSCII, which doesn't have an
+        /// equivalent to "high ASCII" character formatting, so long as the terminating
+        /// character value has its high bit set.  Without this restriction, any collection
+        /// of characters is just a list of DCI strings, which is a weird thing to offer up
+        /// in the UI.
         /// </summary>
         /// <remarks>
         /// For C64Petscii, this will identify strings that are entirely in lower case except
@@ -1201,22 +1206,21 @@ namespace SourceGen {
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
         public static int RecognizeDciStrings(byte[] fileData, int start, int end,
                 CharEncoding.InclusionTest charTest) {
-            int expectedHiBit = fileData[start] & 0x80;
+            int endHiBit = fileData[end] & 0x80;
             int stringCount = 0;
             int stringLen = 0;
 
-            // Quick test on last byte.
-            if ((fileData[end] & 0x80) == expectedHiBit) {
-                return -1;
-            }
-
             for (int i = start; i <= end; i++) {
                 byte val = fileData[i];
-                if ((val & 0x80) != expectedHiBit) {
+                if ((val & 0x80) == endHiBit) {
                     // end of string
                     if (stringLen == 0) {
-                        // Got two consecutive bytes with end-marker polarity... fail.
-                        return -1;
+                        // Got two consecutive bytes with end-marker polarity.  Allow if the
+                        // end char high bit is set.  Otherwise it's just a sequence of
+                        // regular characters.
+                        if (endHiBit == 0) {
+                            return -1;
+                        }
                     }
                     stringCount++;
                     stringLen = 0;
@@ -1230,6 +1234,12 @@ namespace SourceGen {
                 //}
             }
 
+            bool isAscii = charTest(0x5c);      // temporary hack
+            if (isAscii && stringCount == end - start + 1) {
+                // Entire region is single-character strings.  Don't allow for ASCII or
+                // high ASCII.
+                return -1;
+            }
             return stringCount;
         }
 
@@ -1330,10 +1340,10 @@ namespace SourceGen {
                     }
                     return true;
                 case FormatDescriptor.Type.StringDci:
-                    if (length < 2) {
-                        failMsg = Res.Strings.STR_VFY_DCI_SHORT;
-                        return false;
-                    }
+                    //if (length < 2) {
+                    //    failMsg = Res.Strings.STR_VFY_DCI_SHORT;
+                    //    return false;
+                    //}
                     byte first = (byte)(fileData[offset] & 0x80);
                     for (int i = offset + 1; i < offset + length - 1; i++) {
                         if ((fileData[i] & 0x80) != first) {
@@ -1341,7 +1351,7 @@ namespace SourceGen {
                             return false;
                         }
                     }
-                    if ((fileData[offset + length - 1] & 0x80) == first) {
+                    if (length > 1 && (fileData[offset + length - 1] & 0x80) == first) {
                         failMsg = Res.Strings.STR_VFY_DCI_NOT_TERMINATED;
                         return false;
                     }

@@ -352,5 +352,40 @@ L144B   nop
         .byte   $80
 
 _L14DA  nop
+        jmp     _L1511
+
+        .byte   $86
+        .enc    "sg_ascii"
+        .shift  "Hello"
+        .shift  "HI"
+        .shift  "X"
+        .shift  "!"
+        .byte   $86
+        .enc    "sg_hiascii"
+        .byte   $c8,$e5,$ec,$ec,$6f
+        .byte   $c8,$49
+        .enc    "sg_ascii"
+        .byte   'X'
+        .byte   '!'
+        .byte   $86
+        .enc    "none"
+        .shift  "hello"
+        .shift  "hi"
+        .shift  "x"
+        .shift  "!"
+        .byte   $86
+        .byte   $c8,$c5,$cc,$cc,$4f
+        .byte   $c8,$49
+        .byte   'x'
+        .byte   '!'
+        .byte   $86
+        .enc    "screen"
+        .shift  "Hello"
+        .shift  "HI"
+        .shift  "X"
+        .shift  "!"
+        .byte   $86
+
+_L1511  nop
         rts
 

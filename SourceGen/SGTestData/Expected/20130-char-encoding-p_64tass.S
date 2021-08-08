@@ -319,22 +319,65 @@ L144B   nop
         .byte   $5c
         .byte   't'
         .byte   $80
-        .text   "scr ",$05
-        .byte   $13
-        .byte   $03
-        .byte   $01
-        .byte   $10
-        .byte   $05
-        .byte   $13
-        .text   " ",$1c,": ",$1c,$1c," ",$1c,$12," ",$1c
-        .byte   $0e
-        .text   " ",$1c,$22," ",$1c,"' ",$1c
-        .byte   $14
+        .enc    "screen"
+        .text   "SCR escapes "
+        .byte   $1c
+        .text   ": "
+        .byte   $1c
+        .byte   $1c
+        .byte   ' '
+        .byte   $1c
+        .text   "r "
+        .byte   $1c
+        .text   "n "
+        .byte   $1c
+        .byte   $22
+        .byte   ' '
+        .byte   $1c
+        .byte   $27
+        .byte   ' '
+        .byte   $1c
+        .byte   't'
         .byte   $80
         .enc    "sg_hiascii"
         .text   "HIGH escapes \: \\ \r \n \0 \' \t"
         .byte   $80
 
 _L14DA  nop
+        jmp     _L1511
+
+        .byte   $86
+        .enc    "sg_ascii"
+        .shift  "Hello"
+        .shift  "HI"
+        .shift  "X"
+        .shift  "!"
+        .byte   $86
+        .enc    "sg_hiascii"
+        .byte   $c8,$e5,$ec,$ec,$6f
+        .byte   $c8,$49
+        .enc    "sg_ascii"
+        .byte   'X'
+        .byte   '!'
+        .byte   $86
+        .enc    "none"
+        .shift  "hello"
+        .shift  "hi"
+        .shift  "x"
+        .shift  "!"
+        .byte   $86
+        .byte   $c8,$c5,$cc,$cc,$4f
+        .byte   $c8,$49
+        .byte   'x'
+        .byte   '!'
+        .byte   $86
+        .enc    "screen"
+        .shift  "Hello"
+        .shift  "HI"
+        .shift  "X"
+        .shift  "!"
+        .byte   $86
+
+_L1511  nop
         rts
 

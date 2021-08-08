@@ -1283,9 +1283,9 @@ namespace SourceGen.WpfGui {
         }
 
         private FormatDescriptor.SubType ResolveAsciiGeneric(int offset,
-                FormatDescriptor.SubType subType) {
+                FormatDescriptor.SubType subType, byte dciAdjust = 0x00) {
             if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
-                if ((mFileData[offset] & 0x80) != 0) {
+                if (((mFileData[offset] & 0x80) ^ dciAdjust) != 0) {
                     subType = FormatDescriptor.SubType.HighAscii;
                 } else {
                     subType = FormatDescriptor.SubType.Ascii;
@@ -1406,8 +1406,16 @@ namespace SourceGen.WpfGui {
                 if ((val & 0x80) == endMask) {
                     // found the end of a string
                     int length = (i - stringStart) + 1;
+                    // High vs. low ASCII can't look at the first byte, in case it's a 1-byte
+                    // string.  We need to look at the last byte and flip the sense.  (It's
+                    // slightly easier to pass the first byte as usual, and flip it for a 1-byte
+                    // string.)
+                    byte dciAdjust = 0x00;
+                    if (length == 1) {
+                        dciAdjust = 0x80;
+                    }
                     FormatDescriptor dfd = FormatDescriptor.Create(length, type,
-                        ResolveAsciiGeneric(stringStart, subType));
+                        ResolveAsciiGeneric(stringStart, subType, dciAdjust));
                     Results.Add(stringStart, dfd);
                     stringStart = i + 1;
                 }

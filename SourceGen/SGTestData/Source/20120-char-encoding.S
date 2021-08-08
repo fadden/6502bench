@@ -1,7 +1,9 @@
 ; Copyright 2019 faddenSoft. All Rights Reserved.
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
-; Assembler: ACME (has good PETSCII/screen code support)
+; Assembler: ACME v0.96.4 (has good PETSCII/screen code support)
+; (acme -o 20120-char-encoding 20120-char-encoding.S)
+;
 ; 6502 version
 ;
 ; This becomes multiple tests that differ only in how the default
@@ -145,8 +147,10 @@ allbytes
         !hex    f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
 
 end     nop
-        jmp     skip_bs
+        jmp     skip_esc
 
+; String literals with backslash escapes.  Necessary because ACME v0.97
+; introduced the feature and broke compatibility with previous versions.
         !text   "ASCII escapes \: \\ \r \n \",$22," \",$27," \t"
         !byte   $80
         !pet    "PETSCII escapes \: \\ \r \n \",$22," \",$27," \t"
@@ -159,5 +163,46 @@ end     nop
         }
         !byte   $80
 
-skip_bs nop
+skip_esc nop
+        jmp     skip_dci
+
+; Small batches of DCI strings, for testing single-character strings.
+; EDIT: format all of these as DCI strings
+        !byte   $86
+
+        !text   "Hell",$ef                      ;Hello
+        !text   "H",$c9                         ;Hi
+        !byte   $d8                             ;X
+        !byte   $a1                             ;!
+        !byte   $86
+
+        !xor $80 {
+            !text   "Hell",$ef                      ;Hello
+            !text   "H",$c9                         ;Hi
+            !byte   $d8                             ;X
+            !byte   $a1                             ;!
+        }
+        !byte   $86
+
+        !pet    "hellO"
+        !pet    "hI"
+        !byte   $d8
+        !byte   $a1
+        !byte   $86
+
+        !xor $80 {              ;hi then lo; probably not necessary
+            !pet    "hellO"     ;(all C64 DCI seems to be lo-then-hi)
+            !pet    "hI"
+            !byte   $d8
+            !byte   $a1
+        }
+        !byte   $86
+
+        !scr    "Hell",$8f      ;just do lo-then-hi for screen codes
+        !scr    "H",$c9
+        !byte   $d8
+        !byte   $a1
+        !byte   $86
+
+skip_dci nop
         rts

@@ -288,16 +288,23 @@ L144B   nop
         !byte   $5c
         !byte   $54
         !byte   $80
-        !pet    "scr ",$05
-        !byte   $13
-        !byte   $03
-        !byte   $01
-        !byte   $10
-        !byte   $05
-        !byte   $13
-        !pet    " ",$1c,": ",$1c,$1c," ",$1c,$12," ",$1c
-        !byte   $0e
-        !pet    " ",$1c,$22," ",$1c,"' ",$1c
+        !scr    "SCR escapes "
+        !byte   $1c
+        !scr    ": "
+        !byte   $1c
+        !byte   $1c
+        !byte   $20
+        !byte   $1c
+        !scr    "r "
+        !byte   $1c
+        !scr    "n "
+        !byte   $1c
+        !byte   $22
+        !byte   $20
+        !byte   $1c
+        !byte   $27
+        !byte   $20
+        !byte   $1c
         !byte   $14
         !byte   $80
         !xor    $80 {
@@ -306,5 +313,35 @@ L144B   nop
         !byte   $80
 
 @L14DA  nop
+        jmp     @L1511
+
+        !byte   $86
+        !text   "Hell",$ef
+        !text   "H",$c9
+        !text   $d8
+        !text   $a1
+        !byte   $86
+        !hex    c8e5ecec6f
+        !hex    c849
+        !byte   'X'
+        !byte   '!'
+        !byte   $86
+        !pet    "hellO"
+        !pet    "hI"
+        !pet    "X"
+        !pet    $a1
+        !byte   $86
+        !pet    "HELLo"
+        !pet    "Hi"
+        !byte   $58
+        !byte   $21
+        !byte   $86
+        !scr    "Hell",$8f
+        !scr    "H",$c9
+        !scr    $d8
+        !scr    $a1
+        !byte   $86
+
+@L1511  nop
         rts
 

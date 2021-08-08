@@ -285,21 +285,58 @@ L144B    nop
          dfb   $5c
          dfb   $54
          dfb   $80
-         hex   5343522005
-         dfb   $13
-         dfb   $03
-         dfb   $01
-         dfb   $10
-         dfb   $05
-         dfb   $13
-         hex   201c3a201c1c201c12201c
-         dfb   $0e
-         hex   201c22201c27201c
+         hex   534352200513030110051320
+         dfb   $1c
+         hex   3a20
+         dfb   $1c
+         dfb   $1c
+         dfb   $20
+         dfb   $1c
+         hex   1220
+         dfb   $1c
+         hex   0e20
+         dfb   $1c
+         dfb   $22
+         dfb   $20
+         dfb   $1c
+         dfb   $27
+         dfb   $20
+         dfb   $1c
          dfb   $14
          dfb   $80
          asc   "HIGH escapes \: \\ \r \n \0 \' \t"
          dfb   $80
 
 :L14DA   nop
+         jmp   :L1511
+
+         dfb   $86
+         dci   'Hello'
+         dci   'HI'
+         dci   'X'
+         dci   '!'
+         dfb   $86
+         dci   "Hello"
+         dci   "HI"
+         dfb   'X'
+         dfb   '!'
+         dfb   $86
+         hex   48454c4ccf
+         hex   48c9
+         hex   d8
+         hex   a1
+         dfb   $86
+         hex   c8c5cccc4f
+         hex   c849
+         dfb   $58
+         dfb   $21
+         dfb   $86
+         hex   48050c0c8f
+         hex   48c9
+         hex   d8
+         hex   a1
+         dfb   $86
+
+:L1511   nop
          rts
 

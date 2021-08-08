@@ -317,21 +317,58 @@ L144B:   nop
          .byte   $5c
          .byte   $54
          .byte   $80
-         .byte   $53,$43,$52,$20,$05
-         .byte   $13
-         .byte   $03
-         .byte   $01
-         .byte   $10
-         .byte   $05
-         .byte   $13
-         .byte   $20,$1c,$3a,$20,$1c,$1c,$20,$1c,$12,$20,$1c
-         .byte   $0e
-         .byte   $20,$1c,$22,$20,$1c,$27,$20,$1c
+         .byte   $53,$43,$52,$20,$05,$13,$03,$01,$10,$05,$13,$20
+         .byte   $1c
+         .byte   $3a,$20
+         .byte   $1c
+         .byte   $1c
+         .byte   $20
+         .byte   $1c
+         .byte   $12,$20
+         .byte   $1c
+         .byte   $0e,$20
+         .byte   $1c
+         .byte   $22
+         .byte   $20
+         .byte   $1c
+         .byte   $27
+         .byte   $20
+         .byte   $1c
          .byte   $14
          .byte   $80
          HiAscii "HIGH escapes \: \\ \r \n \0 \' \t"
          .byte   $80
 
 @L14DA:  nop
+         jmp     @L1511
+
+         .byte   $86
+         .byte   "Hell",$ef
+         .byte   "H",$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+         .byte   $c8,$e5,$ec,$ec,$6f
+         .byte   $c8,$49
+         .byte   'X'
+         .byte   '!'
+         .byte   $86
+         .byte   $48,$45,$4c,$4c,$cf
+         .byte   $48,$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+         .byte   $c8,$c5,$cc,$cc,$4f
+         .byte   $c8,$49
+         .byte   $58
+         .byte   $21
+         .byte   $86
+         .byte   $48,$05,$0c,$0c,$8f
+         .byte   $48,$c9
+         .byte   $d8
+         .byte   $a1
+         .byte   $86
+
+@L1511:  nop
          rts
 

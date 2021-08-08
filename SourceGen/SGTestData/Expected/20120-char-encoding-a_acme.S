@@ -220,5 +220,35 @@ L144B   nop
         !byte   $80
 
 @L14DA  nop
+        jmp     @L1511
+
+        !byte   $86
+        !text   "Hell",$ef
+        !text   "H",$c9
+        !text   $d8
+        !text   $a1
+        !byte   $86
+        !hex    c8e5ecec6f
+        !hex    c849
+        !byte   'X'
+        !byte   '!'
+        !byte   $86
+        !pet    "hellO"
+        !pet    "hI"
+        !pet    "X"
+        !pet    $a1
+        !byte   $86
+        !pet    "HELLo"
+        !pet    "Hi"
+        !byte   $58
+        !byte   $21
+        !byte   $86
+        !scr    "Hell",$8f
+        !scr    "H",$c9
+        !scr    $d8
+        !scr    $a1
+        !byte   $86
+
+@L1511  nop
         rts
 
