@@ -182,7 +182,7 @@ L1124   rra     ($00),y
 _L1166  sta     ($00),y
         .byte   $92
 
-L1169   .byte   $93,$00
+L1169   sha     ($00),y
         sty     $00,x
         sta     $00,x
         stx     $00,y

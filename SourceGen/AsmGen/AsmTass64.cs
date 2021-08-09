@@ -127,6 +127,8 @@ namespace SourceGen.AsmGen {
 
         // Version we're coded against.
         private static CommonUtil.Version V1_53 = new CommonUtil.Version(1, 53, 1515);
+        private static CommonUtil.Version V1_54 = new CommonUtil.Version(1, 54, 1900);
+        private static CommonUtil.Version V1_55 = new CommonUtil.Version(1, 55, 2176);
         private static CommonUtil.Version V1_56 = new CommonUtil.Version(1, 56, 2625);
 
         // Pseudo-op string constants.
@@ -410,11 +412,15 @@ namespace SourceGen.AsmGen {
                     return null;
                 } else if (op == OpDef.OpSHA_DPIndIndexY) {
                     // not recognized ($93)
-                    return null;
+                    if (mAsmVersion < V1_55) {
+                        return null;
+                    }
                 }
             }
             if (op == OpDef.OpWDM_WDM) {
-                // 64tass v1.54 doesn't like this to have an operand.  Output as hex.
+                // 64tass v1.53 doesn't know what this is.
+                // 64tass v1.55 doesn't like this to have an operand.
+                // Output as hex.
                 return null;
             }
             return string.Empty;        // indicate original is fine

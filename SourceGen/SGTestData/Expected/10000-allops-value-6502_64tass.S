@@ -182,7 +182,7 @@ L1124   rra     ($ff),y
 _L1166  sta     ($ff),y
         .byte   $92
 
-L1169   .byte   $93,$ff
+L1169   sha     ($ff),y
         sty     $ff,x
         sta     $ff,x
         stx     $ff,y
