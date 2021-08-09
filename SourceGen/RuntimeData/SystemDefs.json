@@ -276,7 +276,7 @@
       "GroupName" : "Oric",
       "Cpu" : "6502",
       "Speed" : "1",
-      "Description" : "Oric",
+      "Description" : "Oric Atmos",
       "SymbolFiles" : [
         "RT:Oric/ATMOS-ROM.sym65",
         "RT:Oric/ATMOS-IO.sym65"

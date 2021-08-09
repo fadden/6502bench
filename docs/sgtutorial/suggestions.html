@@ -100,11 +100,20 @@ suggestions to help you on your way.</p>
     inlines so you won't keep tripping over them.  If parts of the program
     are relocated to a different address, set the appropriate address
     overrides.  Progress will be easier once you get code, data, and junk
-    identified and arranged in memory.</li>
+    identified and arranged in memory.
+    <ul>
+    <li>Code start tags are rarely needed, and code end tags are almost never
+    needed.  You shouldn't have to spend a lot of time manually tagging things.
+    If a piece of code isn't being found, it's usually best to figure out why
+    the code that calls it isn't being found, instead of trying to tag it and
+    forge ahead.  It might be dead code that's never called, or it might be
+    called from a table that you can format to add code entry tags for
+    multiple addresses with a single operation.</li>
+    </ul></li>
     <li>Start with easily identifiable pieces.  If a chunk of code is reading
     from the keyboard, you can make reasonable guesses about the purpose of
     the code that interacts with it.
-    The start of the program is often the hardest place to start, because it
+    The start of the program is often the hardest place to begin, because it
     usually just initializes a bunch of stuff you haven't identified.</li>
     <li>Expect to figure out little pieces.  Use what you learn from these
     to figure out other little pieces.  It's a jigsaw puzzle, not a book.</li>
