@@ -215,7 +215,8 @@ namespace SourceGen.AsmGen {
 
             string formattedOperand = null;
             int operandLen = instrLen - 1;
-            PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix;
+            PseudoOp.FormatNumericOpFlags opFlags =
+                PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix;
             bool isPcRelBankWrap = false;
 
             // Tweak branch instructions.  We want to show the absolute address rather
@@ -242,6 +243,11 @@ namespace SourceGen.AsmGen {
             }
             if (op.IsAbsolutePBR) {
                 opFlags |= PseudoOp.FormatNumericOpFlags.IsAbsolutePBR;
+            }
+            if (gen.Quirks.BankZeroAbsPBRRestrict) {
+                // Hack to avoid having to define a new FormatConfig.ExpressionMode for 64tass.
+                // Get rid of this 64tass gets its own exp mode.
+                opFlags |= PseudoOp.FormatNumericOpFlags.Is64Tass;
             }
 
             // 16-bit operands outside bank 0 need to include the bank when computing

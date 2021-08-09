@@ -127,6 +127,7 @@ namespace SourceGen.AsmGen {
 
         // Version we're coded against.
         private static CommonUtil.Version V1_53 = new CommonUtil.Version(1, 53, 1515);
+        private static CommonUtil.Version V1_56 = new CommonUtil.Version(1, 56, 2625);
 
         // Pseudo-op string constants.
         private static PseudoOp.PseudoOpNames sDataOpNames =
@@ -178,13 +179,14 @@ namespace SourceGen.AsmGen {
             if (asmVersion != null) {
                 mAsmVersion = asmVersion.Version;       // Use the actual version.
             } else {
-                mAsmVersion = V1_53;                    // No assembler installed, use default.
+                mAsmVersion = V1_56;                    // No assembler installed, use default.
             }
 
             Quirks.StackIntOperandIsImmediate = true;
             Quirks.LeadingUnderscoreSpecial = true;
             Quirks.Need24BitsForAbsPBR = true;
             Quirks.BitNumberIsArg = true;
+            Quirks.BankZeroAbsPBRRestrict = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;

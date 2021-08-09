@@ -208,6 +208,13 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class AssemblerQuirks {
         /// <summary>
+        /// Does the assembler require a qualifier to be added to the operand when an instruction
+        /// formed with the Program Bank Register (JMP/JSR) attempts to access a bank zero
+        /// address from outside bank zero?
+        /// </summary>
+        public bool BankZeroAbsPBRRestrict { get; set; }
+
+        /// <summary>
         /// Does the assembler expect the bit index for BBR/BBS/RMB/SMB to be expressed as
         /// a separate argument?
         /// </summary>

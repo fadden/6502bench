@@ -123,7 +123,19 @@ L543280  jsr   skip
          lda   #$eaea
          rep   #$30
          nop
-         jsr   $edcb
-         nop
+         lda   skip
+         lda   skip+20
+         jsr   skip
+         jsr   skip+20
+         jsr   (skip,x)
+         bne   :L5432B7
+         jmp   (skip,x)
+
+:L5432B7 jsr   $edcb
+         lda   $edcb
+         bne   :L5432C2
+         jmp   ($edcb,x)
+
+:L5432C2 nop
          rtl
 

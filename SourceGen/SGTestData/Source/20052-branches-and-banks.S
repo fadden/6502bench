@@ -2,7 +2,7 @@
 ; See the LICENSE.txt file for distribution terms (Apache 2.0).
 ;
 ; Assembler: cc65
-; (cl65 --target none -C <cfg>.cfg <src>.S)
+; cl65 --target none -C 20052-branches-and-banks.cfg 20052-branches-and-banks.S
 ;
 ; For the 65816 we want to exercise some additional things.
 
@@ -169,8 +169,22 @@ nxt54b:
         .i16
         nop
 
-; try a 16-bit JSR with no symbol
+; try some 16-bit stuff with and without symbols
+        lda     skip                    ;EDIT: set these to "skip" label
+        lda     skip+20
+        jsr     skip
+        jsr     skip+20
+        jsr     (skip,X)
+        bne     past1
+        jmp     (skip,X)
+past1:
+
+; try a few without symbols
         jsr     $edcb
+        lda     $edcb
+        bne     past2
+        jmp     ($edcb,X)
+past2:
         nop
 
         rtl

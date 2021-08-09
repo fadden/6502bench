@@ -107,7 +107,7 @@ fwdchk  nop
         nop
         rts
 
-L543280 jsr     skip+$540000
+L543280 jsr     skip,k
         nop
         rep     #$30
         .al
@@ -132,8 +132,20 @@ L543280 jsr     skip+$540000
         lda     #$eaea
         rep     #$30
         nop
-        jsr     $54edcb
-        nop
+        lda     skip
+        lda     skip+20
+        jsr     skip,k
+        jsr     skip+20,k
+        jsr     (skip,k,x)
+        bne     _L5432B7
+        jmp     (skip,k,x)
+
+_L5432B7 jsr    $54edcb
+        lda     $edcb
+        bne     _L5432C2
+        jmp     ($54edcb,x)
+
+_L5432C2 nop
         rtl
 
         .here

@@ -562,6 +562,7 @@ namespace SourceGen {
             IsAbsolutePBR           = 1 << 1,   // operand implicitly uses 'K' on 65816 (JMP/JSR)
             HasHashPrefix           = 1 << 2,   // operand has a leading '#', reducing ambiguity
             OmitLabelPrefixSuffix   = 1 << 3,   // don't show annotation char or non-unique prefix
+            Is64Tass                = 1 << 4,   // hack to allow 64tass to keep using "common" exp
         }
 
         /// <summary>
@@ -798,6 +799,7 @@ namespace SourceGen {
                     symbolValue &= 0xffff;
                 }
 
+                bool needCommaK = false;
                 if ((flags & FormatNumericOpFlags.IsAbsolutePBR) != 0) {
                     if ((operandValue & 0x00ff0000) == (symbolValue & 0x00ff0000)) {
                         // JMP or JSR to something within the same bank.  We don't need to
@@ -805,10 +807,16 @@ namespace SourceGen {
                         symbolValue &= 0xffff;
                     } else {
                         // This is an absolute JMP/JSR to an out-of-bank location, which is
-                        // bogus and should probably be prevented at a higher level.  We handle
-                        // it by altering the mask so an adjustment that covers the difference
-                        // in bank values is generated.
-                        mask = 0x00ffffff;
+                        // bogus and should probably be prevented at a higher level.  Most
+                        // assemblers are perfectly happy with this because we're passing a
+                        // 16-bit argument to a 16-bit operation, but 64tass doesn't like it
+                        // when you do this.  We used to just alter the mask to generate a
+                        // (potentially very large) offset, but 64tass stopped accepting that.
+                        // The correct approach is to add ",k" to the operand.
+                        //mask = 0x00ffffff;
+                        if ((flags & FormatNumericOpFlags.Is64Tass) != 0) {
+                            needCommaK = true;
+                        }
                     }
                 }
 
@@ -862,6 +870,10 @@ namespace SourceGen {
                 // to prefix the expression with a no-op addition.
                 if (sb[0] == '(' && (flags & FormatNumericOpFlags.HasHashPrefix) == 0) {
                     sb.Insert(0, "0+");
+                }
+
+                if (needCommaK) {
+                    sb.Append(",k");
                 }
             } else {
                 Debug.Assert(false, "bad numeric len");
