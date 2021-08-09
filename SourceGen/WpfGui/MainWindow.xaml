@@ -560,10 +560,8 @@ limitations under the License.
             </Grid.ColumnDefinitions>
 
 
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Left"
-                          DragStarted="ColSplitter_OnDragStarted" DragCompleted="ColSplitter_OnDragCompleted"/>
-            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Center"
-                          DragStarted="ColSplitter_OnDragStarted" DragCompleted="ColSplitter_OnDragCompleted"/>
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Left"/>
+            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Center"/>
 
             <Grid Name="leftPanel" Grid.Column="0">
                 <Grid.RowDefinitions>

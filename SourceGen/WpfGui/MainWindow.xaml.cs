@@ -784,6 +784,8 @@ namespace SourceGen.WpfGui {
             //   50K: 10 seconds, 20K: 1.6 sec, 10K: 0.6 sec, 5K: 0.2 sec
             const int MAX_SEL_COUNT = 5000;
 
+            mCodeViewRefocusNeeded = true;
+
             // In the current implementation, a large (500K) list can take a couple of
             // seconds to restore a single-line selection if the selected item is near
             // the bottom of the list.
@@ -851,40 +853,52 @@ namespace SourceGen.WpfGui {
 
         /// <summary>
         /// Sets the focus to the ListViewItem identified by SelectedIndex.  This must be done
-        /// when the ItemContainerGenerator's StatusChanged event fires.
+        /// after the ListView contents have changed, when the ItemContainerGenerator's
+        /// StatusChanged event fires.
         /// </summary>
         /// <remarks>
         /// Sample steps to reproduce problem:
-        ///  1. select note
-        ///  2. delete note
-        ///  3. select nearby line
-        ///  4. edit > undo
-        ///  5. hit the down-arrow key
+        ///  1. add or remove a note
+        ///  2. hit the down-arrow key
         ///
-        /// Without this event handler, the list jumps to line zero.  Apparently the keyboard
-        /// navigation is not based on which element(s) are selected.
+        /// This causes the ListView's contents to change enough that the keyboard position
+        /// is reset to zero, so attempting to move cursor up or down with an arrow key causes
+        /// the ListView position to jump to the top of the file.  The keyboard navigation
+        /// appears to be independent of which element(s) are selected.
         ///
-        /// The original article was dealing with a different problem, where you'd have to hit
-        /// the down-arrow twice to make it move the first time, because the focus was on the
-        /// control rather than an item.  The same fix seems to apply for this issue as well.
+        /// The workaround for this is to set the focus to the specific item where you want the
+        /// keyboard to be after making a change to the list.  This isn't quite so simple,
+        /// because at the point where we're restoring the selection flags, the UI elements
+        /// haven't yet been generated.  We need to wait for a "status changed" event to arrive
+        /// from the ItemContainerGenerator.
         ///
-        /// From http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
+        /// This: http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
+        /// formed the basis of my initial solution.  The blog post was about a different problem,
+        /// where you'd have to hit the down-arrow twice after the control was first created
+        /// because the focus is on the control rather than the item.  The same approach applies
+        /// here as well.
         ///
-        /// Unfortunately, grabbing focus like this causes problems with the GridSplitters.  As
-        /// soon as the splitter start to move, the ListView grabs focus and prevents them from
-        /// moving more than a few pixels.  The workaround is to do nothing while the
-        /// splitters are being moved.  This doesn't solve the problem completely, e.g. you
-        /// can't move the splitters with the arrow keys by more than one step because the
-        /// ListView gets a StatusChanged event and steals focus away, but at least the
-        /// mouse works.
+        /// Unfortunately, grabbing focus like this on every update causes problems with the
+        /// GridSplitters.  As soon as the splitter start to move, the ListView grabs focus and
+        /// prevents them from moving more than a few pixels.  The workaround was to do nothing
+        /// while the splitters are being moved.  This didn't solve the problem completely,
+        /// e.g. you couldn't move the splitters with the arrow keys by more than one step
+        /// because the ListView gets a StatusChanged event and steals focus away, but at least the
+        /// mouse worked.  (See issue #52 and https://stackoverflow.com/q/58652064/294248.)
         ///
-        /// Ideally we'd do something smarter with the StatusChanged event, or maybe find some
-        /// way to deal with the selection-jump problem that doesn't involve the StatusChanged
-        /// event, but short of a custom replacement control I don't know what that would be.
-        /// https://stackoverflow.com/q/58652064/294248
+        /// Unfortunately, this update didn't solve other problems created by the initial solution,
+        /// because setting the item focus clears multi-select.  If you held shift down while
+        /// hitting down-arrow, things would work fine until you reached the bottom of the
+        /// screen, at which point the virtual UI stuff would cause the item container generator
+        /// to do work and change state.  (See issue #105.)
+        ///
+        /// The current approach is to set an explicit "refocus needed" boolean when we make
+        /// changes to the list, and ignore the "status changed" events in other circumstances.
+        /// This seems to have the correct behavior (so far).
+        /// Hat tip to https://stackoverflow.com/a/53666203/294248
         /// </remarks>
         private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e) {
-            if (mIsSplitterBeingDragged) {
+            if (!mCodeViewRefocusNeeded) {
                 return;
             }
             if (codeListView.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated) {
@@ -896,21 +910,22 @@ namespace SourceGen.WpfGui {
 
                     if (item != null) {
                         item.Focus();
+                        mCodeViewRefocusNeeded = false;
                     }
                 }
             }
         }
+        private bool mCodeViewRefocusNeeded = false;
 
-        private bool mIsSplitterBeingDragged = false;
-        private void ColSplitter_OnDragStarted(object sender, DragStartedEventArgs e) {
-            mIsSplitterBeingDragged = true;
-        }
-
-        private void ColSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e) {
-            mIsSplitterBeingDragged = false;
-        }
-
+        /// <summary>
+        /// Sets the CodeListView's focus to the selected item.
+        /// </summary>
+        /// <remarks>
+        /// This is required after jumping to a new location; otherwise the keyboard focus is
+        /// still at the previous location.
+        /// </remarks>
         public void CodeListView_SetSelectionFocus() {
+            mCodeViewRefocusNeeded = true;
             ItemContainerGenerator_StatusChanged(null, null);
         }
 
@@ -1005,6 +1020,10 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// Ensures the the code ListView control has input focus.
         /// </summary>
+        /// <remarks>
+        /// Generally don't call this: it puts the focus on the control, not the items in the
+        /// control, so if you use up/down arrows you move to the next control.
+        /// </remarks>
         public void CodeListView_Focus() {
             codeListView.Focus();
         }

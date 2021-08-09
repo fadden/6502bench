@@ -2554,6 +2554,7 @@ namespace SourceGen {
 
                     mMainWin.CodeListView_EnsureVisible(index);
                     mMainWin.CodeListView_SelectRange(index, 1);
+                    mMainWin.CodeListView_SetSelectionFocus();
                     return;
                 }
 
@@ -2571,7 +2572,7 @@ namespace SourceGen {
                 MessageBoxImage.Information);
             mFindStartIndex = -1;
 
-            mMainWin.CodeListView_Focus();
+            //mMainWin.CodeListView_Focus();
         }
 
         public bool CanFormatAsWord() {
@@ -2774,7 +2775,7 @@ namespace SourceGen {
             if (dlg.ShowDialog() == true) {
                 GoToLocation(new NavStack.Location(dlg.TargetOffset, 0, false),
                     GoToMode.JumpToCodeData, true);
-                mMainWin.CodeListView_Focus();
+                //mMainWin.CodeListView_Focus();
             }
         }
 
@@ -2920,6 +2921,7 @@ namespace SourceGen {
 
                         // Update the selection.
                         mMainWin.CodeListView_SelectRange(lineIndex, 1);
+                        mMainWin.CodeListView_SetSelectionFocus();
 
                         if (doPush) {
                             // Update the back stack and associated controls.
