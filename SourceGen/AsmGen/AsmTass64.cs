@@ -750,23 +750,18 @@ namespace SourceGen.AsmGen {
             Debug.Assert(dfd.Length > 0);
 
             CharEncoding.Convert charConv = null;
-            CharEncoding.Convert dciConv = null;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
                     charConv = CharEncoding.ConvertAscii;
-                    dciConv = CharEncoding.ConvertLowAndHighAscii;
                     break;
                 case FormatDescriptor.SubType.HighAscii:
                     charConv = CharEncoding.ConvertHighAscii;
-                    dciConv = CharEncoding.ConvertLowAndHighAscii;
                     break;
                 case FormatDescriptor.SubType.C64Petscii:
                     charConv = CharEncoding.ConvertC64Petscii;
-                    dciConv = CharEncoding.ConvertLowAndHighC64Petscii;
                     break;
                 case FormatDescriptor.SubType.C64Screen:
                     charConv = CharEncoding.ConvertC64ScreenCode;
-                    dciConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
                     break;
                 default:
                     break;
@@ -808,6 +803,7 @@ namespace SourceGen.AsmGen {
                     if ((Project.FileData[offset + dfd.Length - 1] & 0x80) == 0) {
                         // ".shift" directive only works for strings where the low bit starts
                         // clear and ends high.
+                        // TODO(maybe): this is sub-optimal for high-ASCII DCI strings.
                         OutputNoJoy(offset, dfd.Length, labelStr, commentStr);
                         return;
                     }
@@ -820,12 +816,7 @@ namespace SourceGen.AsmGen {
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 Formatter.DOUBLE_QUOTE_DELIM,StringOpFormatter.RawOutputStyle.CommaSep, charConv,
                 false);
-            if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                // DCI is awkward because the character encoding flips on the last byte.  Rather
-                // than clutter up StringOpFormatter for this rare item, we just accept low/high
-                // throughout.
-                stropf.CharConv = dciConv;
-            }
+            stropf.IsDciString = (dfd.FormatType == FormatDescriptor.Type.StringDci);
 
             // Feed bytes in, skipping over hidden bytes (leading L8, trailing null).
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
@@ -847,7 +838,7 @@ namespace SourceGen.AsmGen {
                     if (stropf.Lines.Count != 1) {
                         // Must be single-line.
                         opcodeStr = sDataOpNames.StrGeneric;
-                        stropf.CharConv = charConv; // undo DCI hack
+                        stropf.IsDciString = false;
                         redo = true;
                     }
                     break;

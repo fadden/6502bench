@@ -626,12 +626,7 @@ namespace SourceGen.AsmGen {
             StringOpFormatter stropf = new StringOpFormatter(SourceFormatter,
                 new Formatter.DelimiterDef(delim),
                 StringOpFormatter.RawOutputStyle.DenseHex, charConv, false);
-            if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                // DCI is awkward because the character encoding flips on the last byte.  Rather
-                // than clutter up StringOpFormatter for this rare item, we just accept low/high
-                // throughout.
-                stropf.CharConv = CharEncoding.ConvertLowAndHighAscii;
-            }
+            stropf.IsDciString = (dfd.FormatType == FormatDescriptor.Type.StringDci);
 
             // Feed bytes in, skipping over the leading length bytes.
             stropf.FeedBytes(data, offset + leadingBytes,
@@ -672,7 +667,7 @@ namespace SourceGen.AsmGen {
                     if (stropf.Lines.Count != 1) {
                         // single-line only
                         opcodeStr = sDataOpNames.StrGeneric;
-                        stropf.CharConv = charConv;
+                        stropf.IsDciString = false;
                         redo = true;
                     }
                     break;

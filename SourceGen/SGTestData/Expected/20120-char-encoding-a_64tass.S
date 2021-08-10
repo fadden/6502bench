@@ -251,7 +251,7 @@ L144B   nop
         .byte   $80
 
 _L14DA  nop
-        jmp     _L1511
+        jmp     _L1587
 
         .byte   $86
         .enc    "sg_ascii"
@@ -284,7 +284,33 @@ _L14DA  nop
         .shift  "X"
         .shift  "!"
         .byte   $86
+        .enc    "sg_ascii"
+        .shift  "ascii",$7f
+        .byte   $86
+        .shift  $22,"A quote1",$22
+        .shift  "'A quote2'"
+        .byte   $86
+        .enc    "sg_hiascii"
+        .byte   $a2,$c8,$c1,$a0,$f1,$f5,$ef,$f4,$e5,$b1,$22
+        .byte   $a7,$c8,$c1,$a0,$f1,$f5,$ef,$f4,$e5,$b2,$27
+        .byte   $86
+        .enc    "none"
+        .shift  "petscii",$5e
+        .byte   $86
+        .shift  $22,"a quote1",$22
+        .shift  "'a quote2'"
+        .byte   $86
+        .shift  $5c
+        .byte   $86
+        .enc    "screen"
+        .shift  "ScreenCode",$1e
+        .byte   $86
+        .shift  $22,"A quote1",$22
+        .shift  "'A quote2'"
+        .byte   $86
+        .shift  $1c
+        .byte   $86
 
-_L1511  nop
+_L1587  nop
         rts
 

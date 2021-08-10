@@ -308,7 +308,7 @@ L144B    nop
          dfb   $80
 
 :L14DA   nop
-         jmp   :L1511
+         jmp   :L1587
 
          dfb   $86
          dci   'Hello'
@@ -336,7 +336,29 @@ L144B    nop
          hex   d8
          hex   a1
          dfb   $86
+         dci   'ascii',7f
+         dfb   $86
+         dci   '"A quote1"'
+         dci   27,'A quote2',27
+         dfb   $86
+         dci   a2,"HA quote1",a2
+         dci   "'HA quote2'"
+         dfb   $86
+         hex   50455453434949de
+         dfb   $86
+         hex   22412051554f544531a2
+         hex   27412051554f544532a7
+         dfb   $86
+         hex   dc
+         dfb   $86
+         hex   53031205050e430f04059e
+         dfb   $86
+         hex   22412011150f140531a2
+         hex   27412011150f140532a7
+         dfb   $86
+         hex   9c
+         dfb   $86
 
-:L1511   nop
+:L1587   nop
          rts
 

@@ -204,5 +204,45 @@ skip_esc nop
         !byte   $a1
         !byte   $86
 
+; Test edge case: last character of DCI string is delimiter or invalid
+; character, e.g. PETSCII with no ASCII equivalent.
+;
+; EDIT: format all of these as DCI strings
+
+        !text   "ascii",$ff                     ;invalid end
+        !byte   $86
+
+        !text   $22,"A quote1",$a2
+        !text   $27,"A quote2",$a7
+        !byte   $86
+
+        !xor $80 {
+            !text   $22,"HA quote1",$a2
+            !text   $27,"HA quote2",$a7
+        }
+        !byte   $86
+
+; PETSCII stuff
+        !pet    "petscii",$de                   ;ends with upward arrow ($5e)
+        !byte   $86
+
+        !pet    $22,"a quote1",$a2
+        !pet    $27,"a quote2",$a7
+        !byte   $86
+
+        !byte   $dc                             ;$5c pound sign (UK currency)
+        !byte   $86
+
+; ScreenCode stuff
+        !scr    "ScreenCode",$9e                ;ends with upward arrow
+        !byte   $86
+
+        !scr    $22,"A quote1",$a2
+        !scr    $27,"A quote2",$a7
+        !byte   $86
+
+        !byte   $9c                             ;$1c pound sign (UK currency)
+        !byte   $86
+
 skip_dci nop
         rts

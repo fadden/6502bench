@@ -31,7 +31,16 @@ namespace Asm65 {
         /// </summary>
         public enum ReverseMode { Forward, LineReverse, FullReverse };
 
+        /// <summary>
+        /// Character encoding conversion delegate.  This function converts a raw byte value
+        /// to a printable value, or CharEncoding.UNPRINTABLE_CHAR.
+        /// </summary>
         public CharEncoding.Convert CharConv { get; set; }
+
+        /// <summary>
+        /// True if the input bytes are a DCI string. Only compatible with ReverseMode==Forward.
+        /// </summary>
+        public bool IsDciString { get; set; } = false;
 
         // Output format for raw (non-printable) characters.  Most assemblers use comma-separated
         // hex values, some allow dense hex strings.
@@ -252,6 +261,8 @@ namespace Asm65 {
         /// </summary>
         public void FeedBytes(byte[] data, int offset, int length, int leadingBytes,
                 ReverseMode revMode) {
+            Debug.Assert(!IsDciString || revMode == ReverseMode.Forward);
+
             int startOffset = offset;
             int strEndOffset = offset + length;
 
@@ -288,7 +299,11 @@ namespace Asm65 {
             } else {
                 Debug.Assert(revMode == ReverseMode.Forward);
                 for (; offset < strEndOffset; offset++) {
-                    WriteChar(data[offset]);
+                    byte val = data[offset];
+                    if (IsDciString && offset == strEndOffset - 1) {
+                        val ^= 0x80;
+                    }
+                    WriteChar(val);
                 }
             }
 

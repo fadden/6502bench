@@ -220,7 +220,7 @@ L144B   nop
         !byte   $80
 
 @L14DA  nop
-        jmp     @L1511
+        jmp     @L1587
 
         !byte   $86
         !text   "Hell",$ef
@@ -248,7 +248,29 @@ L144B   nop
         !scr    $d8
         !scr    $a1
         !byte   $86
+        !text   "ascii",$ff
+        !byte   $86
+        !text   $22,"A quote1",$a2
+        !text   "'A quote2",$a7
+        !byte   $86
+        !hex    a2c8c1a0f1f5eff4e5b122
+        !hex    a7c8c1a0f1f5eff4e5b227
+        !byte   $86
+        !pet    "petscii",$de
+        !byte   $86
+        !pet    $22,"a quote1",$a2
+        !pet    "'a quote2",$a7
+        !byte   $86
+        !pet    $dc
+        !byte   $86
+        !scr    "ScreenCode",$9e
+        !byte   $86
+        !scr    $22,"A quote1",$a2
+        !scr    "'A quote2",$a7
+        !byte   $86
+        !scr    $9c
+        !byte   $86
 
-@L1511  nop
+@L1587  nop
         rts
 

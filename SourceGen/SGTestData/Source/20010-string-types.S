@@ -45,13 +45,13 @@
 
         dfb     $81
 
-* 62 high-ASCII underscores.  Should be one line.
+* 62 high-ASCII asterisks.  Should be one line.
         asc     "********************************"
         asc     "******************************"
 
         dfb     $80
 
-* 96 high-ASCII underscores.  Might be converted to "fill".
+* 96 high-ASCII asterisks.  Might be converted to "fill".
         asc     "********************************"
         asc     "********************************"
         asc     "********************************"

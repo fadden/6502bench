@@ -442,13 +442,11 @@ namespace SourceGen {
         /// <param name="dfd">Format descriptor.</param>
         /// <param name="data">File data.</param>
         /// <param name="offset">Offset, within data, of start of string.</param>
-        /// <param name="popcode">Pseudo-opcode string.</param>
+        /// <param name="popcode">Receives the pseudo-opcode string.</param>
         /// <returns>Array of operand strings.</returns>
         public static List<string> FormatStringOp(Formatter formatter, PseudoOpNames opNames,
                 FormatDescriptor dfd, byte[] data, int offset, out string popcode) {
 
-            int hiddenLeadingBytes = 0;
-            int trailingBytes = 0;
             StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
             Formatter.DelimiterSet delSet = formatter.Config.mStringDelimiters;
             Formatter.DelimiterDef delDef;
@@ -456,35 +454,19 @@ namespace SourceGen {
             CharEncoding.Convert charConv;
             switch (dfd.FormatSubType) {
                 case FormatDescriptor.SubType.Ascii:
-                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                        charConv = CharEncoding.ConvertLowAndHighAscii;
-                    } else {
-                        charConv = CharEncoding.ConvertAscii;
-                    }
+                    charConv = CharEncoding.ConvertAscii;
                     delDef = delSet.Get(CharEncoding.Encoding.Ascii);
                     break;
                 case FormatDescriptor.SubType.HighAscii:
-                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                        charConv = CharEncoding.ConvertLowAndHighAscii;
-                    } else {
-                        charConv = CharEncoding.ConvertHighAscii;
-                    }
+                    charConv = CharEncoding.ConvertHighAscii;
                     delDef = delSet.Get(CharEncoding.Encoding.HighAscii);
                     break;
                 case FormatDescriptor.SubType.C64Petscii:
-                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                        charConv = CharEncoding.ConvertLowAndHighC64Petscii;
-                    } else {
-                        charConv = CharEncoding.ConvertC64Petscii;
-                    }
+                    charConv = CharEncoding.ConvertC64Petscii;
                     delDef = delSet.Get(CharEncoding.Encoding.C64Petscii);
                     break;
                 case FormatDescriptor.SubType.C64Screen:
-                    if (dfd.FormatType == FormatDescriptor.Type.StringDci) {
-                        charConv = CharEncoding.ConvertLowAndHighC64ScreenCode;
-                    } else {
-                        charConv = CharEncoding.ConvertC64ScreenCode;
-                    }
+                    charConv = CharEncoding.ConvertC64ScreenCode;
                     delDef = delSet.Get(CharEncoding.Encoding.C64ScreenCode);
                     break;
                 default:
@@ -498,6 +480,11 @@ namespace SourceGen {
                 delDef = Formatter.DOUBLE_QUOTE_DELIM;
             }
 
+            StringOpFormatter stropf = new StringOpFormatter(formatter, delDef,
+                StringOpFormatter.RawOutputStyle.CommaSep, charConv, false);
+
+            int hiddenLeadingBytes = 0;
+            int trailingBytes = 0;
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.StringGeneric:
                     // Generic character data.
@@ -513,30 +500,22 @@ namespace SourceGen {
                     // Character data with a terminating null.  Don't show the null byte.
                     popcode = opNames.StrNullTerm;
                     trailingBytes = 1;
-                    //if (strLen == 0) {
-                    //    showHexZeroes = 1;
-                    //}
                     break;
                 case FormatDescriptor.Type.StringL8:
                     // Character data with a leading length byte.  Don't show the length.
                     hiddenLeadingBytes = 1;
-                    //if (strLen == 0) {
-                    //    showHexZeroes = 1;
-                    //}
                     popcode = opNames.StrLen8;
                     break;
                 case FormatDescriptor.Type.StringL16:
                     // Character data with a leading length word.  Don't show the length.
                     Debug.Assert(dfd.Length > 1);
                     hiddenLeadingBytes = 2;
-                    //if (strLen == 0) {
-                    //    showHexZeroes = 2;
-                    //}
                     popcode = opNames.StrLen16;
                     break;
                 case FormatDescriptor.Type.StringDci:
                     // High bit on last byte is flipped.
                     popcode = opNames.StrDci;
+                    stropf.IsDciString = true;
                     break;
                 default:
                     Debug.Assert(false);
@@ -544,8 +523,6 @@ namespace SourceGen {
                     break;
             }
 
-            StringOpFormatter stropf = new StringOpFormatter(formatter, delDef,
-                StringOpFormatter.RawOutputStyle.CommaSep, charConv, false);
             stropf.FeedBytes(data, offset + hiddenLeadingBytes,
                 dfd.Length - hiddenLeadingBytes - trailingBytes, 0, revMode);
 

@@ -247,7 +247,7 @@ L144B:   nop
          .byte   $80
 
 @L14DA:  nop
-         jmp     @L1511
+         jmp     @L1587
 
          .byte   $86
          .byte   "Hell",$ef
@@ -275,7 +275,29 @@ L144B:   nop
          .byte   $d8
          .byte   $a1
          .byte   $86
+         .byte   "ascii",$ff
+         .byte   $86
+         .byte   $22,"A quote1",$a2
+         .byte   "'A quote2",$a7
+         .byte   $86
+         .byte   $a2,$c8,$c1,$a0,$f1,$f5,$ef,$f4,$e5,$b1,$22
+         .byte   $a7,$c8,$c1,$a0,$f1,$f5,$ef,$f4,$e5,$b2,$27
+         .byte   $86
+         .byte   $50,$45,$54,$53,$43,$49,$49,$de
+         .byte   $86
+         .byte   $22,$41,$20,$51,$55,$4f,$54,$45,$31,$a2
+         .byte   $27,$41,$20,$51,$55,$4f,$54,$45,$32,$a7
+         .byte   $86
+         .byte   $dc
+         .byte   $86
+         .byte   $53,$03,$12,$05,$05,$0e,$43,$0f,$04,$05,$9e
+         .byte   $86
+         .byte   $22,$41,$20,$11,$15,$0f,$14,$05,$31,$a2
+         .byte   $27,$41,$20,$11,$15,$0f,$14,$05,$32,$a7
+         .byte   $86
+         .byte   $9c
+         .byte   $86
 
-@L1511:  nop
+@L1587:  nop
          rts
 
