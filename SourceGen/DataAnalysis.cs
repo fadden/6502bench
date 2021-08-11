@@ -157,8 +157,14 @@ namespace SourceGen {
                         // numeric/Address, but we don't allow that for instructions.)
                         //
                         // Project and platform symbols are applied later.
-                        Debug.Assert(attr.DataDescriptor.FormatSubType !=
-                            FormatDescriptor.SubType.Address);
+
+                        // (This assert is bogus -- this is possible with a bad bit of formatting.
+                        // One way this can occur semi-naturally is to follow a JSR with a 16-bit
+                        // value that evaluates to a pair of "illegal" instructions, which are
+                        // then formatted by the user as a 16-bit address without tagging as
+                        // inline data.  Enabling undocumented 6502 instructions throws it off.)
+                        //Debug.Assert(attr.DataDescriptor.FormatSubType !=
+                        //    FormatDescriptor.SubType.Address);
                         continue;
                     }
 

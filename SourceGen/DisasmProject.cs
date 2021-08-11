@@ -1649,30 +1649,33 @@ namespace SourceGen {
                                 MessageList.MessageEntry.ProblemResolution.FormatDescriptorIgnored));
                         }
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.Address) {
-                        // not expecting this format on an instruction operand
-                        Debug.Assert(attr.IsData || attr.IsInlineData);
-
-                        // This generally doesn't happen for internal addresses, because
-                        // we create an auto label for the target address, and a weak ref
-                        // to the auto label, which means the xref is handled by the symbol
-                        // code above.  This case really only happens for external addresses,
-                        // which either have a label (because we defined a symbol) and got
-                        // handled earlier, or don't have a label and aren't useful for a
-                        // cross-reference.
-                        //
-                        // There might be a case I'm missing, so I'm going to take a swing
-                        // at it and spit out a debug message either way.
-                        int operandAddr = RawData.GetWord(mFileData, offset,
-                            dfd.Length, dfd.FormatType == FormatDescriptor.Type.NumericBE);
-                        int targetOffset = AddrMap.AddressToOffset(offset, operandAddr);
-                        if (targetOffset < 0) {
-                            Debug.WriteLine("No xref for addr $" + operandAddr.ToString("x4") +
-                                " at +" + offset.ToString("x6"));
-                        } else {
-                            Debug.WriteLine("HEY: found unlabeled addr ref at +" +
+                        if (!(attr.IsData || attr.IsInlineData)) {
+                            // not expecting this format on an instruction operand
+                            Debug.WriteLine("Found addr format on instruction at +" +
                                 offset.ToString("x6"));
-                            AddXref(targetOffset, new XrefSet.Xref(offset, false, xrefType,
-                                accType, accessFlags, 0));
+                        } else {
+                            // This generally doesn't happen for internal addresses, because
+                            // we create an auto label for the target address, and a weak ref
+                            // to the auto label, which means the xref is handled by the symbol
+                            // code above.  This case really only happens for external addresses,
+                            // which either have a label (because we defined a symbol) and got
+                            // handled earlier, or don't have a label and aren't useful for a
+                            // cross-reference.
+                            //
+                            // There might be a case I'm missing, so I'm going to take a swing
+                            // at it and spit out a debug message either way.
+                            int operandAddr = RawData.GetWord(mFileData, offset,
+                                dfd.Length, dfd.FormatType == FormatDescriptor.Type.NumericBE);
+                            int targetOffset = AddrMap.AddressToOffset(offset, operandAddr);
+                            if (targetOffset < 0) {
+                                Debug.WriteLine("No xref for addr $" + operandAddr.ToString("x4") +
+                                    " at +" + offset.ToString("x6"));
+                            } else {
+                                Debug.WriteLine("HEY: found unlabeled addr ref at +" +
+                                    offset.ToString("x6"));
+                                AddXref(targetOffset, new XrefSet.Xref(offset, false, xrefType,
+                                    accType, accessFlags, 0));
+                            }
                         }
                     }
 
