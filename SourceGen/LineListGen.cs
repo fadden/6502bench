@@ -404,6 +404,26 @@ namespace SourceGen {
                     // to the top of the list.
                     topIndex = 0;
                 }
+
+                // If the selected item was deleted, we can't restore the selection.  This is
+                // annoying when you're using the keyboard, because if you hit Del to delete a
+                // note and then hit down-arrow you jump to the top of the file.  If we detect
+                // this situation, we want to select the thing that appeared below it.  We can
+                // approximate this by just selecting the first thing at the offset (which is
+                // not quite right if you have both a long comment and a note, but it'll do).
+                //
+                // This doesn't help for some of the header stuff, e.g. if you select the last
+                // platform/project equate and then remove one symbol, the selection gets lost.
+                if (sel.Count == 0 && mSelectionTags.Count != 0) {
+                    Debug.WriteLine("Lost selection");
+                    int tryOffset = mSelectionTags[0].mOffset;
+                    int tryIndex = LineListGen.FindLineByOffset(lineList, tryOffset);
+                    if (tryIndex >= 0) {
+                        Debug.WriteLine(" Setting to offset +" + tryOffset.ToString("x6") +
+                            " (line " + tryIndex + ")");
+                        sel[tryIndex] = true;
+                    }
+                }
                 return sel;
             }
 
@@ -569,6 +589,7 @@ namespace SourceGen {
                 return -1;
             }
 
+            // Start with a binary search.
             int low = 0;
             int high = lineList.Count - 1;
             int mid = -1;
