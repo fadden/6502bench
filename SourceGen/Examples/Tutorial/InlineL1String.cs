@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using PluginCommon;
 
 namespace ExtensionScriptSample {
@@ -15,7 +14,7 @@ namespace ExtensionScriptSample {
         private IApplication mAppRef;
         private byte[] mFileData;
 
-        // Only one call.
+        // Only one label.
         private const string CALL_LABEL = "PrintInlineL1String";
         private int mInlineL1StringAddr;      // jsr
 
@@ -62,7 +61,7 @@ namespace ExtensionScriptSample {
             if (offset + 3 >= mFileData.Length) {
                 return;     // length byte is off end
             }
-            int len = mFileData[3];     // first byte past JSR
+            int len = mFileData[offset + 3];     // first byte past JSR
             if (offset + 4 + len > mFileData.Length) {
                 mAppRef.DebugLog("L1 string ran off end of file at +" +
                     (offset + 4).ToString("x6"));

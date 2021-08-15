@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using PluginCommon;
 
 namespace ExtensionScriptSample {
@@ -41,6 +40,7 @@ namespace ExtensionScriptSample {
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             mNullStringAddrs.Clear();
 
+            // Find matching symbols.
             foreach (PlSymbol sym in plSyms) {
                 if (sym.Label.StartsWith(LABEL_PREFIX)) {
                     mNullStringAddrs.Add(sym.Value, sym);
@@ -61,7 +61,7 @@ namespace ExtensionScriptSample {
             // search for the terminating null byte
             int nullOff = offset + 3;
             while (nullOff < mFileData.Length) {
-                if (mFileData[nullOff] == 0) {
+                if (mFileData[nullOff] == 0x00) {
                     break;
                 }
                 nullOff++;

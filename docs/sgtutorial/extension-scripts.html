@@ -131,11 +131,11 @@
 <div class="grid-container">
     <div class="grid-item-text">
         <p>Double-click the <code>JSR</code> opcode on line $1000
-        to jump to address $1026.  The only thing there is an <code>RTS</code>.
+        to jump to address $1036.  The only thing there is an <code>RTS</code>.
         It's supposed to be a routine that prints a string with a leading length
         byte, but for the sake of keeping the example code short it's just a
         place-holder.  Use the curly toolbar arrow
-        (or <kbd class="key">Alt+LeftArrow</kbd>) to jump back to $1026.</p>
+        (or <kbd class="key">Alt+LeftArrow</kbd>) to jump back to $1000.</p>
     </div>
 </div>
 
@@ -145,7 +145,7 @@
     </div>
     <div class="grid-item-text">
         <p>This time, double-click the <code>JSR</code> <i>operand</i>
-        ("<samp>L1026</samp>") to edit the operand.
+        ("<samp>L1036</samp>") to edit the operand.
         Click <samp>Create Label</samp>, and enter <kbd>PrintInlineL1String</kbd>.
         Remember that labels are case-sensitive;
         you must enter it exactly as shown.  Hit <samp>OK</samp> to accept the label,
@@ -189,12 +189,56 @@
         <img src="images/t4-inlinenull-done.png" alt="t4-inlinenull-done"/>
     </div>
     <div class="grid-item-text">
-        <p>Double-click the operand on line $100D ("<code>L1027</code>"),
+        <p>Double-click the operand on line $100D ("<code>L1037</code>"),
         click <samp>Create Label</samp>,
         and set the label to "<kbd>PrintInlineNullStringOne</kbd>".
         Hit <samp>OK</samp> twice.  That formatted the first one and got us
         to the next <code>JSR</code>.  Repeat the process on line $1019
-        ("<code>L1028</code>"), setting the label to "<kbd>PrintInlineNullStringTwo</kbd>".</p>
+        ("<code>L1038</code>"), setting the label to "<kbd>PrintInlineNullStringTwo</kbd>".</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t4-inlinemulti-before.png" alt="t4-inlinemulti-before"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Things are looking good, but we've got one left, and it's got a
+        twist.  Instead of a string, the <code>JSR</code> at $1025 is followed by a
+        pointer to a string.  We'd like to format the pointer as an address,
+        and then format the string it points to.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t4-inlinemulti-src.png" alt="t4-inlinemulti-src"/>
+    </div>
+    <div class="grid-item-text">
+        <p>We're going to add a third extension script.  Sometimes it's
+        convenient to collect all inline data handlers for a project into a
+        single script, so we'll demonstrate that here.  The new script handles
+        the previous two cases as well as this new case.
+        Go into Project
+        Properties, click the Extension Scripts tab, select the two scripts
+        you added earlier, and click Remove.  Then add the script "InlineMulti.cs"
+        from the project directory.  Click <samp>OK</samp> twice.  Note that
+        the strings formatted earlier remain formatted.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t4-inlinemulti-done.png" alt="t4-inlinemulti-done"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Double-click the operand on line $1025 ("<code>L1039</code>"),
+        click <samp>Create Label</samp>,
+        and set the label to "<kbd>PrintInlineAddrString</kbd>".
+        Hit <samp>OK</samp> twice.  This formatted the address at $1028,
+        and also formatted the string at $102b as a null-terminated string.
+        Because the bytes were formatted as an address and not a just a
+        16-bit value, a label was generated automatically.</p>
     </div>
 </div>
 

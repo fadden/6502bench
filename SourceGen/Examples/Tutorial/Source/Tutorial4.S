@@ -13,11 +13,18 @@
 
         jsr     PrintInlineZString2
         asc     'Test two',00
+
+        jsr     PrintInlineAddr
+        dw      test_three
         rts
+
+test_three asc  'Test three',00
 
 PrintInlineL1String
         rts
 PrintInlineZString1
         rts
 PrintInlineZString2
+        rts
+PrintInlineAddr
         rts
