@@ -407,6 +407,13 @@ namespace SourceGen {
             } else if (oldFormat == null || newFormat == null ||
                     oldFormat.Length != newFormat.Length) {
                 uc.ReanalysisRequired = ReanalysisScope.DataOnly;
+            } else if (oldFormat.FormatType == FormatDescriptor.Type.Junk ||
+                    newFormat.FormatType == FormatDescriptor.Type.Junk) {
+                // If we're changing to or from "junk", we want to redo the analysis
+                // to regenerate the code/data/junk summary values at the bottom of the
+                // screen.  (Redoing the full analysis is overkill, but I don't think this
+                // merits a separate flag.)
+                uc.ReanalysisRequired = ReanalysisScope.DataOnly;
             } else {
                 uc.ReanalysisRequired = ReanalysisScope.None;
             }
