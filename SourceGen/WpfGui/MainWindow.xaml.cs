@@ -486,9 +486,11 @@ namespace SourceGen.WpfGui {
                 // Thanks: https://stackoverflow.com/q/35000893/294248
                 double totalHeight = leftPanel.RowDefinitions[0].ActualHeight +
                     leftPanel.RowDefinitions[2].ActualHeight;
-                leftPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
-                leftPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
-                    GridUnitType.Star);
+                if (totalHeight > value) {
+                    leftPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
+                    leftPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
+                        GridUnitType.Star);
+                }
             }
         }
         public double SymbolsPanelHeight {
@@ -496,9 +498,11 @@ namespace SourceGen.WpfGui {
             set {
                 double totalHeight = rightPanel.RowDefinitions[0].ActualHeight +
                     rightPanel.RowDefinitions[2].ActualHeight;
-                rightPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
-                rightPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
-                    GridUnitType.Star);
+                if (totalHeight > value) {
+                    rightPanel.RowDefinitions[0].Height = new GridLength(value, GridUnitType.Star);
+                    rightPanel.RowDefinitions[2].Height = new GridLength(totalHeight - value,
+                        GridUnitType.Star);
+                }
             }
         }
 
