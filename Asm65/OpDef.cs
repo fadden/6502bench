@@ -326,12 +326,11 @@ namespace Asm65 {
         /// <summary>
         /// Flag update delegate, used for code flow analysis.
         /// </summary>
-        /// <param name="prevFlags">Previous flags value.</param>
+        /// <param name="flags">Current flags, to be modified by delegate.  For conditional
+        ///   branches, this value will be used when the branch is not taken.</param>
         /// <param name="immVal">Immediate mode value, if any.  Value may be 0-255
         ///   for an 8-bit operand, or 0-65535 for a 16-bit operand, or -1 if this is
         ///   not an immediate-mode instruction.</param>
-        /// <param name="newFlags">New flags value.  For conditional branches, this is
-        ///   the value to use when the branch is not taken.</param>
         /// <param name="branchTakenFlags">For conditional branches, this is the updated
         ///   value when the branch is taken.</param>
         private delegate StatusFlags FlagUpdater(StatusFlags flags, int immVal,
@@ -997,6 +996,10 @@ namespace Asm65 {
             BaseMemEffect = MemoryEffect.None,
             StatusFlagUpdater = delegate (StatusFlags flags, int immVal,
                     ref StatusFlags condBranchTakenFlags) {
+                // It's potentially useful to update Z here and in BPL.  For example, if the
+                // branch succeeds, it's likely that whatever set N=1 also set Z=0.  However,
+                // you can set Z independently with TRB/TSB and BIT #imm (and of course PHA/PLP).
+                // These things are rare, but its best to stick with what we know must be true.
                 condBranchTakenFlags.N = 1;
                 flags.N = 0;
                 return flags;
