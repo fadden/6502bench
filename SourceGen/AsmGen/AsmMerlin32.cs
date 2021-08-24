@@ -260,7 +260,7 @@ namespace SourceGen.AsmGen {
                     opcodeStr = sDataOpNames.GetDefineData(length);
                     operand = RawData.GetWord(data, offset, length, false);
                     if (length == 1 && dfd.IsStringOrCharacter &&
-                            (operand & 0x7f) == '{' || (operand & 0x7f) == '}') {
+                            ((operand & 0x7f) == '{' || (operand & 0x7f) == '}')) {
                         // Merlin32 can't handle "DFB '{'", so just output hex.
                         operandStr = formatter.FormatHexValue(operand, length * 2);
                     } else {

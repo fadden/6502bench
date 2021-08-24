@@ -95,7 +95,7 @@ L54321C  ldal  backchk
 
 :L543277 jml   [lodat]
 
-fwdval   adr   $54327d
+fwdval   adr   fwdchk
 
 fwdchk   nop
          nop
