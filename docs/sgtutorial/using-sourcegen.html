@@ -87,12 +87,29 @@
 
 <div class="grid-container">
     <div class="grid-item-text">
+        <p>Many disassemblers take a very simple approach: they dump
+        the entire binary as if it were an instruction stream.  It's then
+        left to the human to carve away the data sections.  SourceGen
+        comes at the problem from a different angle, and assumes
+        everything is data until proven otherwise.  The human need only
+        identify where code areas start.  The computer will trace through
+        code automatically, following branches and subroutine calls, and
+        whatever isn't traced is either data storage or junk (dead code,
+        alignment padding, etc).</p>
+        <p>The difference in approach can be confusing at first for people
+        accustomed to other software.  Code tracing tends to produce better
+        results more quickly, however, because much of the tedium is handled
+        by the software.</p>
+    </div>
+</div>
+
+<hr style="width:80%;"/>
+
+<div class="grid-container">
+    <div class="grid-item-text">
         <p>This first section covers the basics of working with SourceGen: how to
         move around, make edits, generate code, and so on.
-        SourceGen has some unusual features, so it's worth reading through this
-        even if you've used other disassemblers.</p>
-
-        <p>You can't do anything useful until you open an existing project or
+        You can't do anything useful until you open an existing project or
         create a new one, so we'll start there.</p>
     </div>
 </div>
@@ -106,7 +123,8 @@
         No part of the data file is included in the project file, so you need
         to keep both files in the same place.
         If the program you're disassembling was split into more than one data
-        file, you'll need a separate project file for each.</p>
+        file, you'll need a separate project file for each (or combine them into
+        a single file with the concatenation tool).</p>
     </div>
 </div>
 
@@ -134,8 +152,8 @@
         of the primary CPU varieties (6502, 65C02, W65C02, and 65816).  If
         you're unsure, just take your best guess.  It's easy to change things after the
         project has been started.</p>
-        <p>The area on the right side of the window has a list of the files, scripts,
-        and optional features that will be enabled for the
+        <p>The area on the right side of the window has a list of the symbol
+        files, scripts, and optional features that will be enabled for the
         selected system.  The various items here will be explained in more
         detail later on.</p>
     </div>

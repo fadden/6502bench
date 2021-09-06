@@ -94,21 +94,26 @@ suggestions to help you on your way.</p>
     conventions, like whether to use MixedCase or underscore_separated
     or SCREAMING_CAPS for labels.</li>
     <li>Use the program thoroughly.  Understand all of what it does.</li>
-    <li>Begin each project by separating code from data.  Identify external
+    <li>Remember that SourceGen works by tracing through code from marked
+    start points, rather than treating everything as code and requiring you
+    to mark all the data items.
+    Begin each project by finding the code.  Identify external
     entry points, format tables of addresses, and find JSRs that are
-    followed by inline data.  Write an extension script to handle the
+    followed by inline data.  Use an extension script to handle the
     inlines so you won't keep tripping over them.  If parts of the program
     are relocated to a different address, set the appropriate address
-    overrides.  Progress will be easier once you get code, data, and junk
-    identified and arranged in memory.
+    overrides.</li>
     <ul>
-    <li>Code start tags are rarely needed, and code end tags are almost never
-    needed.  You shouldn't have to spend a lot of time manually tagging things.
-    If a piece of code isn't being found, it's usually best to figure out why
-    the code that calls it isn't being found, instead of trying to tag it and
-    forge ahead.  It might be dead code that's never called, or it might be
-    called from a table that you can format to add code entry tags for
-    multiple addresses with a single operation.</li>
+    <li>Code start tags are rarely needed, and code end tags are almost
+    never needed.  You shouldn't have to spend a lot of time manually
+    tagging things.  If a piece of code isn't being found, it's usually
+    best to figure out why the code that calls it isn't being found,
+    instead of trying to tag it and forge ahead from that point.  It might
+    be dead code that's never called, or it might be called from a table
+    that you can format to add code entry tags for multiple addresses with
+    a single operation.  Taking the time to find the table and format it
+    is faster than hand-formatting dozens of little handlers, and it's
+    something you'll need to do eventually anyway.</li>
     </ul></li>
     <li>Start with easily identifiable pieces.  If a chunk of code is reading
     from the keyboard, you can make reasonable guesses about the purpose of
