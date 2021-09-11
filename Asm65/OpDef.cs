@@ -32,7 +32,7 @@ namespace Asm65 {
             Cont,               // LDA, STA, PHP, NOP, ... (always continue to next instruction)
             NoCont,             // RTS, BRK, ... (jump to new address, not specified in operand)
             CallSubroutine,     // JSR, JSL (jump to new address, and also continue to next)
-            ConditionalBranch   // BCC, BEQ, ... (jump to new address and/or continue to next)
+            ConditionalBranch   // BCC, BEQ, ... (jump to new address, or continue to next)
         }
 
         /// <summary>

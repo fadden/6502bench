@@ -16,7 +16,10 @@
 using System;
 
 namespace CommonUtil {
-    public class BitTwiddle {
+    /// <summary>
+    /// Some bit-twiddling functions.
+    /// </summary>
+    public static class BitTwiddle {
         /// <summary>
         /// Returns the argument, rounded up to the next highest power of 2.  If the argument
         /// is an exact power of two, it is returned unmodified.
@@ -32,7 +35,7 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// Classic bit-twiddling approach.  I can't find a "count leading zeroes" function
-        /// in C# that turns into a CPU instruction; if we had that, we could just use 1<<N.
+        /// in C# that turns into a CPU instruction; if we had that, we could just use 1&lt;&lt;N.
         /// </remarks>
         public static int NextHighestPowerOf2(int val) {
             val |= val >> 1;    // "smear" bits across integer
@@ -50,8 +53,8 @@ namespace CommonUtil {
         /// <remarks>
         /// If you pass in 10110100, this will return 00000100.
         ///
-        /// Two's complement negation inverts and adds one, so 01100 --> 10011+1 --> 10100.  The
-        /// only set bit they have in common is the one we want.
+        /// Two's complement negation inverts and adds one, so 01100 --&gt; 10011+1 --&gt; 10100.
+        /// The only set bit they have in common is the one we want.
         /// </remarks>
         public static int IsolateLeastSignificantOne(int val) {
             return val & -val;
@@ -62,7 +65,7 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// If you pass in 10110100, this will return 4.
-        /// 
+        ///
         /// This comes from http://aggregate.org/MAGIC/#Population%20Count%20(Ones%20Count) .
         /// </remarks>
         public static int CountOneBits(int val) {
@@ -82,7 +85,7 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// If you pass in 10110100, this will return 2.
-        /// 
+        ///
         /// Also from http://aggregate.org/MAGIC/ .
         /// </remarks>
         public static int CountTrailingZeroes(int val) {
