@@ -1004,12 +1004,8 @@ namespace SourceGen.WpfGui {
         private void CodeListView_ReplaceEntry(int index, DisplayList.FormattedParts newParts) {
             bool isSelected = CodeDisplayList.SelectedIndices[index];
             if (isSelected && codeListView.SelectionMode != SelectionMode.Single) {
-                if (codeListView.SelectionMode != SelectionMode.Single) {
-                    Debug.WriteLine("HEY: hit unhappy single-select case");
-                    codeListView.SelectedIndex = -1;
-                } else {
-                    codeListView.SelectedItems.Remove(CodeDisplayList[index]);
-                }
+                // Remove entry from selected items list in ListView control.
+                codeListView.SelectedItems.Remove(CodeDisplayList[index]);
             }
             CodeDisplayList[index] = newParts;
             if (isSelected) {
