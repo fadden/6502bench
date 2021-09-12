@@ -565,6 +565,8 @@ namespace SourceGen.WpfGui {
             radioStringLen16.IsEnabled = true;
             radioStringDci.IsEnabled = true;
 
+            // This will disable a string type if we don't find at least one in every region.
+
             IEnumerator<TypedRangeSet.TypedRange> iter = mSelection.RangeListIterator;
             while (iter.MoveNext()) {
                 TypedRangeSet.TypedRange rng = iter.Current;
@@ -1367,15 +1369,26 @@ namespace SourceGen.WpfGui {
             int i;
             for (i = low; i <= high;) {
                 int length = mFileData[i];
+                int lenLen;
                 if (type == FormatDescriptor.Type.StringL16) {
                     length |= mFileData[i + 1] << 8;
-                    length += 2;
+                    lenLen = 2;
                 } else {
-                    length++;
+                    lenLen = 1;
                 }
+                length += lenLen;
+
                 // Zero-length strings are allowed.
-                FormatDescriptor dfd = FormatDescriptor.Create(length, type,
-                    ResolveAsciiGeneric(i, subType));
+                FormatDescriptor.SubType actualSubType = subType;
+                if (subType == FormatDescriptor.SubType.ASCII_GENERIC) {
+                    if (length > lenLen) {
+                        actualSubType = ResolveAsciiGeneric(i + lenLen, subType);
+                    } else {
+                        // Zero-length string, just pick a format.
+                        actualSubType = FormatDescriptor.SubType.Ascii;
+                    }
+                }
+                FormatDescriptor dfd = FormatDescriptor.Create(length, type, actualSubType);
                 Results.Add(i, dfd);
                 i += length;
             }

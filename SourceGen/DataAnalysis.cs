@@ -1036,7 +1036,7 @@ namespace SourceGen {
         /// <summary>
         /// Counts the number of null-terminated strings in the buffer.
         /// 
-        /// Zero-length strings are allowed but not included in the count.
+        /// Zero-length strings are allowed.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
@@ -1058,10 +1058,8 @@ namespace SourceGen {
             for (int i = start; i <= end; i++) {
                 byte val = fileData[i];
                 if (val == 0x00) {
-                    // End of string.  Only update count if string wasn't empty.
-                    if (stringLen != 0) {
-                        stringCount++;
-                    }
+                    // End of string.
+                    stringCount++;
                     stringLen = 0;
                     expectedHiBit = -1;
                 } else {
@@ -1088,7 +1086,7 @@ namespace SourceGen {
         /// <summary>
         /// Counts strings prefixed with an 8-bit length.
         ///
-        /// Zero-length strings are allowed but not counted.
+        /// Zero-length strings are allowed.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
@@ -1110,10 +1108,10 @@ namespace SourceGen {
                     return -1;
                 }
 
+                stringCount++;
                 if (strLen == 0) {
                     continue;
                 }
-                stringCount++;
                 remaining -= strLen;
 
                 int expectedHiBit = fileData[posn] & 0x80;
@@ -1137,7 +1135,7 @@ namespace SourceGen {
         /// <summary>
         /// Counts strings prefixed with a 16-bit length.
         ///
-        /// Zero-length strings are allowed but not counted.
+        /// Zero-length strings are allowed.
         /// </summary>
         /// <param name="fileData">Raw data.</param>
         /// <param name="start">Offset of first byte in range.</param>
@@ -1165,10 +1163,10 @@ namespace SourceGen {
                     return -1;
                 }
 
+                stringCount++;
                 if (strLen == 0) {
                     continue;
                 }
-                stringCount++;
                 remaining -= strLen;
 
                 int expectedHiBit = fileData[posn] & 0x80;
