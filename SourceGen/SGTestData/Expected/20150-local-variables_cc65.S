@@ -5,7 +5,6 @@ CONST_ZERO =     $f0        ;project const
 PROJ_ZERO =      $00        ;project addr
 PROJ_ONE =       $01        ;project addr
 
-;         .segment "SEG000"
          .org    $1000
          ldy     PROJ_ZERO
          lda     (PROJ_ONE),y
@@ -99,7 +98,6 @@ DPNOP    .set    $80        ;same as org
          jsr     DPCODE
          rts
 
-;         .segment "SEG001"
          .org    $0080
 DPCODE:  nop
          lda     DPCODE

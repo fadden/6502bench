@@ -1,7 +1,6 @@
 ;Project file was edited to get all big-endian data types, and to have an
 ;incorrect .junk alignment directive.
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $1000
          bit     L1448
          jsr     L14A8
@@ -63,11 +62,9 @@ LABEL:   .byte   $00,$11,$22,$33,$44,$55,$66,$77,$88,$99,$aa,$bb,$cc,$dd,$ee,$ff
          .res    2,$dd      ;incorrect alignment
          .res    140,$00
          .res    8,$82
-;         .segment "SEG001"
          .org    $1408
          .res    8,$82      ;note no-op .ORG
          .res    8,$83
-;         .segment "SEG002"
          .org    $1428
          .res    8,$83      ;meaningful .ORG
          .res    8,$84

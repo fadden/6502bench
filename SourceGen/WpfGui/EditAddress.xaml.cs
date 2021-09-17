@@ -164,7 +164,7 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             if (AddressText.Length == 0) {
-                NewAddress = CommonUtil.AddressMap.NO_ENTRY_ADDR;
+                NewAddress = CommonUtil.AddressMap.NON_ADDR;
             } else {
                 bool ok = Asm65.Address.ParseAddress(AddressText, mMaxAddressValue, out int addr);
                 Debug.Assert(ok);

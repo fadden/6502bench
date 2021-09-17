@@ -607,7 +607,7 @@ namespace SourceGen.Tools.Omf {
 
             while (true) {
                 // Generate an ORG directive.
-                int origAddr = proj.AddrMap.Get(bufOffset);
+                int origAddr = proj.AddrMap.OffsetToAddress(bufOffset);
                 UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
                     origAddr, addr);
                 cs.Add(uc);

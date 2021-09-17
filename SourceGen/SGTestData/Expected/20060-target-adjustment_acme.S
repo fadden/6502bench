@@ -1,6 +1,5 @@
         !cpu    6502
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
 load11  lda     #$11
 @L1002  ldx     #$22
 @load33 ldy     #$33
@@ -47,7 +46,6 @@ load11  lda     #$11
 
         !byte   $80
 @dat81  !byte   $81
-        } ;!pseudopc
         !pseudopc $2000 {
 @L2000  !byte   $82
         !byte   $83

@@ -484,9 +484,11 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(int offset, int address) {
-            OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
-                SourceFormatter.FormatHexValue(address, 4), string.Empty);
+        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
+            if (isStart) {
+                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+            }
         }
 
         // IGenerator

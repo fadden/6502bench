@@ -19,7 +19,6 @@ plataddr =       $3000      ;address only in platform file
 ;Short, unboxed comment here!!
 ;Two spaces after.  More hyp-
 ;hens?
-;         .segment "SEG000"
          .org    $1000
          lda     #$01       ;Comment!
 ;Comment rulers can be helpful in findin the edges of notes.  Comments are hyph-

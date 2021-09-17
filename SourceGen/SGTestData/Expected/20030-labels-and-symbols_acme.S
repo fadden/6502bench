@@ -9,8 +9,7 @@ absh    =       $feed
 plataddr =      $3000      ;address only in platform file
 projalsa =      $3200      ;same val as projalso
 
-*       =       $0000
-        !pseudopc $2345 {
+*       =       $2345
 start   lda     #zip
         lda     #zip+16
         lda     #zip-192
@@ -59,7 +58,6 @@ start   lda     #zip
 
 @L23A3  jmp     @L1000_1
 
-        } ;!pseudopc
         !pseudopc $1000 {
 @L1000_1 nop
 @L1000  nop

@@ -1,5 +1,4 @@
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $0000
          nop
          nop

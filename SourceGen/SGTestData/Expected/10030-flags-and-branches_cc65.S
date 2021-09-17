@@ -1,5 +1,4 @@
          .setcpu "6502X"
-;         .segment "SEG000"
          .org    $1000
          clv
          cld

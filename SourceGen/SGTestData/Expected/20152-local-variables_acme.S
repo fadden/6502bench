@@ -5,8 +5,7 @@ CONST_ZERO =    $f0        ;project const
 PROJ_ZERO =     $00        ;project addr
 PROJ_ONE =      $01        ;project addr
 
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         !as
         !rs
         ldy     PROJ_ZERO
@@ -188,7 +187,6 @@ L103C   lda     #$fe
         jsr     DPCODE
         rts
 
-        } ;!pseudopc
         !pseudopc $0080 {
 DPCODE  nop
         lda+1   DPCODE

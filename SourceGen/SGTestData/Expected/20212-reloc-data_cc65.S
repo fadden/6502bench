@@ -1,5 +1,4 @@
          .setcpu "65816"
-;         .segment "SEG000"
          .org    $030000
          .a16
          .i16
@@ -76,7 +75,6 @@ L30000:  clc
 
 @L3008E: rts
 
-;         .segment "SEG001"
          .org    $04ffe0
 @L4FFE0: .faraddr @L4FFE0
          .byte   $00
@@ -108,7 +106,6 @@ L30000:  clc
          .byte   $19
          .byte   $1a
          .byte   $1b
-;         .segment "SEG002"
          .org    $050000
          .byte   $1c
          .byte   $1d
@@ -116,7 +113,6 @@ L30000:  clc
          .byte   $1f
          .byte   " !",$22,"#$%&'()*+,-./"
 
-;         .segment "SEG003"
          .org    $023456
          .a8
          .i8
@@ -132,7 +128,6 @@ L30000:  clc
 @L23477: nop
          rts
 
-;         .segment "SEG004"
          .org    $080000
 @L80000: lda     @L80000
          lda     a:@L80019 & $ffff
@@ -154,6 +149,5 @@ L30000:  clc
          .byte   $00
 @L80026: .byte   "This is a test."
          .byte   $00
-;         .segment "SEG005"
          .org    $060000
          .byte   "hello, world!"

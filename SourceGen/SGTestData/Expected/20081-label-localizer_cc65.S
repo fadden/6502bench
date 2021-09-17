@@ -1,7 +1,6 @@
          .setcpu "65C02"
 REALLYLONGLABELNAME = $8888 ;that's a long name
 
-;         .segment "SEG000"
          .org    $1000
          nop
 _start:  lda     @start

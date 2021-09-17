@@ -246,7 +246,7 @@ namespace SourceGen {
             public SerAddressMap() { }
             public SerAddressMap(AddressMap.AddressMapEntry ent) {
                 Offset = ent.Offset;
-                Addr = ent.Addr;
+                Addr = ent.Address;
             }
         }
         public class SerTypeHintRange {
@@ -668,8 +668,20 @@ namespace SourceGen {
             }
 
             // Deserialize address map.
+            proj.AddrMap.Clear();
             foreach (SerAddressMap addr in spf.AddressMap) {
-                proj.AddrMap.Set(addr.Offset, addr.Addr);
+                // TODO(org): serialize length and isRelative
+                int length = CommonUtil.AddressMap.FLOATING_LEN;
+
+                AddressMap.AddResult addResult = proj.AddrMap.AddRegion(addr.Offset,
+                    length, addr.Addr, false);
+                if (addResult != CommonUtil.AddressMap.AddResult.Okay) {
+                    string msg = "off=+" + addr.Offset.ToString("x6") + " addr=$" +
+                        addr.Addr.ToString("x4") + " len=" +
+                        (length == CommonUtil.AddressMap.FLOATING_LEN ? "(floating)" : length.ToString());
+                    string errMsg = string.Format(Res.Strings.ERR_BAD_ADDRESS_REGION_FMT, msg);
+                    report.Add(FileLoadItem.Type.Warning, errMsg);
+                }
             }
 
             // Deserialize analyzer tags (formerly known as "type hints").  The default value

@@ -355,13 +355,20 @@ namespace SourceGen {
         /// Sets the address for every byte in the input.
         /// </summary>
         private void SetAddresses() {
-            // The AddressMap will have at least one entry, will start at offset 0, and
-            // will exactly span the file.
-            foreach (AddressMap.AddressMapEntry ent in mAddrMap) {
-                int addr = ent.Addr;
-                for (int i = ent.Offset; i < ent.Offset + ent.Length; i++) {
-                    mAnattribs[i].Address = addr++;
+            IEnumerator<AddressMap.AddressChange> addrIter = mAddrMap.AddressChangeIterator;
+            addrIter.MoveNext();
+            int addr = 0;
+
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                // Process all change events at this offset.
+                AddressMap.AddressChange change = addrIter.Current;
+                while (change != null && change.Offset == offset) {
+                    addr = change.Address;
+                    addrIter.MoveNext();
+                    change = addrIter.Current;
                 }
+
+                mAnattribs[offset].Address = addr++;
             }
         }
 
@@ -1105,7 +1112,7 @@ namespace SourceGen {
                     " label='" + label + "'; file length is" + mFileData.Length);
             }
 
-            if (!mAddrMap.IsSingleAddrRange(offset, length)) {
+            if (!mAddrMap.IsRangeUnbroken(offset, length)) {
                 LogW(offset, "SIDF: format crosses address map boundary (len=" + length + ")");
                 return false;
             }
@@ -1362,7 +1369,7 @@ namespace SourceGen {
                 dbrChanges[kvp.Key] = kvp.Value;
             }
 
-            // Create an array for fast access.
+            // Create a full-file array for fast access.
             short[] bval = new short[mAnattribs.Length];
             Misc.Memset(bval, DbrValue.UNKNOWN);
             foreach (KeyValuePair<int, DbrValue> kvp in dbrChanges) {
@@ -1370,12 +1377,17 @@ namespace SourceGen {
             }
 
             // Run through file, updating instructions as needed.
-            short curVal = (byte)(mAddrMap.Get(0) >> 16);   // start with B=K
+            // TODO(org): this is wrong if the file starts with a non-addr region; can walk
+            //   through anattribs and set to mAnattribs[].Address of first instruction; maybe
+            //   just init to DbrValue.UNKNOWN and set it inside the loop on first relevant instr
+            int firstAddr = mAddrMap.OffsetToAddress(0);
+            short curVal = (byte)(firstAddr >> 16);   // start with B=K
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 if (bval[offset] != DbrValue.UNKNOWN) {
                     curVal = bval[offset];
                 }
                 if (!mAnattribs[offset].UsesDataBankReg) {
+                    // Not a relevant instruction, move on to next.
                     continue;
                 }
                 Debug.Assert(mAnattribs[offset].IsInstructionStart);

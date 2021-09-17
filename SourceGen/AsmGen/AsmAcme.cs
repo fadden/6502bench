@@ -93,6 +93,20 @@ namespace SourceGen.AsmGen {
         private StreamWriter mOutStream;
 
         /// <summary>
+        /// Output mode; determines how ORG is handled.
+        /// </summary>
+        private enum OutputMode {
+            Unknown = 0, Loadable = 1, Streamable = 2
+        }
+        private OutputMode mOutputMode;
+
+        /// <summary>
+        /// Current pseudo-PC depth.  0 is the "real" PC.
+        /// </summary>
+        private int mPcDepth;
+        private bool mFirstIsOpen;
+
+        /// <summary>
         /// Holds detected version of configured assembler.
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
@@ -100,9 +114,6 @@ namespace SourceGen.AsmGen {
         // Version we're coded against.
         private static CommonUtil.Version V0_96_4 = new CommonUtil.Version(0, 96, 4);
         private static CommonUtil.Version V0_97 = new CommonUtil.Version(0, 97);
-
-        // Set if we're inside a "pseudopc" block, which will need to be closed.
-        private bool mInPseudoPcBlock;
 
         // v0.97 started treating '\' in constants as an escape character.
         private bool mBackslashEscapes = true;
@@ -191,6 +202,20 @@ namespace SourceGen.AsmGen {
             AssemblerConfig config = AssemblerConfig.GetConfig(settings,
                 AssemblerInfo.Id.Acme);
             mColumnWidths = (int[])config.ColumnWidths.Clone();
+
+            // ACME wants the entire file to be loadable into a 64KB memory area.  If the
+            // initial address is too large, a file smaller than 64KB might overrun the bank
+            // boundary and cause a failure.  In that case we want to set the initial address
+            // to zero and "stream" the rest.
+            int firstAddr = project.AddrMap.OffsetToAddress(0);
+            if (firstAddr == AddressMap.NON_ADDR) {
+                firstAddr = 0;
+            }
+            if (firstAddr + project.FileDataLength > 65536) {
+                mOutputMode = OutputMode.Streamable;
+            } else {
+                mOutputMode = OutputMode.Loadable;
+            }
         }
 
         /// <summary>
@@ -244,6 +269,9 @@ namespace SourceGen.AsmGen {
             mLocalizer.QuirkNoOpcodeMnemonics = true;
             mLocalizer.Analyze();
 
+            mPcDepth = 0;
+            mFirstIsOpen = true;
+
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
                 mOutStream = sw;
@@ -258,15 +286,14 @@ namespace SourceGen.AsmGen {
                     // don't try
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         "ACME can't handle 65816 code that lives outside bank zero");
-                    int orgAddr = Project.AddrMap.Get(0);
-                    OutputOrgDirective(0, orgAddr);
+                    int orgAddr = Project.AddrMap.OffsetToAddress(0);
+                    AddressMap.AddressMapEntry fakeEnt = new AddressMap.AddressMapEntry(0,
+                        Project.FileData.Length, orgAddr, false, false);
+                    OutputOrgDirective(fakeEnt, true);
                     OutputDenseHex(0, Project.FileData.Length, string.Empty, string.Empty);
+                    OutputOrgDirective(fakeEnt, false);
                 } else {
                     GenCommon.Generate(this, sw, worker);
-                }
-
-                if (mInPseudoPcBlock) {
-                    OutputLine(string.Empty, CLOSE_PSEUDOPC, string.Empty, string.Empty);
                 }
             }
             mOutStream = null;
@@ -283,7 +310,7 @@ namespace SourceGen.AsmGen {
                 return false;
             }
             foreach (AddressMap.AddressMapEntry ent in Project.AddrMap) {
-                if (ent.Addr > 0xffff) {
+                if (ent.Address > 0xffff) {
                     return true;
                 }
             }
@@ -541,29 +568,39 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(int offset, int address) {
-            // If there's only one address range, just set the "real" PC.  If there's more
-            // than one we can run out of space if the source file has a chunk in high memory
-            // followed by a chunk in low memory, because the "real" PC determines when the
-            // 64KB bank is overrun.
-            if (offset == 0) {
-                // first one
-                if (Project.AddrMap.Count == 1) {
-                    OutputLine("*", "=", SourceFormatter.FormatHexValue(address, 4), string.Empty);
-                    return;
+        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
+            // This is similar in operation to the AsmTass64 implementation.  See comments there.
+            Debug.Assert(mPcDepth >= 0);
+            if (isStart) {
+                if (mPcDepth == 0  && mFirstIsOpen) {
+                    mPcDepth++;
+
+                    // Set the "real" PC for the first address change.  If we're in "loadable"
+                    // mode, just set "*=".  If we're in "streaming" mode, we set "*=" to zero
+                    // and then use a pseudo-PC.
+                    if (mOutputMode == OutputMode.Loadable) {
+                        OutputLine("*", "=", SourceFormatter.FormatHexValue(addrEntry.Address, 4),
+                            string.Empty);
+                        return;
+                    } else {
+                        // set the real PC to address zero to ensure we get a full 64KB
+                        OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
+                    }
+                }
+                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4) + " {", string.Empty);
+                mPcDepth++;
+            } else {
+                mPcDepth--;
+                if (mPcDepth > 0 || !mFirstIsOpen) {
+                    // close previous block
+                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(CLOSE_PSEUDOPC),
+                        string.Empty, string.Empty);
                 } else {
-                    // set the real PC to address zero to ensure we get a full 64KB
-                    OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
+                    // mark initial "*=" region as closed, but don't output anything
+                    mFirstIsOpen = false;
                 }
             }
-
-            if (mInPseudoPcBlock) {
-                // close previous block
-                OutputLine(string.Empty, CLOSE_PSEUDOPC, string.Empty, string.Empty);
-            }
-            OutputLine(string.Empty, sDataOpNames.OrgDirective,
-                SourceFormatter.FormatHexValue(address, 4) + " {", string.Empty);
-            mInPseudoPcBlock = true;
         }
 
         // IGenerator

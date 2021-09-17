@@ -1,5 +1,4 @@
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $1000
 L1000:   lda     #$00
 @L1000:  lda     #$01

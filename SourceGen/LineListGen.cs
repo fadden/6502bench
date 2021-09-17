@@ -1194,7 +1194,7 @@ namespace SourceGen {
                 }
                 Line topLine = lines[index];
                 Line newLine = new Line(topLine.FileOffset, 0, Line.Type.OrgDirective);
-                string addrStr = mFormatter.FormatHexValue(ent.Addr, 4);
+                string addrStr = mFormatter.FormatHexValue(ent.Address, 4);
                 newLine.Parts = FormattedParts.CreateDirective(
                     mFormatter.FormatPseudoOp(mPseudoOpNames.OrgDirective), addrStr);
                 lines.Insert(index, newLine);

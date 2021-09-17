@@ -1,6 +1,5 @@
         !cpu    65816
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         !as
         !rs
         sec
@@ -286,7 +285,6 @@ L11FC   cmp+2   L0086,x
         sbc+2   L0086,x
         inc+2   L0086,x
         sbc+3   L0089,x
-        } ;!pseudopc
         !pseudopc $0080 {
 L0080   bit+1   @L0082
 @L0082  bit+1   @L0082

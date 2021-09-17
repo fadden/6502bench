@@ -1,5 +1,4 @@
          .setcpu "6502X"
-;         .segment "SEG000"
          .org    $1000
          jsr     L1035
          jsr     L1038
@@ -295,7 +294,6 @@ L1238:   isc     (L0080),y
          sbc     a:L0086,x
          inc     a:L0086,x
          isc     a:L0086,x
-;         .segment "SEG001"
          .org    $0080
 L0080:   bit     z:@L0082
 @L0082:  bit     @L0082

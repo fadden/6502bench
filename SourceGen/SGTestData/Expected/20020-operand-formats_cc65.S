@@ -1,6 +1,5 @@
 ;Project file was edited to force ASCII formatting for some operands.
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $1000
          lda     $01
          lda     $0102

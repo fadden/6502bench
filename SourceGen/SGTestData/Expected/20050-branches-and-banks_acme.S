@@ -1,9 +1,7 @@
         !cpu    6502
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         jmp     L0000
 
-        } ;!pseudopc
         !pseudopc $0000 {
 L0000   bit+2   L0000
 L0003   lda+1   L0000

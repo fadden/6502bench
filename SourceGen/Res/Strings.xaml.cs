@@ -75,6 +75,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_EquConstant");
         public static string EQU_STACK_RELATIVE =
             (string)Application.Current.FindResource("str_EquStackRelative");
+        public static string ERR_BAD_ADDRESS_REGION_FMT =
+            (string)Application.Current.FindResource("str_ErrBadAddressRegionFmt");
         public static string ERR_BAD_DEF_SYMBOL_DIR =
             (string)Application.Current.FindResource("str_ErrBadDefSymbolDir");
         public static string ERR_BAD_FD_FMT =

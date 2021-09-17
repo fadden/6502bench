@@ -1,5 +1,4 @@
          .setcpu "65C02"
-;         .segment "SEG000"
          .org    $1000
          jsr     L1017
          jsr     L1099

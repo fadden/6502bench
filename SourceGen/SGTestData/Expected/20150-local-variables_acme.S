@@ -5,8 +5,7 @@ CONST_ZERO =    $f0        ;project const
 PROJ_ZERO =     $00        ;project addr
 PROJ_ONE =      $01        ;project addr
 
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         ldy     PROJ_ZERO
         lda     (PROJ_ONE),y
         sta     $03        ;could be PROJ_ONE+2, but "nearby" is off
@@ -186,7 +185,6 @@ L103C   lda     #$fe
         jsr     DPCODE
         rts
 
-        } ;!pseudopc
         !pseudopc $0080 {
 DPCODE  nop
         lda+1   DPCODE

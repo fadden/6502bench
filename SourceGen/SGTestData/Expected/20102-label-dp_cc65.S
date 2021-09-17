@@ -1,5 +1,4 @@
          .setcpu "65816"
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8
@@ -286,7 +285,6 @@ L11FC:   cmp     a:L0086,x
          sbc     a:L0086,x
          inc     a:L0086,x
          sbc     f:L0089,x
-;         .segment "SEG001"
          .org    $0080
 L0080:   bit     z:@L0082
 @L0082:  bit     @L0082

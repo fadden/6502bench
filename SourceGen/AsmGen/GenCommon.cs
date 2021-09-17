@@ -51,6 +51,14 @@ namespace SourceGen.AsmGen {
 
             int lastProgress = 0;
 
+            // Create an address map iterator and advance it to match gen.StartOffset.
+            IEnumerator<AddressMap.AddressChange> addrIter = proj.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                if (addrIter.Current.IsStart && addrIter.Current.Offset >= offset) {
+                    break;
+                }
+            }
+
             while (offset < proj.FileData.Length) {
                 Anattrib attr = proj.GetAnattrib(offset);
 
@@ -68,10 +76,12 @@ namespace SourceGen.AsmGen {
                     }
                 }
 
-                // Check for address change.
-                int orgAddr = proj.AddrMap.Get(offset);
-                if (orgAddr >= 0) {
-                    gen.OutputOrgDirective(offset, orgAddr);
+                // Check for address changes.  There may be more than one at a given offset.
+                AddressMap.AddressChange change = addrIter.Current;
+                while (change != null && change.Offset == offset) {
+                    gen.OutputOrgDirective(change.Entry, change.IsStart);
+                    addrIter.MoveNext();
+                    change = addrIter.Current;
                 }
 
                 List<DefSymbol> lvars = lvLookup.GetVariablesDefinedAtOffset(offset);
@@ -131,6 +141,20 @@ namespace SourceGen.AsmGen {
                     worker.ReportProgress(curProgress * 10);
                     //System.Threading.Thread.Sleep(500);
                 }
+            }
+
+            // Close off any open ORG blocks.
+            while (addrIter.Current != null) {
+                AddressMap.AddressChange change = addrIter.Current;
+                if (change.Offset != offset) {
+                    Debug.WriteLine("Closing offset mismatch: change=+" +
+                        change.Offset.ToString("x6") + ", cur offset=+" + offset.ToString("x6"));
+                    Debug.Assert(false);
+                }
+                Debug.Assert(change.Offset == offset);
+                gen.OutputOrgDirective(change.Entry, change.IsStart);
+                addrIter.MoveNext();
+                change = addrIter.Current;
             }
         }
 
@@ -533,14 +557,25 @@ namespace SourceGen.AsmGen {
                 //Debug.WriteLine("PRG test: +0/1 has label");
                 return false;
             }
+            // The first part of the address map should be a two-byte region, either added
+            // explicitly or a hole left at the start of the file.  Address doesn't matter.
+            IEnumerator<AddressMap.AddressChange> iter = project.AddrMap.AddressChangeIterator;
+            if (!iter.MoveNext()) {
+                Debug.Assert(false);
+                return false;
+            }
+            AddressMap.AddressChange change = iter.Current;
+            if (change.Entry.Length != 2) {
+                Debug.WriteLine("PRG test: first entry is not a two-byte region");
+            }
             // Confirm there's an address map entry at offset 2.
-            if (project.AddrMap.Get(2) == AddressMap.NO_ENTRY_ADDR) {
+            if (project.AddrMap.GetRegions(0x000002).Count == 0) {
                 //Debug.WriteLine("PRG test: no ORG at +2");
                 return false;
             }
             // See if the address at offset 2 matches the value at 0/1.
             int value01 = project.FileData[0] | (project.FileData[1] << 8);
-            int addr2 = project.AddrMap.OffsetToAddress(2);
+            int addr2 = project.AddrMap.OffsetToAddress(0x000002);
             if (value01 != addr2) {
                 //Debug.WriteLine("PRG test: +0/1 value is " + value01.ToString("x4") +
                 //    ", address at +2 is " + addr2);

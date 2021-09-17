@@ -3,7 +3,6 @@ PrintInlineL1String = $011000
 PrintInlineL2String = $012000
 PrintInlineDciString = $013000
 
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8
@@ -105,7 +104,6 @@ Next1:   jsr     L10BA
 
          .res    289,$00
 
-;         .segment "SEG001"
          .org    $1800
 L1800:   jsr     PrintInlineNullString
          per     $8778
@@ -115,7 +113,6 @@ L1800:   jsr     PrintInlineNullString
          .byte   $6e
          .byte   $20
          .byte   $01
-;         .segment "SEG002"
          .org    $1840
          .byte   "string"
          .byte   $00

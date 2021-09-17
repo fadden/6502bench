@@ -2,7 +2,6 @@
 zero     =       $00
 longsym  =       $123456
 
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8
@@ -15,7 +14,6 @@ lodat:   .byte   $00
          .byte   $01
          .byte   $02
 
-;         .segment "SEG001"
          .org    $440000
 L440000: cmp     L440000
 L440004: lda     L440000
@@ -29,7 +27,6 @@ L440004: lda     L440000
 dat44:   .word   dat44 & $ffff
          .faraddr dat44
 
-;         .segment "SEG002"
          .org    $44ffc0
 L44FFC0: cmp     L44FFC0
 high44:  beq     @L44FFCB
@@ -38,7 +35,6 @@ high44:  beq     @L44FFCB
 
 @L44FFCB: jml    @L2000
 
-;         .segment "SEG003"
          .org    $2000
 @L2000:  bit     @L2000
          pea     dat44 & $ffff
@@ -53,7 +49,6 @@ j2:      jsr     j2+3
          jsl     longsym
          jml     bank54
 
-;         .segment "SEG004"
          .org    $543210
 bank54:  cmp     bank54
          bra     L54321C

@@ -259,6 +259,8 @@ namespace SourceGen {
         /// to this point so we can report fatal errors directly to the user.
         /// </summary>
         public void WindowLoaded() {
+            // Run library unit tests.
+            Debug.Assert(CommonUtil.AddressMap.Test());
             Debug.Assert(CommonUtil.RangeSet.Test());
             Debug.Assert(CommonUtil.TypedRangeSet.Test());
             Debug.Assert(CommonUtil.Version.Test());
@@ -1803,12 +1805,16 @@ namespace SourceGen {
             int lastOffset = CodeLineList[lastIndex].FileOffset;
             int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
             int nextAddr;
+            AddressMap addrMap = mProject.AddrMap;
+
+            // TODO(org): rewrite this - need to identify the specific .ORG statement since
+            //   there can now be several at a single offset
 
             if (firstOffset == lastOffset || nextOffset == mProject.FileDataLength) {
-                // Single item (which may not be a single *line*) is selected, or the
+                // Single item (which might not be a single *line*) is selected, or the
                 // last selected item is the end of the file.
                 nextOffset = -1;
-                nextAddr = AddressMap.NO_ENTRY_ADDR;
+                nextAddr = AddressMap.NON_ADDR;
             } else {
                 // Compute "nextAddr".  If there's an existing entry at nextOffset, we use
                 // that.  If not, we use the "load address", which is determined by the very
@@ -1829,7 +1835,7 @@ namespace SourceGen {
                     nextAddr = cloneMap.OffsetToAddress(nextOffset);
                 }
 #else
-                int fileStartAddr = mProject.AddrMap.OffsetToAddress(0);
+                int fileStartAddr = addrMap.OffsetToAddress(0);
                 nextAddr = ((fileStartAddr + nextOffset) & 0xffff) | (fileStartAddr & 0xff0000);
 #endif
             }
@@ -1849,37 +1855,40 @@ namespace SourceGen {
 
             ChangeSet cs = new ChangeSet(1);
 
-            if (mProject.AddrMap.Get(firstOffset) != dlg.NewAddress) {
-                // Added / removed / changed existing entry.
-                //
-                // We allow creation of an apparently redundant address override, because
-                // sometimes it's helpful to add one to "anchor" an area before relocating
-                // something that appears earlier in the file.
-                int prevAddress = mProject.AddrMap.Get(firstOffset);
-                UndoableChange uc = UndoableChange.CreateAddressChange(firstOffset,
-                    prevAddress, dlg.NewAddress);
-                cs.Add(uc);
-                Debug.WriteLine("EditAddress: changing addr at offset +" +
-                    firstOffset.ToString("x6") + " to $" + dlg.NewAddress.ToString("x4"));
-            }
+            // TODO(org): I'm just commenting this out for now; needs to be totally redone
+
+
+            //if (addrMap.Get(firstOffset) != dlg.NewAddress) {
+            //    // Added / removed / changed existing entry.
+            //    //
+            //    // We allow creation of an apparently redundant address override, because
+            //    // sometimes it's helpful to add one to "anchor" an area before relocating
+            //    // something that appears earlier in the file.
+            //    int prevAddress = addrMap.Get(firstOffset);
+            //    UndoableChange uc = UndoableChange.CreateAddressChange(firstOffset,
+            //        prevAddress, dlg.NewAddress);
+            //    cs.Add(uc);
+            //    Debug.WriteLine("EditAddress: changing addr at offset +" +
+            //        firstOffset.ToString("x6") + " to $" + dlg.NewAddress.ToString("x4"));
+            //}
 
             // We want to create an entry for the chunk that follows the selected area.
             // We don't modify the trailing address if an entry already exists.
             // (Note the "can edit" code prevented us from being called if there's an
             // address map entry in the middle of the selected area.)
             //
-            // If they're removing an existing entry, don't add a new entry at the end.
-            if (nextAddr >= 0 && dlg.NewAddress != AddressMap.NO_ENTRY_ADDR &&
-                    mProject.AddrMap.Get(nextOffset) == AddressMap.NO_ENTRY_ADDR) {
-                // We don't screen for redundant entries here.  That should only happen if
-                // they select a range and then don't change the address.  Maybe it's useful?
-                int prevAddress = mProject.AddrMap.Get(nextOffset);
-                UndoableChange uc = UndoableChange.CreateAddressChange(nextOffset,
-                    prevAddress, nextAddr);
-                cs.Add(uc);
-                Debug.WriteLine("EditAddress: setting trailing addr at offset +" +
-                    nextOffset.ToString("x6") + " to $" + nextAddr.ToString("x4"));
-            }
+            //// If they're removing an existing entry, don't add a new entry at the end.
+            //if (nextAddr >= 0 && dlg.NewAddress != AddressMap.NO_ENTRY_ADDR &&
+            //        addrMap.Get(nextOffset) == AddressMap.NO_ENTRY_ADDR) {
+            //    // We don't screen for redundant entries here.  That should only happen if
+            //    // they select a range and then don't change the address.  Maybe it's useful?
+            //    int prevAddress = addrMap.Get(nextOffset);
+            //    UndoableChange uc = UndoableChange.CreateAddressChange(nextOffset,
+            //        prevAddress, nextAddr);
+            //    cs.Add(uc);
+            //    Debug.WriteLine("EditAddress: setting trailing addr at offset +" +
+            //        nextOffset.ToString("x6") + " to $" + nextAddr.ToString("x4"));
+            //}
 
             if (cs.Count > 0) {
                 ApplyUndoableChanges(cs);
@@ -2614,7 +2623,7 @@ namespace SourceGen {
                     // This must match what GroupedOffsetSetFromSelected() does.
                     if (!mProject.UserLabels.ContainsKey(nextOffset) &&
                             !mProject.HasCommentNoteOrVis(nextOffset) &&
-                            mProject.AddrMap.IsSingleAddrRange(nextOffset - 1, 2)) {
+                            mProject.AddrMap.IsRangeUnbroken(nextOffset - 1, 2)) {
                         // Good to go.
                         Debug.WriteLine("Grabbing second byte from +" + nextOffset.ToString("x6"));
                         trs.Add(nextOffset, rng.Type);
@@ -3606,7 +3615,7 @@ namespace SourceGen {
                     //    + expectedAddr.ToString("x4"));
                     expectedAddr = attr.Address;
                     groupNum++;
-                } else if (offset > 0 && !mProject.AddrMap.IsSingleAddrRange(offset - 1, 2)) {
+                } else if (offset > 0 && !mProject.AddrMap.IsRangeUnbroken(offset - 1, 2)) {
                     // Was the previous byte in a different address range?  This is only
                     // strictly necessary if the previous byte was in the selection set (which
                     // it won't be if the selection starts at the beginning of an address

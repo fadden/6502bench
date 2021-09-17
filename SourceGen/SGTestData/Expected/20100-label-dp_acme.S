@@ -1,6 +1,5 @@
         !cpu    6510
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         jsr     L1035
         jsr     L1038
         jsr     L1059
@@ -295,7 +294,6 @@ L1238   isc     (L0080),y
         sbc+2   L0086,x
         inc+2   L0086,x
         isc+2   L0086,x
-        } ;!pseudopc
         !pseudopc $0080 {
 L0080   bit+1   @L0082
 @L0082  bit+1   @L0082

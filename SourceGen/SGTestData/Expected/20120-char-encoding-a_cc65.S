@@ -1,6 +1,5 @@
 ;Projected edited to format non-char operands as chars.
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $1000
          lda     #'A'
          lda     #'A' | $80

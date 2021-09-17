@@ -682,7 +682,7 @@ namespace SourceGen {
 
                     // Check to see if we just crossed an address change.
                     if (offset < mAnattribs.Length &&
-                            !mProject.AddrMap.IsSingleAddrRange(offset - 1, 2)) {
+                            !mProject.AddrMap.IsRangeUnbroken(offset - 1, 2)) {
                         // Must be an ORG here.  End region and scan.
                         AnalyzeRange(startOffset, offset - 1);
                         startOffset = -1;

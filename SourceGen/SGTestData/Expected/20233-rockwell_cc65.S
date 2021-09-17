@@ -1,7 +1,6 @@
          .setcpu "65C02"
 G_DP     =       $20
 
-;         .segment "SEG000"
          .org    $1000
          bbr0    $10,L1004
          rts

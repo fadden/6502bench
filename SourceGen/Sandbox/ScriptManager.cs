@@ -272,8 +272,10 @@ namespace SourceGen.Sandbox {
                 }
             } else {
                 CheckHealth();
-                List<AddressMap.AddressMapEntry> addrEnts = mProject.AddrMap.GetEntryList();
-                DomainMgr.PluginMgr.PreparePlugins(appRef, addrEnts, plSyms);
+                int spanLength;
+                List<AddressMap.AddressMapEntry> addrEnts =
+                    mProject.AddrMap.GetEntryList(out spanLength);
+                DomainMgr.PluginMgr.PreparePlugins(appRef, spanLength, addrEnts, plSyms);
             }
         }
 

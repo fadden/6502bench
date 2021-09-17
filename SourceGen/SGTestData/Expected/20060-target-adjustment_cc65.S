@@ -1,5 +1,4 @@
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $1000
 load11:  lda     #$11
 @L1002:  ldx     #$22
@@ -47,7 +46,6 @@ load11:  lda     #$11
 
          .byte   $80
 @dat81:  .byte   $81
-;         .segment "SEG001"
          .org    $2000
 @L2000:  .byte   $82
          .byte   $83

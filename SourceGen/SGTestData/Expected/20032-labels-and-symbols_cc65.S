@@ -11,7 +11,6 @@ thirty2  =       $12345678  ;32-bit constant test
 plataddr =       $3000      ;address only in platform file
 projalsa =       $3200      ;same val as projalso
 
-;         .segment "SEG000"
          .org    $012345
          .a8
          .i8
@@ -126,7 +125,6 @@ start:   clc
 
 @nextchunk: jml  @L1000_1
 
-;         .segment "SEG001"
          .org    $1000
 @L1000_1: nop
 @L1000:  nop

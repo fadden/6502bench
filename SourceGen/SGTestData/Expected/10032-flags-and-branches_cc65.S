@@ -1,5 +1,4 @@
          .setcpu "65816"
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8

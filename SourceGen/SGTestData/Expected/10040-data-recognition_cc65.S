@@ -1,5 +1,4 @@
          .setcpu "6502X"
-;         .segment "SEG000"
          .org    $1000
          lda     L10AC
          ora     L10BC

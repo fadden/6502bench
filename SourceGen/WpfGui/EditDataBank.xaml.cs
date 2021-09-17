@@ -99,7 +99,7 @@ namespace SourceGen.WpfGui {
 
             bool[] done = new bool[256];
             foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
-                byte bank = (byte)(ent.Addr >> 16);
+                byte bank = (byte)(ent.Address >> 16);
                 if (done[bank]) {
                     continue;
                 }

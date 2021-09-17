@@ -47,6 +47,7 @@ limitations under the License.
     <system:String x:Key="str_EquAddress">addr</system:String>
     <system:String x:Key="str_EquConstant">const</system:String>
     <system:String x:Key="str_EquStackRelative">stkrl</system:String>
+    <system:String x:Key="str_ErrBadAddressRegionFmt">Bad address region {0}</system:String>
     <system:String x:Key="str_ErrBadDefSymbolDir">Unknown I/O direction in symbol</system:String>
     <system:String x:Key="str_ErrBadFdFmt">Bad format descriptor at +{0:x6}.</system:String>
     <system:String x:Key="str_ErrBadFdFormat">Bad format descriptor type</system:String>

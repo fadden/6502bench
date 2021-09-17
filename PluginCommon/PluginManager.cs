@@ -179,11 +179,12 @@ namespace PluginCommon {
         /// Invokes the Prepare() method on all active plugins.
         /// </summary>
         /// <param name="appRef">Reference to host object providing app services.</param>
+        /// <param name="spanLength">Length of data spanned by address map.</param>
         /// <param name="addrEntries">Serialized AddressMap entries.</param>
         /// <param name="plSyms">SymbolTable contents, converted to PlSymbol.</param>
-        public void PreparePlugins(IApplication appRef,
+        public void PreparePlugins(IApplication appRef, int spanLength,
                 List<AddressMap.AddressMapEntry> addrEntries, List<PlSymbol> plSyms) {
-            AddressMap addrMap = new AddressMap(addrEntries);
+            AddressMap addrMap = new AddressMap(spanLength, addrEntries);
             AddressTranslate addrTrans = new AddressTranslate(addrMap);
             foreach (KeyValuePair<string, IPlugin> kvp in mActivePlugins) {
                 IPlugin ipl = kvp.Value;

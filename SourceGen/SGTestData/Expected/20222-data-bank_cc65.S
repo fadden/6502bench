@@ -1,5 +1,4 @@
          .setcpu "65816"
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8
@@ -38,7 +37,6 @@ L103A:   .word   @L103C
 
 L103D:   .faraddr L2202E
 
-;         .segment "SEG001"
          .org    $022000
 bank2:   lda     bank2
          lda     bank2 & $ffff
@@ -74,14 +72,12 @@ L2202E:  nop
 
 bank2addr: .word L2202E & $ffff
 
-;         .segment "SEG002"
          .org    $033000
 bank3:   lda     bank3
          lda     bank2 & $ffff
          jsr     @L33020 & $ffff
          beq     @L33024
          phk
-;         .segment "SEG003"
          .org    $033020
 @L33020: plb
          nop
@@ -92,7 +88,6 @@ bank3:   lda     bank3
 
 L33028:  .word   L33028 & $ffff
 
-;         .segment "SEG004"
          .org    $024000
 L24000:  lda     L24000
          phb

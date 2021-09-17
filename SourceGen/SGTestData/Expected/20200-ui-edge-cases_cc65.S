@@ -1,15 +1,12 @@
          .setcpu "6502"
-;         .segment "SEG000"
          .org    $2000
          jmp     L2100
 
          .byte   "hello, "  ;string should be split by no-op addr change
-;         .segment "SEG001"
          .org    $200a
          .byte   "world"
          .byte   $80
 
-;         .segment "SEG002"
          .org    $2100
 L2100:   lda     #$00
          sta     addr1-1    ;edit this operand

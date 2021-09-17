@@ -270,7 +270,8 @@ namespace SourceGen {
             ProjectPathName = string.Empty;
 
             AddrMap = new AddressMap(fileDataLen);
-            AddrMap.Set(0, 0x1000);    // default load address to $1000; override later
+            // set default load address to $1000; override later
+            AddrMap.AddRegion(0x000000, fileDataLen, 0x1000, false);
 
             // Default value is "no tag".
             AnalyzerTags = new CodeAnalysis.AnalyzerTag[fileDataLen];
@@ -387,6 +388,7 @@ namespace SourceGen {
             ProjectProps.EntryFlags = SystemDefaults.GetEntryFlags(sysDef);
 
             // Configure the load address.
+            AddrMap.Clear();
             if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
                 // First two bytes are the load address, with the actual file data starting
                 // at +000002.  We need to assign an address to the bytes, but don't want them
@@ -396,8 +398,13 @@ namespace SourceGen {
                 // So we just give it an offset of (start - 2) and leave it to the user to
                 // update if necessary.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                AddrMap.Set(0, loadAddr < 2 ? 0 : loadAddr - 2);
-                AddrMap.Set(2, loadAddr);
+                // TODO(org): use NON_ADDR for first two bytes
+                AddressMap.AddResult addRes =
+                    AddrMap.AddRegion(0, 2, loadAddr < 2 ? 0 : loadAddr - 2, false);
+                Debug.Assert(addRes == AddressMap.AddResult.Okay);
+                addRes = AddrMap.AddRegion(2, mFileData.Length - 2, loadAddr, false);
+                Debug.Assert(addRes == AddressMap.AddResult.Okay);
+
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
                     FormatDescriptor.SubType.None);
                 Comments[0] = Res.Strings.LOAD_ADDRESS;
@@ -405,7 +412,9 @@ namespace SourceGen {
                 AnalyzerTags[2] = CodeAnalysis.AnalyzerTag.Code;
             } else {
                 int loadAddr = SystemDefaults.GetLoadAddress(sysDef);
-                AddrMap.Set(0, loadAddr);
+                AddressMap.AddResult addRes =
+                    AddrMap.AddRegion(0, mFileData.Length, loadAddr, false);
+                Debug.Assert(addRes == AddressMap.AddResult.Okay);
             }
 
             foreach (string str in sysDef.SymbolFiles) {
@@ -750,11 +759,16 @@ namespace SourceGen {
         /// Checks to see if any part of the address map runs across a bank boundary.
         /// </summary>
         private void ValidateAddressMap() {
-            foreach (AddressMap.AddressMapEntry entry in AddrMap) {
-                if ((entry.Addr & 0xff0000) != ((entry.Addr + entry.Length - 1) & 0xff0000)) {
+            // Use the change list, because the region list can have "floating" length values.
+            IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                AddressMap.AddressChange change = addrIter.Current;
+                AddressMap.AddressMapEntry entry = change.Entry;
+                if (change.IsStart &&
+                        (entry.Address & 0xff0000) != ((entry.Address + entry.Length - 1) & 0xff0000)) {
                     string fmt = Res.Strings.MSG_BANK_OVERRUN_DETAIL_FMT;
-                    int firstNext = (entry.Addr & 0xff0000) + 0x010000;
-                    int badOffset = entry.Offset + (firstNext - entry.Addr);
+                    int firstNext = (entry.Address & 0xff0000) + 0x010000;
+                    int badOffset = entry.Offset + (firstNext - entry.Address);
                     Messages.Add(new MessageList.MessageEntry(
                         MessageList.MessageEntry.SeverityLevel.Error,
                         entry.Offset,
@@ -1035,7 +1049,7 @@ namespace SourceGen {
                     continue;
                 }
 
-                if (!AddrMap.IsSingleAddrRange(offset, dfd.Length)) {
+                if (!AddrMap.IsRangeUnbroken(offset, dfd.Length)) {
                     string msg = "descriptor straddles address change; len=" + dfd.Length;
                     genLog.LogE("+" + offset.ToString("x6") + ": " + msg);
                     Messages.Add(new MessageList.MessageEntry(
@@ -2130,13 +2144,27 @@ namespace SourceGen {
                         //}
                         break;
                     case UndoableChange.ChangeType.SetAddress: {
+                            // TODO(org): rewrite this
+
                             AddressMap addrMap = AddrMap;
-                            if (addrMap.Get(offset) != (int)oldValue) {
-                                Debug.WriteLine("GLITCH: old address value mismatch (" +
-                                    addrMap.Get(offset) + " vs " + (int)oldValue + ")");
-                                Debug.Assert(false);
+                            if ((int)oldValue == AddressMap.NON_ADDR) {
+                                // adding new entry
+                                if (addrMap.AddRegion(offset, AddressMap.FLOATING_LEN,
+                                        (int)newValue, false) != AddressMap.AddResult.Okay) {
+                                    Debug.Assert(false, "failed adding region");
+                                }
+                            } else if ((int)newValue == AddressMap.NON_ADDR) {
+                                // removing existing entry
+                                if (!addrMap.RemoveRegion(offset, AddressMap.FLOATING_LEN)) {
+                                    Debug.Assert(false, "failed removing region");
+                                }
+                            } else {
+                                // updating existing entry
+                                if (!addrMap.EditRegion(offset, AddressMap.FLOATING_LEN,
+                                        (int) newValue, false)) {
+                                    Debug.Assert(false, "failed editing region");
+                                }
                             }
-                            addrMap.Set(offset, (int)newValue);
 
                             Debug.WriteLine("Map offset +" + offset.ToString("x6") + " to $" +
                                 ((int)newValue).ToString("x6"));

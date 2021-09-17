@@ -9,7 +9,6 @@ absh     =       $feed
 plataddr =       $3000      ;address only in platform file
 projalsa =       $3200      ;same val as projalso
 
-;         .segment "SEG000"
          .org    $2345
 start:   lda     #zip
          lda     #zip+16
@@ -59,7 +58,6 @@ start:   lda     #zip
 
 @L23A3:  jmp     @L1000_1
 
-;         .segment "SEG001"
          .org    $1000
 @L1000_1: nop
 @L1000:  nop

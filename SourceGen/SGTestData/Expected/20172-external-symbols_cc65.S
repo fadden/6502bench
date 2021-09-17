@@ -9,7 +9,6 @@ hiaddr   =       $e0c030
 addr_e2  =       $e2c030
 addr_e3  =       $e3c030
 
-;         .segment "SEG000"
          .org    $1000
          .a8
          .i8

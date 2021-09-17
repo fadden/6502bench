@@ -1,9 +1,7 @@
         !cpu    6502
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         !word   $1000      ;PRG-style header
 
-        } ;!pseudopc
         !pseudopc $1000 {
         jsr     L1100
         jsr     L1107

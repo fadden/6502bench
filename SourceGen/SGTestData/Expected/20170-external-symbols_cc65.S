@@ -38,7 +38,6 @@ MoreMultiZero =  $c100
 AlsoMoreMultiZero = $c110   ;winner
 BankWrap =       $fff0
 
-;         .segment "SEG000"
          .org    $1000
 L1000:   lda     CodeWrap+255
          ldx     L1000

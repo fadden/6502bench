@@ -3,8 +3,7 @@ PrintInlineL1String = $011000
 PrintInlineL2String = $012000
 PrintInlineDciString = $013000
 
-*       =       $0000
-        !pseudopc $1000 {
+*       =       $1000
         !as
         !rs
         clc
@@ -102,7 +101,6 @@ Next1   jsr     L10BA
 
         !fill   289,$00
 
-        } ;!pseudopc
         !pseudopc $1800 {
 L1800   jsr     PrintInlineNullString
         per     $8778

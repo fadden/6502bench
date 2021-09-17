@@ -103,11 +103,6 @@ namespace SourceGen.AsmGen {
         private StreamWriter mOutStream;
 
         /// <summary>
-        /// If we output a ".logical", we will need a ".here" eventually.
-        /// </summary>
-        private bool mNeedHereOp;
-
-        /// <summary>
         /// What encoding are we currently set up for.
         /// </summary>
         private CharEncoding.Encoding mCurrentEncoding;
@@ -115,10 +110,16 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// Output mode; determines how ORG is handled.
         /// </summary>
-        private enum TassOutputMode {
+        private enum OutputMode {
             Unknown = 0, Loadable = 1, Streamable = 2
         }
-        private TassOutputMode mOutputMode;
+        private OutputMode mOutputMode;
+
+        /// <summary>
+        /// Current pseudo-PC depth.  0 is the "real" PC.
+        /// </summary>
+        private int mPcDepth;
+        private bool mFirstIsOpen;
 
         /// <summary>
         /// Holds detected version of configured assembler.
@@ -220,13 +221,13 @@ namespace SourceGen.AsmGen {
             // of offset +000002.
             bool hasPrgHeader = GenCommon.HasPrgHeader(project);
             int offAdj = hasPrgHeader ? 2 : 0;
-            int startAddr = project.AddrMap.Get(offAdj);
+            int startAddr = project.AddrMap.OffsetToAddress(offAdj);
             if (startAddr + project.FileDataLength - offAdj > 65536) {
                 // Does not fit into memory at load address.
-                mOutputMode = TassOutputMode.Streamable;
+                mOutputMode = OutputMode.Streamable;
                 mHasPrgHeader = false;
             } else {
-                mOutputMode = TassOutputMode.Loadable;
+                mOutputMode = OutputMode.Loadable;
                 mHasPrgHeader = hasPrgHeader;
             }
             //Debug.WriteLine("startAddr=$" + startAddr.ToString("x6") +
@@ -298,6 +299,9 @@ namespace SourceGen.AsmGen {
                 (needLongAddress ? AsmTass64.LONG_ADDRESS : string.Empty) +
                 (mHasPrgHeader ? string.Empty : AsmTass64.NOSTART);
 
+            mPcDepth = 0;
+            mFirstIsOpen = true;
+
             // Use UTF-8 encoding, without a byte-order mark.
             using (StreamWriter sw = new StreamWriter(pathName, false, new UTF8Encoding(false))) {
                 mOutStream = sw;
@@ -309,11 +313,6 @@ namespace SourceGen.AsmGen {
                 }
 
                 GenCommon.Generate(this, sw, worker);
-
-                if (mNeedHereOp) {
-                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(HERE_PSEUDO_OP),
-                        string.Empty, string.Empty);
-                }
             }
             mOutStream = null;
 
@@ -654,34 +653,58 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(int offset, int address) {
+        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
             // 64tass separates the "compile offset", which determines where the output fits
             // into the generated binary, and "program counter", which determines the code
             // the assembler generates.  Since we need to explicitly specify every byte in
-            // the output file, having a distinct compile offset isn't very useful.  We want
+            // the output file, having a distinct compile offset isn't useful here.  We want
             // to set it once before the first line of code, then leave it alone.
             //
             // Any subsequent ORG changes are made to the program counter, and take the form
-            // of a pair of ops (.logical <addr> to open, .here to end).  Omitting the .here
+            // of a pair of ops (".logical <addr>" to open, ".here" to end).  Omitting the .here
             // causes an error.
             //
             // If this is a "streamable" file, meaning it won't actually load into 64K of RAM
             // without wrapping around, then we skip the "* = addr" (same as "* = 0") and just
             // start with ".logical" segments.
-            Debug.Assert(offset >= StartOffset);
-            if (offset == StartOffset && mOutputMode == TassOutputMode.Loadable) {
-                // Set the "compile offset" to the initial address.
-                OutputLine("*", "=",
-                    SourceFormatter.FormatHexValue(Project.AddrMap.Get(StartOffset), 4),
-                        string.Empty);
-            } else {
-                if (mNeedHereOp) {
-                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(HERE_PSEUDO_OP),
-                        string.Empty, string.Empty);
+            //
+            // The assembler's approach is best represented by having an address region that
+            // spans the entire file, with one or more "logical" regions inside.  In practice
+            // (especially for multi-bank 65816 code) that may not be the case, but the
+            // assembler is still expecting us to start with a "* =" and then fit everything
+            // inside that.  So we treat the first region specially, whether or not it wraps
+            // the rest of the file.
+            Debug.Assert(mPcDepth >= 0);
+            if (isStart) {
+                if (mPcDepth == 0 && mFirstIsOpen) {
+                    mPcDepth++;
+
+                    // Set the "real" PC for the first address change.  If we're in "loadable"
+                    // mode, just set "*=".  If we're in "streaming" mode, we set "*=" to zero
+                    // and then use a pseudo-PC.
+                    if (mOutputMode == OutputMode.Loadable) {
+                        OutputLine("*", "=",
+                            SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+                        return;
+                    } else {
+                        // Set the real PC to address zero to ensure we get a full 64KB.  The
+                        // assembler assumes this as a default, so it can be omitted.
+                        //OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
+                    }
                 }
                 OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
-                    SourceFormatter.FormatHexValue(address, 4), string.Empty);
-                mNeedHereOp = true;
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+                mPcDepth++;
+            } else {
+                mPcDepth--;
+                if (mPcDepth > 0 || !mFirstIsOpen) {
+                    // close previous block
+                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(HERE_PSEUDO_OP),
+                        string.Empty, string.Empty);
+                } else {
+                    // mark initial "*=" region as closed, but don't output anything
+                    mFirstIsOpen = false;
+                }
             }
         }
 

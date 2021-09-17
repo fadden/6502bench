@@ -1,5 +1,4 @@
          .setcpu "65816"
-;         .segment "SEG000"
          .org    $021000
          .a8
          .i8
@@ -10,7 +9,6 @@
          jsr     L21107 & $ffff
          jmp     L22000 & $ffff
 
-;         .segment "SEG001"
          .org    $021100
 L21100:  bit     L21100 & $ffff
 L21103:  lda     #$11
@@ -19,7 +17,6 @@ L21107:  ldy     #$11
          per     L21103
          bra     L21103
 
-;         .segment "SEG002"
          .org    $021100
 @L21100_0: bit   @L21100_0 & $ffff
          lda     #$22
@@ -28,7 +25,6 @@ L21107:  ldy     #$11
          per     @L21105
          jmp     @L21105 & $ffff
 
-;         .segment "SEG003"
          .org    $021100
 @L21100_1: bit   @L21100_1 & $ffff
          lda     #$33
@@ -37,20 +33,17 @@ L21107:  ldy     #$11
          per     @L21107_0
          bra     @L21107_0
 
-;         .segment "SEG004"
          .org    $022000
 L22000:  bit     L22000 & $ffff
          beq     $022018
          bra     @L22020
 
-;         .segment "SEG005"
          .org    $022020
 @L22020: bit     @L22020 & $ffff
          beq     $022029
          brl     @L22080
 
 @offend: nop
-;         .segment "SEG006"
          .org    $022080
 @L22080: bit     @L22080 & $ffff
          lda     @offend & $ffff
@@ -65,22 +58,18 @@ L22000:  bit     L22000 & $ffff
          beq     @L22100
          .byte   $ad
 
-;         .segment "SEG007"
          .org    $022100
 @L22100: nop
          nop
          jmp     @L23000 & $ffff
 
-;         .segment "SEG008"
          .org    $022800
          .byte   $00
          .byte   $28
          .res    14,$00
-;         .segment "SEG009"
          .org    $022820
          .res    18,$00
 
-;         .segment "SEG010"
          .org    $023000
 @L23000: bit     @L23000 & $ffff
          lda     #$44
@@ -90,7 +79,6 @@ L22000:  bit     L22000 & $ffff
 
 @ulabel: .byte   $00
          .byte   $01
-;         .segment "SEG011"
          .org    $023100
          .byte   $02
 
@@ -103,7 +91,6 @@ L22000:  bit     L22000 & $ffff
          beq     @L23182
          .byte   $ea
          .byte   $ea
-;         .segment "SEG012"
          .org    $023180
          .byte   $00
          .byte   $01
@@ -117,7 +104,6 @@ L22000:  bit     L22000 & $ffff
 @label1: .byte   $ea
          .byte   $ea
 
-;         .segment "SEG013"
          .org    $023200
 @L23200: bit     @L23200 & $ffff
          .byte   $00
