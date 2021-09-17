@@ -170,7 +170,7 @@ namespace SourceGen.AsmGen {
         /// </summary>
         /// <param name="addrEntry">Address map entry object.</param>
         /// <param name="isStart">True if we're outputing a region-start directive.</param>
-        void OutputOrgDirective(CommonUtil.AddressMap.AddressMapEntry addrEntry, bool isStart);
+        void OutputOrgDirective(CommonUtil.AddressMap.AddressRegion addrEntry, bool isStart);
 
         /// <summary>
         /// Notify the assembler of a change in register width.

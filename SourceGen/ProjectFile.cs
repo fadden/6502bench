@@ -670,11 +670,11 @@ namespace SourceGen {
             // Deserialize address map.
             proj.AddrMap.Clear();
             foreach (SerAddressMap addr in spf.AddressMap) {
-                // TODO(org): serialize length and isRelative
+                // TODO(org): serialize length, isRelative, and preLabel
                 int length = CommonUtil.AddressMap.FLOATING_LEN;
 
                 AddressMap.AddResult addResult = proj.AddrMap.AddRegion(addr.Offset,
-                    length, addr.Addr, false);
+                    length, addr.Addr);
                 if (addResult != CommonUtil.AddressMap.AddResult.Okay) {
                     string msg = "off=+" + addr.Offset.ToString("x6") + " addr=$" +
                         addr.Addr.ToString("x4") + " len=" +

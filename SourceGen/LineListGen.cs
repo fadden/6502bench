@@ -944,7 +944,8 @@ namespace SourceGen {
             // Assume variables may have changed.
             mLvLookup.Reset();
 
-            // Find the previous status flags for M/X tracking.
+            // Find the previous status flags for M/X tracking.  This is for synthesizing
+            // long/short pseudo-op directives.
             StatusFlags prevFlags = StatusFlags.AllIndeterminate;
             if (mProject.CpuDef.HasEmuFlag) {
                 for (int scanoff = startOffset - 1; scanoff >= 0; scanoff--) {
@@ -966,6 +967,8 @@ namespace SourceGen {
             // a no-continue instruction (e.g. JMP) followed by an instruction with a label.
             // When we rename the label, we don't want the blank to disappear during the
             // partial-list generation.
+            //
+            // (Blank lines should always be added ABOVE things rather than AFTER things.)
             bool addBlank = false;
             if (startOffset > 0) {
                 int baseOff = DataAnalysis.GetBaseOperandOffset(mProject, startOffset - 1);
@@ -976,24 +979,68 @@ namespace SourceGen {
                 }
             }
 
+            // Create an address map iterator and advance it to match gen.StartOffset.
+            IEnumerator<AddressMap.AddressChange> addrIter = mProject.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                if (addrIter.Current.IsStart && addrIter.Current.Offset >= startOffset) {
+                    break;
+                }
+            }
+
             int offset = startOffset;
             while (offset <= endOffset) {
+                bool blankAdded = false;
                 Anattrib attr = mProject.GetAnattrib(offset);
                 if (attr.IsInstructionStart && offset > 0 &&
                         mProject.GetAnattrib(offset - 1).IsData) {
                     // Transition from data to code.  (Don't add blank line for inline data.)
                     lines.Add(GenerateBlankLine(offset));
-                } else if (mProject.VisualizationSets.ContainsKey(offset) && !addBlank &&
-                        offset != 0) {
+                    blankAdded = true;
+                } else if (mProject.VisualizationSets.ContainsKey(offset) && !addBlank) {
                     // Blank line before visualization set helps keep image visually grouped
-                    // with its data.  (Slightly weird things happen with .ORG at the start of
-                    // the file; don't try to add a blank there.)
+                    // with its data.
                     lines.Add(GenerateBlankLine(offset));
+                    blankAdded = true;
                 } else if (addBlank) {
                     // Previous instruction wanted to be followed by a blank line.
                     lines.Add(GenerateBlankLine(offset));
+                    blankAdded = true;
                 }
                 addBlank = false;
+
+                // Start with address region changes.
+                while (addrIter.Current != null && addrIter.Current.Offset <= offset) {
+                    AddressMap.AddressChange change = addrIter.Current;
+                    Debug.Assert(change.Offset == offset);  // shouldn't be embedded in something
+
+                    AddressMap.AddressRegion region = change.Region;
+                    if (region.Offset == 0 && AsmGen.GenCommon.HasPrgHeader(mProject)) {
+                        // Suppress the ORG at offset zero.  We know there's another one
+                        // at offset +000002, and that it matches the value at +0/1.
+                        addrIter.MoveNext();
+                        continue;
+                    }
+
+                    if (change.IsStart) {
+                        // Blank line above ORG directive, except at top of file or when we've
+                        // already added one for another reason.
+                        if (region.Offset != 0 && !blankAdded) {
+                            lines.Add(GenerateBlankLine(offset));
+                        }
+                        blankAdded = false;     // next one will need a blank line
+
+                        // TODO(org): pre-label (address / label only, logically part of ORG)
+                        Line newLine = new Line(offset, 0, Line.Type.OrgDirective);
+                        string addrStr = mFormatter.FormatHexValue(region.Address, 4);
+                        newLine.Parts = FormattedParts.CreateDirective(
+                            mFormatter.FormatPseudoOp(mPseudoOpNames.OrgDirective), addrStr);
+                        lines.Add(newLine);
+                    } else {
+                        // TODO(org)
+                    }
+
+                    addrIter.MoveNext();
+                }
 
                 // Insert long comments and notes.  These may span multiple display lines,
                 // and require word-wrap, so it's easiest just to render them fully here.
@@ -1162,61 +1209,6 @@ namespace SourceGen {
                         }
                     }
                     offset += attr.Length;
-                }
-            }
-
-            // See if there were any address shifts in this section.  If so, go back and
-            // insert an ORG statement as the first entry for the offset.  We're expecting to
-            // have very few AddressMap entries (usually just one), so it's more efficient to
-            // process them here and walk through the sub-list than it is to ping the address map
-            // at every line.
-            //
-            // It should not be possible for an address map change to appear in the middle
-            // of an instruction or data item.
-            foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
-                if (ent.Offset < startOffset || ent.Offset > endOffset) {
-                    continue;
-                }
-                if (ent.Offset == 0 && AsmGen.GenCommon.HasPrgHeader(mProject)) {
-                    // Suppress the ORG at offset zero.  We know there's another one
-                    // at offset +000002, and that it matches the value at +0/1.
-                    continue;
-                }
-                int index = FindLineByOffset(lines, ent.Offset);
-                if (index < 0) {
-                    Debug.WriteLine("Couldn't find offset " + ent.Offset +
-                        " in range we just generated");
-                    Debug.Assert(false);
-                    continue;
-                }
-                if (lines[index].LineType == Line.Type.Blank) {
-                    index++;
-                }
-                Line topLine = lines[index];
-                Line newLine = new Line(topLine.FileOffset, 0, Line.Type.OrgDirective);
-                string addrStr = mFormatter.FormatHexValue(ent.Address, 4);
-                newLine.Parts = FormattedParts.CreateDirective(
-                    mFormatter.FormatPseudoOp(mPseudoOpNames.OrgDirective), addrStr);
-                lines.Insert(index, newLine);
-
-                // Prepend a blank line if the previous line wasn't already blank, and this
-                // isn't the ORG at the start of the file.  (This may temporarily do
-                // double-spacing if we do a partial update, because we won't be able to
-                // "see" the previous line.  Harmless.)
-                // TODO(maybe): consider always adding blanks, and doing a fix-up pass afterward.
-                //       (but keep in mind that blank lines should always come above things)
-                //
-                // Interesting case:
-                //   .dd2 $1000
-                //   <blank>
-                //   .org $1234
-                //   .dd2 $aabb    ;comment
-                // We need to include "index == 0" or we'll lose the blank when the comment
-                // is edited.
-                if (ent.Offset != 0 &&
-                        (index == 0 || (index > 0 && lines[index-1].LineType != Line.Type.Blank))){
-                    Line blankLine = GenerateBlankLine(topLine.FileOffset);
-                    lines.Insert(index, blankLine);
                 }
             }
         }

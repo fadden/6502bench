@@ -287,8 +287,8 @@ namespace SourceGen.AsmGen {
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         "ACME can't handle 65816 code that lives outside bank zero");
                     int orgAddr = Project.AddrMap.OffsetToAddress(0);
-                    AddressMap.AddressMapEntry fakeEnt = new AddressMap.AddressMapEntry(0,
-                        Project.FileData.Length, orgAddr, false, false);
+                    AddressMap.AddressRegion fakeEnt = new AddressMap.AddressRegion(0,
+                        Project.FileData.Length, orgAddr);
                     OutputOrgDirective(fakeEnt, true);
                     OutputDenseHex(0, Project.FileData.Length, string.Empty, string.Empty);
                     OutputOrgDirective(fakeEnt, false);
@@ -568,7 +568,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
+        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             // This is similar in operation to the AsmTass64 implementation.  See comments there.
             Debug.Assert(mPcDepth >= 0);
             if (isStart) {

@@ -484,7 +484,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
+        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             if (isStart) {
                 OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
                     SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);

@@ -653,7 +653,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressMapEntry addrEntry, bool isStart) {
+        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             // 64tass separates the "compile offset", which determines where the output fits
             // into the generated binary, and "program counter", which determines the code
             // the assembler generates.  Since we need to explicitly specify every byte in

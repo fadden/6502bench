@@ -79,7 +79,7 @@ namespace SourceGen.AsmGen {
                 // Check for address changes.  There may be more than one at a given offset.
                 AddressMap.AddressChange change = addrIter.Current;
                 while (change != null && change.Offset == offset) {
-                    gen.OutputOrgDirective(change.Entry, change.IsStart);
+                    gen.OutputOrgDirective(change.Region, change.IsStart);
                     addrIter.MoveNext();
                     change = addrIter.Current;
                 }
@@ -152,7 +152,7 @@ namespace SourceGen.AsmGen {
                     Debug.Assert(false);
                 }
                 Debug.Assert(change.Offset == offset);
-                gen.OutputOrgDirective(change.Entry, change.IsStart);
+                gen.OutputOrgDirective(change.Region, change.IsStart);
                 addrIter.MoveNext();
                 change = addrIter.Current;
             }
@@ -565,7 +565,7 @@ namespace SourceGen.AsmGen {
                 return false;
             }
             AddressMap.AddressChange change = iter.Current;
-            if (change.Entry.Length != 2) {
+            if (change.Region.Length != 2) {
                 Debug.WriteLine("PRG test: first entry is not a two-byte region");
             }
             // Confirm there's an address map entry at offset 2.
