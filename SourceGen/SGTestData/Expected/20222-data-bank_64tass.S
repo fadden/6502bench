@@ -71,8 +71,8 @@ L2202E  nop
         rts
 
 bank2addr .word L2202E & $ffff
-
         .here
+
         .logical $033000
 bank3   lda     bank3
         lda     bank2 & $ffff
@@ -89,8 +89,8 @@ _L33024 lda     $2030
         rtl
 
 L33028  .word   L33028 & $ffff
-
         .here
+
         .logical $024000
 L24000  lda     L24000
         phb

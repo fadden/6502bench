@@ -6,8 +6,8 @@
         !pseudopc $200a {
         !text   "world"
         !byte   $80
+        }
 
-        } ;!pseudopc
         !pseudopc $2100 {
 L2100   lda     #$00
         sta     addr1-1    ;edit this operand
@@ -20,4 +20,4 @@ addr1   !text   "!?---"
 
 L2121   rts
 
-        } ;!pseudopc
+        }

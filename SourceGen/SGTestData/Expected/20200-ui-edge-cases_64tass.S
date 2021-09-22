@@ -8,8 +8,8 @@
         .logical $200a
         .text   "world"
         .byte   $80
-
         .here
+
         .logical $2100
 L2100   lda     #$00
         sta     addr1-1    ;edit this operand

@@ -17,12 +17,16 @@ using System;
 using System.Diagnostics;
 
 namespace Asm65 {
+    /// <summary>
+    /// Memory address primitives.
+    /// </summary>
     public static class Address {
         /// <summary>
         /// Converts a 16- or 24-bit address to a string.
         /// </summary>
-        /// <param name="addr"></param>
-        /// <returns></returns>
+        /// <param name="addr">Address</param>
+        /// <param name="always24">If true, force 24-bit output mode.</param>
+        /// <returns>Formatted string.</returns>
         public static string AddressToString(int addr, bool always24) {
             if (!always24 && addr < 65536) {
                 return addr.ToString("x4");

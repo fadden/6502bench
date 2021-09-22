@@ -1180,7 +1180,8 @@ namespace SourceGen.WpfGui {
             mPseudoNameMap = new TextBoxPropertyMap[] {
                 new TextBoxPropertyMap(equDirectiveTextBox, "EquDirective"),
                 new TextBoxPropertyMap(varDirectiveTextBox, "VarDirective"),
-                new TextBoxPropertyMap(orgDirectiveTextBox, "OrgDirective"),
+                new TextBoxPropertyMap(arStartDirectiveTextBox, "ArStartDirective"),
+                new TextBoxPropertyMap(arEndDirectiveTextBox, "ArEndDirective"),
                 new TextBoxPropertyMap(regWidthDirectiveTextBox, "RegWidthDirective"),
                 new TextBoxPropertyMap(dataBankTextBox, "DataBankDirective"),
                 new TextBoxPropertyMap(defineData1TextBox, "DefineData1"),

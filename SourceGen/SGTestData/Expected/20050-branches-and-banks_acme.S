@@ -19,12 +19,12 @@ L0012   lda+1   lodat+1
         clc
         bcc     LFFC0
 
-        } ;!pseudopc
+        }
         !pseudopc $0080 {
 L0080   bit+2   L0080
         jmp     LFFC6
 
-        } ;!pseudopc
+        }
         !pseudopc $ffc0 {
 LFFC0   bit     LFFC0
 LFFC3   clc
@@ -32,4 +32,4 @@ LFFC3   clc
 
 LFFC6   rts
 
-        } ;!pseudopc
+        }

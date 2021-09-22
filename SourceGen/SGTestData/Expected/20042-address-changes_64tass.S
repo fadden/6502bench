@@ -63,8 +63,8 @@ _L22080 bit     _L22080 & $ffff
         lda     $00
         beq     _L22100
         .byte   $ad
-
         .here
+
         .logical $022100
 _L22100 nop
         nop
@@ -78,8 +78,8 @@ _L22100 nop
         .here
         .logical $022820
         .fill   18,$00
-
         .here
+
         .logical $023000
 _L23000 bit     _L23000 & $ffff
         lda     #$44
@@ -115,8 +115,8 @@ _L23182 bit     _L23182 & $ffff
 
 _label1 .byte   $ea
         .byte   $ea
-
         .here
+
         .logical $023200
 _L23200 bit     _L23200 & $ffff
         .byte   $00

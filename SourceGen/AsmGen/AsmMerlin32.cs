@@ -100,7 +100,8 @@ namespace SourceGen.AsmGen {
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "equ" },
                 { "VarDirective", "equ" },
-                { "OrgDirective", "org" },
+                { "ArStartDirective", "org" },
+                //ArEndDirective
                 //RegWidthDirective
                 //DataBankDirective
                 { "DefineData1", "dfb" },
@@ -484,10 +485,12 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             if (isStart) {
-                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+                OutputLine(string.Empty,
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4),
+                    string.Empty);
             }
         }
 

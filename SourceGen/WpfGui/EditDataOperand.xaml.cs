@@ -222,10 +222,6 @@ namespace SourceGen.WpfGui {
             SetControlsFromDescriptor(mFirstFormatDescriptor);
 
             if (mPreferredFormatUnavailable) {
-                // This can happen when e.g. a bunch of stuff is formatted as null-terminated
-                // strings.  We don't recognize a lone zero as a string, but we allow it if
-                // it's next to a bunch of others.  If you come back later and try to format
-                // just that one byte, you end up here.
                 // TODO(maybe): make it more obvious what's going on?
                 Debug.WriteLine("NOTE: preferred format unavailable");
             }

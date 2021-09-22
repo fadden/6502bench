@@ -37,7 +37,6 @@ namespace SourceGen.AsmGen {
         // makefile rules.  Since ".S" is pretty universal for assembly language sources,
         // I'm sticking with that.
         private const string ASM_FILE_SUFFIX = "_acme.S"; // must start with underscore
-        private const string CLOSE_PSEUDOPC = "} ;!pseudopc";
 
         // IGenerator
         public DisasmProject Project { get; private set; }
@@ -124,7 +123,8 @@ namespace SourceGen.AsmGen {
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "=" },
                 //VarDirective
-                { "OrgDirective", "!pseudopc" },
+                { "ArStartDirective", "!pseudopc" },
+                { "ArEndDirective", "}" },
                 //RegWidthDirective         // !al, !as, !rl, !rs
                 //DataBankDirective
                 { "DefineData1", "!byte" },
@@ -286,12 +286,12 @@ namespace SourceGen.AsmGen {
                     // don't try
                     OutputLine(SourceFormatter.FullLineCommentDelimiter +
                         "ACME can't handle 65816 code that lives outside bank zero");
-                    int orgAddr = Project.AddrMap.OffsetToAddress(0);
-                    AddressMap.AddressRegion fakeEnt = new AddressMap.AddressRegion(0,
-                        Project.FileData.Length, orgAddr);
-                    OutputOrgDirective(fakeEnt, true);
+                    int firstAddr = Project.AddrMap.OffsetToAddress(0);
+                    AddressMap.AddressRegion fakeRegion = new AddressMap.AddressRegion(0,
+                        Project.FileData.Length, firstAddr);
+                    OutputArDirective(fakeRegion, true);
                     OutputDenseHex(0, Project.FileData.Length, string.Empty, string.Empty);
-                    OutputOrgDirective(fakeEnt, false);
+                    OutputArDirective(fakeRegion, false);
                 } else {
                     GenCommon.Generate(this, sw, worker);
                 }
@@ -568,7 +568,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             // This is similar in operation to the AsmTass64 implementation.  See comments there.
             Debug.Assert(mPcDepth >= 0);
             if (isStart) {
@@ -587,15 +587,19 @@ namespace SourceGen.AsmGen {
                         OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
                     }
                 }
-                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4) + " {", string.Empty);
+                OutputLine(string.Empty,
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4) + " {",
+                    string.Empty);
                 mPcDepth++;
             } else {
                 mPcDepth--;
                 if (mPcDepth > 0 || !mFirstIsOpen) {
                     // close previous block
-                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(CLOSE_PSEUDOPC),
+                    OutputLine(string.Empty,
+                        SourceFormatter.FormatPseudoOp(sDataOpNames.ArEndDirective),
                         string.Empty, string.Empty);
+                        //";" + SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective));
                 } else {
                     // mark initial "*=" region as closed, but don't output anything
                     mFirstIsOpen = false;

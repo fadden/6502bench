@@ -64,7 +64,8 @@ namespace SourceGen {
         public class PseudoOpNames {
             public string EquDirective { get; private set; }
             public string VarDirective { get; private set; }
-            public string OrgDirective { get; private set; }
+            public string ArStartDirective { get; private set; }
+            public string ArEndDirective { get; private set; }
             public string RegWidthDirective { get; private set; }
             public string DataBankDirective { get; private set; }
 
@@ -115,7 +116,8 @@ namespace SourceGen {
                 }
                 return a.EquDirective == b.EquDirective &&
                     a.VarDirective == b.VarDirective &&
-                    a.OrgDirective == b.OrgDirective &&
+                    a.ArStartDirective == b.ArStartDirective &&
+                    a.ArEndDirective == b.ArEndDirective &&
                     a.RegWidthDirective == b.RegWidthDirective &&
                     a.DataBankDirective == b.DataBankDirective &&
                     a.DefineData1 == b.DefineData1 &&
@@ -145,7 +147,7 @@ namespace SourceGen {
             public override int GetHashCode() {
                 // should be enough
                 return (EquDirective == null ? 0 : EquDirective.GetHashCode()) ^
-                    (OrgDirective == null ? 0 : OrgDirective.GetHashCode()) ^
+                    (ArStartDirective == null ? 0 : ArStartDirective.GetHashCode()) ^
                     (DefineData1 == null ? 0 : DefineData1.GetHashCode()) ^
                     (Fill == null ? 0 : Fill.GetHashCode());
             }
@@ -226,7 +228,8 @@ namespace SourceGen {
             new PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", ".eq" },
                 { "VarDirective", ".var" },
-                { "OrgDirective", ".org" },
+                { "ArStartDirective", ".arstart" },
+                { "ArEndDirective", ".arend" },
                 { "RegWidthDirective", ".rwid" },
                 { "DataBankDirective", ".dbank" },
 

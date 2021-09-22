@@ -106,7 +106,8 @@ namespace SourceGen.AsmGen {
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "=" },
                 { "VarDirective", ".set" },
-                { "OrgDirective", ".org" },
+                { "ArStartDirective", ".org" },
+                //ArEndDirective
                 //RegWidthDirective         // .a8, .a16, .i8, .i16
                 //DataBankDirective
                 { "DefineData1", ".byte" },
@@ -250,20 +251,10 @@ namespace SourceGen.AsmGen {
 
             sw.WriteLine("MEMORY {");
             sw.WriteLine("    MAIN: file=%O, start=%S, size=65536;");
-            //int i = 0;
-            //foreach (AddressMap.AddressMapEntry ame in Project.AddrMap) {
-            //    sw.WriteLine(string.Format("#    MEM{0:D3}: file=%O, start=${1:x4}, size={2};",
-            //        i, ame.Address, ame.Length));
-            //    i++;
-            //}
             sw.WriteLine("}");
 
             sw.WriteLine("SEGMENTS {");
             sw.WriteLine("    CODE: load=MAIN, type=rw;");
-            //foreach (AddressMap.AddressMapEntry ame in Project.AddrMap) {
-            //    sw.WriteLine(string.Format("#    SEG{0:D3}: load=MEM{0:D3}, type=rw;", i));
-            //    i++;
-            //}
             sw.WriteLine("}");
 
             sw.WriteLine("FEATURES {}");
@@ -493,24 +484,6 @@ namespace SourceGen.AsmGen {
                 OutputLine(labelStr, opcodeStr, operandStr, commentStr);
                 labelStr = commentStr = string.Empty;
             }
-
-            //StringBuilder sb = new StringBuilder(MAX_OPERAND_LEN);
-            //int maxPerLine = MAX_OPERAND_LEN / 4;
-            //int numChunks = (length + maxPerLine - 1) / maxPerLine;
-            //for (int chunk = 0; chunk < numChunks; chunk++) {
-            //    int chunkStart = chunk * maxPerLine;
-            //    int chunkEnd = Math.Min((chunk + 1) * maxPerLine, length);
-            //    for (int i = chunkStart; i < chunkEnd; i++) {
-            //        if (i != chunkStart) {
-            //            sb.Append(',');
-            //        }
-            //        sb.Append(formatter.FormatHexValue(data[offset + i], 2));
-            //    }
-
-            //    OutputLine(labelStr, opcodeStr, sb.ToString(), commentStr);
-            //    labelStr = commentStr = string.Empty;
-            //    sb.Clear();
-            //}
         }
 
         /// <summary>
@@ -561,30 +534,12 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             if (!isStart) {
                 return;
             }
 
-            //// Linear search for offset.  List should be small, so this should be quick.
-            //int index = 0;
-            //foreach (AddressMap.AddressMapEntry ame in Project.AddrMap) {
-            //    if (ame.Offset == addrEntry.Offset && ame.Length == addrEntry.Length) {
-            //        break;
-            //    }
-            //    index++;
-            //}
-
-            //mLineBuilder.Clear();
-            //TextUtil.AppendPaddedString(mLineBuilder, ";", 0);
-            //// using +1 to make it look like the comment ';' shifted it over
-            //TextUtil.AppendPaddedString(mLineBuilder, SourceFormatter.FormatPseudoOp(".segment"),
-            //    mColumnWidths[0] + 1);
-            //TextUtil.AppendPaddedString(mLineBuilder, string.Format("\"SEG{0:D3}\"", index),
-            //    mColumnWidths[0] + mColumnWidths[1] + 1);
-            //OutputLine(mLineBuilder.ToString());
-
-            OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
+            OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
                 SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
         }
 

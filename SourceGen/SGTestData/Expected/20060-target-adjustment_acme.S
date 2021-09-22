@@ -81,4 +81,4 @@ load11  lda     #$11
         lda     @L2017
         rts
 
-        } ;!pseudopc
+        }

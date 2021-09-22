@@ -63,7 +63,7 @@ LABEL   !hex    00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
         !pseudopc $1408 {
         !fill   8,$82      ;note no-op .ORG
         !fill   8,$83
-        } ;!pseudopc
+        }
         !pseudopc $1428 {
         !fill   8,$83      ;meaningful .ORG
         !fill   8,$84
@@ -84,4 +84,4 @@ L14A8   !fill   8,$8b
         !fill   8,$8c
         !byte   %10001100
         !fill   7,$8c
-        } ;!pseudopc
+        }

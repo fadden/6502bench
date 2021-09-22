@@ -291,4 +291,4 @@ L0080   bit+1   @L0082
         bit+1   @L0082
 L0086   bit+2   L0086
 L0089   lda+3   L0089
-        } ;!pseudopc
+        }

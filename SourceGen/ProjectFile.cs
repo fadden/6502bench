@@ -673,7 +673,7 @@ namespace SourceGen {
                 // TODO(org): serialize length, isRelative, and preLabel
                 int length = CommonUtil.AddressMap.FLOATING_LEN;
 
-                AddressMap.AddResult addResult = proj.AddrMap.AddRegion(addr.Offset,
+                AddressMap.AddResult addResult = proj.AddrMap.AddEntry(addr.Offset,
                     length, addr.Addr);
                 if (addResult != CommonUtil.AddressMap.AddResult.Okay) {
                     string msg = "off=+" + addr.Offset.ToString("x6") + " addr=$" +

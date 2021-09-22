@@ -57,8 +57,8 @@ L2080   bit     L2080
         lda     $00
         beq     _L2100
         .byte   $ad
-
         .here
+
         .logical $2100
 _L2100  nop
         nop
@@ -72,8 +72,8 @@ _L2100  nop
         .here
         .logical $2820
         .fill   18,$00
-
         .here
+
         .logical $3000
 _L3000  bit     _L3000
         lda     #$44
@@ -110,8 +110,8 @@ _L3182  bit     _L3182
 
 label1  .byte   $ea
         .byte   $ea
-
         .here
+
         .logical $3200
 L3200   bit     L3200
         .byte   $00

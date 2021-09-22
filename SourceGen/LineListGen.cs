@@ -92,7 +92,7 @@ namespace SourceGen {
         /// One of these per line of output in the display.  It should be possible to draw
         /// all of the output without needing to refer back to the project data.  (Currently
         /// making an exception for some selection-dependent field highlighting.)
-        /// 
+        ///
         /// Base fields are immutable, but the Parts property is set after creation.
         /// </summary>
         public class Line {
@@ -116,14 +116,15 @@ namespace SourceGen {
                 Blank                   = 1 << 4,
 
                 // Assembler directives.
-                OrgDirective            = 1 << 5,
-                EquDirective            = 1 << 6,
-                RegWidthDirective       = 1 << 7,
-                DataBankDirective       = 1 << 8,
+                ArStartDirective        = 1 << 5,
+                ArEndDirective          = 1 << 6,
+                EquDirective            = 1 << 7,
+                RegWidthDirective       = 1 << 8,
+                DataBankDirective       = 1 << 9,
 
                 // Additional metadata.
-                LocalVariableTable      = 1 << 9,
-                VisualizationSet        = 1 << 10,
+                LocalVariableTable      = 1 << 10,
+                VisualizationSet        = 1 << 11,
             }
 
             /// <summary>
@@ -535,7 +536,8 @@ namespace SourceGen {
                         // Nothing to do.
                         parts = FormattedParts.CreateBlankLine();
                         break;
-                    case Line.Type.OrgDirective:
+                    case Line.Type.ArStartDirective:
+                    case Line.Type.ArEndDirective:
                     case Line.Type.RegWidthDirective:
                     case Line.Type.DataBankDirective:
                     case Line.Type.LongComment:
@@ -989,29 +991,53 @@ namespace SourceGen {
 
             int offset = startOffset;
             while (offset <= endOffset) {
-                bool blankAdded = false;
+                bool spaceAdded = false;
                 Anattrib attr = mProject.GetAnattrib(offset);
                 if (attr.IsInstructionStart && offset > 0 &&
                         mProject.GetAnattrib(offset - 1).IsData) {
                     // Transition from data to code.  (Don't add blank line for inline data.)
                     lines.Add(GenerateBlankLine(offset));
-                    blankAdded = true;
+                    spaceAdded = true;
                 } else if (mProject.VisualizationSets.ContainsKey(offset) && !addBlank) {
                     // Blank line before visualization set helps keep image visually grouped
                     // with its data.
                     lines.Add(GenerateBlankLine(offset));
-                    blankAdded = true;
+                    spaceAdded = true;
                 } else if (addBlank) {
                     // Previous instruction wanted to be followed by a blank line.
                     lines.Add(GenerateBlankLine(offset));
-                    blankAdded = true;
+                    spaceAdded = true;
                 }
                 addBlank = false;
 
-                // Start with address region changes.
+                // Insert long comments and notes.  These may span multiple display lines,
+                // and require word-wrap, so it's easiest just to render them fully here.
+                // Set "spaceAdded" to true so .arstart doesn't try to add one after the comment.
+                //
+                // TODO: integrate into FormattedOperandCache so we don't have to
+                //   regenerate them unless they change.  Use the MLC as the dependency.
+                if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
+                    List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
+                    StringListToLines(formatted, offset, Line.Type.Note,
+                        noteData.BackgroundColor, NoteColorMultiplier, lines);
+                    spaceAdded = true;
+                }
+                if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
+                    List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
+                    StringListToLines(formatted, offset, Line.Type.LongComment,
+                        longComment.BackgroundColor, NoteColorMultiplier, lines);
+                    spaceAdded = true;
+                }
+                if (mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet visSet)) {
+                    lines.Add(new Line(offset, 0, Line.Type.VisualizationSet));
+                    spaceAdded = true;
+                }
+
+                // Handle address region starts.
                 while (addrIter.Current != null && addrIter.Current.Offset <= offset) {
                     AddressMap.AddressChange change = addrIter.Current;
-                    Debug.Assert(change.Offset == offset);  // shouldn't be embedded in something
+                    // Range starts/ends shouldn't be embedded in something.
+                    Debug.Assert(change.Offset == offset);
 
                     AddressMap.AddressRegion region = change.Region;
                     if (region.Offset == 0 && AsmGen.GenCommon.HasPrgHeader(mProject)) {
@@ -1024,40 +1050,22 @@ namespace SourceGen {
                     if (change.IsStart) {
                         // Blank line above ORG directive, except at top of file or when we've
                         // already added one for another reason.
-                        if (region.Offset != 0 && !blankAdded) {
+                        if (region.Offset != 0 && !spaceAdded) {
                             lines.Add(GenerateBlankLine(offset));
                         }
-                        blankAdded = false;     // next one will need a blank line
+                        spaceAdded = false;     // next one will need a blank line
 
                         // TODO(org): pre-label (address / label only, logically part of ORG)
-                        Line newLine = new Line(offset, 0, Line.Type.OrgDirective);
+                        Line newLine = new Line(offset, 0, Line.Type.ArStartDirective);
                         string addrStr = mFormatter.FormatHexValue(region.Address, 4);
                         newLine.Parts = FormattedParts.CreateDirective(
-                            mFormatter.FormatPseudoOp(mPseudoOpNames.OrgDirective), addrStr);
+                            mFormatter.FormatPseudoOp(mPseudoOpNames.ArStartDirective), addrStr);
                         lines.Add(newLine);
+                        addrIter.MoveNext();
                     } else {
-                        // TODO(org)
+                        // Next entry is an end marker.
+                        break;
                     }
-
-                    addrIter.MoveNext();
-                }
-
-                // Insert long comments and notes.  These may span multiple display lines,
-                // and require word-wrap, so it's easiest just to render them fully here.
-                // TODO: integrate into FormattedOperandCache so we don't have to
-                //   regenerate them unless they change.  Use the MLC as the dependency.
-                if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
-                    List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
-                    StringListToLines(formatted, offset, Line.Type.Note,
-                        noteData.BackgroundColor, NoteColorMultiplier, lines);
-                }
-                if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
-                    List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
-                    StringListToLines(formatted, offset, Line.Type.LongComment,
-                        longComment.BackgroundColor, NoteColorMultiplier, lines);
-                }
-                if (mProject.VisualizationSets.TryGetValue(offset, out VisualizationSet visSet)) {
-                    lines.Add(new Line(offset, 0, Line.Type.VisualizationSet));
                 }
 
                 // Local variable tables come next.  Defer rendering.
@@ -1209,6 +1217,26 @@ namespace SourceGen {
                         }
                     }
                     offset += attr.Length;
+                }
+
+                // Check for address region ends, which will be positioned at the updated offset
+                // (unless they somehow got embedded inside something else).
+                while (addrIter.Current != null && addrIter.Current.Offset <= offset) {
+                    AddressMap.AddressChange change = addrIter.Current;
+                    // Range starts/ends shouldn't be embedded in something.
+                    Debug.Assert(change.Offset == offset);
+
+                    if (!change.IsStart) {
+                        // NOTE: last end(s) are at an offset outside file bounds.
+                        Line newLine = new Line(offset, 0, Line.Type.ArEndDirective);
+                        newLine.Parts = FormattedParts.CreateDirective(
+                            mFormatter.FormatPseudoOp(mPseudoOpNames.ArEndDirective),
+                            string.Empty);
+                        lines.Add(newLine);
+                        addrIter.MoveNext();
+                    } else {
+                        break;
+                    }
                 }
             }
         }

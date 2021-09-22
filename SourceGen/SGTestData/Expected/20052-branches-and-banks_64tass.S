@@ -26,8 +26,8 @@ L440004 lda     L440000
 
 dat44   .word   dat44 & $ffff
         .long   dat44
-
         .here
+
         .logical $44ffc0
 L44FFC0 cmp     L44FFC0
 high44  beq     _L44FFCB

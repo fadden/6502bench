@@ -353,10 +353,12 @@ namespace SourceGen {
                 case LineListGen.Line.Type.EquDirective:
                 case LineListGen.Line.Type.RegWidthDirective:
                 case LineListGen.Line.Type.DataBankDirective:
-                case LineListGen.Line.Type.OrgDirective:
+                case LineListGen.Line.Type.ArStartDirective:
+                case LineListGen.Line.Type.ArEndDirective:
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {
-                        // This happens for long comments embedded in LV tables.
+                        // This happens for long comments generated for LV tables (e.g. "empty
+                        // variable table").
                         TextUtil.AppendPaddedString(sb, parts.Comment, mColStart[(int)Col.Label]);
                         break;
                     }
@@ -714,7 +716,8 @@ namespace SourceGen {
                 case LineListGen.Line.Type.EquDirective:
                 case LineListGen.Line.Type.RegWidthDirective:
                 case LineListGen.Line.Type.DataBankDirective:
-                case LineListGen.Line.Type.OrgDirective:
+                case LineListGen.Line.Type.ArStartDirective:
+                case LineListGen.Line.Type.ArEndDirective:
                 case LineListGen.Line.Type.LocalVariableTable:
                     if (parts.IsLongComment) {
                         // This happens for long comments embedded in LV tables, e.g.

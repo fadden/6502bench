@@ -110,7 +110,7 @@ L1800   jsr     PrintInlineNullString
         !byte   $6e
         !byte   $20
         !byte   $01
-        } ;!pseudopc
+        }
         !pseudopc $1840 {
         !text   "string"
         !byte   $00
@@ -123,4 +123,4 @@ L1848   jsl     PrintInlineL2String
 L184F   jsr     PrintInlineNullString
         adc     $6e
         !byte   $64
-        } ;!pseudopc
+        }

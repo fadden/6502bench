@@ -1530,10 +1530,11 @@ namespace SourceGen {
                         EditProjectSymbol((CodeListColumn)col);
                     }
                     break;
-                case LineListGen.Line.Type.OrgDirective:
+                case LineListGen.Line.Type.ArStartDirective:
                     if (CanEditAddress()) {
                         EditAddress();
                     }
+                    // TODO(org): handle ArEndDirective
                     break;
                 case LineListGen.Line.Type.RegWidthDirective:
                     if (CanEditStatusFlags()) {
@@ -1771,7 +1772,8 @@ namespace SourceGen {
             LineListGen.Line selLine = CodeLineList[selIndex];
             if (selLine.LineType != LineListGen.Line.Type.Code &&
                     selLine.LineType != LineListGen.Line.Type.Data &&
-                    selLine.LineType != LineListGen.Line.Type.OrgDirective) {
+                    selLine.LineType != LineListGen.Line.Type.ArStartDirective) {
+                // TODO(org): handle ArEnd
                 return false;
             }
 
@@ -1803,55 +1805,31 @@ namespace SourceGen {
             int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
             int firstOffset = CodeLineList[selIndex].FileOffset;
             int lastOffset = CodeLineList[lastIndex].FileOffset;
-            int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
-            int nextAddr;
+            //int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
             AddressMap addrMap = mProject.AddrMap;
 
             // TODO(org): rewrite this - need to identify the specific .ORG statement since
             //   there can now be several at a single offset
 
-            if (firstOffset == lastOffset || nextOffset == mProject.FileDataLength) {
-                // Single item (which might not be a single *line*) is selected, or the
-                // last selected item is the end of the file.
-                nextOffset = -1;
-                nextAddr = AddressMap.NON_ADDR;
-            } else {
-                // Compute "nextAddr".  If there's an existing entry at nextOffset, we use
-                // that.  If not, we use the "load address", which is determined by the very
-                // first address.
-                //
-                // I tried this by just removing the selected entry and seeing what the address
-                // would be without it, useful for relocations inside relocations.  This worked
-                // poorly when relocations were chained, i.e. two consecutive blocks were
-                // relocated to different places.  The end address of the second block gets
-                // set based on the first address of the first block, which doesn't seem useful.
-#if false
-                nextAddr = mProject.AddrMap.Get(nextOffset);
-                if (nextAddr == AddressMap.NO_ENTRY_ADDR) {
-                    AddressMap cloneMap = new AddressMap(mProject.AddrMap.GetEntryList());
-                    if (firstOffset != 0) {
-                        cloneMap.Remove(firstOffset);
-                    }
-                    nextAddr = cloneMap.OffsetToAddress(nextOffset);
-                }
-#else
-                int fileStartAddr = addrMap.OffsetToAddress(0);
-                nextAddr = ((fileStartAddr + nextOffset) & 0xffff) | (fileStartAddr & 0xff0000);
-#endif
+            int addr = addrMap.OffsetToAddress(firstOffset);
+            int newLen = lastOffset - firstOffset;
+            if (newLen == 0) {
+                newLen = 123;
             }
-
-            EditAddress dlg = new EditAddress(mMainWin, firstOffset, nextOffset, nextAddr,
+            AddressMap.AddressMapEntry newEntry = new AddressMap.AddressMapEntry(firstOffset,
+                newLen /*DEBUG - replace*/, addr, string.Empty, false);
+            EditAddress dlg = new EditAddress(mMainWin, newEntry, true, newLen,
                 mProject, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
 
-            if (firstOffset == 0 && dlg.NewAddress < 0) {
-                // Not allowed.  The AddressMap will just put it back, which confuses
-                // the undo operation.
-                Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
-                return;
-            }
+            //if (firstOffset == 0 && dlg.NewAddress < 0) {
+            //    // Not allowed.  The AddressMap will just put it back, which confuses
+            //    // the undo operation.
+            //    Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
+            //    return;
+            //}
 
             ChangeSet cs = new ChangeSet(1);
 
@@ -3899,8 +3877,11 @@ namespace SourceGen {
                 case LineListGen.Line.Type.Blank:
                     lineTypeStr = "blank line";
                     break;
-                case LineListGen.Line.Type.OrgDirective:
-                    lineTypeStr = "address directive";
+                case LineListGen.Line.Type.ArStartDirective:
+                    lineTypeStr = "address range start directive";
+                    break;
+                case LineListGen.Line.Type.ArEndDirective:
+                    lineTypeStr = "address range end directive";
                     break;
                 case LineListGen.Line.Type.RegWidthDirective:
                     lineTypeStr = "register width directive";

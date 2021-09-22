@@ -166,11 +166,11 @@ namespace SourceGen.AsmGen {
             LocalVariableTable allDefs);
 
         /// <summary>
-        /// Outputs a code origin directive.
+        /// Outputs an address region directive.
         /// </summary>
-        /// <param name="addrEntry">Address map entry object.</param>
-        /// <param name="isStart">True if we're outputing a region-start directive.</param>
-        void OutputOrgDirective(CommonUtil.AddressMap.AddressRegion addrEntry, bool isStart);
+        /// <param name="region">Address region object.</param>
+        /// <param name="isStart">True if this is the start of a region.</param>
+        void OutputArDirective(CommonUtil.AddressMap.AddressRegion region, bool isStart);
 
         /// <summary>
         /// Notify the assembler of a change in register width.

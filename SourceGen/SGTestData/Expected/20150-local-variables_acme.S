@@ -223,4 +223,4 @@ DPCODE  nop
         beq     @SPLIT2
         rts
 
-        } ;!pseudopc
+        }

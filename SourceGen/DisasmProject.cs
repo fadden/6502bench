@@ -271,7 +271,7 @@ namespace SourceGen {
 
             AddrMap = new AddressMap(fileDataLen);
             // set default load address to $1000; override later
-            AddrMap.AddRegion(0x000000, fileDataLen, 0x1000);
+            AddrMap.AddEntry(0x000000, fileDataLen, 0x1000);
 
             // Default value is "no tag".
             AnalyzerTags = new CodeAnalysis.AnalyzerTag[fileDataLen];
@@ -400,9 +400,9 @@ namespace SourceGen {
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
                 // TODO(org): use NON_ADDR for first two bytes
                 AddressMap.AddResult addRes =
-                    AddrMap.AddRegion(0, 2, loadAddr < 2 ? 0 : loadAddr - 2);
+                    AddrMap.AddEntry(0, 2, loadAddr < 2 ? 0 : loadAddr - 2);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
-                addRes = AddrMap.AddRegion(2, mFileData.Length - 2, loadAddr);
+                addRes = AddrMap.AddEntry(2, mFileData.Length - 2, loadAddr);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
 
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
@@ -413,7 +413,7 @@ namespace SourceGen {
             } else {
                 int loadAddr = SystemDefaults.GetLoadAddress(sysDef);
                 AddressMap.AddResult addRes =
-                    AddrMap.AddRegion(0, mFileData.Length, loadAddr);
+                    AddrMap.AddEntry(0, mFileData.Length, loadAddr);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
             }
 
@@ -756,16 +756,19 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Checks to see if any part of the address map runs across a bank boundary.
+        /// Checks to see if any section of the address map runs across a bank boundary.
         /// </summary>
         private void ValidateAddressMap() {
-            // Use the change list, because the map entry list can have "floating" length values.
+            // Use the change list, because the map entry list can have "floating" length values
+            // (which don't automatically stop at bank boundaries).
             IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
             while (addrIter.MoveNext()) {
                 AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart) {
+                    continue;
+                }
                 AddressMap.AddressRegion region = change.Region;
-                if (change.IsStart &&
-                        (region.Address & 0xff0000) != ((region.Address + region.Length - 1) & 0xff0000)) {
+                if ((region.Address & 0xff0000) != ((region.Address + region.ActualLength - 1) & 0xff0000)) {
                     string fmt = Res.Strings.MSG_BANK_OVERRUN_DETAIL_FMT;
                     int firstNext = (region.Address & 0xff0000) + 0x010000;
                     int badOffset = region.Offset + (firstNext - region.Address);
@@ -2149,18 +2152,18 @@ namespace SourceGen {
                             AddressMap addrMap = AddrMap;
                             if ((int)oldValue == AddressMap.NON_ADDR) {
                                 // adding new entry
-                                if (addrMap.AddRegion(offset, AddressMap.FLOATING_LEN,
+                                if (addrMap.AddEntry(offset, AddressMap.FLOATING_LEN,
                                         (int)newValue) != AddressMap.AddResult.Okay) {
                                     Debug.Assert(false, "failed adding region");
                                 }
                             } else if ((int)newValue == AddressMap.NON_ADDR) {
                                 // removing existing entry
-                                if (!addrMap.RemoveRegion(offset, AddressMap.FLOATING_LEN)) {
+                                if (!addrMap.RemoveEntry(offset, AddressMap.FLOATING_LEN)) {
                                     Debug.Assert(false, "failed removing region");
                                 }
                             } else {
                                 // updating existing entry
-                                if (!addrMap.EditRegion(offset, AddressMap.FLOATING_LEN,
+                                if (!addrMap.EditEntry(offset, AddressMap.FLOATING_LEN,
                                         (int) newValue, string.Empty, false)) {
                                     Debug.Assert(false, "failed editing region");
                                 }

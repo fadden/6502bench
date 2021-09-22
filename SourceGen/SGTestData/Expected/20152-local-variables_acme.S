@@ -294,4 +294,4 @@ L00E6   bit     .ARG+2
         bit     $0100
         rts
 
-        } ;!pseudopc
+        }

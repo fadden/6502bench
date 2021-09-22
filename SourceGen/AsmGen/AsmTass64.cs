@@ -137,7 +137,8 @@ namespace SourceGen.AsmGen {
             new PseudoOp.PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", "=" },
                 { "VarDirective", ".var" },
-                { "OrgDirective", ".logical" },
+                { "ArStartDirective", ".logical" },
+                { "ArEndDirective", ".here" },
                 //RegWidthDirective         // .as, .al, .xs, .xl
                 //DataBankDirective
                 { "DefineData1", ".byte" },
@@ -158,7 +159,6 @@ namespace SourceGen.AsmGen {
                 //StrLen16
                 { "StrDci", ".shift" }
         });
-        private const string HERE_PSEUDO_OP = ".here";
 
 
         // IGenerator
@@ -653,7 +653,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputOrgDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
             // 64tass separates the "compile offset", which determines where the output fits
             // into the generated binary, and "program counter", which determines the code
             // the assembler generates.  Since we need to explicitly specify every byte in
@@ -692,14 +692,17 @@ namespace SourceGen.AsmGen {
                         //OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
                     }
                 }
-                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(sDataOpNames.OrgDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+                OutputLine(string.Empty,
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                    SourceFormatter.FormatHexValue(addrEntry.Address, 4),
+                    string.Empty);
                 mPcDepth++;
             } else {
                 mPcDepth--;
                 if (mPcDepth > 0 || !mFirstIsOpen) {
                     // close previous block
-                    OutputLine(string.Empty, SourceFormatter.FormatPseudoOp(HERE_PSEUDO_OP),
+                    OutputLine(string.Empty,
+                        SourceFormatter.FormatPseudoOp(sDataOpNames.ArEndDirective),
                         string.Empty, string.Empty);
                 } else {
                     // mark initial "*=" region as closed, but don't output anything

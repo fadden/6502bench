@@ -19,59 +19,98 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
-        Title="Set Address"
+        Title="Edit Address Range"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered">
 
+    <Window.Resources>
+        <system:String x:Key="str_HdrCreate">Creating new address range, with properties:</system:String>
+        <system:String x:Key="str_HdrEdit">Editing existing address range, with properties:</system:String>
+        <system:String x:Key="str_HdrResize">Resizing existing address range, with properties:</system:String>
+    </Window.Resources>
+
     <StackPanel Margin="8">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Editing address at offset: "/>
-            <TextBlock Margin="0,2,0,0" Text="{Binding FirstOffsetStr}"
+        <TextBlock Name="headerText" Text="{StaticResource str_HdrCreate}"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" Margin="8,0,0,0" Text="Start:"/>
+            <TextBlock Grid.Column="1" Grid.Row="0" Margin="4,2,0,0"
+                       Text="{Binding RegionStartOffsetStr, FallbackValue=+123456}"
                        FontFamily="{StaticResource GeneralMonoFont}"/>
 
-            <TextBlock Margin="16,0,0,0" Text="(load address: "/>
-            <TextBlock Margin="0,2,0,0" Text="{Binding LoadAddressText, FallbackValue=$1234}"
+            <TextBlock Grid.Column="0" Grid.Row="1" Margin="8,0,0,0" Text="End:"/>
+            <TextBlock Grid.Column="1" Grid.Row="1" Margin="4,2,0,0"
+                       Text="{Binding RegionEndOffsetStr, FallbackValue=+123456}"
                        FontFamily="{StaticResource GeneralMonoFont}"/>
-            <TextBlock Text=")"/>
-        </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-            <TextBlock Text="Address (hex):"/>
-
-            <TextBox Name="addrTextBox" Width="100" Margin="4,1,0,0"
-                     FontFamily="{StaticResource GeneralMonoFont}"
-                     Text="{Binding Path=AddressText, UpdateSourceTrigger=PropertyChanged}"
-                     IsInactiveSelectionHighlightEnabled="True">
-                <TextBox.Resources>
-                    <!-- default non-focus highlight color is nearly invisible -->
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                                     Color="LightBlue"/>
-                </TextBox.Resources>
-            </TextBox>
-        </StackPanel>
-
-        <TextBlock Text="• Enter 16-bit or 24-bit address, e.g. $1000 or 01/be00." Margin="0,4,0,0"/>
-        <TextBlock Text="• Leave the field blank to remove the address override."/>
-
-        <StackPanel Margin="0,8,0,0" Visibility="{Binding NextAddressVis}">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Bytes spanned: "/>
-                <TextBlock Text="{Binding BytesSelectedStr, FallbackValue=123 ($123)}" Margin="0,2,0,0"
+            <TextBlock Grid.Column="0" Grid.Row="2" Margin="8,0,0,0" Text="Length:"/>
+            <StackPanel Grid.Column="1" Grid.Row="2" Margin="4,0,0,0" Orientation="Horizontal">
+                <TextBlock Margin="0,2,0,0"
+                           Text="{Binding RegionLengthStr, FallbackValue=23456 / $1234}"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
+                <TextBlock Text="(floating)" Margin="4,0,0,0" FontWeight="Bold"
+                           Visibility="{Binding FloatTextVis}"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Offset after last selected item ("/>
-                <TextBlock Text="{Binding NextOffsetStr, FallbackValue=+001234}" Margin="0,2,0,0"
-                           FontFamily="{StaticResource GeneralMonoFont}"/>
-                <TextBlock Text=") will resume at address "/>
-                <TextBlock Text="{Binding NextAddressStr, FallbackValue=$abcd}" Margin="0,2,0,0"
-                           FontFamily="{StaticResource GeneralMonoFont}"/>
-                <TextBlock Text="."/>
+        </Grid>
+
+        <!-- failure message goes here -->
+
+        <StackPanel IsEnabled="{Binding IsRegionValid}">
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock Text="Address (hex):"/>
+
+                <TextBox Name="addrTextBox" Width="100" Margin="4,1,0,0"
+                         FontFamily="{StaticResource GeneralMonoFont}"
+                         Text="{Binding Path=AddressText, UpdateSourceTrigger=PropertyChanged}"
+                         IsInactiveSelectionHighlightEnabled="True">
+                    <TextBox.Resources>
+                        <!-- default non-focus highlight color is nearly invisible -->
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                                         Color="LightBlue"/>
+                    </TextBox.Resources>
+                </TextBox>
             </StackPanel>
+
+            <TextBlock Text="• Enter 16-bit or 24-bit address, e.g. $1000 or 01/be00." Margin="0,4,0,0"/>
+            <TextBlock Text="• Leave the field blank to remove the address override."/>
+            <TextBlock Text="• Enter 'NA' if the region is non-addressable."/>
         </StackPanel>
+
+        <GroupBox Header="Advanced" Padding="2,4" Margin="0,12,0,0">
+            <StackPanel>
+                <CheckBox Content="Use relative addressing"
+                          IsChecked="{Binding UseRelativeAddressing}"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <TextBlock Text="Pre-label:"/>
+                    <TextBox Name="preLabelTextBox" Width="100" Margin="4,1,0,0"
+                         FontFamily="{StaticResource GeneralMonoFont}"
+                         Text="{Binding Path=PreLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="(address: " Margin="8,0,0,0"/>
+                    <TextBlock Text="{Binding Path=PreLabelAddressStr, FallbackValue=$1234}"
+                               Margin="0,2,0,0"
+                               FontFamily="{StaticResource GeneralMonoFont}"/>
+                    <TextBlock Text=")"/>
+                </StackPanel>
+
+                <TextBlock Text="• Must be valid label syntax; may not be a local label." Margin="0,4,0,0"/>
+                <TextBlock Text="• Must not be a duplicate of an existing label."/>
+                <TextBlock Text="• Will be ignored if preceding region is non-addressable."/>
+            </StackPanel>
+        </GroupBox>
+
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="OK" IsDefault="True" Width="70"
