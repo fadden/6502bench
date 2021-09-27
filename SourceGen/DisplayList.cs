@@ -447,7 +447,7 @@ namespace SourceGen {
                 return parts;
             }
 
-            public static FormattedParts CreateEquDirective(string label, string opstr,
+            public static FormattedParts CreateFullDirective(string label, string opstr,
                     string addrStr, string comment) {
                 FormattedParts parts = new FormattedParts();
                 parts.Label = label;

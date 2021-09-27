@@ -607,9 +607,10 @@ namespace SourceGen.Tools.Omf {
 
             while (true) {
                 // Generate an ORG directive.
-                int origAddr = proj.AddrMap.OffsetToAddress(bufOffset);
-                UndoableChange uc = UndoableChange.CreateAddressChange(bufOffset,
-                    origAddr, addr);
+                //int origAddr = proj.AddrMap.OffsetToAddress(bufOffset);
+                AddressMap.AddressMapEntry addrEnt = new AddressMap.AddressMapEntry(bufOffset,
+                    AddressMap.FLOATING_LEN, addr, string.Empty, false);
+                UndoableChange uc = UndoableChange.CreateAddressChange(null, addrEnt);
                 cs.Add(uc);
 
                 // Compare amount of space in this bank to amount left in segment.

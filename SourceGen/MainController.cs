@@ -1531,10 +1531,10 @@ namespace SourceGen {
                     }
                     break;
                 case LineListGen.Line.Type.ArStartDirective:
+                case LineListGen.Line.Type.ArEndDirective:
                     if (CanEditAddress()) {
                         EditAddress();
                     }
-                    // TODO(org): handle ArEndDirective
                     break;
                 case LineListGen.Line.Type.RegWidthDirective:
                     if (CanEditStatusFlags()) {
@@ -1764,7 +1764,7 @@ namespace SourceGen {
         }
 
         public bool CanEditAddress() {
-            // First line must be code, data, or an ORG directive.
+            // First line must be code, data, or an AR directive.
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             if (selIndex < 0) {
                 return false;
@@ -1772,13 +1772,25 @@ namespace SourceGen {
             LineListGen.Line selLine = CodeLineList[selIndex];
             if (selLine.LineType != LineListGen.Line.Type.Code &&
                     selLine.LineType != LineListGen.Line.Type.Data &&
-                    selLine.LineType != LineListGen.Line.Type.ArStartDirective) {
-                // TODO(org): handle ArEnd
+                    selLine.LineType != LineListGen.Line.Type.ArStartDirective &&
+                    selLine.LineType != LineListGen.Line.Type.ArEndDirective) {
                 return false;
             }
 
-            // If multiple lines are selected, there must not be an address change between them.
             int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
+
+            // Can only start with .arend if it's single-selection.
+            if (selIndex != lastIndex && selLine.LineType == LineListGen.Line.Type.ArEndDirective) {
+                return false;
+            }
+
+            // If multiple lines with code/data are selected, there must not be an address change
+            // between them unless we're resizing a region.  Determining whether or not a resize
+            // is valid is left to the edit dialog.
+            if (selLine.LineType == LineListGen.Line.Type.ArStartDirective) {
+                // Skip overlapping region check.
+                return true;
+            }
             int firstOffset = CodeLineList[selIndex].FileOffset;
             int lastOffset = CodeLineList[lastIndex].FileOffset;
             if (firstOffset == lastOffset) {
@@ -1786,16 +1798,17 @@ namespace SourceGen {
                 return true;
             }
 
+            // Compute exclusive end point of selected range.
             int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
 
-            foreach (AddressMap.AddressMapEntry ent in mProject.AddrMap) {
-                // It's okay to have an existing entry at firstOffset or nextOffset.
-                if (ent.Offset > firstOffset && ent.Offset < nextOffset) {
-                    Debug.WriteLine("Found mid-selection AddressMap entry at +" +
-                        ent.Offset.ToString("x6"));
-                    return false;
-                }
+            if (!mProject.AddrMap.IsRangeUnbroken(firstOffset, nextOffset - firstOffset)) {
+                Debug.WriteLine("Found mid-selection AddressMap entry (len=" +
+                    (nextOffset - firstOffset) + ")");
+                return false;
             }
+
+            //Debug.WriteLine("First +" + firstOffset.ToString("x6") +
+            //    ", last +" + lastOffset.ToString("x6") + ",next +" + nextOffset.ToString("x6"));
 
             return true;
         }
@@ -1805,69 +1818,52 @@ namespace SourceGen {
             int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
             int firstOffset = CodeLineList[selIndex].FileOffset;
             int lastOffset = CodeLineList[lastIndex].FileOffset;
-            //int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
+            int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
             AddressMap addrMap = mProject.AddrMap;
 
-            // TODO(org): rewrite this - need to identify the specific .ORG statement since
-            //   there can now be several at a single offset
+            // Compute length of selection.  May be zero if it's entirely .arstart/.arend.
+            int selectedLen = nextOffset - firstOffset;
 
-            int addr = addrMap.OffsetToAddress(firstOffset);
-            int newLen = lastOffset - firstOffset;
-            if (newLen == 0) {
-                newLen = 123;
+            AddressMap.AddressRegion curRegion;
+            if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArStartDirective ||
+                    CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
+                // First selected line was .arstart/.arend, find the address map entry.
+                curRegion = CodeLineList.GetAddrRegionFromLine(selIndex);
+                Debug.Assert(curRegion != null);
+                Debug.WriteLine("Using region from " + CodeLineList[selIndex].LineType +
+                    ": " + curRegion);
+            } else {
+                if (selectedLen == 0) {
+                    // A length of zero is only possible if nothing but directives were selected,
+                    // but since the first entry wasn't .arstart/.arend this can't happen.
+                    Debug.Assert(false);
+                    return;
+                }
+                curRegion = null;
             }
-            AddressMap.AddressMapEntry newEntry = new AddressMap.AddressMapEntry(firstOffset,
-                newLen /*DEBUG - replace*/, addr, string.Empty, false);
-            EditAddress dlg = new EditAddress(mMainWin, newEntry, true, newLen,
-                mProject, mFormatter);
+
+            AddressMap.AddressMapEntry newEntry = null;
+            if (curRegion == null) {
+                // No entry, create a new one.
+                int addr = addrMap.OffsetToAddress(firstOffset);
+                // Create a prototype entry with the various values.
+
+                newEntry = new AddressMap.AddressMapEntry(firstOffset,
+                    selectedLen, addr, string.Empty, false);
+                Debug.WriteLine("New entry prototype: " + newEntry);
+            }
+
+            EditAddress dlg = new EditAddress(mMainWin, curRegion, newEntry,
+                selectedLen, firstOffset == lastOffset, mProject, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
             }
 
-            //if (firstOffset == 0 && dlg.NewAddress < 0) {
-            //    // Not allowed.  The AddressMap will just put it back, which confuses
-            //    // the undo operation.
-            //    Debug.WriteLine("EditAddress: not allowed to remove address at offset +000000");
-            //    return;
-            //}
-
             ChangeSet cs = new ChangeSet(1);
-
-            // TODO(org): I'm just commenting this out for now; needs to be totally redone
-
-
-            //if (addrMap.Get(firstOffset) != dlg.NewAddress) {
-            //    // Added / removed / changed existing entry.
-            //    //
-            //    // We allow creation of an apparently redundant address override, because
-            //    // sometimes it's helpful to add one to "anchor" an area before relocating
-            //    // something that appears earlier in the file.
-            //    int prevAddress = addrMap.Get(firstOffset);
-            //    UndoableChange uc = UndoableChange.CreateAddressChange(firstOffset,
-            //        prevAddress, dlg.NewAddress);
-            //    cs.Add(uc);
-            //    Debug.WriteLine("EditAddress: changing addr at offset +" +
-            //        firstOffset.ToString("x6") + " to $" + dlg.NewAddress.ToString("x4"));
-            //}
-
-            // We want to create an entry for the chunk that follows the selected area.
-            // We don't modify the trailing address if an entry already exists.
-            // (Note the "can edit" code prevented us from being called if there's an
-            // address map entry in the middle of the selected area.)
-            //
-            //// If they're removing an existing entry, don't add a new entry at the end.
-            //if (nextAddr >= 0 && dlg.NewAddress != AddressMap.NO_ENTRY_ADDR &&
-            //        addrMap.Get(nextOffset) == AddressMap.NO_ENTRY_ADDR) {
-            //    // We don't screen for redundant entries here.  That should only happen if
-            //    // they select a range and then don't change the address.  Maybe it's useful?
-            //    int prevAddress = addrMap.Get(nextOffset);
-            //    UndoableChange uc = UndoableChange.CreateAddressChange(nextOffset,
-            //        prevAddress, nextAddr);
-            //    cs.Add(uc);
-            //    Debug.WriteLine("EditAddress: setting trailing addr at offset +" +
-            //        nextOffset.ToString("x6") + " to $" + nextAddr.ToString("x4"));
-            //}
-
+            if (curRegion != dlg.ResultEntry) {
+                UndoableChange uc = UndoableChange.CreateAddressChange(curRegion, dlg.ResultEntry);
+                cs.Add(uc);
+            }
             if (cs.Count > 0) {
                 ApplyUndoableChanges(cs);
             } else {
@@ -3855,6 +3851,8 @@ namespace SourceGen {
         #region Info panel
 
         private void UpdateInfoPanel() {
+            const string CRLF = "\r\n";
+
             mMainWin.ClearInfoPanel();
             if (mMainWin.CodeListView_GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
@@ -3877,12 +3875,6 @@ namespace SourceGen {
                 case LineListGen.Line.Type.Blank:
                     lineTypeStr = "blank line";
                     break;
-                case LineListGen.Line.Type.ArStartDirective:
-                    lineTypeStr = "address range start directive";
-                    break;
-                case LineListGen.Line.Type.ArEndDirective:
-                    lineTypeStr = "address range end directive";
-                    break;
                 case LineListGen.Line.Type.RegWidthDirective:
                     lineTypeStr = "register width directive";
                     break;
@@ -3890,6 +3882,14 @@ namespace SourceGen {
                     lineTypeStr = "data bank directive";
                     break;
 
+                case LineListGen.Line.Type.ArStartDirective:
+                    isSimple = false;
+                    lineTypeStr = "address range start directive";
+                    break;
+                case LineListGen.Line.Type.ArEndDirective:
+                    isSimple = false;
+                    lineTypeStr = "address range end directive";
+                    break;
                 case LineListGen.Line.Type.LocalVariableTable:
                     isSimple = false;
                     lineTypeStr = "variable table";
@@ -3943,9 +3943,45 @@ namespace SourceGen {
             }
 
 #if DEBUG
-            mMainWin.InfoOffsetText = ("[offset=+" + line.FileOffset.ToString("x6") + "]");
+            mMainWin.InfoOffsetText = "[offset=+" + line.FileOffset.ToString("x6") +
+                " sub=" + line.SubLineIndex + "]";
 #endif
             if (isSimple) {
+                return;
+            }
+
+            if (line.LineType == LineListGen.Line.Type.ArStartDirective ||
+                    line.LineType == LineListGen.Line.Type.ArEndDirective) {
+                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(lineIndex);
+                StringBuilder esb = new StringBuilder();
+                esb.Append("Address: ");
+                if (region.Address == AddressMap.NON_ADDR) {
+                    esb.Append("non-addressable");
+                } else {
+                    esb.Append("$" +
+                        mFormatter.FormatAddress(region.Address, !mProject.CpuDef.HasAddr16));
+                }
+                esb.Append(CRLF);
+                esb.Append("Start: " + mFormatter.FormatOffset24(region.Offset));
+                esb.Append(CRLF);
+                esb.Append("End: ");
+                esb.Append(mFormatter.FormatOffset24(region.Offset + region.ActualLength - 1));
+                esb.Append(CRLF);
+                esb.Append("Length: " + region.ActualLength + " / " +
+                    mFormatter.FormatHexValue(region.ActualLength, 2));
+                if (region.Length == AddressMap.FLOATING_LEN) {
+                    esb.Append(" (floating)");
+                }
+                esb.Append(CRLF);
+                if (!string.IsNullOrEmpty(region.PreLabel)) {
+                    esb.Append("Pre-label: '" + region.PreLabel + "' addr=$");
+                    esb.Append(mFormatter.FormatAddress(region.PreLabelAddress,
+                        !mProject.CpuDef.HasAddr16));
+                    esb.Append(CRLF);
+                }
+                esb.Append("Relative: " + region.IsRelative);
+                esb.Append(CRLF);
+                mMainWin.InfoPanelDetail1 = esb.ToString();
                 return;
             }
 

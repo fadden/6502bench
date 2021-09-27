@@ -22,25 +22,66 @@ limitations under the License.
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
-        Title="Edit Address Range"
-        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        Title="Set Address Range Properties"
+        Width="350" SizeToContent="Height" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered">
 
     <Window.Resources>
-        <system:String x:Key="str_HdrCreate">Creating new address range, with properties:</system:String>
-        <system:String x:Key="str_HdrEdit">Editing existing address range, with properties:</system:String>
-        <system:String x:Key="str_HdrResize">Resizing existing address range, with properties:</system:String>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <system:String x:Key="str_HdrCreate">Creating new address region</system:String>
+        <system:String x:Key="str_HdrEdit">Editing existing address region:</system:String>
+
+        <system:String x:Key="str_OptEditAsIs">
+            Edit the region's attributes.  Region length will not be changed.
+        </system:String>
+        <system:String x:Key="str_OptEditAndFix">
+            Edit the region's attributes, and convert the floating end to a fixed end.
+        </system:String>
+        <system:String x:Key="str_OptResize">
+            Edit the region's attributes, and resize it to the selection.  The new
+            end offset will be {0}, for a length of {1}.
+        </system:String>
+        <system:String x:Key="str_CreateFixed">
+            Create a new region, with a fixed end point.  The region will start at {0}
+            and have a length of {1}.
+        </system:String>
+        <system:String x:Key="str_CreateFixedFail">
+            Unable to create a new region with a fixed end point here.
+        </system:String>
+        <system:String x:Key="str_CreateFloating">
+            Create a new region, with a floating end point.  The region will start at {0}
+            and end at the next region boundary.  Currently, the length is {1}, but that
+            may change as other regions are added and removed.
+        </system:String>
+        <system:String x:Key="str_CreateFloatingFail">
+            Unable to create a new region with a floating end point here.
+        </system:String>
+
+        <system:String x:Key="str_ErrInternal">Internal error.</system:String>
+        <system:String x:Key="str_ErrInvalidValue">Internal error (invalid value).</system:String>
+        <system:String x:Key="str_ErrOverlapExisting">
+            The new region has the same start offset and length as an existing region.
+        </system:String>
+        <system:String x:Key="str_ErrOverlapFloating">
+            The start offset of the new region is the same as the start offset of an existing
+            region, and one or both have a floating end point.
+        </system:String>
+        <system:String x:Key="str_ErrStraddleExisting">
+            The new region straddles the start or end of an existing region.
+        </system:String>
     </Window.Resources>
 
     <StackPanel Margin="8">
-        <TextBlock Name="headerText" Text="{StaticResource str_HdrCreate}"/>
-        <Grid>
+        <TextBlock Text="{Binding OperationStr, FallbackValue=Editing existing region}"/>
+        <Grid Visibility="{Binding ShowExistingRegion, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -51,23 +92,47 @@ limitations under the License.
                        FontFamily="{StaticResource GeneralMonoFont}"/>
 
             <TextBlock Grid.Column="0" Grid.Row="1" Margin="8,0,0,0" Text="End:"/>
-            <TextBlock Grid.Column="1" Grid.Row="1" Margin="4,2,0,0"
-                       Text="{Binding RegionEndOffsetStr, FallbackValue=+123456}"
-                       FontFamily="{StaticResource GeneralMonoFont}"/>
-
-            <TextBlock Grid.Column="0" Grid.Row="2" Margin="8,0,0,0" Text="Length:"/>
-            <StackPanel Grid.Column="1" Grid.Row="2" Margin="4,0,0,0" Orientation="Horizontal">
+            <StackPanel Grid.Column="1" Grid.Row="1" Margin="4,0,0,0" Orientation="Horizontal">
                 <TextBlock Margin="0,2,0,0"
-                           Text="{Binding RegionLengthStr, FallbackValue=23456 / $1234}"
+                           Text="{Binding RegionEndOffsetStr, FallbackValue=+123456}"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
                 <TextBlock Text="(floating)" Margin="4,0,0,0" FontWeight="Bold"
-                           Visibility="{Binding FloatTextVis}"/>
+                           Visibility="{Binding IsFloating, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
+
+            <TextBlock Grid.Column="0" Grid.Row="2" Margin="8,0,0,0" Text="Length:"/>
+            <TextBlock Grid.Column="1" Grid.Row="2" Margin="4,2,0,0"
+                       Text="{Binding RegionLengthStr, FallbackValue=23456 ($1234)}"
+                       FontFamily="{StaticResource GeneralMonoFont}"/>
         </Grid>
 
-        <!-- failure message goes here -->
+        <RadioButton Name="radioOption1" Margin="0,12,0,0"
+                     Visibility="{Binding ShowOption1, Converter={StaticResource BoolToVis}}"
+                     IsEnabled="{Binding EnableOption1}"
+                     IsChecked="{Binding CheckOption1}">
+            <RadioButton.Content>
+                <TextBlock TextWrapping="Wrap" Text="{Binding Option1Str, FallbackValue=Option 1}"/>
+            </RadioButton.Content>
+        </RadioButton>
+        <RadioButton Name="radioOption2" Margin="0,4,0,0"
+                     Visibility="{Binding ShowOption2, Converter={StaticResource BoolToVis}}"
+                     IsEnabled="{Binding EnableOption2}"
+                     IsChecked="{Binding CheckOption2}">
+            <RadioButton.Content>
+                <TextBlock TextWrapping="Wrap" Text="{Binding Option2Str, FallbackValue=Option 2}"/>
+            </RadioButton.Content>
+        </RadioButton>
 
-        <StackPanel IsEnabled="{Binding IsRegionValid}">
+        <Border Visibility="{Binding ShowErrorMessage, Converter={StaticResource BoolToVis}}"
+                BorderThickness="1" Padding="1" Margin="0,6"
+                BorderBrush="Red">
+            <TextBlock TextWrapping="Wrap" Width="300"
+                       Text="{Binding ErrorMessageStr, FallbackValue=Error Message}"/>
+        </Border>
+
+        <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2" Margin="0,8,0,0"/>
+
+        <StackPanel IsEnabled="{Binding EnableAttributeControls}">
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                 <TextBlock Text="Address (hex):"/>
 
@@ -84,38 +149,41 @@ limitations under the License.
             </StackPanel>
 
             <TextBlock Text="• Enter 16-bit or 24-bit address, e.g. $1000 or 01/be00." Margin="0,4,0,0"/>
-            <TextBlock Text="• Leave the field blank to remove the address override."/>
             <TextBlock Text="• Enter 'NA' if the region is non-addressable."/>
         </StackPanel>
 
-        <GroupBox Header="Advanced" Padding="2,4" Margin="0,12,0,0">
-            <StackPanel>
-                <CheckBox Content="Use relative addressing"
-                          IsChecked="{Binding UseRelativeAddressing}"/>
+        <StackPanel IsEnabled="{Binding EnableAttributeControls}">
+            <GroupBox Header="Advanced" Padding="2,4" Margin="0,12,0,0">
+                <StackPanel>
+                    <CheckBox Content="Use relative addressing"
+                              IsChecked="{Binding UseRelativeAddressing}"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                    <TextBlock Text="Pre-label:"/>
-                    <TextBox Name="preLabelTextBox" Width="100" Margin="4,1,0,0"
-                         FontFamily="{StaticResource GeneralMonoFont}"
-                         Text="{Binding Path=PreLabelText, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Text="(address: " Margin="8,0,0,0"/>
-                    <TextBlock Text="{Binding Path=PreLabelAddressStr, FallbackValue=$1234}"
-                               Margin="0,2,0,0"
-                               FontFamily="{StaticResource GeneralMonoFont}"/>
-                    <TextBlock Text=")"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <TextBlock Text="Pre-label:"/>
+                        <TextBox Name="preLabelTextBox" Width="100" Margin="4,1,0,0"
+                             FontFamily="{StaticResource GeneralMonoFont}"
+                             Text="{Binding Path=PreLabelText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="(address: " Margin="8,0,0,0"/>
+                        <TextBlock Text="{Binding Path=PreLabelAddressStr, FallbackValue=$1234}"
+                                   Margin="0,2,0,0"
+                                   FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Text=")"/>
+                    </StackPanel>
+
+                    <TextBlock Text="• Must be valid label syntax; may not be a local label." Margin="0,4,0,0"/>
+                    <TextBlock Text="• Must not be a duplicate of an existing label."/>
+                    <TextBlock Text="• Will not appear if parent region is non-addressable."/>
                 </StackPanel>
-
-                <TextBlock Text="• Must be valid label syntax; may not be a local label." Margin="0,4,0,0"/>
-                <TextBlock Text="• Must not be a duplicate of an existing label."/>
-                <TextBlock Text="• Will be ignored if preceding region is non-addressable."/>
-            </StackPanel>
-        </GroupBox>
-
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="OK" IsDefault="True" Width="70"
-                    IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
-            <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>
+            </GroupBox>
         </StackPanel>
+
+        <DockPanel Margin="0,10,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="Delete Region" Width="120"
+                    IsEnabled="{Binding CanDeleteRegion}" Click="DeleteRegion_Click"/>
+            <Button DockPanel.Dock="Right" Content="Cancel" Width="70" Margin="4,0,0,0" IsCancel="True"/>
+            <Button DockPanel.Dock="Right" Grid.Column="1" Content="OK" Width="70"
+                    IsDefault="True" IsEnabled="{Binding IsValid}" Click="OkButton_Click"/>
+        </DockPanel>
+
     </StackPanel>
 </Window>

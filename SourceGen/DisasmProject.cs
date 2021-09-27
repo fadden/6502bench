@@ -391,18 +391,13 @@ namespace SourceGen {
             AddrMap.Clear();
             if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
                 // First two bytes are the load address, with the actual file data starting
-                // at +000002.  We need to assign an address to the bytes, but don't want them
-                // to be referenced as an address by something else.  One approach is to use
-                // the load address, and rely on the multi-address code to keep them distinct,
-                // but that throws off the "load address" display in the set-address dialog.
-                // So we just give it an offset of (start - 2) and leave it to the user to
-                // update if necessary.
+                // at +000002.  The first two bytes are non-addressable, so we leave them
+                // out of the map.
                 int loadAddr = RawData.GetWord(mFileData, 0, 2, false);
-                // TODO(org): use NON_ADDR for first two bytes
-                AddressMap.AddResult addRes =
-                    AddrMap.AddEntry(0, 2, loadAddr < 2 ? 0 : loadAddr - 2);
-                Debug.Assert(addRes == AddressMap.AddResult.Okay);
-                addRes = AddrMap.AddEntry(2, mFileData.Length - 2, loadAddr);
+                //AddressMap.AddResult addRes =
+                //    AddrMap.AddEntry(0, 2, loadAddr < 2 ? 0 : loadAddr - 2);
+                //Debug.Assert(addRes == AddressMap.AddResult.Okay);
+                AddressMap.AddResult addRes = AddrMap.AddEntry(2, mFileData.Length - 2, loadAddr);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
 
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
@@ -2147,30 +2142,23 @@ namespace SourceGen {
                         //}
                         break;
                     case UndoableChange.ChangeType.SetAddress: {
-                            // TODO(org): rewrite this
-
+                            AddressMap.AddressMapEntry oldEnt =
+                                (AddressMap.AddressMapEntry)oldValue;
+                            AddressMap.AddressMapEntry newEnt =
+                                (AddressMap.AddressMapEntry)newValue;
                             AddressMap addrMap = AddrMap;
-                            if ((int)oldValue == AddressMap.NON_ADDR) {
-                                // adding new entry
-                                if (addrMap.AddEntry(offset, AddressMap.FLOATING_LEN,
-                                        (int)newValue) != AddressMap.AddResult.Okay) {
-                                    Debug.Assert(false, "failed adding region");
-                                }
-                            } else if ((int)newValue == AddressMap.NON_ADDR) {
-                                // removing existing entry
-                                if (!addrMap.RemoveEntry(offset, AddressMap.FLOATING_LEN)) {
+                            if (oldEnt != null) {
+                                // remove existing entry, possibly replacing it in the next step
+                                if (!addrMap.RemoveEntry(oldEnt.Offset, oldEnt.Length)) {
                                     Debug.Assert(false, "failed removing region");
                                 }
-                            } else {
-                                // updating existing entry
-                                if (!addrMap.EditEntry(offset, AddressMap.FLOATING_LEN,
-                                        (int) newValue, string.Empty, false)) {
-                                    Debug.Assert(false, "failed editing region");
+                            }
+                            if (newValue != null) {
+                                // adding new or replacement entry
+                                if (addrMap.AddEntry(newEnt) != AddressMap.AddResult.Okay) {
+                                    Debug.Assert(false, "failed adding region");
                                 }
                             }
-
-                            Debug.WriteLine("Map offset +" + offset.ToString("x6") + " to $" +
-                                ((int)newValue).ToString("x6"));
 
                             // Visualization generators in extension scripts could be chasing
                             // addresses.  Give them a chance to update.

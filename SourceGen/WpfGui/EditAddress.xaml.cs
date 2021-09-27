@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -28,34 +27,101 @@ namespace SourceGen.WpfGui {
     /// Edit Address Region dialog.
     /// </summary>
     public partial class EditAddress : Window, INotifyPropertyChanged {
-        /// <summary>
-        /// Updated address map entry.  Will be null if we want to delete the entry.
-        /// </summary>
-        public AddressMap.AddressMapEntry NewEntry { get; private set; }
-
+        private const string NON_ADDR_STR = "NA";
 
         /// <summary>
-        /// Offset being edited.
+        /// Updated address map entry.  Will be null if we want to delete the existing entry.
         /// </summary>
-        private int mRegionStartOffset;
+        public AddressMap.AddressMapEntry ResultEntry { get; private set; }
+
+        /// <summary>
+        /// Dialog header.
+        /// </summary>
+        public string OperationStr {
+            get { return mOperationStr; }
+            set { mOperationStr = value; OnPropertyChanged(); }
+        }
+        private string mOperationStr;
+
+        /// <summary>
+        /// Offset of first selected byte.  (Does not change.)
+        /// </summary>
         public string RegionStartOffsetStr {
             get { return mFormatter.FormatOffset24(mRegionStartOffset); }
         }
+        private int mRegionStartOffset;
 
         /// <summary>
-        /// Offset after the end of the selection, or -1 if only one line is selected.
+        /// Offset of last selected byte.  (Does not change.)
         /// </summary>
-        private int mRegionEndOffset;
         public string RegionEndOffsetStr {
             get { return mFormatter.FormatOffset24(mRegionEndOffset); }
         }
+        private int mRegionEndOffset;
 
         public string RegionLengthStr {
             get {
-                int count = mRegionEndOffset - mRegionStartOffset;
-                return count.ToString() + " (" + mFormatter.FormatHexValue(count, 2) + ")";
+                int count = mRegionEndOffset - mRegionStartOffset + 1;
+                return FormatLength(count);
             }
         }
+
+        /// <summary>
+        /// Set to true to show the offset/length stats for a current region.
+        /// </summary>
+        public bool ShowExistingRegion {
+            get { return mShowExistingRegion; }
+            set { mShowExistingRegion = value; OnPropertyChanged(); }
+        }
+        private bool mShowExistingRegion;
+
+        public bool ShowOption1 {
+            get { return mShowOption1; }
+            set { mShowOption1 = value; OnPropertyChanged(); }
+        }
+        private bool mShowOption1;
+
+        public bool ShowOption2 {
+            get { return mShowOption2; }
+            set { mShowOption2 = value; OnPropertyChanged(); }
+        }
+        private bool mShowOption2;
+
+        public bool EnableOption1 {
+            get { return mEnableOption1; }
+            set { mEnableOption1 = value; OnPropertyChanged(); }
+        }
+        private bool mEnableOption1;
+
+        public bool EnableOption2 {
+            get { return mEnableOption2; }
+            set { mEnableOption2 = value; OnPropertyChanged(); }
+        }
+        private bool mEnableOption2;
+
+        public bool CheckOption1 {
+            get { return mCheckOption1; }
+            set { mCheckOption1 = value; OnPropertyChanged(); }
+        }
+        private bool mCheckOption1;
+
+        public bool CheckOption2 {
+            get { return mCheckOption2; }
+            set { mCheckOption2 = value; OnPropertyChanged(); }
+        }
+        private bool mCheckOption2;
+
+        public string Option1Str {
+            get { return mOption1Str; }
+            set { mOption1Str = value; OnPropertyChanged(); }
+        }
+        private string mOption1Str;
+
+        public string Option2Str {
+            get { return mOption2Str; }
+            set { mOption2Str = value; OnPropertyChanged(); }
+        }
+        private string mOption2Str;
 
         /// <summary>
         /// Address at which a pre-label would be placed.  This is determined by the parent
@@ -63,8 +129,27 @@ namespace SourceGen.WpfGui {
         /// </summary>
         private int mPreLabelAddress;
         public string PreLabelAddressStr {
-            get { return mFormatter.FormatOffset24(mRegionEndOffset); }
+            get {
+                if (mPreLabelAddress == AddressMap.NON_ADDR) {
+                    return "NA";
+                } else {
+                    return "$" + mFormatter.FormatAddress(mPreLabelAddress, mShowBank);
+                }
+            }
         }
+        private bool mShowBank;
+
+        public bool ShowErrorMessage {
+            get { return mShowErrorMessage; }
+            set { mShowErrorMessage = value; OnPropertyChanged(); }
+        }
+        private bool mShowErrorMessage;
+
+        public string ErrorMessageStr {
+            get { return mErrorMessageStr; }
+            set { mErrorMessageStr = value; OnPropertyChanged(); }
+        }
+        private string mErrorMessageStr;
 
         /// <summary>
         /// Address input TextBox.
@@ -100,22 +185,31 @@ namespace SourceGen.WpfGui {
         private bool mIsValid;
 
         /// <summary>
-        /// Set to true when requested region is valid.  Everything but the cancel button is
-        /// disabled if not.
+        /// Set to true unless there are no valid options (e.g. invalid new region).
         /// </summary>
-        public bool IsRegionValid {
-            get { return mIsRegionValid; }
-            set { mIsRegionValid = value; OnPropertyChanged(); }
+        public bool EnableAttributeControls {
+            get { return mEnableAttributeControls; }
+            set { mEnableAttributeControls = value; OnPropertyChanged(); }
         }
-        private bool mIsRegionValid;
+        private bool mEnableAttributeControls;
 
         /// <summary>
-        /// Determines whether the "(floating)" message appears next to the length.
+        /// Set to true if the region has a floating end point.
         /// </summary>
-        public Visibility FloatTextVis {
-            get { return mFloatTextVis; }
+        public bool IsFloating {
+            get { return mIsFloating; }
+            set { mIsFloating = value; OnPropertyChanged(); }
         }
-        private Visibility mFloatTextVis;
+        private bool mIsFloating;
+
+        /// <summary>
+        /// Set to true if the region is not new, and thus can be deleted.
+        /// </summary>
+        public bool CanDeleteRegion {
+            get { return mCanDeleteRegion; }
+            set { mCanDeleteRegion = value; OnPropertyChanged(); }
+        }
+        private bool mCanDeleteRegion;
 
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
@@ -123,7 +217,15 @@ namespace SourceGen.WpfGui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private AddressMap.AddressRegion mNewRegion;
+        /// <summary>
+        /// Result for option #1.
+        /// </summary>
+        private AddressMap.AddressMapEntry mResultEntry1;
+
+        /// <summary>
+        /// Result for option #2.
+        /// </summary>
+        private AddressMap.AddressMapEntry mResultEntry2;
 
         /// <summary>
         /// Maximum allowed address value, based on CPU type.
@@ -145,93 +247,226 @@ namespace SourceGen.WpfGui {
         /// Constructor.
         /// </summary>
         /// <param name="owner">Parent window.</param>
-        /// <param name="entry">Map entry definition.  This may be an existing entry, or values
-        ///   representing the selection.</param>
-        /// <param name="newLength">Length of region.  Only used if we're resizing an
-        ///   existing region.</param>
+        /// <param name="curRegion">Current region; will be null for new entries.</param>
+        /// <param name="newEntry">Prototype entry to create.</param>
+        /// <param name="selectionLen">Length, in bytes, of the selection.</param>
+        /// <param name="isSingleLine">True if the selection is a single line.</param>
         /// <param name="project">Project reference.</param>
         /// <param name="formatter">Text formatter object.</param>
-        public EditAddress(Window owner, AddressMap.AddressMapEntry entry, bool isNew,
-                int newLength, DisasmProject project, Formatter formatter) {
+        public EditAddress(Window owner, AddressMap.AddressRegion curRegion,
+                AddressMap.AddressMapEntry newEntry, int selectionLen, bool isSingleLine,
+                DisasmProject project, Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
+            Debug.Assert((curRegion == null) ^ (newEntry == null));     // exactly one must be true
+
             mProject = project;
             mMaxAddressValue = project.CpuDef.MaxAddressValue;
+            mShowBank = !project.CpuDef.HasAddr16;
             mFormatter = formatter;
 
-            Configure(entry, isNew, newLength);
+            Configure(curRegion, newEntry, selectionLen, isSingleLine);
+            UpdateControls();
         }
 
-        private void Configure(AddressMap.AddressMapEntry entry, bool isNew, int newLength) {
-            mRegionStartOffset = mRegionEndOffset = entry.Offset;
-            mPreLabelAddress = 0;
-            IsRegionValid = false;
+        private void Configure(AddressMap.AddressRegion curRegion,
+                AddressMap.AddressMapEntry newEntry, int selectionLen, bool isSingleLine) {
+            Debug.WriteLine("Configuring AR: reg=" + curRegion + " newEnt=" + newEntry +
+                " selLen=" + selectionLen + " isSingle=" + isSingleLine);
 
-            // The passed-in region could have Length=FLOATING_LEN, so we need to resolve
-            // that now.  We also need to figure out if it's valid.  The easiest way to do
-            // that is to clone the address map, add the region to it, and see how the values
-            // resolve.  This also gets us an address for the pre-label.
-            List<AddressMap.AddressMapEntry> entries;
-            int spanLength;
-            entries = mProject.AddrMap.GetEntryList(out spanLength);
-            AddressMap tmpMap = new AddressMap(spanLength, entries);
-            if (!isNew) {
-                // Remove the old entry.
-                if (!tmpMap.RemoveEntry(entry.Offset, entry.Length)) {
-                    // Shouldn't happen.
-                    Debug.Assert(false);
-                    // TODO(org): some sort of failure indicator
-                    return;
-                }
-            }
+            ShowOption1 = ShowOption2 = true;
+            EnableOption1 = EnableOption2 = true;
+            CheckOption1 = true;
+            EnableAttributeControls = true;
 
-            // Add the new / replacement entry.
-            AddressMap.AddResult result = tmpMap.AddEntry(entry);
-            if (result != AddressMap.AddResult.Okay) {
-                // TODO(org): various things with failures
-                Debug.Assert(false);    // remove
-            } else {
-                // Find it in the region tree.
-                mNewRegion = tmpMap.FindRegion(entry.Offset, entry.Length);
-                if (mNewRegion == null) {
-                    // Shouldn't happen.
-                    Debug.Assert(false);
-                    // TODO(org): some sort of failure indicator
-                    return;
+            if (curRegion != null) {
+                // Editing an existing region.
+                CanDeleteRegion = true;
+                ShowExistingRegion = true;
+
+                AddressText = Asm65.Address.AddressToString(curRegion.Address, false);
+                PreLabelText = curRegion.PreLabel;
+                UseRelativeAddressing = curRegion.IsRelative;
+
+                OperationStr = (string)FindResource("str_HdrEdit");
+                mRegionStartOffset = curRegion.Offset;
+                mRegionEndOffset = curRegion.Offset + curRegion.ActualLength - 1;
+                mPreLabelAddress = curRegion.PreLabelAddress;
+
+                if (isSingleLine) {
+                    // Only thing selected was .arstart/.arend.  First action is to edit
+                    // the region properties, second action is to convert floating end
+                    // to fixed.
+                    mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
+                        curRegion.Length, curRegion.Address, curRegion.PreLabel,
+                        curRegion.IsRelative);
+                    Option1Str = (string)FindResource("str_OptEditAsIs");
+                    Option2Str = (string)FindResource("str_OptEditAndFix");
+
+                    if (curRegion.IsFloating) {
+                        mResultEntry2 = new AddressMap.AddressMapEntry(curRegion.Offset,
+                            curRegion.ActualLength, curRegion.Address, curRegion.PreLabel,
+                            curRegion.IsRelative);
+                    } else {
+                        mResultEntry2 = null;
+                        EnableOption2 = false;  // show it, but disabled
+                    }
+
                 } else {
-                    // Set offset / length values based on what we got.
-                    IsRegionValid = true;
-                    mRegionStartOffset = mNewRegion.Offset;
-                    mRegionEndOffset = mNewRegion.Offset + mNewRegion.ActualLength;
-                    mPreLabelAddress = mNewRegion.PreLabelAddress;
-                    mFloatTextVis = mNewRegion.IsFloating ? Visibility.Visible : Visibility.Hidden;
-                    // Init editable stuff.
-                    AddressText = Asm65.Address.AddressToString(mNewRegion.Address, false);
-                    PreLabelText = mNewRegion.PreLabel;
-                    UseRelativeAddressing = mNewRegion.IsRelative;
+                    // Selection started with .arstart and included multiple lines.  First
+                    // action is to resize region.  Second action is edit without resize.
+                    // If resize is illegal (e.g. new region exactly overlaps another),
+                    // first action is disabled.
+                    mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
+                        selectionLen, curRegion.Address, curRegion.PreLabel,
+                        curRegion.IsRelative);
+                    mResultEntry2 = new AddressMap.AddressMapEntry(curRegion.Offset,
+                        curRegion.Length, curRegion.Address, curRegion.PreLabel,
+                        curRegion.IsRelative);
+
+                    string fmt = (string)FindResource("str_OptResize");
+                    Option1Str = string.Format(fmt,
+                        mFormatter.FormatOffset24(curRegion.Offset + selectionLen - 1),
+                        FormatLength(selectionLen));
+                    Option2Str = (string)FindResource("str_OptEditAsIs");
+
+                    Debug.Assert(selectionLen > 0);
+                    AddressMap.AddResult ares;
+                    TryCreateRegion(curRegion, curRegion.Offset, selectionLen,
+                        curRegion.Address, out ares);
+                    if (ares != AddressMap.AddResult.Okay) {
+                        // Can't create the new region, so disable that option (still visible).
+                        EnableOption1 = false;
+                        CheckOption2 = true;
+                    }
+                }
+
+            } else {
+                // Creating a new region.  Prototype entry specifies offset, length, and address.
+                // First action is to create a fixed-length region, second action is to create
+                // a floating region.  Default changes for single-item selections.
+                CanDeleteRegion = false;
+                ShowExistingRegion = false;
+
+                AddressText = Asm65.Address.AddressToString(newEntry.Address, false);
+                PreLabelText = string.Empty;
+                UseRelativeAddressing = false;
+
+                OperationStr = (string)FindResource("str_HdrCreate");
+
+                AddressMap.AddResult ares1;
+                AddressMap.AddressRegion newRegion1 = TryCreateRegion(null, newEntry.Offset,
+                    newEntry.Length, newEntry.Address, out ares1);
+                AddressMap.AddResult ares2;
+                AddressMap.AddressRegion newRegion2 = TryCreateRegion(null, newEntry.Offset,
+                    AddressMap.FLOATING_LEN, newEntry.Address, out ares2);
+
+                if (isSingleLine) {
+                    // For single-line selection, create a floating region by default.
+                    CheckOption2 = true;
+                }
+
+                // If it failed, report the error.  Most common reason will be a start offset
+                // that overlaps an existing region.  You can create a fixed region inside
+                // a fixed region with the same start offset, but can't create a float there.
+                if (ares1 == AddressMap.AddResult.Okay) {
+                    mResultEntry1 = new AddressMap.AddressMapEntry(newEntry.Offset,
+                        newRegion1.ActualLength, newEntry.Address, string.Empty, false);
+
+                    string fmt = (string)FindResource("str_CreateFixed");
+                    Option1Str = string.Format(fmt,
+                        mFormatter.FormatOffset24(newEntry.Offset),
+                        FormatLength(newRegion1.ActualLength));
+                } else {
+                    Option1Str = (string)FindResource("str_CreateFixedFail");
+                    CheckOption2 = true;
+                    EnableOption1 = false;
+                }
+                if (ares2 == AddressMap.AddResult.Okay) {
+                    mResultEntry2 = new AddressMap.AddressMapEntry(newEntry.Offset,
+                        AddressMap.FLOATING_LEN, newEntry.Address, string.Empty, false);
+
+                    string fmt = (string)FindResource("str_CreateFloating");
+                    Option2Str = string.Format(fmt,
+                        mFormatter.FormatOffset24(newEntry.Offset),
+                        FormatLength(newRegion2.ActualLength));
+                } else {
+                    Option2Str = (string)FindResource("str_CreateFloatingFail");
+                    CheckOption1 = true;
+                    CheckOption2 = false;   // required for some reason
+                    EnableOption2 = false;
+                }
+                if (ares1 != AddressMap.AddResult.Okay && ares2 != AddressMap.AddResult.Okay) {
+                    // Unable to create region here.  Explain why not.
+                    EnableAttributeControls = false;
+                    CheckOption1 = CheckOption2 = false;
+
+                    SetErrorString(ares1);
                 }
             }
+        }
+
+        private string FormatLength(int len) {
+            return len + " (" + mFormatter.FormatHexValue(len, 2) + ")";
+        }
+
+        private AddressMap.AddressRegion TryCreateRegion(AddressMap.AddressRegion delRegion,
+                int offset, int length, int addr, out AddressMap.AddResult result) {
+            AddressMap tmpMap = mProject.AddrMap.Clone();
+
+            if (delRegion != null && !tmpMap.RemoveEntry(delRegion.Offset, delRegion.Length)) {
+                Debug.Assert(false, "Failed to remove existing region");
+                result = AddressMap.AddResult.InternalError;
+                return null;
+            }
+
+            result = tmpMap.AddEntry(offset, length, addr);
+            if (result != AddressMap.AddResult.Okay) {
+                return null;
+            }
+            AddressMap.AddressRegion newRegion = tmpMap.FindRegion(offset, length);
+            if (newRegion == null) {
+                // Shouldn't happen.
+                Debug.Assert(false, "Failed to find region we just created");
+                result = AddressMap.AddResult.InternalError;
+                return null;
+            }
+            return newRegion;
+        }
+
+        private void SetErrorString(AddressMap.AddResult result) {
+            string rsrc;
+            switch (result) {
+                case AddressMap.AddResult.InternalError:
+                    rsrc = "str_ErrInternal";
+                    break;
+                case AddressMap.AddResult.InvalidValue:
+                    rsrc = "str_ErrInvalidValue";
+                    break;
+                case AddressMap.AddResult.OverlapExisting:
+                    rsrc = "str_ErrOverlapExisting";
+                    break;
+                case AddressMap.AddResult.OverlapFloating:
+                    rsrc = "str_ErrOverlapFloating";
+                    break;
+                case AddressMap.AddResult.StraddleExisting:
+                    rsrc = "str_ErrStraddelExisting";
+                    break;
+                default:
+                    Debug.Assert(false);
+                    rsrc = "str_ErrInternal";
+                    break;
+            }
+
+            ErrorMessageStr = (string)FindResource(rsrc);   // throws exception on failure
+            ShowErrorMessage = true;
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
             addrTextBox.SelectAll();
             addrTextBox.Focus();
-        }
-
-        private void OkButton_Click(object sender, RoutedEventArgs e) {
-            bool ok = ParseAddress(out int addr);
-            Debug.Assert(ok);
-            if (addr == AddressMap.INVALID_ADDR) {
-                // field was blank, want to delete the entry
-                NewEntry = null;
-            } else {
-                NewEntry = new AddressMap.AddressMapEntry(mNewRegion.Offset,
-                    mNewRegion.Length, addr, PreLabelText,
-                    UseRelativeAddressing);
-            }
-            DialogResult = true;
         }
 
         /// <summary>
@@ -242,24 +477,34 @@ namespace SourceGen.WpfGui {
         /// for TextBox is LostFocus.
         /// </remarks>
         private void UpdateControls() {
-            IsValid = IsRegionValid && ParseAddress(out int unused);
+            IsValid = EnableAttributeControls && ParseAddress(out int unused);
             // TODO(org): check pre-label syntax
         }
 
-        private const string NON_ADDR_STR = "NA";
+        private void OkButton_Click(object sender, RoutedEventArgs e) {
+            bool ok = ParseAddress(out int addr);
+            Debug.Assert(ok);
+
+            AddressMap.AddressMapEntry baseEntry;
+            if (CheckOption1) {
+                baseEntry = mResultEntry1;
+            } else {
+                baseEntry = mResultEntry2;
+            }
+
+            // Combine base entry with pre-label string and relative addressing checkbox.
+            ResultEntry = new AddressMap.AddressMapEntry(baseEntry.Offset,
+                baseEntry.Length, addr, PreLabelText, UseRelativeAddressing);
+            Debug.WriteLine("Dialog result: " + ResultEntry);
+            DialogResult = true;
+        }
 
         /// <summary>
         /// Parses the address out of the AddressText text box.
         /// </summary>
-        /// <param name="addr">Receives the parsed address.  Will be NON_ADDR for "NA", and
-        ///   INVALID_ADDR if blank.</param>
+        /// <param name="addr">Receives the parsed address.  Will be NON_ADDR for "NA".</param>
         /// <returns>True if the string parsed successfully.</returns>
         private bool ParseAddress(out int addr) {
-            // Left blank?
-            if (AddressText.Length == 0) {
-                addr = AddressMap.INVALID_ADDR;
-                return true;
-            }
             // "NA" for non-addressable?
             string upper = AddressText.ToUpper();
             if (upper == NON_ADDR_STR) {
@@ -268,6 +513,11 @@ namespace SourceGen.WpfGui {
             }
             // Parse numerically.
             return Asm65.Address.ParseAddress(AddressText, mMaxAddressValue, out addr);
+        }
+
+        private void DeleteRegion_Click(object sender, RoutedEventArgs e) {
+            ResultEntry = null;
+            DialogResult = true;
         }
     }
 }

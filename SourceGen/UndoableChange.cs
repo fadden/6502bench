@@ -188,20 +188,29 @@ namespace SourceGen {
         /// Creates an UndoableChange for an address map update.
         /// </summary>
         /// <param name="offset">Affected offset.</param>
-        /// <param name="oldAddress">Previous address map entry, or -1 if none.</param>
-        /// <param name="newAddress">New address map entry, or -1 if none.</param>
+        /// <param name="oldEntry">Previous address map entry, or null if none.</param>
+        /// <param name="newEntry">New address map entry, or null for deletion.</param>
         /// <returns>Change record.</returns>
-        public static UndoableChange CreateAddressChange(int offset, int oldAddress,
-                int newAddress) {
-            if (oldAddress == newAddress) {
-                Debug.WriteLine("No-op address change at +" + offset.ToString("x6") +
-                    ": " + oldAddress);
+        public static UndoableChange CreateAddressChange(AddressMap.AddressMapEntry oldEntry,
+                AddressMap.AddressMapEntry newEntry) {
+            int offset;
+            if (oldEntry != null) {
+                offset = oldEntry.Offset;
+            } else if (newEntry != null) {
+                offset = newEntry.Offset;
+            } else {
+                // Shouldn't happen.
+                Debug.Assert(false);
+                offset = -1;
+            }
+            if (oldEntry == newEntry) {
+                Debug.WriteLine("No-op address change at +" + offset.ToString("x6"));
             }
             UndoableChange uc = new UndoableChange();
             uc.Type = ChangeType.SetAddress;
             uc.Offset = offset;
-            uc.OldValue = oldAddress;
-            uc.NewValue = newAddress;
+            uc.OldValue = oldEntry;
+            uc.NewValue = newEntry;
             uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
             return uc;
         }

@@ -83,11 +83,6 @@ namespace CommonUtil {
         /// </summary>
         public const int NON_ADDR = -1025;
 
-        /// <summary>
-        /// Address value to use for an invalid address.
-        /// </summary>
-        public const int INVALID_ADDR = -2048;
-
         #region Structural
 
         /// <summary>
@@ -287,6 +282,17 @@ namespace CommonUtil {
             return newList;
         }
 
+        /// <summary>
+        /// Creates a clone of the address map.
+        /// </summary>
+        /// <returns>Cloned object.</returns>
+        public AddressMap Clone() {
+            List<AddressMap.AddressMapEntry> entries;
+            int spanLength;
+            entries = GetEntryList(out spanLength);
+            return new AddressMap(spanLength, entries);
+        }
+
         // IEnumerable
         public IEnumerator<AddressMapEntry> GetEnumerator() {
             return ((IEnumerable<AddressMapEntry>)mMapEntries).GetEnumerator();
@@ -308,6 +314,7 @@ namespace CommonUtil {
         public enum AddResult {
             Unknown = 0,
             Okay,               // success!
+            InternalError,      // something weird happened
             InvalidValue,       // offset, length, or address parameter is invalid
             OverlapExisting,    // new region overlaps existing region exactly
             OverlapFloating,    // new start matches existing; one or both are floating
@@ -496,30 +503,6 @@ namespace CommonUtil {
 
             outInsIdx = insIdx;
             return AddResult.Okay;
-        }
-
-        /// <summary>
-        /// Edits the region with the specified offset/len, changing the values of addr and isRel.
-        /// </summary>
-        /// <param name="offset">Offset of region to edit.</param>
-        /// <param name="length">Length of region to edit.</param>
-        /// <param name="addr">New value for address.</param>
-        /// <param name="preLabel">Pre-block label.</param>
-        /// <param name="isRelative">New value for IsRelative.</param>
-        /// <returns>True if a region was edited, false otherwise.</returns>
-        public bool EditEntry(int offset, int length, int addr, string preLabel, bool isRelative) {
-            if (!ValidateArgs(offset, length, addr, preLabel)) {
-                throw new Exception("Bad EditRegion args +" + offset.ToString("x6") +
-                    " " + length + " $" + addr);
-            }
-
-            int idx = FindEntry(offset, length);
-            if (idx < 0) {
-                return false;
-            }
-            mMapEntries[idx] = new AddressMapEntry(offset, length, addr, preLabel, isRelative);
-            Regenerate();
-            return true;
         }
 
         /// <summary>
@@ -998,7 +981,7 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// This is NOT intended to say whether the sequence of addresses has a hiccup.  The goal
-        /// is to identify multi-byte elements that have a .ORG statement in the middle.
+        /// is to identify multi-byte elements that have a .arstart/.arend statement in the middle.
         ///
         /// We can do this in a couple of different ways:
         /// 1. Find the node that holds the offset, confirm that it spans offset+length, and

@@ -902,7 +902,7 @@ namespace SourceGen {
                     PseudoOp.FormatNumericOpFlags.None);
                 valueStr = PseudoOp.AnnotateEquDirective(formatter, valueStr, defSym);
                 string comment = formatter.FormatEolComment(defSym.Comment);
-                FormattedParts parts = FormattedParts.CreateEquDirective(
+                FormattedParts parts = FormattedParts.CreateFullDirective(
                     defSym.GenerateDisplayLabel(formatter),
                     formatter.FormatPseudoOp(opNames.EquDirective),
                     valueStr, comment);
@@ -989,9 +989,13 @@ namespace SourceGen {
                 }
             }
 
+            bool hasPrgHeader = AsmGen.GenCommon.HasPrgHeader(mProject);
+
             int offset = startOffset;
+            int arSubLine = 0;
             while (offset <= endOffset) {
                 bool spaceAdded = false;
+
                 Anattrib attr = mProject.GetAnattrib(offset);
                 if (attr.IsInstructionStart && offset > 0 &&
                         mProject.GetAnattrib(offset - 1).IsData) {
@@ -1040,8 +1044,8 @@ namespace SourceGen {
                     Debug.Assert(change.Offset == offset);
 
                     AddressMap.AddressRegion region = change.Region;
-                    if (region.Offset == 0 && AsmGen.GenCommon.HasPrgHeader(mProject)) {
-                        // Suppress the ORG at offset zero.  We know there's another one
+                    if (region.Offset == 0 && hasPrgHeader) {
+                        // Suppress the .arstart at offset zero.  We know there's another one
                         // at offset +000002, and that it matches the value at +0/1.
                         addrIter.MoveNext();
                         continue;
@@ -1056,10 +1060,23 @@ namespace SourceGen {
                         spaceAdded = false;     // next one will need a blank line
 
                         // TODO(org): pre-label (address / label only, logically part of ORG)
-                        Line newLine = new Line(offset, 0, Line.Type.ArStartDirective);
-                        string addrStr = mFormatter.FormatHexValue(region.Address, 4);
-                        newLine.Parts = FormattedParts.CreateDirective(
-                            mFormatter.FormatPseudoOp(mPseudoOpNames.ArStartDirective), addrStr);
+                        Line newLine = new Line(offset, 0, Line.Type.ArStartDirective, arSubLine++);
+                        string addrStr;
+                        if (region.Address == AddressMap.NON_ADDR) {
+                            addrStr = "NA";
+                        } else {
+                            addrStr = mFormatter.FormatHexValue(region.Address, 4);
+                        }
+#if DEBUG
+                        string comment = mFormatter.FormatEolComment("ends at " +
+                            mFormatter.FormatOffset24(region.Offset + region.ActualLength - 1) +
+                            (region.IsFloating ? " (floating)" : string.Empty));
+#else
+                        string comment = string.Empty;
+#endif
+                        newLine.Parts = FormattedParts.CreateFullDirective(string.Empty,
+                            mFormatter.FormatPseudoOp(mPseudoOpNames.ArStartDirective),
+                            addrStr, comment);
                         lines.Add(newLine);
                         addrIter.MoveNext();
                     } else {
@@ -1221,14 +1238,22 @@ namespace SourceGen {
 
                 // Check for address region ends, which will be positioned at the updated offset
                 // (unless they somehow got embedded inside something else).
+                arSubLine = 0;
                 while (addrIter.Current != null && addrIter.Current.Offset <= offset) {
                     AddressMap.AddressChange change = addrIter.Current;
                     // Range starts/ends shouldn't be embedded in something.
                     Debug.Assert(change.Offset == offset);
 
+                    if (change.Region.Offset == 0 && hasPrgHeader) {
+                        // Suppress the .arend at offset +000002.
+                        addrIter.MoveNext();
+                        arSubLine++;    // need to track address map
+                        continue;
+                    }
+
                     if (!change.IsStart) {
                         // NOTE: last end(s) are at an offset outside file bounds.
-                        Line newLine = new Line(offset, 0, Line.Type.ArEndDirective);
+                        Line newLine = new Line(offset, 0, Line.Type.ArEndDirective, arSubLine++);
                         newLine.Parts = FormattedParts.CreateDirective(
                             mFormatter.FormatPseudoOp(mPseudoOpNames.ArEndDirective),
                             string.Empty);
@@ -1509,7 +1534,7 @@ namespace SourceGen {
                     PseudoOp.FormatNumericOpFlags.None);
                 addrStr = PseudoOp.AnnotateEquDirective(mFormatter, addrStr, defSym);
                 string comment = mFormatter.FormatEolComment(defSym.Comment);
-                return FormattedParts.CreateEquDirective(
+                return FormattedParts.CreateFullDirective(
                     mFormatter.FormatVariableLabel(defSym.GenerateDisplayLabel(mFormatter)),
                     mFormatter.FormatPseudoOp(mPseudoOpNames.VarDirective),
                     addrStr, comment);
@@ -1537,6 +1562,42 @@ namespace SourceGen {
             //return lvt[tableIndex];
             List<DefSymbol> lvars = mLvLookup.GetVariablesDefinedAtOffset(offset);
             return lvars[tableIndex];
+        }
+
+        public AddressMap.AddressRegion GetAddrRegionFromLine(int lineIndex) {
+            // A given offset can have one or more .arend lines followed by one or more
+            // .arstart lines.  You can't have start followed by end because that would
+            // be a zero-length block.  We do need to handle both, though, and we need to
+            // handle any synthetic non-addressable regions, so we walk the change list.
+            Line line = this[lineIndex];
+            int offset = line.FileOffset;
+            List<AddressMap.AddressMapEntry> entries = mProject.AddrMap.GetEntries(offset);
+
+            IEnumerator<AddressMap.AddressChange> addrIter = mProject.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                if (addrIter.Current.Offset >= offset) {
+                    break;
+                }
+            }
+
+            int count = line.SubLineIndex;
+            while (addrIter.Current != null && addrIter.Current.Offset == offset) {
+                AddressMap.AddressChange change = addrIter.Current;
+                if (count == 0) {
+                    return change.Region;
+                }
+                if (change.IsStart && !string.IsNullOrEmpty(change.Region.PreLabel)) {
+                    count--;
+                    if (count == 0) {
+                        return change.Region;
+                    }
+                }
+                count--;
+
+                addrIter.MoveNext();
+            }
+
+            return null;
         }
 
         private FormattedParts[] GenerateStringLines(int offset, string popcode,
