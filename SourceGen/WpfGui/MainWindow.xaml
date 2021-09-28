@@ -71,7 +71,7 @@ limitations under the License.
                     <KeyGesture>Del</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="EditAddressCmd" Text="Set Address..."/>
+            <RoutedUICommand x:Key="EditAddressCmd" Text="Define Address Region..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="EditCommentCmd" Text="Edit Comment...">
                 <RoutedUICommand.InputGestures>
@@ -203,6 +203,7 @@ limitations under the License.
                     <KeyGesture>Ctrl+Z</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="ViewAddressMapCmd" Text="View Address Map"/>
 
             <RoutedUICommand x:Key="Debug_ApplesoftToHtmlCmd" Text="Applesoft to HTML..."/>
             <RoutedUICommand x:Key="Debug_ApplyEditCommandsCmd" Text="Apply Edit Commands..."/>
@@ -339,6 +340,8 @@ limitations under the License.
                         CanExecute="CanToggleSingleByteFormat" Executed="ToggleSingleByteFormatCmd_Executed"/>
         <CommandBinding Command="{StaticResource UndoCmd}"
                         CanExecute="CanUndo" Executed="UndoCmd_Executed"/>
+        <CommandBinding Command="{StaticResource ViewAddressMapCmd}"
+                        CanExecute="IsProjectOpen" Executed="ViewAddressMapCmd_Executed"/>
 
         <!-- must come after analyzer tag Ctrl+H Ctrl+C def -->
         <CommandBinding Command="Copy"
@@ -418,6 +421,8 @@ limitations under the License.
                 <MenuItem Command="Find"/>
                 <MenuItem Command="{StaticResource FindNextCmd}"/>
                 <MenuItem Command="{StaticResource FindPreviousCmd}"/>
+                <Separator/>
+                <MenuItem Command="{StaticResource ViewAddressMapCmd}"/>
             </MenuItem>
             <MenuItem Name="actionsMenu" Header="_Actions">
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>

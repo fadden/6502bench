@@ -379,6 +379,7 @@ namespace SourceGen.WpfGui {
                     Option1Str = string.Format(fmt,
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion1.ActualLength));
+                    mPreLabelAddress = newRegion1.PreLabelAddress;
                 } else {
                     Option1Str = (string)FindResource("str_CreateFixedFail");
                     CheckOption2 = true;
@@ -392,6 +393,7 @@ namespace SourceGen.WpfGui {
                     Option2Str = string.Format(fmt,
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion2.ActualLength));
+                    mPreLabelAddress = newRegion2.PreLabelAddress;
                 } else {
                     Option2Str = (string)FindResource("str_CreateFloatingFail");
                     CheckOption1 = true;
@@ -402,6 +404,7 @@ namespace SourceGen.WpfGui {
                     // Unable to create region here.  Explain why not.
                     EnableAttributeControls = false;
                     CheckOption1 = CheckOption2 = false;
+                    mPreLabelAddress = AddressMap.NON_ADDR;
 
                     SetErrorString(ares1);
                 }

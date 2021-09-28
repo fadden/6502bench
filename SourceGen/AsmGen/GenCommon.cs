@@ -135,12 +135,12 @@ namespace SourceGen.AsmGen {
                 }
 
                 // Check for address region ends.  There may be more than one at a given offset.
-                // The end-region offset is listed as the byte *following* the instruction
-                // or data item, so it should match the updated offset.
+                // The end-region offset will be the last byte of the instruction or data item,
+                // so it should be one less than the updated offset.
                 //
                 // If we encounter a region start, we'll handle that at the top of the next
                 // loop iteration.
-                while (change != null && change.Offset == offset) {
+                while (change != null && change.Offset + 1 == offset) {
                     if (!change.IsStart) {
                         gen.OutputArDirective(change.Region, change.IsStart);
                         addrIter.MoveNext();

@@ -309,6 +309,11 @@ namespace CommonUtil {
         public int EntryCount { get { return mMapEntries.Count; } }
 
         /// <summary>
+        /// Number of bytes spanned by the address map.
+        /// </summary>
+        public int Length { get { return mSpanLength; } }
+
+        /// <summary>
         /// Error codes for AddEntry().
         /// </summary>
         public enum AddResult {
@@ -1086,27 +1091,37 @@ namespace CommonUtil {
         ///
         /// Instances are immutable.
         /// </summary>
+        /// <remarks>
+        /// We use inclusive Offset values for both start and end.  If we don't do this, the
+        /// offset for end records will be outside the file bounds.  It also gets a bit painful
+        /// when the display list tries to update [M,N] if put the end at N+1.
+        /// </remarks>
         public class AddressChange {
             // True if this is a region start, false if a region end.
             public bool IsStart { get; private set; }
 
-            // Offset at which change occurs.  For end points, this at the offset AFTER
-            // the last offset in a region.
+            // Offset at which change occurs.  For end points, this is the last offset in
+            // the region (i.e. an inclusive end point).
             public int Offset { get; private set; }
 
-            // Address at Offset after change.  For a region-end change, this is an address
-            // in the parent's range.
+            // Address at Offset after change.  For a region-end change, this is the address
+            // in the parent's range for the following offset.
             public int Address { get; private set; }
 
             // Reference to the AddressRegion that generated this entry.  The reference
             // will be the same for the "start" and "end" entries.
             public AddressRegion Region { get; private set; }
 
-            public AddressChange(bool isStart, int offset, int addr, AddressRegion region) {
+            // True if this region was synthesized to plug a hole.
+            public bool IsSynthetic { get; private set; }
+
+            public AddressChange(bool isStart, int offset, int addr, AddressRegion region,
+                    bool isSynth) {
                 IsStart = isStart;
                 Offset = offset;
                 Address = addr;
                 Region = region;
+                IsSynthetic = isSynth;
             }
         }
 
@@ -1129,8 +1144,10 @@ namespace CommonUtil {
                         Debug.Assert(node.Region.Offset > startOffset);
                         AddressRegion tmpReg = new AddressRegion(startOffset,
                             node.Region.Offset - startOffset, NON_ADDR);
-                        changeList.Add(new AddressChange(true, startOffset, NON_ADDR, tmpReg));
-                        changeList.Add(new AddressChange(false, node.Region.Offset, NON_ADDR, tmpReg));
+                        changeList.Add(new AddressChange(true, startOffset, NON_ADDR,
+                            tmpReg, true));
+                        changeList.Add(new AddressChange(false, node.Region.Offset - 1, NON_ADDR,
+                            tmpReg, true));
                         extraNodes++;
                     }
 
@@ -1145,8 +1162,8 @@ namespace CommonUtil {
                 Debug.Assert(startOffset < mSpanLength);
                 AddressRegion tmpReg = new AddressRegion(startOffset,
                     mSpanLength - startOffset, NON_ADDR);
-                changeList.Add(new AddressChange(true, startOffset, NON_ADDR, tmpReg));
-                changeList.Add(new AddressChange(false, mSpanLength, NON_ADDR, tmpReg));
+                changeList.Add(new AddressChange(true, startOffset, NON_ADDR, tmpReg, true));
+                changeList.Add(new AddressChange(false, mSpanLength - 1, NON_ADDR, tmpReg, true));
                 extraNodes++;
             }
 
@@ -1177,9 +1194,9 @@ namespace CommonUtil {
                 nextAddr = parentStartAddr + node.Region.ActualLength;
             }
             AddressChange startChange = new AddressChange(true,
-                node.Region.Offset, node.Region.Address, node.Region);
+                node.Region.Offset, node.Region.Address, node.Region, false);
             AddressChange endChange = new AddressChange(false,
-                node.Region.Offset + node.Region.ActualLength, nextAddr, node.Region);
+                node.Region.Offset + node.Region.ActualLength - 1, nextAddr, node.Region, false);
 
             changeList.Add(startChange);
             int curAddr = node.Region.Address;
@@ -1206,69 +1223,71 @@ namespace CommonUtil {
         public string FormatAddressMap() {
             StringBuilder sb = new StringBuilder();
             int depth = 0;
-            AddressChange prevChange = null;
+            int prevOffset = -1;
+            int prevAddr = 0;
 
             sb.AppendLine("Address map, len=$" + mSpanLength.ToString("x4"));
             IEnumerator<AddressChange> iter = this.AddressChangeIterator;
             while (iter.MoveNext()) {
                 AddressChange change = iter.Current;
                 if (change.IsStart) {
-                    if (prevChange != null && change.Offset != prevChange.Offset) {
+                    if (prevOffset >= 0 && change.Offset != prevOffset) {
                         // Start of region at new offset.  Output address info for space
                         // between previous start or end.
-                        sb.Append("       ");
-                        PrintAddressInfo(sb, depth, prevChange.Address,
-                            change.Offset - prevChange.Offset);
+                        PrintAddressInfo(sb, depth, prevAddr, change.Offset - prevOffset);
                     }
 
                     // Start following end, or start following start after a gap.
                     if (!string.IsNullOrEmpty(change.Region.PreLabel)) {
-                        sb.Append("       ");
-                        PrintDepthLines(sb, depth);
+                        PrintDepthLines(sb, depth, true);
                         sb.Append("|  pre='" + change.Region.PreLabel + "' ");
-                        if (change.Region.PreLabelAddress != NON_ADDR) {
-                            sb.Append("$" + change.Region.PreLabelAddress.ToString("x4"));
-                        } else {
-                            sb.Append("(non-addr)");
-                        }
+                        PrintAddress(sb, change.Region.PreLabelAddress);
                         sb.Append(CRLF);
                     }
                     sb.Append("+" + change.Offset.ToString("x6"));
-                    PrintDepthLines(sb, depth);
+                    PrintDepthLines(sb, depth, false);
                     sb.Append("+- " + "START (");
                     PrintAddress(sb, change.Address);
                     sb.Append(")");
+                    if (change.IsSynthetic) {
+                        sb.Append(" (auto-generated)");
+                    }
                     sb.Append(CRLF);
 
+                    prevOffset = change.Offset;
+                    prevAddr = change.Address;
                     depth++;
                 } else {
-                    Debug.Assert(prevChange != null);
+                    Debug.Assert(prevOffset >= 0);
                     depth--;
 
-                    if (change.Offset != prevChange.Offset) {
+                    if (change.Offset + 1 != prevOffset) {
                         // End of region at new offset.  Output address info for space
                         // between previous start or end.
-                        sb.Append("       ");
-                        PrintAddressInfo(sb, depth + 1, prevChange.Address,
-                            change.Offset - prevChange.Offset);
+                        PrintAddressInfo(sb, depth + 1, prevAddr, change.Offset + 1 - prevOffset);
                     }
 
                     sb.Append("+" + change.Offset.ToString("x6"));
-                    PrintDepthLines(sb, depth);
+                    PrintDepthLines(sb, depth, false);
                     sb.Append("+- " + "END (now ");
                     PrintAddress(sb, change.Address);
                     sb.Append(")");
                     sb.Append(CRLF);
-                }
 
-                prevChange = change;
+                    // Use offset+1 here so it lines up with start records.
+                    prevOffset = change.Offset + 1;
+                    prevAddr = change.Address;
+                }
             }
             Debug.Assert(depth == 0);
 
             return sb.ToString();
         }
 
-        private static void PrintDepthLines(StringBuilder sb, int depth) {
+        private static void PrintDepthLines(StringBuilder sb, int depth, bool doIndent) {
+            if (doIndent) {
+                sb.Append("       ");
+            }
             sb.Append("  ");
             while (depth-- > 0) {
                 sb.Append("| ");
@@ -1277,7 +1296,7 @@ namespace CommonUtil {
 
         private static void PrintAddressInfo(StringBuilder sb, int depth,
                     int startAddr, int length) {
-            PrintDepthLines(sb, depth);
+            PrintDepthLines(sb, depth, true);
             sb.Append(' ');
             if (startAddr == NON_ADDR) {
                 sb.Append("-NA-");

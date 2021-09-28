@@ -1658,6 +1658,28 @@ namespace SourceGen {
                 return false;
             }
 
+            if (line.IsAddressRangeDirective) {
+                // TODO(someday): make this jump to the actual directive rather than nearby code
+                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line);
+                if (region == null) {
+                    Debug.Assert(false);
+                    return false;
+                }
+                if (!testOnly) {
+                    if (line.LineType == LineListGen.Line.Type.ArStartDirective) {
+                        // jump to end
+                        GoToLocation(
+                            new NavStack.Location(region.Offset + region.ActualLength - 1, 0, true),
+                            GoToMode.JumpToCodeData, true);
+                    } else {
+                        // jump to start
+                        GoToLocation(new NavStack.Location(region.Offset, 0, true),
+                            GoToMode.JumpToCodeData, true);
+                    }
+                }
+                return true;
+            }
+
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
             FormatDescriptor dfd = attr.DataDescriptor;
 
@@ -1828,7 +1850,7 @@ namespace SourceGen {
             if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArStartDirective ||
                     CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
                 // First selected line was .arstart/.arend, find the address map entry.
-                curRegion = CodeLineList.GetAddrRegionFromLine(selIndex);
+                curRegion = CodeLineList.GetAddrRegionFromLine(CodeLineList[selIndex]);
                 Debug.Assert(curRegion != null);
                 Debug.WriteLine("Using region from " + CodeLineList[selIndex].LineType +
                     ": " + curRegion);
@@ -2927,7 +2949,9 @@ namespace SourceGen {
             }
             LineListGen.Line.Type lineType = SelectionAnalysis.mLineType;
             if (lineType != LineListGen.Line.Type.Code &&
-                    lineType != LineListGen.Line.Type.Data) {
+                    lineType != LineListGen.Line.Type.Data &&
+                    lineType != LineListGen.Line.Type.ArStartDirective &&
+                    lineType != LineListGen.Line.Type.ArEndDirective) {
                 return false;
             }
 
@@ -3884,11 +3908,11 @@ namespace SourceGen {
 
                 case LineListGen.Line.Type.ArStartDirective:
                     isSimple = false;
-                    lineTypeStr = "address range start directive";
+                    lineTypeStr = "address region start directive";
                     break;
                 case LineListGen.Line.Type.ArEndDirective:
                     isSimple = false;
-                    lineTypeStr = "address range end directive";
+                    lineTypeStr = "address region end directive";
                     break;
                 case LineListGen.Line.Type.LocalVariableTable:
                     isSimple = false;
@@ -3952,7 +3976,7 @@ namespace SourceGen {
 
             if (line.LineType == LineListGen.Line.Type.ArStartDirective ||
                     line.LineType == LineListGen.Line.Type.ArEndDirective) {
-                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(lineIndex);
+                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line);
                 StringBuilder esb = new StringBuilder();
                 esb.Append("Address: ");
                 if (region.Address == AddressMap.NON_ADDR) {
@@ -4386,6 +4410,21 @@ namespace SourceGen {
             }
             pathName = Path.GetFullPath(fileDlg.FileName);
             return true;
+        }
+
+        /// <summary>
+        /// Displays a representation of the address map.
+        /// </summary>
+        /// <remarks>
+        /// This is in the "tools" section, but it's not a tool.  It's in the "navigation" menu
+        /// but has nothing to do with navigation.  Bit of an oddball.
+        /// </remarks>
+        public void ViewAddressMap() {
+            string mapStr = RenderAddressMap.GenerateString(mProject, mFormatter);
+
+            Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(mMainWin, mapStr);
+            dlg.Title = "Address Map";
+            dlg.ShowDialog();
         }
 
         #endregion Tools

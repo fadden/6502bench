@@ -117,6 +117,7 @@
       <DependentUpon>ShowText.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalVariableTable.cs" />
+    <Compile Include="RenderAddressMap.cs" />
     <Compile Include="Visualization.cs" />
     <Compile Include="VisBitmapAnimation.cs" />
     <Compile Include="VisualizationSet.cs" />

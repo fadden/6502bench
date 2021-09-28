@@ -362,13 +362,19 @@ namespace SourceGen {
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 // Process all change events at this offset.
                 AddressMap.AddressChange change = addrIter.Current;
-                while (change != null && change.Offset == offset) {
+                while (change != null && change.IsStart && change.Offset == offset) {
                     addr = change.Address;
                     addrIter.MoveNext();
                     change = addrIter.Current;
                 }
 
                 mAnattribs[offset].Address = addr++;
+
+                while (change != null && !change.IsStart && change.Offset == offset) {
+                    addr = change.Address;
+                    addrIter.MoveNext();
+                    change = addrIter.Current;
+                }
             }
         }
 

@@ -1437,6 +1437,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.UndoChanges();
         }
 
+        private void ViewAddressMapCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.ViewAddressMap();
+        }
+
         private void Debug_ApplesoftToHtmlCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.Debug_ApplesoftToHtml();
         }

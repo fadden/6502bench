@@ -20,7 +20,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Web.Script.Serialization;
-using System.Windows.Media;
 
 using CommonUtil;
 
@@ -53,7 +52,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 4;
+        public const int CONTENT_VERSION = 5;
 
         private static readonly bool ADD_CRLF = true;
 
@@ -238,15 +237,24 @@ namespace SourceGen {
                 SmartPlbHandling = src.SmartPlbHandling;
             }
         }
-        public class SerAddressMap {
+        public class SerAddressMapEntry {
             public int Offset { get; set; }
             public int Addr { get; set; }
-            // Length is computed field, no need to serialize
+            public int Length { get; set; }
+            public string PreLabel { get; set; }
+            public bool IsRelative { get; set; }
 
-            public SerAddressMap() { }
-            public SerAddressMap(AddressMap.AddressMapEntry ent) {
+            public SerAddressMapEntry() {
+                // Before v1.8, Length was always floating.
+                Length = CommonUtil.AddressMap.FLOATING_LEN;
+                PreLabel = string.Empty;
+            }
+            public SerAddressMapEntry(AddressMap.AddressMapEntry ent) {
                 Offset = ent.Offset;
                 Addr = ent.Address;
+                Length = ent.Length;
+                PreLabel = ent.PreLabel;
+                IsRelative = ent.IsRelative;
             }
         }
         public class SerTypeHintRange {
@@ -421,7 +429,7 @@ namespace SourceGen {
         public int FileDataLength { get; set; }
         public int FileDataCrc32 { get; set; }
         public SerProjectProperties ProjectProps { get; set; }
-        public List<SerAddressMap> AddressMap { get; set; }
+        public List<SerAddressMapEntry> AddressMap { get; set; }
         public List<SerTypeHintRange> TypeHints { get; set; }
         public Dictionary<string, int> StatusFlagOverrides { get; set; }
         public Dictionary<string, string> Comments { get; set; }
@@ -453,10 +461,12 @@ namespace SourceGen {
             spf.FileDataLength = proj.FileDataLength;
             spf.FileDataCrc32 = (int)proj.FileDataCrc32;
 
-            // Convert AddressMap to serializable form.
-            spf.AddressMap = new List<SerAddressMap>();
+            // Convert AddressMap to serializable form.  (AddressMapEntry objects are now
+            // serializable, so this is a bit redundant, but isolating project I/O from
+            // internal data structures is still useful.)
+            spf.AddressMap = new List<SerAddressMapEntry>();
             foreach (AddressMap.AddressMapEntry ent in proj.AddrMap) {
-                spf.AddressMap.Add(new SerAddressMap(ent));
+                spf.AddressMap.Add(new SerAddressMapEntry(ent));
             }
 
             // Reduce analyzer tags (formerly known as "type hints") to a collection of ranges.
@@ -669,16 +679,14 @@ namespace SourceGen {
 
             // Deserialize address map.
             proj.AddrMap.Clear();
-            foreach (SerAddressMap addr in spf.AddressMap) {
-                // TODO(org): serialize length, isRelative, and preLabel
-                int length = CommonUtil.AddressMap.FLOATING_LEN;
-
+            foreach (SerAddressMapEntry addr in spf.AddressMap) {
                 AddressMap.AddResult addResult = proj.AddrMap.AddEntry(addr.Offset,
-                    length, addr.Addr);
+                    addr.Length, addr.Addr, addr.PreLabel, addr.IsRelative);
                 if (addResult != CommonUtil.AddressMap.AddResult.Okay) {
-                    string msg = "off=+" + addr.Offset.ToString("x6") + " addr=$" +
-                        addr.Addr.ToString("x4") + " len=" +
-                        (length == CommonUtil.AddressMap.FLOATING_LEN ? "(floating)" : length.ToString());
+                    string msg = "off=+" + addr.Offset.ToString("x6") + " len=" +
+                        (addr.Length == CommonUtil.AddressMap.FLOATING_LEN ?
+                            "(floating)" : addr.Length.ToString() +
+                        " addr=$" + addr.Addr.ToString("x4"));
                     string errMsg = string.Format(Res.Strings.ERR_BAD_ADDRESS_REGION_FMT, msg);
                     report.Add(FileLoadItem.Type.Warning, errMsg);
                 }
