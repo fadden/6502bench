@@ -247,6 +247,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_MsgLabelIgnored");
         public static string MSG_LOCAL_VARIABLE_TABLE_IGNORED =
             (string)Application.Current.FindResource("str_MsgLocalVariableTableIgnored");
+        public static string MSG_NON_ADDR_LABEL_REF =
+            (string)Application.Current.FindResource("str_MsgNonAddrLabelRef");
         public static string MSG_UNRESOLVED_WEAK_REF =
             (string)Application.Current.FindResource("str_MsgUnresolvedWeakRef");
         public static string MSG_VISUALIZATION_IGNORED =

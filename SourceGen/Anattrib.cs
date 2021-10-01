@@ -49,6 +49,8 @@ namespace SourceGen {
             Changed = 1 << 17,          // set/cleared as the analyzer works
 
             ATagged = 1 << 18,          // was this byte affected by an analyzer tag?
+            AddrRegionChange = 1 << 19, // is this byte in a different address region from prev?
+            NonAddressable = 1 << 20,   // is this byte in a non-addressable range?
         }
 
         // Flags indicating what type of data is here.  Use the following Is* properties
@@ -228,6 +230,30 @@ namespace SourceGen {
                     mAttribFlags |= AttribFlags.ATagged;
                 } else {
                     mAttribFlags &= ~AttribFlags.ATagged;
+                }
+            }
+        }
+        public bool IsAddrRegionChange {
+            get {
+                return (mAttribFlags & AttribFlags.AddrRegionChange) != 0;
+            }
+            set {
+                if (value) {
+                    mAttribFlags |= AttribFlags.AddrRegionChange;
+                } else {
+                    mAttribFlags &= ~AttribFlags.AddrRegionChange;
+                }
+            }
+        }
+        public bool IsNonAddressable {
+            get {
+                return (mAttribFlags & AttribFlags.NonAddressable) != 0;
+            }
+            set {
+                if (value) {
+                    mAttribFlags |= AttribFlags.NonAddressable;
+                } else {
+                    mAttribFlags &= ~AttribFlags.NonAddressable;
                 }
             }
         }

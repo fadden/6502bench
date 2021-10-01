@@ -808,7 +808,7 @@ namespace SourceGen {
         /// <param name="reanalysisTimer">Task timestamp collection object.</param>
         public void Analyze(UndoableChange.ReanalysisScope reanalysisRequired,
                 CommonUtil.DebugLog debugLog, TaskTimer reanalysisTimer) {
-            // This method doesn't report failures.  It succeeds to the best of its ability,
+            // This method doesn't return an error code.  It succeeds to the best of its ability,
             // and handles problems by discarding bad data.  The overall philosophy is that
             // the program will never generate bad data, and any bad project file contents
             // (possibly introduced by hand-editing) are identified at load time, called out
@@ -1530,7 +1530,7 @@ namespace SourceGen {
             // Create a mapping from label (which must be unique) to file offset.  This
             // is different from UserLabels (which only has user-created labels, and is
             // sorted by offset) and SymbolTable (which has constants and platform symbols,
-            // and uses the address as value rather than the offset).
+            // and uses the address as the value rather than the offset).
             SortedList<string, int> labelList = new SortedList<string, int>(mFileData.Length,
                 Asm65.Label.LABEL_COMPARER);
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
@@ -1596,6 +1596,15 @@ namespace SourceGen {
 
                         // Is this a reference to a label?
                         if (labelList.TryGetValue(dfd.SymbolRef.Label, out int symOffset)) {
+                            if (mAnattribs[symOffset].IsNonAddressable) {
+                                Messages.Add(new MessageList.MessageEntry(
+                                    MessageList.MessageEntry.SeverityLevel.Warning,
+                                    offset,
+                                    MessageList.MessageEntry.MessageType.NonAddrLabelRef,
+                                    dfd.SymbolRef.Label,
+                                    MessageList.MessageEntry.ProblemResolution.None));
+                            }
+
                             // Compute adjustment.
                             int adj = 0;
                             if (operandOffset >= 0) {

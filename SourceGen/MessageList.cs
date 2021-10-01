@@ -51,6 +51,7 @@ namespace SourceGen {
                 HiddenLocalVariableTable,
                 HiddenVisualization,
                 UnresolvedWeakRef,
+                NonAddrLabelRef,
                 InvalidOffsetOrLength,
                 InvalidDescriptor,
                 BankOverrun,
@@ -164,6 +165,9 @@ namespace SourceGen {
                     break;
                 case MessageEntry.MessageType.UnresolvedWeakRef:
                     problem = Res.Strings.MSG_UNRESOLVED_WEAK_REF;
+                    break;
+                case MessageEntry.MessageType.NonAddrLabelRef:
+                    problem = Res.Strings.MSG_NON_ADDR_LABEL_REF;
                     break;
                 case MessageEntry.MessageType.InvalidOffsetOrLength:
                     problem = Res.Strings.MSG_INVALID_OFFSET_OR_LENGTH;

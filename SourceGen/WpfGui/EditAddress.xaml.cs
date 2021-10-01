@@ -27,8 +27,6 @@ namespace SourceGen.WpfGui {
     /// Edit Address Region dialog.
     /// </summary>
     public partial class EditAddress : Window, INotifyPropertyChanged {
-        private const string NON_ADDR_STR = "NA";
-
         /// <summary>
         /// Updated address map entry.  Will be null if we want to delete the existing entry.
         /// </summary>
@@ -130,8 +128,8 @@ namespace SourceGen.WpfGui {
         private int mPreLabelAddress;
         public string PreLabelAddressStr {
             get {
-                if (mPreLabelAddress == AddressMap.NON_ADDR) {
-                    return "NA";
+                if (mPreLabelAddress == Address.NON_ADDR) {
+                    return Address.NON_ADDR_STR;
                 } else {
                     return "$" + mFormatter.FormatAddress(mPreLabelAddress, mShowBank);
                 }
@@ -286,7 +284,11 @@ namespace SourceGen.WpfGui {
                 CanDeleteRegion = true;
                 ShowExistingRegion = true;
 
-                AddressText = Asm65.Address.AddressToString(curRegion.Address, false);
+                if (curRegion.Address == Address.NON_ADDR) {
+                    AddressText = Address.NON_ADDR_STR;
+                } else {
+                    AddressText = Asm65.Address.AddressToString(curRegion.Address, false);
+                }
                 PreLabelText = curRegion.PreLabel;
                 UseRelativeAddressing = curRegion.IsRelative;
 
@@ -337,7 +339,8 @@ namespace SourceGen.WpfGui {
                     TryCreateRegion(curRegion, curRegion.Offset, selectionLen,
                         curRegion.Address, out ares);
                     if (ares != AddressMap.AddResult.Okay) {
-                        // Can't create the new region, so disable that option (still visible).
+                        // Can't resize the new region, so disable that option (still visible).
+                        Option1Str = (string)FindResource("str_OptResizeFail");
                         EnableOption1 = false;
                         CheckOption2 = true;
                     }
@@ -404,7 +407,7 @@ namespace SourceGen.WpfGui {
                     // Unable to create region here.  Explain why not.
                     EnableAttributeControls = false;
                     CheckOption1 = CheckOption2 = false;
-                    mPreLabelAddress = AddressMap.NON_ADDR;
+                    mPreLabelAddress = Address.NON_ADDR;
 
                     SetErrorString(ares1);
                 }
@@ -510,8 +513,8 @@ namespace SourceGen.WpfGui {
         private bool ParseAddress(out int addr) {
             // "NA" for non-addressable?
             string upper = AddressText.ToUpper();
-            if (upper == NON_ADDR_STR) {
-                addr = AddressMap.NON_ADDR;
+            if (upper == Address.NON_ADDR_STR) {
+                addr = Address.NON_ADDR;
                 return true;
             }
             // Parse numerically.

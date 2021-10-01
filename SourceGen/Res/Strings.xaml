@@ -133,6 +133,7 @@ limitations under the License.
     <system:String x:Key="str_MsgInvalidOffsetOrLength">Invalid offset or len</system:String>
     <system:String x:Key="str_MsgLabelIgnored">Label ignored</system:String>
     <system:String x:Key="str_MsgLocalVariableTableIgnored">LV table skipped over</system:String>
+    <system:String x:Key="str_MsgNonAddrLabelRef">Ref to non-addressable label</system:String>
     <system:String x:Key="str_MsgUnresolvedWeakRef">Ref'd symbol not found</system:String>
     <system:String x:Key="str_MsgVisualizationIgnored">Visualization ignored</system:String>
     <system:String x:Key="str_NoFilesAvailable">no files available</system:String>

@@ -22,6 +22,25 @@ namespace Asm65 {
     /// </summary>
     public static class Address {
         /// <summary>
+        /// Address value to use for non-addressable regions of the file, such as file headers
+        /// stripped by the system loader or chunks loaded into non-addressable memory.
+        /// </summary>
+        /// <remarks>
+        /// If you change this value, also update the copy in CommonUtil.AddressMap.
+        /// </remarks>
+        public const int NON_ADDR = -1025;
+
+        /// <summary>
+        /// Human-readable string that represents a non-addressable location.
+        /// </summary>
+        /// <remarks>
+        /// This is a bit deep to bury a human-readable string, but it's useful to have the
+        /// value in one place.
+        /// </remarks>
+        public const string NON_ADDR_STR = "NA";
+
+
+        /// <summary>
         /// Converts a 16- or 24-bit address to a string.
         /// </summary>
         /// <param name="addr">Address</param>
@@ -41,6 +60,9 @@ namespace Asm65 {
         /// 
         /// The following all evaluate to the same thing: 1000, $1000, 0x1000, 00/1000.
         /// </summary>
+        /// <remarks>
+        /// This doesn't handle "NA", because most of the time we want to parse an actual address.
+        /// </remarks>
         /// <param name="addrStr">String to validate.</param>
         /// <param name="max">Maximum valid address value.</param>
         /// <param name="addr">Integer form.</param>

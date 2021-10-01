@@ -208,7 +208,7 @@ namespace SourceGen.AsmGen {
             // boundary and cause a failure.  In that case we want to set the initial address
             // to zero and "stream" the rest.
             int firstAddr = project.AddrMap.OffsetToAddress(0);
-            if (firstAddr == AddressMap.NON_ADDR) {
+            if (firstAddr == Address.NON_ADDR) {
                 firstAddr = 0;
             }
             if (firstAddr + project.FileDataLength > 65536) {
@@ -289,9 +289,11 @@ namespace SourceGen.AsmGen {
                     int firstAddr = Project.AddrMap.OffsetToAddress(0);
                     AddressMap.AddressRegion fakeRegion = new AddressMap.AddressRegion(0,
                         Project.FileData.Length, firstAddr);
-                    OutputArDirective(fakeRegion, true);
+                    OutputArDirective(new AddressMap.AddressChange(true,
+                        0, firstAddr, fakeRegion, true));
                     OutputDenseHex(0, Project.FileData.Length, string.Empty, string.Empty);
-                    OutputArDirective(fakeRegion, false);
+                    OutputArDirective(new AddressMap.AddressChange(false,
+                        0, firstAddr, fakeRegion, true));
                 } else {
                     GenCommon.Generate(this, sw, worker);
                 }
@@ -568,10 +570,15 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(CommonUtil.AddressMap.AddressChange change) {
             // This is similar in operation to the AsmTass64 implementation.  See comments there.
             Debug.Assert(mPcDepth >= 0);
-            if (isStart) {
+            int nextAddress = change.Address;
+            if (nextAddress == Address.NON_ADDR) {
+                // Start non-addressable regions at zero to ensure they don't overflow bank.
+                nextAddress = 0;
+            }
+            if (change.IsStart) {
                 if (mPcDepth == 0  && mFirstIsOpen) {
                     mPcDepth++;
 
@@ -579,7 +586,7 @@ namespace SourceGen.AsmGen {
                     // mode, just set "*=".  If we're in "streaming" mode, we set "*=" to zero
                     // and then use a pseudo-PC.
                     if (mOutputMode == OutputMode.Loadable) {
-                        OutputLine("*", "=", SourceFormatter.FormatHexValue(addrEntry.Address, 4),
+                        OutputLine("*", "=", SourceFormatter.FormatHexValue(nextAddress, 4),
                             string.Empty);
                         return;
                     } else {
@@ -589,7 +596,7 @@ namespace SourceGen.AsmGen {
                 }
                 OutputLine(string.Empty,
                     SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4) + " {",
+                    SourceFormatter.FormatHexValue(nextAddress, 4) + " {",
                     string.Empty);
                 mPcDepth++;
             } else {
@@ -606,6 +613,9 @@ namespace SourceGen.AsmGen {
                 }
             }
         }
+
+        // IGenerator
+        public void FlushArDirectives() { }
 
         // IGenerator
         public void OutputRegWidthDirective(int offset, int prevM, int prevX, int newM, int newX) {

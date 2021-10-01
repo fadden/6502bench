@@ -59,6 +59,7 @@ namespace SourceGen.AsmGen {
                 }
             }
 
+            bool arDirectPending = false;
             while (offset < proj.FileData.Length) {
                 Anattrib attr = proj.GetAnattrib(offset);
 
@@ -80,12 +81,18 @@ namespace SourceGen.AsmGen {
                 AddressMap.AddressChange change = addrIter.Current;
                 while (change != null && change.Offset == offset) {
                     if (change.IsStart) {
-                        gen.OutputArDirective(change.Region, change.IsStart);
+                        gen.OutputArDirective(change);
+                        arDirectPending = true;
                         addrIter.MoveNext();
                         change = addrIter.Current;
                     } else {
                         break;
                     }
+                }
+
+                if (arDirectPending) {
+                    gen.FlushArDirectives();
+                    arDirectPending = false;
                 }
 
                 List<DefSymbol> lvars = lvLookup.GetVariablesDefinedAtOffset(offset);
@@ -142,7 +149,8 @@ namespace SourceGen.AsmGen {
                 // loop iteration.
                 while (change != null && change.Offset + 1 == offset) {
                     if (!change.IsStart) {
-                        gen.OutputArDirective(change.Region, change.IsStart);
+                        gen.OutputArDirective(change);
+                        arDirectPending = true;
                         addrIter.MoveNext();
                         change = addrIter.Current;
                     } else {

@@ -87,6 +87,11 @@ namespace SourceGen.AsmGen {
         private StreamWriter mOutStream;
 
         /// <summary>
+        /// Address of next byte of output.
+        /// </summary>
+        private int mNextAddress = -1;
+
+        /// <summary>
         /// Holds detected version of configured assembler.
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
@@ -485,13 +490,21 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
-            if (isStart) {
-                OutputLine(string.Empty,
-                    SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4),
-                    string.Empty);
+        public void OutputArDirective(CommonUtil.AddressMap.AddressChange change) {
+            int nextAddress = change.Address;
+            if (nextAddress == Address.NON_ADDR) {
+                // Start non-addressable regions at zero to ensure they don't overflow bank.
+                nextAddress = 0;
             }
+            mNextAddress = nextAddress;
+        }
+
+        // IGenerator
+        public void FlushArDirectives() {
+            OutputLine(string.Empty,
+                SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                SourceFormatter.FormatHexValue(mNextAddress, 4),
+                string.Empty);
         }
 
         // IGenerator

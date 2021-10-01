@@ -356,6 +356,9 @@ See also https://github.com/fadden/DisasmUiTest
                 <Style TargetType="TextBlock">
                     <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsNonAddressable}" Value="True">
+                            <Setter Property="TextBlock.Foreground" Value="{DynamicResource Brush_ListViewGreyText}"/>
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding Path=HasAddrLabelHighlight}" Value="True">
                             <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
                             <Setter Property="TextBlock.Foreground" Value="{DynamicResource Brush_ListViewForeground}"/>

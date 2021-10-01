@@ -345,7 +345,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// List elements.  Instances are immutable.
+        /// List elements.  Instances are immutable except for ListIndex.
         /// </summary>
         public class FormattedParts {
             public string Offset { get; private set; }
@@ -365,13 +365,31 @@ namespace SourceGen {
             public bool IsVisualizationSet { get; private set; }
             public Visualization[] VisualizationSet { get; private set; }
 
-            // Set to true if we want to highlight the address and label fields.
+            // Set to true if we want to highlight the address and label fields.  This is
+            // examined by a data trigger in CodeListItemStyle.xaml.
             public bool HasAddrLabelHighlight { get; private set; }
 
             // Set to true if the Flags field has been modified.
-            public bool HasModifiedFlags { get; private set; }
+            public bool HasModifiedFlags {
+                get { return (mPartFlags & PartFlags.HasModifiedFlags) != 0; }
+            }
+            // Set to true if the address here is actually non-addressable.
+            public bool IsNonAddressable {
+                get { return (mPartFlags & PartFlags.IsNonAddressable) != 0; }
+            }
 
+            // List index, filled in on demand.  If the list is regenerated we want to
+            // renumber elements without having to recreate them, so this field is mutable.
             public int ListIndex { get; set; } = -1;
+
+            [Flags]
+            public enum PartFlags {
+                None = 0,
+                HasModifiedFlags = 1,        // Flags field is non-default
+                IsNonAddressable = 1 << 1,   // this is a non-addressable region
+            }
+            private PartFlags mPartFlags;
+
 
             private static Color NoColor = CommonWPF.Helper.ZeroColor;
 
@@ -388,11 +406,10 @@ namespace SourceGen {
             private static FormattedParts Clone(FormattedParts orig) {
                 FormattedParts newParts = FormattedParts.Create(orig.Offset, orig.Addr,
                     orig.Bytes, orig.Flags, orig.Attr, orig.Label, orig.Opcode, orig.Operand,
-                    orig.Comment);
+                    orig.Comment, orig.mPartFlags);
 
                 newParts.IsLongComment = orig.IsLongComment;
                 newParts.HasAddrLabelHighlight = orig.HasAddrLabelHighlight;
-                newParts.HasModifiedFlags = orig.HasModifiedFlags;
 
                 newParts.ListIndex = orig.ListIndex;
                 return newParts;
@@ -400,7 +417,7 @@ namespace SourceGen {
 
             public static FormattedParts Create(string offset, string addr, string bytes,
                     string flags, string attr, string label, string opcode, string operand,
-                    string comment) {
+                    string comment, PartFlags pflags) {
                 FormattedParts parts = new FormattedParts();
                 parts.Offset = offset;
                 parts.Addr = addr;
@@ -412,6 +429,7 @@ namespace SourceGen {
                 parts.Operand = operand;
                 parts.Comment = comment;
                 parts.IsLongComment = false;
+                parts.mPartFlags = pflags;
 
                 return parts;
             }
@@ -486,12 +504,6 @@ namespace SourceGen {
             public static FormattedParts RemoveSelectionHighlight(FormattedParts orig) {
                 FormattedParts newParts = Clone(orig);
                 newParts.HasAddrLabelHighlight = false;
-                return newParts;
-            }
-
-            public static FormattedParts SetFlagsModified(FormattedParts orig) {
-                FormattedParts newParts = Clone(orig);
-                newParts.HasModifiedFlags = true;
                 return newParts;
             }
 

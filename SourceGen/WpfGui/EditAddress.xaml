@@ -43,6 +43,9 @@ limitations under the License.
             Edit the region's attributes, and resize it to the selection.  The new
             end offset will be {0}, for a length of {1}.
         </system:String>
+        <system:String x:Key="str_OptResizeFail">
+            Cannot resize to the selection.
+        </system:String>
         <system:String x:Key="str_CreateFixed">
             Create a new region, with a fixed end point.  The region will start at {0}
             and have a length of {1}.

@@ -45,7 +45,9 @@ namespace SourceGen {
             int prevAddr = 0;
             int lastEndOffset = -1;
 
-            sb.AppendLine("Map of address regions");
+            sb.AppendLine("Address region map for " + project.DataFileName);
+            sb.Append(CRLF);
+
             IEnumerator<AddressChange> iter = addrMap.AddressChangeIterator;
             while (iter.MoveNext()) {
                 AddressChange change = iter.Current;
@@ -109,7 +111,10 @@ namespace SourceGen {
                     //sb.Append(")");
                     sb.Append(CRLF);
 
-                    PrintDepthLines(sb, depth, true);
+                    // Add a blank line, but with the depth lines.
+                    if (depth > 0) {
+                        PrintDepthLines(sb, depth, true);
+                    }
                     sb.Append(CRLF);
 
                     // Use offset+1 here so it lines up with start records.
@@ -139,8 +144,8 @@ namespace SourceGen {
 
             PrintDepthLines(sb, depth, true);
             sb.Append(' ');
-            if (startAddr == AddressMap.NON_ADDR) {
-                sb.Append("-NA-");
+            if (startAddr == Address.NON_ADDR) {
+                sb.Append("-" + Address.NON_ADDR_STR + "-");
             } else {
                 PrintAddress(sb, formatter, startAddr, showBank);
                 sb.Append(" - ");
@@ -155,8 +160,8 @@ namespace SourceGen {
 
         private static void PrintAddress(StringBuilder sb, Formatter formatter, int addr,
                 bool showBank) {
-            if (addr == AddressMap.NON_ADDR) {
-                sb.Append("-NA-");
+            if (addr == Address.NON_ADDR) {
+                sb.Append("-" + Address.NON_ADDR_STR + "-");
             } else {
                 sb.Append("$");
                 sb.Append(formatter.FormatAddress(addr, showBank));

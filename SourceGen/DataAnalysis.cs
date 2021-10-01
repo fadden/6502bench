@@ -681,8 +681,8 @@ namespace SourceGen {
                     offset++;
 
                     // Check to see if we just crossed an address change.
-                    if (offset < mAnattribs.Length &&
-                            !mProject.AddrMap.IsRangeUnbroken(offset - 1, 2)) {
+                    if (offset < mAnattribs.Length && mAnattribs[offset].IsAddrRegionChange
+                            /*!mProject.AddrMap.IsRangeUnbroken(offset - 1, 2)*/) {
                         // Must be an ORG here.  End region and scan.
                         AnalyzeRange(startOffset, offset - 1);
                         startOffset = -1;

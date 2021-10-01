@@ -78,10 +78,13 @@ namespace CommonUtil {
         public const int FLOATING_LEN = -1024;
 
         /// <summary>
-        /// Address value to use for non-addressable regions of the file, such as file headers
-        /// stripped by the system loader or chunks loaded into non-addressable memory.
+        /// Value for non-addressable locations.
         /// </summary>
-        public const int NON_ADDR = -1025;
+        /// <remarks>
+        /// MUST match Asm65.Address.NON_ADDR.  We can't use the constant directly here because
+        /// the classes are in different packages that aren't dependent upon each other.
+        /// </remarks>
+        private const int NON_ADDR = -1025;
 
         #region Structural
 

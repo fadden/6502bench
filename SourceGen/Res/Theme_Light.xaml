@@ -21,6 +21,7 @@ limitations under the License.
     <!-- colors for ListView and ListViewItem (see CodeListItemStyle.xaml) -->
     <SolidColorBrush x:Key="Brush_ListViewForeground" Color="Black"/>
     <SolidColorBrush x:Key="Brush_ListViewBackground" Color="White"/>
+    <SolidColorBrush x:Key="Brush_ListViewGreyText" Color="LightGray"/>
 
     <Color x:Key="Color_HoverFill0">#FFF1FBFF</Color>
     <Color x:Key="Color_HoverFill1">#FFD5F1FE</Color>

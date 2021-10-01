@@ -1660,7 +1660,8 @@ namespace SourceGen {
 
             if (line.IsAddressRangeDirective) {
                 // TODO(someday): make this jump to the actual directive rather than nearby code
-                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line);
+                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line,
+                    out bool unused);
                 if (region == null) {
                     Debug.Assert(false);
                     return false;
@@ -1843,6 +1844,15 @@ namespace SourceGen {
             int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
             AddressMap addrMap = mProject.AddrMap;
 
+            // The offset of a .arend directive is the last byte in the address region.  It
+            // has a span length of zero because it's a directive, so if it's selected as
+            // the last offset then our nextOffset calculation will be off by one.  (This would
+            // be avoided by using an exclusive end offset, but that causes other problems.)
+            // Work around it here.
+            if (CodeLineList[lastIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
+                nextOffset++;
+            }
+
             // Compute length of selection.  May be zero if it's entirely .arstart/.arend.
             int selectedLen = nextOffset - firstOffset;
 
@@ -1850,10 +1860,19 @@ namespace SourceGen {
             if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArStartDirective ||
                     CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
                 // First selected line was .arstart/.arend, find the address map entry.
-                curRegion = CodeLineList.GetAddrRegionFromLine(CodeLineList[selIndex]);
+                curRegion = CodeLineList.GetAddrRegionFromLine(CodeLineList[selIndex],
+                    out bool isSynth);
                 Debug.Assert(curRegion != null);
-                Debug.WriteLine("Using region from " + CodeLineList[selIndex].LineType +
-                    ": " + curRegion);
+                if (isSynth) {
+                    // Synthetic regions are created for non-addressable "holes" in the map.
+                    // They're not part of the map, so this is a create operation rather than
+                    // a resize operation.
+                    curRegion = null;
+                    Debug.WriteLine("Ignoring synthetic region");
+                } else {
+                    Debug.WriteLine("Using region from " + CodeLineList[selIndex].LineType +
+                        ": " + curRegion);
+                }
             } else {
                 if (selectedLen == 0) {
                     // A length of zero is only possible if nothing but directives were selected,
@@ -1866,10 +1885,14 @@ namespace SourceGen {
 
             AddressMap.AddressMapEntry newEntry = null;
             if (curRegion == null) {
-                // No entry, create a new one.
+                // No entry, create a new one.  Use the current address as the default value,
+                // unless the region is non-addressable.
                 int addr = addrMap.OffsetToAddress(firstOffset);
-                // Create a prototype entry with the various values.
+                if (addr == Address.NON_ADDR) {
+                    addr = 0;
+                }
 
+                // Create a prototype entry with the various values.
                 newEntry = new AddressMap.AddressMapEntry(firstOffset,
                     selectedLen, addr, string.Empty, false);
                 Debug.WriteLine("New entry prototype: " + newEntry);
@@ -1970,7 +1993,11 @@ namespace SourceGen {
             int offset = CodeLineList[selIndex].FileOffset;
 
             Anattrib attr = mProject.GetAnattrib(offset);
-            EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, attr.Address, offset,
+            int addr = attr.Address;
+            if (attr.IsNonAddressable) {
+                addr = Address.NON_ADDR;
+            }
+            EditLabel dlg = new EditLabel(mMainWin, attr.Symbol, addr, offset,
                 mProject.SymbolTable, mFormatter);
             if (dlg.ShowDialog() != true) {
                 return;
@@ -3849,7 +3876,12 @@ namespace SourceGen {
         private void PopulateSymbolsList() {
             mMainWin.SymbolsList.Clear();
             foreach (Symbol sym in mProject.SymbolTable) {
-                string valueStr = mFormatter.FormatHexValue(sym.Value, 0);
+                string valueStr;
+                if (sym.SymbolSource == Symbol.Source.User && sym.Value == Address.NON_ADDR) {
+                    valueStr = Address.NON_ADDR_STR;
+                } else {
+                    valueStr = mFormatter.FormatHexValue(sym.Value, 0);
+                }
                 string sourceTypeStr = sym.SourceTypeString;
                 if (sym is DefSymbol) {
                     DefSymbol defSym = (DefSymbol)sym;
@@ -3976,10 +4008,15 @@ namespace SourceGen {
 
             if (line.LineType == LineListGen.Line.Type.ArStartDirective ||
                     line.LineType == LineListGen.Line.Type.ArEndDirective) {
-                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line);
+                AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line,
+                    out bool isSynth);
+                if (region == null) {
+                    Debug.Assert(false, "Unable to find region at: " + line);
+                    return;
+                }
                 StringBuilder esb = new StringBuilder();
                 esb.Append("Address: ");
-                if (region.Address == AddressMap.NON_ADDR) {
+                if (region.Address == Address.NON_ADDR) {
                     esb.Append("non-addressable");
                 } else {
                     esb.Append("$" +
@@ -3996,6 +4033,8 @@ namespace SourceGen {
                 if (region.Length == AddressMap.FLOATING_LEN) {
                     esb.Append(" (floating)");
                 }
+                esb.Append(CRLF);
+                esb.Append("Synthetic: " + isSynth);
                 esb.Append(CRLF);
                 if (!string.IsNullOrEmpty(region.PreLabel)) {
                     esb.Append("Pre-label: '" + region.PreLabel + "' addr=$");

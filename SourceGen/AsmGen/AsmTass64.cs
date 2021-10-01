@@ -653,7 +653,7 @@ namespace SourceGen.AsmGen {
         }
 
         // IGenerator
-        public void OutputArDirective(AddressMap.AddressRegion addrEntry, bool isStart) {
+        public void OutputArDirective(CommonUtil.AddressMap.AddressChange change) {
             // 64tass separates the "compile offset", which determines where the output fits
             // into the generated binary, and "program counter", which determines the code
             // the assembler generates.  Since we need to explicitly specify every byte in
@@ -675,7 +675,12 @@ namespace SourceGen.AsmGen {
             // inside that.  So we treat the first region specially, whether or not it wraps
             // the rest of the file.
             Debug.Assert(mPcDepth >= 0);
-            if (isStart) {
+            int nextAddress = change.Address;
+            if (nextAddress == Address.NON_ADDR) {
+                // Start non-addressable regions at zero to ensure they don't overflow bank.
+                nextAddress = 0;
+            }
+            if (change.IsStart) {
                 if (mPcDepth == 0 && mFirstIsOpen) {
                     mPcDepth++;
 
@@ -684,7 +689,7 @@ namespace SourceGen.AsmGen {
                     // and then use a pseudo-PC.
                     if (mOutputMode == OutputMode.Loadable) {
                         OutputLine("*", "=",
-                            SourceFormatter.FormatHexValue(addrEntry.Address, 4), string.Empty);
+                            SourceFormatter.FormatHexValue(nextAddress, 4), string.Empty);
                         return;
                     } else {
                         // Set the real PC to address zero to ensure we get a full 64KB.  The
@@ -694,7 +699,7 @@ namespace SourceGen.AsmGen {
                 }
                 OutputLine(string.Empty,
                     SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                    SourceFormatter.FormatHexValue(addrEntry.Address, 4),
+                    SourceFormatter.FormatHexValue(nextAddress, 4),
                     string.Empty);
                 mPcDepth++;
             } else {
@@ -710,6 +715,9 @@ namespace SourceGen.AsmGen {
                 }
             }
         }
+
+        // IGenerator
+        public void FlushArDirectives() { }
 
         // IGenerator
         public void OutputRegWidthDirective(int offset, int prevM, int prevX, int newM, int newX) {

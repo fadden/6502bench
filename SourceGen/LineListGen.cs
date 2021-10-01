@@ -554,7 +554,8 @@ namespace SourceGen {
                     // should have been done already
                     default:
                         Debug.Assert(false);
-                        parts = FormattedParts.Create("x", "x", "x", "x", "x", "x", "x", "x", "x");
+                        parts = FormattedParts.Create("x", "x", "x", "x", "x", "x", "x", "x", "x",
+                            FormattedParts.PartFlags.None);
                         break;
                 }
                 line.Parts = parts;
@@ -1083,8 +1084,8 @@ namespace SourceGen {
                         // TODO(org): pre-label (address / label only, logically part of ORG)
                         Line newLine = new Line(offset, 0, Line.Type.ArStartDirective, arSubLine++);
                         string addrStr;
-                        if (region.Address == AddressMap.NON_ADDR) {
-                            addrStr = "NA";
+                        if (region.Address == Address.NON_ADDR) {
+                            addrStr = Address.NON_ADDR_STR;
                         } else {
                             addrStr = mFormatter.FormatHexValue(region.Address, 4);
                         }
@@ -1265,7 +1266,18 @@ namespace SourceGen {
                 while (addrIter.Current != null && addrIter.Current.Offset < offset) {
                     AddressMap.AddressChange change = addrIter.Current;
                     // Range starts/ends shouldn't be embedded in something.
-                    Debug.Assert(change.Offset == offset - 1);
+                    if (change.Offset != offset - 1) {
+                        Debug.Assert(false, "Bad offset: change.Offset=+" +
+                            change.Offset.ToString("x6") + " offset-1=+" +
+                            (offset - 1).ToString("x6"));
+                    }
+
+                    // The .arend can only appear on the same offset as .arstart in a single-byte
+                    // region, and we can't have more than one of those at the same offset.
+                    // If this is not a single-byte region, we need to reset the sub-line count.
+                    if (change.Region.Length != 1) {
+                        arSubLine = 0;
+                    }
 
                     if (change.Region.Offset == 0 && hasPrgHeader) {
                         // Suppress the .arend at offset +000001.
@@ -1277,11 +1289,11 @@ namespace SourceGen {
                     if (!change.IsStart) {
                         // Show the start address to make it easier to pair them visually.
                         string addrStr;
-                        if (change.Region.Address == AddressMap.NON_ADDR) {
-                            addrStr = "(NA)";
+                        if (change.Region.Address == Address.NON_ADDR) {
+                            addrStr = "\u2191 " + Address.NON_ADDR_STR;
                         } else {
-                            addrStr = "(" + mFormatter.FormatHexValue(change.Region.Address, 4) +
-                                ")";
+                            addrStr = "\u2191 " +
+                                mFormatter.FormatHexValue(change.Region.Address, 4);
                         }
 
                         // Associate with offset of previous byte.
@@ -1369,7 +1381,6 @@ namespace SourceGen {
                 opcodeStr = opcodeStr + " \u25bc";  // BLACK DOWN-POINTING TRIANGLE
             }
 
-            string formattedOperand = null;
             int operandLen = instrLen - 1;
             PseudoOp.FormatNumericOpFlags opFlags = PseudoOp.FormatNumericOpFlags.None;
 
@@ -1400,6 +1411,8 @@ namespace SourceGen {
             if (attr.OperandAddress >= 0) {
                 operandForSymbol = attr.OperandAddress;
             }
+
+            string formattedOperand;
 
             // Check Length to watch for bogus descriptors.  ApplyFormatDescriptors() should
             // have discarded anything appropriate, so we might be able to eliminate this test.
@@ -1472,11 +1485,15 @@ namespace SourceGen {
             }
             string commentStr = mFormatter.FormatEolComment(eolComment);
 
-            FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
-                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
+            FormattedParts.PartFlags pflags = FormattedParts.PartFlags.None;
             if (mProject.StatusFlagOverrides[offset] != StatusFlags.DefaultValue) {
-                parts = FormattedParts.SetFlagsModified(parts);
+                pflags |= FormattedParts.PartFlags.HasModifiedFlags;
             }
+            if (attr.IsNonAddressable) {
+                pflags |= FormattedParts.PartFlags.IsNonAddressable;
+            }
+            FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
+                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr, pflags);
             return parts;
         }
 
@@ -1527,8 +1544,12 @@ namespace SourceGen {
                 }
             }
 
+            FormattedParts.PartFlags pflags = FormattedParts.PartFlags.None;
+            if (attr.IsNonAddressable) {
+                pflags |= FormattedParts.PartFlags.IsNonAddressable;
+            }
             FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
-                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr);
+                flagsStr, attrStr, labelStr, opcodeStr, operandStr, commentStr, pflags);
             return parts;
         }
 
@@ -1604,7 +1625,7 @@ namespace SourceGen {
             return lvars[tableIndex];
         }
 
-        public AddressMap.AddressRegion GetAddrRegionFromLine(Line line) {
+        public AddressMap.AddressRegion GetAddrRegionFromLine(Line line, out bool isSynth) {
             // A given offset can have one or more .arstart lines and one or more .arend lines.
             // You can't have an end followed by a start, because that would mean the regions
             // overlap.  If there's both start and end present, we have a 1-byte region.
@@ -1622,11 +1643,13 @@ namespace SourceGen {
             while (addrIter.Current != null && addrIter.Current.Offset == offset) {
                 AddressMap.AddressChange change = addrIter.Current;
                 if (count == 0) {
+                    isSynth = change.IsSynthetic;
                     return change.Region;
                 }
                 if (change.IsStart && !string.IsNullOrEmpty(change.Region.PreLabel)) {
                     count--;
                     if (count == 0) {
+                        isSynth = change.IsSynthetic;
                         return change.Region;
                     }
                 }
@@ -1635,6 +1658,7 @@ namespace SourceGen {
                 addrIter.MoveNext();
             }
 
+            isSynth = false;
             return null;
         }
 
@@ -1673,8 +1697,13 @@ namespace SourceGen {
 
                 operandStr = operands[subLineIndex];
 
+                FormattedParts.PartFlags pflags = FormattedParts.PartFlags.None;
+                if (attr.IsNonAddressable) {
+                    pflags |= FormattedParts.PartFlags.IsNonAddressable;
+                }
                 FormattedParts parts = FormattedParts.Create(offsetStr, addrStr, bytesStr,
-                    /*flags*/string.Empty, attrStr, labelStr, opcodeStr, operandStr, commentStr);
+                    /*flags*/string.Empty, attrStr, labelStr, opcodeStr, operandStr, commentStr,
+                    pflags);
 
                 partsArray[subLineIndex] = parts;
             }

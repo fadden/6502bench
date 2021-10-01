@@ -358,20 +358,43 @@ namespace SourceGen {
             IEnumerator<AddressMap.AddressChange> addrIter = mAddrMap.AddressChangeIterator;
             addrIter.MoveNext();
             int addr = 0;
+            bool nonAddr = false;
+            bool addrChange = false;
 
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
-                // Process all change events at this offset.
                 AddressMap.AddressChange change = addrIter.Current;
+
+                // Process all start events at this offset.  The new address takes effect
+                // immediately.
                 while (change != null && change.IsStart && change.Offset == offset) {
                     addr = change.Address;
+                    if (addr == Address.NON_ADDR) {
+                        addr = 0;
+                        nonAddr = true;
+                    } else {
+                        nonAddr = false;
+                    }
+                    addrChange = true;
                     addrIter.MoveNext();
                     change = addrIter.Current;
                 }
 
                 mAnattribs[offset].Address = addr++;
+                mAnattribs[offset].IsAddrRegionChange = addrChange;
+                mAnattribs[offset].IsNonAddressable = nonAddr;
+                addrChange = false;
 
+                // Process all end events at this offset.  The new address and "address
+                // region change" flag take effect on the *following* offset.
                 while (change != null && !change.IsStart && change.Offset == offset) {
                     addr = change.Address;
+                    if (addr == Address.NON_ADDR) {
+                        addr = 0;
+                        nonAddr = true;
+                    } else {
+                        nonAddr = false;
+                    }
+                    addrChange = true;
                     addrIter.MoveNext();
                     change = addrIter.Current;
                 }
@@ -522,6 +545,10 @@ namespace SourceGen {
                     // the inline data "wins", and we stop here.
                     LogW(offset, "Code ran into inline data section");
                     return;
+                } else if (mAnattribs[offset].IsNonAddressable) {
+                    mAnattribs[offset].IsInstruction = false;
+                    LogW(offset, "Code ran into non-addressable area");
+                    return;
                 }
 
                 // Identify the instruction, and see if it runs off the end of the file.
@@ -541,14 +568,18 @@ namespace SourceGen {
                     mAnattribs[offset].IsData = true;
                     return;
                 }
-                if (mAnattribs[offset + instrLen -1].Address !=
-                        mAnattribs[offset].Address + instrLen - 1) {
-                    // Address change happened mid-instruction.  Mark it as data.
-                    LogW(offset, "Detected address change mid-instruction");
-                    mAnattribs[offset].IsInstructionStart = false;
-                    mAnattribs[offset].IsInstruction = false;
-                    mAnattribs[offset].IsData = true;
-                    return;
+
+                // Check for mid-instruction address region changes.  An address change on the
+                // first byte is fine.
+                for (int i = offset + 1; i < offset + instrLen; i++) {
+                    if (mAnattribs[i].IsAddrRegionChange) {
+                        // Found a region start and/or end.  Mark this offset as data and return.
+                        LogW(offset, "Detected address change mid-instruction");
+                        mAnattribs[offset].IsInstructionStart = false;
+                        mAnattribs[offset].IsInstruction = false;
+                        mAnattribs[offset].IsData = true;
+                        return;
+                    }
                 }
 
                 // Instruction not defined for this CPU.  Treat as data.
@@ -782,10 +813,10 @@ namespace SourceGen {
                     break;
                 }
 
-                // Make sure we don't "continue" across an ORG.
-                // NOTE: it's possible to do some crazy things with multiple ORGs that will
-                // cause us to misinterpret things, but I don't think that matters.  What's
-                // important is that the code analyzer doesn't drive into a data area.
+                // Make sure we don't "continue" across an address change.  This is different
+                // from the earlier mid-instruction check in that we don't actually care if
+                // there's a region change between instructions so long as the next address
+                // has the expected value.
                 int expectedAddr = mAnattribs[offset].Address + mAnattribs[offset].Length +
                     inlineDataGapLen;
                 if (mAnattribs[nextOffset].Address != expectedAddr) {
@@ -1118,6 +1149,7 @@ namespace SourceGen {
                     " label='" + label + "'; file length is" + mFileData.Length);
             }
 
+            // NOTE: might be faster to check Anattrib IsAddrRegionChange for short regions
             if (!mAddrMap.IsRangeUnbroken(offset, length)) {
                 LogW(offset, "SIDF: format crosses address map boundary (len=" + length + ")");
                 return false;
@@ -1383,12 +1415,15 @@ namespace SourceGen {
             }
 
             // Run through file, updating instructions as needed.
-            // TODO(org): this is wrong if the file starts with a non-addr region; can walk
-            //   through anattribs and set to mAnattribs[].Address of first instruction; maybe
-            //   just init to DbrValue.UNKNOWN and set it inside the loop on first relevant instr
-            int firstAddr = mAddrMap.OffsetToAddress(0);
-            short curVal = (byte)(firstAddr >> 16);   // start with B=K
+            short curVal = DbrValue.UNKNOWN;
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                if (mAnattribs[offset].IsNonAddressable) {
+                    continue;
+                }
+                if (curVal == DbrValue.UNKNOWN) {
+                    // On first encounter with addressable memory, init curVal so B=K.
+                    curVal = (byte)(mAddrMap.OffsetToAddress(offset) >> 16);
+                }
                 if (bval[offset] != DbrValue.UNKNOWN) {
                     curVal = bval[offset];
                 }

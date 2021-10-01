@@ -168,9 +168,15 @@ namespace SourceGen.AsmGen {
         /// <summary>
         /// Outputs an address region directive.
         /// </summary>
-        /// <param name="region">Address region object.</param>
         /// <param name="isStart">True if this is the start of a region.</param>
-        void OutputArDirective(CommonUtil.AddressMap.AddressRegion region, bool isStart);
+        /// <param name="change">Address map change record.</param>
+        void OutputArDirective(CommonUtil.AddressMap.AddressChange change);
+
+        /// <summary>
+        /// Signals the code generator to flush any pending address region directives.  Useful
+        /// for generation of non-hierarchical directives.
+        /// </summary>
+        void FlushArDirectives();
 
         /// <summary>
         /// Notify the assembler of a change in register width.
