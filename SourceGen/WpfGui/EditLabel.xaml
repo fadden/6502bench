@@ -51,6 +51,8 @@ limitations under the License.
             <TextBlock Name="firstLetterLabel" Text="• Must start with a letter or underscore"/>
             <TextBlock Name="validCharsLabel" Text="• Valid characters are ASCII letters, numbers, and underscore"/>
             <TextBlock Name="notDuplicateLabel" Text="• Must not be a duplicate of an existing label"/>
+            <TextBlock Visibility="{Binding NonAddrWarningVis}" Foreground="Blue"
+                       Text="• NOTE: label is in a non-addressable data area"/>
         </StackPanel>
 
         <GroupBox Grid.Column="0" Grid.Row="1" Header="Label Type" Padding="2,4" Margin="0,12,0,0">

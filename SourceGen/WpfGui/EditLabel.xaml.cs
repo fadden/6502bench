@@ -121,6 +121,8 @@ namespace SourceGen.WpfGui {
             set { mIsExportedEnabled = value; OnPropertyChanged(); }
         }
 
+        public Visibility NonAddrWarningVis { get; private set; }
+
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
@@ -142,6 +144,12 @@ namespace SourceGen.WpfGui {
 
             string fmt = (string)FindResource("str_NonUniqueLocalFmt");
             NonUniqueButtonLabel = string.Format(fmt, mFormatter.NonUniqueLabelPrefix);
+
+            if (mAddress == Address.NON_ADDR) {
+                NonAddrWarningVis = Visibility.Visible;
+            } else {
+                NonAddrWarningVis = Visibility.Collapsed;
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

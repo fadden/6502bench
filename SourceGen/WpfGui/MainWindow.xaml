@@ -425,12 +425,12 @@ limitations under the License.
                 <MenuItem Command="{StaticResource ViewAddressMapCmd}"/>
             </MenuItem>
             <MenuItem Name="actionsMenu" Header="_Actions">
-                <MenuItem Command="{StaticResource EditAddressCmd}"/>
-                <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
-                <MenuItem Command="{StaticResource EditLabelCmd}"/>
                 <MenuItem Command="{StaticResource EditOperandCmd}"/>
+                <MenuItem Command="{StaticResource EditLabelCmd}"/>
                 <MenuItem Command="{StaticResource EditCommentCmd}" InputGestureText="Ctrl+;"/>
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
+                <MenuItem Command="{StaticResource EditAddressCmd}"/>
+                <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Command="{StaticResource EditDataBankCmd}"/>
                 <MenuItem Command="{StaticResource EditNoteCmd}"/>
                 <MenuItem Command="{StaticResource EditProjectSymbolCmd}"/>

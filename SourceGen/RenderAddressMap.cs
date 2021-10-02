@@ -107,6 +107,9 @@ namespace SourceGen {
                     sb.Append(formatter.FormatOffset24(change.Offset));
                     PrintDepthLines(sb, depth, false);
                     sb.Append("+- " + "end");
+                    if (change.Region.IsFloating) {
+                        sb.Append(" (floating)");
+                    }
                     //PrintAddress(sb, formatter, change.Address, showBank);
                     //sb.Append(")");
                     sb.Append(CRLF);

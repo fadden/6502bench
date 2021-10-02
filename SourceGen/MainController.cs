@@ -1532,7 +1532,9 @@ namespace SourceGen {
                     break;
                 case LineListGen.Line.Type.ArStartDirective:
                 case LineListGen.Line.Type.ArEndDirective:
-                    if (CanEditAddress()) {
+                    if ((CodeListColumn)col == CodeListColumn.Opcode) {
+                        JumpToOperandTarget(line, false);
+                    } else if (CanEditAddress()) {
                         EditAddress();
                     }
                     break;
@@ -1807,9 +1809,10 @@ namespace SourceGen {
                 return false;
             }
 
-            // If multiple lines with code/data are selected, there must not be an address change
+            // If multiple lines with code/data are selected, there must not be a .arstart
             // between them unless we're resizing a region.  Determining whether or not a resize
-            // is valid is left to the edit dialog.
+            // is valid is left to the edit dialog.  It's okay for a .arend to be in the middle
+            // so long as the corresponding .arstart is at the current offset.
             if (selLine.LineType == LineListGen.Line.Type.ArStartDirective) {
                 // Skip overlapping region check.
                 return true;
@@ -1821,14 +1824,18 @@ namespace SourceGen {
                 return true;
             }
 
-            // Compute exclusive end point of selected range.
-            int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
+            // Anything else is too complicated to be worth messing with here.  We could do
+            // the work, but we have no good way of telling the user what went wrong.
+            // Let the dialog explain it.
 
-            if (!mProject.AddrMap.IsRangeUnbroken(firstOffset, nextOffset - firstOffset)) {
-                Debug.WriteLine("Found mid-selection AddressMap entry (len=" +
-                    (nextOffset - firstOffset) + ")");
-                return false;
-            }
+            //// Compute exclusive end point of selected range.
+            //int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
+
+            //if (!mProject.AddrMap.IsRangeUnbroken(firstOffset, nextOffset - firstOffset)) {
+            //    Debug.WriteLine("Found mid-selection AddressMap entry (len=" +
+            //        (nextOffset - firstOffset) + ")");
+            //    return false;
+            //}
 
             //Debug.WriteLine("First +" + firstOffset.ToString("x6") +
             //    ", last +" + lastOffset.ToString("x6") + ",next +" + nextOffset.ToString("x6"));

@@ -1086,6 +1086,17 @@ namespace SourceGen {
                         string addrStr;
                         if (region.Address == Address.NON_ADDR) {
                             addrStr = Address.NON_ADDR_STR;
+                        } else if (change.Region.IsRelative &&
+                                change.Region.PreLabelAddress != Address.NON_ADDR) {
+                            int diff = region.Address - change.Region.PreLabelAddress;
+                            string pfxStr;
+                            if (diff >= 0) {
+                                pfxStr = "*+";
+                            } else {
+                                pfxStr = "*-";
+                                diff = -diff;
+                            }
+                            addrStr = pfxStr + mFormatter.FormatHexValue(diff, 4);
                         } else {
                             addrStr = mFormatter.FormatHexValue(region.Address, 4);
                         }

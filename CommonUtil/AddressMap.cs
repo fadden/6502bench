@@ -256,6 +256,7 @@ namespace CommonUtil {
             // (Shouldn't be necessary since we're only doing this to pass the address map to
             // plugins, but... better safe.)
             foreach (AddressMapEntry ent in entries) {
+                // TODO(maybe): suppress Regenerate() call in AddEntry while we work
                 AddResult result = AddEntry(ent.Offset, ent.Length, ent.Address, ent.PreLabel,
                     ent.IsRelative);
                 if (result != AddResult.Okay) {
@@ -357,7 +358,7 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Adds a new entry to the map.
+        /// Adds a new entry to the map.  Uses defaults for PreLabel and IsRelative.
         /// </summary>
         /// <param name="offset">File offset of region start.</param>
         /// <param name="length">Length of region, or FLOATING_LEN for a floating end point.</param>
@@ -423,14 +424,16 @@ namespace CommonUtil {
                 return AddResult.Okay;
             }
 
-            // Find insertion point.
-            int insIdx;
-            for (insIdx = 0; insIdx < mMapEntries.Count; insIdx++) {
-                AddressMapEntry ent = mMapEntries[insIdx];
-                if (ent.Offset > offset) {
-                    // Insert before this one.
-                    break;
-                } else if (ent.Offset == offset) {
+            // Find the insertion point, and check for conflicts.
+            //
+            // If we know where to insert the new entry, we only need to check the previous
+            // node, following node, and parents.  However, we may not have regenerated the
+            // tree structure since the previous add, so we can't rely on that.  We're expecting
+            // the list to be short, so checking all entries shouldn't be prohibitive.
+            int insIdx = -1;
+            for (int i = 0; i < mMapEntries.Count; i++) {
+                AddressMapEntry ent = mMapEntries[i];
+                if (ent.Offset == offset) {
                     // We share a start point with this entry.  See if we fit inside it or
                     // wrap around it.
                     if (length == FLOATING_LEN || ent.Length == FLOATING_LEN) {
@@ -441,33 +444,18 @@ namespace CommonUtil {
                         return AddResult.OverlapExisting;
                     } else if (ent.Length < length) {
                         // New region is larger, would become parent, so insert before this.
-                        break;
+                        if (insIdx < 0) {
+                            insIdx = i;
+                        }
                     } else {
                         // New region is smaller and will be a child of this entry, so we want
                         // to insert *after* this point.  Loop again to see if the following
                         // entry is also a parent for this new one.
                         Debug.Assert(ent.Length > length);
                     }
-                }
-            }
-
-            // The insertion index indicates the entry we want to insert before.  We need to
-            // confirm that the new block doesn't straddle the blocks on either side.  If we're
-            // inserting into a bunch of blocks with coincident start points, it's possible for
-            // the blocks appearing before and after to share the same start offset.
-
-            if (insIdx > 0) {
-                // Check previous block.  We know that its offset is <= the new offset, so
-                // either its a parent or a sibling.
-                AddressMapEntry ent = mMapEntries[insIdx - 1];
-                if (ent.Offset == offset) {
-                    // Previous is our parent.  These things were checked earlier.
-                    Debug.Assert(length != FLOATING_LEN && ent.Length != FLOATING_LEN);
-                    Debug.Assert(ent.Length > length);
-                } else {
+                } else if (ent.Offset < offset) {
                     // Existing block starts before this new one.  The existing block must either
                     // be floating, be completely before this, or completely envelop this.
-                    Debug.Assert(ent.Offset < offset);
                     if (ent.Length == FLOATING_LEN) {
                         // sibling -- must end before us
                     } else if (ent.Offset + ent.Length <= offset) {
@@ -480,20 +468,12 @@ namespace CommonUtil {
                         // whoops
                         return AddResult.StraddleExisting;
                     }
-                }
-            }
-            if (insIdx < mMapEntries.Count) {
-                // Check following block.  We know that its offset is >= the new offset, so it's
-                // either a child or a sibling.
-                AddressMapEntry ent = mMapEntries[insIdx];
-                if (ent.Offset == offset) {
-                    // Following block is our child.  These things were checked earlier.
-                    Debug.Assert(length != FLOATING_LEN && ent.Length != FLOATING_LEN);
-                    Debug.Assert(ent.Length < length);
                 } else {
                     // Existing block starts after this new one.  The existing block must either
                     // be floating, be completely after this, or be completely enveloped by this.
-                    Debug.Assert(ent.Offset > offset);
+                    if (insIdx < 0) {
+                        insIdx = i;
+                    }
                     if (ent.Length == FLOATING_LEN) {
                         // child or sibling, depending on start offset
                     } else if (offset + length <= ent.Offset) {
@@ -507,6 +487,10 @@ namespace CommonUtil {
                         return AddResult.StraddleExisting;
                     }
                 }
+            }
+
+            if (insIdx < 0) {
+                insIdx = mMapEntries.Count;
             }
 
             outInsIdx = insIdx;
@@ -548,13 +532,6 @@ namespace CommonUtil {
             }
             return -1;
         }
-
-        // Returns true if adding the specified region is a valid action.
-        // ??? do we want to do this, or just ask "does region exist"?  Depends on
-        // flow in edit dialog.
-        //public bool CanAddRegion(int offset, int length) {
-        //    return false;
-        //}
 
         /// <summary>
         /// Gets a list of the entries with the specified offset value.
@@ -1097,7 +1074,7 @@ namespace CommonUtil {
         /// <remarks>
         /// We use inclusive Offset values for both start and end.  If we don't do this, the
         /// offset for end records will be outside the file bounds.  It also gets a bit painful
-        /// when the display list tries to update [M,N] if put the end at N+1.
+        /// when the display list tries to update [M,N] if the end is actually held at N+1.
         /// </remarks>
         public class AddressChange {
             // True if this is a region start, false if a region end.
@@ -1451,6 +1428,8 @@ namespace CommonUtil {
                 map.AddEntry(off0 + 1, len0, 0x1000));
             Test_Expect(AddResult.InvalidValue, ref result,
                 map.AddEntry(off0, mapLen + 1, 0x1000));
+            Test_Expect(AddResult.StraddleExisting, ref result,
+                map.AddEntry(off0 + 1, off2 - off0, 0x1000));
 
             // One region to wrap them all.  Add then remove.
             Test_Expect(AddResult.Okay, ref result,
@@ -1596,9 +1575,6 @@ namespace CommonUtil {
             Test_Expect(0x002100, ref result, map.AddressToOffset(0x002300, 0x5000));
             Test_Expect(0x003100, ref result, map.AddressToOffset(0x003000, 0x5000));
 
-            string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
-            Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
-
             result &= map.DebugValidate();
             return result;
         }
@@ -1699,6 +1675,39 @@ namespace CommonUtil {
             return result;
         }
 
+        private static bool Test_OddOverlap() {
+            const int mapLen = 0x1000;
+            AddressMap map = new AddressMap(mapLen);
+            bool result = true;
+
+            // Top region spans full map.
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, mapLen, 0x1000));
+            // Parent region covers next two.
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, 0x0400, 0x1000));
+            // Floating region.
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000100, FLOATING_LEN, 0x2000));
+            // Fixed region follows.
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000200, 0x0100, 0x3000));
+
+            string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
+            Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
+
+            // Add a region that starts in the middle of the floating region (becoming
+            // a sibling), and ends after the fixed region (becoming its parent).
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000180, 0x0200, 0x4000));
+            // Remove it.
+            Test_Expect(true, ref result, map.RemoveEntry(0x000180, 0x0200));
+
+            // Add a region that starts in the middle of the floating region and ends after
+            // the parent.  Since this crosses the parent's end boundary and doesn't share
+            // the parent's start offset, this is invalid.
+            Test_Expect(AddResult.StraddleExisting, ref result,
+                map.AddEntry(0x000180, 0x0400, 0x4000));
+
+            result &= map.DebugValidate();
+            return result;
+        }
+
         public static bool Test() {
             bool ok = true;
             ok &= Test_Primitives();
@@ -1708,6 +1717,7 @@ namespace CommonUtil {
             ok &= Test_Nested();
             ok &= Test_Cross();
             ok &= Test_Pyramids();
+            ok &= Test_OddOverlap();
 
             Debug.WriteLine("AddressMap: test complete (ok=" + ok + ")");
             return ok;

@@ -697,9 +697,25 @@ namespace SourceGen.AsmGen {
                         //OutputLine("*", "=", SourceFormatter.FormatHexValue(0, 4), string.Empty);
                     }
                 }
+
+                AddressMap.AddressRegion region = change.Region;
+                string addrStr;
+                if (region.IsRelative && region.PreLabelAddress != Address.NON_ADDR) {
+                    int diff = nextAddress - region.PreLabelAddress;
+                    string pfxStr;
+                    if (diff >= 0) {
+                        pfxStr = "*+";
+                    } else {
+                        pfxStr = "*-";
+                        diff = -diff;
+                    }
+                    addrStr = pfxStr + SourceFormatter.FormatHexValue(diff, 4);
+                } else {
+                    addrStr = SourceFormatter.FormatHexValue(nextAddress, 4);
+                }
                 OutputLine(string.Empty,
                     SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                    SourceFormatter.FormatHexValue(nextAddress, 4),
+                    addrStr,
                     string.Empty);
                 mPcDepth++;
             } else {

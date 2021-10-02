@@ -584,9 +584,12 @@ namespace SourceGen.AsmGen {
             if (change.Region.ActualLength != 2) {
                 Debug.WriteLine("PRG test: first entry is not a two-byte region");
             }
-            // Confirm there's an address map entry at offset 2.
-            if (project.AddrMap.GetEntries(0x000002).Count == 0) {
-                //Debug.WriteLine("PRG test: no ORG at +2");
+            // Confirm there's a single address map entry at offset 2.  If there's more than
+            // one we likely have a situation where the first one is a "full-file" region, and
+            // the second determines the address.  This weird scenario causes problems with
+            // code generation, so we just don't support it.
+            if (project.AddrMap.GetEntries(0x000002).Count != 1) {
+                //Debug.WriteLine("PRG test: wrong #of entries at +000002");
                 return false;
             }
             // See if the address at offset 2 matches the value at 0/1.

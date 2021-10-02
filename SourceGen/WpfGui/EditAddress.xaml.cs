@@ -18,7 +18,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
-
+using System.Windows.Controls;
+using System.Windows.Documents;
 using Asm65;
 using CommonUtil;
 
@@ -108,18 +109,6 @@ namespace SourceGen.WpfGui {
             set { mCheckOption2 = value; OnPropertyChanged(); }
         }
         private bool mCheckOption2;
-
-        public string Option1Str {
-            get { return mOption1Str; }
-            set { mOption1Str = value; OnPropertyChanged(); }
-        }
-        private string mOption1Str;
-
-        public string Option2Str {
-            get { return mOption2Str; }
-            set { mOption2Str = value; OnPropertyChanged(); }
-        }
-        private string mOption2Str;
 
         /// <summary>
         /// Address at which a pre-label would be placed.  This is determined by the parent
@@ -279,6 +268,11 @@ namespace SourceGen.WpfGui {
             CheckOption1 = true;
             EnableAttributeControls = true;
 
+            string option1Summ;
+            string option1Msg;
+            string option2Summ;
+            string option2Msg;
+
             if (curRegion != null) {
                 // Editing an existing region.
                 CanDeleteRegion = true;
@@ -304,14 +298,18 @@ namespace SourceGen.WpfGui {
                     mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
                         curRegion.Length, curRegion.Address, curRegion.PreLabel,
                         curRegion.IsRelative);
-                    Option1Str = (string)FindResource("str_OptEditAsIs");
-                    Option2Str = (string)FindResource("str_OptEditAndFix");
+                    option1Summ = (string)FindResource("str_OptEditAsIsSummary");
+                    option1Msg = (string)FindResource("str_OptEditAsIs");
 
                     if (curRegion.IsFloating) {
+                        option2Summ = (string)FindResource("str_OptEditAndFixSummary");
+                        option2Msg = (string)FindResource("str_OptEditAndFix");
                         mResultEntry2 = new AddressMap.AddressMapEntry(curRegion.Offset,
                             curRegion.ActualLength, curRegion.Address, curRegion.PreLabel,
                             curRegion.IsRelative);
                     } else {
+                        option2Summ = string.Empty;
+                        option2Msg = (string)FindResource("str_CreateFixedAlreadyFixed");
                         mResultEntry2 = null;
                         EnableOption2 = false;  // show it, but disabled
                     }
@@ -328,11 +326,13 @@ namespace SourceGen.WpfGui {
                         curRegion.Length, curRegion.Address, curRegion.PreLabel,
                         curRegion.IsRelative);
 
+                    option1Summ = (string)FindResource("str_OptResizeSummary");
                     string fmt = (string)FindResource("str_OptResize");
-                    Option1Str = string.Format(fmt,
+                    option1Msg = string.Format(fmt,
                         mFormatter.FormatOffset24(curRegion.Offset + selectionLen - 1),
                         FormatLength(selectionLen));
-                    Option2Str = (string)FindResource("str_OptEditAsIs");
+                    option2Summ = (string)FindResource("str_OptEditAsIsSummary");
+                    option2Msg = (string)FindResource("str_OptEditAsIs");
 
                     Debug.Assert(selectionLen > 0);
                     AddressMap.AddResult ares;
@@ -340,7 +340,9 @@ namespace SourceGen.WpfGui {
                         curRegion.Address, out ares);
                     if (ares != AddressMap.AddResult.Okay) {
                         // Can't resize the new region, so disable that option (still visible).
-                        Option1Str = (string)FindResource("str_OptResizeFail");
+                        option1Summ = string.Empty;
+                        string fmta = (string)FindResource("str_OptResizeFail");
+                        option1Msg = string.Format(fmta, GetErrorString(ares));
                         EnableOption1 = false;
                         CheckOption2 = true;
                     }
@@ -378,13 +380,19 @@ namespace SourceGen.WpfGui {
                     mResultEntry1 = new AddressMap.AddressMapEntry(newEntry.Offset,
                         newRegion1.ActualLength, newEntry.Address, string.Empty, false);
 
+                    option1Summ = (string)FindResource("str_CreateFixedSummary");
                     string fmt = (string)FindResource("str_CreateFixed");
-                    Option1Str = string.Format(fmt,
+                    option1Msg = string.Format(fmt,
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion1.ActualLength));
                     mPreLabelAddress = newRegion1.PreLabelAddress;
                 } else {
-                    Option1Str = (string)FindResource("str_CreateFixedFail");
+                    option1Summ = string.Empty;
+                    if (ares1 == AddressMap.AddResult.StraddleExisting) {
+                        option1Msg = (string)FindResource("str_CreateFixedFailStraddle");
+                    } else {
+                        option1Msg = (string)FindResource("str_CreateFixedFail");
+                    }
                     CheckOption2 = true;
                     EnableOption1 = false;
                 }
@@ -392,13 +400,15 @@ namespace SourceGen.WpfGui {
                     mResultEntry2 = new AddressMap.AddressMapEntry(newEntry.Offset,
                         AddressMap.FLOATING_LEN, newEntry.Address, string.Empty, false);
 
+                    option2Summ = (string)FindResource("str_CreateFloatingSummary");
                     string fmt = (string)FindResource("str_CreateFloating");
-                    Option2Str = string.Format(fmt,
+                    option2Msg = string.Format(fmt,
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion2.ActualLength));
                     mPreLabelAddress = newRegion2.PreLabelAddress;
                 } else {
-                    Option2Str = (string)FindResource("str_CreateFloatingFail");
+                    option2Summ = string.Empty;
+                    option2Msg = (string)FindResource("str_CreateFloatingFail");
                     CheckOption1 = true;
                     CheckOption2 = false;   // required for some reason
                     EnableOption2 = false;
@@ -412,6 +422,20 @@ namespace SourceGen.WpfGui {
                     SetErrorString(ares1);
                 }
             }
+
+            TextBlock tb1 = option1TextBlock;
+            tb1.Inlines.Clear();
+            if (!string.IsNullOrEmpty(option1Summ)) {
+                tb1.Inlines.Add(new Run(option1Summ + " ") { FontWeight = FontWeights.Bold });
+            }
+            tb1.Inlines.Add(option1Msg);
+
+            TextBlock tb2 = option2TextBlock;
+            tb2.Inlines.Clear();
+            if (!string.IsNullOrEmpty(option2Summ)) {
+                tb2.Inlines.Add(new Run(option2Summ + " ") { FontWeight = FontWeights.Bold });
+            }
+            tb2.Inlines.Add(option2Msg);
         }
 
         private string FormatLength(int len) {
@@ -442,7 +466,7 @@ namespace SourceGen.WpfGui {
             return newRegion;
         }
 
-        private void SetErrorString(AddressMap.AddResult result) {
+        private string GetErrorString(AddressMap.AddResult result) {
             string rsrc;
             switch (result) {
                 case AddressMap.AddResult.InternalError:
@@ -458,15 +482,18 @@ namespace SourceGen.WpfGui {
                     rsrc = "str_ErrOverlapFloating";
                     break;
                 case AddressMap.AddResult.StraddleExisting:
-                    rsrc = "str_ErrStraddelExisting";
+                    rsrc = "str_ErrStraddleExisting";
                     break;
                 default:
                     Debug.Assert(false);
                     rsrc = "str_ErrInternal";
                     break;
             }
+            return(string)FindResource(rsrc);   // throws exception on failure
+        }
 
-            ErrorMessageStr = (string)FindResource(rsrc);   // throws exception on failure
+        private void SetErrorString(AddressMap.AddResult result) {
+            ErrorMessageStr = GetErrorString(result);
             ShowErrorMessage = true;
         }
 

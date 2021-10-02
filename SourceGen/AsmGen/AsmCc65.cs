@@ -550,6 +550,7 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void FlushArDirectives() {
+            // TODO(someday): handle IsRelative
             OutputLine(string.Empty,
                 SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
                 SourceFormatter.FormatHexValue(mNextAddress, 4),
