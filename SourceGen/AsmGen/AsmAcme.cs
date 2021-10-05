@@ -579,6 +579,10 @@ namespace SourceGen.AsmGen {
                 nextAddress = 0;
             }
             if (change.IsStart) {
+                if (change.Region.HasValidPreLabel) {
+                    string labelStr = mLocalizer.ConvLabel(change.Region.PreLabel);
+                    OutputLine(labelStr, string.Empty, string.Empty, string.Empty);
+                }
                 if (mPcDepth == 0  && mFirstIsOpen) {
                     mPcDepth++;
 

@@ -36,6 +36,7 @@ namespace SourceGen {
             // can have the same value.
             Unknown = 0,
             User,               // user-defined; only used for internal address labels
+            AddrPreLabel,       // external address, from address region pre-label
             Project,            // external address or const, from project configuration file
             Platform,           // external address or const, from platform definition file
             Auto,               // auto-generated internal address label
@@ -192,6 +193,7 @@ namespace SourceGen {
             switch (SymbolSource) {
                 case Source.Auto:               sc = 'A';   break;
                 case Source.User:               sc = 'U';   break;
+                case Source.AddrPreLabel:       sc = 'R';   break;
                 case Source.Platform:           sc = 'P';   break;
                 case Source.Project:            sc = 'J';   break;
                 case Source.Variable:           sc = 'V';   break;

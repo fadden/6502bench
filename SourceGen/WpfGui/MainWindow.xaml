@@ -803,6 +803,8 @@ limitations under the License.
                                           IsChecked="{Binding SymFilterProjectSymbols}"/>
                             <ToggleButton Content="Plat" Width="40" Margin="2,2"
                                           IsChecked="{Binding SymFilterPlatformSymbols}"/>
+                            <ToggleButton Content="PreL" Width="40" Margin="2,2"
+                                          IsChecked="{Binding SymFilterAddrPreLabels}"/>
                             <ToggleButton Content="Auto" Width="40" Margin="2,2"
                                           IsChecked="{Binding SymFilterAutoLabels}"/>
                             <ToggleButton Content="Addr" Width="40" Margin="2,2"

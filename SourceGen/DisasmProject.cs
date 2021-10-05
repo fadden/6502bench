@@ -828,6 +828,9 @@ namespace SourceGen {
             SymbolTable.Clear();
             MergePlatformProjectSymbols();
 
+            // Merge in any address region pre-labels.
+            MergeAddressPreLabels();
+
             // Merge user labels into the symbol table, overwriting platform/project symbols
             // where they conflict.  Labels whose values are out of sync (because of a change
             // to the address map) are updated as part of this.
@@ -1174,7 +1177,7 @@ namespace SourceGen {
         ///
         /// This should be done before any other symbol assignment or generation, so that user
         /// labels take precedence (by virtue of overwriting the earlier platform symbols),
-        /// and auto label generation can propery generate a unique label.
+        /// and auto label generation can properly generate a unique label.
         ///
         /// Within platform symbol loading, later symbols should replace earlier symbols,
         /// so that ordering of platform files behaves in an intuitive fashion.
@@ -1199,6 +1202,27 @@ namespace SourceGen {
             // Now add project symbols, overwriting platform symbols with the same label.
             foreach (KeyValuePair<string, DefSymbol> kvp in ProjectProps.ProjectSyms) {
                 SymbolTable[kvp.Value.Label] = kvp.Value;
+            }
+        }
+
+        /// <summary>
+        /// Merges symbols from AddressMap into SymbolTable.  Existing entries with matching
+        /// labels will be replaced.
+        /// </summary>
+        /// <remarks>
+        /// These are external symbols, with a higher precedence than project symbols.
+        /// </remarks>
+        private void MergeAddressPreLabels() {
+            IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                AddressMap.AddressRegion region = addrIter.Current.Region;
+                if (addrIter.Current.IsStart && region.HasValidPreLabel) {
+                    // Generate a DefSymbol for it, and add it to the symbol table.
+                    Symbol sym = new Symbol(region.PreLabel, region.PreLabelAddress,
+                        Symbol.Source.AddrPreLabel, Symbol.Type.ExternalAddr,
+                        Symbol.LabelAnnotation.None);
+                    SymbolTable[sym.Label] = sym;
+                }
             }
         }
 
@@ -1384,7 +1408,8 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Generates references to symbols in the project/platform symbol tables.
+        /// Generates references to symbols in the project/platform symbol tables.  Also picks
+        /// up references to address region pre-labels.
         /// 
         /// For each instruction or data item that appears to reference an address, and
         /// does not have a target offset, look for a matching address in the symbol tables.
@@ -1544,6 +1569,20 @@ namespace SourceGen {
                         // using a code start tag to place it in the middle of an instruction).
                         // Just ignore the duplicate.
                         Debug.WriteLine("Xref ignoring duplicate label '" + attr.Symbol.Label +
+                            "': " + ex.Message);
+                    }
+                }
+            }
+            // Add all address region pre-labels, regardless of whether or not their parent
+            // is non-addressable.  Duplicates of user labels will be rejected.  Note the
+            // references will appear on the line for the next file offset, not the pre-label
+            // itself, because we need to associated it with a file offset.
+            foreach (AddressMap.AddressMapEntry ent in AddrMap) {
+                if (!string.IsNullOrEmpty(ent.PreLabel)) {
+                    try {
+                        labelList.Add(ent.PreLabel, ent.Offset);
+                    } catch (ArgumentException ex) {
+                        Debug.WriteLine("Xref ignoring pre-label duplicate '" + ent.PreLabel +
                             "': " + ex.Message);
                     }
                 }
@@ -2611,22 +2650,33 @@ namespace SourceGen {
         /// <summary>
         /// Finds a label by name.  SymbolTable must be populated.
         /// </summary>
+        /// <remarks>
+        /// We're interested in user labels and auto-generated labels.  Do a lookup in
+        /// SymbolTable to find the symbol, then if it's user or auto, we do a second
+        /// search to find the file offset it's associated with.  The second search
+        /// requires a linear walk through anattribs; if we do this often we'll want to
+        /// maintain a symbol-to-offset structure.
+        ///
+        /// We're also interested in address region pre-labels.  Those are technically
+        /// external symbols, but they appear in the label field.
+        ///
+        /// This will not find "hidden" labels, i.e. labels that are in the middle of an
+        /// instruction or multi-byte data area, because those are removed from SymbolTable.
+        /// </remarks>
         /// <param name="name">Label to find.</param>
         /// <returns>File offset associated with label, or -1 if not found.</returns>
         public int FindLabelOffsetByName(string name) {
-            // We're interested in user labels and auto-generated labels.  Do a lookup in
-            // SymbolTable to find the symbol, then if it's user or auto, we do a second
-            // search to find the file offset it's associated with.  The second search
-            // requires a linear walk through anattribs; if we do this often we'll want to
-            // maintain a symbol-to-offset structure.
-            //
-            // This will not find "hidden" labels, i.e. labels that are in the middle of an
-            // instruction or multi-byte data area, because those are removed from SymbolTable.
-
             if (!SymbolTable.TryGetValue(name, out Symbol sym)) {
                 return -1;
             }
             if (!sym.IsInternalLabel) {
+                if (sym.SymbolSource == Symbol.Source.AddrPreLabel) {
+                    foreach (AddressMap.AddressMapEntry ent in AddrMap) {
+                        if (ent.PreLabel == sym.Label) {
+                            return ent.Offset;
+                        }
+                    }
+                }
                 return -1;
             }
             for (int i = 0; i < mAnattribs.Length; i++) {

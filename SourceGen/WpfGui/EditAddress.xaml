@@ -173,7 +173,8 @@ limitations under the License.
                 </TextBox>
             </StackPanel>
 
-            <TextBlock Text="• Enter 16-bit or 24-bit address, e.g. $1000 or 01/be00" Margin="0,4,0,0"/>
+            <TextBlock Name="enterAddressLabel" Margin="0,4,0,0"
+                       Text="• Enter 16-bit or 24-bit address, e.g. $1000 or 01/be00"/>
             <TextBlock Text="• Enter 'NA' to mark the region non-addressable"/>
         </StackPanel>
 
@@ -195,9 +196,12 @@ limitations under the License.
                         <TextBlock Text=")"/>
                     </StackPanel>
 
-                    <TextBlock Text="• Must be valid label syntax; may not be a local label" Margin="0,4,0,0"/>
-                    <TextBlock Text="• Must not be a duplicate of an existing label"/>
-                    <TextBlock Text="• Will not appear if parent region is non-addressable"/>
+                    <TextBlock Name="validSyntaxLabel" Margin="0,4,0,0"
+                               Text="• Must be valid label syntax; may not be a local label"/>
+                    <TextBlock Name="notDuplicateLabel"
+                               Text="• Must not be a duplicate of an existing label"/>
+                    <TextBlock Name="parentNonAddrLabel"
+                               Text="• Will not appear if parent region is non-addressable"/>
                 </StackPanel>
             </GroupBox>
         </StackPanel>

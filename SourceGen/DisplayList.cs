@@ -458,19 +458,26 @@ namespace SourceGen {
                 return parts;
             }
 
-            public static FormattedParts CreateDirective(string opstr, string addrStr) {
+            public static FormattedParts CreateDirective(string opstr, string operandStr) {
                 FormattedParts parts = new FormattedParts();
                 parts.Opcode = opstr;
-                parts.Operand = addrStr;
+                parts.Operand = operandStr;
+                return parts;
+            }
+
+            public static FormattedParts CreatePreLabelDirective(string addrStr, string labelStr) {
+                FormattedParts parts = new FormattedParts();
+                parts.Addr = addrStr;
+                parts.Label = labelStr;
                 return parts;
             }
 
             public static FormattedParts CreateFullDirective(string label, string opstr,
-                    string addrStr, string comment) {
+                    string operandStr, string comment) {
                 FormattedParts parts = new FormattedParts();
                 parts.Label = label;
                 parts.Opcode = opstr;
-                parts.Operand = addrStr;
+                parts.Operand = operandStr;
                 parts.Comment = comment;
                 return parts;
             }

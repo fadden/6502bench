@@ -191,8 +191,19 @@ namespace CommonUtil {
             /// Is the end point floating?
             /// </summary>
             public bool IsFloating {
+                get { return Length == FLOATING_LEN; }
+            }
+
+            /// <summary>
+            /// Does this region have a valid pre-label?
+            /// </summary>
+            /// <remarks>
+            /// This only checks for the existence of the label and whether the parent region
+            /// is non-addressable.  It does not verify the label's syntax.
+            /// </remarks>
+            public bool HasValidPreLabel {
                 get {
-                    return Length == FLOATING_LEN;
+                    return !string.IsNullOrEmpty(PreLabel) && PreLabelAddress != NON_ADDR;
                 }
             }
 

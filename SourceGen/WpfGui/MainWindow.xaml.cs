@@ -1769,6 +1769,16 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
             }
         }
+        private bool mSymFilterAddrPreLabels;
+        public bool SymFilterAddrPreLabels {
+            get { return mSymFilterAddrPreLabels; }
+            set {
+                mSymFilterAddrPreLabels = value;
+                AppSettings.Global.SetBool(AppSettings.SYMWIN_SHOW_ADDR_PRE_LABELS, value);
+                SymbolsListFilterChanged();
+                OnPropertyChanged();
+            }
+        }
         private bool mSymFilterAutoLabels;
         public bool SymFilterAutoLabels {
             get { return mSymFilterAutoLabels; }
@@ -1834,6 +1844,7 @@ namespace SourceGen.WpfGui {
             }
             SymbolsListItem sli = (SymbolsListItem)item;
 
+            // TODO: this should also work for project/platform symbols that have EQU directives
             mMainCtrl.GoToLabel(sli.Sym);
             codeListView.Focus();
         }
@@ -1847,6 +1858,7 @@ namespace SourceGen.WpfGui {
                 (SymFilterNonUniqueLabels != true && sli.Sym.IsNonUnique) ||
                 (SymFilterProjectSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Project) ||
                 (SymFilterPlatformSymbols != true && sli.Sym.SymbolSource == Symbol.Source.Platform) ||
+                (SymFilterAddrPreLabels != true && sli.Sym.SymbolSource == Symbol.Source.AddrPreLabel) ||
                 (SymFilterAutoLabels != true && sli.Sym.SymbolSource == Symbol.Source.Auto) ||
                 (SymFilterAddresses != true && !sli.Sym.IsConstant) ||
                 (SymFilterConstants != true && sli.Sym.IsConstant) ||

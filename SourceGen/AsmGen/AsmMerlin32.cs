@@ -106,7 +106,7 @@ namespace SourceGen.AsmGen {
                 { "EquDirective", "equ" },
                 { "VarDirective", "equ" },
                 { "ArStartDirective", "org" },
-                //ArEndDirective
+                { "ArEndDirective", "org_end" },    // not actually used
                 //RegWidthDirective
                 //DataBankDirective
                 { "DefineData1", "dfb" },
@@ -491,6 +491,18 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputArDirective(CommonUtil.AddressMap.AddressChange change) {
+            if (change.IsStart && change.Region.HasValidPreLabel) {
+                // Need to output the previous ORG, if any, then a label on a line by itself.
+                if (mNextAddress >= 0) {
+                    OutputLine(string.Empty,
+                        SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                        SourceFormatter.FormatHexValue(mNextAddress, 4),
+                        string.Empty);
+                }
+                string labelStr = mLocalizer.ConvLabel(change.Region.PreLabel);
+                OutputLine(labelStr, string.Empty, string.Empty, string.Empty);
+            }
+
             int nextAddress = change.Address;
             if (nextAddress == Address.NON_ADDR) {
                 // Start non-addressable regions at zero to ensure they don't overflow bank.
@@ -502,10 +514,12 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public void FlushArDirectives() {
             // TODO(someday): handle IsRelative
+            Debug.Assert(mNextAddress >= 0);
             OutputLine(string.Empty,
                 SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
                 SourceFormatter.FormatHexValue(mNextAddress, 4),
                 string.Empty);
+            mNextAddress = -1;
         }
 
         // IGenerator

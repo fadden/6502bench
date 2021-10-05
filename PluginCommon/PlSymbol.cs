@@ -31,6 +31,7 @@ namespace PluginCommon {
         public enum Source {
             Unknown = 0,
             User,
+            AddrPreLabel,
             Project,
             Platform
         }

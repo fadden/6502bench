@@ -65,8 +65,8 @@ offset.  For example, the LDA instruction could reference a label at $2008 as "L
 The assembler cares about the symbolic references, not the actual offsets or addresses.  For
 this reason we can ignore references to an address with a label if those references don't
 actually use the label.  (One consequence of this is that formatting an operand as hex
-eliminates it from the set of things for us to consider.  Also, ORG directives have no effect
-on the localizer.)
+eliminates it from the set of things for us to consider.  Also, address range changes have
+no effect on the localizer unless there's a pre-label defined.)
 
 Labels that are marked as global, but to which there are no references, could in theory be
 elided.  To do this we would have to omit them from the generated code, which would be
@@ -264,44 +264,34 @@ namespace SourceGen.AsmGen {
                     continue;
                 }
 
-                string newLabel = sym.LabelWithoutTag;
-                if (remapUnders && newLabel[0] == '_') {
-                    newLabel = NO_UNDER_PFX + newLabel;
-                    // This could cause a conflict with an existing label.  It's rare but
-                    // possible.
-                    if (allGlobalLabels.ContainsKey(newLabel)) {
-                        newLabel = MakeUnique(newLabel, allGlobalLabels);
-                    }
-                }
-                if (opNames != null && opNames.ContainsKey(newLabel.ToUpperInvariant())) {
-                    // Clashed with mnemonic.  Uniquify it.
-                    newLabel = MakeUnique(newLabel, allGlobalLabels);
-                }
-
-                // We might have remapped something earlier and it happens to match this label.
-                // If so, we can either remap the current label, or remap the previous label
-                // a little harder.  The easiest thing to do is remap the current label.
-                if (allGlobalLabels.ContainsKey(newLabel)) {
-                    newLabel = MakeUnique(newLabel, allGlobalLabels);
-                }
-
-                // If we've changed it, add it to the map.
-                if (newLabel != sym.Label) {
-                    LabelMap[sym.Label] = newLabel;
-                }
-
-                allGlobalLabels.Add(newLabel, newLabel);
+                RemapGlobalSymbol(sym, allGlobalLabels, opNames, remapUnders);
             }
 
-            // Remap any project/platform symbols that clash with opcode mnemonics.
+            // Remap any project/platform symbols that clash with opcode mnemonics or have
+            // leading underscores that aren't allowed.
             foreach (DefSymbol defSym in mProject.ActiveDefSymbolList) {
-                if (opNames != null && opNames.ContainsKey(defSym.Label.ToUpperInvariant())) {
-                    // Clashed with mnemonic.  Uniquify it.
-                    Debug.WriteLine("Renaming clashing def sym: " + defSym.Label);
-                    string newLabel = MakeUnique(defSym.Label, allGlobalLabels);
-                    LabelMap[defSym.Label] = newLabel;
-                    allGlobalLabels.Add(newLabel, newLabel);
+                //if (opNames != null && opNames.ContainsKey(defSym.Label.ToUpperInvariant())) {
+                //    // Clashed with mnemonic.  Uniquify it.
+                //    Debug.WriteLine("Renaming clashing def sym: " + defSym.Label);
+                //    string newLabel = MakeUnique(defSym.Label, allGlobalLabels);
+                //    LabelMap[defSym.Label] = newLabel;
+                //    allGlobalLabels.Add(newLabel, newLabel);
+                //}
+                RemapGlobalSymbol(defSym, allGlobalLabels, opNames, remapUnders);
+            }
+
+            // Remap any address region pre-labels with inappropriate values.
+            IEnumerator<CommonUtil.AddressMap.AddressChange> addrIter =
+                mProject.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                CommonUtil.AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart || !change.Region.HasValidPreLabel) {
+                    continue;
                 }
+                Symbol sym = new Symbol(change.Region.PreLabel, change.Region.PreLabelAddress,
+                    Symbol.Source.AddrPreLabel, Symbol.Type.ExternalAddr,
+                    Symbol.LabelAnnotation.None);
+                RemapGlobalSymbol(sym, allGlobalLabels, opNames, remapUnders);
             }
 
             //
@@ -351,6 +341,48 @@ namespace SourceGen.AsmGen {
                 // do the last bit
                 ProcessLocals(startGlobal, mProject.FileDataLength, scopedLocals);
             }
+        }
+
+        /// <summary>
+        /// Remaps a global label, handling promotion from local, leading underscores, and
+        /// clashes with opcode mnemonics.
+        /// </summary>
+        /// <param name="sym">Symbol to rename.</param>
+        /// <param name="allGlobalLabels">List of all global labels, used when uniquifing
+        ///   a "promoted" local.  May be updated.</param>
+        /// <param name="opNames">List of opcode mnemonics for configured CPU.  Will be
+        ///   null if the assembler allows labels to be the same as opcodes.</param>
+        /// <param name="remapUnders">True if leading underscores are not allowed (because
+        ///   they're used to indicate local labels).</param>
+        private void RemapGlobalSymbol(Symbol sym, Dictionary<string, string> allGlobalLabels,
+                Dictionary<string, Asm65.OpDef> opNames, bool remapUnders) {
+            string newLabel = sym.LabelWithoutTag;
+            if (remapUnders && newLabel[0] == '_') {
+                newLabel = NO_UNDER_PFX + newLabel;
+                // This could cause a conflict with an existing label.  It's rare but
+                // possible.
+                if (allGlobalLabels.ContainsKey(newLabel)) {
+                    newLabel = MakeUnique(newLabel, allGlobalLabels);
+                }
+            }
+            if (opNames != null && opNames.ContainsKey(newLabel.ToUpperInvariant())) {
+                // Clashed with mnemonic.  Uniquify it.
+                newLabel = MakeUnique(newLabel, allGlobalLabels);
+            }
+
+            // We might have remapped something earlier and it happens to match this label.
+            // If so, we can either remap the current label, or remap the previous label
+            // a little harder.  The easiest thing to do is remap the current label.
+            if (allGlobalLabels.ContainsKey(newLabel)) {
+                newLabel = MakeUnique(newLabel, allGlobalLabels);
+            }
+
+            // If we've changed it, add it to the map.
+            if (newLabel != sym.Label) {
+                LabelMap[sym.Label] = newLabel;
+            }
+
+            allGlobalLabels.Add(newLabel, newLabel);
         }
 
         /// <summary>
@@ -406,6 +438,19 @@ namespace SourceGen.AsmGen {
                         mOffsetPairs.Add(new OffsetPair(xref.Offset, offset));
                     }
                 }
+            }
+
+            // Add the AddressRegion pre-labels to the list, as globals.  We may need to
+            // re-map the label if it matches a mnemonic.
+            IEnumerator<CommonUtil.AddressMap.AddressChange> addrIter =
+                mProject.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                CommonUtil.AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart || !change.Region.HasValidPreLabel) {
+                    continue;
+                }
+                mGlobalFlags[change.Region.Offset] = true;
+                mGlobalLabels.Add(new OffsetLabel(change.Region.Offset, change.Region.PreLabel));
             }
         }
 

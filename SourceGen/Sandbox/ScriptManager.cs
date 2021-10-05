@@ -332,17 +332,20 @@ namespace SourceGen.Sandbox {
             foreach (Symbol sym in symTab) {
                 PlSymbol.Source plsSource;
                 switch (sym.SymbolSource) {
-                    case Symbol.Source.Platform:
-                        plsSource = PlSymbol.Source.Platform;
+                    case Symbol.Source.User:
+                        plsSource = PlSymbol.Source.User;
+                        break;
+                    case Symbol.Source.AddrPreLabel:
+                        plsSource = PlSymbol.Source.AddrPreLabel;
                         break;
                     case Symbol.Source.Project:
                         plsSource = PlSymbol.Source.Project;
                         break;
-                    case Symbol.Source.User:
-                        plsSource = PlSymbol.Source.User;
+                    case Symbol.Source.Platform:
+                        plsSource = PlSymbol.Source.Platform;
                         break;
-                    case Symbol.Source.Variable:
                     case Symbol.Source.Auto:
+                    case Symbol.Source.Variable:
                         // don't forward these to plugins
                         continue;
                     default:

@@ -324,6 +324,7 @@ namespace SourceGen {
             settings.SetBool(AppSettings.SYMWIN_SHOW_NON_UNIQUE, false);
             settings.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
+            settings.SetBool(AppSettings.SYMWIN_SHOW_ADDR_PRE_LABELS, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_AUTO, false);
             settings.SetBool(AppSettings.SYMWIN_SHOW_ADDR, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_CONST, true);
@@ -549,6 +550,8 @@ namespace SourceGen {
                 settings.GetBool(AppSettings.SYMWIN_SHOW_PROJECT, false);
             mMainWin.SymFilterPlatformSymbols =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_PLATFORM, false);
+            mMainWin.SymFilterAddrPreLabels =
+                settings.GetBool(AppSettings.SYMWIN_SHOW_ADDR_PRE_LABELS, false);
             mMainWin.SymFilterConstants =
                 settings.GetBool(AppSettings.SYMWIN_SHOW_CONST, false);
             mMainWin.SymFilterAddresses =
@@ -1698,10 +1701,12 @@ namespace SourceGen {
                 } else {
                     if (mProject.SymbolTable.TryGetValue(dfd.SymbolRef.Label, out Symbol sym)) {
                         if (sym.SymbolSource == Symbol.Source.User ||
-                                sym.SymbolSource == Symbol.Source.Auto) {
+                                sym.SymbolSource == Symbol.Source.Auto ||
+                                sym.SymbolSource == Symbol.Source.AddrPreLabel) {
                             int labelOffset = mProject.FindLabelOffsetByName(dfd.SymbolRef.Label);
                             if (labelOffset >= 0) {
                                 if (!testOnly) {
+                                    // TODO(org): jump to .arstart
                                     GoToLocation(new NavStack.Location(labelOffset, 0, false),
                                         GoToMode.JumpToCodeData, true);
                                 }
@@ -1894,9 +1899,12 @@ namespace SourceGen {
             if (curRegion == null) {
                 // No entry, create a new one.  Use the current address as the default value,
                 // unless the region is non-addressable.
-                int addr = addrMap.OffsetToAddress(firstOffset);
-                if (addr == Address.NON_ADDR) {
-                    addr = 0;
+                Anattrib attr = mProject.GetAnattrib(firstOffset);
+                int addr;
+                if (attr.IsNonAddressable) {
+                    addr = Address.NON_ADDR;
+                } else {
+                    addr = attr.Address;
                 }
 
                 // Create a prototype entry with the various values.
@@ -3101,16 +3109,12 @@ namespace SourceGen {
         /// </summary>
         /// <param name="sym">Label symbol.</param>
         public void GoToLabel(Symbol sym) {
-            if (sym.IsInternalLabel) {
-                int offset = mProject.FindLabelOffsetByName(sym.Label);
-                if (offset >= 0) {
-                    GoToLocation(new NavStack.Location(offset, 0, false),
-                        GoToMode.JumpToCodeData, true);
-                } else {
-                    Debug.WriteLine("DClick symbol: " + sym + ": label not found");
-                }
+            int offset = mProject.FindLabelOffsetByName(sym.Label);
+            if (offset >= 0) {
+                GoToLocation(new NavStack.Location(offset, 0, false),
+                    GoToMode.JumpToCodeData, true);
             } else {
-                Debug.WriteLine("DClick symbol: " + sym + ": not label");
+                Debug.WriteLine("DClick symbol: " + sym + ": label not found");
             }
         }
 

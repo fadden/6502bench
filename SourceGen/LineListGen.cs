@@ -1081,7 +1081,16 @@ namespace SourceGen {
                         spaceAdded = false;     // next one will need a blank line
                         multiStart = true;      // unless it's another .arstart immediately
 
-                        // TODO(org): pre-label (address / label only, logically part of ORG)
+                        if (region.HasValidPreLabel) {
+                            Line preLine =
+                                new Line(offset, 0, Line.Type.ArStartDirective, arSubLine++);
+                            string preAddrStr = mFormatter.FormatAddress(region.PreLabelAddress,
+                                !mProject.CpuDef.HasAddr16);
+                            preLine.Parts = FormattedParts.CreatePreLabelDirective(preAddrStr,
+                                region.PreLabel);
+                            lines.Add(preLine);
+                        }
+
                         Line newLine = new Line(offset, 0, Line.Type.ArStartDirective, arSubLine++);
                         string addrStr;
                         if (region.Address == Address.NON_ADDR) {
@@ -1274,6 +1283,15 @@ namespace SourceGen {
 
                 // Check for address region ends, which will be positioned one byte before the
                 // updated offset (unless they somehow got embedded inside something else).
+                //
+                // The .arend can only appear on the same offset as .arstart in a single-byte
+                // region, and we can't have more than one of those at the same offset.
+                // If this is not a single-byte region, we need to reset the sub-line count.
+                // (Alternatively: track the offset of the last .arstart, and reset subline
+                // if they differ.)
+                if (addrIter.Current != null && addrIter.Current.Region.Length != 1) {
+                    arSubLine = 0;
+                }
                 while (addrIter.Current != null && addrIter.Current.Offset < offset) {
                     AddressMap.AddressChange change = addrIter.Current;
                     // Range starts/ends shouldn't be embedded in something.
@@ -1281,13 +1299,6 @@ namespace SourceGen {
                         Debug.Assert(false, "Bad offset: change.Offset=+" +
                             change.Offset.ToString("x6") + " offset-1=+" +
                             (offset - 1).ToString("x6"));
-                    }
-
-                    // The .arend can only appear on the same offset as .arstart in a single-byte
-                    // region, and we can't have more than one of those at the same offset.
-                    // If this is not a single-byte region, we need to reset the sub-line count.
-                    if (change.Region.Length != 1) {
-                        arSubLine = 0;
                     }
 
                     if (change.Region.Offset == 0 && hasPrgHeader) {
@@ -1299,11 +1310,12 @@ namespace SourceGen {
 
                     if (!change.IsStart) {
                         // Show the start address to make it easier to pair them visually.
+                        string floatStr = change.Region.IsFloating ? "~" : "";
                         string addrStr;
                         if (change.Region.Address == Address.NON_ADDR) {
-                            addrStr = "\u2191 " + Address.NON_ADDR_STR;
+                            addrStr = "\u2191 " + floatStr + Address.NON_ADDR_STR;
                         } else {
-                            addrStr = "\u2191 " +
+                            addrStr = "\u2191 " + floatStr +
                                 mFormatter.FormatHexValue(change.Region.Address, 4);
                         }
 
@@ -1654,12 +1666,14 @@ namespace SourceGen {
             while (addrIter.Current != null && addrIter.Current.Offset == offset) {
                 AddressMap.AddressChange change = addrIter.Current;
                 if (count == 0) {
+                    // Could be pre-label or .arstart that follows it.  Both go to the same place.
                     isSynth = change.IsSynthetic;
                     return change.Region;
                 }
-                if (change.IsStart && !string.IsNullOrEmpty(change.Region.PreLabel)) {
+                if (change.IsStart && change.Region.HasValidPreLabel) {
                     count--;
                     if (count == 0) {
+                        // This is the .arstart following the pre-label.
                         isSynth = change.IsSynthetic;
                         return change.Region;
                     }

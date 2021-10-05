@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using Asm65;
 using CommonUtil;
 
@@ -198,11 +199,25 @@ namespace SourceGen.WpfGui {
         }
         private bool mCanDeleteRegion;
 
+
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        // Non-error color for labels.
+        private Brush mDefaultLabelColor = SystemColors.WindowTextBrush;
+
+        /// <summary>
+        /// Initial value for pre-label.
+        /// </summary>
+        private string mOrigPreLabel;
+
+        /// <summary>
+        /// True if parent region is non-addressable.
+        /// </summary>
+        private bool mParentNonAddr;
 
         /// <summary>
         /// Result for option #1.
@@ -277,6 +292,8 @@ namespace SourceGen.WpfGui {
                 // Editing an existing region.
                 CanDeleteRegion = true;
                 ShowExistingRegion = true;
+                mOrigPreLabel = curRegion.PreLabel;
+                mParentNonAddr = (curRegion.PreLabelAddress == Address.NON_ADDR);
 
                 if (curRegion.Address == Address.NON_ADDR) {
                     AddressText = Address.NON_ADDR_STR;
@@ -354,8 +371,13 @@ namespace SourceGen.WpfGui {
                 // a floating region.  Default changes for single-item selections.
                 CanDeleteRegion = false;
                 ShowExistingRegion = false;
+                mOrigPreLabel = string.Empty;
 
-                AddressText = Asm65.Address.AddressToString(newEntry.Address, false);
+                if (newEntry.Address == Address.NON_ADDR) {
+                    AddressText = Address.NON_ADDR_STR;
+                } else {
+                    AddressText = Asm65.Address.AddressToString(newEntry.Address, false);
+                }
                 PreLabelText = string.Empty;
                 UseRelativeAddressing = false;
 
@@ -386,6 +408,8 @@ namespace SourceGen.WpfGui {
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion1.ActualLength));
                     mPreLabelAddress = newRegion1.PreLabelAddress;
+
+                    mParentNonAddr = (newRegion1.PreLabelAddress == Address.NON_ADDR);
                 } else {
                     option1Summ = string.Empty;
                     if (ares1 == AddressMap.AddResult.StraddleExisting) {
@@ -406,6 +430,8 @@ namespace SourceGen.WpfGui {
                         mFormatter.FormatOffset24(newEntry.Offset),
                         FormatLength(newRegion2.ActualLength));
                     mPreLabelAddress = newRegion2.PreLabelAddress;
+
+                    mParentNonAddr = (newRegion2.PreLabelAddress == Address.NON_ADDR);
                 } else {
                     option2Summ = string.Empty;
                     option2Msg = (string)FindResource("str_CreateFloatingFail");
@@ -510,8 +536,53 @@ namespace SourceGen.WpfGui {
         /// for TextBox is LostFocus.
         /// </remarks>
         private void UpdateControls() {
-            IsValid = EnableAttributeControls && ParseAddress(out int unused);
-            // TODO(org): check pre-label syntax
+            bool addrOkay = ParseAddress(out int unused);
+            if (addrOkay) {
+                enterAddressLabel.Foreground = mDefaultLabelColor;
+            } else {
+                enterAddressLabel.Foreground = Brushes.Red;
+            }
+
+            bool preLabelOkay = PreLabelTextChanged();
+
+            IsValid = EnableAttributeControls && addrOkay && preLabelOkay;
+        }
+
+        /// <summary>
+        /// Validates pre-label.
+        /// </summary>
+        private bool PreLabelTextChanged() {
+            string label = PreLabelText;
+
+            parentNonAddrLabel.Foreground = mDefaultLabelColor;
+            if (string.IsNullOrEmpty(label)) {
+                return true;
+            }
+
+            if (mParentNonAddr) {
+                parentNonAddrLabel.Foreground = Brushes.Blue;
+            }
+
+            // Check syntax.  We don't care about the details.
+            bool isValid = Asm65.Label.ValidateLabelDetail(label, out bool unused1,
+                out bool unused2);
+            if (!isValid) {
+                validSyntaxLabel.Foreground = Brushes.Red;
+                return false;
+            } else {
+                validSyntaxLabel.Foreground = mDefaultLabelColor;
+            }
+
+            // Check for duplicates.
+            notDuplicateLabel.Foreground = mDefaultLabelColor;
+            if (label == mOrigPreLabel) {
+                return true;
+            }
+            if (mProject.SymbolTable.TryGetValue(label, out Symbol sym)) {
+                notDuplicateLabel.Foreground = Brushes.Red;
+                return false;
+            }
+            return true;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {

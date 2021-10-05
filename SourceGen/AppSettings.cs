@@ -84,6 +84,7 @@ namespace SourceGen {
         public const string SYMWIN_SHOW_AUTO = "symwin-show-auto";
         public const string SYMWIN_SHOW_PROJECT = "symwin-show-project";
         public const string SYMWIN_SHOW_PLATFORM = "symwin-show-platform";
+        public const string SYMWIN_SHOW_ADDR_PRE_LABELS = "symwin-show-addr-pre-labels";
         public const string SYMWIN_SHOW_CONST = "symwin-show-const";
         public const string SYMWIN_SHOW_ADDR = "symwin-show-addr";
         public const string SYMWIN_SORT_ASCENDING = "symwin-sort-ascending";

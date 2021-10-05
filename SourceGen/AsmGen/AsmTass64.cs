@@ -59,7 +59,7 @@ namespace SourceGen.AsmGen {
         public AssemblerQuirks Quirks { get; private set; }
 
         // IGenerator
-        public LabelLocalizer Localizer { get; private set; }
+        public LabelLocalizer Localizer { get { return mLocalizer; } }
 
         public int StartOffset {
             get {
@@ -96,6 +96,11 @@ namespace SourceGen.AsmGen {
         /// StringBuilder to use when composing a line.  Held here to reduce allocations.
         /// </summary>
         private StringBuilder mLineBuilder = new StringBuilder(100);
+
+        /// <summary>
+        /// Label localization helper.
+        /// </summary>
+        private LabelLocalizer mLocalizer;
 
         /// <summary>
         /// Stream to send the output to.
@@ -289,10 +294,10 @@ namespace SourceGen.AsmGen {
             string msg = string.Format(Res.Strings.PROGRESS_GENERATING_FMT, pathName);
             worker.ReportProgress(0, msg);
 
-            Localizer = new LabelLocalizer(Project);
-            Localizer.LocalPrefix = "_";
-            Localizer.QuirkNoOpcodeMnemonics = true;
-            Localizer.Analyze();
+            mLocalizer = new LabelLocalizer(Project);
+            mLocalizer.LocalPrefix = "_";
+            mLocalizer.QuirkNoOpcodeMnemonics = true;
+            mLocalizer.Analyze();
 
             bool needLongAddress = Project.FileDataLength > 65536 + (mHasPrgHeader ? 2 : 0);
             string extraOptions = string.Empty +
@@ -681,6 +686,10 @@ namespace SourceGen.AsmGen {
                 nextAddress = 0;
             }
             if (change.IsStart) {
+                if (change.Region.HasValidPreLabel) {
+                    string labelStr = mLocalizer.ConvLabel(change.Region.PreLabel);
+                    OutputLine(labelStr, string.Empty, string.Empty, string.Empty);
+                }
                 if (mPcDepth == 0 && mFirstIsOpen) {
                     mPcDepth++;
 
