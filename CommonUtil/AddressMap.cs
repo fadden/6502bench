@@ -977,7 +977,7 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// This is NOT intended to say whether the sequence of addresses has a hiccup.  The goal
-        /// is to identify multi-byte elements that have a .arstart/.arend statement in the middle.
+        /// is to identify multi-byte elements that have an arstart/arend statement in the middle.
         ///
         /// We can do this in a couple of different ways:
         /// 1. Find the node that holds the offset, confirm that it spans offset+length, and

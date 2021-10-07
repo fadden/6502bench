@@ -228,8 +228,8 @@ namespace SourceGen {
             new PseudoOpNames(new Dictionary<string, string> {
                 { "EquDirective", ".eq" },
                 { "VarDirective", ".var" },
-                { "ArStartDirective", ".arstart" },
-                { "ArEndDirective", ".arend" },
+                { "ArStartDirective", ".addrs" },
+                { "ArEndDirective", ".adrend" },
                 { "RegWidthDirective", ".rwid" },
                 { "DataBankDirective", ".dbank" },
 

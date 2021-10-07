@@ -45,7 +45,7 @@ namespace SourceGen {
             int prevAddr = 0;
             int lastEndOffset = -1;
 
-            sb.AppendLine("Address region map for " + project.DataFileName);
+            sb.AppendLine("Address region map for \"" + project.DataFileName + "\"");
             sb.Append(CRLF);
 
             IEnumerator<AddressChange> iter = addrMap.AddressChangeIterator;
@@ -67,12 +67,6 @@ namespace SourceGen {
                     }
 
                     // Start following end, or start following start after a gap.
-                    if (!string.IsNullOrEmpty(change.Region.PreLabel)) {
-                        PrintDepthLines(sb, depth, true);
-                        sb.Append("|  pre='" + change.Region.PreLabel + "' ");
-                        PrintAddress(sb, formatter, change.Region.PreLabelAddress, showBank);
-                        sb.Append(CRLF);
-                    }
                     sb.Append(formatter.FormatOffset24(change.Offset));
                     PrintDepthLines(sb, depth, false);
                     sb.Append("+- " + "start");
@@ -83,9 +77,15 @@ namespace SourceGen {
                         // If there's a label here, show it.
                         Anattrib attr = project.GetAnattrib(change.Offset);
                         if (attr.Symbol != null && !string.IsNullOrEmpty(attr.Symbol.Label)) {
-                            sb.Append(" : ");
-                            sb.Append(attr.Symbol.Label);
+                            sb.Append(" '");
+                            sb.Append(attr.Symbol.GenerateDisplayLabel(formatter));
+                            sb.Append("'");
                         }
+                    }
+                    if (change.Region.HasValidPreLabel) {
+                        sb.Append("  pre='");
+                        sb.Append(change.Region.PreLabel);
+                        sb.Append("'");
                     }
 
                     sb.Append(CRLF);

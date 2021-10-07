@@ -52,7 +52,8 @@ OverVar     @   $40     4
 BankWrap    @   $fff0   $20
 
 ; Width specifiers on constants should be ignored.
-FatConst    =   $4000   8
+; Uses a leading '_' to test special 64tass handling.
+_FatConst   =   $4000   8
 
 ; Overlapping multi-byte items with exact and inexact matches.
 OverA_0     @   $6000   8       ;should win, alphabetically

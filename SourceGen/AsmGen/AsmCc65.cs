@@ -112,8 +112,8 @@ namespace SourceGen.AsmGen {
                 { "EquDirective", "=" },
                 { "VarDirective", ".set" },
                 { "ArStartDirective", ".org" },
-                //ArEndDirective
-                //RegWidthDirective         // .a8, .a16, .i8, .i16
+                { "ArEndDirective", ".adrend" },    // on-screen display only
+                //RegWidthDirective             // .a8, .a16, .i8, .i16
                 //DataBankDirective
                 { "DefineData1", ".byte" },
                 { "DefineData2", ".word" },
@@ -123,12 +123,12 @@ namespace SourceGen.AsmGen {
                 //DefineBigData3
                 //DefineBigData4
                 { "Fill", ".res" },
-                { "Dense", ".byte" },       // not really dense, just comma-separated bytes
+                { "Dense", ".byte" },           // really just just comma-separated bytes
                 //Junk
                 { "StrGeneric", ".byte" },
                 //StrReverse
                 { "StrNullTerm", ".asciiz" },
-                //StrLen8                   // macro with .strlen?
+                //StrLen8                       // TODO(maybe): macro with .strlen?
                 //StrLen16
                 //StrDci
         });

@@ -735,9 +735,15 @@ namespace SourceGen {
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Address) != 0) {
                         if (!string.IsNullOrEmpty(parts.Addr)) {
-                            string str = parts.Addr + ":";
+                            string str;
+                            if (parts.IsNonAddressable) {
+                                str = "<span class=\"greytext\">" + parts.Addr + "</span>";
+                            } else {
+                                str = parts.Addr;
+                            }
+                            str += ":";
                             colPos = AddSpacedString(sb, colPos, mColStart[(int)Col.Address],
-                                str, str.Length);
+                                str, parts.Addr.Length + 1);
                         }
                     }
                     if ((mLeftFlags & ActiveColumnFlags.Bytes) != 0) {

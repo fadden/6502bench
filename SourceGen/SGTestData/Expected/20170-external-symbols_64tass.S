@@ -1,5 +1,5 @@
         .cpu    "6502"
-FatConst =      $4000
+X_FatConst =    $4000
 
 OverVar =       $40
 CodeWrap =      $0f00      ;encases program
@@ -116,7 +116,7 @@ LocalVar .var   $41
         ldx     OverVar+3
         ldx     $44
         nop
-        lda     FatConst-1
+        lda     X_FatConst-1
         lda     $4000
         lda     $4001
         lda     BankWrap+8

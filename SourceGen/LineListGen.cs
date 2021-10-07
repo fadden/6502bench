@@ -282,8 +282,8 @@ namespace SourceGen {
                 int topOffset = dl[topIndex].FileOffset;
                 int firstIndex = dl.FindLineIndexByOffset(topOffset);
                 Debug.Assert(topIndex >= firstIndex);
-                savedSel.mTopPosition =
-                    new NavStack.Location(topOffset, topIndex - firstIndex, false);
+                savedSel.mTopPosition = new NavStack.Location(topOffset, topIndex - firstIndex,
+                    NavStack.GoToMode.JumpToAdjIndex);
 
                 List<Line> lineList = dl.mLineList;
                 Debug.Assert(lineList.Count == sel.Length);
@@ -832,7 +832,7 @@ namespace SourceGen {
                 // Blank lines and comments can appear before or after code/data.  They
                 // must have the offset of the associated line, and a span of zero.
                 if (line.FileOffset != expectedOffset && line.FileOffset != lastOffset) {
-                    // .arend directives are associated with the last byte of a region, so
+                    // arend directives are associated with the last byte of a region, so
                     // we need to make a special exemption for them.
                     if (line.LineType == Line.Type.ArEndDirective &&
                             line.FileOffset == expectedOffset - 1) {
@@ -1035,7 +1035,7 @@ namespace SourceGen {
 
                 // Insert long comments and notes.  These may span multiple display lines,
                 // and require word-wrap, so it's easiest just to render them fully here.
-                // Set "spaceAdded" to true so .arstart doesn't try to add one after the comment.
+                // Set "spaceAdded" to true so arstart doesn't try to add one after the comment.
                 //
                 // TODO: integrate into FormattedOperandCache so we don't have to
                 //   regenerate them unless they change.  Use the MLC as the dependency.
@@ -1066,7 +1066,7 @@ namespace SourceGen {
 
                     AddressMap.AddressRegion region = change.Region;
                     if (region.Offset == 0 && hasPrgHeader) {
-                        // Suppress the .arstart at offset zero.  We know there's another one
+                        // Suppress the arstart at offset zero.  We know there's another one
                         // at offset +000002, and that it matches the value at +0/1.
                         addrIter.MoveNext();
                         continue;
@@ -1079,7 +1079,7 @@ namespace SourceGen {
                             lines.Add(GenerateBlankLine(offset));
                         }
                         spaceAdded = false;     // next one will need a blank line
-                        multiStart = true;      // unless it's another .arstart immediately
+                        multiStart = true;      // unless it's another arstart immediately
 
                         if (region.HasValidPreLabel) {
                             Line preLine =
@@ -1109,16 +1109,19 @@ namespace SourceGen {
                         } else {
                             addrStr = mFormatter.FormatHexValue(region.Address, 4);
                         }
-#if DEBUG
+#if DEBUG1
                         string comment = mFormatter.FormatEolComment("ends at " +
                             mFormatter.FormatOffset24(region.Offset + region.ActualLength - 1) +
                             (region.IsFloating ? " (floating)" : string.Empty));
-#else
-                        string comment = string.Empty;
-#endif
                         if (change.IsSynthetic) {
                             comment += " (auto-generated)";
                         }
+#else
+                        string comment = string.Empty;
+                        if (change.IsSynthetic) {
+                            comment = mFormatter.FormatEolComment("(auto-generated)");
+                        }
+#endif
                         newLine.Parts = FormattedParts.CreateFullDirective(string.Empty,
                             mFormatter.FormatPseudoOp(mPseudoOpNames.ArStartDirective),
                             addrStr, comment);
@@ -1284,10 +1287,10 @@ namespace SourceGen {
                 // Check for address region ends, which will be positioned one byte before the
                 // updated offset (unless they somehow got embedded inside something else).
                 //
-                // The .arend can only appear on the same offset as .arstart in a single-byte
+                // The arend can only appear on the same offset as arstart in a single-byte
                 // region, and we can't have more than one of those at the same offset.
                 // If this is not a single-byte region, we need to reset the sub-line count.
-                // (Alternatively: track the offset of the last .arstart, and reset subline
+                // (Alternatively: track the offset of the last arstart, and reset subline
                 // if they differ.)
                 if (addrIter.Current != null && addrIter.Current.Region.Length != 1) {
                     arSubLine = 0;
@@ -1302,7 +1305,7 @@ namespace SourceGen {
                     }
 
                     if (change.Region.Offset == 0 && hasPrgHeader) {
-                        // Suppress the .arend at offset +000001.
+                        // Suppress the arend at offset +000001.
                         addrIter.MoveNext();
                         arSubLine++;    // need to track address map
                         continue;
@@ -1330,7 +1333,7 @@ namespace SourceGen {
 
                         // Put a blank line before the next thing.
                         // TODO(maybe): this gets lost in a partial update, e.g. you add a
-                        //  long comment right after a .arend with no following .arstart and
+                        //  long comment right after a arend with no following arstart and
                         //  then hit "undo", because the blank is logically part of the
                         //  following offset.
                         addBlank = true;
@@ -1649,7 +1652,7 @@ namespace SourceGen {
         }
 
         public AddressMap.AddressRegion GetAddrRegionFromLine(Line line, out bool isSynth) {
-            // A given offset can have one or more .arstart lines and one or more .arend lines.
+            // A given offset can have one or more arstart lines and one or more arend lines.
             // You can't have an end followed by a start, because that would mean the regions
             // overlap.  If there's both start and end present, we have a 1-byte region.
             int offset = line.FileOffset;
@@ -1666,14 +1669,14 @@ namespace SourceGen {
             while (addrIter.Current != null && addrIter.Current.Offset == offset) {
                 AddressMap.AddressChange change = addrIter.Current;
                 if (count == 0) {
-                    // Could be pre-label or .arstart that follows it.  Both go to the same place.
+                    // Could be pre-label or arstart that follows it.  Both go to the same place.
                     isSynth = change.IsSynthetic;
                     return change.Region;
                 }
                 if (change.IsStart && change.Region.HasValidPreLabel) {
                     count--;
                     if (count == 0) {
-                        // This is the .arstart following the pre-label.
+                        // This is the arstart following the pre-label.
                         isSynth = change.IsSynthetic;
                         return change.Region;
                     }

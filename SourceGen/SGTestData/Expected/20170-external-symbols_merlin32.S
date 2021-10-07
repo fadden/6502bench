@@ -1,4 +1,4 @@
-FatConst equ   $4000
+_FatConst equ  $4000
 
 OverVar  equ   $40
 CodeWrap equ   $0f00      ;encases program
@@ -115,7 +115,7 @@ L1000    lda   CodeWrap+255
          ldx   OverVar+3
          ldx   $44
          nop
-         lda   FatConst-1
+         lda   _FatConst-1
          lda   $4000
          lda   $4001
          lda   BankWrap+8

@@ -1664,7 +1664,8 @@ namespace SourceGen {
             }
 
             if (line.IsAddressRangeDirective) {
-                // TODO(someday): make this jump to the actual directive rather than nearby code
+                // TODO(someday): make this jump to the specific directive rather than the first
+                //   (should be able to do it with LineDelta)
                 AddressMap.AddressRegion region = CodeLineList.GetAddrRegionFromLine(line,
                     out bool unused);
                 if (region == null) {
@@ -1674,13 +1675,12 @@ namespace SourceGen {
                 if (!testOnly) {
                     if (line.LineType == LineListGen.Line.Type.ArStartDirective) {
                         // jump to end
-                        GoToLocation(
-                            new NavStack.Location(region.Offset + region.ActualLength - 1, 0, true),
-                            GoToMode.JumpToCodeData, true);
+                        GoToLocation(new NavStack.Location(region.Offset + region.ActualLength - 1,
+                            0, NavStack.GoToMode.JumpToArEnd), true);
                     } else {
                         // jump to start
-                        GoToLocation(new NavStack.Location(region.Offset, 0, true),
-                            GoToMode.JumpToCodeData, true);
+                        GoToLocation(new NavStack.Location(region.Offset,
+                            0, NavStack.GoToMode.JumpToArStart), true);
                     }
                 }
                 return true;
@@ -1706,9 +1706,11 @@ namespace SourceGen {
                             int labelOffset = mProject.FindLabelOffsetByName(dfd.SymbolRef.Label);
                             if (labelOffset >= 0) {
                                 if (!testOnly) {
-                                    // TODO(org): jump to .arstart
-                                    GoToLocation(new NavStack.Location(labelOffset, 0, false),
-                                        GoToMode.JumpToCodeData, true);
+                                    NavStack.GoToMode mode = NavStack.GoToMode.JumpToCodeData;
+                                    if (sym.SymbolSource == Symbol.Source.AddrPreLabel) {
+                                        mode = NavStack.GoToMode.JumpToArStart;
+                                    }
+                                    GoToLocation(new NavStack.Location(labelOffset, 0, mode), true);
                                 }
                                 return true;
                             }
@@ -1719,8 +1721,8 @@ namespace SourceGen {
                                 if (mProject.ActiveDefSymbolList[i] == sym) {
                                     int offset = LineListGen.DefSymOffsetFromIndex(i);
                                     if (!testOnly) {
-                                        GoToLocation(new NavStack.Location(offset, 0, false),
-                                            GoToMode.JumpToCodeData, true);
+                                        GoToLocation(new NavStack.Location(offset, 0,
+                                            NavStack.GoToMode.JumpToCodeData), true);
                                     }
                                     return true;
                                 }
@@ -1737,8 +1739,8 @@ namespace SourceGen {
                 // Operand has an in-file target offset.  We can resolve it as a numeric reference.
                 // Find the line for that offset and jump to it.
                 if (!testOnly) {
-                    GoToLocation(new NavStack.Location(attr.OperandOffset, 0, false),
-                        GoToMode.JumpToCodeData, true);
+                    GoToLocation(new NavStack.Location(attr.OperandOffset, 0,
+                        NavStack.GoToMode.JumpToCodeData), true);
                 }
                 return true;
             } else if (attr.IsDataStart || attr.IsInlineDataStart) {
@@ -1748,8 +1750,8 @@ namespace SourceGen {
                 int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
                 if (operandOffset >= 0) {
                     if (!testOnly) {
-                        GoToLocation(new NavStack.Location(operandOffset, 0, false),
-                            GoToMode.JumpToCodeData, true);
+                        GoToLocation(new NavStack.Location(operandOffset, 0,
+                            NavStack.GoToMode.JumpToCodeData), true);
                     }
                     return true;
                 }
@@ -1809,15 +1811,15 @@ namespace SourceGen {
 
             int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
 
-            // Can only start with .arend if it's single-selection.
+            // Can only start with arend if it's single-selection.
             if (selIndex != lastIndex && selLine.LineType == LineListGen.Line.Type.ArEndDirective) {
                 return false;
             }
 
-            // If multiple lines with code/data are selected, there must not be a .arstart
+            // If multiple lines with code/data are selected, there must not be an arstart
             // between them unless we're resizing a region.  Determining whether or not a resize
-            // is valid is left to the edit dialog.  It's okay for a .arend to be in the middle
-            // so long as the corresponding .arstart is at the current offset.
+            // is valid is left to the edit dialog.  It's okay for an arend to be in the middle
+            // so long as the corresponding arstart is at the current offset.
             if (selLine.LineType == LineListGen.Line.Type.ArStartDirective) {
                 // Skip overlapping region check.
                 return true;
@@ -1856,7 +1858,7 @@ namespace SourceGen {
             int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
             AddressMap addrMap = mProject.AddrMap;
 
-            // The offset of a .arend directive is the last byte in the address region.  It
+            // The offset of an arend directive is the last byte in the address region.  It
             // has a span length of zero because it's a directive, so if it's selected as
             // the last offset then our nextOffset calculation will be off by one.  (This would
             // be avoided by using an exclusive end offset, but that causes other problems.)
@@ -1865,13 +1867,13 @@ namespace SourceGen {
                 nextOffset++;
             }
 
-            // Compute length of selection.  May be zero if it's entirely .arstart/.arend.
+            // Compute length of selection.  May be zero if it's entirely arstart/arend.
             int selectedLen = nextOffset - firstOffset;
 
             AddressMap.AddressRegion curRegion;
             if (CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArStartDirective ||
                     CodeLineList[selIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
-                // First selected line was .arstart/.arend, find the address map entry.
+                // First selected line was arstart/arend, find the address map entry.
                 curRegion = CodeLineList.GetAddrRegionFromLine(CodeLineList[selIndex],
                     out bool isSynth);
                 Debug.Assert(curRegion != null);
@@ -1888,7 +1890,7 @@ namespace SourceGen {
             } else {
                 if (selectedLen == 0) {
                     // A length of zero is only possible if nothing but directives were selected,
-                    // but since the first entry wasn't .arstart/.arend this can't happen.
+                    // but since the first entry wasn't arstart/arend this can't happen.
                     Debug.Assert(false);
                     return;
                 }
@@ -2820,20 +2822,20 @@ namespace SourceGen {
 
             GotoBox dlg = new GotoBox(mMainWin, mProject, offset, mFormatter);
             if (dlg.ShowDialog() == true) {
-                GoToLocation(new NavStack.Location(dlg.TargetOffset, 0, false),
-                    GoToMode.JumpToCodeData, true);
+                GoToLocation(new NavStack.Location(dlg.TargetOffset, 0,
+                    NavStack.GoToMode.JumpToCodeData), true);
                 //mMainWin.CodeListView_Focus();
             }
         }
 
-        public enum GoToMode { Unknown = 0, JumpToCodeData, JumpToNote, JumpToAdjIndex };
         /// <summary>
         /// Moves the view and selection to the specified offset.  We want to select stuff
         /// differently if we're jumping to a note vs. jumping to an instruction.
         /// </summary>
-        /// <param name="gotoOffset">Offset to jump to.</param>
+        /// <param name="newLoc">Location to jump to.</param>
+        /// <param name="mode">Interesting set of lines within that offset.</param>
         /// <param name="doPush">If set, push new offset onto navigation stack.</param>
-        public void GoToLocation(NavStack.Location loc, GoToMode mode, bool doPush) {
+        public void GoToLocation(NavStack.Location newLoc, bool doPush) {
             NavStack.Location prevLoc = GetCurrentlySelectedLocation();
             //Debug.WriteLine("GoToLocation: " + loc + " mode=" + mode + " doPush=" + doPush +
             //    " (curLoc=" + prevLoc + ")");
@@ -2844,8 +2846,7 @@ namespace SourceGen {
             // entry in the symbol table for the current offset, we want to move the selection,
             // so we don't want to bail out if the offset matches.  Easiest thing to do is to
             // do the move but not push it.
-            bool jumpToNote = (mode == GoToMode.JumpToNote);
-            if (loc.Offset == prevLoc.Offset && jumpToNote == prevLoc.IsNote) {
+            if (newLoc.Offset == prevLoc.Offset && newLoc.Mode == prevLoc.Mode) {
                 // we're jumping to ourselves?
                 if (doPush) {
                     Debug.WriteLine("Ignoring push for goto to current offset");
@@ -2853,27 +2854,30 @@ namespace SourceGen {
                 }
             }
 
-            int topLineIndex = CodeLineList.FindLineIndexByOffset(loc.Offset);
+            int topLineIndex = CodeLineList.FindLineIndexByOffset(newLoc.Offset);
             if (topLineIndex < 0) {
-                Debug.Assert(false, "failed goto offset +" + loc.Offset.ToString("x6"));
+                Debug.Assert(false, "failed goto offset +" + newLoc.Offset.ToString("x6"));
                 return;
             }
             int lastLineIndex;
-            if (mode == GoToMode.JumpToNote) {
+            if (newLoc.Mode == NavStack.GoToMode.JumpToNote) {
                 // Select all note lines, disregard the rest.
                 while (CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Note) {
+                    if (CodeLineList[topLineIndex].FileOffset != newLoc.Offset) {
+                        // This can happen if the note got deleted.
+                        break;
+                    }
                     topLineIndex++;
-                    Debug.Assert(CodeLineList[topLineIndex].FileOffset == loc.Offset);
                 }
                 lastLineIndex = topLineIndex + 1;
                 while (lastLineIndex < CodeLineList.Count &&
                         CodeLineList[lastLineIndex].LineType == LineListGen.Line.Type.Note) {
                     lastLineIndex++;
                 }
-            } else if (loc.Offset < 0) {
+            } else if (newLoc.Offset < 0) {
                 // This is the offset of the header comment or a .EQ directive. Don't mess with it.
                 lastLineIndex = topLineIndex + 1;
-            } else if (mode == GoToMode.JumpToCodeData) {
+            } else if (newLoc.Mode == NavStack.GoToMode.JumpToCodeData) {
                 // Advance to the code or data line.
                 while (CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Code &&
                         CodeLineList[topLineIndex].LineType != LineListGen.Line.Type.Data) {
@@ -2881,14 +2885,35 @@ namespace SourceGen {
                 }
 
                 lastLineIndex = topLineIndex + 1;
-            } else if (mode == GoToMode.JumpToAdjIndex) {
+            } else if (newLoc.Mode == NavStack.GoToMode.JumpToAdjIndex) {
                 // Adjust the line position by the line delta.  If the adjustment moves us to
                 // a different element, ignore the adjustment.
                 if (CodeLineList[topLineIndex].FileOffset ==
-                        CodeLineList[topLineIndex + loc.LineDelta].FileOffset) {
-                    topLineIndex += loc.LineDelta;
+                        CodeLineList[topLineIndex + newLoc.LineDelta].FileOffset) {
+                    topLineIndex += newLoc.LineDelta;
                 }
                 lastLineIndex = topLineIndex + 1;
+            } else if (newLoc.Mode == NavStack.GoToMode.JumpToArStart ||
+                    newLoc.Mode == NavStack.GoToMode.JumpToArEnd) {
+                LineListGen.Line.Type matchType = LineListGen.Line.Type.ArStartDirective;
+                if (newLoc.Mode != NavStack.GoToMode.JumpToArStart) {
+                    matchType = LineListGen.Line.Type.ArEndDirective;
+                }
+                // Find first instance of specified type.
+                LineListGen.Line tmpLine = CodeLineList[topLineIndex];
+                while (CodeLineList[topLineIndex].LineType != matchType) {
+                    if (CodeLineList[topLineIndex].FileOffset > newLoc.Offset) {
+                        // This can happen if the region got deleted.
+                        break;
+                    }
+                    topLineIndex++;
+                }
+                lastLineIndex = topLineIndex + 1;
+                // If there's multiple lines, make sure they're all on screen.
+                while (lastLineIndex < CodeLineList.Count &&
+                        CodeLineList[lastLineIndex].LineType == matchType) {
+                    lastLineIndex++;
+                }
             } else {
                 Debug.Assert(false);
                 lastLineIndex = topLineIndex + 1;
@@ -3029,7 +3054,8 @@ namespace SourceGen {
             int offset = CodeLineList[index].FileOffset;
             int lineDelta = index - CodeLineList.FindLineIndexByOffset(offset);
             bool isNote = (CodeLineList[index].LineType == LineListGen.Line.Type.Note);
-            return new NavStack.Location(offset, lineDelta, isNote);
+            return new NavStack.Location(offset, lineDelta,
+                isNote ? NavStack.GoToMode.JumpToNote : NavStack.GoToMode.JumpToAdjIndex);
         }
 
         public void GotoLastChange() {
@@ -3076,11 +3102,11 @@ namespace SourceGen {
             }
 
             if (isNote) {
-                GoToLocation(new NavStack.Location(offset, 0, true),
-                    GoToMode.JumpToNote, true);
+                GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToNote),
+                    true);
             } else {
-                GoToLocation(new NavStack.Location(offset, 0, false),
-                    GoToMode.JumpToCodeData, true);
+                GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToCodeData),
+                    true);
             }
         }
 
@@ -3090,8 +3116,7 @@ namespace SourceGen {
         public void NavigateBackward() {
             Debug.Assert(mNavStack.HasBackward);
             NavStack.Location backLoc = mNavStack.MoveBackward(GetCurrentlySelectedLocation());
-            GoToLocation(backLoc,
-                backLoc.IsNote ? GoToMode.JumpToNote : GoToMode.JumpToAdjIndex, false);
+            GoToLocation(backLoc, false);
         }
 
         public bool CanNavigateForward() {
@@ -3100,8 +3125,7 @@ namespace SourceGen {
         public void NavigateForward() {
             Debug.Assert(mNavStack.HasForward);
             NavStack.Location fwdLoc = mNavStack.MoveForward(GetCurrentlySelectedLocation());
-            GoToLocation(fwdLoc,
-                fwdLoc.IsNote ? GoToMode.JumpToNote : GoToMode.JumpToAdjIndex, false);
+            GoToLocation(fwdLoc, false);
         }
 
         /// <summary>
@@ -3111,8 +3135,9 @@ namespace SourceGen {
         public void GoToLabel(Symbol sym) {
             int offset = mProject.FindLabelOffsetByName(sym.Label);
             if (offset >= 0) {
-                GoToLocation(new NavStack.Location(offset, 0, false),
-                    GoToMode.JumpToCodeData, true);
+                // TODO(someday): jump to correct line for address region pre-labels
+                GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToCodeData),
+                    true);
             } else {
                 Debug.WriteLine("DClick symbol: " + sym + ": label not found");
             }
@@ -4045,14 +4070,23 @@ namespace SourceGen {
                     esb.Append(" (floating)");
                 }
                 esb.Append(CRLF);
+                esb.Append("Pre-label: ");
+                if (!string.IsNullOrEmpty(region.PreLabel)) {
+                    esb.Append("'");
+                    esb.Append(region.PreLabel);
+                    if (region.PreLabelAddress == Address.NON_ADDR) {
+                        esb.Append("' (non-addressable)");
+                    } else {
+                        esb.Append("' addr=$");
+                        esb.Append(mFormatter.FormatAddress(region.PreLabelAddress,
+                            !mProject.CpuDef.HasAddr16));
+                    }
+                } else {
+                    esb.Append("none");
+                }
+                esb.Append(CRLF);
                 esb.Append("Synthetic: " + isSynth);
                 esb.Append(CRLF);
-                if (!string.IsNullOrEmpty(region.PreLabel)) {
-                    esb.Append("Pre-label: '" + region.PreLabel + "' addr=$");
-                    esb.Append(mFormatter.FormatAddress(region.PreLabelAddress,
-                        !mProject.CpuDef.HasAddr16));
-                    esb.Append(CRLF);
-                }
                 esb.Append("Relative: " + region.IsRelative);
                 esb.Append(CRLF);
                 mMainWin.InfoPanelDetail1 = esb.ToString();

@@ -38,6 +38,15 @@ namespace SourceGen {
         // TODO(someday): change the back button to a pop-up list of locations (like the way
         //   VS 2017 does it).
 
+        public enum GoToMode {
+            Unknown = 0,
+            JumpToCodeData,     // destination is first byte of code or data at target offset
+            JumpToNote,         // destination is Note at target offset
+            JumpToAdjIndex,     // destination is first line at target offset plus LineDelta
+            JumpToArStart,      // destination is arstart at target offset.
+            JumpToArEnd,        // destination is arend at target offset
+        };
+
         /// <summary>
         /// Holds enough information to get us back where we were, in style.
         /// </summary>
@@ -49,7 +58,7 @@ namespace SourceGen {
 
             /// <summary>
             /// Number of lines between the first line at the specified offset, and the
-            /// line we actually want to land on.
+            /// line we actually want to land on.  Used when Mode=JumpToAdjIndex.
             /// </summary>
             /// <remarks>
             /// It's possible this line no longer exists.  Easiest test is to compare the
@@ -59,21 +68,22 @@ namespace SourceGen {
             public int LineDelta { get; set; }
 
             /// <summary>
-            /// True if the target is the note at the given offset, rather than the code/data.
+            /// Specifies interesting things to find at the target offset.
             /// </summary>
-            /// <remarks>
-            /// This is an alternative to LineDelta.
-            /// </remarks>
-            public bool IsNote { get; set; }
+            public GoToMode Mode { get; set; }
 
-            public Location(int offset, int lineDelta, bool isNote) {
+            public Location(int offset, int lineDelta, GoToMode mode) {
                 Offset = offset;
                 LineDelta = lineDelta;
-                IsNote = isNote;
+                Mode = mode;
+
+                //if (lineDelta != 0 && mode != GoToMode.JumpToAdjIndex) {
+                //    Debug.WriteLine("HEY: lineDelta=" + lineDelta + " mode=" + mode);
+                //}
             }
 
             public override string ToString() {
-                return string.Format("[+{0:x6},{1},{2}]", Offset, LineDelta, IsNote);
+                return string.Format("[+{0:x6},{1},{2}]", Offset, LineDelta, Mode);
             }
 
             public static bool operator ==(Location a, Location b) {
@@ -83,7 +93,7 @@ namespace SourceGen {
                 if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
                     return false;   // one is null
                 }
-                return a.Offset == b.Offset && a.LineDelta == b.LineDelta && a.IsNote == b.IsNote;
+                return a.Offset == b.Offset && a.LineDelta == b.LineDelta && a.Mode == b.Mode;
             }
             public static bool operator !=(Location a, Location b) {
                 return !(a == b);
@@ -92,7 +102,7 @@ namespace SourceGen {
                 return obj is Location && this == (Location)obj;
             }
             public override int GetHashCode() {
-                return Offset + (LineDelta * 1000000) + (IsNote ? (1<<24) : 0);
+                return Offset + (LineDelta * 1000000) + ((int)Mode << 24);
             }
         }
 

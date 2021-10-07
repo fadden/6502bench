@@ -27,7 +27,7 @@
 "OperandFormats":{
 "207":{
 "Length":3,"Format":"NumericLE","SubFormat":"Symbol","SymbolRef":{
-"Label":"FatConst","Part":"Low"}}},
+"Label":"_FatConst","Part":"Low"}}},
 "LvTables":{
 "192":{
 "Variables":[{

@@ -106,7 +106,7 @@ namespace SourceGen.AsmGen {
                 { "EquDirective", "equ" },
                 { "VarDirective", "equ" },
                 { "ArStartDirective", "org" },
-                { "ArEndDirective", "org_end" },    // not actually used
+                { "ArEndDirective", "adrend" },     // on-screen display only
                 //RegWidthDirective
                 //DataBankDirective
                 { "DefineData1", "dfb" },

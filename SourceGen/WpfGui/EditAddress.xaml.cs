@@ -309,7 +309,7 @@ namespace SourceGen.WpfGui {
                 mPreLabelAddress = curRegion.PreLabelAddress;
 
                 if (isSingleLine) {
-                    // Only thing selected was .arstart/.arend.  First action is to edit
+                    // Only thing selected was arstart/arend.  First action is to edit
                     // the region properties, second action is to convert floating end
                     // to fixed.
                     mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
@@ -332,7 +332,7 @@ namespace SourceGen.WpfGui {
                     }
 
                 } else {
-                    // Selection started with .arstart and included multiple lines.  First
+                    // Selection started with arstart and included multiple lines.  First
                     // action is to resize region.  Second action is edit without resize.
                     // If resize is illegal (e.g. new region exactly overlaps another),
                     // first action is disabled.

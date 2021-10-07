@@ -1,5 +1,5 @@
         !cpu    6502
-FatConst =      $4000
+_FatConst =     $4000
 
 OverVar =       $40
 CodeWrap =      $0f00      ;encases program
@@ -117,7 +117,7 @@ L1000   lda     CodeWrap+255
         ldx     OverVar+3
         ldx     $44
         nop
-        lda     FatConst-1
+        lda     _FatConst-1
         lda     $4000
         lda     $4001
         lda     BankWrap+8
