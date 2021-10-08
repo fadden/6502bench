@@ -19,8 +19,11 @@ The files are:
    not match the data file contents.  The program should tell you this and
    offer to let you locate the correct file.
  * Simple-BadDescLen.dis65 : An operand format descriptor covers a range
-   off the end of the file.  THe program should tell you that it's discarding
+   off the end of the file.  The program should tell you that it's discarding
    the bad format and continuing.
+ * Simple-BadExt.dis65 : The project has an extension script that attempts
+   to perform some basic file I/O that should be blocked by the security
+   sandbox.  (Must look at analyzer output to see the failure.)
  * Simple-BadJSON.dis65 : Garbage has been inserted into the JSON data
    stream.  The project load should fail with an appropriate message.
  * Simple-BadLen.dis65 : The data file length stored in the project file
@@ -29,6 +32,10 @@ The files are:
  * Simple-BadMagic.dis65 : The "magic number" at the start of the project
    file has been damaged.  The project load should fail with an
    appropriate message.
+ * Simple-BadRegions.dis65 : The project has three correct regions, and
+   three bad regions: one is zero-length, one is an exact duplicate of
+   another region, and one straddles two regions.  The bad regions should
+   be discarded with warning messages.
  * Simple-DupLabel.dis65 : More than one line has the same label.  You
    should be warned that the duplicates are being stripped away.
  * Simple-FutureVersion.dis65 : The project has a content-version higher
@@ -36,10 +43,9 @@ The files are:
  * Simple-MissingPlatSym.dis65 : One of the platform symbol files listed in
    the project file does not exist.  You should be notified of the problem
    and loading should continue.  (Furthermore, if you look in the project
-   settings, the missing project file should still be present.)
+   settings, the missing project file should still be listed.)
  * Simple-TooShort.dis65 : Same as Simple-BadMagic, but tests to see if we
    choke when the file is shorter than the magic string.
 
  * ZeroLengthFile : This is intended for use with "new project".  The
    application should refuse to create a new project for a zero-length file.
-

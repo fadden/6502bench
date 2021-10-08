@@ -275,6 +275,8 @@ namespace SourceGen.Sandbox {
                 int spanLength;
                 List<AddressMap.AddressMapEntry> addrEnts =
                     mProject.AddrMap.GetEntryList(out spanLength);
+                // TODO: if Prepare() throws an exception, we should catch it and report
+                //   it to the user.
                 DomainMgr.PluginMgr.PreparePlugins(appRef, spanLength, addrEnts, plSyms);
             }
         }

@@ -14,6 +14,91 @@
 <p><a href="index.html">Back to index</a></p>
 
 
+<h2><a name="address">Define Address Region</a></h2>
+
+<p><a href="intro-details.html#address-regions">Address regions</a>
+may be created, edited, resized, or removed.  Which
+operation is performed depends on the current selection.  You can
+specify the start and end points of a region by selecting the entire
+region, or by selecting just the first and last lines.</p>
+<p>In all cases, you can specify the range's initial address
+as a hexadecimal value.  You can prefix it with '$', but that's not
+required.
+24-bit addresses may be written with a bank separator, e.g. "12/3456"
+would resolve to address $123456.
+If you want to set the region to be non-addressable, enter
+"<code>NA</code>".</p>
+
+<p>You can also enter a <a href="intro-details.html#pre-labels">pre-label</a>
+or specify that the operand should be formatted as a
+<a href="intro-details.html#relative-addr">relative address</a>.
+
+<p>To delete a region, click the "Delete Region" button.</p>
+
+<h4>Create</h4>
+
+<p>If your selection starts with a code or data line, the editor
+will allow to create a new address region.  If a single line was
+selected, the default behavior will be to create a region with a
+floating end point.  If multiple lines were selected, the default
+behavior will be to create a region with a fixed end point.</p>
+
+<p>The address field will be initialized to the address of the
+first selected line.</p>
+
+<p>You can create a child region that shares the same start offset
+as an existing region by selecting the first code or data line
+within that region.  Note that regions with floating end points cannot
+have the same start offset as another region.</p>
+
+<h4>Edit</h4>
+
+<p>If you select only the address region start line, perhaps by
+double-clicking the operand there, you will be able to edit the
+current region's properties.</p>
+
+<p>If the region has a floating end point, you can choose to convert
+it to a fixed end.  The end doesn't move; it just gets fixed in place.
+This is a quick way to "lock down" regions once you've established
+their end points.</p>
+
+<h4>Resize</h4>
+
+<p>If you select multiple lines, and the first line is an address
+region start directive, you will be able to resize that region to
+the selection.  By definition, the updated region will have a fixed
+end point.</p>
+
+<h4>Other notes</h4>
+
+<p>There is no affordance for moving the start offset of a region.  You
+must create a new region and then delete the old one.</p>
+
+<p>Regions may not "straddle" the start or end points of other regions.</p>
+
+<p>Double-clicking on the pseudo-opcode of a region start or end
+declaration will move the selection to the other end, rather than
+opening the editor.</p>
+
+<p>To see detailed information about an address region in the "Info"
+window, select the region start or end directive.  You can see the
+current arrangement of address regions across your entire
+project with Navigate &gt; View Address Map.</p>
+
+
+
+<h2><a name="flags">Override Status Flags</a></h2>
+
+<p>The state of the processor status flags are tracked for every
+instruction.  Each individual flag is recorded as zero, one, or
+"indeterminate", meaning it could hold either value at the start of
+that instruction.  You can override the value of individual flags.</p>
+<p>The 65816 emulation bit, which is not part of the processor status
+register, may also be set in the editor.</p>
+<p>The M, X, and E flags will not be editable unless your CPU configuration
+is set to 65816.</p>
+
+
 <h2><a name="label">Edit Label</a></h2>
 <p>Sets or clears a label at the selected offset.  The label must have the
 <a href="intro-details.html#about-symbols">proper form</a>, and not have the same
@@ -34,7 +119,7 @@ be imported by other projects (see
 <a href="advanced.html#multi-bin">Working With Multiple Binaries</a>).</p>
 
 
-<h2><a name="instruction-operand">Edit Instruction Operand</a></h2>
+<h2><a name="instruction-operand">Edit Operand (Instruction)</a></h2>
 <p>Operands can be formatted explicitly, or you can let the disassembler
 select the format for you.  By default, immediate constants and
 addresses with no matching symbol are formatted as hex.  Symbols
@@ -131,7 +216,8 @@ and comment fields.  If not, a new entry with a generic name and
 pre-filled value field will be created in the nearest table.</p>
 
 
-<h2><a name="data-operand">Edit Data Operand</a></h2>
+<h2><a name="data-operand">Edit Operand (Data)</a></h2>
+
 <p>This dialog offers a variety of choices, and can be used to apply a
 format to multiple lines.  You must select all of the bytes you want
 to format.  For example, to format two bytes as a 16-bit word, you must
@@ -274,91 +360,6 @@ comment will have one fewer character per line in cc65 output.</p>
 <p>The long comment at the very top of the project is special, as it's
 not associated with a file offset.  If you delete it, you can get it
 back by using Edit &gt; Edit Header Comment.</p>
-
-
-<h2><a name="address">Define Address Region</a></h2>
-
-<p>Address regions may be created, edited, resized, or removed.  Which
-operation is performed depends on the current selection.  You can
-specify the start and end points of a region by selecting the entire
-region, or by selecting just the first and last lines.</p>
-<p>In all cases, you can specify the range's initial address
-as a hexadecimal value.  You can prefix it with '$', but that's not
-required.
-24-bit addresses may be written with a bank separator, e.g. "12/3456"
-would resolve to address $123456.
-If you want to set the region to be non-addressable, enter
-"<code>NA</code>".</p>
-
-<p>You can also enter a <a href="intro-details.html#pre-labels">pre-label</a>
-or specify that the operand should be formatted as a
-<a href="intro-details.html#relative-addr">relative address</a>.
-
-<p>To delete a region, click the "Delete Region" button.</p>
-
-<h4>Create</h4>
-
-<p>If your selection starts with a code or data line, the editor
-will allow to create a new address region.  If a single line was
-selected, the default behavior will be to create a region with a
-floating end point.  If multiple lines were selected, the default
-behavior will be to create a region with a fixed end point.</p>
-
-<p>The address field will be initialized to the address of the
-first selected line.</p>
-
-<p>You can create a child region that shares the same start offset
-as an existing region by selecting the first code or data line
-within that region.  Note that regions with floating end points cannot
-have the same start offset as another region.</p>
-
-<h4>Edit</h4>
-
-<p>If you select only the address region start line, perhaps by
-double-clicking the operand there, you will be able to edit the
-current region's properties.</p>
-
-<p>If the region has a floating end point, you can choose to convert
-it to a fixed end.  The end doesn't move; it just gets fixed in place.
-This is a quick way to "lock down" regions once you've established
-their end points.</p>
-
-<h4>Resize</h4>
-
-<p>If you select multiple lines, and the first line is an address
-region start directive, you will be able to resize that region to
-the selection.  By definition, the updated region will have a fixed
-end point.</p>
-
-<h4>Other notes</h4>
-
-<p>There is no affordance for moving the start offset of a region.  You
-must create a new region and then delete the old one.</p>
-
-<p>Regions may not "straddle" the start or end points of other regions.</p>
-
-<p>Double-clicking on the pseudo-opcode of a region start or end
-declaration will move the selection to the other end, rather than
-opening the editor.</p>
-
-<p>To see detailed information about an address region in the "Info"
-window, select the region start or end directive.  You can see the
-current arrangement of address regions across your entire
-project with Navigate &gt; View Address Map.</p>
-
-
-
-<h2><a name="flags">Override Status Flags</a></h2>
-
-<p>The state of the processor status flags are tracked for every
-instruction.  Each individual flag is recorded as zero, one, or
-"indeterminate", meaning it could hold either value at the start of
-that instruction.  You can override the value of individual flags.</p>
-<p>The 65816 emulation bit, which is not part of the processor status
-register, may also be set in the editor.</p>
-<p>The M, X, and E flags will not be editable unless your CPU configuration
-is set to 65816.</p>
-
 
 <h2><a name="data-bank">Edit Data Bank (65816 only)</a></h2>
 
