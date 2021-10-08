@@ -84,6 +84,17 @@ namespace SourceGen {
 
             string helpFilePath = Path.Combine(RuntimeDataAccess.GetDirectory(),
                 HELP_DIR, fileName);
+            if (!File.Exists(helpFilePath)) {
+                // Alternate path, used during development.  If it also doesn't exist, leave
+                // the original path intact so the error message is useful.
+                string altPath = Path.Combine(RuntimeDataAccess.GetDirectory() +
+                        "\\..\\..\\docs\\sgmanual",
+                    fileName);
+                altPath = Path.GetFullPath(altPath);    // normalize
+                if (File.Exists(altPath)) {
+                    helpFilePath = altPath;
+                }
+            }
             string url = "file://" + helpFilePath;
             //url = url.Replace("#", "%23");
             Debug.WriteLine("Requesting help URL: " + url);

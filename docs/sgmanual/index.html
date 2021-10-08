@@ -18,6 +18,16 @@ and 65816 code.  The official web site is
 <p>If you want to get up to speed quickly, start with the
 <a href="https://6502bench.com/sgtutorial/">tutorials</a>.</p>
 
+<div id="webwarn" style="display:none;">
+<p style="color:red;">
+NOTE: the version of the manual on the web may be older or newer
+than the version of the program you're using.  To ensure you're
+reading the correct version, open the manual from within SourceGen,
+using the <samp>Help &gt; Help</samp> menu item or by hitting
+<kbd class="key">F1</kbd>.
+</p>
+</div>
+
 <h2>Contents</h2>
 <ul>
   <li><a href="intro.html">Overview</a>
@@ -210,5 +220,16 @@ and 65816 code.  The official web site is
 <hr/>
 <p>Copyright 2020 faddenSoft</p>
 </div>
+
+<script>
+    // Show a warning when reading the manual on the web (rather than
+    // from a file in the SourceGen installation directory).
+    var proto = window.location.protocol;
+    console.log(proto);
+    if (proto == "http:" || proto == "https:") {
+        document.getElementById("webwarn").style.display = "block";
+    }
+</script>
+
 </body>
 </html>
