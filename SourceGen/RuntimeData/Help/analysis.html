@@ -114,7 +114,7 @@ file.  After a change is made, a full or partial re-analysis is done to
 fill out the Anattribs.</p>
 <p>Consider a simple example:</p>
 <pre>
-         .ORG    $1000
+         .ADDRS  $1000
          JMP     L1003
 L1003    NOP
 </pre>
@@ -323,9 +323,9 @@ if they're associated with the first (opcode) byte of an instruction.</p>
 <p>The uncategorized data analyzer tries to find character strings and
 opportunities to use the ".FILL" operation.  It breaks the file into
 pieces, where contiguous regions hold nothing but data, are not split
-across a ".ORG" directive, are not interrupted by data, and do not
-contain anything that the user has chosen to format.  Each region is
-scanned for matching patterns.  If a match is found, a format entry
+across address region start/end directives, are not interrupted by data,
+and do not contain anything that the user has chosen to format.  Each
+region is scanned for matching patterns.  If a match is found, a format entry
 is added to the Anattrib array.  Otherwise, data is added as single-byte
 values.</p>
 

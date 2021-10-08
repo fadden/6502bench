@@ -113,7 +113,7 @@ specified by the chosen assembler.</p>
 do not affect generated code.</p>
 
 <p>The
-<a href="intro.html#width-disambiguation">operand width disambiguator</a>
+<a href="intro-details.html#width-disambiguation">operand width disambiguator</a>
 strings are used when the width of an instruction operand is unclear.
 You may specify values for all of them or none of them.</p>
 
@@ -221,13 +221,13 @@ are required to process the file correctly.</p>
 They specify which CPU to use, which extension scripts to load, and a
 variety of other things that directly impact how SourceGen processes
 the project.  Because of the potential impact, all changes to
-the project properties are made through the undo/redo buffer.</p>
+the project properties are made through the undo/redo buffer,
+which means you hit "undo" to revert a property change.</p>
 
 <p>The properties editor is divided into four tabs.  Changes aren't pushed
 out to the main application until you close the dialog.  Clicking Apply
 will capture the current changes, ensuring that they're applied even if
 you later hit Cancel, but the changes are not applied immediately.</p>
-<p>All changes are subject to undo/redo.</p>
 
 
 <h3><a name="projprop-general">General</a></h3>
@@ -315,7 +315,7 @@ can be labeled with the letter 'B'.</p>
 
 <h3><a name="projprop-projsym">Project Symbols</a></h3>
 <p>You can add, edit, and delete individual symbols and constants.
-See the <a href="intro.html#about-symbols">symbols</a> section for an
+See the <a href="intro-details.html#about-symbols">symbols</a> section for an
 explanation of how project symbols work.</p>
 
 <p>The Edit Symbol button opens the
@@ -337,7 +337,7 @@ Project Symbols tab selected by hitting F6 from the main code list.</p>
 <h3><a name="projprop-symfiles">Symbol Files</a></h3>
 <p>From here, you can add and remove platform symbol files, or change
 the order in which they are loaded.
-See the <a href="intro.html#about-symbols">symbols</a> section for an
+See the <a href="intro-details.html#about-symbols">symbols</a> section for an
 explanation of how platform symbols work, and the
 <a href="advanced.html#platform-symbols">advanced topics</a> section
 for a description of the file syntax.</p>

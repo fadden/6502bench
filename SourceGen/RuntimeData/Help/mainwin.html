@@ -314,7 +314,7 @@ selection to the navigation stack.  This makes notes useful as bookmarks.</p>
 
 <h3><a name="symbols">Symbols Window</a></h3>
 
-<p>All known <a href="intro.html#about-symbols">symbols</a> are shown
+<p>All known <a href="intro-details.html#about-symbols">symbols</a> are shown
 here.  The filter buttons allow you to screen out symbols you're not
 interested in, such as platform symbols or constants.</p>
 
@@ -327,9 +327,9 @@ way to move around the file, jumping from label to label.</p>
 
 <p>The "type" column uses a two-letter code to identify the symbol's
 type and scope.  The first letter is one of A (auto), U (user),
-P (platform), J (project), or V (variable).  The second letter is one
-of N (non-unique local), L (local), G (global), X (exported),
-E (external), or C (constant).</p>
+P (platform), J (project), R (pre-label), or V (variable).
+The second letter is one of N (non-unique local), L (local), G (global),
+X (exported), E (external), or C (constant).</p>
 
 
 <h3><a name="info">Info Window</a></h3>
@@ -397,7 +397,8 @@ will jump to the nearest instance.</p>
 
 <p>If an instruction or data line has an operand that references an address
 in the file, you can navigate to the operand's location with
-Navigate &gt; Jump to Operand.</p>
+Navigate &gt; Jump to Operand.  You can also do this by double-clicking
+in the opcode column.</p>
 
 <p>When you edit something, lines throughout the listing can change.  This
 is different from a source code editor, where editing a line just changes

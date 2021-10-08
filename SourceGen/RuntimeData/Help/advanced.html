@@ -275,24 +275,29 @@ file, and operate on that.</p>
 <h2><a name="overlap">Overlapping Address Spaces</a></h2>
 <p>Some programs use memory overlays, where multiple parts of the
 code run in the same address in RAM.  Others use bank switching to access
-parts of the program that reside in separate physical RAM, but appear at
-the same address.</p>
-<p>SourceGen allows you to set the same address on multiple parts of
-a file.  Branches to a given address are resolved against the current
-segment first.  For example, consider this:</p>
+parts of the program that reside in separate physical RAM or ROM,
+but appear at the same address.  Nested address regions allow for a
+variety of configurations, which can make address resolution complicated.</p>
+
+<p>The general goal is to have references to an address resolve to
+the "nearest" match.  For example, consider a simple overlay:</p>
 <pre>
-         .ORG    $1000
+         .ADDRS  $1000
          JMP     L1100
 
-         .ORG    $1100
+         .ADDRS  $1100
 L1100    BIT     L1100
 L1103    LDA     #$11
          BRA     L1103
+         .ADREND
 
-         .ORG    $1100
+         .ADDRS  $1100
 L1100_0  BIT     L1100_0
 L1103_0  LDA     #$22
          JMP     L1103_0
+         .ADREND
+
+         .ADREND
 </pre>
 
 <p>Both sections start at $1100, and have branches to $1103.  The branch
@@ -301,6 +306,32 @@ that address chunk, while the branch in the second section resolves to
 the label in the second chunk.  When branches originate outside the current
 address chunk, the first chunk that includes that address is used, as
 it is with the <code>JMP $1000</code> at the start of the file.</p>
+
+<p>The full address-to-offset algorithm is as follows.
+There are two inputs: the file offset of the instruction or data item
+that has the reference (e.g. the JMP or LDA), and the address
+it is referring to.</p>
+<ul>
+  <li>Create a tree with all address regions.  Each "node" in the tree
+    has an offset, length, and start address.</li>
+  <li>Search the tree for a node that includes the offset of the
+    reference source.
+    When there are multiple overlapping regions, descend until the
+    deepest child that spans the offset is found.  This node will be
+    the starting point of the search.</li>
+  <li>Loop until we hit the top of the tree:
+  <ul>
+    <li>Perform a recursive depth-first search of all children of the
+      current node.  They're searched in order of ascending file offset.</li>
+    <li>If the address wasn't found in the children, check the current
+      node.  If we find it here, return this node as the result.</li>
+    <li>Move up to the parent node.
+  </ul></li>
+</ul>
+
+<p>This searches all children and all siblings before checking the parent.
+If we hit the top of the tree without finding a match, we conclude
+that the reference is to an external address.</p>
 
 
 <h2><a name="reloc-data">OMF Relocation Dictionaries</a></h2>

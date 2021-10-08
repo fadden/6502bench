@@ -10,7 +10,7 @@
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen</h1>
+<h1>6502bench SourceGen Reference Manual</h1>
 <p>SourceGen is an interactive disassembler for 6502, 65C02,
 and 65816 code.  The official web site is
 <a href="https://6502bench.com/">https://6502bench.com/</a>.</p>
@@ -22,29 +22,40 @@ and 65816 code.  The official web site is
 <ul>
   <li><a href="intro.html">Overview</a>
   <ul>
-    <li><a href="intro.html#fundamental-concepts">Fundamental Concepts</a></li>
-    <li><a href="intro.html#begin">About 6502 Code</a>
+    <li><a href="intro.html#fundamental-concepts">Fundamentals</a></li>
       <ul>
+        <li><a href="intro.html#begin">About 6502 Code</a>
         <li><a href="intro.html#charenc">Character Encoding</a></li>
+        <li><a href="intro.html#sgconcepts">SourceGen Concepts</a></li>
       </ul></li>
-    <li><a href="intro.html#sgintro">How SourceGen Works</a>
+    <li><a href="intro.html#sgintro">How SourceGen Works</a></li>
+  </ul></li>
+  <li><a href="intro-details.html">Digging Deeper</a>
+  <ul>
+    <li><a href="intro-details.html#about-symbols">All About Symbols</a>
       <ul>
-        <li><a href="intro.html#scripts">Extension Scripts</a></li>
-        <li><a href="intro.html#atags">Code Analyzer Start, Stop, and Skip</a></li>
+        <li><a href="intro-details.html#connecting-operands">Connecting Operands With Labels</a></li>
+        <li><a href="intro-details.html#internal-address-symbols">Internal Address Symbols</a></li>
+        <li><a href="intro-details.html#external-address-symbols">External Address Symbols</a></li>
+        <li><a href="intro-details.html#unique-local-global">Unique vs. Non-Unique and Local vs. Global</a></li>
+        <li><a href="intro-details.html#weak-refs">Weak Symbolic References</a></li>
+        <li><a href="intro-details.html#symbol-parts">Parts and Adjustments</a></li>
+        <li><a href="intro-details.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
       </ul></li>
-    <li><a href="intro.html#sgconcepts">SourceGen Concepts</a></li>
-    <li><a href="intro.html#about-symbols">All About Symbols</a>
+    <li><a href="intro-details.html#width-disambiguation">Width Disambiguation</a></li>
+    <li><a href="intro-details.html#address-regions">Address Regions</a>
       <ul>
-        <li><a href="intro.html#connecting-operands">Connecting Operands With Labels</a></li>
-        <li><a href="intro.html#internal-address-symbols">Internal Address Symbols</a></li>
-        <li><a href="intro.html#external-address-symbols">External Address Symbols</a></li>
-        <li><a href="intro.html#unique-local-global">Unique vs. Non-Unique and Local vs. Global</a></li>
-        <li><a href="intro.html#weak-refs">Weak References</a></li>
-        <li><a href="intro.html#symbol-parts">Parts and Adjustments</a></li>
-        <li><a href="intro.html#nearby-targets">Automatic Use of Nearby Targets</a></li>
+        <li><a href="intro-details.html#fixed-float">Fixed vs. Floating</a></li>
+        <li><a href="intro-details.html#non-addr">Non-Addressable Areas</a></li>
+        <li><a href="intro-details.html#pre-labels">Pre-Labels</a></li>
+        <li><a href="intro-details.html#relative-addr">Relative Addressing</a></li>
       </ul></li>
-    <li><a href="intro.html#width-disambiguation">Width Disambiguation</a></li>
-    <li><a href="intro.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
+    <li><a href="intro-details.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
+    <li><a href="intro-details.html#atags">Directing the Code Analyzer</a>
+      <ul>
+        <li><a href="intro-details.html#scripts">Extension Scripts</a></li>
+      </ul></li>
+    <li><a href="intro-details.html#pseudo-ops">Data and Directive Pseudo-Opcodes</a></li>
   </ul></li>
 
   <li><a href="mainwin.html">Using SourceGen</a>
@@ -72,8 +83,6 @@ and 65816 code.  The official web site is
 
   <li><a href="editors.html">Editors</a>
   <ul>
-    <li><a href="editors.html#address">Edit Address</a></li>
-    <li><a href="editors.html#flags">Edit Status Flags</a></li>
     <li><a href="editors.html#label">Edit Label</a></li>
     <li><a href="editors.html#instruction-operand">Edit Instruction Operand</a>
       <ul>
@@ -84,6 +93,8 @@ and 65816 code.  The official web site is
     <li><a href="editors.html#data-operand">Edit Data Operand</a></li>
     <li><a href="editors.html#comment">Edit Comment</a></li>
     <li><a href="editors.html#long-comment">Edit Long Comment</a></li>
+    <li><a href="editors.html#address">Define Address Region<a></li>
+    <li><a href="editors.html#flags">Override Status Flags</a></li>
     <li><a href="editors.html#data-bank">Edit Data Bank (65816 only)</a></li>
     <li><a href="editors.html#note">Edit Note</a></li>
     <li><a href="editors.html#project-symbol">Edit Project Symbol</a></li>

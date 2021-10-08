@@ -87,7 +87,7 @@ an additional command-line option) to the assembler.</p>
   <li>the format at offset +000000 is a 16-bit numeric data item
     (not executable code, not two 8-byte values, not the first part
     of a 24-bit value, etc.)</li>
-  <li>there is an ORG directive at +000002
+  <li>there is an address region start directive at +000002
   <li>the 16-bit value at +000000 is equal to the address of the
     byte at +000002</li>
   <li>there is no label at offset +000000 (explicit or auto-generated)</li>

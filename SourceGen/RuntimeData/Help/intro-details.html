@@ -1,0 +1,958 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="main.css" rel="stylesheet" type="text/css" />
+<title>More Details - 6502bench SourceGen</title>
+</head>
+
+<body>
+<div id="content">
+<h1>6502bench SourceGen: Intro Details</h1>
+<p><a href="index.html">Back to index</a></p>
+
+<h2><a name="more-details">More Details</a></h2>
+
+<p>This section digs a little deeper into how SourceGen works.</p>
+
+
+
+<h2><a name="about-symbols">All About Symbols</a></h2>
+
+<p>A symbol has two essential parts, a label and a value.  The label is a short
+ASCII string; the value may be an 8-to-24-bit address or a 32-bit numeric
+constant.  Symbols can be defined in different ways, and applied in
+different ways.</p>
+
+<p>The label syntax is restricted to a format that should be compatible
+with most assemblers:</p>
+<ul>
+  <li>2-32 characters long.</li>
+  <li>Starts with a letter or underscore.</li>
+  <li>Comprised of ASCII letters, numbers, and the underscore.</li>
+</ul>
+<p>Label comparisons are case-sensitive, as is customary for programming
+languages.</p>
+<p>Sometimes the purpose of a subroutine or variable isn't immediately
+clear, but you can take a reasonable guess.  You can document your
+uncertainty by adding a question mark ('?') to the end of the label.
+This isn't really part of the label, so it won't appear in the assembled
+output, and you don't have to include it when searching for a symbol.</p>
+<p>Some assemblers restrict the set of valid labels further.  For example,
+64tass uses a leading underscore to indicate a local label, and reserves
+a double leading underscore (e.g. <code>__label</code>) for its own
+purposes.  In such cases, the label will be modified to comply with the
+target assembler syntax.</p>
+
+<p>Operands may use parts of symbols.  For example, if you have a label
+<code>MYSTRING</code>, you can write:</p>
+<pre>
+MYSTRING .STR    "hello"
+         LDA     #&lt;MYSTRING
+         STA     $00
+         LDA     #&gt;MYSTRING
+         STA     $01
+</pre>
+<p>See <a href="#symbol-parts">Parts and Adjustments</a> for more details.</p>
+
+<p>Symbols that represent a memory address within a project are treated
+differently from those outside a project.  We refer to these as internal
+and external addresses, respectively.</p>
+
+
+<h3><a name="connecting-operands">Connecting Operands with Labels</a></h3>
+
+<p>Suppose you have the following code:</p>
+<pre>
+         LDA     $1234
+         JSR     $2345
+</pre>
+<p>If we put that in a source file, it will assemble correctly.
+However, if those addresses are part of the file, the code may break if
+changes are made and things assemble to different addresses.  It would
+be better to generate code that references labels, e.g.:</p>
+<pre>
+         LDA     my_data
+         JSR     nifty_func
+</pre>
+<p>SourceGen tries to establish labels for address operands automatically.
+How this works depends on whether the operand's address is inside the file or
+external, and whether there are existing labels at or near the target
+address.  The details are explored in the next few sections.</p>
+<p>On the 65816 this process is trickier, because addresses are 24 bits
+instead of 16.  For a control-transfer instruction like <code>JSR</code>,
+the high 8 bits come from the Program Bank Register (K).  For a data-access
+instruction like <code>LDA</code>, the high 8 bits come from the Data
+Bank Register (B).  The PBR value is determined by the address in which
+the code is executing, so it's easy to determine.  The DBR value can be
+set arbitrarily.  Sometimes it's easy to figure out, sometimes it has
+to be specified manually.</p>
+
+
+<h3><a name="internal-address-symbols">Internal Address Symbols</a></h3>
+
+<p>Symbols that represent an address inside the file being disassembled
+are referred to as <i>internal</i>.  They come in two varieties.</p>
+
+<p><b>User labels</b> are labels added to instructions or data by the user.
+The editor will try to prevent you from creating a label that has the same
+name as another symbol, but if you manage to do so, the user label takes
+precedence over symbols from other sources.  User labels may be tagged
+as non-unique local, unique local, global, or global and exported.  Local
+vs. global is important for the label localizer, while exported symbols
+can be pulled directly into other projects.</p>
+
+<p><b>Auto labels</b> are automatically generated labels placed on
+instructions or data offsets that are the target of operands.  They're
+formed by appending the hexadecimal address to the letter "L", with
+additional characters added if some other symbol has already defined
+that label.  Options can be set that change the "L" to a character or
+characters based on how the label is referenced, e.g. "B" for branch targets.
+Auto labels are only added where they are needed, and are removed when
+no longer necessary.  Because auto labels may be renamed or vanish, the
+editor will try to prevent you from referring to them explicitly when
+editing operands.</p>
+
+
+<h3><a name="external-address-symbols">External Address Symbols</a></h3>
+
+<p>Symbols that represent an address outside the file being disassembled
+are referred to as <i>external</i>.  These may be ROM entry points,
+data buffers, zero-page variables, or a number of other things.  Because
+the memory address they appear at aren't within the bounds of the file,
+we can't simply put an address label on them.  Three different mechanisms
+exist for defining them.  If an instruction or data operand refers to
+an address outside the file bounds, SourceGen looks for a symbol with
+a matching address value.</p>
+
+<p><b>Platform symbols</b> are defined in platform symbol files.  These
+are named with a ".sym65" extension, and have a fairly straightforward
+name/value syntax.  Several files for popular platforms come with SourceGen
+and live in the <code>RuntimeData</code> directory.  You can also create your
+own, but they have to live in the same directory as the project file.</p>
+
+<p>Platform symbols can be addresses or constants.  Addresses are
+limited to 24-bit values, and are matched automatically.  Constants may
+be 32-bit values, but must be specified manually.</p>
+
+<p>If two platform symbols have the same label, only the most recently read
+one is kept.  If two platform symbols have different labels but the
+same value, both symbols will be kept, but the one in the file loaded
+last will take priority when doing a lookup by address.  If symbols with
+the same value are defined in the same file, the one whose symbol appears
+first alphabetically takes priority.</p>
+
+<p>Platform address symbols have an optional width.  This can be used
+to define multi-byte items, such as two-byte pointers or 256-byte stacks.
+If no width is specified, a default value of 1 is used.  Widths are ignored
+for constants.
+Overlapping symbols are resolved as described earlier, with symbols loaded
+later taking priority over previously-loaded symbols.  In addition,
+symbols defined closer to the target address take priority, so if you put
+a 4-byte symbol in the middle of a 256-byte symbol, the 4-byte symbol will
+be visible because the start point is closer to the addresses it covers
+than the start of the 256-byte range.</p>
+
+<p>Platform symbols can be designated for reading, writing, or both.
+Normally you'd want both, but if an address is a memory-mapped I/O
+location that has different behavior for reads and writes, you'd want
+to define two different symbols, and have the correct one applied
+based on the access type.</p>
+
+<p><b>Project symbols</b> behave like platform symbols, but they are
+defined in the project file itself, through the Project Properties editor.
+The editor will try to prevent you from creating two symbols with the same
+name.  If two symbols have the same value, the one whose label comes
+first alphabetically is used.</p>
+
+<p>Project symbols always have precedence over platform symbols, allowing
+you to redefine symbols within a project.  (You can "hide" a platform
+symbol by creating a project symbol constant with the same name.  Use a
+value like $ffffffff or $deadbeef so you'll know why it's there.)</p>
+
+<p><b>Address region pre-labels</b> are an oddity: they're external
+address symbols that also act like user labels.  These are explained
+in more detail <a href="#pre-labels">later</a>.</p>
+
+<p><b>Local variables</b> are redefinable symbols that are organized
+into tables.  They're used to specify labels for zero-page addresses
+and 65816 stack-relative instructions.  These are explained in more
+detail in the next section.</p>
+
+
+<h4><a name="local-vars">How Local Variables Work</a></h4>
+
+<p>Local variables are applied to instructions that have zero
+page operands (<code>op ZP</code>, <code>op (ZP),Y</code>, etc.), or
+65816 stack relative operands
+(<code>op OFF,S</code> or <code>op (OFF,S),Y</code>).  While they must be
+unique relative to other kinds of labels, they don't have to be unique
+with respect to earlier variable definitions.  So you can define
+<code>TMP .EQ $10</code>, and a few lines later define
+<code>TMP .EQ $20</code>.  This is handy because zero-page addresses are
+often used in different ways by different parts of the program.  For
+example:</p>
+<pre>
+         LDA     ($00),Y
+         INC     $02
+         ... elsewhere ...
+         DEC     $00
+         STA     ($01),Y
+</pre>
+<p>If we had given <code>$00</code> the label <code>PTR</code> and
+<code>$02</code> the label <code>COUNT</code> globally,
+the second pair of instructions would look all wrong.  With local
+variable tables you can set <code>PTR=$00 COUNT=$02</code> for the first chunk,
+and <code>COUNT=$00 PTR=$01</code> for the second chunk.</p>
+
+<p>Local variables have a value and a width.  If we create a pair of
+variable definitions like this:</p>
+<pre>
+PTR      .eq     $00        ;2 bytes
+COUNT    .eq     $02        ;1 byte
+</pre>
+<p>Then this:</p>
+<pre>
+         STA     $00
+         STX     $01
+         LDY     $02
+</pre>
+<p>Would become:</p>
+<pre>
+         STA     PTR
+         STX     PTR+1
+         LDY     COUNT
+</pre>
+
+<p>The scope of a variable definition starts at the point where it is
+defined, and stops when its definition is erased.  There are three
+ways for a table to erase an earlier definition:</p>
+<ol>
+  <li>Create a new definition with the same name.</li>
+  <li>Create a new definition that has an overlapping value.  For
+    example, if you have a two-byte variable <code>PTR = $00</code>,
+    and define a one-byte variable <code>COUNT = $01</code>, the
+    definition for <code>PTR</code> will be cleared because its second
+    byte overlaps.</li>
+  <li>Tables have a "clear previous" flag that erases all previous
+    definitions.  This doesn't usually cause anything to be generated in the
+    assembly sources; instead, it just causes SourceGen to stop using
+    that label.</li>
+</ol>
+<p>As you might expect, you're not allowed to have duplicate labels or
+overlapping values in an individual table.</p>
+<p>If a platform/project symbol has the same value as a local variable,
+the local variable is used.  If the local variable definition is cleared,
+use of the platform/project symbol will resume.</p>
+<p>Not all assemblers support redefinable variables.  In those cases,
+the symbol names will be modified to be unique (e.g. the second definition
+of <code>PTR</code> becomes <code>PTR_1</code>), and variables will have
+global scope.</p>
+
+
+<h3><a name="unique-local-global">Unique vs. Non-Unique and Local vs. Global</a></h3>
+
+<p>Most assemblers have a notion of "local" labels, which have a scope
+that is book-ended by global labels.  These are handy for generic branch
+target names like "loop" or "notzero" that you might want to use in
+multiple places.  The exact definition of local variable scope varies
+between assemblers, so labels that you want to be local might have to
+be promoted to global (and probably renamed).</p>
+<p>SourceGen has a similar concept with a slight twist: they're called
+non-unique labels, because the goal is to be able to use the same
+label in more than one place.  Whether or not they actually turn out
+to be local is a decision deferred to assembly source generation time.
+(You can also declare a label to be a unique local if you like; the
+auto-generated labels like "L1234" do this.)</p>
+<p>When you're writing code for an assembler, it has to be unambiguous,
+because the assembler can't guess at what the output should be.  For a
+disassembler, the output is known, so a greater degree of ambiguity is
+tolerable.  Instead of throwing errors and refusing to continue, the
+source generator can modify the output until it works.  For example:<p>
+<pre>
+@LOOP    LDX     #$02
+@LOOP    DEX
+         BNE     @LOOP
+         DEY
+         BNE     @LOOP
+</pre>
+<p>This would confuse an assembler.  SourceGen already knows which @LOOP
+is being branched to, so it can just rename one of them to "@LOOP1".</p>
+<p>One situation where non-unique labels cause difficulty is with
+weak symbolic references (see next section).  For example, suppose
+the above code then did this:</p>
+<pre>
+         LDA     #&lt;@LOOP
+</pre>
+<p>While it's possible to make an educated guess at which @LOOP was
+meant, it's easy to get wrong.  In situations like this, it's best to
+give the labels different names.</p>
+
+
+<h3><a name="weak-refs">Weak Symbolic References</a></h3>
+
+<p>Symbolic references in operands are "weak references".  If the named
+symbol exists, the reference is used.  If the symbol can't be found, the
+operand is formatted in hex instead.  They're called "weak" because
+failing to resolve the reference isn't considered an error.</p>
+
+<p>It's important to know this when editing a project.  Consider the
+following trivial chunk of code:</p>
+
+<pre>
+1000: 4c0310      JMP     $1003
+1003: ea          NOP
+</pre>
+
+<p>When you load it into SourceGen, it will be formatted like this:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     L1003
+L1003    NOP
+</pre>
+
+<p>The analyzer found the JMP operand, and created an auto label for
+address $1003.  It then created a weak reference to "L1003" in the JMP
+operand.</p>
+
+<p>If you edit the JMP instruction's operand to use the symbol "FOO", the
+results are probably not what you want:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     $1003
+         NOP
+</pre>
+
+<p>This happened because you added a weak reference to "FOO" in the operand,
+but the label doesn't exist.  The operand is formatted as hex.  Because
+there's no longer a reference to L1003, SourceGen removed the auto-label
+as well.</p>
+
+<p>If you set the label "FOO" on the NOP instruction, you'll see what you
+probably wanted:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     FOO
+FOO      NOP
+</pre>
+
+<p>You don't actually need the explicit reference in the JMP instruction.
+If you edit the JMP operand and set it back to "Default", the code will
+still look the same.  This is because SourceGen identified the numeric
+reference, and automatically added a symbolic reference to the label on
+the NOP instruction.</p>
+
+<p>However, suppose you didn't actually want FOO as the operand label.
+You can create a project symbol, BAR with the value $1003, and then edit
+the operand to reference BAR instead.  Your code would then look like:</p>
+<pre>
+BAR      .EQ     $1003
+         .ADDRS  $1000
+         JMP     BAR
+FOO      NOP
+</pre>
+
+<p>If you change the value of BAR in the project symbol file, the operand
+will continue to refer to it, but with an adjustment.  For example, if
+you changed BAR from $1003 to $1007, the code would become:</p>
+<pre>
+BAR      .EQ     $1007
+         .ADDRS  $1000
+         JMP     BAR-4
+FOO      NOP
+</pre>
+
+<p>If you rename a label, all references to that label are updated.  For
+numeric references that happens implicitly.  For explicit operand
+references, the weak references are updated individually.  (Modern IDEs
+call this "refactoring".)</p>
+<p>If you remove a label, all of the numeric references to it will
+reference something else, probably a new auto label.  Weak references
+to the symbol will break and be formatted as hex, but will not be
+removed.  Similarly, removing symbols from a platform or project file
+will break the reference but won't modify the operands.</p>
+
+<h3><a name="symbol-parts">Parts and Adjustments</a></h3>
+
+<p>Sometimes you want to use part of a label, or adjust the value slightly.
+(I use "adjustment" rather than "offset" to avoid confusing it with file
+offsets.) Consider the following example:</p>
+<pre>
+1000: a910      LDA     #$10
+1002: 48        PHA
+1003: a906      LDA     #$06
+1005: 48        PHA
+1006: 60        RTS
+1007: 4c3aff    JMP     $ff3a
+</pre>
+
+<p>This pushes the address of the JMP instruction ($1007) onto the stack,
+and jumps to it with the RTS instruction.  However, RTS requires the
+address of the byte before the target instruction, so we actually push
+$1006.</p>
+
+<p>The disassembler won't know that offset $1007 is code because nothing
+appears to reference it.  After tagging $1007 as a code start point, the
+project looks like this:</p>
+<pre>
+         LDA      #$10
+         PHA
+         LDA      #$06
+         PHA
+         RTS
+
+         JMP      $ff3a
+</pre>
+
+<p>We set a label called "NEXT" on the JMP instruction, and then edit
+the two LDA instructions to reference the high and low parts, yielding:</p>
+<pre>
+         .ADDRS  $1000
+         LDA     #&gt;NEXT
+         PHA
+         LDA     #&lt;NEXT-1
+         PHA
+         RTS
+
+NEXT     JMP     $ff3a
+</pre>
+
+<p>SourceGen will adjust label values by whatever amount is required to
+generate the original value.  If the adjustment seems wrong, make sure
+you're selecting the right part of the symbol.</p>
+
+<p>Different assemblers use different syntaxes to form expressions.  This
+is particularly noticeable in 65816 code.  You can adjust how it appears
+on-screen from the app settings.</p>
+
+<h3><a name="nearby-targets">Automatic Use of Nearby Targets</a></h3>
+
+<p>Sometimes you want to use a symbol that doesn't match up with the
+operand.  SourceGen tries to anticipate situations where that might be
+the case, and apply adjustments for you.</p>
+
+<p>Suppose you have the following:</p>
+<pre>
+         .ADDRS  $1000
+         LDA     #$00
+         STA     L1010
+         LDA     #$20
+         STA     L1011
+         LDA     #$e1
+         STA     L1012
+         RTS
+
+L1010    .DD1    $00
+L1011    .DD1    $00
+L1012    .DD1    $00
+</pre>
+
+<p>Showing stores to three different labeled addresses is fine, but
+the code is actually setting up a single 24-bit address.  For clarity,
+you'd like the output to reflect the fact that it's a single, multi-byte
+variable.  So, if you set a label at $1010, SourceGen removes the
+nearby auto labels, and sets the numeric references to use your label:</p>
+
+<pre>
+         .ADDRS  $1000
+         LDA     #$00
+         STA     DATA
+         LDA     #$20
+         STA     DATA+1
+         LDA     #$e1
+         STA     DATA+2
+         RTS
+
+DATA     .DD1    $00
+         .DD1    $00
+         .DD1    $00
+</pre>
+
+<p>If you decide that you really wanted each store to have its own
+label, you can set labels on the other two addresses.  SourceGen won't
+search for alternate labels if the numeric reference target has a
+user-defined label.</p>
+
+<p>This is also used for self-modifying code.  For example:</p>
+<pre>
+1000: a9ff      LDA     #$ff
+1002: 8d0610    STA     $1006
+1005: 4900      EOR     #$00
+</pre>
+
+<p>The above changes the <code>EOR #$00</code> instruction to
+<code>EOR #$ff</code>.  The operand target is $1006, but we can't
+put a label there because it's in the middle of the instruction.  So
+SourceGen puts a label at $1005 and adjusts it:</p>
+<pre>
+         LDA     #$ff
+         STA     L1005+1
+L1005    EOR     #$00
+</pre>
+
+<p>If you really don't like the way this works, you can disable the
+search for nearby targets entirely from the
+<a href="settings.html#project-properties">project properties</a>.
+Self-modifying code will always be adjusted because of the limitation
+on mid-instruction labels.</p>
+
+
+<h2><a name="width-disambiguation">Width Disambiguation</a></h2>
+
+<p>It's possible to interpret certain instructions in multiple ways.
+For example, "LDA $0000" might be an absolute load from a 16-bit
+address, or it might be a direct page load from an 8-bit address.
+Humans can infer from the fact that it was written with a 4-digit address
+that it's meant to be absolute, but assemblers often treat operands
+purely as numbers, and would just see "LDA 0".  Common practice is to
+use the shortest instruction possible.</p>
+<p>Every assembler seems to address the problem in a slightly different
+way.  Some use opcode suffixes, others use operand prefixes, some
+allow both.  You can configure how they appear in the
+<a href="settings.html#app-settings">application settings</a>.</p>
+<p>SourceGen will only add width disambiguators to opcodes or operands when
+they are needed, with one exception: the opcode suffix for long
+(24-bit address) operations is always applied.  This is done because some
+assemblers require it, insisting on "LDAL" rather than "LDA" for an
+absolute long load, and because it can make 65816 code easier to read.</p>
+
+
+
+<h2 id="address-regions">Address Regions</h2>
+
+<p>Simple programs are loaded at a particular address and executed there.
+The source code starts with a directive that tells the assembler what the
+initial address is, and the code and data statements that follow are
+placed appropriately.  More complicated programs might relocate parts
+of themselves to other parts of memory, or be comprised of multiple
+"overlay" segments that, through disk loading or bank-switching, all execute
+at the same address.</p>
+
+<p>Consider the code in the first tutorial.  It loads at $1000, copies
+part of itself to $2000, and transfers execution there:</p>
+
+<pre>
+                                   .ADDRS $1000
+1000: a0 71                        LDY    #$71
+1002: b9 17 10     L1002           LDA    SRC,y
+1005: 99 00 20                     STA    MAIN,y
+1008: 88                           DEY
+1009: 30 09                        BMI    L1014
+100b: 10 f5                        BPL    L1002
+
+100d: 00                           .DD1   $00
+100e: 68 65 6c 6c+                 .STR   "hello!"
+
+1014: 4c 00 20     L1014           JMP    MAIN
+
+1017:              SRC
+                                   .ADDRS $2000
+2000: ad 00 30     MAIN            LDA    $3000
+[...]
+</pre>
+
+<p>The arrangement of this code can be viewed in a couple of ways.  One
+way is to see it linearly: the code starts at $1000, continues to $1017,
+then restarts at $2000:</p>
+<pre>
++000000  +- start
+         |  $1000 - $1016  length=23 ($0017)
++000016  +- end (floating)
+
++000017  +- start 'MAIN'
+         |  $2000 - $2070  length=113 ($0071)
++000087  +- end (floating)
+</pre>
+
+<p>The other way to picture it is hierarchical: the file loads
+fully at $1000, and has a "child" region at offset +000017 in which the
+address changes to $2000:</p>
+<pre>
++000000  +- start
+         |  $1000 - $1016  length=23 ($0017)
++000017  | +- start 'MAIN'  pre='SRC'
+         | |  $2000 - $2070  length=113 ($0071)
++000087  | +- end
++000087  +- end
+</pre>
+
+<p>The latter is closer to what many assemblers expect, with a "physical"
+PC that starts where the file is loaded, and a "logical" or "pseudo" PC
+that determines how the code is generated.  SourceGen supports both
+approaches.  The only thing that would change in this example is that
+the nested approach allows the "SRC" label to exist.  (More on this
+later, on the section on <a href="#pre-labels">pre-labels</a>.)</p>
+
+<p>The real value of a hierarchical arrangement becomes apparent when
+the area copied out of the file is only a small part of it.  For
+example, suppose something like:</p>
+
+<pre>
+        .ADDRS  $1000
+        LDA     SUB_SRC,Y
+        STA     SUB_DST,Y
+        JMP     CONT
+
+SUB_SRC
+        .ADDRS  $2000
+SUB_DST [small routine]
+        .ADREND
+
+CONT    LDA     #$12
+        JSR     SUB_DST
+</pre>
+<p>In this case, a small routine is copied out of the middle of the
+code that lives at $1000.  We want the code at CONT to pick up where
+things left off.  If SUB_SRC is at $1009, and is 23 bytes long, then
+CONT should be $1020.  We could output <code>.ADDRS $1020</code>
+directly before CONT, but it's inconvenient to work with the generated
+code if we want to modify the subroutine (changing its length)
+and re-assemble it.</p>
+
+
+<h3 id="fixed-float">Fixed vs. Floating</h3>
+
+<p>Sometimes when disassembling code you know exactly where an address
+region starts and ends.  Other times you know where it starts, but won't
+know where it stops until you've had a chance to look at the updated
+disassembly.  In the former case you create a region with a "fixed" end
+point, in the latter you create one with a "floating" end point.</p>
+<p>Address regions with fixed end points always stop in the same place.
+Regions with floating end points stop at the next address region boundary,
+which means they can change size as regions are added or removed.
+The end will be placed for either the start of a new region (a "sibling"),
+or the end of an encapsulating region (the "parent").</p>
+
+<p>Regions that overlap must have a parent/child relationship.  Whichever
+one starts last or ends first is the child.  A strict ordering is necessary
+because a given file offset can only have one address, and if we don't
+know which region is the child we can't know which address to assign.
+Regions cannot straddle the start or end of another region, and cannot
+exactly overlap (have the same start and length) as another region.
+One consequence of these rules is that "floating" regions cannot share
+a start offset with another region, because their end point would be
+adjusted to match the end of the other region.</p>
+
+<p>The arrangement of regions is particularly important when attempting
+to resolve an address operand (such as a JSR) to a location within the
+file.  The process is straightforward if the address only appears once,
+but when overlays cause multiple parts of the file to have the same
+address, the operand target may be in different places depending on where
+the call is being made from.
+The algorithm for resolving addresses is described
+in the <a href="advanced.html#overlap">advanced topics</a> section.</p>
+
+
+<h3 id="non-addr">Non-Addressable Areas</h3>
+
+<p>Some files have contents that aren't actually loaded into memory
+addressable by the 6502.  One example is a file header, such as a load
+address extracted by the system when reading the program into memory, or
+something intended to be read by an emulator.  Another example is the
+CHR graphic data on the NES, which is loaded into an area inaccessible
+to the CPU.</p>
+
+<p>The generated source file must recreate the original binary exactly,
+but we don't really want to assign an address to non-addressable data,
+because it should never be resolved as the target of a JSR or LDA.  To
+handle this case, you can set a region's address to "NA".  The assembler
+needs to have <i>some</i> notion of address, so the start address will
+be treated as zero.</p>
+
+<p>Non-addressable regions cannot include executable code.  You may put
+labels on data items, but attempting to reference them will cause a
+warning and will likely generate code that doesn't assemble.</p>
+
+<p>It's possible to delete all address regions from a project, or edit
+them so that there are "holes" not covered by a region.
+To handle this, all projects are effectively covered by a non-addressable
+region that spans the entire file.  Any part of the file that isn't
+explicitly covered by a user-specified region will be provided an
+auto-generated non-addressable region.  Such regions don't actually exist,
+so attempting to edit one will actually cause a new region to be created.</p>
+
+
+<h3 id="pre-labels">Pre-Labels</h3>
+
+<p>The need for pre-labels was illustrated in the earlier example, where
+code in Tutorial1 was copied from $1017 to $2000.  The fundamental issue
+is that offset +000017 has <i>two</i> addresses: $1017 and $2000.  The
+assembler can only generate code for one.  Pre-labels allow you to do
+the same thing you'd do in the source code, which is to add a label
+immediately before the address is changed.</p>
+
+<p>Pre-labels are "external" symbols, similar to project symbols,
+because they refer to an address that is outside the file bounds.
+They're always treated as having global scope.
+However, they also behave like user labels, because they're generated
+as part of the instruction stream and interfere with local label
+references that cross them.</p>
+
+<p>The address of a pre-label is determined by the parent region.
+Suppose you have a file with an arrangement like:</p>
+<pre>
+  region1 start
+   ...
+    region2 start
+     ...
+    region2 end
+  region1 end
+</pre>
+
+<p>You can put a pre-label on <code>region2</code>, which will be the
+address of the byte in <code>region1</code> right before the address
+changed.  You can't put a pre-label on <code>region1</code>, because
+before <code>region1</code> there was no address.  Similarly:</p>
+<pre>
+  region1 start
+   ...
+  region1 end
+  region2 start
+   ...
+  region2 end
+</pre>
+
+<p>You can't put a pre-label on <code>region2</code> because its parent
+is non-addressable.  <code>region1</code>'s address doesn't apply,
+because <code>region1</code> ended before the label would be issued.</p>
+
+
+<h3 id="relative-addr">Relative Addressing</h3>
+
+<p>It is occasionally useful to output an address region start directive
+that uses relative addressing instead of absolute addressing.  For
+example, given:</p>
+<pre>
+        .ADDRS  $1000
+        [...]
+        .ADDRS  $2000
+</pre>
+<p>We could instead generate:</p>
+<pre>
+        .ADDRS  $1000
+        [...]
+        .ADDRS  *+$0fe9
+</pre>
+
+<p>This has no effect on the definition of the region.  It only affects
+how the start directive is generated in the assembly source file.</p>
+
+<p>The value is an offset from the current assembler program counter.
+If the new region is the child of a non-addressable region, a relative
+offset cannot be used.</p>
+
+
+
+<h2><a name="atags">Directing the Code Analyzer</a></h2>
+
+<p>Sometimes SourceGen can't automatically find the start or end of an
+instruction stream, or gets confused by inline data.  These situations
+can be resolved by adding analyzer tags.</p>
+
+<p><b>Code start point</b> tags tell the analyzer to add the offset
+to the list of instruction start points.  Suppose you've got a code
+library that begins with jump vectors, like this:</p>
+<pre>
+1000: 4c0910    JMP     $1009
+1003: 4cef10    JMP     $10ef
+1006: 4c3012    JMP     $1230
+1009: 18        CLC
+</pre>
+
+<p>When opened with SourceGen, it will look like this:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     L1009
+
+         .DD1    $4c
+         .DD1    $ef
+         .DD1    $10
+         .DD1    $4c
+         .DD1    $30
+         .DD1    $12
+L1009    CLC
+</pre>
+
+<p>SourceGen doesn't see any code that jumps to $1003 or $1006, so it
+assumes those are data.  Further, the functions at those addresses may
+also be considered data unless some bit of code reachable from L1009
+calls into them.  If you tag $1003 and $1006 as code start points,
+you'll get better results:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     L1009
+         JMP     L10ef
+         JMP     L1230
+L1009    CLC
+</pre>
+
+<p>Be careful that you only tag the instruction opcode byte.  If
+you tagged each and every byte from $1003 to $1008, you would
+end up with a mess:</p>
+<pre>
+         .ADDRS  $1000
+         JMP     L1009
+         JMP &#x25bc;   L10ef
+         BPL &#x25bc;   L1053
+         JMP &#x25bc;   L1230
+         BMI     L101b
+L1009    CLC
+</pre>
+
+<p>The exact set of instructions shown depends on your CPU configuration.
+The problem is that the bytes in the middle of the instruction have
+been tagged as start points, so SourceGen is treating them as
+embedded instructions.  $EF and $12 aren't valid 6502 opcodes, so
+they're being ignored, but $10 is BPL and $30 is BMI.  Because tagging
+multiple consecutive bytes is rarely useful, SourceGen only applies code
+start tags to the first byte in a selected line.</p>
+
+<p><b>Code stop point</b> tags tell the analyzer when it should stop.  For
+example, suppose address $ff00 is known to always be nonzero, and the code
+uses that fact to get a branch-always on the 6502:</p>
+<pre>
+         .ADDRS  $1000
+         LDA     $ff00
+         BNE     L1010
+         BRK     $11
+</pre>
+
+<p>By tagging the BRK as a code stop point, you're telling the analyzer that
+it should stop trying to execute code when it reaches that point.  (Note
+that this example would actually be better solved by setting a status flag
+override on the BNE that sets Z=0, so the code tracer will know it's a
+branch-always and just do the right thing.)  As with code start points,
+code stop points should only be placed on the opcode byte.  Placing a
+code stop point in the middle of what SourceGen believes to be instruction
+will have no effect.</p>
+<p>As with code start points, only the first byte in each selected line will
+be tagged.</p>
+
+<p><b>Inline data</b> tags identify bytes as being part of the
+instruction stream, but not instructions.  A simple example of this
+is the ProDOS 8 call interface on the Apple II, which looks like this:</p>
+<pre>
+         JSR     $bf00
+         .DD1    $function
+         .DD2    $address
+         BCS     BAD
+</pre>
+
+<p>The three bytes following the <code>JSR $bf00</code> should be tagged
+as inline data, so that the code analyzer skips over them and continues the
+analysis at the <code>BCS</code> instruction.  You can think of these as
+"code skip" tags, but they're different from stop/start points, because
+every byte of inline data must be tagged.  When
+applying the tag, all bytes in a selected line will be modified.</p>
+<p>If code branches into a region that is tagged as inline data, the
+branch will be ignored.</p>
+
+
+<h3><a name="scripts">Extension Scripts</a></h3>
+
+<p>Extension scripts are C# source files that are compiled and
+executed by SourceGen.  They can be added to a project from SourceGen's
+runtime data directory, or can live in the directory next to the project
+file.  They're used to generate visualizations of graphical data, and
+to format inline data automatically.</p>
+<p>The inline data formatting feature can significantly reduce the tedium
+in certain projects.  For example, suppose the code uses a string print
+routine that embeds a null-terminated string right after a JSR.  Ordinarily
+you'd have to walk through the code, marking every instance by hand so
+the disassembler would know where the string ends and execution resumes.
+With an extension script, you can just pass in the print routine's label,
+and let the script do the formatting automatically.</p>
+
+<p>To reduce the chances of a script causing problems, all scripts are
+executed in a sandbox with severely restricted access.  Notably, nothing
+in the sandbox can access files, except to read files from the PluginDll
+directory.</p>
+<p>The PluginDll directory lives next to the SourceGen executable, and
+contains all of the compiled script DLLs, as well as two pre-built
+application DLLs that plugins are allowed access to.  The contents
+are persistent, to avoid recompiling the scripts every time SourceGen
+is launched, but may be manually deleted without harm.</p>
+<p>More details can be found in the
+<a href="advanced.html#extension-scripts">advanced topics</a> section.</p>
+
+
+<h2><a name="pseudo-ops">Data and Directive Pseudo-Opcodes</a></h2>
+
+<p>The on-screen code list shows assembler directives that are similar
+to what the various cross-assemblers provide.  The actual directives
+generated for a given assembler may match exactly or be totally different.
+The idea is to represent the concept behind the directive, then let the
+code generator figure out the implementation details.</p>
+
+<p>There are eight assembler directives that appear in the code list:</p>
+<ul>
+  <li>.EQ - defines a symbol's value.  These are generated automatically
+    when an operand that matches a platform or project symbol is found.</li>
+  <li>.VAR - defines a local variable.  These are generated for
+    local variable tables.</li>
+  <li>.ADDRS/.ADREND - specifies the start or end of an
+    address region.</li>
+  <li>.RWID - specifies the width of the accumulator and index registers
+    (65816 only).  Note this doesn't change the actual width, just tells
+    the assembler that the width has changed.</li>
+  <li>.DBANK - specifies what value the Data Bank Register holds
+    (65816 only).  Used when matching operands to labels.</li>
+  <li>.JUNK - indicates that the data in a range of bytes is irrelevant.
+    (When generating sources, this will become .FILL or .BULK
+    depending on the contents of the memory region and the assembler's
+    capabilities.)</li>
+  <li>.ALIGN - a special case of .JUNK that indicates the irrelevant
+    bytes exist to force alignment to a memory boundary (usually a
+    256-byte page).  Depending on the memory contents, it may be possible
+    to output this as an assembler-specific alignment directive.</li>
+</ul>
+
+<p>Every data item is represented by a pseudo-op.  Some of them may
+represent hundreds of bytes and span multiple lines.</p>
+<ul>
+  <li>.DD1, .DD2, .DD3, .DD4 - basic "define data" op.  A 1-4 byte
+    little-endian value.</li>
+  <li>.DBD2, .DBD3, .DBD4 - "define big-endian data".  2-4 bytes of
+    big-endian data.  (The 3- and 4-byte versions are not currently
+    available in the UI, since they're very unusual and few assemblers
+    support them.)</li>
+  <li>.BULK - data packed in as compact a form as the assembler allows.
+    Useful for chunks of graphics data.</li>
+  <li>.FILL - a series of identical bytes.  The operand
+    has two parts, the byte count followed by the byte value.</li>
+</ul>
+
+<p>In addition, several pseudo-ops are defined for string constants:</p>
+<ul>
+  <li>.STR - basic character string.</li>
+  <li>.RSTR - string in reverse order.</li>
+  <li>.ZSTR - null-terminated string.</li>
+  <li>.DSTR - Dextral Character Inverted string.  The high bit of the
+    last byte is flipped.</li>
+  <li>.L1STR - string prefixed with a length byte.</li>
+  <li>.L2STR - string prefixed with a length word.</li>
+</ul>
+
+<p>You can configure the pseudo-operands to look more like what your
+favorite assembler uses in the
+<a href="settings.html#appset-pseudoop">Pseudo-Op</a> tab in the
+application settings.</p>
+
+<p>String constants start and end with delimiter characters, typically
+single or double quotes.  You can configure the delimiters differently
+for each character encoding, so that it's obvious whether the text is
+in ASCII or PETSCII.  See the
+<a href="settings.html#appset-textdelim">Text Delimiters</a> tab in
+the application settings.</p>
+
+
+</div>
+
+<div id="footer">
+<p><a href="index.html">Back to index</a></p>
+</div>
+</body>
+<!-- Copyright 2018 faddenSoft -->
+</html>
