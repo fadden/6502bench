@@ -74,6 +74,8 @@ namespace MakeDist {
                 SourceFileSpec.NotBins, true, null),
             new CopySpec("SourceGen/Examples", "Examples",
                 SourceFileSpec.All, true, null),
+            new CopySpec("docs/sgmanual", "RuntimeData/Help",
+                SourceFileSpec.All, false, null),
         };
         private static CopySpec[] sTestSpec = {
             new CopySpec("SourceGen/SGTestData", "SGTestData",
