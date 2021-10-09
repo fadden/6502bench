@@ -107,17 +107,17 @@ a4040   bit     a4040
         .here               ;$4000
 
 
+; EDIT: create region starting at $e000, ending at REGION2_END; relative
+        .logical $e000
+tailend
+partek  bit     part2k
+late    nop
+        jmp     partdk
+
 ; EDIT: create region starting at $d000, ending at REGION2_END; relative
         .logical $d000
-tailend
-partdk  bit     part2k
-late    nop
-        jmp     partek
 
-; EDIT: create
-        .logical $e000
-
-partek  bit     partek
+partdk  bit     partdk
         jmp     partfk
 
 ; EDIT: create, make it floating

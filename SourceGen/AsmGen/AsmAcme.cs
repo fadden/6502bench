@@ -600,7 +600,7 @@ namespace SourceGen.AsmGen {
                 }
                 AddressMap.AddressRegion region = change.Region;
                 string addrStr;
-                if (region.IsRelative && region.PreLabelAddress != Address.NON_ADDR) {
+                if (region.HasValidIsRelative) {
                     int diff = nextAddress - region.PreLabelAddress;
                     string pfxStr;
                     if (diff >= 0) {

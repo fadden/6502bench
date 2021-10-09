@@ -1,10 +1,12 @@
          org   $0000
          dw    $3000      ;load address
 
-         org   $3000
+         org   $1000
+         org   *+$1000
+         org   *+$1000
 L3000    bit   L3000
 :L3003   lda   :L3003
-         and   :LD003
+         and   :LE003
          jmp   :L200C
 
          org   $200c
@@ -19,7 +21,7 @@ L3000    bit   L3000
          hex   ce554c4c2d5445524d20d0c5d4d3c3c9c920535452494e4700
          dfb   $80
          dw    :L3003
-         dw    :LD003
+         dw    :LE003
          dfb   $80
 
          org   $4000
@@ -68,21 +70,22 @@ L3000    bit   L3000
 :L4040   bit   :L4040
          bit   :L5017
          nop
-         jmp   :LD000
-
-         org   $d000
-:LD000   bit   :L200C
-:LD003   nop
          jmp   :LE000
 
-         org   $e000
-:LE000   bit   :LE000
+         org   $1082
+         org   *+$cf7e
+:LE000   bit   :L200C
+:LE003   nop
+         jmp   :LD000
+
+         org   *-$1007
+:LD000   bit   :LD000
          jmp   :LF000
 
          org   $f000
 :LF000   bit   :LF000
          lda   :L3003
-         and   :LD003
+         and   :LE003
          nop
          rts
 

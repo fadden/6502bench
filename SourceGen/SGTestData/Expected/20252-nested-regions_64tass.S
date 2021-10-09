@@ -18,7 +18,7 @@ _L11018 lda     _L11018
         jmp     _L11026
 
 _L1101F .byte   $80
-        .logical *-$011020
+        .logical $0000
         .byte   $ea
         .byte   $60
         .dword  _L31004

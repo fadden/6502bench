@@ -7,7 +7,7 @@
         .logical *+$1000
 L3000   bit     L3000
 _L3003  lda     _L3003
-        and     _LD003
+        and     _LE003
         jmp     _L200C
 
         .here
@@ -22,7 +22,7 @@ _L1012  bit     _L1012
         .null   "Null-term PETSCII string"
         .byte   $80
         .word   _L3003
-        .word   _LD003
+        .word   _LE003
         .byte   $80
         .here
 
@@ -72,22 +72,22 @@ _L5017  rts
 _L4040  bit     _L4040
         bit     _L5017
         nop
-        jmp     _LD000
-
-        .here
-        .logical *+$bf7e
-_LD000  bit     _L200C
-_LD003  nop
         jmp     _LE000
 
-        .logical $e000
-_LE000  bit     _LE000
+        .here
+        .logical *+$cf7e
+_LE000  bit     _L200C
+_LE003  nop
+        jmp     _LD000
+
+        .logical *-$1007
+_LD000  bit     _LD000
         jmp     _LF000
 
         .logical $f000
 _LF000  bit     _LF000
         lda     _L3003
-        and     _LD003
+        and     _LE003
         nop
         rts
 

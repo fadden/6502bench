@@ -97,6 +97,18 @@ namespace SourceGen.AsmGen {
         private int mNextAddress = -1;
 
         /// <summary>
+        /// True if we've seen an "is relative" flag in a block of address region start directives.
+        /// </summary>
+        /// <remarks>
+        /// The trick with IsRelative is that, if there are multiple arstarts at the same
+        /// offset, we need to output some or all of them, starting from the one just before
+        /// the first IsRelative start.  We probably want to disable the use of Flush and
+        /// just generate them as they appear, using the next Flush as the signal to return
+        /// to standard behavior.
+        /// </remarks>
+        bool mIsInRelative = false;
+
+        /// <summary>
         /// Holds detected version of configured assembler.
         /// </summary>
         private CommonUtil.Version mAsmVersion = CommonUtil.Version.NO_VERSION;
@@ -540,34 +552,73 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputArDirective(CommonUtil.AddressMap.AddressChange change) {
-            if (change.IsStart && change.Region.HasValidPreLabel) {
-                // Need to output the previous ORG, if any, then a label on a line by itself.
-                if (mNextAddress >= 0) {
-                    OutputLine(string.Empty,
-                        SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                        SourceFormatter.FormatHexValue(mNextAddress, 4),
-                        string.Empty);
-                }
-                string labelStr = mLocalizer.ConvLabel(change.Region.PreLabel);
-                OutputLine(labelStr, string.Empty, string.Empty, string.Empty);
-            }
-
             int nextAddress = change.Address;
             if (nextAddress == Address.NON_ADDR) {
                 // Start non-addressable regions at zero to ensure they don't overflow bank.
                 nextAddress = 0;
             }
+
+            if (change.IsStart) {
+                AddressMap.AddressRegion region = change.Region;
+                if (region.HasValidPreLabel || region.HasValidIsRelative) {
+                    // Need to output the previous ORG, if one is pending.
+                    if (mNextAddress >= 0) {
+                        OutputLine(string.Empty,
+                            SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                            SourceFormatter.FormatHexValue(mNextAddress, 4),
+                            string.Empty);
+                    }
+                }
+                if (region.HasValidPreLabel) {
+                    string labelStr = mLocalizer.ConvLabel(change.Region.PreLabel);
+                    OutputLine(labelStr, string.Empty, string.Empty, string.Empty);
+                }
+                if (region.HasValidIsRelative) {
+                    // Found a valid IsRelative.  Switch to "relative mode" if not there already.
+                    mIsInRelative = true;
+                }
+                if (mIsInRelative) {
+                    // Once we see a region with IsRelative set, we output regions as we
+                    // find them until the next Flush.
+                    string addrStr;
+                    if (region.HasValidIsRelative) {
+                        int diff = nextAddress - region.PreLabelAddress;
+                        string pfxStr;
+                        if (diff >= 0) {
+                            pfxStr = "*+";
+                        } else {
+                            pfxStr = "*-";
+                            diff = -diff;
+                        }
+                        addrStr = pfxStr + SourceFormatter.FormatHexValue(diff, 4);
+                    } else {
+                        addrStr = SourceFormatter.FormatHexValue(nextAddress, 4);
+                    }
+                    OutputLine(string.Empty,
+                        SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                        addrStr, string.Empty);
+
+                    mNextAddress = -1;
+                    return;
+                }
+            }
+
             mNextAddress = nextAddress;
         }
 
         // IGenerator
         public void FlushArDirectives() {
-            // TODO(someday): handle IsRelative
-            OutputLine(string.Empty,
-                SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
-                SourceFormatter.FormatHexValue(mNextAddress, 4),
-                string.Empty);
+            // Output pending directives.  There will always be something to do here unless
+            // we were in "relative" mode.
+            Debug.Assert(mNextAddress >= 0 || mIsInRelative);
+            if (mNextAddress >= 0) {
+                OutputLine(string.Empty,
+                    SourceFormatter.FormatPseudoOp(sDataOpNames.ArStartDirective),
+                    SourceFormatter.FormatHexValue(mNextAddress, 4),
+                    string.Empty);
+            }
             mNextAddress = -1;
+            mIsInRelative = false;
         }
 
         // IGenerator

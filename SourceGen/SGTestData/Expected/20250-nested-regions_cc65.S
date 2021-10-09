@@ -2,10 +2,12 @@
          .org    $0000
          .word   $3000      ;load address
 
-         .org    $3000
+         .org    $1000
+         .org    *+$1000
+         .org    *+$1000
 L3000:   bit     L3000
 @L3003:  lda     @L3003
-         and     @LD003
+         and     @LE003
          jmp     @L200C
 
          .org    $200c
@@ -21,7 +23,7 @@ L3000:   bit     L3000
          .byte   $c9,$20,$53,$54,$52,$49,$4e,$47,$00
          .byte   $80
          .word   @L3003
-         .word   @LD003
+         .word   @LE003
          .byte   $80
 
          .org    $4000
@@ -70,21 +72,22 @@ L3000:   bit     L3000
 @L4040:  bit     @L4040
          bit     @L5017
          nop
-         jmp     @LD000
-
-         .org    $d000
-@LD000:  bit     @L200C
-@LD003:  nop
          jmp     @LE000
 
-         .org    $e000
-@LE000:  bit     @LE000
+         .org    $1082
+         .org    *+$cf7e
+@LE000:  bit     @L200C
+@LE003:  nop
+         jmp     @LD000
+
+         .org    *-$1007
+@LD000:  bit     @LD000
          jmp     @LF000
 
          .org    $f000
 @LF000:  bit     @LF000
          lda     @L3003
-         and     @LD003
+         and     @LE003
          nop
          rts
 

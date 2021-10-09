@@ -2,7 +2,7 @@
 {
 "_ContentVersion":5,
 "FileDataLength":156,
-"FileDataCrc32":1681364707,
+"FileDataCrc32":367497130,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -74,17 +74,17 @@
 
 {
 "Offset":132,
-"Addr":53248,
+"Addr":57344,
 "Length":24,
 "PreLabel":"",
 "IsRelative":true},
 
 {
 "Offset":139,
-"Addr":57344,
+"Addr":53248,
 "Length":17,
 "PreLabel":"",
-"IsRelative":false},
+"IsRelative":true},
 
 {
 "Offset":145,

@@ -7,7 +7,7 @@
         !pseudopc *+$1000 {
 L3000   bit     L3000
 @L3003  lda     @L3003
-        and     @LD003
+        and     @LE003
         jmp     @L200C
 
         }
@@ -22,7 +22,7 @@ L3000   bit     L3000
         !pet    "Null-term PETSCII string",$00
         !byte   $80
         !word   @L3003
-        !word   @LD003
+        !word   @LE003
         !byte   $80
         }
 
@@ -72,22 +72,22 @@ L3000   bit     L3000
 @L4040  bit     @L4040
         bit     @L5017
         nop
-        jmp     @LD000
-
-        }
-        !pseudopc *+$bf7e {
-@LD000  bit     @L200C
-@LD003  nop
         jmp     @LE000
 
-        !pseudopc $e000 {
-@LE000  bit     @LE000
+        }
+        !pseudopc *+$cf7e {
+@LE000  bit     @L200C
+@LE003  nop
+        jmp     @LD000
+
+        !pseudopc *-$1007 {
+@LD000  bit     @LD000
         jmp     @LF000
 
         !pseudopc $f000 {
 @LF000  bit     @LF000
         lda     @L3003
-        and     @LD003
+        and     @LE003
         nop
         rts
 

@@ -183,7 +183,7 @@ namespace CommonUtil {
             public int ActualLength { get; private set; }
 
             /// <summary>
-            /// Address associated with pre-label.
+            /// Address associated with pre-label and relative addressing.
             /// </summary>
             public int PreLabelAddress { get; private set; }
 
@@ -204,6 +204,19 @@ namespace CommonUtil {
             public bool HasValidPreLabel {
                 get {
                     return !string.IsNullOrEmpty(PreLabel) && PreLabelAddress != NON_ADDR;
+                }
+            }
+
+            /// <summary>
+            /// Is this region validly marked "is relative"?
+            /// </summary>
+            /// <remarks>
+            /// The relative address is determined by subtracting the Address from the
+            /// PreLabelAddress, so neither may be NON_ADDR.
+            /// </remarks>
+            public bool HasValidIsRelative {
+                get {
+                    return IsRelative && PreLabelAddress != NON_ADDR && Address != NON_ADDR;
                 }
             }
 

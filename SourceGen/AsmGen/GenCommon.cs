@@ -90,6 +90,7 @@ namespace SourceGen.AsmGen {
                     }
                 }
 
+                // Reached end of start directives.  Write the last one.
                 if (arDirectPending) {
                     gen.FlushArDirectives();
                     arDirectPending = false;
