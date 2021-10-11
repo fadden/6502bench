@@ -113,6 +113,10 @@ limitations under the License.
     <system:String x:Key="str_InfoLineSumNonFmt">Line {0}: {1}</system:String>
     <system:String x:Key="str_InfoLineSumPluralFmt">Line {0}: {1} bytes of {2}</system:String>
     <system:String x:Key="str_InfoLineSumSingularFmt">Line {0}: {1} byte of {2}</system:String>
+    <system:String x:Key="str_InfoMultiLineSumFmt">{0} lines selected</system:String>
+    <system:String x:Key="str_InfoMultiLineStartFmt">First: line {0} offset {1}</system:String>
+    <system:String x:Key="str_InfoMultiLineEndFmt">Last: line {0} offset {1}</system:String>
+    <system:String x:Key="str_InfoMultiLineLenFmt">Selection spans {0} bytes</system:String>
     <system:String x:Key="str_InitialExtensionScripts">Extension scripts:</system:String>
     <system:String x:Key="str_InitialParameters">Default settings:</system:String>
     <system:String x:Key="str_InitialSymbolFiles">Symbol files:</system:String>

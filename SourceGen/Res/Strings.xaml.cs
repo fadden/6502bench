@@ -207,6 +207,14 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_InfoLineSumPluralFmt");
         public static string INFO_LINE_SUM_SINGULAR_FMT =
             (string)Application.Current.FindResource("str_InfoLineSumSingularFmt");
+        public static string INFO_MULTI_LINE_SUM_FMT =
+            (string)Application.Current.FindResource("str_InfoMultiLineSumFmt");
+        public static string INFO_MULTI_LINE_START_FMT =
+            (string)Application.Current.FindResource("str_InfoMultiLineStartFmt");
+        public static string INFO_MULTI_LINE_END_FMT =
+            (string)Application.Current.FindResource("str_InfoMultiLineEndFmt");
+        public static string INFO_MULTI_LINE_LEN_FMT =
+            (string)Application.Current.FindResource("str_InfoMultiLineLenFmt");
         public static string INITIAL_EXTENSION_SCRIPTS =
             (string)Application.Current.FindResource("str_InitialExtensionScripts");
         public static string INITIAL_PARAMETERS =

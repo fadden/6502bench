@@ -1573,18 +1573,23 @@ namespace SourceGen {
                     }
                 }
             }
-            // Add all address region pre-labels, regardless of whether or not their parent
-            // is non-addressable.  Duplicates of user labels will be rejected.  Note the
-            // references will appear on the line for the next file offset, not the pre-label
-            // itself, because we need to associated it with a file offset.
-            foreach (AddressMap.AddressMapEntry ent in AddrMap) {
-                if (!string.IsNullOrEmpty(ent.PreLabel)) {
+            // Add all valid address region pre-labels.  Duplicates of user labels will be
+            // rejected.  Note the references will appear on the line for the next file offset,
+            // not the pre-label itself, because we need to associate it with a file offset.
+            IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart) {
+                    continue;
+                }
+                if (change.Region.HasValidPreLabel) {
                     try {
-                        labelList.Add(ent.PreLabel, ent.Offset);
+                        labelList.Add(change.Region.PreLabel, change.Region.Offset);
                     } catch (ArgumentException ex) {
-                        Debug.WriteLine("Xref ignoring pre-label duplicate '" + ent.PreLabel +
-                            "': " + ex.Message);
+                        Debug.WriteLine("Xref ignoring pre-label duplicate '" +
+                            change.Region.PreLabel + "': " + ex.Message);
                     }
+
                 }
             }
 
@@ -1635,13 +1640,20 @@ namespace SourceGen {
 
                         // Is this a reference to a label?
                         if (labelList.TryGetValue(dfd.SymbolRef.Label, out int symOffset)) {
+                            // Post a warning if the reference is to a non-addressable offset,
+                            // unless the label in question is a pre-label.  We need to ignore
+                            // those because it's valid to have a pre-label on an addressable
+                            // region that shares a start point with a non-addressable child.
                             if (mAnattribs[symOffset].IsNonAddressable) {
-                                Messages.Add(new MessageList.MessageEntry(
-                                    MessageList.MessageEntry.SeverityLevel.Warning,
-                                    offset,
-                                    MessageList.MessageEntry.MessageType.NonAddrLabelRef,
-                                    dfd.SymbolRef.Label,
-                                    MessageList.MessageEntry.ProblemResolution.None));
+                                if (mAnattribs[symOffset].Symbol != null &&
+                                        mAnattribs[symOffset].Symbol.Label == dfd.SymbolRef.Label) {
+                                    Messages.Add(new MessageList.MessageEntry(
+                                        MessageList.MessageEntry.SeverityLevel.Warning,
+                                        offset,
+                                        MessageList.MessageEntry.MessageType.NonAddrLabelRef,
+                                        dfd.SymbolRef.Label,
+                                        MessageList.MessageEntry.ProblemResolution.None));
+                                }
                             }
 
                             // Compute adjustment.

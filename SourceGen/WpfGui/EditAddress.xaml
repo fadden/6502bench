@@ -48,10 +48,8 @@ limitations under the License.
         <system:String x:Key="str_OptResizeSummary">
             Resize.
         </system:String>
-        <system:String x:Key="str_OptResize">
-            Edit the region's attributes, and resize it to the selection.  The new
-            end offset will be {0}, for a length of {1}.
-        </system:String>
+        <system:String x:Key="str_OptResize" xml:space="preserve"
+            >Edit the region's attributes, and resize it to the selection.  The new end offset will be:&#x0a;End: {0}&#x0a;Length: {1}</system:String>
         <system:String x:Key="str_OptResizeFail">
             Resize not available: cannot resize to the selection.  {0}
         </system:String>

@@ -1603,9 +1603,9 @@ namespace SourceGen {
                             break;
                         case CodeListColumn.Opcode:
                             if (IsPlbInstruction(line) && CanEditDataBank()) {
-                            // Special handling for PLB instruction, so you can update the bank
-                            // value just be double-clicking on it.  Only used for PLBs without
-                            // user- or auto-assigned bank changes.
+                                // Special handling for PLB instruction, so you can update the bank
+                                // value just by double-clicking on it.  Only used for PLBs without
+                                // user- or auto-assigned bank changes.
                                 EditDataBank();
                             } else {
                                 JumpToOperandTarget(line, false);
@@ -3178,6 +3178,10 @@ namespace SourceGen {
                 mLineType = LineListGen.Line.Type.Unclassified;
                 mEntityCounts = new EntityCounts();
             }
+
+            public override string ToString() {
+                return "SelState: numSel=" + mNumItemsSelected + " type=" + mLineType;
+            }
         }
 
         /// <summary>
@@ -3946,10 +3950,45 @@ namespace SourceGen {
             const string CRLF = "\r\n";
 
             mMainWin.ClearInfoPanel();
-            if (mMainWin.CodeListView_GetSelectionCount() != 1) {
-                // Nothing selected, or multiple lines selected.
+            int selCount = mMainWin.CodeListView_GetSelectionCount();
+            if (selCount < 1) {
+                // Nothing selected.
+                return;
+            } else if (selCount > 1) {
+                // Multiple lines selected.
+                mMainWin.InfoLineDescrText = string.Format(Res.Strings.INFO_MULTI_LINE_SUM_FMT,
+                    selCount);
+
+                int firstIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+                int lastIndex = mMainWin.CodeListView_GetLastSelectedIndex();
+                int firstOffset = CodeLineList[firstIndex].FileOffset;
+                int nextOffset = CodeLineList[lastIndex].FileOffset +
+                    CodeLineList[lastIndex].OffsetSpan;
+                if (firstOffset == nextOffset) {
+                    return;     // probably selected a bunch of lines from a long comment or note
+                }
+                if (firstOffset < 0 || nextOffset < 0) {
+                    // We're in the header comment or .equ area.
+                    return;
+                }
+                if (CodeLineList[lastIndex].LineType == LineListGen.Line.Type.ArEndDirective) {
+                    nextOffset++;
+                }
+
+                StringBuilder msb = new StringBuilder();
+                msb.AppendFormat(Res.Strings.INFO_MULTI_LINE_START_FMT, firstIndex,
+                    mFormatter.FormatOffset24(firstOffset));
+                msb.Append(CRLF);
+                msb.AppendFormat(Res.Strings.INFO_MULTI_LINE_END_FMT, lastIndex,
+                    mFormatter.FormatOffset24(nextOffset - 1));
+                msb.Append(CRLF);
+                int len = nextOffset - firstOffset;
+                string lenStr = len.ToString() + " (" + mFormatter.FormatHexValue(len, 2) + ")";
+                msb.AppendFormat(Res.Strings.INFO_MULTI_LINE_LEN_FMT, lenStr);
+                mMainWin.InfoPanelDetail1 = msb.ToString();
                 return;
             }
+
             int lineIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             LineListGen.Line line = CodeLineList[lineIndex];
 
