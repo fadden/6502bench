@@ -2788,6 +2788,48 @@ namespace SourceGen {
             }
         }
 
+        public bool CanRemoveFormatting() {
+            // Want at least one line of code or data.  No need to check for existing formatting.
+            EntityCounts counts = SelectionAnalysis.mEntityCounts;
+            return (counts.mDataLines > 0 || counts.mCodeLines > 0);
+        }
+
+        public void RemoveFormatting() {
+            RangeSet sel = OffsetSetFromSelected();
+            ChangeSet cs = new ChangeSet(16);
+            foreach (int offset in sel) {
+                if (offset < 0) {
+                    // header comment
+                    continue;
+                }
+
+                // Formatted?
+                if (mProject.OperandFormats.TryGetValue(offset, out FormatDescriptor oldFd)) {
+                    Debug.WriteLine("Remove format from +" + offset.ToString("x6"));
+                    UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
+                        oldFd, null);
+                    cs.Add(uc);
+                }
+
+                // As an added bonus, check for mid-line labels.  The tricky part with this is
+                // that the determination of visibility is made before the effects of removing
+                // the formatting are known.  In general we try very hard to avoid embedding
+                // labels, so this is unlikely to be a problem.
+                Anattrib attr = mProject.GetAnattrib(offset);
+                if (attr.Symbol != null && !attr.IsStart) {
+                    Debug.WriteLine("Remove label from +" + offset.ToString("x6"));
+                    UndoableChange uc = UndoableChange.CreateLabelChange(offset, attr.Symbol, null);
+                    cs.Add(uc);
+                }
+            }
+
+            if (cs.Count != 0) {
+                ApplyUndoableChanges(cs);
+            } else {
+                Debug.WriteLine("No formatting or embedded labels found");
+            }
+        }
+
         public void ReloadExternalFiles() {
             string messages = mProject.LoadExternalFiles();
             if (messages.Length != 0) {
@@ -3525,6 +3567,11 @@ namespace SourceGen {
             RangeSet rs = new RangeSet();
 
             foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
+                if (CodeLineList[index].LineType == LineListGen.Line.Type.ArEndDirective) {
+                    // We don't care about these, and they have the offset of the *last* byte
+                    // of multi-byte instructions, which is a little confusing.
+                    continue;
+                }
                 int offset = CodeLineList[index].FileOffset;
 
                 // Mark every byte of an instruction or multi-byte data item --
@@ -3536,6 +3583,7 @@ namespace SourceGen {
                     // header area
                     len = 1;
                 }
+                Anattrib attr = mProject.GetAnattrib(offset);
                 Debug.Assert(len > 0);
                 for (int i = offset; i < offset + len; i++) {
                     rs.Add(i);

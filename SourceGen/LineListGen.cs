@@ -307,7 +307,15 @@ namespace SourceGen {
                     if (lineType == Line.Type.Code || lineType == Line.Type.Data) {
                         lineType = Line.Type.CodeOrData;
                     }
-                    if (line.FileOffset != curOffset) {
+                    if (line.FileOffset == curOffset || lineType == Line.Type.ArEndDirective) {
+                        // Another item at same offset.  We special-case the arend directive
+                        // because it's contained within the previous item, so we want it to be
+                        // set on the existing [offset,offset+span) range tag.
+                        tag.mSpan = Math.Max(tag.mSpan, line.OffsetSpan);
+                        tag.mTypes |= lineType;
+                        Debug.Assert(line.FileOffset >= tag.mOffset &&
+                            line.FileOffset < tag.mOffset + tag.mSpan);
+                    } else {
                         // advanced to new offset, flush previous
                         if (tag != null) {
                             savedSel.mSelectionTags.Add(tag);
@@ -315,10 +323,6 @@ namespace SourceGen {
                         curOffset = line.FileOffset;
 
                         tag = new Tag(line.FileOffset, line.OffsetSpan, lineType);
-                    } else {
-                        // another item at same offset
-                        tag.mSpan = Math.Max(tag.mSpan, line.OffsetSpan);
-                        tag.mTypes |= lineType;
                     }
                 }
                 if (curOffset == -1) {
@@ -344,6 +348,7 @@ namespace SourceGen {
             /// that correspond to items in the SavedSelection tag list.
             /// </summary>
             /// <param name="dl">Display list, with list of Lines.</param>
+            /// <param name="topIndex">Index of line to place at top of list control.</param>
             /// <returns>Set of selected lines.</returns>
             public DisplayListSelection Restore(LineListGen dl, out int topIndex) {
                 List<Line> lineList = dl.mLineList;

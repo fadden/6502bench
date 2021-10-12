@@ -1099,6 +1099,9 @@ namespace CommonUtil {
         /// We use inclusive Offset values for both start and end.  If we don't do this, the
         /// offset for end records will be outside the file bounds.  It also gets a bit painful
         /// when the display list tries to update [M,N] if the end is actually held at N+1.
+        /// The fundamental problem is that the "end region" directive is a separate physical
+        /// entity in the line list, not an abstract start+length value, which must be placed
+        /// inside the address region.
         /// </remarks>
         public class AddressChange {
             // True if this is a region start, false if a region end.

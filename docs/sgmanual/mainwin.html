@@ -162,23 +162,14 @@ or character string, effectively selects the entire item.</p>
 the Actions menu item in the menu bar.  The set of options that are
 enabled will depend on what you have selected in the main window.</p>
 <ul>
-  <li><a href="editors.html#address">Set Address</a>.  Sets the
-    target address at that offset.  When multiple lines are selected,
-    the target addresses at the start and end of the range is set.
-    Enabled when the first line selected is code, data, or an address
-    override, and the full selected range does not overlap with another
-    address override.</li>
-  <li><a href="editors.html#flags">Override Status Flags</a>.  Changes
-    the status flags at that offset.  Enabled when a single instruction
-    line is selected.</li>
-  <li><a href="editors.html#label">Edit Label</a>.  Sets the label
-    at that offset.  Enabled when a single instruction or data line is
-    selected.</li>
   <li><a href="editors.html#instruction-operand">Edit Operand</a>.  Opens the
     Edit Instruction Operand or Edit Data Operand window, depending on
     what's selected.
     Enabled when a single instruction line is selected, or when one
     or more data lines are selected.</li>
+  <li><a href="editors.html#label">Edit Label</a>.  Sets the label
+    at that offset.  Enabled when a single instruction or data line is
+    selected.</li>
   <li><a href="editors.html#comment">Edit Comment</a>.  Sets the
     comment at that offset.  Enabled when a single instruction or data
     line is selected.</li>
@@ -188,6 +179,15 @@ enabled will depend on what you have selected in the main window.</p>
   <li><a href="editors.html#note">Edit Note</a>.  Sets the note at
     that offset.  Enabled when a single instruction or data line, or
     an existing note, is selected.</li>
+  <li><a href="editors.html#address">Define Address Region</a>.
+    Sets the assembly address at the selected offset.  Can be used
+    to set a start point with a floating end, or specify a region
+    with a fixed end point (useful for code that get relocated).
+    Enabled when the first line selected is code, data, or an address
+    start directive.</li>
+  <li><a href="editors.html#flags">Override Status Flags</a>.  Changes
+    the status flags at that offset.  Enabled when a single instruction
+    line is selected.</li>
   <li><a href="editors.html#project-symbol">Edit Project Symbol</a>.
     Sets the name, value, and comment of the project symbol.  Enabled
     when a single equate directive, generated from a project symbol, is
@@ -199,14 +199,16 @@ enabled will depend on what you have selected in the main window.</p>
     variable table.</li>
   <li><a href="visualization.html#vis-and-sets">Create/Edit Visualization Set</a>.
     Create a new visualization set or edit an existing set.</li>
-
+</ul>
+<ul>
   <li><a href="#atags">Analyzer Tags</a> (Tag Address As Code Start Point,
     Tag Address As Code Stop Point, Tag Bytes As Inline Data,
     Remove Analyzer Tags).
     Enabled when one or more code and data lines are selected.  Remove
     Analyzer Tags is only enabled when at least one line has tags.  The
     keyboard shortcuts are two-key combinations.</li>
-
+</ul>
+<ul>
   <li><a href="#address-table">Format Address Table</a>.  Formats
     a series of bytes as parts of a table of addresses.</li>
   <li><a href="#toggle-single">Toggle Single-Byte Format</a>.  Toggles
@@ -214,6 +216,9 @@ enabled will depend on what you have selected in the main window.</p>
     when one or more data lines are selected.</li>
   <li><a href="#format-as-word">Format As Word</a>.  Formats two bytes as
     a 16-bit little-endian word.</li>
+  <li><a href="#remove-formatting">Remove Formatting</a>.  Reverts
+    instruction and data operand formats to the default.  Clears
+    embedded labels.</li>
   <li>Delete Note / Long Comment.  Deletes the selected note or long
     comment.  Enabled when a single note or long comment is selected.</li>
   <li><a href="tools.html#hexdump">Show Hex Dump</a>.  Opens the hex dump
@@ -359,11 +364,20 @@ include:</p>
 <ul>
   <li>Hidden label: a label placed on code or data is now stuck in the
     middle of a multi-byte instruction or data item.</li>
+  <li>Hidden local variable table: a local variable table has been
+    placed in the middle of a multi-byte item.</li>
+  <li>Hidden visualization: a visualization set has been
+    placed in the middle of a multi-byte item.</li>
   <li>Unresolved weak ref: a reference to a non-existent symbol was found.</li>
+  <li>Non-addressable label reference: a code or data operand has a
+    reference to a label defined in a non-addressable section of the
+    file.  (The generated code will likely fail to assemble.)</li>
   <li>Invalid offset or length: the offset or length in a format object
     had an invalid value.</li>
   <li>Invalid descriptor: the format descriptor is inappropriate,
     e.g. formatting an instruction as a string.</li>
+  <li>Bank overrun: the generated code would run past address $ffff.
+    The handling of this in generated code is assembler-dependent.</li>
 </ul>
 <p>The "context" column will provide additional detail about the problem,
 and the "resolution" column will indicate how it's being handled.  In most
@@ -574,6 +588,17 @@ also be selected.  This won't work if the following byte is part of a
 multi-byte data item, is the start of a new region (see
 <a href="editors.html#data-operand">Edit Data Operand</a> for a definition of
 what splits a region), or is the last byte in the file.</p>
+
+
+<h3 id="remove-formatting">Remove Formatting</a></h3>
+
+<p>Removes instruction and data operand formatting from the selected lines.
+This removes the visible formatting as well as any formatting instructions
+that got embedded inside multi-byte data items.  (You will be notified of
+such things in the <a href="#messages">message list</a>.)</p>
+
+<p>This will also remove any labels that are embedded in multi-byte items,
+without removing visible labels.</p>
 
 
 <h3><a name="toggle-data">Toggle Data Scan</a></h3>

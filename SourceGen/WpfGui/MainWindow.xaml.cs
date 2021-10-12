@@ -1145,6 +1145,10 @@ namespace SourceGen.WpfGui {
                 (counts.mCodeStartTags != 0 || counts.mCodeStopTags != 0 || counts.mInlineDataTags != 0);
         }
 
+        private void CanRemoveFormatting(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanRemoveFormatting();
+        }
+
         private void CanJumpToOperand(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanJumpToOperand();
         }
@@ -1371,8 +1375,11 @@ namespace SourceGen.WpfGui {
         }
 
         private void RemoveAnalyzerTagsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
-            Debug.WriteLine("remove atags");
             mMainCtrl.MarkAsType(CodeAnalysis.AnalyzerTag.None, false);
+        }
+
+        private void RemoveFormattingCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.RemoveFormatting();
         }
 
         private void SaveCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
