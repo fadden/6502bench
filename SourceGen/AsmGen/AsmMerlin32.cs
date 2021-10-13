@@ -130,6 +130,7 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", "ds" },
                 { "Dense", "hex" },
+                { "Uninit", "ds" },
                 //Junk
                 //Align
                 { "StrGeneric", "asc" },
@@ -312,6 +313,7 @@ namespace SourceGen.AsmGen {
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
                     break;
+                case FormatDescriptor.Type.Uninit:
                 case FormatDescriptor.Type.Junk:
                     int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
                     if (fillVal >= 0) {
@@ -324,6 +326,12 @@ namespace SourceGen.AsmGen {
                             } else {
                                 operandStr = "\\," + formatter.FormatHexValue(fillVal, 2);
                             }
+                        } else if (length == 1 && fillVal != 0x00) {
+                            // Single-byte HEX looks better than "ds 1,$xx", and will match up
+                            // with adjacent multi-byte junk/uninit.
+                            multiLine = true;
+                            opcodeStr = operandStr = null;
+                            OutputDenseHex(offset, length, labelStr, commentStr);
                         } else {
                             if (fillVal == 0) {
                                 operandStr = length.ToString();

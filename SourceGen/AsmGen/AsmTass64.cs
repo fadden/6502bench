@@ -155,6 +155,7 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", ".fill" },
                 { "Dense", ".byte" },       // not really dense, just comma-separated bytes
+                { "Uninit", ".fill" },
                 //Junk
                 { "Align", ".align" },
                 { "StrGeneric", ".text" },
@@ -552,16 +553,20 @@ namespace SourceGen.AsmGen {
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
                     break;
+                case FormatDescriptor.Type.Uninit:
+                    // TODO: use the special syntax for uninit byte/word/dword if possible.
                 case FormatDescriptor.Type.Junk:
+                    bool canAlign = (dfd.FormatType == FormatDescriptor.Type.Junk);
                     int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
-                    if (fillVal >= 0 && GenCommon.CheckJunkAlign(offset, dfd, Project.AddrMap)) {
+                    if (canAlign && fillVal >= 0 &&
+                            GenCommon.CheckJunkAlign(offset, dfd, Project.AddrMap)) {
                         // .align <expression>[, <fill>]
                         opcodeStr = sDataOpNames.Align;
                         int alignVal = 1 << FormatDescriptor.AlignmentToPower(dfd.FormatSubType);
                         operandStr = alignVal.ToString() +
                             "," + formatter.FormatHexValue(fillVal, 2);
-                    } else if (fillVal >= 0) {
-                        // treat same as Fill
+                    } else if (fillVal >= 0 && (length > 1 || fillVal == 0x00)) {
+                        // If multi-byte, or single byte and zero, treat same as Fill.
                         opcodeStr = sDataOpNames.Fill;
                         operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
                     } else {

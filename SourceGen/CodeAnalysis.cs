@@ -1271,6 +1271,8 @@ namespace SourceGen {
                     return FormatDescriptor.Type.StringDci;
                 case DataType.Fill:
                     return FormatDescriptor.Type.Fill;
+                case DataType.Uninit:
+                    return FormatDescriptor.Type.Uninit;
                 case DataType.Dense:
                     return FormatDescriptor.Type.Dense;
                 default:

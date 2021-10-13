@@ -136,6 +136,7 @@ namespace SourceGen.AsmGen {
                 //DefineBigData4
                 { "Fill", ".res" },
                 { "Dense", ".byte" },           // really just just comma-separated bytes
+                { "Uninit", ".res" },
                 //Junk
                 { "StrGeneric", ".byte" },
                 //StrReverse
@@ -447,13 +448,14 @@ namespace SourceGen.AsmGen {
                     opcodeStr = operandStr = null;
                     OutputDenseHex(offset, length, labelStr, commentStr);
                     break;
+                case FormatDescriptor.Type.Uninit:
                 case FormatDescriptor.Type.Junk:
                     // The ca65 .align directive has a dependency on the alignment of the
                     // segment as a whole.  We're not currently declaring multiple segments,
                     // so we can't use .align without generating complaints.
                     int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
-                    if (fillVal >= 0) {
-                        // treat same as Fill
+                    if (fillVal >= 0 && (length > 1 || fillVal == 0x00)) {
+                        // If multi-byte, or single byte and zero, treat same as Fill.
                         opcodeStr = sDataOpNames.Fill;
                         operandStr = length + "," + formatter.FormatHexValue(fillVal, 2);
                     } else {

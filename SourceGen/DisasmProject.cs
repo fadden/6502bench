@@ -1648,7 +1648,7 @@ namespace SourceGen {
                                 if (mAnattribs[symOffset].Symbol != null &&
                                         mAnattribs[symOffset].Symbol.Label == dfd.SymbolRef.Label) {
                                     Messages.Add(new MessageList.MessageEntry(
-                                        MessageList.MessageEntry.SeverityLevel.Warning,
+                                        MessageList.MessageEntry.SeverityLevel.Error,
                                         offset,
                                         MessageList.MessageEntry.MessageType.NonAddrLabelRef,
                                         dfd.SymbolRef.Label,
@@ -1766,7 +1766,8 @@ namespace SourceGen {
                     offset += attr.Length;
 
                     if (attr.DataDescriptor != null &&
-                            attr.DataDescriptor.FormatType == FormatDescriptor.Type.Junk) {
+                            (attr.DataDescriptor.FormatType == FormatDescriptor.Type.Uninit ||
+                             attr.DataDescriptor.FormatType == FormatDescriptor.Type.Junk)) {
                         ByteCounts.JunkByteCount += attr.Length;
                     } else {
                         ByteCounts.DataByteCount += attr.Length;

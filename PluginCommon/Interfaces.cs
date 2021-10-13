@@ -448,7 +448,9 @@ namespace PluginCommon {
         StringL16,
         StringDci,
         Dense,
-        Fill
+        Fill,
+        Uninit,
+        Junk
     }
 
     /// <summary>
@@ -473,5 +475,7 @@ namespace PluginCommon {
         HighAscii,
         C64Petscii,
         C64Screen
+
+        // skipping alignment sub-types for now
     }
 }

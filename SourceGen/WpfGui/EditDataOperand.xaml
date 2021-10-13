@@ -143,6 +143,8 @@ limitations under the License.
         </StackPanel>
         <RadioButton Name="radioFill" GroupName="Main" Content="Area _filled with value" Margin="0,4,0,0"
                      Checked="MainGroup_CheckedChanged"/>
+        <RadioButton Name="radioUninit" GroupName="Main" Content="Uninitialized data" Margin="0,4,0,0"
+                     Checked="MainGroup_CheckedChanged"/>
         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
             <RadioButton Name="radioJunk" GroupName="Main" Content="_Junk bytes, end aligned to"
                          Checked="MainGroup_CheckedChanged"/>

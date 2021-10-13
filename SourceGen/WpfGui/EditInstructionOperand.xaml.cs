@@ -682,6 +682,8 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.Type.StringDci:
                 case FormatDescriptor.Type.Dense:
                 case FormatDescriptor.Type.Fill:
+                case FormatDescriptor.Type.Uninit:
+                case FormatDescriptor.Type.Junk:
                 default:
                     // Unexpected; used to be data?
                     break;

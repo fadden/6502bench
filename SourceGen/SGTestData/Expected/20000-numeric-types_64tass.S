@@ -88,4 +88,15 @@ L14A8   .fill   8,$8b
         .fill   8,$8c
         .byte   %10001100
         .fill   7,$8c
+        .byte   $90
+        .byte   $92,$91
+        .byte   $95,$94,$93
+        .byte   $99,$98,$97,$96
+        .fill   1,$00
+        .fill   2,$00
+        .fill   3,$00
+        .fill   4,$00
+        .byte   $80
+        .fill   5,$00
+        .byte   $80
         .here

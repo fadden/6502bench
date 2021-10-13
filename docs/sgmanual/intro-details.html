@@ -899,6 +899,9 @@ code generator figure out the implementation details.</p>
     the assembler that the width has changed.</li>
   <li>.DBANK - specifies what value the Data Bank Register holds
     (65816 only).  Used when matching operands to labels.</li>
+  <li>.DS - identifies space set aside for variable storage.  The storage
+    is initialized by the program before first use, so the values
+    in the binary don't actually matter.</li>
   <li>.JUNK - indicates that the data in a range of bytes is irrelevant.
     (When generating sources, this will become .FILL or .BULK
     depending on the contents of the memory region and the assembler's

@@ -61,6 +61,7 @@ namespace SourceGen {
 
             Dense,              // raw data, represented as compactly as possible
             Fill,               // fill memory with a value
+            Uninit,             // uninitialized data storage area
             Junk                // contents of memory are not interesting
         }
 
@@ -90,6 +91,8 @@ namespace SourceGen {
             // Dense; no sub-types
 
             // Fill; no sub-types
+
+            // Uninit; no sub-types
 
             // Junk; data may exist for alignment purposes.  Sub-type indicates boundary.
             // (SubType=None indicates no alignment)
@@ -496,6 +499,9 @@ namespace SourceGen {
                             break;
                         case Type.Fill:
                             retstr += "fill";
+                            break;
+                        case Type.Uninit:
+                            retstr += "uninitialized data";
                             break;
                         case Type.Junk:
                             retstr += "unaligned junk";

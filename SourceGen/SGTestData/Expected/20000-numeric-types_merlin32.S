@@ -82,3 +82,14 @@ L14A8    ds    8,$8b
          ds    8,$8c
          dfb   %10001100
          ds    7,$8c
+         hex   90
+         hex   9291
+         hex   959493
+         hex   99989796
+         ds    1
+         ds    2
+         ds    3
+         ds    4
+         dfb   $80
+         ds    5
+         dfb   $80

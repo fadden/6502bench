@@ -1191,6 +1191,7 @@ namespace SourceGen.WpfGui {
                 new TextBoxPropertyMap(defineBigData2TextBox, "DefineBigData2"),
                 new TextBoxPropertyMap(fillTextBox, "Fill"),
                 new TextBoxPropertyMap(denseTextBox, "Dense"),
+                new TextBoxPropertyMap(uninitTextBox, "Uninit"),
                 new TextBoxPropertyMap(junkTextBox, "Junk"),
                 new TextBoxPropertyMap(alignTextBox, "Align"),
                 new TextBoxPropertyMap(strGenericTextBox, "StrGeneric"),

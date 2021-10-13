@@ -507,7 +507,7 @@ namespace SourceGen.WpfGui {
 
                 // Check for run of bytes (2 or more of the same thing).  Remember that
                 // we check this one region at a time, and each region could have different
-                // bytes, but so long as the bytes are all the same within a region we're good.
+                // bytes, but so long as the bytes are all the same within each region we're good.
                 if (radioFill.IsEnabled && count > 1 &&
                         DataAnalysis.RecognizeRun(mFileData, rng.Low, rng.High) == count) {
                     // LGTM
@@ -897,6 +897,9 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.Type.Fill:
                     preferredFormat = radioFill;
                     break;
+                case FormatDescriptor.Type.Uninit:
+                    preferredFormat = radioUninit;
+                    break;
                 case FormatDescriptor.Type.Junk:
                     preferredFormat = radioJunk;
                     break;
@@ -1070,6 +1073,8 @@ namespace SourceGen.WpfGui {
                 type = FormatDescriptor.Type.Dense;
             } else if (radioFill.IsChecked == true) {
                 type = FormatDescriptor.Type.Fill;
+            } else if (radioUninit.IsChecked == true) {
+                type = FormatDescriptor.Type.Uninit;
             } else if (radioJunk.IsChecked == true) {
                 type = FormatDescriptor.Type.Junk;
                 JunkAlignmentItem comboItem = (JunkAlignmentItem)junkAlignComboBox.SelectedItem;

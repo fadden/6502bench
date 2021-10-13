@@ -84,4 +84,15 @@ L14A8   !fill   8,$8b
         !fill   8,$8c
         !byte   %10001100
         !fill   7,$8c
+        !hex    90
+        !hex    9291
+        !hex    959493
+        !hex    99989796
+        !fill   1,$00
+        !fill   2,$00
+        !fill   3,$00
+        !fill   4,$00
+        !byte   $80
+        !fill   5,$00
+        !byte   $80
         }

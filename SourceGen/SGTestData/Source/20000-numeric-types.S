@@ -71,3 +71,16 @@ dref    ds      16,$85              ;has a data reference
         ds      16,$8a              ;EDIT: add visualization
 cref    ds      16,$8b              ;has a code reference
         ds      16,$8c              ;EDIT: format byte as binary
+
+; Some uninitialized data for the "uninit" op.
+        dfb     $90
+        dw      $9192
+        adr     $939495
+        adrl    $96979899
+        ds      1
+        ds      2
+        ds      3
+        ds      4
+        dfb     $80
+        ds      5
+        dfb     $80

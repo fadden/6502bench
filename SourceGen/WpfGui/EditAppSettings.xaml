@@ -661,7 +661,12 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
-                        <!-- TODO: add uninitialized data op -->
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="Uninitialized:"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="uninitTextBox" Grid.Column="3" Grid.Row="4"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBlock Grid.Column="4" Grid.Row="4" Text="Junk:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Name="junkTextBox" Grid.Column="5" Grid.Row="4"
