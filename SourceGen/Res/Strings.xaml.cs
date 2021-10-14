@@ -55,14 +55,6 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_DataBankK");
         public static string DEFAULT_HEADER_COMMENT_FMT =
             (string)Application.Current.FindResource("str_DefaultHeaderCommentFmt");
-        public static string DEFAULT_ASCII_DELIM_PAT =
-            (string)Application.Current.FindResource("str_DefaultAsciiDelimPat");
-        public static string DEFAULT_HIGH_ASCII_DELIM_PAT =
-            (string)Application.Current.FindResource("str_DefaultHighAsciiDelimPat");
-        public static string DEFAULT_C64_PETSCII_DELIM_PAT =
-            (string)Application.Current.FindResource("str_DefaultC64PetsciiDelimPat");
-        public static string DEFAULT_C64_SCREEN_CODE_DELIM_PAT =
-            (string)Application.Current.FindResource("str_DefaultC64ScreenCodeDelimPat");
         public static string CLIPFORMAT_ALL_COLUMNS =
             (string)Application.Current.FindResource("str_ClipformatAllColumns");
         public static string CLIPFORMAT_ASSEMBLER_SOURCE =

@@ -164,15 +164,16 @@ namespace Asm65 {
         #region Text Delimiters
 
         /// <summary>
-        /// Container for character and string delimiter pieces.  Instances are immutable.
+        /// Container for delimiter pieces for characters or strings.  Instances are immutable.
         /// </summary>
         /// <remarks>
-        /// For single-character operands, a simple concatenation of the four fields, with the
-        /// character in the middle, is performed.
+        /// For single-character operands, the generated format string will be a simple
+        /// concatenation of the four fields, with the character in the middle.
         ///
         /// For strings, the prefix is included at the start of the first line, but not included
-        /// on subsequent lines.  This is primarily intended for the on-screen display, not
-        /// assembly source generation.  The suffix is not used at all.
+        /// on subsequent lines in a multi-line operand.  This is primarily intended for the
+        /// on-screen display, not assembly source generation (which doesn't generally make use
+        /// of a string prefix).  The suffix is not used at all.
         /// </remarks>
         public class DelimiterDef {
             public string Prefix { get; private set; }
@@ -203,10 +204,37 @@ namespace Asm65 {
             public override string ToString() {
                 return Prefix + OpenDelim + '#' + CloseDelim + Suffix;
             }
+
+            public static bool operator ==(DelimiterDef a, DelimiterDef b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;    // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;   // one is null
+                }
+                // All fields must be equal.  Ignore FormatStr, which is generated from the
+                // other fields.
+                return a.Prefix == b.Prefix && a.OpenDelim == b.OpenDelim &&
+                    a.CloseDelim == b.CloseDelim && a.Suffix == b.Suffix;
+            }
+            public static bool operator !=(DelimiterDef a, DelimiterDef b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is DelimiterDef && this == (DelimiterDef)obj;
+            }
+            public override int GetHashCode() {
+                return Prefix.GetHashCode() ^ OpenDelim.GetHashCode() ^ CloseDelim.GetHashCode() ^
+                    Suffix.GetHashCode();
+            }
         }
         public static readonly DelimiterDef SINGLE_QUOTE_DELIM = new DelimiterDef('\'');
         public static readonly DelimiterDef DOUBLE_QUOTE_DELIM = new DelimiterDef('"');
 
+        /// <summary>
+        /// Set of DelimiterDef objects, indexed by character encoding.  The objects may be
+        /// for character or string encoding.
+        /// </summary>
         public class DelimiterSet {
             private Dictionary<CharEncoding.Encoding, DelimiterDef> mDelimiters =
                 new Dictionary<CharEncoding.Encoding, DelimiterDef>();
@@ -321,6 +349,35 @@ namespace Asm65 {
                 offset = commaIndex + 1 + len;
                 return resultStr;
             }
+
+            public static bool operator ==(DelimiterSet a, DelimiterSet b) {
+                if (ReferenceEquals(a, b)) {
+                    return true;    // same object, or both null
+                }
+                if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) {
+                    return false;   // one is null
+                }
+                // Compare set contents.
+                if (a.mDelimiters.Count != b.mDelimiters.Count) {
+                    return false;
+                }
+                foreach (KeyValuePair<CharEncoding.Encoding, DelimiterDef> kvp in a.mDelimiters) {
+                    if (kvp.Value != b.Get(kvp.Key)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            public static bool operator !=(DelimiterSet a, DelimiterSet b) {
+                return !(a == b);
+            }
+            public override bool Equals(object obj) {
+                return obj is DelimiterSet && this == (DelimiterSet)obj;
+            }
+            public override int GetHashCode() {
+                return mDelimiters.GetHashCode();
+            }
+
         }
 
         #endregion Text Delimiters

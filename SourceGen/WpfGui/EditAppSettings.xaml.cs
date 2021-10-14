@@ -139,8 +139,9 @@ namespace SourceGen.WpfGui {
             }
             // Can't set the selected item yet.
 
-            Construct_PseudoOp();
+            Construct_TextDelimiters();
             Construct_DisplayFormat();
+            Construct_PseudoOp();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -436,6 +437,77 @@ namespace SourceGen.WpfGui {
 
         #region Text Delimiters
 
+        public class TextDelimPreset {
+            public const int ID_CUSTOM = -2;
+            public const int ID_DEFAULT = -1;
+            public int Ident { get; private set; }      // ID_ value, or zero
+            public string Name { get; private set; }
+            public Formatter.DelimiterSet CharDelims { get; private set; }
+            public Formatter.DelimiterSet StringDelims { get; private set; }
+
+            public TextDelimPreset(int id, string name, Formatter.DelimiterSet charDelims,
+                    Formatter.DelimiterSet stringDelims) {
+                Ident = id;
+                Name = name;
+                CharDelims = charDelims;
+                StringDelims = stringDelims;
+            }
+        }
+        public TextDelimPreset[] DelimPresets { get; private set; }
+
+        private void ConstructTextDelimPresets() {
+            // "custom" must be in slot 0
+            DelimPresets = new TextDelimPreset[4];
+            DelimPresets[0] = new TextDelimPreset(TextDelimPreset.ID_CUSTOM,
+                (string)FindResource("str_PresetCustom"), null, null);
+            DelimPresets[1] = new TextDelimPreset(TextDelimPreset.ID_DEFAULT,
+                (string)FindResource("str_PresetDefault"),
+                Formatter.DelimiterSet.GetDefaultCharDelimiters(),
+                Formatter.DelimiterSet.GetDefaultStringDelimiters());
+
+            Formatter.DelimiterSet chrDel = new Formatter.DelimiterSet();
+            chrDel.Set(CharEncoding.Encoding.Ascii,
+                new Formatter.DelimiterDef(string.Empty, '\'', '\'', string.Empty));
+            chrDel.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
+            chrDel.Set(CharEncoding.Encoding.C64Petscii,
+                new Formatter.DelimiterDef("pet:", '\'', '\'', string.Empty));
+            chrDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                new Formatter.DelimiterDef("scr:", '\'', '\'', string.Empty));
+            Formatter.DelimiterSet strDel = new Formatter.DelimiterSet();
+            strDel.Set(CharEncoding.Encoding.Ascii,
+                new Formatter.DelimiterDef(string.Empty, '\"', '\"', string.Empty));
+            strDel.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef("\u2191", '\"', '\"', string.Empty));
+            strDel.Set(CharEncoding.Encoding.C64Petscii,
+                new Formatter.DelimiterDef("pet:", '\"', '\"', string.Empty));
+            strDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                new Formatter.DelimiterDef("scr:", '\"', '\"', string.Empty));
+            DelimPresets[2] = new TextDelimPreset(0,
+                (string)FindResource("str_DelimStraight"), chrDel, strDel);
+
+            chrDel = new Formatter.DelimiterSet();
+            chrDel.Set(CharEncoding.Encoding.Ascii,
+                new Formatter.DelimiterDef(string.Empty, '\u2018', '\u2019', string.Empty));
+            chrDel.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef(string.Empty, '\u201c', '\u201d', string.Empty));
+            chrDel.Set(CharEncoding.Encoding.C64Petscii,
+                new Formatter.DelimiterDef("pet:", '\u2018', '\u2019', string.Empty));
+            chrDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                new Formatter.DelimiterDef("scr:", '\u2018', '\u2019', string.Empty));
+            strDel = new Formatter.DelimiterSet();
+            strDel.Set(CharEncoding.Encoding.Ascii,
+                new Formatter.DelimiterDef(string.Empty, '\u2018', '\u2019', string.Empty));
+            strDel.Set(CharEncoding.Encoding.HighAscii,
+                new Formatter.DelimiterDef(string.Empty, '\u201c', '\u201d', string.Empty));
+            strDel.Set(CharEncoding.Encoding.C64Petscii,
+                new Formatter.DelimiterDef("pet:", '\u201c', '\u201d', string.Empty));
+            strDel.Set(CharEncoding.Encoding.C64ScreenCode,
+                new Formatter.DelimiterDef("scr:", '\u201c', '\u201d', string.Empty));
+            DelimPresets[3] = new TextDelimPreset(0,
+                (string)FindResource("str_DelimMerlin"), chrDel, strDel);
+        }
+
         private class DelimiterTextBoxes {
             public CharEncoding.Encoding mEncoding;
             public TextBox mPrefix;
@@ -455,8 +527,8 @@ namespace SourceGen.WpfGui {
         private DelimiterTextBoxes[] mCharDtb;
         private DelimiterTextBoxes[] mStringDtb;
 
-        private void Loaded_TextDelimiters() {
-            // Map text boxes to delimiter definitions.
+        private void MapTextDelimControls() {
+            // Map TextBox controls to delimiter definitions.
             mCharDtb = new DelimiterTextBoxes[] {
                 new DelimiterTextBoxes(CharEncoding.Encoding.Ascii,
                     chrdAsciiPrefix, chrdAsciiOpen, chrdAsciiClose, chrdAsciiSuffix),
@@ -511,6 +583,18 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        // prevent recursion
+        private bool mSettingTextDelimCombo;
+
+        private void Construct_TextDelimiters() {
+            ConstructTextDelimPresets();
+        }
+
+        private void Loaded_TextDelimiters() {
+            MapTextDelimControls();
+            UpdateTextDelimQuickCombo();
+        }
+
         // Import delimiters from a DelimiterSet to the text fields.
         private void ImportDelimiters(Formatter.DelimiterSet delSet, DelimiterTextBoxes[] boxarr) {
             foreach (DelimiterTextBoxes boxes in boxarr) {
@@ -540,17 +624,47 @@ namespace SourceGen.WpfGui {
 
         // Invoked when text is changed in any delimiter text box.
         private void DelimiterTextChanged(object sender, EventArgs e) {
+            UpdateTextDelimQuickCombo();
             IsDirty = true;
         }
 
-        private void ChrDelDefaultsButton_Click(object sender, RoutedEventArgs e) {
-            Formatter.DelimiterSet chrDel = Formatter.DelimiterSet.GetDefaultCharDelimiters();
-            ImportDelimiters(chrDel, mCharDtb);
+        private void TextDelimQuickComboBox_SelectionChanged(object sender,
+                SelectionChangedEventArgs e) {
+            if (mSettingTextDelimCombo) {
+                // We shouldn't actually recurse indefinitely because we'll eventually
+                // decide that nothing is changing, but I feel better having this here.
+                return;
+            }
+
+            TextDelimPreset preset = (TextDelimPreset)textDelimQuickComboBox.SelectedItem;
+            if (preset.Ident == TextDelimPreset.ID_CUSTOM) {
+                // Not an actual preset.  Leave the combo box set to "Custom".
+                return;
+            }
+
+            ImportDelimiters(preset.CharDelims, mCharDtb);
+            ImportDelimiters(preset.StringDelims, mStringDtb);
+
+            // dirty flag will be set by change watchers if one or more fields have changed
         }
 
-        private void StrDelDefaultsButton_Click(object sender, RoutedEventArgs e) {
-            Formatter.DelimiterSet strDel = Formatter.DelimiterSet.GetDefaultStringDelimiters();
-            ImportDelimiters(strDel, mStringDtb);
+        private void UpdateTextDelimQuickCombo() {
+            mSettingTextDelimCombo = true;
+
+            // If the current settings match one of the quick sets, update the combo box to
+            // match.  Otherwise, set it to "custom".
+            textDelimQuickComboBox.SelectedIndex = 0;
+            Formatter.DelimiterSet inputChars = ExportDelimiters(mCharDtb);
+            Formatter.DelimiterSet inputStrings = ExportDelimiters(mStringDtb);
+            for (int i = 1; i < DelimPresets.Length; i++) {
+                TextDelimPreset preset = DelimPresets[i];
+                if (preset.CharDelims == inputChars && preset.StringDelims == inputStrings) {
+                    textDelimQuickComboBox.SelectedIndex = i;
+                    break;
+                }
+            }
+
+            mSettingTextDelimCombo = false;
         }
 
         #endregion Text Delimiters
@@ -895,6 +1009,7 @@ namespace SourceGen.WpfGui {
             set {
                 mSettings.SetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, value);
                 OnPropertyChanged();
+                UpdateDisplayFormatQuickCombo();
                 IsDirty = true;
             }
         }

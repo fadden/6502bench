@@ -28,11 +28,13 @@ limitations under the License.
         Loaded="Window_Loaded">
 
     <Window.Resources>
+        <system:String x:Key="str_PresetCustom">Custom</system:String>
+        <system:String x:Key="str_PresetDefault">Default</system:String>
         <system:String x:Key="str_ExpStyleCommon">Common</system:String>
         <system:String x:Key="str_ExpStyleCc65">cc65</system:String>
         <system:String x:Key="str_ExpStyleMerlin">Merlin</system:String>
-        <system:String x:Key="str_PresetCustom">Custom</system:String>
-        <system:String x:Key="str_PresetDefault">Default</system:String>
+        <system:String x:Key="str_DelimStraight">Straight</system:String>
+        <system:String x:Key="str_DelimMerlin">Merlin</system:String>
     </Window.Resources>
 
     <DockPanel Margin="8">
@@ -143,282 +145,286 @@ limitations under the License.
 
 
             <TabItem Name="textDelimitersTab" Header="Text Delimiters">
-                <Grid>
-                    <Grid.Resources>
-                        <!-- TextBox spacer -->
-                        <Thickness x:Key="TBS" Left="2" Top="4" Right="0" Bottom="0"/>
-                        <Thickness x:Key="ENC" Left="0" Top="3" Right="4" Bottom="3"/>
-                    </Grid.Resources>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
+                               Text="Select pseudo-op names for display. This does not affect source code generation. Blank entries get a default value."/>
 
-                    <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="4,0,0,0"
-                        Text="Configure character and string delimiters. This does not affect source code generation."/>
+                    <Grid DockPanel.Dock="Top" Height="240" Margin="4,0">
 
-                    <GroupBox Grid.Column="0" Grid.Row="1" Header="Character Operand Delimiters" Margin="4"
-                              Padding="2,4">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Grid.Resources>
+                            <!-- TextBox spacer -->
+                            <Thickness x:Key="TBS" Left="2" Top="4" Right="0" Bottom="0"/>
+                            <Thickness x:Key="ENC" Left="0" Top="3" Right="4" Bottom="3"/>
+                        </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                                <!-- decorative lines to set off row/column headers -->
-                                <Rectangle Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
-                                           VerticalAlignment="Bottom" Height="1"
-                                           Stroke="LightGray" Fill="Transparent"/>
-                                <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5"
-                                           HorizontalAlignment="Right" Width="1"
-                                           Stroke="LightGray" Fill="Transparent"/>
+                        <GroupBox Grid.Column="0" Grid.Row="1" Header="Character Operand Delimiters" Margin="4"
+                                  Padding="2,4">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Column="0" Grid.Row="0" Text="Encoding" Margin="0,2,0,3"/>
-                                <TextBlock Grid.Column="1" Grid.Row="0" Text="Prefix" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Grid.Row="0" Text="Open" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="3" Grid.Row="0" Text="Close" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="4" Grid.Row="0" Text="Suffix" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
+                                    <!-- decorative lines to set off row/column headers -->
+                                    <Rectangle Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
+                                               VerticalAlignment="Bottom" Height="1"
+                                               Stroke="LightGray" Fill="Transparent"/>
+                                    <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5"
+                                               HorizontalAlignment="Right" Width="1"
+                                               Stroke="LightGray" Fill="Transparent"/>
 
-                                <TextBlock Text="Plain ASCII" Grid.Column="0" Grid.Row="1"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="chrdAsciiPrefix" Grid.Column="1" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdAsciiOpen" Grid.Column="2" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdAsciiClose" Grid.Column="3" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdAsciiSuffix" Grid.Column="4" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Encoding" Margin="0,2,0,3"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="Prefix" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Grid.Row="0" Text="Open" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="3" Grid.Row="0" Text="Close" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="4" Grid.Row="0" Text="Suffix" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
 
-                                <TextBlock Text="High ASCII" Grid.Column="0" Grid.Row="2"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="chrdHighAsciiPrefix" Grid.Column="1" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdHighAsciiOpen" Grid.Column="2" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdHighAsciiClose" Grid.Column="3" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdHighAsciiSuffix" Grid.Column="4" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBlock Text="Plain ASCII" Grid.Column="0" Grid.Row="1"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="chrdAsciiPrefix" Grid.Column="1" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdAsciiOpen" Grid.Column="2" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdAsciiClose" Grid.Column="3" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdAsciiSuffix" Grid.Column="4" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                                <TextBlock Text="C64 PETSCII" Grid.Column="0" Grid.Row="3"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="chrdPetsciiPrefix" Grid.Column="1" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdPetsciiOpen" Grid.Column="2" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdPetsciiClose" Grid.Column="3" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdPetsciiSuffix" Grid.Column="4" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBlock Text="High ASCII" Grid.Column="0" Grid.Row="2"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="chrdHighAsciiPrefix" Grid.Column="1" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdHighAsciiOpen" Grid.Column="2" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdHighAsciiClose" Grid.Column="3" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdHighAsciiSuffix" Grid.Column="4" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                                <TextBlock Text="C64 Screen Code" Grid.Column="0" Grid.Row="4"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="chrdScreenCodePrefix" Grid.Column="1" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdScreenCodeOpen" Grid.Column="2" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdScreenCodeClose" Grid.Column="3" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="chrdScreenCodeSuffix" Grid.Column="4" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBlock Text="C64 PETSCII" Grid.Column="0" Grid.Row="3"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="chrdPetsciiPrefix" Grid.Column="1" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdPetsciiOpen" Grid.Column="2" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdPetsciiClose" Grid.Column="3" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdPetsciiSuffix" Grid.Column="4" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                            </Grid>
+                                    <TextBlock Text="C64 Screen Code" Grid.Column="0" Grid.Row="4"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="chrdScreenCodePrefix" Grid.Column="1" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdScreenCodeOpen" Grid.Column="2" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdScreenCodeClose" Grid.Column="3" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="chrdScreenCodeSuffix" Grid.Column="4" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
 
-                            <Button Content="Reset To Defaults" Width="120" Margin="0,8,0,0"
-                                    HorizontalAlignment="Left" Click="ChrDelDefaultsButton_Click"/>
-                        </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Column="1" Grid.Row="1" Header="Text String Delimiters" Margin="4"
+                                  Padding="2,4">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- decorative lines to set off row/column headers -->
+                                    <Rectangle Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
+                                               VerticalAlignment="Bottom" Height="1"
+                                               Stroke="LightGray" Fill="Transparent"/>
+                                    <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5"
+                                               HorizontalAlignment="Right" Width="1"
+                                               Stroke="LightGray" Fill="Transparent"/>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Encoding" Margin="0,2,0,3"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="Prefix" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Grid.Row="0" Text="Open" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="3" Grid.Row="0" Text="Close" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Visibility="Hidden" Grid.Column="4" Grid.Row="0" Text="Suffix" Margin="3,2,3,0"
+                                               HorizontalAlignment="Center"/>
+
+                                    <TextBlock Text="Plain ASCII" Grid.Column="0" Grid.Row="1"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="strdAsciiPrefix" Grid.Column="1" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdAsciiOpen" Grid.Column="2" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdAsciiClose" Grid.Column="3" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Visibility="Hidden" Name="strdAsciiSuffix" Grid.Column="4" Grid.Row="1"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+
+                                    <TextBlock Text="High ASCII" Grid.Column="0" Grid.Row="2"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="strdHighAsciiPrefix" Grid.Column="1" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdHighAsciiOpen" Grid.Column="2" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdHighAsciiClose" Grid.Column="3" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Visibility="Hidden" Name="strdHighAsciiSuffix" Grid.Column="4" Grid.Row="2"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+
+                                    <TextBlock Text="C64 PETSCII" Grid.Column="0" Grid.Row="3"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="strdPetsciiPrefix" Grid.Column="1" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdPetsciiOpen" Grid.Column="2" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdPetsciiClose" Grid.Column="3" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Visibility="Hidden" Name="strdPetsciiSuffix" Grid.Column="4" Grid.Row="3"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+
+                                    <TextBlock Text="C64 Screen Code" Grid.Column="0" Grid.Row="4"
+                                               Margin="{StaticResource ENC}"/>
+                                    <TextBox Name="strdScreenCodePrefix" Grid.Column="1" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="8"
+                                             Text="01234567"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdScreenCodeOpen" Grid.Column="2" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Name="strdScreenCodeClose" Grid.Column="3" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="20" MaxLength="1"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                    <TextBox Visibility="Hidden" Name="strdScreenCodeSuffix" Grid.Column="4" Grid.Row="4"
+                                             HorizontalAlignment="Center" VerticalAlignment="Top"
+                                             Margin="{StaticResource TBS}" Width="65" MaxLength="12"
+                                             FontFamily="{StaticResource GeneralMonoFont}"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Column="0" Grid.Row="2" Header="Sample Characters" Margin="4"
+                                  Padding="2,4">
+                            <StackPanel>
+                                <TextBox IsReadOnly="True"
+                                         Text="&#x2018;&#x2019;&#x2022;&#x201c;&#x201d;&#x2191;&#xab;&#xbb;&#x2770;&#x2771;"
+                                         FontFamily="{StaticResource GeneralMonoFont}" FontSize="16"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+
+                    <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
+                              HorizontalAlignment="Left" Padding="2,4">
+                        <ComboBox Name="textDelimQuickComboBox" Width="170" IsReadOnly="True"
+                                  ItemsSource="{Binding DelimPresets}" DisplayMemberPath="Name"
+                                  SelectionChanged="TextDelimQuickComboBox_SelectionChanged"/>
                     </GroupBox>
-
-                    <GroupBox Grid.Column="1" Grid.Row="1" Header="Text String Delimiters" Margin="4"
-                              Padding="2,4">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- decorative lines to set off row/column headers -->
-                                <Rectangle Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
-                                           VerticalAlignment="Bottom" Height="1"
-                                           Stroke="LightGray" Fill="Transparent"/>
-                                <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5"
-                                           HorizontalAlignment="Right" Width="1"
-                                           Stroke="LightGray" Fill="Transparent"/>
-
-                                <TextBlock Grid.Column="0" Grid.Row="0" Text="Encoding" Margin="0,2,0,3"/>
-                                <TextBlock Grid.Column="1" Grid.Row="0" Text="Prefix" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Grid.Row="0" Text="Open" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="3" Grid.Row="0" Text="Close" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Visibility="Hidden" Grid.Column="4" Grid.Row="0" Text="Suffix" Margin="3,2,3,0"
-                                           HorizontalAlignment="Center"/>
-
-                                <TextBlock Text="Plain ASCII" Grid.Column="0" Grid.Row="1"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="strdAsciiPrefix" Grid.Column="1" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdAsciiOpen" Grid.Column="2" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdAsciiClose" Grid.Column="3" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Visibility="Hidden" Name="strdAsciiSuffix" Grid.Column="4" Grid.Row="1"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-
-                                <TextBlock Text="High ASCII" Grid.Column="0" Grid.Row="2"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="strdHighAsciiPrefix" Grid.Column="1" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdHighAsciiOpen" Grid.Column="2" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdHighAsciiClose" Grid.Column="3" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Visibility="Hidden" Name="strdHighAsciiSuffix" Grid.Column="4" Grid.Row="2"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-
-                                <TextBlock Text="C64 PETSCII" Grid.Column="0" Grid.Row="3"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="strdPetsciiPrefix" Grid.Column="1" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdPetsciiOpen" Grid.Column="2" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdPetsciiClose" Grid.Column="3" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Visibility="Hidden" Name="strdPetsciiSuffix" Grid.Column="4" Grid.Row="3"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-
-                                <TextBlock Text="C64 Screen Code" Grid.Column="0" Grid.Row="4"
-                                           Margin="{StaticResource ENC}"/>
-                                <TextBox Name="strdScreenCodePrefix" Grid.Column="1" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="8"
-                                         Text="01234567"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdScreenCodeOpen" Grid.Column="2" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Name="strdScreenCodeClose" Grid.Column="3" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="20" MaxLength="1"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                                <TextBox Visibility="Hidden" Name="strdScreenCodeSuffix" Grid.Column="4" Grid.Row="4"
-                                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         Margin="{StaticResource TBS}" Width="65" MaxLength="12"
-                                         FontFamily="{StaticResource GeneralMonoFont}"/>
-                            </Grid>
-
-                            <Button Content="Reset To Defaults" Width="120" Margin="0,8,0,0"
-                                    HorizontalAlignment="Left" Click="StrDelDefaultsButton_Click"/>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <GroupBox Grid.Column="0" Grid.Row="2" Header="Sample Characters" Margin="4"
-                              Padding="2,4">
-                        <StackPanel>
-                            <TextBox IsReadOnly="True"
-                                     Text="&#x2018;&#x2019;&#x2022;&#x201c;&#x201d;&#x2191;&#xab;&#xbb;&#x2770;&#x2771;"
-                                     FontFamily="{StaticResource GeneralMonoFont}" FontSize="16"/>
-                        </StackPanel>
-                    </GroupBox>
-                </Grid>
+                </DockPanel>
             </TabItem>
 
 
@@ -510,10 +516,13 @@ limitations under the License.
                                      FontFamily="{StaticResource GeneralMonoFont}"/>
                         </StackPanel>
 
+                        <CheckBox DockPanel.Dock="Top" Margin="4,8,0,0"
+                                  Content="Use comma-separated format for bulk data"
+                                  IsChecked="{Binding CommaSeparatedBulkData}"/>
+
                         <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
                                   HorizontalAlignment="Left" Padding="2,4">
-                            <ComboBox Name="displayFmtQuickComboBox" DockPanel.Dock="Right"
-                                      Width="170" IsReadOnly="True"
+                            <ComboBox Name="displayFmtQuickComboBox" Width="170" IsReadOnly="True"
                                       ItemsSource="{Binding DisplayPresets}" DisplayMemberPath="Name"
                                       SelectionChanged="DisplayFmtQuickComboBox_SelectionChanged"/>
                         </GroupBox>
@@ -526,9 +535,6 @@ limitations under the License.
                         <CheckBox DockPanel.Dock="Top" Margin="4,12,0,0"
                                   Content="Add spaces in Bytes column"
                                   IsChecked="{Binding SpacesBetweenBytes}"/>
-                        <CheckBox DockPanel.Dock="Top" Margin="4,8,0,0"
-                                  Content="Use comma-separated format for bulk data"
-                                  IsChecked="{Binding CommaSeparatedBulkData}"/>
 
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
                             <TextBlock Text="Wrap operands at" Margin="0,3,0,0"/>
@@ -728,9 +734,8 @@ limitations under the License.
                     </Grid>
 
                     <GroupBox DockPanel.Dock="Bottom" Header="Quick Set"
-                              HorizontalAlignment="Right" Padding="2,4">
-                        <ComboBox Name="pseudoOpQuickComboBox" DockPanel.Dock="Right"
-                                  Width="170" IsReadOnly="True"
+                              HorizontalAlignment="Left" Padding="2,4">
+                        <ComboBox Name="pseudoOpQuickComboBox" Width="170" IsReadOnly="True"
                                   ItemsSource="{Binding PseudoOpPresets}" DisplayMemberPath="Name"
                                   SelectionChanged="PseudoOpQuickComboBox_SelectionChanged"/>
                     </GroupBox>

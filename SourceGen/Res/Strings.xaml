@@ -40,10 +40,6 @@ limitations under the License.
     <system:String x:Key="str_DataBankUserFmt">{0}</system:String>
     <system:String x:Key="str_DataBankK">K</system:String>
     <system:String x:Key="str_DefaultHeaderCommentFmt">6502bench SourceGen v{0}</system:String>
-    <system:String x:Key="str_DefaultAsciiDelimPat">&#x2018;#&#x2019;</system:String>
-    <system:String x:Key="str_DefaultHighAsciiDelimPat">&#x201c;#&#x201d;</system:String>
-    <system:String x:Key="str_DefaultC64PetsciiDelimPat">pet:&#x201c;#&#x201d;</system:String>
-    <system:String x:Key="str_DefaultC64ScreenCodeDelimPat">scr:&#x201c;#&#x201d;</system:String>
     <system:String x:Key="str_EquAddress">addr</system:String>
     <system:String x:Key="str_EquConstant">const</system:String>
     <system:String x:Key="str_EquStackRelative">stkrl</system:String>

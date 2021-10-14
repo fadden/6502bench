@@ -96,15 +96,21 @@ don't look very good at smaller font sizes.)</p>
 <p>If one of the delimiter characters appears in the string itself,
 the character will be output as hex to avoid confusion.  For this
 reason, it's generally wise to use delimiter characters that aren't
-part of the ASCII character set.  The "Sample Characters" box holds some
-characters that you can copy and paste (with Ctrl+C / Ctrl+V) into the
-delimiter fields.</p>
+part of the ASCII character set, such as "curly" quotes.  The
+"Sample Characters" box holds some characters that you can copy and
+paste (with Ctrl+C / Ctrl+V) into the delimiter fields.</p>
 <p>For character operands, the prefix and suffix are added to the start
 and end of the operand.  For string operands, the prefix is added to the
-start of the first line, and suffixes aren't allowed.
+start of the first line, and suffixes aren't allowed.</p>
 <p>These options change the way the code list looks on screen.  They
 do not affect generated code, which must use the delimiter characters
 specified by the chosen assembler.</p>
+
+<p>The "quick set" pop-up can be used to set the fields for a few
+common configurations.  The default set uses curly quotes with a few
+prefixes and suffixes, while "straight" uses the ASCII apostrophe and
+double-quote characters.  "Merlin" uses a format similar to what the
+Merlin assembler expects.</p>
 
 
 <h3><a name="appset-displayformat">Display Format</a></h3>
@@ -131,6 +137,11 @@ The setting affects label editing as well as display.</p>
 <p>If you would like your local variables to be shown with a prefix
 character, you can set it in the "local variable prefix" box.</p>
 
+<p>The "comma-separated format for bulk data" determines whether large
+blocks of hex look like <code>ABC123</code> or
+<code>$AB,$C1,$23</code>.  The former reduces the number of lines
+required, the latter is more readable.</p>
+
 <p>The "quick set" pop-up configures the fields on the left side of the
 tab to match the conventions of the specified assembler.  Select your
 preferred assembler in the combo box to set the fields.  The setting
@@ -143,13 +154,9 @@ hex data in the code list "bytes" column from dense (<code>20edfd</code>)
 to spaced (<code>20 ed fd</code>).  This also affects the format of
 clipboard copies and exports.</p>
 
-<p>The "comma-separated format for bulk data" determines whether large
-blocks of hex look like <code>ABC123</code> or
-<code>$AB,$C1,$23</code>.  The former reduces the number of lines
-required, the latter is more readable.</p>
 <p>Long operands, such as strings and bulk data, are wrapped to a new
 line after a certain number of characters.  Use the pop-up to configure
-the value.  Larger values can make the code easier to read, but smaller
+the value.  Larger values can make the code display more compact, but smaller
 values allow you to shrink the width of the operand column in the
 on-screen listing, moving the comment field closer in.</p>
 
