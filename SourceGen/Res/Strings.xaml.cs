@@ -367,6 +367,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_SymbolImportGoodFmt");
         public static string SYMBOL_IMPORT_NONE =
             (string)Application.Current.FindResource("str_SymbolImportNone");
+        public static string TIPS_LOADING =
+            (string)Application.Current.FindResource("str_TipsLoading");
+        public static string TIPS_NOT_AVAILABLE =
+            (string)Application.Current.FindResource("str_TipsNotAvailable");
         public static string TITLE_BASE =
             (string)Application.Current.FindResource("str_TitleBase");
         public static string TITLE_MODIFIED =

@@ -193,6 +193,8 @@ limitations under the License.
     <system:String x:Key="str_SymbolImportCaption">Symbol Import</system:String>
     <system:String x:Key="str_SymbolImportGoodFmt">Imported {0} global symbols.</system:String>
     <system:String x:Key="str_SymbolImportNone">No global+export symbols were found.</system:String>
+    <system:String x:Key="str_TipsLoading">Loading tips...</system:String>
+    <system:String x:Key="str_TipsNotAvailable">Daily tips are not available.</system:String>
     <system:String x:Key="str_TitleBase">6502bench SourceGen</system:String>
     <system:String x:Key="str_TitleModified">(save needed)</system:String>
     <system:String x:Key="str_TitleNewProject">[new project]</system:String>

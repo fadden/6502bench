@@ -1,0 +1,52 @@
+{
+  "_copyright" : "Copyright 2021 faddenSoft. All rights reserved.",
+  "_license" : "Apache 2.0; see LICENSE.txt for details",
+  "Tips" : [
+    {
+      "Text" : "Many disassemblers assume everything is code, and ask you to separate out the data. SourceGen automatically finds all reachable code, so you just need to identify the places where the code starts."
+    },
+    {
+      "Text" : "Data that follows a JSR or JSL should be marked as \"inline data\". This allows the code analyzer to skip over it.  Common situations, such as null-terminated strings and addresses, can be handled automatically.",
+      "Image" : "print-inline-sample.png"
+    },
+    {
+      "Text" : "Most screen elements will respond to a double-click, either by jumping to a symbol or opening an appropriate editor. For example, you can double-click in the Bytes column to see a hex dump at that address."
+    },
+    {
+      "Text" : "You can jump to the address referred to by an instruction operand by selecting the line and hitting Ctrl+J, or simply by double-clicking on the opcode.",
+      "Image" : "dbl-click-opcode.png"
+    },
+    {
+      "Text" : "You can configure SourceGen to look more like your favorite assembler.  The Application Settings editor lets you configure pseudo-op directives, upper/lower case, and much more.",
+      "Image" : "pseudo-op-names.png"
+    },
+    {
+      "Text" : "The References window shows all locations that reference the selected line. Double-click on an entry to jump directly there."
+    },
+    {
+      "Text" : "Use the Goto feature (Ctrl+G) to jump to an address, file offset, or label."
+    },
+    {
+      "Text" : "All actions that affect the project are added to the undo/redo buffer. Feel free to experiment."
+    },
+    {
+      "Text" : "Notes are like full-line comments, but they don't appear in generated source code, so you can use them to make notes while you work. They also serve as color-coded bookmarks.",
+      "Image" : "note-sample.png"
+    },
+    {
+      "Text" : "You're not limited to global labels. You can create non-unique local labels, like \"@LOOP\", and define multiple labels for zero-page addresses in local variable tables."
+    },
+    {
+      "Text" : "2D bitmap images and 3D wireframe meshes can be converted to images that are displayed inline. This can make it much easier to figure out what a piece of code is drawing."
+    },
+    {
+      "Text" : "Large address tables can be formatted with a single operation. Various arrangements of address bytes are supported."
+    },
+    {
+      "Text" : "Source code can be generated for several cross-assemblers, or exported to HTML with embedded graphics. Animations can be exported as animated GIFs."
+    },
+    {
+      "Text" : "The online tutorial at 6502bench.com has many more tips."
+    }
+  ]
+}

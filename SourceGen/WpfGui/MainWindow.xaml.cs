@@ -28,6 +28,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 using CommonUtil;
 using CommonWPF;
@@ -132,6 +133,9 @@ namespace SourceGen.WpfGui {
         private ColorScheme mColorScheme;
         private ResourceDictionary mLightTheme;
         private ResourceDictionary mDarkTheme;
+
+        // Daily tips.
+        private DailyTips mDailyTips;
 
 
         public MainWindow() {
@@ -359,6 +363,8 @@ namespace SourceGen.WpfGui {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             mMainCtrl.WindowLoaded();
             CreateCodeListContextMenu();
+
+            InitDailyTip();
 
 #if DEBUG
             // Get more info on CollectionChanged events that do not agree with current
@@ -1645,7 +1651,6 @@ namespace SourceGen.WpfGui {
 
         #endregion Misc
 
-
         #region References panel
 
         public class ReferencesListItem {
@@ -2149,5 +2154,86 @@ namespace SourceGen.WpfGui {
         }
 
         #endregion Message list panel
+
+        #region Daily tips
+
+        private int mDailyTipCurrent = 0;
+        private int mDailyTipMax = 0;
+
+        public Visibility DailyTipVisibility {
+            get { return mDailyTipVisibility; }
+            set { mDailyTipVisibility = value; OnPropertyChanged(); }
+        }
+        private Visibility mDailyTipVisibility = Visibility.Collapsed;
+
+        public string DailyTipText {
+            get {
+                if (mDailyTipText == null) {
+                    return Res.Strings.TIPS_LOADING;
+                }
+                return mDailyTipText;
+            }
+            set { mDailyTipText = value; OnPropertyChanged(); }
+        }
+        private string mDailyTipText;
+
+        public BitmapSource DailyTipImage {
+            get { return mDailyTipImage; }
+            set { mDailyTipImage = value; OnPropertyChanged(); }
+        }
+        private BitmapSource mDailyTipImage;
+
+        public bool IsEnabledDailyTipPrev {
+            get { return mIsEnabledDailyTipPrev; }
+            set { mIsEnabledDailyTipPrev = value; OnPropertyChanged(); }
+        }
+        private bool mIsEnabledDailyTipPrev;
+
+        public bool IsEnabledDailyTipNext {
+            get { return mIsEnabledDailyTipNext; }
+            set { mIsEnabledDailyTipNext = value; OnPropertyChanged(); }
+        }
+        private bool mIsEnabledDailyTipNext;
+
+        public string DailyTipPosStr {
+            get { return mDailyTipPosStr; }
+            set { mDailyTipPosStr = value; OnPropertyChanged(); }
+        }
+        private string mDailyTipPosStr;
+
+        private void DailyTipPrevious_Click(object sender, RoutedEventArgs e) {
+            if (mDailyTipCurrent > 0) {
+                mDailyTipCurrent--;
+                UpdateDailyTip();
+            }
+        }
+        private void DailyTipNext_Click(object sender, RoutedEventArgs e) {
+            if (mDailyTipCurrent < mDailyTipMax - 1) {
+                mDailyTipCurrent++;
+                UpdateDailyTip();
+            }
+        }
+
+        public void InitDailyTip() {
+            mDailyTips = new DailyTips();
+            if (mDailyTips.Load()) {
+                DailyTipVisibility = Visibility.Visible;
+            }
+            mDailyTipCurrent = mDailyTips.DailyNumber;
+            mDailyTipMax = mDailyTips.Count;
+            UpdateDailyTip();
+        }
+        private void UpdateDailyTip() {
+            DailyTips.Tip tip = mDailyTips.Get(mDailyTipCurrent);
+            DailyTipText = tip.Text;
+            DailyTipImage = tip.Bitmap;
+
+            IsEnabledDailyTipPrev = (mDailyTipCurrent > 0);
+            IsEnabledDailyTipNext = (mDailyTipCurrent < mDailyTipMax - 1);
+            DailyTipPosStr = string.Format("{0}/{1}", mDailyTipCurrent + 1, mDailyTipMax);
+        }
+
+        #endregion Daily tips
+
     }
 }

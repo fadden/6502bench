@@ -1716,8 +1716,8 @@ namespace CommonUtil {
             // Fixed region follows.
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000200, 0x0100, 0x3000));
 
-            string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
-            Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
+            //string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
+            //Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
 
             // Add a region that starts in the middle of the floating region (becoming
             // a sibling), and ends after the fixed region (becoming its parent).

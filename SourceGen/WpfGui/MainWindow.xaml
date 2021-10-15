@@ -640,12 +640,16 @@ limitations under the License.
             <!-- Launch panel.  Either this or the code list panel will be visible. -->
             <Grid Grid.Column="2" Name="launchPanel" Visibility="{Binding Path=LaunchPanelVisibility}"
                   d:IsHidden="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <Image Source="/SourceGen;component/Res/Logo.png" Height="100"/>
                     <Grid Margin="8">
                         <Grid.RowDefinitions>
@@ -662,13 +666,14 @@ limitations under the License.
                     </Grid>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" HorizontalAlignment="Left">
+                <!-- recents -->
+                <StackPanel Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left">
                     <Button Content="Start new project" Width="240" Height="50" Margin="10,30,10,10"
                             Command="{StaticResource NewProjectCmd}"/>
                     <Button Content="Open existing project" Width="240" Height="50" Margin="10"
                             Command="{StaticResource OpenCmd}"/>
                     <Button Width="240" Height="50" Margin="10" Visibility="{Binding RecentProjectVisibility1}"
-                            ToolTip="{Binding RecentProjectPath1}" ToolTipService.InitialShowDelay="1000"
+                            ToolTip="{Binding RecentProjectPath1}" ToolTipService.InitialShowDelay="750"
                             Command="{DynamicResource RecentProjectCmd}" CommandParameter="0">
                         <Button.Content>
                             <StackPanel>
@@ -678,7 +683,7 @@ limitations under the License.
                         </Button.Content>
                     </Button>
                     <Button Width="240" Height="50" Margin="10" Visibility="{Binding RecentProjectVisibility2}"
-                            ToolTip="{Binding RecentProjectPath2}" ToolTipService.InitialShowDelay="1000"
+                            ToolTip="{Binding RecentProjectPath2}" ToolTipService.InitialShowDelay="750"
                             Command="{DynamicResource RecentProjectCmd}" CommandParameter="1">
                         <Button.Content>
                             <StackPanel>
@@ -688,10 +693,49 @@ limitations under the License.
                         </Button.Content>
                     </Button>
                 </StackPanel>
+
+                <!-- daily tips -->
+                <GroupBox Grid.Column="1" Grid.Row="1" Width="300" MinHeight="210" Padding="2,0" Margin="20,20,0,0"
+                          VerticalAlignment="Top" Visibility="{Binding DailyTipVisibility}"
+                          Header="Tip of the Day">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Text="{Binding DailyTipText, FallbackValue=Tip text here!}"/>
+                        <Image Grid.Row="1" Margin="0,4,0,0"
+                               Source="{Binding DailyTipImage}"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None"/>
+
+                        <Grid Grid.Row="2" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Width="70" HorizontalAlignment="Left"
+                                    Content="Previous"
+                                    IsEnabled="{Binding IsEnabledDailyTipPrev}"
+                                    Click="DailyTipPrevious_Click"/>
+                            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                       Text="{Binding DailyTipPosStr, FallbackValue=?/?}"/>
+                            <Button Grid.Column="2" Width="70" HorizontalAlignment="Right"
+                                    Content="Next"
+                                    IsEnabled="{Binding IsEnabledDailyTipNext}"
+                                    Click="DailyTipNext_Click"/>
+                        </Grid>
+                        
+                    </Grid>
+                </GroupBox>
             </Grid>
 
             <!-- Code list panel.  Either this or the Launch panel will be visible. -->
-            <Grid Grid.Column="2" Name="codeListGrid" Visibility="{Binding Path=CodeListVisibility}">
+            <Grid Grid.Column="2" Name="codeListGrid" Visibility="{Binding Path=CodeListVisibility}"
+                  d:IsHidden="False">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
