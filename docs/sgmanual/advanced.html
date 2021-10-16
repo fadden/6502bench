@@ -157,10 +157,6 @@ import the changes.</p>
 the full .NET Standard 2.0 APIs.  They're compiled at run time by SourceGen
 and executed in a sandbox with security restrictions.</p>
 
-<p>SourceGen defines an interface that plugins must implement, and an
-interface that plugins can use to interact with SourceGen.  See
-Interfaces.cs in the PluginCommon directory.</p>
-
 <p>The current interfaces can be used to generate visualizations, to
 identify inline data that follows JSR, JSL, or BRK instructions, and to
 format operands.  The latter can be used to format code and data, e.g.
@@ -169,23 +165,62 @@ replacing immediate load operands with symbolic constants.</p>
 <p>Scripts may be loaded from the RuntimeData directory, or from the directory
 where the project file lives.  Attempts to load them from other locations
 will fail.</p>
-<p>A project may load multiple scripts.  The order in which they are
+<p>A project may load multiple scripts.  The order in which functions are
 invoked is not defined.</p>
 
-<h4>Known Issues and Limitations</h4>
+<h3 id="built-in">Built-In Scripts</h3>
 
-<p>Scripts are currently limited to C# version 5, because the compiler
-built into .NET only handles that.  C# 6 and later require installing an
-additional package ("Roslyn"), so SourceGen does not support this.</p>
+<p>A number of scripts are distributed with SourceGen, and may be used
+freely by projects.  Most are tailored for a specific platform, e.g.
+Apple II ProDOS calls or Atari 2600 graphics.</p>
+<p>The <samp>StdInline.cs</samp> script in the <samp>RuntimeData/Common</samp>
+directory has some general-purpose inline data formatting functions.
+To use them, add the script to the project, then add an appropriate label
+to the subroutine that handles the inline data.  For example, suppose the
+code looks like this:</p>
+<pre>
+$1000  START        JSR     L1234
+$1003               .STR    "hello, world!"
+$1010               .DD1    $00
+$1011               .DD1    $a9
+$1012               .DD1    $55
+[...]
+$1234  L1234        PLA
+[...]
+</pre>
+<p>The code won't analyze correctly because it will try to follow the
+code into the string data.  If you include the script, and set the label
+at <code>L1234</code> to <code>InAZ_PrintString</code>, the code will
+then format correctly:</p>
+<pre>
+$1000  START        JSR     InAZ_PrintString
+$1003               .ZSTR   "hello, world!"
+$1011               LDA     #$55
+[...]
+$1234  InAZ_PrintString PLA
+[...]
+</pre>
 
-<p>When a project is opened, any errors encountered by the script compiler
-are reported to the user.  If the project is already open, and a script
-is added to the project through the Project Properties editor, compiler
-messages are silently discarded.  (This also applies if you undo/redo across
-the property edit.)  Use File &gt; Reload External Files to see the
-compiler messages.</p>
+<p>The label prefixes currently defined by the script are:</p>
+<ul>
+  <li><code>InAZ_</code> : inline ASCII null-terminated string</li>
+  <li><code>InA1_</code> : inline ASCII length-delimited string</li>
+  <li><code>InPZ_</code> : inline PETSCII null-terminated string</li>
+  <li><code>InP1_</code> : inline PETSCII length-delimited string</li>
+  <li><code>InW_</code> : inline 16-bit word</li>
+  <li><code>InWA_</code> : inline 16-bit address</li>
+  <li><code>InNR_</code> : non-returning call (i.e. the JSR acts like
+    a JMP)</li>
+</ul>
+</p>
 
-<h4>Development</h4>
+<p>Anything more complicated will require a custom script.</p>
+
+<h3 id="script-dev">Script Development</h3>
+
+<p>SourceGen defines an interface that plugins must implement, and an
+interface that plugins can use to interact with SourceGen.  See
+Interfaces.cs in the PluginCommon directory.</p>
 
 <p>The easiest way to develop extension scripts is inside the 6502bench
 solution in Visual Studio.  This way you have the interfaces available
@@ -205,9 +240,22 @@ will allow regeneration of the PDB files.</p>
 <p>Some commonly useful functions are defined in the
 <code>PluginCommon.Util</code> class, which is available to plugins.  These
 call into the CommonUtil library, which is shared with SourceGen.
-While plugins could use CommonUtil directly, they should avoid doing so.  The
-APIs there are not guaranteed to be stable, so plugins that rely on them
-may break in a subsequent release of SourceGen.</p>
+While plugins could technically use CommonUtil directly, they should avoid
+doing so.  The APIs there are not guaranteed to be stable, so plugins
+that rely on them may break in a subsequent release of SourceGen.</p>
+
+<h4>Known Issues and Limitations</h4>
+
+<p>Scripts are currently limited to C# version 5, because the compiler
+built into .NET only handles that.  C# 6 and later require installing an
+additional package ("Roslyn"), so SourceGen does not support this.</p>
+
+<p>When a project is opened, any errors encountered by the script compiler
+are reported to the user.  If the project is already open, and a script
+is added to the project through the Project Properties editor, compiler
+messages are silently discarded.  (This also applies if you undo/redo across
+the property edit.)  Use File &gt; Reload External Files to see the
+compiler messages.</p>
 
 <h4>PluginDllCache Directory</h4>
 

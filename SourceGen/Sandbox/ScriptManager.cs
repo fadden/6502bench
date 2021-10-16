@@ -325,7 +325,7 @@ namespace SourceGen.Sandbox {
         }
 
         /// <summary>
-        /// Gathers a list of platform symbols from the project's symbol table.
+        /// Gathers a list of symbols from the project's symbol table.
         /// </summary>
         private List<PlSymbol> GeneratePlSymbolList() {
             List<PlSymbol> plSymbols = new List<PlSymbol>();

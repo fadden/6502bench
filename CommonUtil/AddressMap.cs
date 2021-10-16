@@ -82,9 +82,10 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// MUST match Asm65.Address.NON_ADDR.  We can't use the constant directly here because
-        /// the classes are in different packages that aren't dependent upon each other.
+        /// the classes are in different packages that aren't dependent upon each other.  We
+        /// have to make this public because PluginCommon.AddressTranslate needs it as well.
         /// </remarks>
-        private const int NON_ADDR = -1025;
+        public const int NON_ADDR = -1025;
 
         #region Structural
 

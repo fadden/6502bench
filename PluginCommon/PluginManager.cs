@@ -190,7 +190,11 @@ namespace PluginCommon {
                 IPlugin ipl = kvp.Value;
                 ipl.Prepare(appRef, mFileData, addrTrans);
                 if (ipl is IPlugin_SymbolList) {
-                    ((IPlugin_SymbolList)ipl).UpdateSymbolList(plSyms);
+                    try {
+                        ((IPlugin_SymbolList)ipl).UpdateSymbolList(plSyms);
+                    } catch (Exception ex) {
+                        throw new Exception("Failed in UpdateSymbolList(" + kvp.Key + ")", ex);
+                    }
                 }
             }
         }

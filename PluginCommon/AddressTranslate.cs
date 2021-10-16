@@ -15,6 +15,7 @@
  */
 using System;
 using System.Runtime.Serialization;
+
 using CommonUtil;
 
 namespace PluginCommon {
@@ -37,6 +38,8 @@ namespace PluginCommon {
     /// access to data that is split into multiple regions.
     /// </remarks>
     public class AddressTranslate {
+        public const int NON_ADDR = AddressMap.NON_ADDR;
+
         private AddressMap mAddrMap;
 
         public AddressTranslate(AddressMap addrMap) {
