@@ -169,7 +169,7 @@ limitations under the License.
                     </StackPanel>
                     <Button Width="150" Margin="0,8,0,0" HorizontalAlignment="Left"
                             Content="{Binding CreateEditLabelText, FallbackValue=Diddle Label}"
-                            Click="EditLabel_Click"/>
+                            IsEnabled="{Binding IsDiddleLabelEnabled}" Click="EditLabel_Click"/>
                 </StackPanel>
 
                 <StackPanel Visibility="{Binding ShowNarExternalSymbol, Converter={StaticResource BoolToVis}}">

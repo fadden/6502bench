@@ -308,6 +308,12 @@ namespace SourceGen.WpfGui {
                 SymbolValueHex = SYMBOL_NOT_USED;
             }
 
+            // We want to disable the create/edit label button if a symbol has been
+            // specified, because the label being edited is the one that the numeric
+            // reference points to, not the one the symbol points to.
+            // TODO(maybe): leave it enabled if the symbolic ref matches the numeric ref.
+            IsDiddleLabelEnabled = !FormatSymbol;
+
             UpdatePreview();
             UpdateCopyToOperand();
         }
@@ -857,6 +863,12 @@ namespace SourceGen.WpfGui {
         }
         private bool mIsCopyToOperandEnabled;
 
+        public bool IsDiddleLabelEnabled {
+            get { return mIsDiddleLabelEnabled; }
+            set { mIsDiddleLabelEnabled = value; OnPropertyChanged(); }
+        }
+        private bool mIsDiddleLabelEnabled;
+
         /// <summary>
         /// Edited label value.  Will be null if the label hasn't been created, or has been
         /// deleted (by entering a blank string in the label edit box).
@@ -889,7 +901,7 @@ namespace SourceGen.WpfGui {
         private DefSymbol mEditedProjectSymbol;
 
         /// <summary>
-        /// Configures the UI in the local variables box at load time.
+        /// Configures the UI in the Numeric Address Reference box at load time.
         /// </summary>
         private void NumericReferences_Loaded() {
             SymbolEditOffsetResult = -1;
@@ -1121,7 +1133,7 @@ namespace SourceGen.WpfGui {
 
 
         /// <summary>
-        /// Configures the UI in the local variables box at load time.
+        /// Configures the UI in the Local Variable box at load time.
         /// </summary>
         private void LocalVariables_Loaded() {
             if (!mOpDef.IsDirectPageInstruction && !mOpDef.IsStackRelInstruction) {
