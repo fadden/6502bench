@@ -48,9 +48,9 @@ globalnm
         nop
 nglobal nop
 globlat jsr     nglobal
-        bra     end
+        bra     NOT1
 
-end     nop
+NOT1    nop
 EXCESSIVELY_LONG_LABEL
         lda     REALLYLONGLABELNAME
 @_uname nop

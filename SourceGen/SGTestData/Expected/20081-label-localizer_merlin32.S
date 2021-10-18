@@ -44,9 +44,9 @@ globalnm jsr   :L104A
          nop
 nglobal  nop
 globlat  jsr   nglobal
-         bra   end
+         bra   NOT
 
-end      nop
+NOT      nop
 EXCESSIVELY_LONG_LABEL
          lda   REALLYLONGLABELNAME
 :_uname  nop

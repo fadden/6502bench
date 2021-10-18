@@ -268,6 +268,7 @@ namespace SourceGen.AsmGen {
             // between global labels.  (This is poorly documented.)
             mLocalizer.LocalPrefix = "@";
             mLocalizer.QuirkNoOpcodeMnemonics = true;
+            mLocalizer.ReservedWords = new List<string>() { "NOT" };
             mLocalizer.Analyze();
 
             mPcDepth = 0;

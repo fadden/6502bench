@@ -148,6 +148,11 @@ namespace SourceGen.AsmGen {
         public bool QuirkNoOpcodeMnemonics { get; set; }
 
         /// <summary>
+        /// Set this if there are reserved words that must not be used as labels.
+        /// </summary>
+        public List<string> ReservedWords { get; set; }
+
+        /// <summary>
         /// Project reference.
         /// </summary>
         private DisasmProject mProject;
@@ -238,18 +243,24 @@ namespace SourceGen.AsmGen {
             Dictionary<string, string> allGlobalLabels = new Dictionary<string, string>();
             bool remapUnders = (LocalPrefix == "_");
 
-            Dictionary<string, Asm65.OpDef> opNames = null;
+            HashSet<string> rsvdNames = new HashSet<string>();
             if (QuirkNoOpcodeMnemonics) {
                 // Create a searchable list of opcode names using the current CPU definition.
                 // (All tested assemblers that failed on opcode names only did so for names
                 // that were part of the current definition, e.g. "TSB" was accepted as a label
                 // when the CPU was set to 6502.)
-                opNames = new Dictionary<string, Asm65.OpDef>();
                 Asm65.CpuDef cpuDef = mProject.CpuDef;
                 for (int i = 0; i < 256; i++) {
                     Asm65.OpDef op = cpuDef.GetOpDef(i);
                     // There may be multiple entries with the same name (e.g. "NOP").  That's fine.
-                    opNames[op.Mnemonic.ToUpperInvariant()] = op;
+                    rsvdNames.Add(op.Mnemonic.ToUpperInvariant());
+                }
+            }
+
+            // Add any words that the assembler just doesn't like.
+            if (ReservedWords != null) {
+                foreach (string str in ReservedWords) {
+                    rsvdNames.Add(str);
                 }
             }
 
@@ -264,7 +275,7 @@ namespace SourceGen.AsmGen {
                     continue;
                 }
 
-                RemapGlobalSymbol(sym, allGlobalLabels, opNames, remapUnders);
+                RemapGlobalSymbol(sym, allGlobalLabels, rsvdNames, remapUnders);
             }
 
             // Remap any project/platform symbols that clash with opcode mnemonics or have
@@ -277,7 +288,7 @@ namespace SourceGen.AsmGen {
                 //    LabelMap[defSym.Label] = newLabel;
                 //    allGlobalLabels.Add(newLabel, newLabel);
                 //}
-                RemapGlobalSymbol(defSym, allGlobalLabels, opNames, remapUnders);
+                RemapGlobalSymbol(defSym, allGlobalLabels, rsvdNames, remapUnders);
             }
 
             // Remap any address region pre-labels with inappropriate values.
@@ -291,7 +302,7 @@ namespace SourceGen.AsmGen {
                 Symbol sym = new Symbol(change.Region.PreLabel, change.Region.PreLabelAddress,
                     Symbol.Source.AddrPreLabel, Symbol.Type.ExternalAddr,
                     Symbol.LabelAnnotation.None);
-                RemapGlobalSymbol(sym, allGlobalLabels, opNames, remapUnders);
+                RemapGlobalSymbol(sym, allGlobalLabels, rsvdNames, remapUnders);
             }
 
             //
@@ -350,12 +361,13 @@ namespace SourceGen.AsmGen {
         /// <param name="sym">Symbol to rename.</param>
         /// <param name="allGlobalLabels">List of all global labels, used when uniquifing
         ///   a "promoted" local.  May be updated.</param>
-        /// <param name="opNames">List of opcode mnemonics for configured CPU.  Will be
-        ///   null if the assembler allows labels to be the same as opcodes.</param>
+        /// <param name="rsvdNames">List of reserved words.  If the assembler doesn't allow
+        ///   the use of opcode mnemonics as labels, this will hold the list of mnemonics for
+        ///   the configured CPU.</param>
         /// <param name="remapUnders">True if leading underscores are not allowed (because
         ///   they're used to indicate local labels).</param>
         private void RemapGlobalSymbol(Symbol sym, Dictionary<string, string> allGlobalLabels,
-                Dictionary<string, Asm65.OpDef> opNames, bool remapUnders) {
+                HashSet<string> rsvdNames, bool remapUnders) {
             string newLabel = sym.LabelWithoutTag;
             if (remapUnders && newLabel[0] == '_') {
                 newLabel = NO_UNDER_PFX + newLabel;
@@ -365,7 +377,7 @@ namespace SourceGen.AsmGen {
                     newLabel = MakeUnique(newLabel, allGlobalLabels);
                 }
             }
-            if (opNames != null && opNames.ContainsKey(newLabel.ToUpperInvariant())) {
+            if (rsvdNames != null && rsvdNames.Contains(newLabel.ToUpperInvariant())) {
                 // Clashed with mnemonic.  Uniquify it.
                 newLabel = MakeUnique(newLabel, allGlobalLabels);
             }
