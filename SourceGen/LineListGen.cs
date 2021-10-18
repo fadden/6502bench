@@ -307,7 +307,8 @@ namespace SourceGen {
                     if (lineType == Line.Type.Code || lineType == Line.Type.Data) {
                         lineType = Line.Type.CodeOrData;
                     }
-                    if (line.FileOffset == curOffset || lineType == Line.Type.ArEndDirective) {
+                    if (line.FileOffset == curOffset ||
+                            (tag != null && lineType == Line.Type.ArEndDirective)) {
                         // Another item at same offset.  We special-case the arend directive
                         // because it's contained within the previous item, so we want it to be
                         // set on the existing [offset,offset+span) range tag.

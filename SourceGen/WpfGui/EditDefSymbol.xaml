@@ -32,8 +32,8 @@ limitations under the License.
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <system:String x:Key="str_WidthLimitFmt">• Decimal or hex value, 1-{0}</system:String>
-        <system:String x:Key="str_ProjectConstant">Constant</system:String>
-        <system:String x:Key="str_VariableConstant">Stack-Relative Offset</system:String>
+        <system:String x:Key="str_ProjectConstant">_Constant</system:String>
+        <system:String x:Key="str_VariableConstant">Stack-Relative _Offset</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -54,7 +54,7 @@ limitations under the License.
         <TextBlock Grid.Column="0" Grid.Row="0" Margin="0,0,8,0">Symbol type:</TextBlock>
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="0,1,0,12"
                     IsEnabled="{Binding NotReadOnlyValueAndType}">
-            <RadioButton Content="Address" GroupName="Type" Margin="0,0,0,0" IsChecked="{Binding IsAddress}"/>
+            <RadioButton Content="_Address" GroupName="Type" Margin="0,0,0,0" IsChecked="{Binding IsAddress}"/>
             <RadioButton Content="{Binding ConstantLabel, FallbackValue=Constant}" Margin="8,0,0,0"
                             GroupName="Type" IsChecked="{Binding IsConstant}"/>
         </StackPanel>

@@ -2352,18 +2352,14 @@ namespace SourceGen {
                                         "project/platform symbol");
                                     needReanalysis = UndoableChange.ReanalysisScope.DataOnly;
                                 } else {
-                                    affectedOffsets.Add(offset);
+                                    AddAffectedLine(affectedOffsets, offset);
 
                                     // Use the cross-reference table to identify the offsets that
                                     // we need to update.
                                     if (mXrefs.TryGetValue(offset, out XrefSet xrefs)) {
                                         foreach (XrefSet.Xref xr in xrefs) {
-                                            // This isn't quite right -- in theory we should be
-                                            // adding all offsets that are part of the instruction,
-                                            // so that affectedOffsets can hold a contiguous range
-                                            // instead of a collection of opcode offsets.  In
-                                            // practice, for a label change, it shouldn't matter.
-                                            affectedOffsets.Add(xr.Offset);
+                                            // Add all bytes in the instruction / data item.
+                                            AddAffectedLine(affectedOffsets, xr.Offset);
                                         }
                                     }
                                 }
@@ -2432,8 +2428,8 @@ namespace SourceGen {
                             }
                             Comments[offset] = (string)newValue;
 
-                            // Only affects this offset.
-                            affectedOffsets.Add(offset);
+                            // Only affects the bytes at this offset.
+                            AddAffectedLine(affectedOffsets, offset);
                         }
                         break;
                     case UndoableChange.ChangeType.SetLongComment: {
@@ -2449,8 +2445,8 @@ namespace SourceGen {
                                 LongComments[offset] = (MultiLineComment)newValue;
                             }
 
-                            // Only affects this offset.
-                            affectedOffsets.Add(offset);
+                            // Only affects the bytes at this offset.
+                            AddAffectedLine(affectedOffsets, offset);
                         }
                         break;
                     case UndoableChange.ChangeType.SetNote: {
@@ -2466,8 +2462,8 @@ namespace SourceGen {
                                 Notes[offset] = (MultiLineComment)newValue;
                             }
 
-                            // Only affects this offset.
-                            affectedOffsets.Add(offset);
+                            // Only affects the bytes at this offset.
+                            AddAffectedLine(affectedOffsets, offset);
                         }
                         break;
                     case UndoableChange.ChangeType.SetProjectProperties: {
@@ -2553,6 +2549,31 @@ namespace SourceGen {
             }
 
             return needReanalysis;
+        }
+
+        /// <summary>
+        /// Adds all offsets associated with the code or data item at the specified offset
+        /// to the range set.
+        /// </summary>
+        /// <remarks>
+        /// In the past, it was only really necessary to add the first offset, because that
+        /// would trigger the entire line to be redrawn.  That's not the case with arend
+        /// directives, which are associated with the last byte of a multi-byte item.
+        /// </remarks>
+        /// <param name="affectedOffsets">Range set to update.</param>
+        /// <param name="offset">Offset of first byte.</param>
+        private void AddAffectedLine(RangeSet affectedOffsets, int offset) {
+            int len = 1;
+            if (offset >= 0) {  // header comment doesn't have an Anattrib entry
+                len = mAnattribs[offset].Length;
+            }
+            if (len == 0) {
+                Debug.Assert(false, "Zero-length affected line?");
+                len = 1;
+            }
+            for (int i = offset; i < offset + len; i++) {
+                affectedOffsets.Add(i);
+            }
         }
 
         /// <summary>
