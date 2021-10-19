@@ -1,19 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Visualizations - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Visualizations - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Visualizations</h1>
+<h1>SourceGen: Visualizations</h1>
 <p><a href="index.html">Back to index</a></p>
 
-<h2><a name="overview">Overview</a></h2>
+<h2 id="overview">Overview</h2>
 
 <p>Programs are generally a combination of code and data.  Sometimes
 the data is graphical in nature, e.g. a bitmap used as a font or
@@ -48,7 +49,7 @@ write a script that generates random flowers, and use it to make your
 source listings more cheerful.</p>
 
 
-<h2><a name="vis-and-sets">Visualizations and Visualization Sets</a></h2>
+<h2 id="vis-and-sets">Visualizations and Visualization Sets</h2>
 
 <p>Visualizations are essentially decorative: they do not affect the
 assembled output, and do not change how code is analyzed.  They are
@@ -60,17 +61,17 @@ You can display a visualization near the data or near the instructions
 that perform the drawing.  Or both.</p>
 
 <p>To create a visualization set, select a code or data line, and use
-Actions &gt; Create/Edit Visualization Set.  To edit a visualization set,
-select it and use the same menu item, or just double-click on it.  This
-opens the Visualization Set Editor window.</p>
+<samp>Actions &gt; Create/Edit Visualization Set</samp>.  To edit
+a visualization set, select it and use the same menu item, or just
+double-click on it.  This opens the Visualization Set Editor window.</p>
 
 <p>The visualization set editor shows a list of visualizations associated
 with the selected file offset.  You can create a new visualization, edit
 or remove an existing entry, or rearrange them.
-If you select "New Bitmap" or edit an existing bitmap entry, the
+If you select <samp>New Bitmap</samp> or edit an existing bitmap entry, the
 Bitmap Visualization Editor window will open.
-Similarly, if you select "New Bitmap Animation" or edit an existing
-bitmap animation, the Bitmap Animation Editor will open.</p>
+Similarly, if you select <samp>New Bitmap Animation</samp> or edit an
+existing bitmap animation, the Bitmap Animation Editor will open.</p>
 
 <h4>Visualization Editor</h4>
 
@@ -79,7 +80,7 @@ generator defined by an active extension script.  Select the one that is
 appropriate for the data you're trying to visualize.  Every visualizer may
 have different parameters, so as you select different entries the set of
 input parameters below the preview window may change.</p>
-<p>There are two categorizes of visualization generator: bitmap, and
+<p>There are two categories of visualization generator: bitmap, and
 wireframe.  Bitmaps are simple 2D images, but wireframes are 2D or 3D
 meshes that can be viewed from different angles.  When you select a
 wireframe generator, additional view controls will be added at the bottom.
@@ -101,8 +102,8 @@ the former a text entry field that accepts decimal and hexadecimal values.
 The range of allowable values is shown to the right of the entry field.
 If you enter an invalid value, the parameter description will turn red.</p>
 
-<p>The "Export" button at the top right can be used to save a copy of
-the bitmap or wireframe rendering with the current parameters.</p>
+<p>The <samp>Export</samp> button at the top right can be used to save a
+copy of the bitmap or wireframe rendering with the current parameters.</p>
 
 <h5>Wireframe View Controls</h5>
 
@@ -122,12 +123,13 @@ about which rotations are performed points toward the viewer.  The
 rotations are performed with a matrix using Euler angles, and are
 subject to gimbal lock (e.g. if you set Y to 90 degrees, X and Z rotate
 about the same axis).</p>
-<p>If you check the "Animated" box, you can add a simple spin.  Choose
-the number of degrees to rotate per frame, how many frames to generate before
-resetting, and the delay between each frame.  Clicking the "Auto" button
-will automatically select the number of frames needed to display the
-animation in an unbroken loop (useful for animated GIFs).  Click
-the "Test Animation" button to see it in action.</p>
+<p>If you check the <samp>Animated</samp> box, you can add a simple spin.
+Choose the number of degrees to rotate per frame, how many frames to
+generate before resetting, and the delay between each frame.  Clicking
+the <samp>Auto</samp> button will automatically select the number of
+frames needed to display the animation in an unbroken loop (useful
+for animated GIFs).  Click the <samp>Test Animation</samp> button to
+see it in action.</p>
 
 <h4>Bitmap Animation Editor</h4>
 
@@ -137,15 +139,15 @@ stores animated graphics as a series of frames.</p>
 <p>The "tag" is a unique string that will be shown in the display list.
 The same rules apply as for bitmap visualizations.</p>
 <p>The list at the top left holds all visualizations.  Select items on
-the left and use the "Add" button to add them to the list on the right,
-which has the set that is included in the animation.  You can reorder
-the list with the up/down buttons.  Adding the same frame multiple times
-is allowed.</p>
-<p>The "frame delay" field lets you specify how long each frame is shown
-on screen, in milliseconds.  Some animation formats may use a different
-time resolution; for example, animated GIFs use units of 1/100th of a
-second.  The closest value will be used.  Note also that some viewers
-(notably web browsers) will cap the update rate.</p>
+the left and use the <samp>Add</samp> button to add them to the list on
+the right, which has the set that is included in the animation.  You
+can reorder the list with the up/down buttons.  Adding the same frame
+multiple times is allowed.</p>
+<p>The <samp>frame delay</samp> field lets you specify how long each
+frame is shown on screen, in milliseconds.  Some animation formats may
+use a different time resolution; for example, animated GIFs use units
+of 1/100th of a second.  The closest value will be used.  Note also
+that some viewers (notably web browsers) will cap the update rate.</p>
 <p>When you have one or more frames in the animation list, you can preview
 the result in the window at the bottom.  The actual appearance may be
 slightly different, especially if the frames are different sizes.  For
@@ -153,7 +155,7 @@ example, the preview window scales individual frames, but animated GIFs
 will be scaled to the size of the largest frame.</p>
 
 
-<h2><a name="runtime">Scripts Included with SourceGen</a></h2>
+<h2 id="runtime">Scripts Included with SourceGen</h2>
 
 <p>A number of visualization generation scripts are included with
 SourceGen, in the platform-specific runtime data directories.</p>
@@ -184,7 +186,7 @@ results do not need to be perfectly accurate to be useful when disassembling
 code.</p>
 
 
-<h3>Apple II - Apple/VisHiRes and Apple/VisShapeTable</h3>
+<h3>Apple II : Apple/VisHiRes and Apple/VisShapeTable</h3>
 
 <p>There is no standard format for small hi-res bitmaps, but certain
 arrangements are common.  The VisHiRes script defines four generators:</p>
@@ -227,7 +229,7 @@ have multiple vector shapes.  The only parameter other than the offset
 is the shape number.</p>
 
 
-<h3>Atari 2600 - Atari/Vis2600</h3>
+<h3>Atari 2600 : Atari/Vis2600</h3>
 
 <p>The Atari 2600 graphics system has registers that determine the
 appearance of a sprite or playfield on a single row.  The register
@@ -249,7 +251,7 @@ straightforward fashion.</p>
     repeated as-is or flipped.</li>
 </ul>
 
-<h3>Atari Arcade - Atari/VisAVG </h3>
+<h3>Atari Arcade : Atari/VisAVG</h3>
 
 <p>Different versions of Atari's Analog Vector Graphics were used in
 several games, notably Battlezone, Tempest, and Star Wars.  The commands
@@ -260,9 +262,9 @@ well as lines, but works fine for annotating a disassembly.</p>
 the commands to visualize, and the base address of vector RAM.  The latter
 is necessary to convert AVG JMP/JSR commands into offsets.</p>
 
-<h3>Commodore 64 - Commodore/VisC64</h3>
+<h3>Commodore 64 : Commodore/VisC64</h3>
 
-<p>The Commodore 64 has a 64-bit sprite format defined by the hardware.
+<p>The Commodore 64 has a 64-byte sprite format defined by the hardware.
 It comes in two basic varieties:</p>
 <ul>
   <li><b>High-resolution sprite</b> - 24x21 monochrome.  Pixels are either
@@ -295,7 +297,7 @@ It comes in two basic varieties:</p>
 a sprite that is doubled in both width and height will look exactly like
 a sprite that is not doubled at all.</p>
 
-<h3>Nintendo Entertainment System - Nintendo/VisNES</h3>
+<h3>Nintendo Entertainment System : Nintendo/VisNES</h3>
 
 <p>NES PPU pattern tables hold 8x8 tiles with 2 bits of color per pixel.
 Converting the full collection to a reference bitmap is straightforward.

@@ -16,3 +16,13 @@ body {
     margin: 20px 10px 10px 10px;
     /*position: relative;*/
 }
+
+/*
+ * Display of keyboard shortcuts in the <kbd> element.
+ */
+kbd.key {
+    border-radius: 5px;
+    padding: 0px 2px 0;
+    border: 1px solid black;
+    background-color: #f7f7f7;
+}

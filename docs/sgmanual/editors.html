@@ -1,20 +1,21 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Editors - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Editors - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Editors</h1>
+<h1>SourceGen: Editors</h1>
 <p><a href="index.html">Back to index</a></p>
 
 
-<h2><a name="address">Define Address Region</a></h2>
+<h2 id="address">Define Address Region</h2>
 
 <p><a href="intro-details.html#address-regions">Address regions</a>
 may be created, edited, resized, or removed.  Which
@@ -83,11 +84,11 @@ opening the editor.</p>
 <p>To see detailed information about an address region in the "Info"
 window, select the region start or end directive.  You can see the
 current arrangement of address regions across your entire
-project with Navigate &gt; View Address Map.</p>
+project with <samp>Navigate &gt; View Address Map</samp>.</p>
 
 
 
-<h2><a name="flags">Override Status Flags</a></h2>
+<h2 id="flags">Override Status Flags</h2>
 
 <p>The state of the processor status flags are tracked for every
 instruction.  Each individual flag is recorded as zero, one, or
@@ -99,7 +100,7 @@ register, may also be set in the editor.</p>
 is set to 65816.</p>
 
 
-<h2><a name="label">Edit Label</a></h2>
+<h2 id="label">Edit Label</h2>
 <p>Sets or clears a label at the selected offset.  The label must have the
 <a href="intro-details.html#about-symbols">proper form</a>, and not have the same
 name as another symbol, unless it's specified to be non-unique.  If you
@@ -119,14 +120,14 @@ be imported by other projects (see
 <a href="advanced.html#multi-bin">Working With Multiple Binaries</a>).</p>
 
 
-<h2><a name="instruction-operand">Edit Operand (Instruction)</a></h2>
+<h2 id="instruction-operand">Edit Operand (Instruction)</h2>
 <p>Operands can be formatted explicitly, or you can let the disassembler
 select the format for you.  By default, immediate constants and
 addresses with no matching symbol are formatted as hex.  Symbols
 defined as address labels, platform/project symbols, and local
 variables will be identified and applied automatically.</p>
 
-<h3><a name="explicit-format">Explicit Formats</a></h3>
+<h3 id="explicit-format">Explicit Formats</h3>
 <p>Operands can be displayed in a variety of numeric formats, or as a
 symbol.  The character formats are only available for operands
 whose value falls into the proper range.  The ASCII format handles
@@ -162,13 +163,14 @@ branch instructions.</p>
 
 <p>The bottom part of the window has some shortcuts for working with
 address references and local variables.  These are primarily used to
-change the way things work when "Default" is selected.  The shortcuts
+change the way things work when the <samp>Default</samp> format option
+is selected.  The shortcuts
 don't cause any changes to the recorded format of the instruction
 being edited.  All of the actions can be performed elsewhere, by
 editing the label at the target address, editing the project symbol
 set, or editing a local variable table.</p>
 
-<h3><a name="shortcut-nar">Numeric Address References</a></h3>
+<h3 id="shortcut-nar">Numeric Address References</h3>
 
 <p>For operands that are 8-bit, 16-bit, or 24-bit addresses, you can
 define a symbol for the address as a label or
@@ -187,9 +189,10 @@ in the editor.</p>
 address or I/O location, you can define a project symbol.  If a
 match was found in the configured platform definition files, it will be
 shown; it can't be edited, but it can be overridden by a project symbol.
-You can create or modify a project symbol by clicking on "Create Project
-Symbol" or "Edit Project Symbol".  You can't delete project symbols
-from this editor (use Project Properties instead).</p>
+You can create or modify a project symbol by clicking on
+<samp>Create Project Symbol</samp> or <samp>Edit Project Symbol</samp>.
+You can't delete project symbols
+from this editor (use the Project Properties editor instead).</p>
 
 <p>It's possible to have more than one project symbol for the same
 address.  For example, on the Apple II, reading from the memory-mapped
@@ -199,24 +202,26 @@ have two different names for it.  If more than one project symbol has the
 same address, the first one found will be used, which may not be
 what is desired.  In such situations, you should create the project
 symbol and then copy the symbol name into the operand.  You can do this
-in one step by clicking the "Copy to Operand" button.
+in one step by clicking the <samp>Copy to Operand</samp> button.
 (In most cases you don't want to do this, because if the project
 symbol is deleted or renamed, you'll have operands that refer to a
 nonexistent symbol.  Unlike labels, project symbol renames do not
 refactor the rest of the project.)
 
-<h3><a name="shortcut-local-var">Local Variable References</a></h3>
+<h3 id="shortcut-local-var">Local Variable References</h3>
 
 <p>For zero-page address operands and (65816-only) stack-relative
-constant operands, a local variable can be created or modified.  This
+constant operands, a
+<a href="intro-details.html#local-vars">local variable</a>
+can be created or modified.  This
 requires that a local variable table has been defined at or before
 the instruction being edited.</p>
 <p>If an existing entry is found, you will be able to edit the name
 and comment fields.  If not, a new entry with a generic name and
-pre-filled value field will be created in the nearest table.</p>
+pre-filled value field will be prepared in the nearest prior table.</p>
 
 
-<h2><a name="data-operand">Edit Operand (Data)</a></h2>
+<h2 id="data-operand">Edit Operand (Data)</h2>
 
 <p>This dialog offers a variety of choices, and can be used to apply a
 format to multiple lines.  You must select all of the bytes you want
@@ -234,46 +239,48 @@ many regions they have been divided into.</p>
 <p>(End-of-line comments do <i>not</i> split a region, and will
 disappear if they end up inside a multi-byte data item.)</p>
 
-<p>The "Simple Data" items behave the same as their equivalents in the
-Edit Operand dialog.  However, because the width is not determined by
-an instruction opcode, and multiple items can be selected, you will need
-to specify how wide each item is and what its byte order is.  For data
-you also have the option of setting the format to "Address", which marks
-the selected bytes as a numeric reference.</p>
+<p>The <samp>Simple Data</samp> items behave the same as their equivalents
+in the Edit Operand (Instruction) dialog.  However, because the width is
+not determined by an instruction opcode, and multiple items can be selected,
+you will need to specify how wide each item is and what its byte order is.
+For data you also have the option of setting the format to
+<samp>Address</samp>, which marks the selected bytes as a
+numeric reference.</p>
 
 <p>Consider a simple example: suppose you find a table of 16-bit
 addresses in the code.  Click on
 the first byte, shift-click the last byte, then select the Edit Data menu
 item.  The number of bytes selected should be even.  Select
-"16-bit words, little-endian", then over to the right click on
-"Address".  When you click OK, the selected data will be formatted as a
-series of 16-bit address values.  If the addresses can be resolved inside
-the data file, each address will be assigned a label.</p>
+<samp>16-bit words, little-endian</samp>, then over to the right click on
+<samp>Address</samp>.  When you click <samp>OK</samp>, the selected data
+will be formatted as a series of 16-bit address values.  If the addresses
+can be resolved inside the data file, each address will be assigned
+an automatically-generated label.</p>
 
-<p>The "Bulk Data" items can represent large chunks of data compactly.
-The "fill" option is only available if all selected bytes have the
-same value.</p>
+<p>The <samp>Bulk Data</samp> items can represent large chunks of data
+compactly.  The <samp>Fill</samp> option is only available if all selected
+bytes have the same value.</p>
 <p>If a region of bytes is used for data storage, but the initial values
-don't matter, you can mark it as "uninitialized data".  (The code
-generated will usually use an initialized bulk data directive rather
-than a "leave space" directive, because SourceGen wants to guarantee
-that the assembled binary matches the original.)</p>
+don't matter, you can mark it as <samp>Uninitialized data</samp>.
+(Note that the code generated will usually use an initialized bulk data
+directive rather than a "leave space" directive, because SourceGen wants
+to guarantee that the assembled binary matches the original.)</p>
 <p>If a region of bytes is irrelevant, e.g. dead code or padding,
-you can mark it as "junk".  If it appears to be adding bytes to reach a
-power-of-two address boundary, you can designate it as an alignment
-directive.  If you have multiple regions selected, only options that
-work for all regions will be shown.</p>
+you can mark it as <samp>Junk</samp>.  If it appears to be adding bytes
+to reach a power-of-two address boundary, you can designate it as an alignment
+directive.  If you have multiple regions selected, only the alignment
+options that work for all regions will be shown.</p>
 
-<p>The "String" items are enabled or disabled depending on whether the
-data you have selected is in the appropriate format.  For example,
-"Null-terminated strings" is only enabled if the data regions are
+<p>The <samp>String</samp> items are enabled or disabled depending on
+whether the data you have selected is in the appropriate format.  For example,
+<samp>Null-terminated strings</samp> is only enabled if the data regions are
 composed entirely of characters followed by $00.  Zero-length strings
 are allowed.
 DCI (Dextral Character Inverted) strings have the high bit on the last
 byte flipped; for PETSCII this will usually look like a series of
 lower-case letters followed by a capital letter, but may look odd if the
 last character is punctuation (e.g. '!' becomes $A1, which is a
-rectangle character that SourceGen will only display as hex).</p>
+rectangle glyph that will be displayed as a hex value).</p>
 <p>The character encoding can be selected, offering a choice between
 plain ASCII, low + high ASCII, C64 PETSCII, and C64 screen codes.  When
 you change the encoding, your available options may change.  The
@@ -317,7 +324,7 @@ CODE     LDA     LABEL+2
 <p>With the label out of the way, the data can be formatted as desired.</p>
 
 
-<h2><a name="comment">Edit Comment</a></h2>
+<h2 id="comment">Edit Comment</h2>
 <p>Enter an end-of-line (EOL) comment, or leave the text field blank to
 delete it.  EOL comments may be placed on instruction and data lines, but
 not on assembler directives.</p>
@@ -339,7 +346,7 @@ stored in the project file, and can be edited with the project symbol
 editor.</p>
 
 
-<h2><a name="long-comment">Edit Long Comment</a></h2>
+<h2 id="long-comment">Edit Long Comment</h2>
 <p>Long comments can be arbitrarily long and span multiple lines.  They
 will be word-wrapped at a line width of your choosing.  They're always
 drawn with a fixed-width font, so you can create ASCII-art diagrams.
@@ -360,13 +367,14 @@ the length of the line, not just the comment text, an asterisk-boxed
 comment will have one fewer character per line in cc65 output.</p>
 
 <p>Clear the text field to delete the comment.</p>
-<p>You can use Ctrl+Enter as a keyboard shortcut for "OK".</p>
+<p>You can use <kbd class="key">Ctrl+Enter</kbd> as a keyboard shortcut
+for <samp>OK</samp>.</p>
 
 <p>The long comment at the very top of the project is special, as it's
 not associated with a file offset.  If you delete it, you can get it
-back by using Edit &gt; Edit Header Comment.</p>
+back by using <samp>Edit &gt; Edit Header Comment</samp>.</p>
 
-<h2><a name="data-bank">Edit Data Bank (65816 only)</a></h2>
+<h2 id="data-bank">Edit Data Bank (65816 only)</h2>
 
 <p>Sets the Data Bank Register (DBR) value for 65816 code.  This is used
 when matching 16-bit address operands with labels.  The new value is
@@ -389,7 +397,7 @@ instructions, double-clicking on a <code>PLB</code> opcode in the
 code list will open the editor.</p>
 
 
-<h2><a name="note">Edit Note</a></h2>
+<h2 id="note">Edit Note</h2>
 <p>Notes are similar to long comments, in that they can be arbitrarily
 long and span multiple lines.  However, because they're never included
 in generated output, options like line width formatting and boxing
@@ -407,10 +415,11 @@ also simply type a color name like "violet" so long as it appears in the
 <a href="https://docs.microsoft.com/en-us/dotnet/media/art-color-table.png?view=netframework-4.8">list of Microsoft .NET colors</a>.</p>
 
 <p>Clear the text field to delete the note.</p>
-<p>You can use Ctrl+Enter as a keyboard shortcut for "OK".</p>
+<p>You can use <kbd class="key">Ctrl+Enter</kbd> as a keyboard shortcut
+for <samp>OK</samp>.</p>
 
 
-<h2><a name="project-symbol">Edit Project Symbol</a></h2>
+<h2 id="project-symbol">Edit Project Symbol</h2>
 <p>This is used to edit the properties of a project symbol.</p>
 <p>Symbols marked as "address" will be applied automatically when an
 operand references an address outside the scope of the data file.  They
@@ -423,7 +432,7 @@ not have the same name as another project symbol.  It can overlap
 with platform symbols and user labels.</p>
 <p>The value may be entered in decimal, hexadecimal, or binary.  The numeric
 base you choose will be remembered, so that the value will be displayed
-the same way when used in a .EQ directive.</p>
+the same way when used in a <code>.EQ</code> directive.</p>
 <p>You can optionally provide a width for address symbols.  For example,
 if the address is of a two-byte pointer or a 64-byte buffer, you would
 set the width field to cause all references to any location in that range
@@ -431,26 +440,27 @@ to be set to the symbol.  Widths may be entered in hex or decimal.  If
 the field is left blank, a width of 1 is assumed.  Overlapping symbols
 are allowed.  The width is ignored for constants.</p>
 <p>If you enter a comment, it will be placed at the end of the line of
-the .EQ directive.</p>
+the <code>.EQ</code> directive.</p>
 <p>For address symbols that represent a memory-mapped I/O location, it
 can be useful to have different symbols for reads and writes.  Use
-the Read/Write checkboxes to specify the desired behavior.</p>
+the <samp>Read</samp>/<samp>Write</samp> checkboxes to specify the
+desired behavior.</p>
 
 
-<h2><a name="lvtable">Create/Edit Local Variable Table</a></h2>
+<h2 id="lvtable">Create/Edit Local Variable Table</h2>
 <p><a href="intro-details.html#local-vars">Local variables</a> are arranged in
 tables, which are created at a specific file offset.  They must be
 associated with a line of code, and are usually placed at the start of
 a subroutine.
-The "Create Local Variable Table" action creates a new table, and
-opens the editor.  The "Edit Prior Local Variable Table" searches
+The <samp>Create Local Variable Table</samp> action creates a new table, and
+opens the editor.  The <samp>Edit Prior Local Variable Table</samp> searches
 for the closest table that appears at or before the selected line,
 and edits that.</p>
 <p>The editor allows you to create, edit, and delete entries, as well
 as move and delete entire tables (though these last two options are not
 available when creating a new table).  Empty tables are allowed.  These
 can be useful if the "clear previous" flag is set.  If you want to
-delete the table, click the "Delete Table" button.</p>
+delete the table, click the <samp>Delete Table</samp> button.</p>
 <p>Use the buttons to add, edit, or remove individual variables.  Each
 variable has a name, a value, a width, and an optional comment.  The
 standard naming rules for symbols apply.  Variables are only used for
@@ -459,8 +469,8 @@ range 0-255.  The width may extend one byte past the end (to address $0100)
 to allow 16-bit accesses to $ff (particularly useful on 65816).</p>
 <p>You can move a table to any offset that is the start of an instruction
 and doesn't already have a local variable table present.  Click the
-"Move Table" button and enter the new offset in hex.  You can also click
-on the up/down buttons to move to the next valid offset.</p>
+<samp>Move Table</samp> button and enter the new offset in hex.  You can
+also click on the up/down buttons to move to the next valid offset.</p>
 
 </div>
 

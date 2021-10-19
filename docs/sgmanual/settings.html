@@ -1,25 +1,26 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Properties &amp; Settings - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Properties &amp; Settings - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Properties &amp; Settings</h1>
+<h1>SourceGen: Properties &amp; Settings</h1>
 <p><a href="index.html">Back to index</a></p>
 
-<h2><a name="overview">Settings Overview</a></h2>
+<h2 id="overview">Settings Overview</h2>
 
 <p>There are two kinds of settings: application settings, and
 project properties.</p>
 
 
-<h2><a name="app-settings">Application Settings</a></h2>
+<h2 id="app-settings">Application Settings</h2>
 
 <p>Application settings are stored in a file called "SourceGen-settings"
 in the SourceGen installation directory.  If the file is missing or
@@ -30,15 +31,15 @@ affect the way the project analyzes code and data, though they may affect
 the way generated assembly sources look.</p>
 
 <p>The settings editor is divided into four tabs.  Changes don't take
-effect until you hit Apply or OK.</p>
+effect until you hit <samp>Apply</samp> or <samp>OK</samp>.</p>
 
 
-<h3><a name="appset-codeview">Code View</a></h3>
+<h3 id="appset-codeview">Code View</h3>
 
 <p>These settings change the way the code looks on screen.</p>
 
-<p>Click the Column Visibility buttons to hide columns.  Click them
-again to restore the column to a width appropriate for the current font.
+<p>Click the <samp>Column Visibility</samp> buttons to hide columns.  Click
+them again to restore the column to a width appropriate for the current font.
 A "hidden" column just has a width of zero, so with careful mouse
 positioning you can show and hide columns by dragging the column headers.
 The buttons may be more convenient though.</p>
@@ -53,35 +54,35 @@ to set all values.  These settings are also used for generated assembly
 code, unless the assembler has specific case-sensitivity requirements.  There
 is no setting for labels, which are always case-sensitive.</p>
 
-<p>The Clipboard drop-down list lets you choose the format for text
-<a href="mainwin.html#clipboard">copied to the clipboard</a>.  The
-"Assembler Source" format includes the rightmost columns (label,
+<p>The <samp>Clipboard</samp> drop-down list lets you choose the format
+for text <a href="mainwin.html#clipboard">copied to the clipboard</a>.  The
+<samp>Assembler Source</samp> format includes the rightmost columns (label,
 opcode, operand, and comment), like assembly source code does.  The
-"Disassembly" format adds the address and bytes on the left.  Use
-the "All Columns" format to get all columns.</p>
+<samp>Disassembly</samp> format adds the address and bytes on the left.  Use
+the <samp>All Columns</samp> format to get all columns.</p>
 
-<p>When "show cycle counts for instructions" is checked, every instruction
-line will have an end-of-line comment that indicates the number of cycles
-required for that instruction.  If the cycle count can't be determined
-solely from a static analysis, e.g. an extra cycle is required if
-<code>LDA (dp),Y</code> crosses a page boundary, a '+' will be shown.
-In some cases the variability can be factored out if the state of
-certain status flags is known, e.g. 65C02 instructions that take longer
-in decimal mode won't be shown as variable if the analyzer can determine
-that D=0 or D=1.  This checkbox enables display in the on-screen list, but
-does not affect generated source code, which can be configured independently
-on the Asm Config tab.</p>
+<p>When <samp>show cycle counts for instructions</samp> is checked,
+every instruction line will have an end-of-line comment that indicates
+the number of cycles required for that instruction.  If the cycle count
+can't be determined solely from a static analysis, e.g. an extra cycle
+is required if <code>LDA (dp),Y</code> crosses a page boundary, a '+'
+will be shown.  In some cases the variability can be factored out if the
+state of certain status flags is known, e.g. 65C02 instructions that take
+longer in decimal mode won't be shown as ambiguous if the analyzer can
+determine that D=0 or D=1.  This checkbox enables display in the
+on-screen list, but does not affect generated source code, which can
+be configured independently on the <samp>Asm Config</samp> tab.</p>
 
-<p>Check "use 'dark' color scheme" to change the main disassembly list
-to use white text on a black background, and mute the Note highlight
-colors.
+<p>Check <samp>use 'dark' color scheme</samp> to change the main
+disassembly list to use white text on a black background, and mute
+the Note highlight colors.
 (Most of the GUI uses standard Windows controls that take their colors
 from the system theme, but the disassembly list uses a custom style.  You
 can change the rest of the UI from the Windows display "personalization"
 controls.)</p>
 
 
-<h3><a name="appset-textdelim">Text Delimiters</a></h3>
+<h3 id="appset-textdelim">Text Delimiters</h3>
 
 <p>Character and string operands are shown surrounded by quotes, e.g.
 <code>LDA #'*'</code> or <code>.STR "Hello, world!"</code>.  It's
@@ -97,8 +98,9 @@ don't look very good at smaller font sizes.)</p>
 the character will be output as hex to avoid confusion.  For this
 reason, it's generally wise to use delimiter characters that aren't
 part of the ASCII character set, such as "curly" quotes.  The
-"Sample Characters" box holds some characters that you can copy and
-paste (with Ctrl+C / Ctrl+V) into the delimiter fields.</p>
+<samp>Sample Characters</samp> box holds some characters that you can
+copy and paste (with <kbd class="key">Ctrl+C</kbd> /
+<kbd class="key">Ctrl+V</kbd>) into the delimiter fields.</p>
 <p>For character operands, the prefix and suffix are added to the start
 and end of the operand.  For string operands, the prefix is added to the
 start of the first line, and suffixes aren't allowed.</p>
@@ -113,7 +115,7 @@ double-quote characters.  "Merlin" uses a format similar to what the
 Merlin assembler expects.</p>
 
 
-<h3><a name="appset-displayformat">Display Format</a></h3>
+<h3 id="appset-displayformat">Display Format</h3>
 
 <p>These options change the way the code list looks on screen.  They
 do not affect generated code.</p>
@@ -135,10 +137,10 @@ but that's a valid label start character, and so isn't allowed here.)
 The setting affects label editing as well as display.</p>
 
 <p>If you would like your local variables to be shown with a prefix
-character, you can set it in the "local variable prefix" box.</p>
+character, you can set it in the <samp>local variable prefix</samp> box.</p>
 
-<p>The "comma-separated format for bulk data" determines whether large
-blocks of hex look like <code>ABC123</code> or
+<p>The <samp>comma-separated format for bulk data</samp> determines
+whether large blocks of hex look like <code>ABC123</code> or
 <code>$AB,$C1,$23</code>.  The former reduces the number of lines
 required, the latter is more readable.</p>
 
@@ -149,10 +151,10 @@ automatically switches to "custom" when you edit a field.
 (64tass and ACME use the "common"
 expression style, cc65 and Merlin 32 have their own unique styles.)</p>
 
-<p>The "add spaces in Bytes column" checkbox changes the format of the
-hex data in the code list "bytes" column from dense (<code>20edfd</code>)
-to spaced (<code>20 ed fd</code>).  This also affects the format of
-clipboard copies and exports.</p>
+<p>The <samp>add spaces in Bytes column</samp> checkbox changes the format
+of the hex data in the code list "bytes" column from dense
+(<code>20edfd</code>) to spaced (<code>20 ed fd</code>).  This also
+affects the format of clipboard copies and exports.</p>
 
 <p>Long operands, such as strings and bulk data, are wrapped to a new
 line after a certain number of characters.  Use the pop-up to configure
@@ -161,7 +163,7 @@ values allow you to shrink the width of the operand column in the
 on-screen listing, moving the comment field closer in.</p>
 
 
-<h3><a name="appset-pseudoop">Pseudo-Op</a></h3>
+<h3 id="appset-pseudoop">Pseudo-Op</h3>
 
 <p>These options change the way the code list looks on screen.  Assembler
 directives and data pseudo-opcodes will use these values.  This does
@@ -178,7 +180,7 @@ in the combo box to set the fields.  The setting automatically switches to
 
 
 
-<h3><a name="appset-asmconfig">Asm Config</a></h3>
+<h3 id="appset-asmconfig">Asm Config</h3>
 
 <p>These settings configure cross-assemblers and modify assembly source
 generation in various ways.</p>
@@ -195,25 +197,25 @@ executable.</p>
     with all configuration files and libraries
   <li>Merlin 32: <code>Merlin32.exe</code>
 </ul>
-<p>The "column widths" section allows you to specify the minimum
+<p>The <samp>column widths</samp> section allows you to specify the minimum
 width of the label, opcode, operand, and comment fields.  If the width
 is less than 1, or isn't a valid number, 1 will be used.  These are
 not hard stops: if the contents of a field are too wide, the contents
 of the next column will be pushed over.  (The comment field width is
 not currently being used, but may be used to fold lines in the future.)</p>
 
-<p>When "show cycle counts in comments" is checked, cycle counts are
-inserted into end-of-line comments.  This works the same as the option
-in the Code View tab, but applies to generated source code rather than
-the on-screen display.</p>
+<p>When <samp>show cycle counts in comments</samp> is checked, cycle
+counts are inserted into end-of-line comments.  This works the same as
+the option in the <samp>Code View</samp> tab, but applies to generated
+source code rather than the on-screen display.</p>
 
-<p>If "put long labels on separate line" is checked, labels that are
-longer than the label column are placed on their own line.  This looks
-a bit nicer because otherwise the opcode gets pushed out of alignment.
+<p>If <samp>put long labels on separate line</samp> is checked, labels
+that are longer than the label column are placed on their own line.  This
+looks a bit nicer because otherwise the opcode gets pushed out of alignment.
 (Some assemblers get bent out of shape if you split an equate
 directive, so those might stay on one line.)</p>
 
-<p>If you enable "identify assembler in output", a comment will be
+<p>If you enable <samp>identify assembler in output</samp>, a comment will be
 added to the top of the generated assembly output that identifies the
 target assembler and version.  It also shows the command-line options
 passed to the assembler.  This can be very helpful if the source
@@ -222,7 +224,7 @@ the source file what the intended target assembler is, or what options
 are required to process the file correctly.</p>
 
 
-<h2><a name="project-properties">Project Properties</a></h2>
+<h2 id="project-properties">Project Properties</h2>
 
 <p>Project properties are stored in the .dis65 project file.
 They specify which CPU to use, which extension scripts to load, and a
@@ -232,12 +234,13 @@ the project properties are made through the undo/redo buffer,
 which means you hit "undo" to revert a property change.</p>
 
 <p>The properties editor is divided into four tabs.  Changes aren't pushed
-out to the main application until you close the dialog.  Clicking Apply
-will capture the current changes, ensuring that they're applied even if
-you later hit Cancel, but the changes are not applied immediately.</p>
+out to the main application until you close the dialog.  Clicking
+<samp>Apply</samp> will capture the current changes, ensuring that
+they're applied even if you later hit Cancel, but the changes are not
+applied to the project immediately.</p>
 
 
-<h3><a name="projprop-general">General</a></h3>
+<h3 id="projprop-general">General</h3>
 
 <p>The choice of CPU determines the set of available instructions, as
 well as cycle costs and register widths.  There are many variations
@@ -259,89 +262,92 @@ treated as one of these four:</p>
 similar, but they have additional instructions and some fundamental
 architectural changes.  These are not currently supported by SourceGen.</p>
 
-<p>If "enable undocumented instructions" is checked, some additional
-opcodes are recognized on the 6502 and 65C02.  These instructions are
-not part of the chip specification, but most of them have consistent
-behavior and can be used.  If the box is not checked, the instructions
-are treated as invalid and cause the code analyzer to assume that it
-has run into a data area.  This option has no effect on the 65816.</p>
-<p>The "treat BRK as two-byte instruction" checkbox determines whether
-BRK instructions should be handled as if they have an operand.</p>
+<p>If <samp>enable undocumented instructions</samp> is checked, some
+additional opcodes are recognized on the 6502 and 65C02.  These
+instructions are not part of the chip specification, but most of them
+have consistent behavior and can be used.  If the box is not checked,
+the instructions are treated as invalid and cause the code analyzer to
+assume that it has run into a data area.  This option has no effect on
+the 65816.</p>
+<p>The <samp>treat BRK as two-byte instruction</samp> checkbox determines
+whether <code>BRK</code> instructions should be handled as if they have
+an operand.</p>
 
-<p>The entry flags determine the initial value for the processor status
-flag register.  Code that is unreachable internally (requiring a code
-start point tag) will use this value.  This is chiefly of value for
-65816 code, where the initial value of the M/X/E flags has a significant
-impact on how instructions are disassembled.</p>
+<p>The <samp>entry flags</samp> determine the initial value for the
+processor status flag register.  Code that is unreachable internally
+(requiring a code start point tag) will use this value.  This is chiefly
+of value for 65816 code, where the initial value of the M/X/E flags has
+a significant impact on how instructions are disassembled.</p>
 
-<p>If "analyze uncategorized data" is checked, SourceGen will attempt to
-identify character strings and regions that are filled with a repeated
-value.  If it's not checked, anything that isn't detected as code or
-explicitly formatted as data will be shown as individual byte values.</p>
-<p>If "seek nearby targets" is checked, the analyzer will try to use
-nearby labels for data loads and stores, adjusting them to fit
+<p>If <samp>analyze uncategorized data</samp> is checked, SourceGen
+will attempt to identify character strings and regions that are filled
+with a repeated value.  If it's not checked, anything that isn't detected
+as code or explicitly formatted as data will be shown as individual
+byte values.</p>
+<p>If <samp>seek nearby targets</samp> is checked, the analyzer will try to
+use nearby labels for data loads and stores, adjusting them to fit
 (e.g. <code>LDA LABEL+1</code>).  If not enabled, labels are not applied
 unless they match exactly.  Note that references into the middle of an
 instruction or formatted data area are always adjusted, regardless of
 how this is set.  This setting has no effect on local variables, and
 only enables a 1-byte backward search on project/platform symbols.</p>
-<p>The "use relocation data" checkbox is only available if the project
-was created from a relocatable source, e.g. by the OMF Converter tool.
-If checked, information from the relocation dictionary will be used to
-improve automatic operand formatting.</p>
-<p>If "smart PLP handling" is checked, the analyzer will try to use
-the processor status flags from a nearby <code>PHP</code> when a
+<p>The <samp>use relocation data</samp> checkbox is only available if
+the project was created from a relocatable source, e.g. by the OMF Converter
+tool.  If checked, information from the relocation dictionary will be
+used to improve automatic operand formatting.</p>
+<p>If <samp>smart PLP handling</samp> is checked, the analyzer will try
+to use the processor status flags from a nearby <code>PHP</code> when a
 <code>PLP</code> is encountered.  If not enabled, all flags are set to
 "indeterminate" following a <code>PLP</code>, except for the M/X
 flags on the 65816, which are left unmodified.  (In practice this
 approach doesn't seem to work all that well, so the setting is
 un-checked by default.)</p>
-<p>If "smart PLB handling" is checked, the analyzer will watch for
+<p>If <samp>smart PLB handling</samp> is checked, the analyzer will watch for
 code patterns like <code>PLB</code> preceded by <code>PHK</code>,
 and generate appropriate Data Bank Register changes.  If not enabled,
 the DBR is set to the bank of the address of the start of the file,
 and does not change unless explicitly set.  Only useful for 65816 code.</p>
-
-<p>The "default text encoding" setting has two effects.  First, it
+<p>The <samp>default text encoding</samp> setting has two effects.  First, it
 specifies which character encoding to use when searching for strings in
 uncategorized data.  Second, if an assembler has a notion of preferred
 character encoding (e.g. you can default string operands to PETSCII),
-this setting will determine which encoding is preferred.</p>
-<p>The "min chars for string detection" setting determines how many
-ASCII characters need to appear consecutively for the data analyzer to
+this setting will determine which encoding is preferred in generated
+sources.</p>
+<p>The <samp>min chars for string detection</samp> setting determines how
+many ASCII characters need to appear consecutively for the data analyzer to
 declare it a string.  Shorter values are prone to false-positive
 identifications, longer values miss out on short strings.  You can also
 set it to "none" to disable automatic string identification.</p>
+<p>The <samp>auto-label style</samp> setting determines the format for
+labels that are generated automatically.  By default the label will be
+the letter 'L' followed by the hexadecimal address, but the label can
+be annotated based on usage.  For example, addresses that are the target
+of branch instructions can be labeled with the letter 'B'.</p>
 
-<p>The auto-label style setting determines the format for labels that are
-generated automatically.  By default the label will be the letter 'L'
-followed by the hexadecimal address, but the label can be annotated based
-on usage.  For example, addresses that are the target of branch instructions
-can be labeled with the letter 'B'.</p>
 
-
-<h3><a name="projprop-projsym">Project Symbols</a></h3>
+<h3 id="projprop-projsym">Project Symbols</h3>
 <p>You can add, edit, and delete individual symbols and constants.
 See the <a href="intro-details.html#about-symbols">symbols</a> section for an
 explanation of how project symbols work.</p>
 
-<p>The Edit Symbol button opens the
+<p>The <samp>Edit Symbol</samp> button opens the
 <a href="editors.html#project-symbol">Edit Project Symbol</a> dialog, which
 allows changing any part of a symbol definition.  You're not allowed to
 create two symbols with the same label.</p>
 
-<p>The Import button allows you to import symbols from another project.
-Only labels that have been tagged as global and exported will be imported.
-Existing symbols with identical labels will be replaced, so it's okay to
-run the importer multiple times.  Labels that aren't found will not be
-removed, so you can safely import from multiple projects, but will need
-to manually delete any symbols that are no longer being exported.</p>
+<p>The <samp>Import</samp> button allows you to import symbols from
+another project.  Only labels that have been tagged as global and
+exported will be imported.  Existing symbols with identical labels will
+be replaced, so it's okay to run the importer multiple times.  Labels
+that aren't found will not be removed, so you can safely import from
+multiple projects, but will need to manually delete any symbols that are
+no longer being exported.</p>
 
 <p>Shortcut: you can open the project properties window with the
 Project Symbols tab selected by hitting F6 from the main code list.</p>
 
 
-<h3><a name="projprop-symfiles">Symbol Files</a></h3>
+<h3 id="projprop-symfiles">Symbol Files</h3>
 <p>From here, you can add and remove platform symbol files, or change
 the order in which they are loaded.
 See the <a href="intro-details.html#about-symbols">symbols</a> section for an
@@ -356,11 +362,11 @@ other people, but also acts as a minor security check, to prevent a
 wayward project from trying to open files it shouldn't.</p>
 <p>Click one of the "Add Symbol Files" buttons to include one or more
 symbol files in the project.
-The "Add Symbol Files from Runtime" button sets the directory
-to the SourceGen RuntimeData directory, while "Add Symbol Files from Project"
-starts in the project directory.  If you haven't yet saved the project,
-the latter button will be disabled.  The only difference between the
-buttons is the initial directory.</p>
+The <samp>Add Symbol Files from Runtime</samp> button sets the directory
+to the SourceGen RuntimeData directory, while
+<samp>Add Symbol Files from Project</samp> starts in the project directory.
+If you haven't yet saved the project, the latter button will be disabled.
+The only difference between the buttons is the initial directory.</p>
 <p>In the list, files loaded from the RuntimeData directory will be
 prefixed with <code>RT:</code>.  Files loaded from the project directory
 will be prefixed with <code>PROJ:</code>.</p>
@@ -368,7 +374,7 @@ will be prefixed with <code>PROJ:</code>.</p>
 you will receive a warning.</p>
 
 
-<h3><a name="projprop-extscripts">Extension Scripts</a></h3>
+<h3 id="projprop-extscripts">Extension Scripts</h3>
 <p>From here, you can add and remove extension script files.
 See the <a href="advanced.html#extension-scripts">extension scripts</a>
 section for details on how extension scripts work.</p>
@@ -379,11 +385,11 @@ is mostly to keep things manageable when projects are distributed to
 other people, but also acts as a minor security check, to prevent a
 wayward project from trying to open files it shouldn't.</p>
 <p>Click one of the "Add Scripts" buttons to include one more scripts in
-the project.  The "Add Scripts from Runtime" button sets the directory
-to the SourceGen RuntimeData directory, while "Add Scripts from Project"
-starts in the project directory.  If you haven't yet saved the project,
-the latter button will be disabled.  The only difference between the
-buttons is the initial directory.</p>
+the project.  The <samp>Add Scripts from Runtime</samp> button sets
+the directory to the SourceGen RuntimeData directory, while
+<samp>Add Scripts from Project</samp> starts in the project directory.
+If you haven't yet saved the project, the latter button will be disabled.
+The only difference between the buttons is the initial directory.</p>
 <p>In the list, files loaded from the RuntimeData directory will be
 prefixed with <code>RT:</code>.  Files loaded from the project directory
 will be prefixed with <code>PROJ:</code>.</p>

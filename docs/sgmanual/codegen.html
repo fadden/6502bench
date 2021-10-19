@@ -1,32 +1,35 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Code Generation &amp; Assembly - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Code Generation &amp; Assembly - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Code Generation &amp; Assembly</h1>
+<h1>SourceGen: Code Generation &amp; Assembly</h1>
 <p><a href="index.html">Back to index</a></p>
 
 <p>SourceGen can generate an assembly source file that, when fed into
 the target assembler, will recreate the original data file exactly.
 Every assembler is different, so support must be added to SourceGen
 for each.</p>
-<p>The generation / assembly dialog can be opened with File &gt; Assemble.</p>
+<p>The generation / assembly dialog can be opened with
+<samp>File &gt; Assemble</samp>.</p>
 <p>If you want to show code to others, perhaps by adding a page to
 your web site, you can "export" the formatted code as text or HTML.
 This is explained in more detail <a href="#export-source">below</a>.
 
 
-<h2><a name="generate">Generating Source Code</a></h2>
+<h2 id="generate">Generating Source Code</h2>
 
 <p>Cross assemblers tend to generate additional files, either compiler
-intermediaries ("file.o") or metadata ("_FileInformation.txt").  Some
+intermediaries ("<samp>file.o</samp>") or metadata
+("<samp>_FileInformation.txt</samp>").  Some
 generators may produce multiple source files, perhaps a link script or
 symbol definition header to go with the assembly source.  To avoid
 spreading files across the filesystem, SourceGen does all of its work
@@ -34,14 +37,15 @@ in the same directory where the project lives.  Before you can generate
 code, you have to have assigned your project a directory.  This is why
 you can't assemble a project until you've saved it for the first time.</p>
 
-<p>The Generate and Assemble dialog has a drop-down list near the top
-that lets you pick which assembler to target.  The name of the assembler
-will be shown with the detected version number.  If the assembler
-executable isn't configured, "[latest version]" will be shown instead
-of a version number.</p>
-<p>The Settings button will take you directly to the assembler configuration
-tab in the application settings dialog.</p>
-<p>Hit the Generate button to generate the source code into a file on disk.
+<p>The <samp>Generate and Assemble</samp> dialog has a drop-down list near
+the top that lets you pick which assembler to target.  The name of the
+assembler will be shown with the detected version number.  If the assembler
+executable isn't configured, "<samp>[latest version]</samp>" will be
+shown instead of a version number.</p>
+<p>The <samp>Settings</samp> button will take you directly to the
+assembler configuration tab in the application settings dialog.</p>
+<p>Hit the <samp>Generate</samp> button to generate the source code into
+a file on disk.
 The file will use the project name, with the <code>.dis65</code> extension
 replaced by <code>_&lt;assembler&gt;.S</code>.</p>
 <p>The first 64KiB of each generated file will be shown in the preview
@@ -51,26 +55,27 @@ prepended to each line to make it easier to track down errors.</p>
 
 
 
-<h3><a name="localizer">Label Localizer</a></h3>
+<h3 id="localizer">Label Localizer</h3>
 <p>The label localizer is an optional feature that automatically converts
 some labels to an assembler-specific less-than-global label format.  Local
-labels may be reusable (e.g. using "]LOOP" for multiple consecutive
-loops is easier to understand than giving each one a unique label) or
-reduce the size of a generated link table.  There are usually restrictions
-on local labels, e.g. references to them may not be allowed to cross a
-global label definition, which the localizer factors in automatically.</p>
+labels may be reusable (e.g. using "<code>@LOOP</code>" for multiple
+consecutive loops is easier to understand than giving each one a unique
+label) or reduce the size of a generated link table.  There are usually
+restrictions on local labels, e.g. references to them may not be allowed
+to cross a global label definition, which the localizer factors in
+automatically.</p>
 
 
-<h3><a name="reserved-labels">Reserved Label Names</a></h3>
+<h3 id="reserved-labels">Reserved Label Names</h3>
 <p>Some label names aren't allowed.  For example, 64tass reserves the
 use of labels that begin with two underscores.  Most assemblers will
 also prevent you from using opcode mnemonics as labels (which means
-you can't assemble <code>jmp jmp jmp</code>).</p>
+you can't assemble the infinite loop <code>jmp jmp jmp</code>).</p>
 <p>If a label doesn't appear to be legal, the generated code will use
 a suitable replacement (e.g. <code>jmp_1 jmp jmp_1</code>).</p>
 
 
-<h3><a name="platform-features">Platform-Specific Features</a></h3>
+<h3 id="platform-features">Platform-Specific Features</h3>
 <p>SourceGen needs to be able to assemble binaries for any system
 with any assembler, so it generally avoids platform-specific features.
 One exception to that is C64 PRG files.</p>
@@ -98,16 +103,16 @@ can add a label or reformat the bytes.  This feature is currently only
 enabled for 64tass.</p>
 
 
-<h2><a name="assemble">Cross-Assembling Generated Code</a></h2>
+<h2 id="assemble">Cross-Assembling Generated Code</h2>
 
 <p>After generating sources, if you have a cross-assembler executable
-configured, you can run it by clicking the "Run Assembler" button.  The
-command-line output will be displayed, with stdout and stderr separated.
+configured, you can run it by clicking the <samp>Run Assembler</samp> button.
+The command-line output will be displayed, with stdout and stderr separated.
 (I'd prefer them to be interleaved, but that's not what the system
 provides.)</p>
 
 <p>The output will show the assembler's exit code, which will be zero
-on success (note: sometimes they lie.)  If it appeared to succeed,
+on success (note: sometimes they lie).  If it appeared to succeed,
 SourceGen will then compare the assembler's output to the original file,
 and report any differences.</p>
 <p>Failures here may be due to bugs in the cross-assembler or in
@@ -115,7 +120,7 @@ SourceGen.  However, SourceGen can generally work around assembler bugs,
 so any failure is an opportunity for improvement.</p>
 
 
-<h2><a name="supported">Supported Assemblers</a></h2>
+<h2 id="supported">Supported Assemblers</h2>
 
 <p>SourceGen currently supports the following cross-assemblers:</p>
 <ul>
@@ -125,7 +130,7 @@ so any failure is an opportunity for improvement.</p>
   <li><a href="#merlin32">Merlin 32</a></li>
 </ul>
 
-<h3><a name="version">Version-Specific Code Generation</a></h3>
+<h3 id="version">Version-Specific Code Generation</h3>
 
 <p>Code generation must be tailored to the specific version of the
 assembler.  This is most easily understood with an example.</p>
@@ -141,15 +146,16 @@ be generated for all versions of the assembler by just outputting raw hex
 bytes, but that's ugly and annoying, so we don't want to be stuck doing
 that forever.  We want to detect which version of the assembler is in
 use, and output actual <code>MVN</code>/<code>MVP</code> instructions
-when producing code for newer versions of the assembler.</p>
+when producing code for versions of the assembler that don't have the bug.</p>
 <p>When you configure a cross-assembler, SourceGen runs the executable with
-version query args, and extracts the version information from the output
-stream.  This is used by the generator to ensure that the output will compile.
-If no assembler is configured, SourceGen will produce code optimized
-for the latest version of the assembler.</p>
+version query arguments, and extracts the version information from the output
+stream.  This is used by the generator to ensure that the output will work
+correctly with the installed assembler.
+If the assembler is present on the system, SourceGen will produce code
+optimized for the latest supported version of the assembler.</p>
 
 
-<h3><a name="quirks">Assembler-Specific Bugs &amp; Quirks</a></h3>
+<h3 id="quirks">Assembler-Specific Bugs &amp; Quirks</h3>
 
 <p>This is a list of bugs and quirky behavior in cross-assemblers that
 SourceGen works around when generating code.</p>
@@ -163,8 +169,21 @@ to halt with an error message.  The code generator needs
 to understand expression syntax and operator precedence to generate correct
 code, but also needs to know how to handle the corner cases.</p>
 
+<h4>Undocumented Opcodes</h4>
 
-<h3><a name="64tass">64tass</a></h3>
+<p>The data sheet for the 6502 does not define all 256 possible opcodes.
+Analysis and experimentation have found that many of these "undocumented"
+operations actually do useful things.  The people who did the research
+didn't always use the same mnemonic names for them, which led to a bit
+of confusion in assemblers.</p>
+<p>The most authoritative source is
+<a href="https://csdb.dk/release/download.php?id=229739"><i>NMOS 6510 Unintended Opcodes</i> (PDF)</a>.
+The document defines a primary mnemonic and lists common aliases for
+each operation.  SourceGen will output the primary mnemonic unless the
+target assembler doesn't handle it.</p>
+
+
+<h3 id="64tass">64tass</h3>
 
 <p>Tested versions: v1.53.1515, v1.54.1900, v1.55.2176, v1.56.2625
 <a href="https://sourceforge.net/projects/tass64/">[web site]</a></p>
@@ -199,9 +218,9 @@ code, but also needs to know how to handle the corner cases.</p>
     character ('`') rather than the caret ('^').  (There's a note in the
     docs to the effect that they plan to move to carets.)</li>
   <li>Instructions whose argument is formed by combining with the
-    65816 Program Bank Register (16-bit JMP/JSR) must be specified
-    as 24-bit values for code that lives outside bank 0.  This is
-    true for both symbols and raw hex (e.g. <code>JSR $1234</code>
+    65816 Program Bank Register (16-bit <code>JMP</code>/<code>JSR</code>)
+    must be specified as 24-bit values for code that lives outside bank 0.
+    This is true for both symbols and raw hex (e.g. <code>JSR $1234</code>
     is invalid outside bank 0).  Attempting to JSR to a label in bank
     0 from outside bank 0 causes an error, even though it is technically
     a 16-bit operand.</li>
@@ -218,7 +237,7 @@ code, but also needs to know how to handle the corner cases.</p>
 </ul>
 
 
-<h3><a name="acme">ACME</a></h3>
+<h3 id="acme">ACME</h3>
 
 <p>Tested versions: v0.96.4, v0.97
 <a href="https://sourceforge.net/projects/acme-crossass/">[web site]</a></p>
@@ -229,7 +248,7 @@ code, but also needs to know how to handle the corner cases.</p>
     outside bank zero cannot be assembled.  SourceGen currently deals with
     this by outputting the entire file as a hex dump.</li>
   <li>Undocumented opcode $AB (<code>LAX #imm</code>) generates an error.</li>
-  <li>BRK and WDM are not allowed to have operands.</li>
+  <li>BRK is not allowed to have an operand.</li>
 </ul>
 
 <p>Quirks:</p>
@@ -262,7 +281,7 @@ code, but also needs to know how to handle the corner cases.</p>
 </ul>
 
 
-<h3><a name="cc65">cc65</a></h3>
+<h3 id="cc65">cc65</h3>
 
 <p>Tested versions: v2.17, v2.18
 <a href="https://cc65.github.io/">[web site]</a></p>
@@ -286,8 +305,9 @@ code, but also needs to know how to handle the corner cases.</p>
     more common interpretation would be <code>label &gt;&gt; (8 - 16)</code>.
     (This is actually somewhat convenient, since none of the expressions
     SourceGen currently generates require parenthesis.)</li>
-  <li>Undocumented opcode <code>SBX</code> ($cb) uses the mnemonic AXS.  All
-    other opcodes match up with the "unintended opcodes" document.</li>
+  <li>Undocumented opcode <code>SBX</code> ($cb) uses the mnemonic
+    <code>AXS</code>.  All other opcodes match up with the
+    "unintended opcodes" document.</li>
   <li>ca65 is implemented as a single-pass assembler, so label widths
     can't always be known in time.  For example, if you use some zero-page
     labels, but they're defined via <code>.ORG $0000</code> after the point
@@ -304,7 +324,7 @@ code, but also needs to know how to handle the corner cases.</p>
 </ul>
 
 
-<h3><a name="merlin32">Merlin 32</a></h3>
+<h3 id="merlin32">Merlin 32</h3>
 
 <p>Tested Versions: v1.0
 <a href="https://www.brutaldeluxe.fr/products/crossdevtools/merlin/">[web site]</a>
@@ -353,7 +373,7 @@ code, but also needs to know how to handle the corner cases.</p>
 
 
 
-<h2><a name="export-source">Exporting Source Code</a></h2>
+<h2 id="export-source">Exporting Source Code</h2>
 <p>The "export" function takes what you see in the code list in the app
 and converts it to text or HTML.  The options you've set in the app
 settings, such as capitalization, text delimiters, pseudo-opcode names,

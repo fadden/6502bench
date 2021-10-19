@@ -1,18 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Tools - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Tools - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Tools</h1>
+<h1>SourceGen: Tools</h1>
 
-<h2><a name="instruction-chart">Instruction Chart</a></h2>
+<p>The <samp>Tools</samp> menu offers a selection of useful tools that
+operate independently of the current project (if any).</p>
+
+
+<h2 id="instruction-chart">Instruction Chart</h2>
 
 <p>This opens a window with a summary of all 256 opcodes.  The CPU can
 be chosen from the pop-up list at the bottom.  Undocumented opcodes for
@@ -20,10 +25,11 @@ be chosen from the pop-up list at the bottom.  Undocumented opcodes for
 by unchecking the box at the bottom.</p>
 <p>The status flags affected by each instruction reflect their behavior
 on the 65816.  The only significant difference between 65816 and
-6502/65C02 is the way the BRK instruction affects the D and B/X flags.</p>
+6502/65C02 is the way the <code>BRK</code> instruction affects the
+D and B/X flags.</p>
 
 
-<h2><a name="ascii-chart">ASCII Chart</a></h2>
+<h2 id="ascii-chart">ASCII Chart</h2>
 
 <p>This opens a window with the ASCII character set.  Each character is
 displayed next to its numeric value in decimal and hexadecimal.  The
@@ -31,7 +37,7 @@ pop-up list at the bottom allows you to flip between standard and "high"
 ASCII.</p>
 
 
-<h2><a name="apple2-screen-chart">Apple II Screen Chart</a></h2>
+<h2 id="apple2-screen-chart">Apple II Screen Chart</h2>
 
 <p>The Apple II text and hi-res screens are mapped to memory in a way
 that makes sense to computers but is a little confusing for humans.  This
@@ -39,61 +45,63 @@ chart maps line numbers to addresses and vice-versa.  Select different
 screens and sort orders from the list at the bottom.</p>
 
 
-<h2><a name="hexdump">Hex Dump Viewer</a></h2>
+<h2 id="hexdump">Hex Dump Viewer</h2>
 
 <p>You can use this to view the contents of the project data file
-by double-clicking the "bytes" column, or with Actions &gt; Show Hex Dump.
+by double-clicking the values in the "Bytes" column, or with
+<samp>Actions &gt; Show Hex Dump</samp>.
 The viewer is displayed in a "modeless" dialog that does not
 prevent you from continuing to work with the project.  If you
 double-click a different line in the project, the viewer will automatically
 highlight those bytes.</p>
 
-<p>You can also use this to view the contents of arbitrary files by
-using Tools &gt; Hex Dump.  There is no fixed limit on the number of
+<p>You can also view the contents of arbitrary files by using
+<samp>Tools &gt; Hex Dump</samp>.  There is no fixed limit on the number of
 viewers you can have open simultaneously.  (Be aware that the viewer
 currently loads the entire file into memory, and you will run out of room
 eventually.  Not coincidentally, the viewer has a size limit of 16MiB
 per file.)</p>
 
 <p>You can select lines with the mouse as you would in any other list
-view.  Ctrl+A selects all lines.  Ctrl+C copies the selected lines to
+view.  <kbd class="key">Ctrl+A</kbd> selects all lines.
+<kbd class="key">Ctrl+C</kbd> copies the selected lines to
 the system clipboard.</p>
 
 <p>The "character conversion" selector allows you to choose how the
 bytes are converted to characters for the Text column.  Choose from
 the usual set of encodings.</p>
 
-<p>If "ASCII-only dump" is not checked, non-printable bytes are shown in
-the ASCII dump as a middle dot ('&#183;').  If the box is checked,
-non-printable bytes are represented by a period ('.') instead.  The
-use of non-ASCII characters makes the dump unambiguous when unprintable
+<p>If <samp>ASCII-only dump</samp> is not checked, non-printable bytes
+are shown in the ASCII dump as a middle dot ('&#183;').  If the option is
+checked, non-printable bytes are represented by a period ('.') instead.
+The use of non-ASCII characters makes the dump unambiguous when unprintable
 characters are mixed with periods, but the lines may be unsuitable for
 pasting in some forums.</p>
 
-<p>If "always on top" is checked, the window will stay above all other
-windows that don't also declare that they should always be on top.  By
-default this box is checked when displaying project data, and not checked for
-external files.</p>
+<p>If <samp>always on top</samp> is checked, the window will stay above
+all other windows that don't also declare that they should always be on
+top.  By default this box is checked when displaying project data, and
+not checked for external files.</p>
 
 
-<h2><a name="file-concat">File Concatenator</a></h2>
+<h2 id="file-concat">File Concatenator</h2>
 
 <p>The File Concatenator combines multiple files into a single file.
 Select the files to add, arrange them in the proper order, then hit
-"Save".  CRC-32 values are shown for reference.</p>
+<samp>Save</samp>.  CRC-32 values are shown for reference.</p>
 
 
-<h2><a name="file-slicer">File Slicer</a></h2>
+<h2 id="file-slicer">File Slicer</h2>
 
 <p>The File Slicer allows you to "slice" a piece out of a file, saving
 it to a new file.  Specify the start and length in decimal or hex.  If
 you leave a field blank, they will default to offset 0 and the remaining
 length of the file, respectively.</p>
 <p>The hex dumps show the area just before and after the chunk to be
-sliced, allowing you to confirm the placement.</p>
+sliced, allowing you to confirm the positions.</p>
 
 
-<h2><a name="omf-converter">OMF Converter</a></h2>
+<h2 id="omf-converter">OMF Converter</h2>
 
 <p>This tool allows you to view Apple IIgs Object Module Format (OMF)
 executables, and convert them for disassembly.</p>
@@ -107,34 +115,34 @@ The loaded image is saved to a new file, and a SourceGen project file is
 created with some basic attributes filled in.</p>
 
 <p>Only "Load" files (S16, PIF, TOL, etc) may be converted.  Compiler object
-files and libraries contain references that must be resolved by
+files and libraries (OBJ, LIB) contain references that must be resolved by
 a IIgs linker, and are not supported.</p>
 
 <p>Before you can examine or convert a file, you must first extract
 it from the Apple II disk image, using a mode that does not modify the
 original (e.g. extract with "configure to preserve Apple II formats"
-in CiderPress).  Then, open it with the "Tools &gt; Convert OMF".</p>
+in CiderPress).  Then, open it with <samp>Tools &gt; Convert OMF</samp>.</p>
 
 <p>The initial view shows all of the OMF segments in the file.  Double-clicking
 on an entry opens a detailed view that shows the segment header and a
 list of all the OMF records.  For load files, the relocation dictionary is
 also shown.</p>
 
-<p>To convert the file, click "Generate" to create a modified binary and a
-SourceGen project file.</p>
+<p>To convert the file, click <samp>Generate</samp> to create a
+modified binary and a SourceGen project file.</p>
 
-<p>If "offset segment start by $0100" is checked, the converter will try
-to shift the segment's load address from <code>$xx/0000</code> to
-<code>$xx/0100</code>.  This can make the generated code a little nicer
-to work with because it removes potential ambiguity with direct page
-addresses.  For example, <code>LDA $56</code> and <code>LDA $0056</code>
-may be interpreted as the same thing by the assembler, requiring
-generation of operand width disambiguators.  By shifting the initial
-address we avoid the potential ambiguity.</p>
-<p>Check "add comments and notes for each segment" to add a long comment
-and a note at the start of each segment.  The comments include the
-segment name, type, and optional flags.  The notes just provide a quick
-way to jump to a segment.</p>
+<p>If <samp>offset segment start by $0100</samp> is checked, the
+converter will try to shift the segment's load address from
+<code>$xx/0000</code> to <code>$xx/0100</code>.  This can make the
+generated code a little nicer to work with because it removes potential
+ambiguity with direct page addresses.  For example, <code>LDA $56</code>
+and <code>LDA $0056</code> may be interpreted as the same thing by the
+assembler, requiring generation of operand width disambiguators.  By
+shifting the initial address we avoid the potential ambiguity.</p>
+<p>Check <samp>add comments and notes for each segment</samp> to add a
+long comment and a note at the start of each segment.  The comments
+include the segment name, type, and optional flags.  The notes just
+provide a quick way to jump to a segment.</p>
 
 <p>The binary generated by the tool is not in OMF format and will not
 execute on an Apple IIgs.  To be functional, the generated sources must be
@@ -142,8 +150,8 @@ assembled by a program capable of generating OMF output, such as Merlin.</p>
 
 <p>The <a href="advanced.html#reloc-data">relocation dictionaries</a> from
 the executable are included in the project file, and can be used to guide
-the disassembler's analysis.  The "use reloc data" setting in the project
-properties controls this feature.</p>
+the disassembler's analysis.  The <samp>use reloc data</samp> setting in
+the project properties controls this feature.</p>
 
 <p>A full explanation of the structure of OMF is beyond the scope of this
 manual.  For more information on OMF, see Appendix F of the GS/OS Reference

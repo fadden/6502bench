@@ -31,6 +31,21 @@ If the leading number is 20000 or greater, the test file will be loaded as
 a saved project.  A file with the same name plus a ".dis65" extension will
 be opened as the project file.
 
+### Overriding Settings ###
+
+All tests are run with a fixed set of app settings, so that the tests look
+the same regardless of how the assemblers are configured.  For example,
+upper-case conversion is disabled, and cycle counts are not shown.
+
+Sometimes a test will want to exercise one of these settings, so we need
+a way to tell the test harness to override the default.  We do this by
+creating project symbols.
+
+| Name                   | Value | Description
+| ---------------------- | ----- | -------------------------------------------|
+| __ENABLE_LABEL_NEWLINE | any   | Puts long labels on their own line         |
+| __ENABLE_CYCLE_COUNTS  | any   | Adds cycle count to end-of-line comments   |
+
 ### Execution ###
 
 With debug features enabled, you can open the test runner from the menu

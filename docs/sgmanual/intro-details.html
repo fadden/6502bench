@@ -1,25 +1,26 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>More Details - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>More Details - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Intro Details</h1>
+<h1>SourceGen: More Details</h1>
 <p><a href="index.html">Back to index</a></p>
 
-<h2><a name="more-details">More Details</a></h2>
+<h2 id="more-details">Intro, Continued</h2>
 
-<p>This section digs a little deeper into how SourceGen works.</p>
+<p>This section of the manual digs a little deeper into how SourceGen works.</p>
 
 
 
-<h2><a name="about-symbols">All About Symbols</a></h2>
+<h2 id="about-symbols">All About Symbols</h2>
 
 <p>A symbol has two essential parts, a label and a value.  The label is a short
 ASCII string; the value may be an 8-to-24-bit address or a 32-bit numeric
@@ -62,7 +63,7 @@ differently from those outside a project.  We refer to these as internal
 and external addresses, respectively.</p>
 
 
-<h3><a name="connecting-operands">Connecting Operands with Labels</a></h3>
+<h3 id="connecting-operands">Connecting Operands with Labels</h3>
 
 <p>Suppose you have the following code:</p>
 <pre>
@@ -91,7 +92,7 @@ set arbitrarily.  Sometimes it's easy to figure out, sometimes it has
 to be specified manually.</p>
 
 
-<h3><a name="internal-address-symbols">Internal Address Symbols</a></h3>
+<h3 id="internal-address-symbols">Internal Address Symbols</h3>
 
 <p>Symbols that represent an address inside the file being disassembled
 are referred to as <i>internal</i>.  They come in two varieties.</p>
@@ -116,7 +117,7 @@ editor will try to prevent you from referring to them explicitly when
 editing operands.</p>
 
 
-<h3><a name="external-address-symbols">External Address Symbols</a></h3>
+<h3 id="external-address-symbols">External Address Symbols</h3>
 
 <p>Symbols that represent an address outside the file being disassembled
 are referred to as <i>external</i>.  These may be ROM entry points,
@@ -182,7 +183,7 @@ and 65816 stack-relative instructions.  These are explained in more
 detail in the next section.</p>
 
 
-<h4><a name="local-vars">How Local Variables Work</a></h4>
+<h4 id="local-vars">How Local Variables Work</h4>
 
 <p>Local variables are applied to instructions that have zero
 page operands (<code>op ZP</code>, <code>op (ZP),Y</code>, etc.), or
@@ -239,7 +240,7 @@ ways for a table to erase an earlier definition:</p>
   <li>Tables have a "clear previous" flag that erases all previous
     definitions.  This doesn't usually cause anything to be generated in the
     assembly sources; instead, it just causes SourceGen to stop using
-    that label.</li>
+    those labels.</li>
 </ol>
 <p>As you might expect, you're not allowed to have duplicate labels or
 overlapping values in an individual table.</p>
@@ -252,7 +253,7 @@ of <code>PTR</code> becomes <code>PTR_1</code>), and variables will have
 global scope.</p>
 
 
-<h3><a name="unique-local-global">Unique vs. Non-Unique and Local vs. Global</a></h3>
+<h3 id="unique-local-global">Unique vs. Non-Unique and Local vs. Global</h3>
 
 <p>Most assemblers have a notion of "local" labels, which have a scope
 that is book-ended by global labels.  These are handy for generic branch
@@ -278,20 +279,21 @@ source generator can modify the output until it works.  For example:<p>
          DEY
          BNE     @LOOP
 </pre>
-<p>This would confuse an assembler.  SourceGen already knows which @LOOP
-is being branched to, so it can just rename one of them to "@LOOP1".</p>
+<p>This would confuse an assembler.  SourceGen already knows which
+<code>@LOOP</code> is being branched to, so it can just rename one of
+them to <code>@LOOP1</code>.</p>
 <p>One situation where non-unique labels cause difficulty is with
 weak symbolic references (see next section).  For example, suppose
 the above code then did this:</p>
 <pre>
          LDA     #&lt;@LOOP
 </pre>
-<p>While it's possible to make an educated guess at which @LOOP was
-meant, it's easy to get wrong.  In situations like this, it's best to
+<p>While it's possible to make an educated guess at which <code>@LOOP</code>
+was meant, it's easy to get wrong.  In situations like this, it's best to
 give the labels different names.</p>
 
 
-<h3><a name="weak-refs">Weak Symbolic References</a></h3>
+<h3 id="weak-refs">Weak Symbolic References</h3>
 
 <p>Symbolic references in operands are "weak references".  If the named
 symbol exists, the reference is used.  If the symbol can't be found, the
@@ -313,40 +315,43 @@ following trivial chunk of code:</p>
 L1003    NOP
 </pre>
 
-<p>The analyzer found the JMP operand, and created an auto label for
-address $1003.  It then created a weak reference to "L1003" in the JMP
-operand.</p>
+<p>The analyzer found the <code>JMP</code> operand, and created an auto
+label for address $1003.  It then created a weak reference to
+"<code>L1003</code>" in the <code>JMP</code> operand.</p>
 
-<p>If you edit the JMP instruction's operand to use the symbol "FOO", the
-results are probably not what you want:</p>
+<p>If you edit the <code>JMP</code> instruction's operand to use the
+symbol "<code>FOO</code>", the results are probably not what you want:</p>
 <pre>
          .ADDRS  $1000
          JMP     $1003
          NOP
 </pre>
 
-<p>This happened because you added a weak reference to "FOO" in the operand,
-but the label doesn't exist.  The operand is formatted as hex.  Because
-there's no longer a reference to L1003, SourceGen removed the auto-label
-as well.</p>
+<p>This happened because you added a weak reference to "<code>FOO</code>"
+in the operand, but the label isn't defined anywhere.  With no matching
+label found, the operand was formatted as hex.  Further, because there's
+no longer a numeric reference to the code at $1003, SourceGen removed
+the <code>L1003</code> auto-label.</p>
 
-<p>If you set the label "FOO" on the NOP instruction, you'll see what you
-probably wanted:</p>
+<p>If you set the label "<code>FOO</code>" on the <code>NOP</code>
+instruction, you'll see what you probably wanted:</p>
 <pre>
          .ADDRS  $1000
          JMP     FOO
 FOO      NOP
 </pre>
 
-<p>You don't actually need the explicit reference in the JMP instruction.
-If you edit the JMP operand and set it back to "Default", the code will
-still look the same.  This is because SourceGen identified the numeric
-reference, and automatically added a symbolic reference to the label on
-the NOP instruction.</p>
+<p>Of course, you don't actually need the explicit reference in the
+<code>JMP</code> instruction.  If you edit the <code>JMP</code> operand
+and set the format back to <samp>Default</samp>, removing the weak
+symbolic reference, the code will still look the same.
+This is because SourceGen identified the numeric reference, and
+used that to find the label on the <code>NOP</code> instruction.</p>
 
-<p>However, suppose you didn't actually want FOO as the operand label.
-You can create a project symbol, BAR with the value $1003, and then edit
-the operand to reference BAR instead.  Your code would then look like:</p>
+<p>However, suppose you didn't actually want <code>FOO</code> as the
+operand label.  You can create a project symbol called "<code>BAR</code>"
+with the value $1003, and then edit the operand to reference <code>BAR</code>
+instead.  Your code would then look like:</p>
 <pre>
 BAR      .EQ     $1003
          .ADDRS  $1000
@@ -354,9 +359,10 @@ BAR      .EQ     $1003
 FOO      NOP
 </pre>
 
-<p>If you change the value of BAR in the project symbol file, the operand
-will continue to refer to it, but with an adjustment.  For example, if
-you changed BAR from $1003 to $1007, the code would become:</p>
+<p>If you change the value of <code>BAR</code> in the project symbol file,
+the operand will continue to refer to it, but with an adjustment.  For
+example, if you changed <code>BAR</code> from $1003 to $1007,
+the code would become:</p>
 <pre>
 BAR      .EQ     $1007
          .ADDRS  $1000
@@ -374,7 +380,7 @@ to the symbol will break and be formatted as hex, but will not be
 removed.  Similarly, removing symbols from a platform or project file
 will break the reference but won't modify the operands.</p>
 
-<h3><a name="symbol-parts">Parts and Adjustments</a></h3>
+<h3 id="symbol-parts">Parts and Adjustments</h3>
 
 <p>Sometimes you want to use part of a label, or adjust the value slightly.
 (I use "adjustment" rather than "offset" to avoid confusing it with file
@@ -388,10 +394,10 @@ offsets.) Consider the following example:</p>
 1007: 4c3aff    JMP     $ff3a
 </pre>
 
-<p>This pushes the address of the JMP instruction ($1007) onto the stack,
-and jumps to it with the RTS instruction.  However, RTS requires the
-address of the byte before the target instruction, so we actually push
-$1006.</p>
+<p>This pushes the address of the <code>JMP</code> instruction ($1007)
+onto the stack, and jumps to it with the <code>RTS</code> instruction.
+However, <code>RTS</code> requires the address of the byte <i>before</i>
+the target instruction, so we actually need to push $1006.</p>
 
 <p>The disassembler won't know that offset $1007 is code because nothing
 appears to reference it.  After tagging $1007 as a code start point, the
@@ -406,8 +412,9 @@ project looks like this:</p>
          JMP      $ff3a
 </pre>
 
-<p>We set a label called "NEXT" on the JMP instruction, and then edit
-the two LDA instructions to reference the high and low parts, yielding:</p>
+<p>We set a label called "<code>NEXT</code>" on the <code>JMP</code>
+instruction, and then edit the two <code>LDA</code> instructions to
+reference the high and low parts, yielding:</p>
 <pre>
          .ADDRS  $1000
          LDA     #&gt;NEXT
@@ -424,10 +431,11 @@ generate the original value.  If the adjustment seems wrong, make sure
 you're selecting the right part of the symbol.</p>
 
 <p>Different assemblers use different syntaxes to form expressions.  This
-is particularly noticeable in 65816 code.  You can adjust how it appears
-on-screen from the app settings.</p>
+is particularly noticeable in 65816 code.  You can choose which syntax
+to use on-screen from the application settings.</p>
 
-<h3><a name="nearby-targets">Automatic Use of Nearby Targets</a></h3>
+
+<h3 id="nearby-targets">Automatic Use of Nearby Targets</h3>
 
 <p>Sometimes you want to use a symbol that doesn't match up with the
 operand.  SourceGen tries to anticipate situations where that might be
@@ -499,11 +507,11 @@ Self-modifying code will always be adjusted because of the limitation
 on mid-instruction labels.</p>
 
 
-<h2><a name="width-disambiguation">Width Disambiguation</a></h2>
+<h2 id="width-disambiguation">Width Disambiguation</h2>
 
 <p>It's possible to interpret certain instructions in multiple ways.
-For example, "LDA $0000" might be an absolute load from a 16-bit
-address, or it might be a direct page load from an 8-bit address.
+For example, "<code>LDA $0000</code>" might be an absolute load from a 16-bit
+address, or it might be a zero-page load from an 8-bit address.
 Humans can infer from the fact that it was written with a 4-digit address
 that it's meant to be absolute, but assemblers often treat operands
 purely as numbers, and would just see "LDA 0".  Common practice is to
@@ -515,8 +523,9 @@ allow both.  You can configure how they appear in the
 <p>SourceGen will only add width disambiguators to opcodes or operands when
 they are needed, with one exception: the opcode suffix for long
 (24-bit address) operations is always applied.  This is done because some
-assemblers require it, insisting on "LDAL" rather than "LDA" for an
-absolute long load, and because it can make 65816 code easier to read.</p>
+assemblers require it, insisting on "<code>LDAL</code>" rather than
+"<code>LDA</code>" for an absolute long load, and because it can
+make 65816 code easier to read.</p>
 
 
 
@@ -597,17 +606,20 @@ example, suppose something like:</p>
 
 SUB_SRC
         .ADDRS  $2000
-SUB_DST [small routine]
+SUB_DST LDY     #$00
+        [...]
+        RTS
         .ADREND
 
 CONT    LDA     #$12
         JSR     SUB_DST
 </pre>
 <p>In this case, a small routine is copied out of the middle of the
-code that lives at $1000.  We want the code at CONT to pick up where
-things left off.  If SUB_SRC is at $1009, and is 23 bytes long, then
-CONT should be $1020.  We could output <code>.ADDRS $1020</code>
-directly before CONT, but it's inconvenient to work with the generated
+code that lives at $1000.  We want the code at <code>CONT</code>
+to pick up where things left off.  If <code>SUB_SRC</code> is at $1009,
+and is 23 bytes long, then <code>CONT</code> should be $1020.  We
+could output <code>.ADDRS $1020</code> directly before <code>CONT</code>,
+but it's inconvenient to work with the generated
 code if we want to modify the subroutine (changing its length)
 and re-assemble it.</p>
 
@@ -636,11 +648,11 @@ a start offset with another region, because their end point would be
 adjusted to match the end of the other region.</p>
 
 <p>The arrangement of regions is particularly important when attempting
-to resolve an address operand (such as a JSR) to a location within the
-file.  The process is straightforward if the address only appears once,
-but when overlays cause multiple parts of the file to have the same
-address, the operand target may be in different places depending on where
-the call is being made from.
+to resolve an address operand (such as a <code>JSR</code>) to a location
+within the file.  The process is straightforward if the address only
+appears once, but when overlays cause multiple parts of the file to have
+the same address, the operand target may be in different places depending
+on where the call is being made from.
 The algorithm for resolving addresses is described
 in the <a href="advanced.html#overlap">advanced topics</a> section.</p>
 
@@ -656,10 +668,10 @@ to the CPU.</p>
 
 <p>The generated source file must recreate the original binary exactly,
 but we don't really want to assign an address to non-addressable data,
-because it should never be resolved as the target of a JSR or LDA.  To
-handle this case, you can set a region's address to "NA".  The assembler
-needs to have <i>some</i> notion of address, so the start address will
-be treated as zero.</p>
+because it should never be resolved as the target of a <code>JSR</code>
+or <code>LDA</code>.  To handle this case, you can set a region's address
+to "<kbd>NA</kbd>".  The assembler needs to have <i>some</i> notion of
+address, so the start address will be treated as zero.</p>
 
 <p>Non-addressable regions cannot include executable code.  You may put
 labels on data items, but attempting to reference them will cause a
@@ -745,7 +757,7 @@ offset cannot be used.</p>
 
 
 
-<h2><a name="atags">Directing the Code Analyzer</a></h2>
+<h2 id="atags">Directing the Code Analyzer</h2>
 
 <p>Sometimes SourceGen can't automatically find the start or end of an
 instruction stream, or gets confused by inline data.  These situations
@@ -777,9 +789,9 @@ L1009    CLC
 
 <p>SourceGen doesn't see any code that jumps to $1003 or $1006, so it
 assumes those are data.  Further, the functions at those addresses may
-also be considered data unless some bit of code reachable from L1009
-calls into them.  If you tag $1003 and $1006 as code start points,
-you'll get better results:</p>
+also be considered data unless some bit of code reachable from
+<code>L1009</code> calls into them.  If you tag $1003 and $1006 as code
+start points, you'll get better results:</p>
 <pre>
          .ADDRS  $1000
          JMP     L1009
@@ -805,9 +817,10 @@ L1009    CLC
 The problem is that the bytes in the middle of the instruction have
 been tagged as start points, so SourceGen is treating them as
 embedded instructions.  $EF and $12 aren't valid 6502 opcodes, so
-they're being ignored, but $10 is BPL and $30 is BMI.  Because tagging
-multiple consecutive bytes is rarely useful, SourceGen only applies code
-start tags to the first byte in a selected line.</p>
+they're being ignored, but $10 is <code>BPL</code> and $30 is
+<code>BMI</code>.
+Because tagging multiple consecutive bytes is rarely useful, SourceGen
+only applies code start tags to the first byte in a selected line.</p>
 
 <p><b>Code stop point</b> tags tell the analyzer when it should stop.  For
 example, suppose address $ff00 is known to always be nonzero, and the code
@@ -819,14 +832,15 @@ uses that fact to get a branch-always on the 6502:</p>
          BRK     $11
 </pre>
 
-<p>By tagging the BRK as a code stop point, you're telling the analyzer that
-it should stop trying to execute code when it reaches that point.  (Note
-that this example would actually be better solved by setting a status flag
-override on the BNE that sets Z=0, so the code tracer will know it's a
-branch-always and just do the right thing.)  As with code start points,
-code stop points should only be placed on the opcode byte.  Placing a
-code stop point in the middle of what SourceGen believes to be instruction
-will have no effect.</p>
+<p>By tagging the <code>BRK</code> as a code stop point, you're telling the
+analyzer that it should stop trying to execute code when it reaches
+that point.
+(Note that this example would actually be better solved by setting a
+status flag override on the <code>BNE</code> that sets Z=0, so the code
+tracer will know it's a branch-always and just do the right thing.)
+As with code start points, code stop points should only be placed on the
+opcode byte.  Placing a code stop point in the middle of what SourceGen
+believes to be instruction will have no effect.</p>
 <p>As with code start points, only the first byte in each selected line will
 be tagged.</p>
 
@@ -850,7 +864,7 @@ applying the tag, all bytes in a selected line will be modified.</p>
 branch will be ignored.</p>
 
 
-<h3><a name="scripts">Extension Scripts</a></h3>
+<h3 id="scripts">Extension Scripts</h3>
 
 <p>Extension scripts are C# source files that are compiled and
 executed by SourceGen.  They can be added to a project from SourceGen's
@@ -867,9 +881,9 @@ and let the script do the formatting automatically.</p>
 
 <p>To reduce the chances of a script causing problems, all scripts are
 executed in a sandbox with severely restricted access.  Notably, nothing
-in the sandbox can access files, except to read files from the PluginDll
+in the sandbox can access files, except to read files from the PluginDllCache
 directory.</p>
-<p>The PluginDll directory lives next to the SourceGen executable, and
+<p>The PluginDllCache directory lives next to the SourceGen executable, and
 contains all of the compiled script DLLs, as well as two pre-built
 application DLLs that plugins are allowed access to.  The contents
 are persistent, to avoid recompiling the scripts every time SourceGen
@@ -878,7 +892,7 @@ is launched, but may be manually deleted without harm.</p>
 <a href="advanced.html#extension-scripts">advanced topics</a> section.</p>
 
 
-<h2><a name="pseudo-ops">Data and Directive Pseudo-Opcodes</a></h2>
+<h2 id="pseudo-ops">Data and Directive Pseudo-Opcodes</h2>
 
 <p>The on-screen code list shows assembler directives that are similar
 to what the various cross-assemblers provide.  The actual directives
@@ -888,54 +902,58 @@ code generator figure out the implementation details.</p>
 
 <p>There are eight assembler directives that appear in the code list:</p>
 <ul>
-  <li>.EQ - defines a symbol's value.  These are generated automatically
-    when an operand that matches a platform or project symbol is found.</li>
-  <li>.VAR - defines a local variable.  These are generated for
+  <li><code>.EQ</code> - defines a symbol's value.  These are generated
+    automatically when an operand that matches a platform or project
+    symbol is found.</li>
+  <li><code>.VAR</code> - defines a local variable.  These are generated for
     local variable tables.</li>
-  <li>.ADDRS/.ADREND - specifies the start or end of an
-    address region.</li>
-  <li>.RWID - specifies the width of the accumulator and index registers
-    (65816 only).  Note this doesn't change the actual width, just tells
-    the assembler that the width has changed.</li>
-  <li>.DBANK - specifies what value the Data Bank Register holds
+  <li><code>.ADDRS</code>/<code>.ADREND</code> - specifies the start or
+    end of an address region, respectively.</li>
+  <li><code>.RWID</code> - specifies the width of the accumulator and
+    index registers (65816 only).  Note this doesn't change the actual
+    width, just tells the assembler that the width has changed.</li>
+  <li><code>.DBANK</code> - specifies what value the Data Bank Register holds
     (65816 only).  Used when matching operands to labels.</li>
-  <li>.DS - identifies space set aside for variable storage.  The storage
-    is initialized by the program before first use, so the values
+  <li><code>.DS</code> - identifies space set aside for variable storage.
+    The storage is initialized by the program before first use, so the values
     in the binary don't actually matter.</li>
-  <li>.JUNK - indicates that the data in a range of bytes is irrelevant.
-    (When generating sources, this will become .FILL or .BULK
+  <li><code>.JUNK</code> - indicates that the data in a range of bytes is
+    irrelevant.  (When generating sources, this will become
+    <code>.FILL</code> or <code>.BULK</code>
     depending on the contents of the memory region and the assembler's
     capabilities.)</li>
-  <li>.ALIGN - a special case of .JUNK that indicates the irrelevant
-    bytes exist to force alignment to a memory boundary (usually a
-    256-byte page).  Depending on the memory contents, it may be possible
-    to output this as an assembler-specific alignment directive.</li>
+  <li><code>.ALIGN</code> - a special case of <code>.JUNK</code> that
+    indicates the irrelevant bytes exist to force alignment to a
+    memory boundary (usually a 256-byte page).  Depending on the
+    memory contents, it may be possible to output this as an
+    assembler-specific alignment directive.</li>
 </ul>
 
 <p>Every data item is represented by a pseudo-op.  Some of them may
 represent hundreds of bytes and span multiple lines.</p>
 <ul>
-  <li>.DD1, .DD2, .DD3, .DD4 - basic "define data" op.  A 1-4 byte
+  <li><code>.DD1</code>, <code>.DD2</code>, <code>.DD3</code>,
+    <code>.DD4</code> - basic "define data" op.  A 1-4 byte
     little-endian value.</li>
-  <li>.DBD2, .DBD3, .DBD4 - "define big-endian data".  2-4 bytes of
-    big-endian data.  (The 3- and 4-byte versions are not currently
-    available in the UI, since they're very unusual and few assemblers
-    support them.)</li>
-  <li>.BULK - data packed in as compact a form as the assembler allows.
-    Useful for chunks of graphics data.</li>
-  <li>.FILL - a series of identical bytes.  The operand
+  <li><code>.DBD2</code>, <code>.DBD3</code>, <code>.DBD4</code> - "define
+    big-endian data".  2-4 bytes of big-endian data.
+    (The 3- and 4-byte versions are not currently available in the UI,
+    since they're very unusual and few assemblers support them.)</li>
+  <li><code>.BULK</code> - data packed in as compact a form as the
+    assembler allows.  Useful for things like chunks of graphics data.</li>
+  <li><code>.FILL</code> - a series of identical bytes.  The operand
     has two parts, the byte count followed by the byte value.</li>
 </ul>
 
 <p>In addition, several pseudo-ops are defined for string constants:</p>
 <ul>
-  <li>.STR - basic character string.</li>
-  <li>.RSTR - string in reverse order.</li>
-  <li>.ZSTR - null-terminated string.</li>
-  <li>.DSTR - Dextral Character Inverted string.  The high bit of the
-    last byte is flipped.</li>
-  <li>.L1STR - string prefixed with a length byte.</li>
-  <li>.L2STR - string prefixed with a length word.</li>
+  <li><code>.STR</code> - basic character string.</li>
+  <li><code>.RSTR</code> - string in reverse order.</li>
+  <li><code>.ZSTR</code> - null-terminated string.</li>
+  <li><code>.DSTR</code> - Dextral Character Inverted string.  The
+    high bit of the last byte is flipped.</li>
+  <li><code>.L1STR</code> - string prefixed with a length byte.</li>
+  <li><code>.L2STR</code> - string prefixed with a length word.</li>
 </ul>
 
 <p>You can configure the pseudo-operands to look more like what your

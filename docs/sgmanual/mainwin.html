@@ -1,49 +1,53 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Using SourceGen - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Using SourceGen - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Using SourceGen</h1>
+<h1>SourceGen: Using SourceGen</h1>
 <p><a href="index.html">Back to index</a></p>
 
-<h2><a name="starting-new">Starting a New Project</a></h2>
+<h2 id="starting-new">Starting a New Project</h2>
 
-<p>Select File &gt; New, or if no project is open, click "Start new project".
-This opens the Create New Project window.</p>
+<p>Select <samp>File &gt; New</samp>, or if no project is open, you
+can click the <samp>Start new project</samp> button.
+This opens the <samp>Create New Project</samp> window.</p>
 <p>Start by selecting your target system from the tree on the left.
 The panel on the right will show the CPU that will be selected, as well
 as the symbol files and extension scripts that will be loaded by default.
 All of these may be overridden later from the project properties.
-(If the description in the panel on the right says "[placeholder]", it
-means that the system doesn't yet have a set of symbols defined for it.)</p>
+(If the description in the panel on the right says
+"<samp>[placeholder]</samp>", it means that the system doesn't yet have
+a set of symbols defined for it.)</p>
 
-<p>Next, click the "Select File..." button.  Pick the file you wish to
-disassemble.  The dialog will update with the pathname and some notes
-about the file's size.  Click "OK" if all looks good to create the
+<p>Next, click the <samp>Select File...</samp> button.  Pick the file you
+wish to disassemble.  The dialog will update with the pathname and some notes
+about the file's size.  Click <samp>OK</samp> if all looks good to create the
 project.</p>
 <p><strong>NOTE:</strong> Support for very large 65816 programs is
 incomplete.  The maximum size for a data file is limited to 1 MiB.</p>
 
-<p>The first time you save the project (with File &gt; Save), you will be
-prompted for the project name.  It's best to use the data file's name
-with ".dis65" added, so this will be set as the default.  The data
-file's name is not stored in the project file, so if you pick a different
-name, or save the project in a different directory, you will have to
-select the data file manually whenever you open the project.</p>
+<p>The first time you save the project (with <samp>File &gt; Save</samp>),
+you will be prompted for the project name.  It's best to use the
+data file's name with "<samp>.dis65</samp>" added, so this will be set as
+the default.  The data file's name is not stored in the project file,
+so if you pick a different name, or save the project in a different
+directory, you will have to select the data file manually whenever you
+open the project.</p>
 
 
-<h2><a name="opening">Opening an Existing Project</a></h2>
+<h2 id="opening">Opening an Existing Project</h2>
 
-<p>Select File &gt; Open, or if no project is open, click "Open
-existing project".  Select the .dis65 project file from the standard
-file dialog.</p>
+<p>Select <samp>File &gt; Open</samp>, or if no project is open, you
+can click the <samp>Open existing project</samp> button.
+Select the .dis65 project file from the standard file dialog.</p>
 <p>SourceGen will try to open a data file with the project's name,
 minus the ".dis65".  If it can't find a file with that name, or if there's
 something wrong with it (e.g. the CRC doesn't match), you will be given
@@ -60,11 +64,11 @@ also be given the opportunity to simply cancel loading the project.</p>
 
 <p>The locations of the last few projects you've worked with are saved
 in the application settings.  You can access them from
-File &gt; Recent Projects.  If no project is open, links to the two
-most-recently-opened projects will be available.</p>
+<samp>File &gt; Recent Projects</samp>.  If no project is open, buttons
+that open the two most-recently-opened projects will be available.</p>
 
 
-<h2><a name="working">Working With a Project</a></h2>
+<h2 id="working">Working With a Project</h2>
 
 <p>The main project window is divided into five areas:</p>
 <ol>
@@ -89,7 +93,7 @@ code, data, and uninitialized data (variable storage or junk) found
 in the program.  These values are updated as you work.</p>
 
 
-<h3><a name="code-list">Code List</a></h3>
+<h3 id="code-list">Code List</h3>
 
 <p>The code list provides a view of the code being disassembled.  Each
 line may be an instruction, data item, long comment, note, or
@@ -157,14 +161,14 @@ respectively.</p>
 <p>The code list is a standard Windows list view.  You can left-click
 to select an item, ctrl-left-click to toggle individual items on and
 off, and shift-left-click to select a range.  You can select all lines
-with Edit &gt; Select All.  Resize columns by
+with <samp>Edit &gt; Select All</samp>.  Resize columns by
 left-clicking on the divider in the header and dragging it.</p>
 <p>Selecting any part of a multi-line item, such as a long comment
 or character string, effectively selects the entire item.</p>
 
 <p>Right-clicking opens a menu.  The contents are the same as those in
-the Actions menu item in the menu bar.  The set of options that are
-enabled will depend on what you have selected in the main window.</p>
+the <samp>Actions</samp> menu item in the menu bar.  The set of options
+that are enabled will depend on what you have selected in the main window.</p>
 <ul>
   <li><a href="editors.html#instruction-operand">Edit Operand</a>.  Opens the
     Edit Instruction Operand or Edit Data Operand window, depending on
@@ -231,10 +235,12 @@ enabled will depend on what you have selected in the main window.</p>
 </ul>
 
 
-<h3><a name="undo">Undo &amp; Redo</a></h3>
+<h3 id="undo">Undo &amp; Redo</h3>
 
-<p>You can undo a change with Edit &gt; Undo, or Ctrl+Z.  You can redo a
-change with Edit &gt; Redo, Ctrl+Y, or Ctrl+Shift+Z.</p>
+<p>You can undo a change with <samp>Edit &gt; Undo</samp>, or
+<kbd class="key">Ctrl+Z</kbd>.  You can redo a
+change with <samp>Edit &gt; Redo</samp>, <kbd class="key">Ctrl+Y</kbd>,
+or <kbd class="key">Ctrl+Shift+Z</kbd>.</p>
 <p>All changes to the project, including changes to the project properties,
 are added to the undo/redo buffer.  This has no fixed size limit, so no
 matter how much you change, you can always undo back to the point where
@@ -243,7 +249,7 @@ the project was opened.</p>
 clears it.</p>
 
 
-<h3><a name="references">References Window</a></h3>
+<h3 id="references">References Window</h3>
 
 <p>When a single instruction or data line is selected in the main window,
 all references to that offset will be shown in the References window.
@@ -275,10 +281,10 @@ the instruction is using the location as a base address.</p>
 (e.g. <code>LDA (dp),Y</code>) will show "ptr".  This makes it easy
 to identify the locations that are reading or writing through the
 pointer from those that are reading or writing the pointer itself.</p>
-<p>This will be prefixed with "Sym" or "Oth" to indicate whether or not
-the reference used the label at the current address.  To understand
-this, consider that addresses can be referenced in different ways.
-For example:</p>
+<p>This will be prefixed with "<samp>Sym</samp>" or "<samp>Oth</samp>"
+to indicate whether or not the reference used the label at the current
+address.  To understand this, consider that addresses can be referenced
+in different ways.  For example:</p>
 <pre>
          LDA     DATA0
          LDX     DATA0+1
@@ -294,9 +300,9 @@ instructions referenced it.  When <code>DATA1</code> is selected, the
 references window will show the <code>LDX</code>, because that
 instruction accessed <code>DATA1</code>'s location even though it didn't
 use the symbol.  To make the difference clear, the lines in the references
-window will either show "Sym" (to indicate that the symbol at the selected
-line was referenced) or "Oth" (to indicate that some other symbol, or no
-symbol, was used).</p>
+window will either show "<samp>Sym</samp>" (to indicate that the symbol
+at the selected line was referenced) or "<samp>Oth</samp>" (to indicate
+that some other symbol, or no symbol, was used).</p>
 
 <p>When an equate directive (generated for platform and project
 symbols) or local variable assignment is selected, the References
@@ -314,18 +320,32 @@ or project symbol, an equate directive will not be generated for it.</p>
 reference, and adds the previous selection to the navigation stack.</p>
 
 
-<h3><a name="notes">Notes Window</a></h3>
+<h3 id="notes">Notes Window</h3>
 
 <p>When you add a note, it will also be added to this window.
 Double-clicking on a note will jump directly to it, and add the previous
 selection to the navigation stack.  This makes notes useful as bookmarks.</p>
 
 
-<h3><a name="symbols">Symbols Window</a></h3>
+<h3 id="symbols">Symbols Window</h3>
 
 <p>All known <a href="intro-details.html#about-symbols">symbols</a> are shown
 here.  The filter buttons allow you to screen out symbols you're not
-interested in, such as platform symbols or constants.</p>
+interested in, such as platform symbols or constants.  The filters are:</p>
+<ul>
+  <li><samp>User</samp> - include "user labels", i.e. labels that
+    were entered by the user.</li>
+  <li><samp>NonU</samp> - include non-unique (local) labels.</li>
+  <li><samp>Proj</samp> - include project symbols.</li>
+  <li><samp>Plat</samp> - include platform symbols.</li>
+  <li><samp>PreL</samp> - include address region pre-labels.</li>
+  <li><samp>Auto</samp> - include auto-generated labels.</li>
+  <li><samp>Addr</samp> - include symbols for addresses.  This
+    includes all labels, as well as addresses defined in project
+    and platform symbol tables.</li>
+  <li><samp>Cnst</samp> - include constants, defined in project
+    and platform symbol tables.</li>
+</ul>
 
 <p>Clicking on one of the column headers will sort the list on that
 field.  Click a second time to reverse the sort direction.</p>
@@ -341,7 +361,7 @@ The second letter is one of N (non-unique local), L (local), G (global),
 X (exported), E (external), or C (constant).</p>
 
 
-<h3><a name="info">Info Window</a></h3>
+<h3 id="info">Info Window</h3>
 
 <p>Some additional information about the currently-selected line is
 shown, such as the formatting applied to the operand.  If the operand
@@ -350,9 +370,11 @@ For an instruction,
 a summary is shown that includes the cycle count, flags affected, and a
 brief description of what the instruction does.  The latter can be
 especially handy for undocumented instructions.</p>
+<p>If multiple lines are selected, the number of selected lines and the
+number of bytes spanned by the selection will be shown.</p>
 
 
-<h3><a name="messages">Messages Window</a></h3>
+<h3 id="messages">Messages Window</h3>
 
 <p>Sometimes a change will invalidate an earlier change.  For example,
 suppose you add a code stop point, and format the data that follows
@@ -388,35 +410,38 @@ and the "resolution" column will indicate how it's being handled.  In most
 cases, the offending item will be ignored.</p>
 <p>Double-clicking on an entry will jump to that offset.</p>
 <p>The message list will not appear if there are no messages.  You can
-hide the list by clicking on the "Hide" button to the left of the messages.
-Un-hide the list by clicking on the "N messages" button at the bottom-right
-corner of the application window.</p>
+hide the list by clicking on the <samp>Hide</samp> button to the left of
+the messages.  Un-hide the list by clicking on the <samp>N messages</samp>
+button at the bottom-right corner of the application window.</p>
 
 
-<h3><a name="navigation">Navigation</a></h3>
+<h3 id="navigation">Navigation</h3>
 
 <p>The simplest way to move through the code list is with the scroll wheel
 on your mouse, or by left-clicking and dragging the scroll bar.  You
-can also use PgUp/PgDn and the arrow keys.</p>
+can also use <kbd class="key">PgUp</kbd>/<kbd class="key">PgDn</kbd>
+and the arrow keys.</p>
 
-<p>Use Navigate &gt; Find to search for text.  This performs a case-insensitive
-text search on the label, opcode, operand, and comment fields.
-Use Navigate &gt; Find Next to find the next match, and
-Navigate &gt; Find Previous to find the previous match.  Note "next" is
-always downward, and "previous" is always upward, regardless of the
-direction of the initial search chosen in the Find dialog.</p>
+<p>Use <samp>Navigate &gt; Find</samp> to search for text.  This performs
+a case-insensitive text search on the label, opcode, operand, and comment
+fields.
+Use <samp>Navigate &gt; Find Next</samp> to find the next match, and
+<samp>Navigate &gt; Find Previous</samp> to find the previous match.
+Note "next" is always downward, and "previous" is always upward,
+regardless of the direction of the initial search chosen in the
+Find dialog.</p>
 
-<p>Use Navigate &gt; Go To to jump to an offset, address, or label.  Remember
-that offsets and addresses are always hexadecimal, and offsets start
-with a '+'.  If you have a label that is also a valid hexadecimal
-address, like "FEED", the label takes precedence.  To jump to the address
-write "$FEED" instead.  If you enter a non-unique label, the selection
-will jump to the nearest instance.</p>
+<p>Use <samp>Navigate &gt; Go To</samp> to jump to an offset, address,
+or label.  Remember that offsets and addresses are always hexadecimal,
+and offsets start with a '+'.  If you have a label that is also a
+valid hexadecimal address, like "FEED", the label takes precedence.  To
+jump to the address write "$FEED" instead.  If you enter a non-unique label,
+the selection will jump to the nearest instance.</p>
 
 <p>If an instruction or data line has an operand that references an address
 in the file, you can navigate to the operand's location with
-Navigate &gt; Jump to Operand.  You can also do this by double-clicking
-in the opcode column.</p>
+<samp>Navigate &gt; Jump to Operand</samp>.  You can also do this by
+double-clicking in the opcode column.</p>
 
 <p>When you edit something, lines throughout the listing can change.  This
 is different from a source code editor, where editing a line just changes
@@ -424,48 +449,62 @@ that line.  To allow you to watch the effects changes have, the undo/redo
 commands try to keep the listing in the same position.
 If you want to go to the place where the last change (i.e. the change
 that will be undone by the next Undo operation) was made,
-Navigate &gt; Go to Last Change will jump to the first offset
+<samp>Navigate &gt; Go to Last Change</samp> will jump to the first offset
 associated with the most recent change.
 If the last change was to the project properties, it will jump to the
 first offset in the file.</p>
 
 <p>When you jump around, e.g. by double-clicking on an opcode or an entry
 in one of the side windows, the previously-selected line is added to
-a navigation stack.  You can use Navigate &gt; Nav Forward and
-Navigate &gt; Nav Backward to move forward and backward through the
-stack.  (The curly arrows on the left side of the toolbar may be more
-convenient.  You can use Alt+Left/Right Arrow, or
-Ctrl+- / Ctrl+Shift+-, as keyboard shortcuts.)</p>
+a navigation stack.  You can use <samp>Navigate &gt; Nav Forward</samp> and
+<samp>Navigate &gt; Nav Backward</samp> to move forward and backward
+through the stack.  (The curly arrows on the left side of the toolbar may
+be more convenient.  You can use
+<kbd class="key">Alt+LeftArrow</kbd> / <kbd class="key">Alt+RightArrow</kbd>,
+or <kbd class="key">Ctrl+-</kbd> / <kbd class="key">Ctrl+Shift+-</kbd>,
+as keyboard shortcuts.)</p>
 
 
-<h3><a name="atags">Adding and Removing Analyzer Tags</a></h3>
+<h3 id="atags">Adding and Removing Analyzer Tags</h3>
 
 <p><i>(Note: These were referred to as code/data "hints" in older
 versions of SourceGen.)</i></p>
 
 <p>To set code start or stop points, select the desired offsets and
-use Actions &gt; Tag Address As Code Start Point (or Stop Point).  Because
-these indicate a transition between code and data regions, there is rarely
-any need to tag multiple consecutive bytes.
-For this reason, only the first byte on each selected line will be tagged.</p>
+use <samp>Actions &gt; Tag Address As Code Start Point</samp>
+(or <samp>Stop Point</samp>).  Because these indicate a transition
+between code and data regions, there is rarely any need to tag
+multiple consecutive bytes.  For this reason, only the first byte on
+each selected line will be tagged.</p>
 
-<p>For inline data, you need to cover the entire range, so every byte in every
-selected line is tagged when you select Tag Bytes As Inline Data.  Similarly,
-the Remove Analyzer Tags menu item will remove tags from every byte.</p>
+<p>For inline data that follows a
+<code>JSR</code>/<code>JSL</code>/<code>BRK</code>,
+you need to cover the entire range, so every byte
+in every selected line is tagged when you select
+<samp>Tag Bytes As Inline Data</samp>.  Similarly, the
+<samp>Remove Analyzer Tags</samp> menu item will remove tags from
+every byte.</p>
+
+<p>Tip: while code start points and inline data tagging are both very
+important, code <i>stop</i> points are rarely useful.  The code
+analyzer is pretty good at separating code from data.  If you find
+yourself using stop points frequently, you're probably Doing It Wrong.</p>
 
 <p>If you're having a hard time selecting just the right bytes because
 the instructions are caught up in a multi-byte data item, such as an
 auto-detected character string, you can disable uncategorized data analysis
-(the thing that creates the .STR and .FILL ops for you).  You can do this
-from the
+(the thing that creates the <code>.STR</code> and <code>.FILL</code>
+ops for you).  You can do this from the
 <a href="settings.html#project-properties">project properties</a> editor,
-or simply by hitting Ctrl+D.  Hit that, tag the byte or bytes, then hit it
-again to re-enable the string &amp; fill analyzer.</p>
-<p>Another approach is to use the "Toggle Single-Byte Format"
-menu item to "flatten" the item.</p>
+or simply by hitting <kbd class="key">Ctrl+D</kbd>.  Hit that, tag the
+byte or bytes, then hit it again to re-enable the
+string &amp; fill analyzer.</p>
+<p>Another approach is to use the <samp>Toggle Single-Byte Format</samp>
+menu item to "flatten" the item, explicitly formatting everything as
+individual hex bytes.</p>
 
 
-<h3><a name="address-table">Format Address Table</a></h3>
+<h3 id="address-table">Format Address Table</h3>
 
 <p>Tables of addresses are fairly common.  Sometimes you'll find them as a
 series of 16-bit words, like this:</p>
@@ -487,12 +526,12 @@ jmptabh  .dd1    &gt;func1
 </pre>
 
 <p>Sometimes the tables contain <code>address - 1</code>, because the
-values are to be pushed onto the stack for an RTS call.</p>
+values are to be pushed onto the stack for an <code>RTS</code> call.</p>
 
-<p>While the .dd2 case is easy to format with the data operand editor,
-formatting addresses whose components are split into multiple tables can
-be tedious.  Even in the easy case, you may want to create labels and set
-code start points for each item.</p>
+<p>While the <code>.dd2</code> case is easy to format with the data
+operand editor, formatting addresses whose components are split into
+multiple tables can be tedious.  Even in the easy case, you may want
+to create labels and set code start points for each item.</p>
 
 <p>The Address Table Formatter helps you associate symbols with the
 addresses in the table.  It works for simple and "split" tables.</p>
@@ -503,45 +542,47 @@ bytes.  If the number of bytes selected can't be evenly divided by the
 number of parts -- two parts for 16-bit data, three parts for 24-bit data --
 the formatter will report an error.</p>
 <p>With the data selected, open the format dialog with
-Actions &gt; Format Split-Address Table.  The rather complicated dialog
-is split into sections.</p>
+<samp>Actions &gt; Format Split-Address Table</samp>.  The rather
+complicated dialog is split into sections.</p>
 <ul>
   <li>Address Characteristics: select whether the table has 16-bit
   addresses or 24-bit addresses.  (24-bit addresses are disabled if you
   don't have the CPU set to 65816.)  If the table is split into individual
-  sub-tables for low bytes and high bytes, check the "Parts are split
-  across sub-tables" box.  If the address parts are being pushed
-  on the stack for an RTS/RTL, check the "Adjusted for RTS/RTL" box to
-  adjust them by 1.</li>
+  sub-tables for low bytes and high bytes, check the <samp>Parts are split
+  across sub-tables</samp> box.  If the address parts are being pushed
+  on the stack for an <code>RTS</code>/<code>RTL</code>,
+  check the <samp>Adjusted for RTS/RTL</samp> box to adjust them by 1.</li>
   <li>Low Byte Source: indicate which part of the table or word holds the
   low bytes.  For common little-endian words, the low bytes come first.  In
   the split-table example above, the low bytes came first, followed by the
-  high bytes, so you would select "first part of selection".  If they were
-  stored the other way around, you would click "second part" instead.</li>
+  high bytes, so you would select <samp>first part of selection</samp>.
+  If they were stored the other way around, you would click
+  <samp>second part</samp> instead.</li>
   <li>High Byte Source: indicate which part of the table or word holds
   the high bytes.  For a 16-bit address this will be the part you didn't
   pick for the low bytes.
   Sometimes, if all addresses land on the same 256-byte page, the high byte
   will be a constant in the code, and only the low bytes will be stored in
-  a table.  If that's the case, select "Constant", and enter the high byte
-  in the text box.  (Decimal, hex, and binary are accepted.)</li>
-  <li>Bank Byte Source: for 24-bit addresses, you can select "Nth part of
-  selection", which will just use whichever part you didn't specify for
+  a table.  If that's the case, select <samp>Constant</samp>, and enter
+  the high byte in the text box.
+  (Decimal, hex, and binary are accepted.)</li>
+  <li>Bank Byte Source: for 24-bit addresses, you can select <samp>Nth part of
+  selection</samp>, which will just use whichever part you didn't specify for
   the low and high bytes.  If the table holds 16-bit addresses, you can
-  use the "Constant" field to specify the data bank.</li>
+  use the <samp>Constant</samp> field to specify the data bank.</li>
   <li>Options: if the table holds the addresses of executable code, check
-  the "Tag targets as code start points" box.  If the target address
-  hasn't been identified by the code analyzer through some other execution
-  path, it will be tagged as a code start point.</li>
+  the <samp>Tag targets as code start points</samp> box.  If the target
+  address hasn't been identified by the code analyzer through some
+  other execution path, it will be tagged as a code start point.</li>
   <li>Generated Addresses: this shows the full list of addresses that are
   generated with the current set of parameters.  Each address is shown with
   a file offset and a symbol.  If the address can't be mapped within the
   file, the offset is shown as dashes instead.  If the address can be
   mapped, and it already has a user-specified label, the label will be
-  shown.  If no label was found, the table will show "(+)", indicating
-  that a permanent label will be added at the target offset.  If everything
-  is set up correctly, and the addresses fall entirely within the program,
-  you shouldn't see any unknown entries here.</li>
+  shown.  If no label was found, the table will show "<code>(+)</code>",
+  indicating that a permanent label will be added at the target offset.  If
+  everything is set up correctly, and the addresses fall entirely within
+  the program, you shouldn't see any unknown entries here.</li>
 </ul>
 
 <p>For a 16-bit address, you have three choices: low byte first, high byte
@@ -564,18 +605,18 @@ does everything as a single undoable action, so if it comes out looking
 wrong, just hit "undo" and try something else.</p>
 
 
-<h3><a name="toggle-single">Toggle Single-Byte Format</a></h3>
+<h3 id="toggle-single">Toggle Single-Byte Format</h3>
 
-<p>The "Toggle Single-Byte Format" feature provides a quick way to
-change a range of bytes to single bytes
+<p>The <samp>Toggle Single-Byte Format</samp> feature provides a quick
+way to change a range of bytes to single bytes
 or back to their default format.  It's equivalent to opening the Edit
-Data Operand dialog and selecting "Single bytes" displayed as hex, or
-selecting "Default".</p>
+Data Operand dialog and selecting <samp>Single bytes</samp> displayed
+as hex, or selecting <samp>Default</samp>.</p>
 <p>This can be handy if the default format for a range of bytes is a
 string, but you want to see it as bytes or set a label in the middle.</p>
 
 
-<h3><a name="format-as-word">Format As Word</a></h3>
+<h3 id="format-as-word">Format As Word</h3>
 
 <p>This is a quick way to format pairs of bytes as 16-bit words.  It's
 equivalent to opening the Edit Data Operand dialog and selecting
@@ -585,7 +626,7 @@ equivalent to opening the Edit Data Operand dialog and selecting
 single-byte values.  This means, for example, that you can't select a
 10-byte string and have it turn into five 16-bit words.  You can select as
 many bytes as you want, but they must come in pairs.  (Remember that you
-can turn off auto-generation of strings and .FILLs with
+can turn off auto-generation of strings and <code>.FILL</code>s with
 <a href="#toggle-data">Toggle Data Scan</a>.)</p>
 <p>As a special case, if you select a single byte, the following byte will
 also be selected.  This won't work if the following byte is part of a
@@ -594,7 +635,7 @@ multi-byte data item, is the start of a new region (see
 what splits a region), or is the last byte in the file.</p>
 
 
-<h3 id="remove-formatting">Remove Formatting</a></h3>
+<h3 id="remove-formatting">Remove Formatting</h3>
 
 <p>Removes instruction and data operand formatting from the selected lines.
 This removes the visible formatting as well as any formatting instructions
@@ -605,23 +646,24 @@ such things in the <a href="#messages">message list</a>.)</p>
 without removing visible labels.</p>
 
 
-<h3><a name="toggle-data">Toggle Data Scan</a></h3>
+<h3 id="toggle-data">Toggle Data Scan</h3>
 
 <p>This menu item is in the Edit menu, and acts as a shortcut to opening
-the Project Properties editor, and clicking on the "Analyze Uncategorized
-Data" checkbox.  When enabled, SourceGen will look for character strings and
-regions of identical bytes, and generate .STR and .FILL directives.  When
+the Project Properties editor, and clicking on the <samp>Analyze
+Uncategorized Data</samp> checkbox.  When enabled, SourceGen will look
+for character strings and regions of identical bytes, and generate
+<code>.STR</code> and <code>.FILL</code> directives.  When
 disabled, uncategorized data is presented as one byte per line, which can
 be handy if you're trying to get at a byte in the middle of a string.</p>
 <p>As with all other project property changes, this is an undoable
 action.</p>
 
 
-<h3><a name="clipboard">Copying to Clipboard</a></h3>
+<h3 id="clipboard">Copying to Clipboard</h3>
 
-<p>When you use Edit &gt; Copy, all lines selected in the code list are
-copied to the system clipboard.  This can be a convenient way to post
-code snippets into forum postings or documentation.  The text is
+<p>When you use <samp>Edit &gt; Copy</samp>, all lines selected in the
+code list are copied to the system clipboard.  This can be a convenient
+way to post code snippets into forum postings or documentation.  The text is
 copied from the data shown on screen, so your chosen capitalization
 and pseudo-ops will appear in the copy.</p>
 <p>Long comments are included, but notes are not.</p>
@@ -631,8 +673,8 @@ included.  From the
 alternative formats that include additional columns.</p>
 
 <p>A copy of all of the fields is also written to the clipboard in CSV
-format.  If you have a spreadsheet like Excel, you can use Paste Special
-to put the data into individual cells.</p>
+format.  If you have a spreadsheet like Excel, you can use
+<samp>Paste Special</samp> to put the data into individual cells.</p>
 
 </div>
 

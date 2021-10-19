@@ -1,20 +1,21 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Advanced Topics - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Advanced Topics - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Advanced Topics</h1>
+<h1>SourceGen: Advanced Topics</h1>
 <p><a href="index.html">Back to index</a></p>
 
 
-<h2><a name="platform-symbols">Platform Symbol Files (.sym65)</a></h2>
+<h2 id="platform-symbols">Platform Symbol Files (.sym65)</h2>
 
 <p>Platform symbol files contain lists of symbols, each of which has a
 label and a value.  SourceGen comes with a collection of symbols for
@@ -124,8 +125,8 @@ the symbol established for the masked value will be used instead.</p>
 <p>If there are multiple masked values for a given address, the precedence
 is undefined.</p>
 <p>To disable the MULTI_MASK and resume normal declarations, write the
-tag without arguments:
-<pre>  *MULTI_MASK</pre></p>
+tag without arguments:</p>
+<pre>  *MULTI_MASK</pre>
 
 
 <h3>Creating a Project-Specific Symbol File</h3>
@@ -151,7 +152,7 @@ not detected automatically.  Use File &gt; Reload External Files to
 import the changes.</p>
 
 
-<h2><a name="extension-scripts">Extension Scripts</a></h2>
+<h2 id="extension-scripts">Extension Scripts</h2>
 
 <p>Extension scripts, also called "plugins", are C# programs with access to
 the full .NET Standard 2.0 APIs.  They're compiled at run time by SourceGen
@@ -212,7 +213,6 @@ $1234  InAZ_PrintString PLA
   <li><code>InNR_</code> : non-returning call (i.e. the JSR acts like
     a JMP)</li>
 </ul>
-</p>
 
 <p>Anything more complicated will require a custom script.</p>
 
@@ -298,7 +298,7 @@ circumstances change, so I'm using app domains as a way to keep the API
 honest.</p>
 
 
-<h2><a name="multi-bin">Working With Multiple Binaries</a></h2>
+<h2 id="multi-bin">Working With Multiple Binaries</h2>
 
 <p>Sometimes a program is split into multiple files on disk.  They
 may be all loaded at once, or some may be loaded into the same place
@@ -320,7 +320,7 @@ once, so there's no reason to treat them as separate projects. Currently,
 the best way to deal with this is to concatenate the files into a single
 file, and operate on that.</p>
 
-<h2><a name="overlap">Overlapping Address Spaces</a></h2>
+<h2 id="overlap">Overlapping Address Spaces</h2>
 <p>Some programs use memory overlays, where multiple parts of the
 code run in the same address in RAM.  Others use bank switching to access
 parts of the program that reside in separate physical RAM or ROM,
@@ -382,7 +382,7 @@ If we hit the top of the tree without finding a match, we conclude
 that the reference is to an external address.</p>
 
 
-<h2><a name="reloc-data">OMF Relocation Dictionaries</a></h2>
+<h2 id="reloc-data">OMF Relocation Dictionaries</h2>
 
 <p><i>This feature is considered experimental.  Some features,
 like cross-reference tracking, may not work correctly with it.</i></p>
@@ -406,14 +406,14 @@ Without context, the disassembler will treat the PEA instruction as two
 independent 16-bit addresses, and the immediate values as constants:</p>
 <pre>
                                .dbank  $02
-02/317c: f4 02 00     L2317C   pea     L20002 & $ffff
-02/317f: f4 54 32              pea     L23254 & $ffff
+02/317c: f4 02 00     L2317C   pea     L20002 &amp; $ffff
+02/317f: f4 54 32              pea     L23254 &amp; $ffff
 02/3182: a2 0c 20              ldx     #WriteCString
 02/3185: 22 00 00 e1           jsl     Toolbox
 02/3189: a9 00 00     L23189   lda     #$0000
-02/318c: 8d 78 3f              sta     L23F78 & $ffff
+02/318c: 8d 78 3f              sta     L23F78 &amp; $ffff
 02/318f: a9 03 00              lda     #$0003
-02/3192: 8d 7a 3f              sta     L23F78 & $ffff +2
+02/3192: 8d 7a 3f              sta     L23F78 &amp; $ffff +2
 </pre>
 <p>Worse yet, those <code>STA</code> instruction operands would have been
 shown as hex values or incorrect labels if the DBR had been set incorrectly.
@@ -422,14 +422,14 @@ address from which the addresses were formed, and we can tell when
 immediate values are addresses rather than constants.  And we can do this
 even without setting the DBR.</p>
 <pre>
-02/317c: f4 02 00     L2317C   pea     L23254 >> 16
-02/317f: f4 54 32              pea     L23254 & $ffff
+02/317c: f4 02 00     L2317C   pea     L23254 &gt;&gt; 16
+02/317f: f4 54 32              pea     L23254 &amp; $ffff
 02/3182: a2 0c 20              ldx     #WriteCString
 02/3185: 22 00 00 e1           jsl     Toolbox
-02/3189: a9 00 00     L23189   lda     #L30000 & $ffff
-02/318c: 8d 78 3f              sta     L23F78 & $ffff
-02/318f: a9 03 00              lda     #L30000 >> 16
-02/3192: 8d 7a 3f              sta     L23F78 & $ffff +2
+02/3189: a9 00 00     L23189   lda     #L30000 &amp; $ffff
+02/318c: 8d 78 3f              sta     L23F78 &amp; $ffff
+02/318f: a9 03 00              lda     #L30000 &gt;&gt; 16
+02/3192: 8d 7a 3f              sta     L23F78 &amp; $ffff +2
 </pre>
 <p>The absence of relocation data can be a useful signal as well.  For
 example, when pushing arguments for a toolbox call, the disassembler
@@ -449,10 +449,10 @@ relocated.  Consider this bit of source code:</p>
 <pre>
 02/0aa8: a5 42                 lda     $42
 02/0aaa: 48                    pha
-02/0aab: f4 02 00              pea     L20002 & $ffff
-02/0aae: f4 03 31              pea     L23103 & $ffff
-02/0ab1: f4 05 00              pea     L20005 & $ffff
-02/0ab4: f4 00 00              pea     L20000 & $ffff
+02/0aab: f4 02 00              pea     L20002 &amp; $ffff
+02/0aae: f4 03 31              pea     L23103 &amp; $ffff
+02/0ab1: f4 05 00              pea     L20005 &amp; $ffff
+02/0ab4: f4 00 00              pea     L20000 &amp; $ffff
 02/0ab7: a2 0b 26              ldx     #Int2Dec
 02/0aba: 22 00 00 e1           jsl     Toolbox
 </pre>
@@ -460,8 +460,8 @@ relocated.  Consider this bit of source code:</p>
 <pre>
 02/0aa8: a5 42                 lda     $42
 02/0aaa: 48                    pha
-02/0aab: f4 02 00              pea     L230C2 >> 16
-02/0aae: f4 03 31              pea     L23103 & $ffff
+02/0aab: f4 02 00              pea     L230C2 &gt;&gt; 16
+02/0aae: f4 03 31              pea     L23103 &amp; $ffff
 02/0ab1: f4 05 00              pea     $0005
 02/0ab4: f4 00 00              pea     $0000
 02/0ab7: a2 0b 26              ldx     #Int2Dec
@@ -469,7 +469,7 @@ relocated.  Consider this bit of source code:</p>
 </pre>
 
 
-<h2><a name="debug">Debug Menu Options</a></h2>
+<h2 id="debug">Debug Menu Options</h2>
 
 <p>The DEBUG menu is hidden by default in release builds, but can be
 exposed by checking the "enable DEBUG menu" box in the application
@@ -478,8 +478,8 @@ not help you debug 6502 projects.</p>
 
 <p>Features:</p>
 <ul>
-  <li>Re-analyze (F5).  Causes a full re-analysis.  Useful if you think
-    the display is out of sync.</li>
+  <li>Re-analyze (<kbd class="key">F5</kbd>).  Causes a full re-analysis.
+    Useful if you think the display is out of sync.</li>
   <li>Source Generation Tests.  Opens the regression test harness.  See
     <code>README.md</code> in the SGTestData directory for more information.
     If the regression tests weren't included in the SourceGen distribution,

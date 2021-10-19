@@ -1,19 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Intro - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Intro - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Intro</h1>
+<h1>SourceGen: Intro</h1>
 <p><a href="index.html">Back to index</a></p>
 
-<h2><a name="overview">Overview</a></h2>
+<h2 id="overview">Overview</h2>
 
 <p>SourceGen converts 6502/65C02/65816 machine-language programs to
 assembly-language source.</p>
@@ -58,7 +59,7 @@ something that people actually want.</p>
 the <a href="https://6502bench.com/sgtutorial/">tutorials</a>.</p>
 
 
-<h2><a name="fundamental-concepts">Fundamentals</a></h2>
+<h2 id="fundamental-concepts">Fundamentals</h2>
 
 <p>The next few sections present some general concepts and terminology.  The
 rest of the documentation assumes you've read and understood this.</p>
@@ -68,7 +69,7 @@ other programs is actually a pretty good way to learn how to code in
 assembly.  You will need to be familiar with hexadecimal numbers and
 general programming concepts to make sense of this, however.</p>
 
-<h3><a name="begin">About 6502 Code</a></h3>
+<h3 id="begin">About 6502 Code</h3>
 
 <p>For brevity's sake, "6502 code" should be taken to mean "code for
 the 6502 CPU or any of its derivatives, including but not limited to
@@ -156,7 +157,7 @@ how 80-column display memory is mapped.</p>
 <p>On a few systems, such as the Atari 2600, RAM, ROM, and registers can
 appear at multiple locations, "mirrored" across the address space.</p>
 
-<h3><a name="charenc">Character Encoding</a></h3>
+<h3 id="charenc">Character Encoding</h3>
 
 <p>The American Standard Code for Information Interchange (ASCII) was
 developed in the 1960s, and became widely used as the means for representing
@@ -184,7 +185,7 @@ bell ($07), linefeed ($0a), and carriage return ($0d) are recognized as
 string data, and in C64 PETSCII a number of text color and formatting
 control codes are also allowed.</p>
 
-<h3><a name="sgconcepts">SourceGen Concepts</a></h3>
+<h3 id="sgconcepts">SourceGen Concepts</h3>
 
 <p>As you work on a disassembled file, formatting operands and adding
 comments, everything you do is saved in the project file as "meta data".
@@ -247,7 +248,7 @@ can happen to labels.  SourceGen will try to prevent this from happening
 by splitting formatted data into sub-regions at label boundaries.</p>
 
 
-<h2><a name="sgintro">How SourceGen Works</a></h2>
+<h2 id="sgintro">How SourceGen Works</h2>
 
 <p>SourceGen employs a partial emulation technique that traces the flow
 of execution through the program.  Most of what a given instruction does

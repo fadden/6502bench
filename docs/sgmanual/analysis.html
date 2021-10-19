@@ -1,22 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="main.css" rel="stylesheet" type="text/css" />
-<title>Instruction and Data Analysis - 6502bench SourceGen</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="main.css"/>
+    <title>Instruction and Data Analysis - 6502bench SourceGen</title>
 </head>
 
 <body>
 <div id="content">
-<h1>6502bench SourceGen: Instruction and Data Analysis</h1>
+<h1>SourceGen: Instruction and Data Analysis</h1>
 <p><a href="index.html">Back to index</a></p>
 
 <p><i>This section discusses the internal workings of SourceGen.  It is
 not necessary to understand this to use the program.</i></p>
 
-<h2><a name="analysis-process">Analysis Process</a></h2>
+<h2 id="analysis-process">Analysis Process</h2>
 
 <p>Analysis of the file data is a complex multi-step process.  Some
 changes to the project, such as adding a code start point or
@@ -87,7 +88,7 @@ many lines it will occupy, so it's done immediately and cached for re-use
 on subsequent runs.</p>
 
 
-<h3><a name="auto-format">Automatic Formatting</a></h3>
+<h3 id="auto-format">Automatic Formatting</h3>
 
 <p>Every offset in the file is marked as an instruction byte, data byte, or
 inline data byte.  Some offsets are also marked as the start of an instruction
@@ -142,7 +143,7 @@ to the user-specified descriptor list.  During the analysis pass it would
 be added to the Anattrib array at offset +000000.</p>
 
 
-<h3><a name="undo-redo">Interaction With Undo/Redo</a></h3>
+<h3 id="undo-redo">Interaction With Undo/Redo</h3>
 
 <p>The analysis pass always considers the current state of the user
 data structures.  Whether you're adding a label or removing one, the
@@ -189,7 +190,7 @@ add up quickly).  When undoing a change, before and after are simply
 reversed.</p>
 
 
-<h2><a name="code-analysis">Code Analysis</a></h2>
+<h2 id="code-analysis">Code Analysis</h2>
 
 <p>The code tracer walks through the instructions, examining them to
 determine where execution will proceed next.  There are five possibilities
@@ -282,7 +283,7 @@ assumes that it's equal to the program bank register ("K"), and provides
 a way to override the value.</p>
 
 
-<h3><a name="extension-scripts">Extension Scripts</a></h3>
+<h3 id="extension-scripts">Extension Scripts</h3>
 
 <p>Extension scripts can mark data that follows a JSR, JSL, or BRK as inline
 data, or change the format of nearby data or instructions.  The first
@@ -303,7 +304,7 @@ with inline data tags specified by the user, because those are applied
 before code analysis starts.)</p>
 
 
-<h2><a name="data-analysis">Data Analysis</a></h2>
+<h2 id="data-analysis">Data Analysis</h2>
 <p>The data analyzer performs two tasks.  It matches operands with
 offsets, and it analyzes uncategorized data.  This behavior can be
 modified in the
@@ -321,9 +322,9 @@ the instruction start.  This is necessary because labels are only visible
 if they're associated with the first (opcode) byte of an instruction.</p>
 
 <p>The uncategorized data analyzer tries to find character strings and
-opportunities to use the ".FILL" operation.  It breaks the file into
-pieces, where contiguous regions hold nothing but data, are not split
-across address region start/end directives, are not interrupted by data,
+opportunities to use the "<code>.FILL</code>" operation.  It breaks the file
+into pieces where contiguous regions hold nothing but data, are not split
+across address region start/end directives, are not interrupted by labels,
 and do not contain anything that the user has chosen to format.  Each
 region is scanned for matching patterns.  If a match is found, a format entry
 is added to the Anattrib array.  Otherwise, data is added as single-byte
