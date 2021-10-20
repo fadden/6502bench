@@ -4151,10 +4151,10 @@ namespace SourceGen {
                 esb.Append("End: ");
                 esb.Append(mFormatter.FormatOffset24(region.Offset + region.ActualLength - 1));
                 esb.Append(CRLF);
-                esb.Append("Length: " + region.ActualLength + " / " +
-                    mFormatter.FormatHexValue(region.ActualLength, 2));
+                esb.Append("Length: " + region.ActualLength + " (" +
+                    mFormatter.FormatHexValue(region.ActualLength, 2) + ")");
                 if (region.Length == AddressMap.FLOATING_LEN) {
-                    esb.Append(" (floating)");
+                    esb.Append(" [floating]");
                 }
                 esb.Append(CRLF);
                 esb.Append("Pre-label: ");
@@ -4169,7 +4169,7 @@ namespace SourceGen {
                             !mProject.CpuDef.HasAddr16));
                     }
                 } else {
-                    esb.Append("none");
+                    esb.Append("(not set)");
                 }
                 esb.Append(CRLF);
                 esb.Append("Synthetic: " + isSynth);

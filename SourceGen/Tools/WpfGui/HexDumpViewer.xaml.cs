@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 using Asm65;
 using CharConvMode = Asm65.Formatter.FormatConfig.CharConvMode;
@@ -120,6 +121,13 @@ namespace SourceGen.Tools.WpfGui {
                 }
             }
             charConvComboBox.SelectedIndex = index;
+        }
+
+        // Catch ESC key.
+        private void Window_KeyEventHandler(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Escape) {
+                Close();
+            }
         }
 
         /// <summary>

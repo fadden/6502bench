@@ -22,7 +22,7 @@ limitations under the License.
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
-        Title="Edit Address Region Properties"
+        Title="Edit Address Region"
         Width="350" SizeToContent="Height" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered">
@@ -30,28 +30,32 @@ limitations under the License.
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <system:String x:Key="str_HdrCreate">Creating new address region</system:String>
+        <system:String x:Key="str_HdrCreate">Creating new address region.</system:String>
         <system:String x:Key="str_HdrEdit">Editing existing address region:</system:String>
 
         <system:String x:Key="str_OptEditAsIsSummary">
-            Edit only.
+            Edit attributes.
         </system:String>
         <system:String x:Key="str_OptEditAsIs">
-            Edit the region's attributes.  Region length will not be changed.
+            Edit the region's attributes.  The region's length will not be changed.
         </system:String>
         <system:String x:Key="str_OptEditAndFixSummary">
-            Set fixed size.
+            Fix end point.
         </system:String>
         <system:String x:Key="str_OptEditAndFix">
-            Edit the region's attributes, and convert the floating end to a fixed end.
+            Convert the floating end to a fixed end, using the current length, and edit
+            the region's attributes.
+        </system:String>
+        <system:String x:Key="str_EditFixedAlreadyFixed">
+            Option to set fixed end not available: end point is already fixed.
         </system:String>
         <system:String x:Key="str_OptResizeSummary">
             Resize.
         </system:String>
         <system:String x:Key="str_OptResize" xml:space="preserve"
-            >Edit the region's attributes, and resize it to the selection.  The new end offset will be:&#x0a;End: {0}&#x0a;Length: {1}</system:String>
+            >Resize the region to the current selection, and edit the region's attributes.  The new end point will be:&#x0a;Offset: {0}&#x0a;Length: {1}</system:String>
         <system:String x:Key="str_OptResizeFail">
-            Resize not available: cannot resize to the selection.  {0}
+            Option to resize not available: cannot resize to the selection.  {0}
         </system:String>
         <system:String x:Key="str_CreateFixedSummary">
             Create fixed.
@@ -59,9 +63,6 @@ limitations under the License.
         <system:String x:Key="str_CreateFixed">
             Create a new region, with a fixed end point.  The region will start at {0}
             and have a length of {1}.
-        </system:String>
-        <system:String x:Key="str_CreateFixedAlreadyFixed">
-            Create fixed not available: can't convert to fixed end point because it's already fixed.
         </system:String>
         <system:String x:Key="str_CreateFixedFail">
             Create fixed not available: unable to create a new region with a fixed end point here.
@@ -79,7 +80,7 @@ limitations under the License.
             may change as other regions are added and removed.
         </system:String>
         <system:String x:Key="str_CreateFloatingFail">
-            Create floating not available: unable to create a new region with a floating end point here.
+            Option to create floating region not available: unable to create a new region with a floating end point here.
         </system:String>
 
         <system:String x:Key="str_ErrInternal">Internal error.</system:String>
@@ -88,7 +89,7 @@ limitations under the License.
             The new region would have the same start offset and length as an existing region.
         </system:String>
         <system:String x:Key="str_ErrOverlapFloating">
-            The start offset of the new region is the same as the start offset of an existing
+            The start offset of the new region would be the same as the start offset of an existing
             region, and one or both have a floating end point.
         </system:String>
         <system:String x:Key="str_ErrStraddleExisting">
@@ -109,13 +110,18 @@ limitations under the License.
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Column="0" Grid.Row="0" Margin="8,0,0,0" Text="Start:"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="0" Margin="8,0,0,0" Text="Address:"/>
             <TextBlock Grid.Column="1" Grid.Row="0" Margin="4,2,0,0"
-                       Text="{Binding RegionStartOffsetStr, FallbackValue=+123456}"
+                       Text="{Binding RegionAddressStr, FallbackValue=$1234}"
                        FontFamily="{StaticResource GeneralMonoFont}"/>
 
-            <TextBlock Grid.Column="0" Grid.Row="1" Margin="8,0,0,0" Text="End:"/>
-            <StackPanel Grid.Column="1" Grid.Row="1" Margin="4,0,0,0" Orientation="Horizontal">
+            <TextBlock Grid.Column="0" Grid.Row="1" Margin="8,0,0,0" Text="Start:"/>
+            <TextBlock Grid.Column="1" Grid.Row="1" Margin="4,2,0,0"
+                       Text="{Binding RegionStartOffsetStr, FallbackValue=+123456}"
+                       FontFamily="{StaticResource GeneralMonoFont}"/>
+            <TextBlock Grid.Column="0" Grid.Row="2" Margin="8,0,0,0" Text="End:"/>
+            <StackPanel Grid.Column="1" Grid.Row="2" Margin="4,0,0,0" Orientation="Horizontal">
                 <TextBlock Margin="0,2,0,0"
                            Text="{Binding RegionEndOffsetStr, FallbackValue=+123456}"
                            FontFamily="{StaticResource GeneralMonoFont}"/>
@@ -123,8 +129,8 @@ limitations under the License.
                            Visibility="{Binding IsFloating, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
 
-            <TextBlock Grid.Column="0" Grid.Row="2" Margin="8,0,0,0" Text="Length:"/>
-            <TextBlock Grid.Column="1" Grid.Row="2" Margin="4,2,0,0"
+            <TextBlock Grid.Column="0" Grid.Row="3" Margin="8,0,0,0" Text="Length:"/>
+            <TextBlock Grid.Column="1" Grid.Row="3" Margin="4,2,0,0"
                        Text="{Binding RegionLengthStr, FallbackValue=23456 ($1234)}"
                        FontFamily="{StaticResource GeneralMonoFont}"/>
         </Grid>
@@ -153,10 +159,10 @@ limitations under the License.
                        Text="{Binding ErrorMessageStr, FallbackValue=Error Message}"/>
         </Border>
 
-        <Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2" Margin="0,8,0,0"/>
+        <!--<Rectangle HorizontalAlignment="Stretch" Fill="LightGray" Height="2" Margin="0,8,0,0"/>-->
 
         <StackPanel IsEnabled="{Binding EnableAttributeControls}">
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                 <TextBlock Text="Address (hex):"/>
 
                 <TextBox Name="addrTextBox" Width="100" Margin="4,1,0,0"
@@ -177,12 +183,12 @@ limitations under the License.
         </StackPanel>
 
         <StackPanel IsEnabled="{Binding EnableAttributeControls}">
-            <GroupBox Header="Advanced" Padding="2,4" Margin="0,12,0,0">
+            <GroupBox Header="Advanced" Padding="2,4" Margin="0,16,0,0">
                 <StackPanel>
                     <CheckBox Content="Use relative addressing"
                               IsChecked="{Binding UseRelativeAddressing}"/>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                         <TextBlock Text="Pre-label:"/>
                         <TextBox Name="preLabelTextBox" Width="100" Margin="4,1,0,0"
                              FontFamily="{StaticResource GeneralMonoFont}"

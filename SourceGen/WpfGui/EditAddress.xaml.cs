@@ -44,6 +44,14 @@ namespace SourceGen.WpfGui {
         private string mOperationStr;
 
         /// <summary>
+        /// Initial address.  (Does not change.)
+        /// </summary>
+        public string RegionAddressStr {
+            get { return "$" + mFormatter.FormatAddress(mRegionAddress, mShowBank); }
+        }
+        private int mRegionAddress;
+
+        /// <summary>
         /// Offset of first selected byte.  (Does not change.)
         /// </summary>
         public string RegionStartOffsetStr {
@@ -304,6 +312,7 @@ namespace SourceGen.WpfGui {
                 UseRelativeAddressing = curRegion.IsRelative;
 
                 OperationStr = (string)FindResource("str_HdrEdit");
+                mRegionAddress = curRegion.Address;
                 mRegionStartOffset = curRegion.Offset;
                 mRegionEndOffset = curRegion.Offset + curRegion.ActualLength - 1;
                 mPreLabelAddress = curRegion.PreLabelAddress;
@@ -326,7 +335,7 @@ namespace SourceGen.WpfGui {
                             curRegion.IsRelative);
                     } else {
                         option2Summ = string.Empty;
-                        option2Msg = (string)FindResource("str_CreateFixedAlreadyFixed");
+                        option2Msg = (string)FindResource("str_EditFixedAlreadyFixed");
                         mResultEntry2 = null;
                         EnableOption2 = false;  // show it, but disabled
                     }
@@ -361,6 +370,14 @@ namespace SourceGen.WpfGui {
                         string fmta = (string)FindResource("str_OptResizeFail");
                         option1Msg = string.Format(fmta, GetErrorString(ares));
                         EnableOption1 = false;
+                        CheckOption2 = true;
+                    }
+
+                    if (curRegion.ActualLength == selectionLen) {
+                        // The selection size matches the region's length, which means they
+                        // have the entire region selected, so "resize" and "edit" do the same
+                        // thing.  No real need to disable the resize option, but we can default
+                        // to "edit only" to emphasize that there's no actual change.
                         CheckOption2 = true;
                     }
                 }

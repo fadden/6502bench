@@ -71,7 +71,7 @@ limitations under the License.
                     <KeyGesture>Del</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
-            <RoutedUICommand x:Key="EditAddressCmd" Text="Define Address Region..."/>
+            <RoutedUICommand x:Key="EditAddressCmd" Text="Create/Edit Address Region..."/>
             <RoutedUICommand x:Key="EditAppSettingsCmd" Text="Settings..."/>
             <RoutedUICommand x:Key="EditCommentCmd" Text="Edit Comment...">
                 <RoutedUICommand.InputGestures>

@@ -25,7 +25,8 @@ limitations under the License.
         Title="Hex Dump Viewer"
         Width="542" Height="600" MinWidth="542" MinHeight="180" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="True"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        PreviewKeyDown="Window_KeyEventHandler">
 
     <Window.Resources>
         <system:String x:Key="str_AsciiOnly">Plain ASCII only</system:String>
