@@ -6,7 +6,7 @@
       "Text" : "Many disassemblers assume everything is code, and ask you to separate out the data. SourceGen automatically finds all reachable code, so you just need to identify the places where the code starts."
     },
     {
-      "Text" : "Data that follows a JSR or JSL should be marked as \"inline data\". This allows the code analyzer to skip over it.  Common situations, such as null-terminated strings and addresses, can be handled automatically.",
+      "Text" : "Data that follows a JSR or JSL should be marked as \"inline data\". This allows the code analyzer to skip over it.  Common situations, such as null-terminated strings and addresses, can be handled automatically with an extension script.",
       "Image" : "print-inline-sample.png"
     },
     {

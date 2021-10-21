@@ -265,6 +265,10 @@ namespace SourceGen.AsmGen {
         }
 
         private void GenerateLinkerScript(StreamWriter sw) {
+            // Use a generic linker script.  Note the start address is "%S", which uses the
+            // command line argument, with a default value of $0200.  If we wanted to support
+            // PRG-style files, with the load address output by the assembler, we'd need to
+            // add a LOADADDR segment.
             sw.WriteLine("# 6502bench SourceGen generated linker script for " + mFileNameBase);
 
             sw.WriteLine("MEMORY {");
