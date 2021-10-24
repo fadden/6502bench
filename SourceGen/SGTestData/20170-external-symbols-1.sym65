@@ -121,3 +121,11 @@ TooLong         @   $c0f8   $a
 *MULTI_MASK $ffff $ffff $fffff  ;range
 
 *MULTI_MASK
+
+
+; The following lines have nothing but whitespace.
+ 
+     
+		
+  ;Comment with leading spaces.
+	;leading tab

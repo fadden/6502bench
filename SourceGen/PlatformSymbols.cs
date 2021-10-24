@@ -141,8 +141,9 @@ namespace SourceGen {
             int lineNum = 0;
             foreach (string line in lines) {
                 lineNum++;      // first line is line 1, says Vim and VisualStudio
-                if (string.IsNullOrEmpty(line) || line[0] == ';') {
-                    // ignore
+                string trimLine = line.Trim();
+                if (string.IsNullOrEmpty(trimLine) || trimLine[0] == ';') {
+                    // all whitespace, or just a comment; ignore
                 } else if (line[0] == '*') {
                     if (line.StartsWith(TAG_CMD)) {
                         tag = ParseTag(line);
