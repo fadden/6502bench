@@ -407,6 +407,10 @@ namespace SourceGen.AsmGen {
             if (attr.Length != instrBytes) {
                 // This instruction has another instruction inside it.  Throw out what we
                 // computed and just output as bytes.
+                // TODO: in some odd situations we can split something that doesn't need
+                //   to be split (see note at end of #107).  Working around the problem at
+                //   this stage is a little awkward because I think we need to check for the
+                //   presence of labels on one or more later lines.
                 gen.GenerateShortSequence(offset, instrBytes, out opcodeStr, out operandStr);
             } else if (isPcRelBankWrap && gen.Quirks.NoPcRelBankWrap) {
                 // Some assemblers have trouble generating PC-relative operands that wrap

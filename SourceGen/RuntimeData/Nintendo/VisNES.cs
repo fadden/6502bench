@@ -115,8 +115,7 @@ namespace RuntimeData.Nintendo {
 
             foreach (PlSymbol sym in plSyms) {
                 if (sym.Label == CHR_ROM) {
-                    int addr = sym.Value;
-                    mChrRomOffset = mAddrTrans.AddressToOffset(0, addr);
+                    mChrRomOffset = sym.Offset;
                     break;
                 }
             }

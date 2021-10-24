@@ -81,6 +81,11 @@ namespace PluginCommon {
         /// </summary>
         public string Tag { get; private set; }
 
+        /// <summary>
+        /// Symbol offset, for user labels and pre-labels; -1 otherwise.
+        /// </summary>
+        public int Offset { get; private set; }
+
 
         /// <summary>
         /// Nullary constructor, for deserialization.
@@ -92,14 +97,20 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="label">Symbol label.</param>
         /// <param name="value">Symbol value.</param>
+        /// <param name="width">Width, for platform/project symbols.</param>
+        /// <param name="source">Symbol source.</param>
+        /// <param name="type">Symbol type.</param>
         /// <param name="tag">Symbol group tag.</param>
-        public PlSymbol(string label, int value, int width, Source source, Type type, string tag) {
+        /// <param name="offset">Offset, for user labels and pre-labels; -1 otherwise.</param>
+        public PlSymbol(string label, int value, int width, Source source, Type type, string tag,
+                int offset) {
             Label = label;
             Value = value;
             Width = width;
             SymbolSource = source;
             SymbolType = type;
             Tag = tag;
+            Offset = offset;
         }
 
         /// <summary>

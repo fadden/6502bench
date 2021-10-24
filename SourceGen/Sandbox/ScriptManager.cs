@@ -327,18 +327,51 @@ namespace SourceGen.Sandbox {
         /// <summary>
         /// Gathers a list of symbols from the project's symbol table.
         /// </summary>
+        /// <remarks>
+        /// Remember that we need to set this up before code analysis runs, so many of the
+        /// secondary data structures (like Anattribs) won't be available.
+        /// </remarks>
         private List<PlSymbol> GeneratePlSymbolList() {
             List<PlSymbol> plSymbols = new List<PlSymbol>();
             SymbolTable symTab = mProject.SymbolTable;
 
+            // UserLabels maps offset to Symbol.  Create the reverse mapping.
+            Dictionary<Symbol, int> symbolOffsets =
+                new Dictionary<Symbol, int>(mProject.UserLabels.Count);
+            foreach (KeyValuePair<int, Symbol> kvp in mProject.UserLabels) {
+                symbolOffsets[kvp.Value] = kvp.Key;
+            }
+
+            // Add in the address region pre-labels.
+            IEnumerator<AddressMap.AddressChange> addrIter = mProject.AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart) {
+                    continue;
+                }
+                if (change.Region.HasValidPreLabel) {
+                    Symbol newSym = new Symbol(change.Region.PreLabel,
+                        change.Region.PreLabelAddress, Symbol.Source.AddrPreLabel,
+                        Symbol.Type.ExternalAddr, Symbol.LabelAnnotation.None);
+                    symbolOffsets[newSym] = change.Region.Offset;
+                }
+            }
+
             foreach (Symbol sym in symTab) {
                 PlSymbol.Source plsSource;
+                int symOff, offset = -1;
                 switch (sym.SymbolSource) {
                     case Symbol.Source.User:
                         plsSource = PlSymbol.Source.User;
+                        if (symbolOffsets.TryGetValue(sym, out symOff)) {
+                            offset = symOff;
+                        }
                         break;
                     case Symbol.Source.AddrPreLabel:
                         plsSource = PlSymbol.Source.AddrPreLabel;
+                        if (symbolOffsets.TryGetValue(sym, out symOff)) {
+                            offset = symOff;
+                        }
                         break;
                     case Symbol.Source.Project:
                         plsSource = PlSymbol.Source.Project;
@@ -381,8 +414,8 @@ namespace SourceGen.Sandbox {
                     tag = defSym.Tag;
                 }
 
-
-                plSymbols.Add(new PlSymbol(sym.Label, sym.Value, width, plsSource, plsType, tag));
+                plSymbols.Add(new PlSymbol(sym.Label, sym.Value, width, plsSource, plsType, tag,
+                    offset));
             }
 
             return plSymbols;

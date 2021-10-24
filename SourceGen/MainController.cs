@@ -3177,7 +3177,7 @@ namespace SourceGen {
         public void GoToLabel(Symbol sym) {
             int offset = mProject.FindLabelOffsetByName(sym.Label);
             if (offset >= 0) {
-                // TODO(someday): jump to correct line for address region pre-labels
+                // TODO(someday): jump to symbol line, not arstart, for address region pre-labels
                 GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToCodeData),
                     true);
             } else {

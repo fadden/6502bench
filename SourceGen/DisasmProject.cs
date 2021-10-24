@@ -759,7 +759,7 @@ namespace SourceGen {
             IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
             while (addrIter.MoveNext()) {
                 AddressMap.AddressChange change = addrIter.Current;
-                if (!change.IsStart) {
+                if (!change.IsStart || change.Address == Address.NON_ADDR) {
                     continue;
                 }
                 AddressMap.AddressRegion region = change.Region;
@@ -1552,46 +1552,7 @@ namespace SourceGen {
                 }
             }
 
-            // Create a mapping from label (which must be unique) to file offset.  This
-            // is different from UserLabels (which only has user-created labels, and is
-            // sorted by offset) and SymbolTable (which has constants and platform symbols,
-            // and uses the address as the value rather than the offset).
-            SortedList<string, int> labelList = new SortedList<string, int>(mFileData.Length,
-                Asm65.Label.LABEL_COMPARER);
-            for (int offset = 0; offset < mAnattribs.Length; offset++) {
-                Anattrib attr = mAnattribs[offset];
-                if (attr.Symbol != null) {
-                    try {
-                        labelList.Add(attr.Symbol.Label, offset);
-                    } catch (ArgumentException ex) {
-                        // Duplicate UserLabel entries are stripped when projects are loaded, but
-                        // it might be possible to cause this by hiding/unhiding a label (e.g.
-                        // using a code start tag to place it in the middle of an instruction).
-                        // Just ignore the duplicate.
-                        Debug.WriteLine("Xref ignoring duplicate label '" + attr.Symbol.Label +
-                            "': " + ex.Message);
-                    }
-                }
-            }
-            // Add all valid address region pre-labels.  Duplicates of user labels will be
-            // rejected.  Note the references will appear on the line for the next file offset,
-            // not the pre-label itself, because we need to associate it with a file offset.
-            IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
-            while (addrIter.MoveNext()) {
-                AddressMap.AddressChange change = addrIter.Current;
-                if (!change.IsStart) {
-                    continue;
-                }
-                if (change.Region.HasValidPreLabel) {
-                    try {
-                        labelList.Add(change.Region.PreLabel, change.Region.Offset);
-                    } catch (ArgumentException ex) {
-                        Debug.WriteLine("Xref ignoring pre-label duplicate '" +
-                            change.Region.PreLabel + "': " + ex.Message);
-                    }
-
-                }
-            }
+            SortedList<string, int> labelList = CreateLabelToOffsetMap();
 
             // No particular reason to do this here, but it's convenient.
             ByteCounts.Reset();
@@ -1800,6 +1761,54 @@ namespace SourceGen {
         public XrefSet GetXrefSet(int offset) {
             mXrefs.TryGetValue(offset, out XrefSet xset);
             return xset;        // will be null if not found
+        }
+
+        /// <summary>
+        /// Creates a mapping from label (which must be unique) to file offset.  This
+        /// is different from UserLabels (which only has user-created labels, and is
+        /// sorted by offset) and SymbolTable (which has constants and platform symbols,
+        /// and uses the address as the value rather than the offset).
+        ///
+        /// We use Anattribs to ensure that we only include visible labels.
+        /// </summary>
+        private SortedList<string, int> CreateLabelToOffsetMap() {
+            SortedList<string, int> labelList = new SortedList<string, int>(mFileData.Length,
+                Asm65.Label.LABEL_COMPARER);
+            for (int offset = 0; offset < mAnattribs.Length; offset++) {
+                Anattrib attr = mAnattribs[offset];
+                if (attr.Symbol != null) {
+                    try {
+                        labelList.Add(attr.Symbol.Label, offset);
+                    } catch (ArgumentException ex) {
+                        // Duplicate UserLabel entries are stripped when projects are loaded, but
+                        // it might be possible to cause this by hiding/unhiding a label (e.g.
+                        // using a code start tag to place it in the middle of an instruction).
+                        // Just ignore the duplicate.
+                        Debug.WriteLine("Xref ignoring duplicate label '" + attr.Symbol.Label +
+                            "': " + ex.Message);
+                    }
+                }
+            }
+            // Add all valid address region pre-labels.  Duplicates of user labels will be
+            // rejected.  Note the references will appear on the line for the next file offset,
+            // not the pre-label itself, because we need to associate it with a file offset.
+            IEnumerator<AddressMap.AddressChange> addrIter = AddrMap.AddressChangeIterator;
+            while (addrIter.MoveNext()) {
+                AddressMap.AddressChange change = addrIter.Current;
+                if (!change.IsStart) {
+                    continue;
+                }
+                if (change.Region.HasValidPreLabel) {
+                    try {
+                        labelList.Add(change.Region.PreLabel, change.Region.Offset);
+                    } catch (ArgumentException ex) {
+                        Debug.WriteLine("Xref ignoring pre-label duplicate '" +
+                            change.Region.PreLabel + "': " + ex.Message);
+                    }
+
+                }
+            }
+            return labelList;
         }
 
         /// <summary>
