@@ -9,7 +9,7 @@
 ; (see https://wiki.nesdev.com/w/index.php/PPU_registers)
 ;
 ; pattern: 001? ???? ???? ?xxx
-*MULTI_MASK %0010000000000000 %0010000000000000 %0000000000000111
+*MULTI_MASK %1110000000000000 %0010000000000000 %0000000000000111
 
 PPUCTRL     @   $2000   ;W VPHB SINN  various
 PPUMASK     @   $2001   ;W BGRs bMmG  various
