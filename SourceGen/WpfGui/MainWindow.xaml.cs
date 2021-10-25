@@ -1030,9 +1030,9 @@ namespace SourceGen.WpfGui {
         /// Generally don't call this: it puts the focus on the control, not the items in the
         /// control, so if you use up/down arrows you move to the next control.
         /// </remarks>
-        public void CodeListView_Focus() {
-            codeListView.Focus();
-        }
+        //public void CodeListView_Focus() {
+        //    codeListView.Focus();
+        //}
 
         #endregion Selection management
 
@@ -1686,7 +1686,7 @@ namespace SourceGen.WpfGui {
             // Jump to the offset, then shift the focus back to the code list.
             mMainCtrl.GoToLocation(new NavStack.Location(rli.OffsetValue, 0,
                 NavStack.GoToMode.JumpToCodeData), true);
-            codeListView.Focus();
+            //codeListView.Focus();
         }
 
         #endregion References panel
@@ -1730,7 +1730,7 @@ namespace SourceGen.WpfGui {
             // Jump to the offset, then shift the focus back to the code list.
             mMainCtrl.GoToLocation(new NavStack.Location(nli.OffsetValue, 0,
                 NavStack.GoToMode.JumpToNote), true);
-            codeListView.Focus();
+            //codeListView.Focus();
         }
 
         #endregion Notes panel
@@ -1858,7 +1858,7 @@ namespace SourceGen.WpfGui {
 
             // TODO: this should also work for project/platform symbols that have EQU directives
             mMainCtrl.GoToLabel(sli.Sym);
-            codeListView.Focus();
+            //codeListView.Focus();
         }
 
         private void SymbolsList_Filter(object sender, FilterEventArgs e) {
@@ -2112,7 +2112,7 @@ namespace SourceGen.WpfGui {
             // Jump to the offset, then shift the focus back to the code list.
             mMainCtrl.GoToLocation(new NavStack.Location(mli.OffsetValue, 0,
                 NavStack.GoToMode.JumpToCodeData), true);
-            codeListView.Focus();
+            //codeListView.Focus();
         }
 
         /// <summary>
