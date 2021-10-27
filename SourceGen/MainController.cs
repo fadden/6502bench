@@ -4320,6 +4320,9 @@ namespace SourceGen {
             //sb.Append("DEBUG: opAddr=" + attr.OperandAddress.ToString("x4") +
             //    " opOff=" + attr.OperandOffset.ToString("x4") + "\r\n");
 
+            if (attr.NoContinueScript) {
+                sb.AppendLine("\"No-continue\" flag set by script");
+            }
             if (attr.HasAnalyzerTag) {
                 sb.Append("\u2022 Analyzer Tags: ");
                 for (int i = 0; i < line.OffsetSpan; i++) {

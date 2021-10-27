@@ -41,15 +41,54 @@ L1040    nop
          dfb   $00
 
 :L10AD   nop
-         jsr   :L10B6
-         jsr   :L10C3
+         jsr   InW_test1
+         dw    $1100
+         nop
+         jmp   LF000
+
+         dfb   $80
+
+         org   $2000
+InW_test1 nop
+         jsr   InW_test1
+         dw    $1200
+         rts
+
+         dfb   $80
+
+         org   $2000
+InW_test2 nop
+         jsr   InW_test2
+         dw    $1300
+         rts
+
+         dfb   $80
+
+         org   $2000
+not_inline nop
+         jsr   not_inline
+         bit   not_inline
+         rts
+
+         dfb   $81
+         org   $0000
+InW_na_test dfb $ea
+         dfb   $20
+         dfb   $00
+         dfb   $30
+         dfb   $60
+         dfb   $81
+
+         org   $f000
+LF000    jsr   :LF008
+         jsr   :LF015
          nop
          rts
 
-:L10B6   jsr   InA1_test
+:LF008   jsr   InA1_test
          dfb   $ff
          asc   'too long'
          dfb   $ea
 
-:L10C3   jsr   InAZ_test
+:LF015   jsr   InAZ_test
          asc   'does not end'

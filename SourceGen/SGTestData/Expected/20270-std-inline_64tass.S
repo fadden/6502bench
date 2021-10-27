@@ -50,16 +50,60 @@ L1040   nop
         .byte   $00
 
 _L10AD  nop
-        jsr     _L10B6
-        jsr     _L10C3
+        jsr     InW_test1
+        .word   $1100
+        nop
+        jmp     LF000
+
+        .byte   $80
+
+        .logical $2000
+InW_test1 nop
+        jsr     InW_test1
+        .word   $1200
+        rts
+
+        .byte   $80
+        .here
+
+        .logical $2000
+InW_test2 nop
+        jsr     InW_test2
+        .word   $1300
+        rts
+
+        .byte   $80
+        .here
+
+        .logical $2000
+not_inline nop
+        jsr     not_inline
+        bit     not_inline
+        rts
+
+        .byte   $81
+        .here
+        .logical $0000
+InW_na_test .byte $ea
+        .byte   $20
+        .byte   $00
+        .byte   $30
+        .byte   $60
+        .byte   $81
+        .here
+
+        .logical $f000
+LF000   jsr     _LF008
+        jsr     _LF015
         nop
         rts
 
-_L10B6  jsr     InA1_test
+_LF008  jsr     InA1_test
         .byte   $ff
         .enc    "sg_ascii"
         .text   "too long"
         .byte   $ea
 
-_L10C3  jsr     InAZ_test
+_LF015  jsr     InAZ_test
         .text   "does not end"
+        .here

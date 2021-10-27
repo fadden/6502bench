@@ -56,7 +56,62 @@ calls   nop
         brk
 cont    nop
 
+
+; Test having multiple address spaces with the same target address.
+; Two of the spaces have a matching symbol, one doesn't.  If we
+; match strictly by address we'll get it wrong.
+        jsr     f_W_2k1
+        !word   $1100
+
+        nop
+        jmp     end_stuff
+
+        !byte   $80
+
+        !pseudopc $2000 {   ;EDIT: add address space, set label InW_
+f_W_2k1 nop
+        jsr     f_W_2k1
+        !word   $1200
+        rts
+        }
+
+        !byte   $80
+
+        !pseudopc $2000 {   ;EDIT: add address space, set label InW_
+f_W_2k2 nop
+        jsr     f_W_2k2
+        !word   $1300
+        rts
+        }
+
+        !byte   $80
+
+        !pseudopc $2000 {   ;EDIT: add address space, no label
+notspec nop
+        jsr     notspec
+        bit     notspec
+        rts
+        }
+
+        !byte   $81
+
+; Test having a label in a non-addressable area.  The formatter should
+; ignore it, since such areas can't have code in them.  Note we can't
+; actually call it, since that would require referencing a label in a
+; non-addressable region, so we're really just using this as a way to
+; exercise the setup code in the script.
+        !pseudopc $3000 {   ;EDIT: add NA address space, set label InW_
+f_W_na  nop
+        jsr     f_W_na
+        rts
+        }
+
+        !byte   $81
+
+
+        !pseudopc   $f000 {
 ; end-of-file error cases
+end_stuff
         jsr     end_err1
         jsr     end_err2
 
@@ -70,3 +125,4 @@ end_err1
 end_err2
         jsr     f_AZ
         !text   "does not end"      ;must be last
+        }

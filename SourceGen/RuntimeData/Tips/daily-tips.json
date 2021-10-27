@@ -34,7 +34,10 @@
       "Image" : "note-sample.png"
     },
     {
-      "Text" : "You're not limited to global labels. You can create non-unique local labels, like \"@LOOP\", and define multiple labels for zero-page addresses in local variable tables."
+      "Text" : "You're not limited to global labels. You can create non-unique local labels, like \"@LOOP\", and define multiple labels for zero-page addresses in Local Variable Tables."
+    },
+    {
+      "Text" : "You can copy and paste lines from the disassembly listing as text simply by selecting them and hitting Ctrl+C. This can be handy for bug reports and online forum postings. The set of columns copied can be chosen in the application settings."
     },
     {
       "Text" : "2D bitmap images and 3D wireframe meshes can be converted to images that are displayed inline. This can make it much easier to figure out what a piece of code is drawing."

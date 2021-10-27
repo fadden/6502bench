@@ -42,15 +42,59 @@ L1040   nop
         !byte   $00
 
 @L10AD  nop
-        jsr     @L10B6
-        jsr     @L10C3
+        jsr     InW_test1
+        !word   $1100
+        nop
+        jmp     LF000
+
+        !byte   $80
+
+        !pseudopc $2000 {
+InW_test1 nop
+        jsr     InW_test1
+        !word   $1200
+        rts
+
+        !byte   $80
+        }
+
+        !pseudopc $2000 {
+InW_test2 nop
+        jsr     InW_test2
+        !word   $1300
+        rts
+
+        !byte   $80
+        }
+
+        !pseudopc $2000 {
+not_inline nop
+        jsr     not_inline
+        bit     not_inline
+        rts
+
+        !byte   $81
+        }
+        !pseudopc $0000 {
+InW_na_test !byte $ea
+        !byte   $20
+        !byte   $00
+        !byte   $30
+        !byte   $60
+        !byte   $81
+        }
+
+        !pseudopc $f000 {
+LF000   jsr     @LF008
+        jsr     @LF015
         nop
         rts
 
-@L10B6  jsr     InA1_test
+@LF008  jsr     InA1_test
         !byte   $ff
         !text   "too long"
         !byte   $ea
 
-@L10C3  jsr     InAZ_test
+@LF015  jsr     InAZ_test
         !text   "does not end"
+        }

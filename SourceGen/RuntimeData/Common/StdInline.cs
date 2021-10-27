@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+
 using PluginCommon;
 
 namespace RuntimeData.Common {
@@ -37,9 +38,19 @@ namespace RuntimeData.Common {
     /// ASCII functions work for standard and high ASCII, auto-detecting the encoding based on
     /// the first character.
     /// </summary>
+    /// <remarks>
+    /// As an optimization, we use a lookup table keyed by address, and another keyed by offset.
+    /// For a project that doesn't have overlapping address spaces this wouldn't be necessary,
+    /// and we could just map the address (JSR operand) to the inline data type.  Since this
+    /// code is meant be a general-purpose, we need to use the offset, but that requires a lookup
+    /// in the address translation table, which we would prefer to avoid doing for every JSR in
+    /// the project.  So we do a quick check on the address first, and only do the offset
+    /// translation if it looks like a possible match.
+    /// </remarks>
     public class StdInline : MarshalByRefObject, IPlugin, IPlugin_SymbolList, IPlugin_InlineJsr {
         private IApplication mAppRef;
         private byte[] mFileData;
+        private AddressTranslate mAddrTrans;
 
         private class NameMap {
             public string Prefix { get; private set; }
@@ -60,8 +71,11 @@ namespace RuntimeData.Common {
             new NameMap("InWA_", InlineKind.InWA),
         };
 
-        // Map of addresses (not offsets) in project to inline data handled by code there.
-        private Dictionary<int, InlineKind> mInlineLabels = new Dictionary<int, InlineKind>();
+        // Map of JSR offsets in project to inline data type expected to follow.
+        private Dictionary<int, InlineKind> mInlineOffsets = new Dictionary<int, InlineKind>();
+
+        // List of "interesting" addresses.  Used as an optimization.
+        private Dictionary<int, int> mInlineAddrs = new Dictionary<int, int>();
 
         // IPlugin
         public string Identifier {
@@ -69,9 +83,10 @@ namespace RuntimeData.Common {
         }
 
         // IPlugin
-        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate unused) {
+        public void Prepare(IApplication appRef, byte[] fileData, AddressTranslate addrTrans) {
             mAppRef = appRef;
             mFileData = fileData;
+            mAddrTrans = addrTrans;
 
             mAppRef.DebugLog("StdInline(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
@@ -80,31 +95,34 @@ namespace RuntimeData.Common {
         public void Unprepare() {
             mAppRef = null;
             mFileData = null;
+            mAddrTrans = null;
         }
 
         // IPlugin_SymbolList
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
-            mInlineLabels.Clear();
+            mInlineOffsets.Clear();
+            mInlineAddrs.Clear();
 
-            // Find matching symbols.  Save the symbol's value (its address) and the type.
-            // We want an exact match on L1STR_NAME, and prefix matches on the other two.
+            // Find matching symbols.
             foreach (PlSymbol sym in plSyms) {
-                // We might want to ignore user labels in non-addressable regions, which all
-                // show up with NON_ADDR as their address.  In practice it doesn't matter.
+                if (sym.Value == AddressTranslate.NON_ADDR) {
+                    // The non-addressable target won't be returned by the address-to-offset
+                    // lookup, so this doesn't change the behavior.  But there's no value in
+                    // having NON_ADDR in the lookup table, so strip it out now.
+                    //mAppRef.DebugLog("Ignoring non-addr label '" + sym.Label + "'");
+                    continue;
+                }
                 foreach (NameMap map in sMap) {
                     if (sym.Label.StartsWith(map.Prefix)) {
-                        // Multiple offsets could have the same address.  Map the first.
-                        if (!mInlineLabels.ContainsKey(sym.Value)) {
-                            mInlineLabels.Add(sym.Value, map.Kind);
-                        } else {
-                            mAppRef.DebugLog("Ignoring duplicate address " +
-                                sym.Value.ToString("x4"));
-                        }
+                        // Offsets will be unique.
+                        mInlineOffsets.Add(sym.Offset, map.Kind);
+                        // Symbol values (addresses) may not be unique.
+                        mInlineAddrs[sym.Value] = sym.Value;
                         break;
                     }
                 }
             }
-            mAppRef.DebugLog("Found matches for " + mInlineLabels.Count + " labels");
+            mAppRef.DebugLog("Found matches for " + mInlineOffsets.Count + " labels");
         }
 
         // IPlugin_SymbolList
@@ -124,9 +142,23 @@ namespace RuntimeData.Common {
         public void CheckJsr(int offset, int operand, out bool noContinue) {
             noContinue = false;
 
-            InlineKind kind;
-            if (!mInlineLabels.TryGetValue(operand, out kind)) {
+            // Do a quick test on the address.
+            int unused;
+            if (!mInlineAddrs.TryGetValue(operand, out unused)) {
                 // JSR destination address not recognized.
+                return;
+            }
+
+            // Address matched.  Translate the target address to the actual offset.  This is
+            // important when multiple offsets have the same address.
+            int targetOffset = mAddrTrans.AddressToOffset(offset, operand);
+            if (targetOffset < 0) {
+                mAppRef.DebugLog("Failed to map address $" + operand.ToString("x4") + " to offset");
+                return;
+            }
+            InlineKind kind;
+            if (!mInlineOffsets.TryGetValue(targetOffset, out kind)) {
+                // Actual call target doesn't have a matching label.
                 return;
             }
 

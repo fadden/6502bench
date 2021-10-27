@@ -106,11 +106,11 @@ namespace SourceGen {
         public int DailyNumber {
             get {
                 // We show a different tip every day by taking the day-of-year value and
-                // modding it by the number of tips we have.  Doesn't do the right thing
-                // at the end of year transition, but everybody is off partying anyway.
+                // modding it by the number of tips we have.
                 if (mTips.Count > 0) {
-                    int doy = DateTime.Now.DayOfYear;
-                    return doy % mTips.Count;
+                    DateTime now = DateTime.Now;
+                    int dayIndex = now.Year * 365 + now.DayOfYear;
+                    return dayIndex % mTips.Count;
                 } else {
                     return 0;
                 }
