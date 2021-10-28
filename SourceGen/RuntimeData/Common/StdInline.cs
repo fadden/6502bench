@@ -112,6 +112,13 @@ namespace RuntimeData.Common {
                     //mAppRef.DebugLog("Ignoring non-addr label '" + sym.Label + "'");
                     continue;
                 }
+                if (sym.Offset < 0) {
+                    // Ignore project/platform symbols.  External symbols are tricky, because
+                    // there can be multiple symbols for a given address.  We'd need to know
+                    // which specific symbol was referenced by the JSR, and we don't have that
+                    // information.
+                    continue;
+                }
                 foreach (NameMap map in sMap) {
                     if (sym.Label.StartsWith(map.Prefix)) {
                         // Offsets will be unique.
@@ -142,10 +149,10 @@ namespace RuntimeData.Common {
         public void CheckJsr(int offset, int operand, out bool noContinue) {
             noContinue = false;
 
-            // Do a quick test on the address.
+            // Do a quick test on the target address.
             int unused;
             if (!mInlineAddrs.TryGetValue(operand, out unused)) {
-                // JSR destination address not recognized.
+                // JSR destination address not special.
                 return;
             }
 

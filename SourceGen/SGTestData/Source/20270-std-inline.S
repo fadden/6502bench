@@ -8,6 +8,7 @@
 
         !cpu    6502
 *       =       $1000
+f_W_ext =      $e000       ;EDIT: add project symbol
         jmp     calls
 
 ; EDIT: put appropriate labels on these
@@ -64,7 +65,7 @@ cont    nop
         !word   $1100
 
         nop
-        jmp     end_stuff
+        jmp     test_ext
 
         !byte   $80
 
@@ -108,6 +109,17 @@ f_W_na  nop
 
         !byte   $81
 
+
+; Test a call to a project symbol with a matching name.  These don't
+; have offsets, so the question of whether or not to handle the JSR
+; hinges on the specific symbol used in the source.
+        !pseudopc $4000 {
+test_ext bit    test_ext
+
+        jsr     f_W_ext
+
+        jmp     end_stuff
+        }
 
         !pseudopc   $f000 {
 ; end-of-file error cases

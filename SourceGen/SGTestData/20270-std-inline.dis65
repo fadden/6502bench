@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":5,
-"FileDataLength":251,
-"FileDataCrc32":-1864354559,
+"FileDataLength":260,
+"FileDataCrc32":66352775,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -21,7 +21,22 @@
 "PlatformSymbolFileIdentifiers":[],
 "ExtensionScriptFileIdentifiers":["RT:Common/StdInline.cs"],
 "ProjectSyms":{
-}},
+"InW_project":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":false,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"InW_project",
+"Value":57344,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"}}},
 
 "AddressMap":[{
 "Offset":0,
@@ -60,6 +75,13 @@
 
 {
 "Offset":215,
+"Addr":16384,
+"Length":-1024,
+"PreLabel":"",
+"IsRelative":false},
+
+{
+"Offset":224,
 "Addr":61440,
 "Length":-1024,
 "PreLabel":"",

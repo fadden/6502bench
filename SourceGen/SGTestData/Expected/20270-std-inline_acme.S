@@ -1,4 +1,6 @@
         !cpu    6502
+InW_project =   $e000
+
 *       =       $1000
         jmp     L1040
 
@@ -45,7 +47,7 @@ L1040   nop
         jsr     InW_test1
         !word   $1100
         nop
-        jmp     LF000
+        jmp     L4000
 
         !byte   $80
 
@@ -84,8 +86,14 @@ InW_na_test !byte $ea
         !byte   $81
         }
 
+        !pseudopc $4000 {
+L4000   bit     L4000
+        jsr     InW_project
+        jmp     @LF000
+
+        }
         !pseudopc $f000 {
-LF000   jsr     @LF008
+@LF000  jsr     @LF008
         jsr     @LF015
         nop
         rts

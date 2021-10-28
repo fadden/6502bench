@@ -3,6 +3,8 @@
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
+InW_project =   $e000
+
 *       =       $1000
         jmp     L1040
 
@@ -53,7 +55,7 @@ _L10AD  nop
         jsr     InW_test1
         .word   $1100
         nop
-        jmp     LF000
+        jmp     L4000
 
         .byte   $80
 
@@ -92,8 +94,14 @@ InW_na_test .byte $ea
         .byte   $81
         .here
 
+        .logical $4000
+L4000   bit     L4000
+        jsr     InW_project
+        jmp     _LF000
+
+        .here
         .logical $f000
-LF000   jsr     _LF008
+_LF000  jsr     _LF008
         jsr     _LF015
         nop
         rts

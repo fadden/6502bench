@@ -1,3 +1,5 @@
+InW_project equ $e000
+
          org   $1000
          jmp   L1040
 
@@ -44,7 +46,7 @@ L1040    nop
          jsr   InW_test1
          dw    $1100
          nop
-         jmp   LF000
+         jmp   L4000
 
          dfb   $80
 
@@ -79,8 +81,13 @@ InW_na_test dfb $ea
          dfb   $60
          dfb   $81
 
+         org   $4000
+L4000    bit   L4000
+         jsr   InW_project
+         jmp   :LF000
+
          org   $f000
-LF000    jsr   :LF008
+:LF000   jsr   :LF008
          jsr   :LF015
          nop
          rts
