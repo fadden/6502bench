@@ -20,7 +20,9 @@ using PluginCommon;
 
 namespace RuntimeData.Atari {
     /// <summary>
-    /// Visualizer for Atari Analog Vector Generator commands.
+    /// Visualizer for Atari Analog Vector Generator commands (Battlezone, etc).
+    ///
+    /// Currently ignores beam intensity, except as on/off.
     ///
     /// References:
     ///  http://www.ionpool.net/arcade/atari_docs/avg.pdf
@@ -174,7 +176,7 @@ namespace RuntimeData.Atari {
                                 ii *= 2;
                             }
 
-                            // note dx/dy==0 is not supported for SVEC
+                            // note dx/dy==0 (i.e. draw point) is not supported for SVEC
                             beamX += (int)Math.Round(dx * scale);
                             beamY += (int)Math.Round(dy * scale);
                             if (ii == 0) {
@@ -248,7 +250,7 @@ namespace RuntimeData.Atari {
             return vw;
         }
 
-        private Opcode GetOpcode(ushort code) {
+        private static Opcode GetOpcode(ushort code) {
             switch (code & 0xe000) {
                 case 0x0000:    return Opcode.VCTR;
                 case 0x2000:    return Opcode.HALT;
@@ -263,13 +265,13 @@ namespace RuntimeData.Atari {
         }
 
         // Sign-extend a signed 5-bit value.
-        int sign5(int val) {
+        private static int sign5(int val) {
             byte val5 = (byte)(val << 3);
             return (sbyte)val5 >> 3;
         }
 
         // Sign-extend a signed 13-bit value.
-        int sign13(int val) {
+        private static int sign13(int val) {
             ushort val13 = (ushort)(val << 3);
             return (short)val13 >> 3;
         }

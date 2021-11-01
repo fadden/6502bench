@@ -34,6 +34,10 @@ namespace SourceGen {
             public double Y1 { get; private set; }
 
             public LineSeg(double x0, double y0, double x1, double y1) {
+                if (double.IsNaN(x0) || double.IsNaN(y0) || double.IsNaN(x1) || double.IsNaN(y1)) {
+                    throw new Exception("Invalid LineSeg: x0=" + x0 + " y0=" + y0 +
+                        " x1=" + x1 + " y1=" + y1);
+                }
                 X0 = x0;
                 Y0 = y0;
                 X1 = x1;
@@ -242,6 +246,15 @@ namespace SourceGen {
                 if (bigMagRc < mag) {
                     bigMagRc = mag;
                 }
+            }
+
+            // Avoid divide-by-zero.
+            if (bigMag == 0) {
+                Debug.WriteLine("NOTE: wireframe magnitude was zero");
+                bigMag = 1;
+            }
+            if (bigMagRc == 0) {
+                bigMagRc = 1;
             }
             wireObj.mBigMag = bigMag;
             wireObj.mBigMagRc = bigMagRc;

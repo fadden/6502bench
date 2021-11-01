@@ -43,7 +43,7 @@
       "Text" : "2D bitmap images and 3D wireframe meshes can be converted to images that are displayed inline. This can make it much easier to figure out what a piece of code is drawing."
     },
     {
-      "Text" : "Large address tables can be formatted with a single operation. Various arrangements of address bytes are supported."
+      "Text" : "Large tables of pointers to code and data can be formatted with a single operation. Various arrangements of address bytes are supported, including low/high parts split into separate tables."
     },
     {
       "Text" : "Source code can be generated for several cross-assemblers, or exported to HTML with embedded graphics. Animations can be exported as animated GIFs."

@@ -146,10 +146,11 @@ that .NET apps don't work under WINE, so it can only be run on a full
 Windows system emulation.
 
 (SourceGen versions 1.0 and 1.1 used the WinForms API, which has been
-implemented for Mono, but after encountering significant bugs that I wasn't
-able to work around I abandoned the approach and switched to WPF.  Besides
-working better under Windows, WPF uses a more modern approach (XAML) that
-may ease the transition to a cross-platform GUI API like Avalonia.)
+implemented for [Mono](https://www.mono-project.com/), but after
+encountering significant bugs that I wasn't able to work around I
+abandoned the approach and switched to WPF.  Besides working better
+under Windows, WPF uses a more modern approach (XAML) that may ease
+the transition to a cross-platform GUI API like Avalonia or MAUI.)
 
 
 ## Getting Started ##

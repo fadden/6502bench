@@ -75,6 +75,9 @@ namespace PluginCommon {
         /// <param name="z">Z coordinate.</param>
         /// <returns>Vertex index.  Indices start at zero and count up.</returns>
         public int AddVertex(float x, float y, float z) {
+            if (float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z)) {
+                throw new Exception("Invalid vertex x=" + x + " y=" + y + " z=" + z);
+            }
             mVerticesX.Add(x);
             mVerticesY.Add(y);
             mVerticesZ.Add(z);
@@ -113,6 +116,9 @@ namespace PluginCommon {
         /// <param name="z">Z coordinate.</param>
         /// <returns>Face index.  Indices start at zero and count up.</returns>
         public int AddFaceNormal(float x, float y, float z) {
+            if (float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z)) {
+                throw new Exception("Invalid normal x=" + x + " y=" + y + " z=" + z);
+            }
             Debug.Assert(x != 0.0f || y != 0.0f || z != 0.0f);  // no zero-length normals
             mNormalsX.Add(x);
             mNormalsY.Add(y);
@@ -128,6 +134,10 @@ namespace PluginCommon {
         /// <param name="y">Y coordinate.</param>
         /// <param name="z">Z coordinate.</param>
         public void ReplaceFaceNormal(int index, float x, float y, float z) {
+            if (float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z)) {
+                throw new Exception("Invalid normal x=" + x + " y=" + y + " z=" + z);
+            }
+            Debug.Assert(x != 0.0f || y != 0.0f || z != 0.0f);  // no zero-length normals
             mNormalsX[index] = x;
             mNormalsY[index] = y;
             mNormalsZ[index] = z;
