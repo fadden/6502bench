@@ -25,8 +25,7 @@ namespace RuntimeData.Atari {
     /// Currently ignores beam brightness, except as on/off.
     ///
     /// References:
-    ///  http://computerarcheology.com/Arcade/Asteroids/DVG.html
-    ///  https://www.nicholasmikstas.com/asteroids-vector-rom
+    ///  https://wiki.philpem.me.uk/_media/elec/vecgen/vecgen.pdf
     ///
     /// https://github.com/mamedev/mame/blob/master/src/mame/video/avgdvg.cpp is the
     /// definitive description, but it's harder to parse than the above (it's emulating
@@ -48,7 +47,7 @@ namespace RuntimeData.Atari {
 
         private const string P_OFFSET = "offset";
         private const string P_BASE_ADDR = "baseAddr";
-        private const string P_IGNORE_CUR = "ignoreCur";
+        private const string P_IGNORE_LABS = "ignoreLabs";
 
         // Visualization descriptors.
         private VisDescr[] mDescriptors = new VisDescr[] {
@@ -58,8 +57,8 @@ namespace RuntimeData.Atari {
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Base address",
                         P_BASE_ADDR, typeof(int), 0x0000, 0xffff, 0, 0x4000),
-                    new VisParamDescr("Ignore CUR movement",
-                        P_IGNORE_CUR, typeof(bool), false, true, 0, false),
+                    new VisParamDescr("Ignore LABS move",
+                        P_IGNORE_LABS, typeof(bool), false, true, 0, false),
 
                     VisWireframe.Param_IsRecentered("Centered", true),
                 }),
@@ -108,13 +107,13 @@ namespace RuntimeData.Atari {
         }
 
         private enum Opcode {
-            Unknown = 0, VEC, CUR, HALT, JSR, RTS, JMP, SVEC
+            Unknown = 0, VCTR, LABS, HALT, JSRL, RTSL, JMPL, SVEC
         }
 
         private IVisualizationWireframe GenerateWireframe(ReadOnlyDictionary<string, object> parms) {
             int offset = Util.GetFromObjDict(parms, P_OFFSET, 0);
             int baseAddr = Util.GetFromObjDict(parms, P_BASE_ADDR, 0);
-            bool ignoreCur = Util.GetFromObjDict(parms, P_IGNORE_CUR, false);
+            bool ignoreLabs = Util.GetFromObjDict(parms, P_IGNORE_LABS, false);
 
             if (offset < 0 || offset >= mFileData.Length) {
                 // should be caught by editor
@@ -142,7 +141,7 @@ namespace RuntimeData.Atari {
                     Opcode opc = GetOpcode(code0);
 
                     switch (opc) {
-                        case Opcode.VEC: {  // SSSS -mYY YYYY YYYY | BBBB -mXX XXXX XXXX
+                        case Opcode.VCTR: { // SSSS -mYY YYYY YYYY | BBBB -mXX XXXX XXXX
                                 ushort code1 = (ushort)Util.GetWord(mFileData, offset, 2, false);
                                 offset += 2;
 
@@ -151,7 +150,7 @@ namespace RuntimeData.Atari {
                                 int localsc = code0 >> 12;   // local scale
                                 int bb = code1 >> 12;   // brightness
 
-                                double scale = CalcScaleVEC(scaleFactor + localsc);
+                                double scale = CalcScaleMult(scaleFactor + localsc);
                                 double dx = xval * scale;
                                 double dy = yval * scale;
 
@@ -173,13 +172,13 @@ namespace RuntimeData.Atari {
                                 }
 
                                 if (VERBOSE) {
-                                    mAppRef.DebugLog("VEC scale=" + localsc + " x=" + dx +
+                                    mAppRef.DebugLog("VCTR scale=" + localsc + " x=" + dx +
                                         " y=" + dy + " b=" + bb + " --> dx=" + dx +
                                         " dy=" + dy);
                                 }
                             }
                             break;
-                        case Opcode.CUR: {  // 1010 00yy yyyy yyyy | SSSS 00xx xxxx xxxx
+                        case Opcode.LABS: { // 1010 00yy yyyy yyyy | SSSS 00xx xxxx xxxx
                                 ushort code1 = (ushort)Util.GetWord(mFileData, offset, 2, false);
                                 offset += 2;
 
@@ -187,7 +186,7 @@ namespace RuntimeData.Atari {
                                 int xc = code1 & 0x07ff;
                                 int scale = code1 >> 12;
 
-                                if (!ignoreCur) {
+                                if (!ignoreLabs) {
                                     // Some things do a big screen movement before they start
                                     // drawing, which throws off the auto-scaling.  The output
                                     // looks better if we ignore the initial movement.
@@ -199,7 +198,7 @@ namespace RuntimeData.Atari {
                                 scaleFactor = (sbyte)left >> 4;
 
                                 if (VERBOSE) {
-                                    mAppRef.DebugLog("CUR scale=" + scale + " x=" + xc +
+                                    mAppRef.DebugLog("LABS scale=" + scale + " x=" + xc +
                                         " y=" + yc);
                                 }
                             }
@@ -210,7 +209,7 @@ namespace RuntimeData.Atari {
                             }
                             done = true;
                             break;
-                        case Opcode.JSR: {  // 1100 aaaa aaaa aaaa
+                        case Opcode.JSRL: { // 1100 aaaa aaaa aaaa
                                 int vaddr = code0 & 0x0fff;
                                 if (stackPtr == stack.Length) {
                                     mAppRef.ReportError("Stack overflow at +" +
@@ -223,14 +222,14 @@ namespace RuntimeData.Atari {
                                 }
                             }
                             break;
-                        case Opcode.JMP: {  // 1110 aaaa aaaa aaaa
+                        case Opcode.JMPL: { // 1110 aaaa aaaa aaaa
                                 int vaddr = code0 & 0x0fff;
                                 if (!Branch(vaddr, baseAddr, ref offset)) {
                                     return null;
                                 }
                             }
                             break;
-                        case Opcode.RTS:    // 1101 0000 0000 0000
+                        case Opcode.RTSL:   // 1101 0000 0000 0000
                             if (stackPtr == 0) {
                                 done = true;
                             } else {
@@ -242,10 +241,13 @@ namespace RuntimeData.Atari {
                                 int xval = sign3(code0 & 0x07);
                                 int localsc = ((code0 >> 11) & 0x01) | ((code0 >> 2) & 0x02);
                                 // SVEC scale is VEC scale + 2
-                                double scale = CalcScaleVEC(scaleFactor + localsc + 2);
+                                double scale = CalcScaleMult(scaleFactor + localsc + 2);
                                 int bb = (code0 >> 4) & 0x0f;
 
-                                // The dx/dy values need to be * 256 to make them work right.
+                                // The dx/dy values need to be x256 to make them work right.
+                                // This is not mentioned in any document I've found, but it's
+                                // required if e.g. you want the hexagon to match up with the 'C'
+                                // in the Asteroids copyright message.
                                 double dx = (xval << 8) * scale;
                                 double dy = (yval << 8) * scale;
                                 beamX += dx;
@@ -295,18 +297,18 @@ namespace RuntimeData.Atari {
 
         private static Opcode GetOpcode(ushort code) {
             switch (code & 0xf000) {
-                case 0xa000:    return Opcode.CUR;
+                case 0xa000:    return Opcode.LABS;
                 case 0xb000:    return Opcode.HALT;
-                case 0xc000:    return Opcode.JSR;
-                case 0xd000:    return Opcode.RTS;
-                case 0xe000:    return Opcode.JMP;
+                case 0xc000:    return Opcode.JSRL;
+                case 0xd000:    return Opcode.RTSL;
+                case 0xe000:    return Opcode.JMPL;
                 case 0xf000:    return Opcode.SVEC;
-                default:        return Opcode.VEC;      // 0x0nnn - 0x9nnn
+                default:        return Opcode.VCTR;     // 0x0nnn - 0x9nnn
             }
         }
 
         // Convert scale factor (0-9) to a multiplier.
-        private static double CalcScaleVEC(int scaleFactor) {
+        private static double CalcScaleMult(int scaleFactor) {
             // 0 is N/512, 9 is N/1.
             if (scaleFactor < 0) {
                 scaleFactor = 0;
@@ -335,7 +337,7 @@ namespace RuntimeData.Atari {
         }
 
         /// <summary>
-        /// Converts a JSR/JMP operand to a file offset.
+        /// Converts a JSRL/JMPL operand to a file offset.
         /// </summary>
         /// <param name="vaddr">DVG address operand.</param>
         /// <param name="baseAddr">Base address of vector memory.</param>
@@ -345,7 +347,7 @@ namespace RuntimeData.Atari {
             int fileAddr = baseAddr + vaddr * 2;
             int fileOffset = mAddrTrans.AddressToOffset(offset, fileAddr);
             if (fileOffset < 0) {
-                mAppRef.ReportError("JMP/JSR to " + vaddr.ToString("x4") + " invalid");
+                mAppRef.ReportError("JMPL/JSRL to " + vaddr.ToString("x4") + " invalid");
                 return false;
             }
             offset = fileOffset;
