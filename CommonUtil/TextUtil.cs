@@ -127,15 +127,23 @@ namespace CommonUtil {
             Debug.Assert(findStrQuote == repStr.Contains('\"'));
 
             bool inQuote = false;
+            bool lastBackSlash = false;
             for (int i = 0; i < inStr.Length; i++) {
                 char ch = inStr[i];
                 if (inQuote) {
-                    // Check to see if the double-quote is quoted.  It's safe to back up
-                    // one because we don't start in-quote.
-                    if (ch == '\"' && inStr[i-1] != '\\') {
+                    if (lastBackSlash) {
+                        lastBackSlash = false;
+                        // JSON recognizes: \" \\ \/ \b \f \n \r \t \uXXXX
+                        // Ignore them all.  Especially important for \", so we don't
+                        // mishandle quoted quotes, and for \\, so we don't fail to handle
+                        // quotes on a string that ends with a backslash.
+                    } else if (ch == '\\') {
+                        lastBackSlash = true;
+                    } else if (ch == '"') {
+                        // Un-quoted quote.  End of string.
                         inQuote = false;
                     } else {
-                        // in quoted text, keep going
+                        // Still in quoted string, keep going.
                     }
                     sb.Append(ch);
                 } else {

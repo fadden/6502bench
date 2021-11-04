@@ -35,11 +35,11 @@ plataddr =      $3000      ;address only in platform file
 ;Thirty columns.  'cause forty
 ;felt like too many.  Oh, hyp-
 ;henation!
-        lda     #$05
+        lda     #$05       ;comment ending in backslash\
 ;*******************************************************************************
 ;* Short box comment, 80 cols.                                                 *
 ;*******************************************************************************
-        lda     #$06
+        lda     #$06       ;comment, with, commas \\ \" \/ \\\
 ;***************************************************************
 ;*                                                             *
 ;* Choppy                                                      *

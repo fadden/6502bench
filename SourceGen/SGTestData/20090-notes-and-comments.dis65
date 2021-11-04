@@ -1,53 +1,166 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":2,"FileDataLength":98,"FileDataCrc32":-80207687,"ProjectProps":{
-"CpuName":"6502","IncludeUndocumentedInstr":false,"TwoByteBrk":false,"EntryFlags":32702671,"AutoLabelStyle":"Simple","AnalysisParams":{
-"AnalyzeUncategorizedData":true,"DefaultTextScanMode":"LowHighAscii","MinCharsForString":4,"SeekNearbyTargets":true,"SmartPlpHandling":true},
-"PlatformSymbolFileIdentifiers":["RT:TestData/TestSyms.sym65"],"ExtensionScriptFileIdentifiers":[],"ProjectSyms":{
+"_ContentVersion":5,
+"FileDataLength":98,
+"FileDataCrc32":-80207687,
+"ProjectProps":{
+"CpuName":"6502",
+"IncludeUndocumentedInstr":false,
+"TwoByteBrk":false,
+"EntryFlags":32702671,
+"AutoLabelStyle":"Simple",
+"AnalysisParams":{
+"AnalyzeUncategorizedData":true,
+"DefaultTextScanMode":"LowHighAscii",
+"MinCharsForString":4,
+"SeekNearbyTargets":true,
+"UseRelocData":false,
+"SmartPlpHandling":true,
+"SmartPlbHandling":true},
+
+"PlatformSymbolFileIdentifiers":["RT:TestData/TestSyms.sym65"],
+"ExtensionScriptFileIdentifiers":[],
+"ProjectSyms":{
 }},
+
 "AddressMap":[{
-"Offset":0,"Addr":4096}],"TypeHints":[{
-"Low":0,"High":0,"Hint":"Code"}],"StatusFlagOverrides":{
+"Offset":0,
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"IsRelative":false}],
+"TypeHints":[{
+"Low":0,
+"High":0,
+"Hint":"Code"}],
+"StatusFlagOverrides":{
 },
+
 "Comments":{
-"0":"Comment!","2":"\u0026another comment with \u0026\u0026s!","30":"Pull in plataddr to see the comment on the platform file entry.","34":"Comment at the end of a lengthy bulk hex item might overflow various things, but could be wrapped."},
+"0":"Comment!",
+"2":"\u0026another comment with \u0026\u0026s!",
+"8":"comment ending in backslash\\",
+"10":"comment, with, commas \\\\ \\\" \\/ \\\\\\",
+"30":"Pull in plataddr to see the comment on the platform file entry.",
+"34":"Comment at the end of a lengthy bulk hex item might overflow various things, but could be wrapped."},
+
 "LongComments":{
 "-2147483647":{
-"Text":"Old school boxed output header.  Brk\r\nmultiple lines yay.  How about a hy-phenated word?\r\nLooonglonglonglonglonglonglonglonglonglonglongword.\r\n*\r\nThrow in a line divider.  These aren\u0027t:\r\n*!\r\n *\r\n\u0026XYZ\r\n\r\n","BoxMode":true,"MaxWidth":40,"BackgroundColor":0},
+"Text":"Old school boxed output header.  Brk\r\nmultiple lines yay.  How about a hy-phenated word?\r\nLooonglonglonglonglonglonglonglonglonglonglongword.\r\n*\r\nThrow in a line divider.  These aren\u0027t:\r\n*!\r\n *\r\n\u0026XYZ\r\n\r\n",
+"BoxMode":true,
+"MaxWidth":40,
+"BackgroundColor":0},
+
 "0":{
-"Text":"Short, unboxed comment here!!  Two spaces after.  More hyp-hens?\r\n","BoxMode":false,"MaxWidth":30,"BackgroundColor":0},
+"Text":"Short, unboxed comment here!!  Two spaces after.  More hyp-hens?\r\n",
+"BoxMode":false,
+"MaxWidth":30,
+"BackgroundColor":0},
+
 "2":{
-"Text":"Comment rulers can be helpful in findin the edges of notes.  Comments are hyph-enatingly fun.  Like the note, this goes out to 80 columns.","BoxMode":false,"MaxWidth":80,"BackgroundColor":0},
+"Text":"Comment rulers can be helpful in findin the edges of notes.  Comments are hyph-enatingly fun.  Like the note, this goes out to 80 columns.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
 "4":{
-"Text":"Down to 64 columns this time.  Why 64?  Why not 64.  A rose, by any other name, would break the line at the same place.  Or hy-phen split.\r\n","BoxMode":false,"MaxWidth":64,"BackgroundColor":0},
+"Text":"Down to 64 columns this time.  Why 64?  Why not 64.  A rose, by any other name, would break the line at the same place.  Or hy-phen split.\r\n",
+"BoxMode":false,
+"MaxWidth":64,
+"BackgroundColor":0},
+
 "6":{
-"Text":"Ah, the classic 40-column limitation... brings back memories.  Of, you know, h-yphenated things.","BoxMode":false,"MaxWidth":40,"BackgroundColor":0},
+"Text":"Ah, the classic 40-column limitation... brings back memories.  Of, you know, h-yphenated things.",
+"BoxMode":false,
+"MaxWidth":40,
+"BackgroundColor":0},
+
 "8":{
-"Text":"Thirty columns.  \u0027cause forty felt like too many.  Oh, hyp-henation!","BoxMode":false,"MaxWidth":30,"BackgroundColor":0},
+"Text":"Thirty columns.  \u0027cause forty felt like too many.  Oh, hyp-henation!",
+"BoxMode":false,
+"MaxWidth":30,
+"BackgroundColor":0},
+
 "10":{
-"Text":"Short box comment, 80 cols.","BoxMode":true,"MaxWidth":80,"BackgroundColor":0},
+"Text":"Short box comment, 80 cols.",
+"BoxMode":true,
+"MaxWidth":80,
+"BackgroundColor":0},
+
 "12":{
-"Text":"\r\nChoppy\r\n\r\nbox\r\n\r\ncomment\r\n\r\n64 cols\r\n\r\n","BoxMode":true,"MaxWidth":64,"BackgroundColor":0},
+"Text":"\r\nChoppy\r\n\r\nbox\r\n\r\ncomment\r\n\r\n64 cols\r\n\r\n",
+"BoxMode":true,
+"MaxWidth":64,
+"BackgroundColor":0},
+
 "14":{
-"Text":"Some non-ASCII stuff:\r\n†•�␇\r\n(right side of box looks pushed over on-screen because font isn\u0027t fully mono)","BoxMode":true,"MaxWidth":64,"BackgroundColor":0},
+"Text":"Some non-ASCII stuff:\r\n†•�␇\r\n(right side of box looks pushed over on-screen because font isn\u0027t fully mono)",
+"BoxMode":true,
+"MaxWidth":64,
+"BackgroundColor":0},
+
 "16":{
-"Text":"Specific line break case at end  of.  Sentence.\r\nAlternate version for semicolon zz.  Output.\r\n\r\nSame thing but with three spaces zz.   Three!\r\nAgain with the three spces between.   Things.\r\n\r\nTry to make it the very last thing..  ","BoxMode":true,"MaxWidth":40,"BackgroundColor":0}},
+"Text":"Specific line break case at end  of.  Sentence.\r\nAlternate version for semicolon zz.  Output.\r\n\r\nSame thing but with three spaces zz.   Three!\r\nAgain with the three spces between.   Things.\r\n\r\nTry to make it the very last thing..  ",
+"BoxMode":true,
+"MaxWidth":40,
+"BackgroundColor":0}},
+
 "Notes":{
 "0":{
-"Text":"And now, a note.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-7278960},
+"Text":"And now, a note.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-7278960},
+
 "2":{
-"Text":"Another note, this one longer.  We don\u0027t get to see where the lines break, which makes it harder to hit the edges.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-5383962},
+"Text":"Another note, this one longer.  We don\u0027t get to see where the lines break, which makes it harder to hit the edges.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-5383962},
+
 "4":{
-"Text":"Another day, another note.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-256},
+"Text":"Another day, another note.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-256},
+
 "6":{
-"Text":"Take note!","BoxMode":false,"MaxWidth":80,"BackgroundColor":-18751},
+"Text":"Take note!",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-18751},
+
 "8":{
-"Text":"Duly noted.","BoxMode":false,"MaxWidth":80,"BackgroundColor":-23296}},
+"Text":"Duly noted.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-23296}},
+
 "UserLabels":{
 "34":{
-"Label":"bytes","Value":4130,"Source":"User","Type":"LocalOrGlobalAddr"}},
+"Label":"bytes",
+"Value":4130,
+"Source":"User",
+"Type":"LocalOrGlobalAddr",
+"LabelAnno":"None"}},
+
 "OperandFormats":{
 "34":{
-"Length":64,"Format":"Dense","SubFormat":"None","SymbolRef":null}},
+"Length":64,
+"Format":"Dense",
+"SubFormat":"None",
+"SymbolRef":null}},
+
 "LvTables":{
+},
+
+"Visualizations":[],
+"VisualizationAnimations":[],
+"VisualizationSets":{
+},
+
+"RelocList":{
+},
+
+"DbrValues":{
 }}
