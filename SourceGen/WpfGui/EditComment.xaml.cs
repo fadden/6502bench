@@ -67,12 +67,12 @@ namespace SourceGen.WpfGui {
 
         private void CommentTextBox_TextChanged(object sender, TextChangedEventArgs e) {
             if (!CommonUtil.TextUtil.IsPrintableAscii(commentTextBox.Text)) {
-                asciiOnlyLabel.Foreground = Brushes.Red;
+                asciiOnlyLabel.Foreground = Brushes.Blue;
             } else {
                 asciiOnlyLabel.Foreground = mDefaultLabelColor;
             }
             if (commentTextBox.Text.Length > RECOMMENDED_MAX_LENGTH) {
-                maxLengthLabel.Foreground = Brushes.Red;
+                maxLengthLabel.Foreground = Brushes.Blue;
             } else {
                 maxLengthLabel.Foreground = mDefaultLabelColor;
             }
