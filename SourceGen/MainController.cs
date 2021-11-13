@@ -2435,7 +2435,7 @@ namespace SourceGen {
                 return false;
             }
             EntityCounts counts = SelectionAnalysis.mEntityCounts;
-            // Single line, must be a visualization set.
+            // Single line, must be a visualization set or a place where one can be created.
             LineListGen.Line.Type lineType = SelectionAnalysis.mLineType;
             return (lineType == LineListGen.Line.Type.VisualizationSet ||
                     lineType == LineListGen.Line.Type.Code ||
@@ -3402,16 +3402,20 @@ namespace SourceGen {
             return false;
         }
 
-        private bool mUpdatingSelectionHighlight;       // recursion guard
+        private bool mUpdatingSelectionHighlight;       // recursion guard for next method
+
         /// <summary>
         /// Updates the selection highlight.  When a code item with an operand offset is
         /// selected, such as a branch, we want to highlight the address and label of the
         /// target.
         /// </summary>
         private void UpdateSelectionHighlight() {
-            int targetIndex = FindSelectionHighlight();
+            if (mUpdatingSelectionHighlight) {
+                return;
+            }
 
-            if (mTargetHighlightIndex != targetIndex && !mUpdatingSelectionHighlight) {
+            int targetIndex = FindSelectionHighlight();
+            if (mTargetHighlightIndex != targetIndex) {
                 Debug.WriteLine("Target highlight moving from " + mTargetHighlightIndex +
                     " to " + targetIndex);
 
@@ -3573,6 +3577,10 @@ namespace SourceGen {
                     continue;
                 }
                 int offset = CodeLineList[index].FileOffset;
+                if (offset < 0) {
+                    // Ignore file header comment and EQU lines.
+                    continue;
+                }
 
                 // Mark every byte of an instruction or multi-byte data item --
                 // everything that is represented by the line the user selected.
