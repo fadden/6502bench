@@ -10,6 +10,13 @@ body {
     font-size: 14px;                /* 16 recommended for mobile */
     padding: 0px;
     margin: 20px 10px 10px 10px;    /* TRBL order */
+
+    /*
+     * For white text on black background, uncomment this, and
+     * update the link text colors below.
+     */
+    /* color: white;
+    background-color: black; */
 }
 table, th, td {
     border: 1px solid black;
