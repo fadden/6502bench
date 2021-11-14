@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="../main.css"/>
     <!-- END: /incl-head.html -->
 
-    <title>Simple Edits - SourceGen Tutorial</title>
+    <title>Making Edits - SourceGen Tutorial</title>
 </head>
 
 <body>
@@ -49,7 +49,7 @@
 </div>
 <!-- END: /incl-topnav.html -->
 
-<!-- START: incl-sidenav.html active:#sidenav-simple-edits -->
+<!-- START: incl-sidenav.html active:#sidenav-making-edits -->
 <div id="sidenav">
     <!-- side navigation bar contents -->
     <ul>
@@ -58,7 +58,7 @@
         <li id="sidenav-using-sourcegen"><a href="using-sourcegen.html">Using SourceGen</a>
         <ul>
             <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
-            <li id="sidenav-simple-edits" class="active"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-making-edits" class="active"><a href="making-edits.html">Making Edits</a></li>
             <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
             <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
             <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
@@ -83,13 +83,13 @@
 
 <div id="main">
 
-<h2>Simple Edits</h2>
+<h2>Making Edits</h2>
 
 <div class="grid-container">
     <div class="grid-item-text">
         <p>Click the very first line of the file, which is a comment that says
-        something like "6502bench SourceGen vX.Y.Z".  There are three ways to
-        open the comment editor:</p>
+        something like "6502bench SourceGen vX.Y.Z".  That's not very inspiring,
+        so let's change it.  There are three ways to open the comment editor:</p>
         <ol>
           <li>Select <samp>Actions &gt; Edit Long Comment</samp> from the menu bar.</li>
           <li>Right click, and select <samp>Edit Long Comment</samp> from the
@@ -98,7 +98,7 @@
         </ol>
         <p>Most things in the code list will respond to a double-click.
         Double-clicking on addresses, flags, labels, operands, and comments will
-        open editors for those things.  Double-clicking on a value in the "bytes"
+        open editors for those things.  Double-clicking on a value in the "Bytes"
         column will open a floating hex dump viewer.  This is usually the most
         convenient way to edit something: point and click.</p>
     </div>
@@ -157,22 +157,83 @@
     </div>
 </div>
 
+
+<h4>Operands &amp; End-of-Line Comments</h4>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-simple-instr-edit.png" alt="t1-simple-instr-edit"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the line with address $1000 ("<code>LDY #$70</code>"), then
+        <samp>Actions &gt; Edit Operand</samp>.  This allows you to pick how you
+        want the operand to look.  It's currently set to <samp>Default</samp>,
+        which for an 8-bit immediate argument means it's shown as a hexadecimal
+        value.  Click <samp>Decimal</samp>, then <samp>OK</samp>.  It now appears
+        as a decimal value.</p>
+        <p>You can also open the editor by double-clicking the operand.</p>
+
+        <p>If you double-click on a data item, such as the string at $100e,
+        you will open the Data Operand Editor instead of the Instruction
+        Operand Editor.  (There will be more about this later.)</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-1000-comment.png" alt="t1-1000-comment"/>
+    </div>
+    <div class="grid-item-text">
+        <p>On the line at $1000, select <samp>Actions &gt; Edit Comment</samp>.
+        Type a short comment, and hit <kbd class="key">Enter</kbd>.  Your
+        comment appears at the end of the line, in the "comment" column.</p>
+        <p>You can also open the editor by double-clicking in the comment column.</p>
+    </div>
+</div>
+
+
+<h4>Address Regions</h4>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-code-list-1000.png" alt="t1-code-list-1000"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Let's take a closer look at the program, which has a short section of
+        code followed by a bunch of data.  The initial code segment is reading
+        bytes from $1017 and writing them to $2000, using an index register that
+        starts at 112 ($70) and counts down past zero.  That means it's copying
+        113 ($71) bytes.  When the copy is done, execution jumps to the copy of
+        the code at $2000.  It appears to be relocating the next part of the code
+        before executing it.  The disassembler needs to be told about the address
+        change, which we do with the Address Region Editor.</p>
+        <p>When defining an address region, there are two ways to go about it.
+        If you know where the region ends, you can select the entire thing,
+        and create it with an explicit size.  If you're not sure where it
+        ends, you can create a region with a "floating" end that continues
+        until it runs into another region or the end of the file.  Let's
+        try it both ways.</p>
+    </div>
+</div>
+
 <div class="grid-container">
     <div class="grid-item-image">
         <img src="images/t1-set-addr-1017.png" alt="t1-set-addr-1017"/>
     </div>
     <div class="grid-item-text">
-        <p>It's time to do something with the code.  If you look at what the code
-        does you'll see that it's copying several dozen bytes from $1017
-        to $2000, then jumping to $2000.  It appears to be relocating the next
-        part of the code before
-        executing it.  We want to let the disassembler know what's going on, so
-        select the line at address $1017 and then
-        <samp>Actions &gt; Set Address</samp>.  (Or double-click on
-        "<code>1017</code>" in the <samp>Addr</samp> column.)
-        In the <samp>Set Address</samp> dialog, type "<kbd>2000</kbd>", and hit Enter.)</p>
+        <p>Select the line at address $1017 and then
+        <samp>Actions &gt; Create/Edit Address Region</samp>.  (Or double-click
+        on "<code>1017</code>" in the <samp>Addr</samp> column.)
+        Since we only have one line selected, the address region editor
+        defaulted to "<samp>Create floating</samp>".  It will put the floating
+        end marker $71 bytes after the start, which happens to be what we
+        want.  (It turns out the tutorial is copying all data to the end of
+        the file... how convenient.)
+        In the <samp>Address</samp> field, type "<kbd>2000</kbd>", and click
+        <samp>OK</samp> (or hit <kbd class="key">Enter</kbd>).</p>
     </div>
 </div>
+
 
 <div class="grid-container">
     <div class="grid-item-image">
@@ -181,8 +242,9 @@
     <div class="grid-item-text">
         <p>Note the way the code list has changed.  When you changed the address,
         the <code>JMP $2000</code> at address $1014 found a home inside
-        the bounds of the file, so
-        the code tracer was able to find the instructions there.</p>
+        the bounds of the file, so the code tracer was able to find the
+        instructions there.  We now have all code and data correctly identified
+        automatically, without the need to explicitly tag anything.</p>
     </div>
 </div>
 
@@ -194,35 +256,63 @@
         make to the project.  (The undo history is <strong>not</strong> saved in
         the project file, though, so when you exit the program the history is
         lost.)</p>
-        <p>As you make alterations to the addresses, notice that, while the
+        <p>Hit <samp>Edit &gt; Undo</samp> one more time, so we're back to
+        where we were before we added the address region.  Let's try creating
+        it the other way.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-select-info.png" alt="t1-select-info"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Click on line $1017, then scroll to the bottom and shift-click on
+        the very last line ("<code>.adrend</code>").  (If you prefer to use
+        keyboard navigation, move to line $1017, then hit
+        <kbd class="key">Shift+PgDn</kbd> until the selection includes the
+        end of the file.)
+        If you look at the Info window in the bottom-right, you should see a
+        line that says, "<samp>Selection spans 113 ($71) bytes</samp>", which
+        is what we want.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-set-addr-fixed.png" alt="t1-set-addr-fixed"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Use <samp>Actions &gt; Create/Edit Address Region</samp> to open
+        the editor.
+        This time we have selected more than one line, so
+        "<samp>Create fixed</samp>" is selected by default.  Enter
+        "<kbd>2000</kbd>" in the Address field, and click <samp>OK</samp>.</p>
+
+        <p>The results are the same as before.  If the region being copied
+        had been a small part of the file, rather than continuing all the
+        way to the end, the outcome would have been slightly different.
+        When an address region with a fixed length ends, the next byte will
+        be assigned an address based on the <i>previous</i> region.  So if
+        you created a region that mapped addresses $1017-$1046 to $2000-202f,
+        then the next byte would be at address $1047.  This is very useful
+        for code that relocates small parts of itself, or uses memory
+        mapping tricks to execute parts of itself at different locations.</p>
+    </div>
+</div>
+
+<h4>Address vs. Offset</h4>
+
+<div class="grid-container">
+    <div class="grid-item-text">
+        <p>As you make alterations to the addresses, you will notice that, while the
         <samp>Address</samp> column changes, the <samp>Offset</samp> column does not.
         File offsets never change, which is why they're shown here and
         in the References and Notes windows.  (They can, however, be distracting,
         so you'll be forgiven if you reduce the offset column width to zero.)</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t1-simple-instr-edit.png" alt="t1-simple-instr-edit"/>
-    </div>
-    <div class="grid-item-text">
-        <p>Select the line with address $2003 ("CMP #$04"), then
-        <samp>Actions &gt; Edit Operand</samp>.  This allows you to pick how you want the
-        operand to look.  It's currently set to "Default", which for an 8-bit
-        immediate argument means it's shown as a hexadecimal value.  Click
-        "Binary", then "OK".  It now appears as a binary value.</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t1-2003-done.png" alt="t1-2003-done"/>
-    </div>
-    <div class="grid-item-text">
-        <p>On that same line, select <samp>Actions &gt; Edit Comment</samp>.  Type a short
-        comment, and hit <kbd class="key">Enter</kbd>.  Your comment appears
-        in the "comment" column.</p>
+        <p>In some cases, such as programs with multiple segments or overlays,
+        the same address may apply to several different areas.  SourceGen fully
+        supports binaries with overlapping parts.</p>
     </div>
 </div>
 

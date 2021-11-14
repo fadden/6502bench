@@ -58,7 +58,7 @@
         <li id="sidenav-using-sourcegen"><a href="using-sourcegen.html">Using SourceGen</a>
         <ul>
             <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
-            <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-making-edits"><a href="making-edits.html">Making Edits</a></li>
             <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
             <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
             <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
@@ -94,9 +94,9 @@
         inline data.  We're going to do it a faster way.  For this tutorial,
         start a new project with the <samp>Generic 6502</samp> profile, and
         in the SourceGen Examples/Tutorial directory select "Tutorial4".</p>
-        <p>We'll need to load scripts from the project directory, so we have to
+        <!--<p>We'll need to load scripts from the project directory, so we have to
         save the project.  <samp>File &gt; Save</samp>,
-        use the default name ("Tutorial4.dis65").</p>
+        use the default name ("Tutorial4.dis65").</p>-->
     </div>
 </div>
 
@@ -111,20 +111,23 @@
         a script that can handle that, so use
         <samp>Edit &gt; Project Properties</samp>, select the
         <samp>Extension Scripts</samp> tab, and click
-        <samp>Add Scripts from Project</samp>.  The file
-        browser opens in the project directory.  Select the file
-        "InlineL1String.cs", click <samp>Open</samp>, then <samp>OK</samp>.</p>
+        <samp>Add Scripts from Runtime</samp>.  The file
+        browser opens in the RuntimeData directory.  Open the
+        "<samp>Common</samp>" folder, select the file
+        "<samp>StdInline.cs</samp>", click <samp>Open</samp>,
+        then <samp>OK</samp>.</p>
     </div>
 </div>
 
 <div class="grid-container">
     <div class="grid-item-image">
-        <img src="images/t4-inlinel1-src.png" alt="t4-inlinel1-src"/>
+        <img src="images/t4-stdinline-src.png" alt="t4-stdinline-src"/>
     </div>
     <div class="grid-item-text">
         <p>Nothing happened.  If you look at the script with an editor (and you
         know some C#), you'll see that it's looking for a <code>JSR</code> to a
-        function called <code>PrintInlineL1String</code>.  So let's give it one.</p>
+        function that begins with certain prefixes.  For ASCII length-delimited
+        strings, the prefix is <code>InA1_</code>.  So let's set a label.</p>
     </div>
 </div>
 
@@ -146,7 +149,7 @@
     <div class="grid-item-text">
         <p>This time, double-click the <code>JSR</code> <i>operand</i>
         ("<samp>L1036</samp>") to edit the operand.
-        Click <samp>Create Label</samp>, and enter <kbd>PrintInlineL1String</kbd>.
+        Click <samp>Create Label</samp>, and enter <kbd>InA1_PrintString</kbd>.
         Remember that labels are case-sensitive;
         you must enter it exactly as shown.  Hit <samp>OK</samp> to accept the label,
         and <samp>OK</samp> to close the operand editor.</p>
@@ -160,27 +163,9 @@
     <div class="grid-item-text">
         <p>If all went well, address $1003
         should now be an L1 string "<code>How long?</code>", and address $100D
-        should be another <code>JSR</code>.</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-text">
-        <p>The next <code>JSR</code> appears to be followed by a null-terminated string, so
-        we'll need something that handles that.</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t4-inlinenull-src.png" alt="t4-inlinenull-src"/>
-    </div>
-    <div class="grid-item-text">
-        <p>Go back into Project Properties
-        and add the script called "InlineNullTermString.cs" from the project directory.
-        This script is slightly different, in that it handles any <code>JSR</code> to a label
-        that starts with <code>PrintInlineNullString</code>.  So let's give it a couple of
-        those.</p>
+        should be another <code>JSR</code>.  This one appears to be followed
+        by an inline null-terminated string, so we'll need something
+        that handles that.</p>
     </div>
 </div>
 
@@ -191,39 +176,11 @@
     <div class="grid-item-text">
         <p>Double-click the operand on line $100D ("<code>L1037</code>"),
         click <samp>Create Label</samp>,
-        and set the label to "<kbd>PrintInlineNullStringOne</kbd>".
+        and set the label to "<kbd>InAZ_PrintString1</kbd>".
         Hit <samp>OK</samp> twice.  That formatted the first one and got us
-        to the next <code>JSR</code>.  Repeat the process on line $1019
-        ("<code>L1038</code>"), setting the label to "<kbd>PrintInlineNullStringTwo</kbd>".</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t4-inlinemulti-before.png" alt="t4-inlinemulti-before"/>
-    </div>
-    <div class="grid-item-text">
-        <p>Things are looking good, but we've got one left, and it's got a
-        twist.  Instead of a string, the <code>JSR</code> at $1025 is followed by a
-        pointer to a string.  We'd like to format the pointer as an address,
-        and then format the string it points to.</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t4-inlinemulti-src.png" alt="t4-inlinemulti-src"/>
-    </div>
-    <div class="grid-item-text">
-        <p>We're going to add a third extension script.  Sometimes it's
-        convenient to collect all inline data handlers for a project into a
-        single script, so we'll demonstrate that here.  The new script handles
-        the previous two cases as well as this new case.
-        Go into Project
-        Properties, click the Extension Scripts tab, select the two scripts
-        you added earlier, and click Remove.  Then add the script "InlineMulti.cs"
-        from the project directory.  Click <samp>OK</samp> twice.  Note that
-        the strings formatted earlier remain formatted.</p>
+        to the next <code>JSR</code>, at $1019.  Repeat the process on line $1019
+        ("<code>L1038</code>"), setting the label to
+        "<kbd>InAZ_PrintString2</kbd>".</p>
     </div>
 </div>
 
@@ -232,18 +189,19 @@
         <img src="images/t4-inlinemulti-done.png" alt="t4-inlinemulti-done"/>
     </div>
     <div class="grid-item-text">
-        <p>Double-click the operand on line $1025 ("<code>L1039</code>"),
-        click <samp>Create Label</samp>,
-        and set the label to "<kbd>PrintInlineAddrString</kbd>".
-        Hit <samp>OK</samp> twice.  This formatted the address at $1028,
-        and also formatted the string at $102b as a null-terminated string.
+        <p>The last <code>JSR</code>, at $1025, is followed by a 16-bit
+        pointer.  Edit the operand, and use <samp>Create Label</samp> to
+        set the label at the target address to "<kbd>InWA_StringPtr</kbd>".
         Because the bytes were formatted as an address and not a just a
         16-bit value, a label was generated automatically.</p>
-    </div>
-</div>
 
-<div class="grid-container">
-    <div class="grid-item-text">
+        <p>What we'd really like to do in this case is to have it format the
+        16-bit address as a pointer, and format the data it points to as
+        a null-terminated string.  The StdInline script doesn't know how to
+        do that though, so you'd need to write a custom script.  (Scripts
+        can format multiple data items, add symbolic references to labels
+        and constants, and chase pointers around.)</p>
+
         <p>The entire project is now nicely formatted.  In a real project the
         "Print Inline" locations would be actual print functions, not just <code>RTS</code>
         instructions.  There would likely be multiple <code>JSR</code>s to the print function,
@@ -251,9 +209,14 @@
         strings and clean up the disassembly automatically.  The reason for
         allowing wildcard names is that some functions may have multiple
         entry points or chain through different locations.</p>
+    </div>
+</div>
 
+<div class="grid-container">
+    <div class="grid-item-text">
         <p>Extension scripts can make your life much easier, but they do require
-        some programming experience.  See the SourceGen manual for more details.</p>
+        some programming experience.  See the "Advanced Topics" section in the
+        SourceGen manual for more details.</p>
     </div>
 </div>
 

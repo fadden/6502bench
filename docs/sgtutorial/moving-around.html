@@ -58,7 +58,7 @@
         <li id="sidenav-using-sourcegen"><a href="using-sourcegen.html">Using SourceGen</a>
         <ul>
             <li id="sidenav-moving-around" class="active"><a href="moving-around.html">Moving Around</a></li>
-            <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-making-edits"><a href="making-edits.html">Making Edits</a></li>
             <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
             <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
             <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
@@ -169,7 +169,10 @@
         <p>Click on L1002 again, then double-click on the opcode ("LDA").  The
         selection jumps to L1017.  When an operand references an in-file address,
         double-clicking on the opcode will take you to it.  (Double-clicking on
-        the operand itself opens a format editor; more on that later.)</p>
+        the operand itself opens a format editor; more on that later.)
+        You can accomplish the same thing by selecting the line and hitting
+        <kbd class="key">Ctrl+J</kbd>, or using
+        <samp>Jump to Operand</samp> from the <samp>Navigate</samp> menu.</p>
         <p>With line L1017 selected, double-click on the line that appears in the
         References window.  Note the selection jumps to L1002.  You can immediately
         jump to any reference.</p>
@@ -190,11 +193,11 @@
 
 <div class="grid-container">
     <div class="grid-item-text">
-        <p>Select Navigate &gt; Find.  Type "hello", and hit Enter.  The selection will
-        move to address $100E, which is a string that says "hello!".  You can use
-        Navigate &gt; Find Next to try to find the next occurrence (there isn't one).  You
-        can search for any text that appears in the rightmost columns (label, opcode,
-        operand, comment).</p>
+        <p>Select <samp>Navigate &gt; Find</samp>.  Type "hello", and hit Enter.  The
+        selection will move to address $100E, which is a string that says "hello!".  You
+        can use <samp>Navigate &gt; Find Next</samp> to try to find the next
+        occurrence (there isn't one).  You can search for any text that appears in
+        the rightmost columns (label, opcode, operand, comment).</p>
     </div>
 </div>
 
@@ -203,8 +206,9 @@
         <img src="images/t1-goto-box.png" alt="t1-goto-box"/>
     </div>
     <div class="grid-item-text">
-        <p>Select Navigate &gt; Go To.  You can enter a label, address, or file offset.
-        Enter "100b" to set the selection to the line at address $100B.</p>
+        <p>Select <samp>Navigate &gt; Go To</samp>.  You can enter a label,
+        address, or file offset.  Enter "<kbd>100b</kbd>" to set the selection
+        to the line at address $100B.</p>
     </div>
 </div>
 
@@ -220,6 +224,9 @@
         on opcodes or lines in the side windows, the locations are added to a
         navigation history.  The arrows let you move forward and backward
         through it.</p>
+        <p>The "Nav Backward" feature is bound to the 4th button found on some
+        mice (usually found on the side, activated with the thumb).  This can
+        be used to navigate quickly through a project using only the mouse.</p>
     </div>
 </div>
 
@@ -227,7 +234,7 @@
 
 <div id="prevnext">
     <a href="using-sourcegen.html" class="btn-previous">&laquo; Previous</a>
-    <a href="simple-edits.html" class="btn-next">Next &raquo;</a>
+    <a href="making-edits.html" class="btn-next">Next &raquo;</a>
 </div>
 
 <!-- START: /incl-footer.html -->

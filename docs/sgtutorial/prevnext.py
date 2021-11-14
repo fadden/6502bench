@@ -17,7 +17,7 @@ gFileList = [
     "about-disasm.html",
     "using-sourcegen.html",
     "moving-around.html",
-    "simple-edits.html",
+    "making-edits.html",
     "labels-symbols.html",
     "editing-data.html",
     "generating-code.html",

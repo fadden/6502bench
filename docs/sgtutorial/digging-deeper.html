@@ -58,7 +58,7 @@
         <li id="sidenav-using-sourcegen"><a href="using-sourcegen.html">Using SourceGen</a>
         <ul>
             <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
-            <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-making-edits"><a href="making-edits.html">Making Edits</a></li>
             <li id="sidenav-labels-symbols"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
             <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
             <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
@@ -166,10 +166,12 @@
         <img src="images/t2-1000-setcode.png" alt="t2-1000-setcode"/>
     </div>
     <div class="grid-item-text">
-        <p>Since we believe $2000 is the load address for everything that follows,
-        click on the line with address $1002, select
-        <samp>Actions &gt; Set Address</samp>, and enter "2000".  With that line
-        still selected, use <samp>Actions &gt; Tag Address As Code Start Point</samp>
+        <p>Since we currently believe $2000 is the load address for everything
+        that follows, click on the line with address $1002, select
+        <samp>Actions &gt; Create/Edit Address Region</samp>, and enter "2000"
+        for the address.  Click <samp>OK</samp>.
+        With that line still selected, use
+        <samp>Actions &gt; Tag Address As Code Start Point</samp>
         (<kbd class="key">Ctrl+H</kbd> <kbd class="key">Ctrl+C</kbd>) to
         tell the analyzer to start looking for code there.</p>
     </div>

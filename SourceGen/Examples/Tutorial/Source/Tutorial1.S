@@ -8,12 +8,12 @@ OUTPUT  equ     $0400
 
         org     $1000
 
-        ldy     #END-AFTER
+        ldy     #END-AFTER-1
 copy    lda     BEFORE,y
         sta     AFTER,y
         dey
-        bmi     done
         bpl     copy
+        bmi     done
 
         dfb     $00
 stuff   asc     'hello!'
@@ -59,4 +59,3 @@ string3 asc     'string three '
 stringX asc     'invalid index'
 
 END
-

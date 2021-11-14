@@ -58,7 +58,7 @@
         <li id="sidenav-using-sourcegen"><a href="using-sourcegen.html">Using SourceGen</a>
         <ul>
             <li id="sidenav-moving-around"><a href="moving-around.html">Moving Around</a></li>
-            <li id="sidenav-simple-edits"><a href="simple-edits.html">Simple Edits</a></li>
+            <li id="sidenav-making-edits"><a href="making-edits.html">Making Edits</a></li>
             <li id="sidenav-labels-symbols" class="active"><a href="labels-symbols.html">Labels &amp; Symbols</a></li>
             <li id="sidenav-editing-data"><a href="editing-data.html">Editing Data Operands</a></li>
             <li id="sidenav-generating-code"><a href="generating-code.html">Generating Code</a></li>
@@ -374,10 +374,63 @@
 </div>
 
 
+<hr style="width:80%;"/>
+
+<h4>Address Region Pre-Labels</h4>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-prelabel-before.png" alt="t1-prelabel-before"/>
+    </div>
+    <div class="grid-item-text">
+        <p>When we created an address region at $2000, the <code>LDA</code>
+        on line $1002 lost its label, and the <code>STA</code> on line $1005
+        gained one.  The difficulty with having labels in both operands is that
+        both instructions refer to the byte at offset +000017, but that offset has
+        different addresses before and after the code is relocated, and you
+        can't assign multiple addresses to a single file offset.</p>
+        <p>In assembly source code, we'd solve this by putting a label right
+        before the address change, and another one after.  We can do the same
+        thing here by setting a "pre-label" for the address region.</p>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-prelabel-edit.png" alt="t1-prelabel-edit"/>
+    </div>
+    <div class="grid-item-text">
+        <p>Select the <code>.addrs</code> line before line $2000, then use
+        <samp>Actions &gt; Create/Edit Address Region</samp> (or double-click
+        on the operand of the <code>.addrs</code> line, i.e. "<code>$2000</code>";
+        if you double-click on the <code>.addrs</code> opcode you'll jump
+        to the matching <code>.adrend</code> instead).
+        This opens the address region editor.  In the <samp>Pre-label</samp>
+        section near the bottom, enter "<kbd>COPY_SRC</kbd>", then click
+        <samp>OK</samp>.
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t1-prelabel-after.png" alt="t1-prelabel-after"/>
+    </div>
+    <div class="grid-item-text">
+        <p>This added a line before the <code>.addrs $2000</code> with
+        the new label, and updated the <code>LDA</code> at line $1002 to
+        refer to the symbol.</p>
+        <p>Pre-labels are treated as "external" symbols, because the address
+        they're associated with isn't actually represented by the file in its final
+        form.  As a result, you can't use non-unique local names like
+        <samp>@LOOP</samp>.</p>
+    </div>
+</div>
+
+
 </div> <!-- #main -->
 
 <div id="prevnext">
-    <a href="simple-edits.html" class="btn-previous">&laquo; Previous</a>
+    <a href="making-edits.html" class="btn-previous">&laquo; Previous</a>
     <a href="editing-data.html" class="btn-next">Next &raquo;</a>
 </div>
 
