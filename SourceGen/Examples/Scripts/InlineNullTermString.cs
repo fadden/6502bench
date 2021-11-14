@@ -33,9 +33,15 @@ namespace ExtensionScriptSample {
                 AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
+        public void Unprepare() {
+            mAppRef = null;
+            mFileData = null;
+        }
+
         public void UpdateSymbolList(List<PlSymbol> plSyms) {
             mNullStringAddrs.Clear();
 
+            // Find matching symbols.
             foreach (PlSymbol sym in plSyms) {
                 if (sym.Label.StartsWith(LABEL_PREFIX)) {
                     mNullStringAddrs.Add(sym.Value, sym);
