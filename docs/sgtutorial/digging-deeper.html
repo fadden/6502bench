@@ -128,9 +128,15 @@
         <p>Click on the first line of code at address $1000, and select
         <samp>Actions &gt; Remove Analyzer Tags</samp>
         (<kbd class="key">Ctrl+H</kbd> <kbd class="key">Ctrl+R</kbd>).
-        This removes the "code entry point" tag.
-        Unfortunately the $20 is still auto-detected as being part of a string
-        directive.</p>
+        This removes the "code start point" tag.
+        Then, click on the <code>.addrs</code> line above it, and select
+        <samp>Actions &gt; Create / Edit Address Region</samp>.  Down
+        at the bottom, click <samp>Delete Region</samp>.  This
+        removes the default address region, replacing it with one that
+        says "<code>NA</code>", meaning that the code is non-addressable.
+        This is correct for the first two bytes, which will be
+        read by the system loader but not actually loaded into memory.
+        We still need to create a new address region at offset +000002.</p>
     </div>
 </div>
 
@@ -139,8 +145,10 @@
         <img src="images/t2-1000-edit2.png" alt="t2-1000-edit2"/>
     </div>
     <div class="grid-item-text">
-        <p>The string is making it hard to manipulate the next few bytes,
-        so let's fix that by selecting <samp>Edit &gt; Toggle Data Scan</samp>
+        <p>Unfortunately the $20 is still auto-detected as being part
+        of a string directive, which is making it hard to manipulate
+        the next few bytes.
+        Let's fix that by selecting <samp>Edit &gt; Toggle Data Scan</samp>
         (<kbd class="key">Ctrl+D</kbd>).  This turns off the feature that
         automatically generates string and <code>.FILL</code> directives,
         so now each uncategorized byte is on its own line.</p>
@@ -155,7 +163,8 @@
         <p>You could select the first two lines and use
         <samp>Actions &gt; Edit Operand</samp> to format them as a 16-bit
         little-endian hex value, but there's a shortcut: select the first
-        line with data (address $1000), then <samp>Actions &gt; Format As Word</samp>
+        line with data (offset +000000), then
+        <samp>Actions &gt; Format As Word</samp>
         (<kbd class="key">Ctrl+W</kbd>).
         It automatically grabbed the following byte and combined them.</p>
     </div>
@@ -167,7 +176,7 @@
     </div>
     <div class="grid-item-text">
         <p>Since we currently believe $2000 is the load address for everything
-        that follows, click on the line with address $1002, select
+        that follows, click on the line with offset +000002, select
         <samp>Actions &gt; Create/Edit Address Region</samp>, and enter "2000"
         for the address.  Click <samp>OK</samp>.
         With that line still selected, use
