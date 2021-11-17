@@ -771,7 +771,7 @@ limitations under the License.
                             <GridViewColumn Header="Opcode" Width="60"
                                             DisplayMemberBinding="{Binding Opcode}"/>
                             <GridViewColumn Header="Operand" Width="100"
-                                            DisplayMemberBinding="{Binding Operand}"/>
+                                            CellTemplate="{StaticResource operandHighlightTemplate}"/>
                             <GridViewColumn Header="Comment" Width="344"
                                             DisplayMemberBinding="{Binding Comment}"/>
                         </GridView>

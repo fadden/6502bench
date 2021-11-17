@@ -55,6 +55,8 @@ namespace PluginCommon {
             mNextColorIdx = 0;
         }
 
+        // TODO: add GetPixelIndex, which returns the index we passed into SetPixelIndex
+
         public int GetPixel(int x, int y) {
             byte pix = mData[x + y * Width];
             return mPalette[pix];

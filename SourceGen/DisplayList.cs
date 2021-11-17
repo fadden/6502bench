@@ -369,6 +369,10 @@ namespace SourceGen {
             // examined by a data trigger in CodeListItemStyle.xaml.
             public bool HasAddrLabelHighlight { get; private set; }
 
+            // Set to true if we want to highlight the operand field.  This is
+            // examined by a data trigger in CodeListItemStyle.xaml.
+            public bool HasOperandHighlight { get; private set; }
+
             // Set to true if the Flags field has been modified.
             public bool HasModifiedFlags {
                 get { return (mPartFlags & PartFlags.HasModifiedFlags) != 0; }
@@ -502,15 +506,27 @@ namespace SourceGen {
                 return parts;
             }
 
-            public static FormattedParts AddSelectionHighlight(FormattedParts orig) {
+            public static FormattedParts AddSelectionAddrHighlight(FormattedParts orig) {
                 FormattedParts newParts = Clone(orig);
                 newParts.HasAddrLabelHighlight = true;
                 return newParts;
             }
 
-            public static FormattedParts RemoveSelectionHighlight(FormattedParts orig) {
+            public static FormattedParts RemoveSelectionAddrHighlight(FormattedParts orig) {
                 FormattedParts newParts = Clone(orig);
                 newParts.HasAddrLabelHighlight = false;
+                return newParts;
+            }
+
+            public static FormattedParts AddSelectionOperHighlight(FormattedParts orig) {
+                FormattedParts newParts = Clone(orig);
+                newParts.HasOperandHighlight = true;
+                return newParts;
+            }
+
+            public static FormattedParts RemoveSelectionOperHighlight(FormattedParts orig) {
+                FormattedParts newParts = Clone(orig);
+                newParts.HasOperandHighlight = false;
                 return newParts;
             }
 

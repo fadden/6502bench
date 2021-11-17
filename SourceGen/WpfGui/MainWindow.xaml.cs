@@ -981,24 +981,48 @@ namespace SourceGen.WpfGui {
         /// Adds an address/label selection highlight to the specified line.
         /// </summary>
         /// <param name="index">Line index.  If &lt; 0, method has no effect.</param>
-        public void CodeListView_AddSelectionHighlight(int index) {
+        public void CodeListView_AddSelectionAddrHighlight(int index) {
             if (index < 0) {
                 return;
             }
             CodeListView_ReplaceEntry(index,
-                DisplayList.FormattedParts.AddSelectionHighlight(CodeDisplayList[index]));
+                DisplayList.FormattedParts.AddSelectionAddrHighlight(CodeDisplayList[index]));
         }
 
         /// <summary>
         /// Removes an address/label selection highlight from the specified line.
         /// </summary>
         /// <param name="index">Line index.  If &lt; 0, method has no effect.</param>
-        public void CodeListView_RemoveSelectionHighlight(int index) {
+        public void CodeListView_RemoveSelectionAddrHighlight(int index) {
             if (index < 0) {
                 return;
             }
             CodeListView_ReplaceEntry(index,
-                DisplayList.FormattedParts.RemoveSelectionHighlight(CodeDisplayList[index]));
+                DisplayList.FormattedParts.RemoveSelectionAddrHighlight(CodeDisplayList[index]));
+        }
+
+        /// <summary>
+        /// Adds an operand selection highlight to the specified line.
+        /// </summary>
+        public void CodeListView_AddSelectionOperHighlight(int index) {
+            Debug.Assert(index >= 0);
+            CodeListView_ReplaceEntry(index,
+                DisplayList.FormattedParts.AddSelectionOperHighlight(CodeDisplayList[index]));
+        }
+
+        /// <summary>
+        /// Removes an operand selection highlight from the specified line.
+        /// </summary>
+        public void CodeListView_RemoveSelectionOperHighlight(int index) {
+            Debug.Assert(index >= 0);
+            if (index >= CodeDisplayList.Count) {
+                // Shouldn't happen unless we resize the list without clearing the highlights.
+                Debug.WriteLine("NOTE: selection oper high index exceeds count (" +
+                    index + " vs. " + CodeDisplayList.Count + ")");
+                return;
+            }
+            CodeListView_ReplaceEntry(index,
+                DisplayList.FormattedParts.RemoveSelectionOperHighlight(CodeDisplayList[index]));
         }
 
         /// <summary>

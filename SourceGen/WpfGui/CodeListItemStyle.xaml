@@ -407,4 +407,22 @@ See also https://github.com/fadden/DisasmUiTest
             </TextBlock.Text>
         </TextBlock>
     </DataTemplate>
+    <DataTemplate x:Key="operandHighlightTemplate">
+        <TextBlock>
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=HasOperandHighlight}" Value="True">
+                            <Setter Property="TextBlock.Background" Value="{StaticResource HighlightedCellFill}"/>
+                            <Setter Property="TextBlock.Foreground" Value="{DynamicResource Brush_ListViewForeground}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+            <TextBlock.Text>
+                <Binding Path="Operand"/>
+            </TextBlock.Text>
+        </TextBlock>
+    </DataTemplate>
 </ResourceDictionary>

@@ -182,6 +182,11 @@ namespace SourceGen {
         private int mTargetHighlightIndex = -1;
 
         /// <summary>
+        /// Tracks the operands we have highlighted.
+        /// </summary>
+        private List<int> mOperandHighlights = new List<int>();
+
+        /// <summary>
         /// Code list color scheme.
         /// </summary>
         private MainWindow.ColorScheme mColorScheme = MainWindow.ColorScheme.Light;
@@ -879,8 +884,20 @@ namespace SourceGen {
                 CodeLineList, mMainWin.CodeDisplayList.SelectedIndices, topItemIndex);
             //savedSel.DebugDump();
 
-            // Clear this so we don't try to fiddle with it later.
+            // Clear the addr/label highlight index.
+            // (Certain changes will blow away the CodeDisplayList and affect the selection,
+            // which will cause the selection-changed handler to try to un-highlight something
+            // that doesn't exist.  We want to clear the index here, but we probably also want
+            // to clear the highlighting before we do it.  As it happens, changes will either
+            // be big enough to wipe out our highlight, or small enough that we immediately
+            // re-highlight the thing that's already highlighted, so it doesn't really matter.
+            // If we start to see vestigial highlighting after a change, we'll need to be
+            // more rigorous here.)
             mTargetHighlightIndex = -1;
+
+            // Clear operand highlighting indices as well.
+            mOperandHighlights.Clear();
+
             mReanalysisTimer.EndTask("Save selection");
 
             mReanalysisTimer.StartTask("Apply changes");
@@ -1404,7 +1421,11 @@ namespace SourceGen {
             }
             mDataPathName = null;
             mProjectPathName = null;
+
+            // We may get a "selection changed" message as things are being torn down.  Clear
+            // these so we don't try to remove the highlight from something that doesn't exist.
             mTargetHighlightIndex = -1;
+            mOperandHighlights.Clear();
 
             mMainWin.ShowCodeListView = false;
             mMainWin.ProjectClosing();
@@ -3405,16 +3426,19 @@ namespace SourceGen {
         private bool mUpdatingSelectionHighlight;       // recursion guard for next method
 
         /// <summary>
-        /// Updates the selection highlight.  When a code item with an operand offset is
+        /// Updates the selection highlights.  When a code or data item with an operand offset is
         /// selected, such as a branch, we want to highlight the address and label of the
-        /// target.
+        /// target.  When a code or data item is referenced by another instruction, such as a
+        /// branch, we want to highlight the operands of all such instructions.
         /// </summary>
         private void UpdateSelectionHighlight() {
             if (mUpdatingSelectionHighlight) {
                 return;
             }
+            mUpdatingSelectionHighlight = true;
 
-            int targetIndex = FindSelectionHighlight();
+            int targetIndex = FindSelectionAddrHighlight(out bool isSingleCodeData,
+                out int selIndex);
             if (mTargetHighlightIndex != targetIndex) {
                 Debug.WriteLine("Target highlight moving from " + mTargetHighlightIndex +
                     " to " + targetIndex);
@@ -3429,25 +3453,47 @@ namespace SourceGen {
                 // it will be the selected line while we're doing this little dance.  When the
                 // calls below update the selection, this method will be called again. This
                 // turns into infinite recursion.
-                mUpdatingSelectionHighlight = true;
-                mMainWin.CodeListView_RemoveSelectionHighlight(mTargetHighlightIndex);
-                mMainWin.CodeListView_AddSelectionHighlight(targetIndex);
-                mUpdatingSelectionHighlight = false;
+                mMainWin.CodeListView_RemoveSelectionAddrHighlight(mTargetHighlightIndex);
+                mMainWin.CodeListView_AddSelectionAddrHighlight(targetIndex);
 
                 mTargetHighlightIndex = targetIndex;
             }
+
+            if (mOperandHighlights.Count > 0) {
+                foreach (int index in mOperandHighlights) {
+                    mMainWin.CodeListView_RemoveSelectionOperHighlight(index);
+                }
+                mOperandHighlights.Clear();
+            }
+            if (isSingleCodeData) {
+                LineListGen.Line line = CodeLineList[selIndex];
+                XrefSet xrefs = mProject.GetXrefSet(line.FileOffset);
+                if (xrefs != null) {
+                    foreach (XrefSet.Xref xr in xrefs) {
+                        int refIndex = CodeLineList.FindCodeDataIndexByOffset(xr.Offset);
+                        mMainWin.CodeListView_AddSelectionOperHighlight(refIndex);
+                        mOperandHighlights.Add(refIndex);
+                    }
+                }
+            }
+
+            mUpdatingSelectionHighlight = false;
         }
 
-        private int FindSelectionHighlight() {
+        private int FindSelectionAddrHighlight(out bool isSingleCodeData, out int selIndex) {
             if (mMainWin.CodeListView_GetSelectionCount() != 1) {
+                isSingleCodeData = false;
+                selIndex = -1;
                 return -1;
             }
-            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             LineListGen.Line line = CodeLineList[selIndex];
             if (!line.IsCodeOrData) {
+                isSingleCodeData = false;
                 return -1;
             }
             Debug.Assert(line.FileOffset >= 0);
+            isSingleCodeData = true;
 
             // Does this have an operand with an in-file target offset?
             // TODO: may not work correctly with reloc data?
