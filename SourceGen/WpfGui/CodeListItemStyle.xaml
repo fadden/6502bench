@@ -329,7 +329,7 @@ See also https://github.com/fadden/DisasmUiTest
         <!-- This causes individual TextBoxes to stretch to fill the column.  This is nice
         because the cell-highlight stuff will set the background on the full cell rather than
         just the bit with the text. -->
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
 
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=IsLongComment}" Value="True">
