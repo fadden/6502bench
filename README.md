@@ -36,7 +36,7 @@ as well as many less-common ones.
   points on several popular systems.
 - Project files are designed for sharing and collaboration.
 
-SourceGen has been used to disassemble software for the Apple II,
+SourceGen has been used to disassemble software for the Apple II, C64,
 NES (Nintendo Entertainment System), Atari 2600 VCS, and coin-op
 arcade systems.  A large collection of completed projects can be found
 on the [6502 Disassembly](https://6502disassembly.com) site.
