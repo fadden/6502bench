@@ -38,7 +38,9 @@ as well as many less-common ones.
 
 SourceGen has been used to disassemble software for the Apple II,
 NES (Nintendo Entertainment System), Atari 2600 VCS, and coin-op
-arcade systems.  Video demos of [basic features](https://youtu.be/dalISyBPQq8)
+arcade systems.  A large collection of completed projects can be found
+on the [6502 Disassembly](https://6502disassembly.com) site.
+Video demos of [basic features](https://youtu.be/dalISyBPQq8)
 and [visualizations](https://youtu.be/lSvEr5nCHbY) are available.
 
 #### Features in Detail ####
