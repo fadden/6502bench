@@ -1633,8 +1633,7 @@ namespace SourceGen {
             }
         }
 
-        public DefSymbol GetLocalVariableFromLine(int lineIndex) {
-            Line line = this[lineIndex];
+        public DefSymbol GetLocalVariableFromLine(Line line) {
             int offset = line.FileOffset;
             if (!mProject.LvTables.TryGetValue(offset, out LocalVariableTable lvt)) {
                 Debug.Assert(false);
@@ -1661,7 +1660,6 @@ namespace SourceGen {
             // You can't have an end followed by a start, because that would mean the regions
             // overlap.  If there's both start and end present, we have a 1-byte region.
             int offset = line.FileOffset;
-            List<AddressMap.AddressMapEntry> entries = mProject.AddrMap.GetEntries(offset);
 
             IEnumerator<AddressMap.AddressChange> addrIter = mProject.AddrMap.AddressChangeIterator;
             while (addrIter.MoveNext()) {

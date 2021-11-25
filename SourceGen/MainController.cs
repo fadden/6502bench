@@ -3437,8 +3437,21 @@ namespace SourceGen {
             }
             mUpdatingSelectionHighlight = true;
 
-            int targetIndex = FindSelectionAddrHighlight(out bool isSingleCodeData,
-                out int selIndex);
+            //
+            // Start with the target address highlight, for branches and in-file memory accesses.
+            //
+
+            int targetIndex = -1;
+            LineListGen.Line selectedLine = null;
+            if (mMainWin.CodeListView_GetSelectionCount() == 1) {
+                int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+                selectedLine = CodeLineList[selIndex];
+                if (selectedLine.IsCodeOrData) {
+                    Debug.Assert(selectedLine.FileOffset >= 0);
+                    targetIndex = FindSelectionAddrHighlight(selectedLine);
+                }
+            }
+
             if (mTargetHighlightIndex != targetIndex) {
                 Debug.WriteLine("Target highlight moving from " + mTargetHighlightIndex +
                     " to " + targetIndex);
@@ -3459,15 +3472,25 @@ namespace SourceGen {
                 mTargetHighlightIndex = targetIndex;
             }
 
+            //
+            // Now do the source operand highlight, to see what refers to the current address.
+            //
+
+            // Un-highlight anything we had highlighted previously.
             if (mOperandHighlights.Count > 0) {
                 foreach (int index in mOperandHighlights) {
                     mMainWin.CodeListView_RemoveSelectionOperHighlight(index);
                 }
                 mOperandHighlights.Clear();
             }
-            if (isSingleCodeData) {
-                LineListGen.Line line = CodeLineList[selIndex];
-                XrefSet xrefs = mProject.GetXrefSet(line.FileOffset);
+            if (selectedLine != null) {
+                XrefSet xrefs = null;
+                if (selectedLine.IsCodeOrData) {
+                    xrefs = mProject.GetXrefSet(selectedLine.FileOffset);
+                } else if (selectedLine.LineType == LineListGen.Line.Type.LocalVariableTable) {
+                    DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(selectedLine);
+                    xrefs = (defSym == null) ? null : defSym.Xrefs;
+                }
                 if (xrefs != null) {
                     foreach (XrefSet.Xref xr in xrefs) {
                         int refIndex = CodeLineList.FindCodeDataIndexByOffset(xr.Offset);
@@ -3480,21 +3503,7 @@ namespace SourceGen {
             mUpdatingSelectionHighlight = false;
         }
 
-        private int FindSelectionAddrHighlight(out bool isSingleCodeData, out int selIndex) {
-            if (mMainWin.CodeListView_GetSelectionCount() != 1) {
-                isSingleCodeData = false;
-                selIndex = -1;
-                return -1;
-            }
-            selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
-            LineListGen.Line line = CodeLineList[selIndex];
-            if (!line.IsCodeOrData) {
-                isSingleCodeData = false;
-                return -1;
-            }
-            Debug.Assert(line.FileOffset >= 0);
-            isSingleCodeData = true;
-
+        private int FindSelectionAddrHighlight(LineListGen.Line line) {
             // Does this have an operand with an in-file target offset?
             // TODO: may not work correctly with reloc data?
             Anattrib attr = mProject.GetAnattrib(line.FileOffset);
@@ -3898,7 +3907,7 @@ namespace SourceGen {
 
             // Find the appropriate xref set.
             if (type == LineListGen.Line.Type.LocalVariableTable) {
-                DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(lineIndex);
+                DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(CodeLineList[lineIndex]);
                 xrefs = (defSym == null) ? null : defSym.Xrefs;
             } else {
                 int offset = CodeLineList[lineIndex].FileOffset;
