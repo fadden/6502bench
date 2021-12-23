@@ -1567,6 +1567,13 @@ namespace SourceGen.WpfGui {
             mMainCtrl.HandleCodeListDoubleClick(row, col);
         }
 
+        /// <summary>
+        /// Escapes a generated string for use as a WPF menu item.
+        /// </summary>
+        private string EscapeMenuString(string instr) {
+            return instr.Replace("_", "__");
+        }
+
         private void RecentProjectsMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
             MenuItem recents = (MenuItem)sender;
             recents.Items.Clear();
@@ -1579,7 +1586,8 @@ namespace SourceGen.WpfGui {
             } else {
                 for (int i = 0; i < mMainCtrl.RecentProjectPaths.Count; i++) {
                     MenuItem mi = new MenuItem();
-                    mi.Header = string.Format("{0}: {1}", i + 1, mMainCtrl.RecentProjectPaths[i]);
+                    mi.Header = EscapeMenuString(string.Format("{0}: {1}", i + 1,
+                        mMainCtrl.RecentProjectPaths[i]));
                     mi.Command = recentProjectCmd.Command;
                     mi.CommandParameter = i;
                     recents.Items.Add(mi);

@@ -802,25 +802,25 @@ namespace Asm65 {
         }
         private static StatusFlags FlagUpdater_ROL(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
-            // this rotates the N flag into C, so set C=N
-            // if carry is one, set Z=0; otherwise set Z/N=indeterminate
-            // (if Z=1 we should set Z=C, but this seems rare and I don't entirely trust Z)
+            // In immediate mode we effectively rotate the N flag into C, but we can't know
+            // whether the flags were set for the value in the acc, so that doesn't help us.
+            // Ditto for the Z flag, which we could otherwise combine with the C flag in
+            // certain situations.
+            //
+            // if carry is set, set Z=0 (N/C indeterminate);
+            // otherwise set Z/N=indeterminate
             if (flags.C == 1) {
-                flags.C = flags.N;
                 flags.Z = 0;
-                flags.N = TriState16.INDETERMINATE;
+                flags.C = flags.N = TriState16.INDETERMINATE;
             } else {
-                flags.C = flags.N;
-                flags.Z = flags.N = TriState16.INDETERMINATE;
+                flags.C = flags.Z = flags.N = TriState16.INDETERMINATE;
             }
             return flags;
         }
         private static StatusFlags FlagUpdater_ROR(StatusFlags flags, int immVal,
                 ref StatusFlags condBranchTakenFlags) {
-            // if carry is set, set Z=0 and N=1;
-            // if carry is clear, set N=0;
-            // if carry is clear and Z=1, everything is zero and no flags change
-            //  (this seems unlikely, so I'm going to assume we've mis-read a flag and ignore this)
+            // if carry is set, set Z=0 and N=1 (C indeterminate);
+            // if carry is clear, set N=0 (Z/C indeterminate);
             // otherwise, Z/N/C=indeterminate
             if (flags.C == 1) {
                 flags.Z = 0;
