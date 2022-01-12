@@ -277,10 +277,27 @@ namespace SourceGen.WpfGui {
                 out Symbol.LabelAnnotation unused4);
             bool labelUnique;
 
-            // NOTE: should be using Asm65.Label.LABEL_COMPARER?
             if (mDefSymbolList.TryGetValue(trimLabel, out DefSymbol existing)) {
-                // It's okay if it's the same object.
-                labelUnique = (existing == mOldSym);
+                // We found a match.  See if we're just seeing the symbol we're editing.
+                //
+                // We only want to check the label, not the entire symbol, because otherwise
+                // things can go funny when multiple edits are done without flushing the data
+                // back to the symbol table.  For example, when this is invoked from the
+                // Edit Project Symbol button in the instruction operand editor, the user might
+                // edit the comment field of an existing project symbol, hit OK here, then try
+                // to edit it again before closing the operand editor.  In that case we get
+                // passed the edited DefSymbol, which no longer fully matches what's in the
+                // symbol table.
+                //
+                // TODO: we still don't handle the case where the user changes the label from
+                // FOO to FOO1 and then back to FOO without closing the instruction edit dialog.
+                // The problem is that we find a match for FOO in the symbol table without
+                // realizing that it was the original name before the edits began.  To fix this
+                // we need to pass in the original label as well as the recently-edited symbol,
+                // and allow the new name to match either.
+
+                //labelUnique = (existing == mOldSym);
+                labelUnique = Asm65.Label.LABEL_COMPARER.Equals(existing.Label, mOldSym.Label);
             } else {
                 labelUnique = true;
             }

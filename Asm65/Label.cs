@@ -32,12 +32,16 @@ namespace Asm65 {
 
         /// <summary>
         /// String comparer to use when comparing labels.
-        /// 
+        /// </summary>
+        /// <remarks>
+        /// Usage:
+        ///   if (Label.LABEL_COMPARER.Equals(label1, label2)) { ... }
+        ///
         /// We may want case-insensitive string compares, and we want the "invariant culture"
         /// version for consistent results across users in multiple locales.  (The labels are
         /// expected to be ASCII strings, so the latter isn't crucial unless we change the
         /// allowed set.)
-        /// </summary>
+        /// </remarks>
         public static readonly StringComparer LABEL_COMPARER = LABELS_CASE_SENSITIVE ?
             StringComparer.InvariantCulture :
             StringComparer.InvariantCultureIgnoreCase;
