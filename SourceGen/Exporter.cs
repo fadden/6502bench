@@ -1088,11 +1088,18 @@ namespace SourceGen {
                 }
                 if (count == 0) {
                     sb.Append("<table>\r\n");
+                    sb.Append("  <tr><th>Label</th><th>Value</th></tr>");
                 }
                 sb.Append("  <tr>");
                 sb.Append("<td><a href=\"#" + LABEL_LINK_PREFIX + sym.Label + "\">" +
                     sym.Label + "</a></td>");
-                sb.Append("<td><code>" + mFormatter.FormatHexValue(sym.Value, 2) + "</code></td>");
+                sb.Append("<td><code>");
+                if (sym.Value != Address.NON_ADDR) {
+                    sb.Append(mFormatter.FormatHexValue(sym.Value, 2));
+                } else {
+                    sb.Append(Address.NON_ADDR_STR);
+                }
+                sb.Append("</code></td>");
                 sb.Append("</tr>\r\n");
                 count++;
             }
