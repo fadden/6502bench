@@ -1104,11 +1104,11 @@ namespace SourceGen.WpfGui {
             DisplayPresets = new DisplayFormatPreset[AssemblerList.Count + 2];
             DisplayPresets[0] = new DisplayFormatPreset(DisplayFormatPreset.ID_CUSTOM,
                 (string)FindResource("str_PresetCustom"), string.Empty, string.Empty,
-                string.Empty, string.Empty, string.Empty, string.Empty, false,
+                string.Empty, string.Empty, string.Empty, string.Empty, true,
                 ExpressionMode.Unknown);
             DisplayPresets[1] = new DisplayFormatPreset(DisplayFormatPreset.ID_DEFAULT,
                 (string)FindResource("str_PresetDefault"), string.Empty, "l", "a:", "f:",
-                string.Empty, string.Empty, false, ExpressionMode.Common);
+                string.Empty, string.Empty, true, ExpressionMode.Common);
             for (int i = 0; i < AssemblerList.Count; i++) {
                 AssemblerInfo asmInfo = AssemblerList[i];
                 AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);

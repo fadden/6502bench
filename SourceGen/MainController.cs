@@ -514,7 +514,7 @@ namespace SourceGen {
             mFormatterConfig.mLocalVariableLabelPrefix =
                 settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
             mFormatterConfig.mCommaSeparatedDense =
-                settings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, false);
+                settings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, true);
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
             if (chrDelCereal != null) {
