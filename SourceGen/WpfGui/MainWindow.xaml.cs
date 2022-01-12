@@ -1888,8 +1888,10 @@ namespace SourceGen.WpfGui {
             }
             SymbolsListItem sli = (SymbolsListItem)item;
 
-            // TODO: this should also work for project/platform symbols that have EQU directives
-            mMainCtrl.GoToLabel(sli.Sym);
+            if (!mMainCtrl.GoToSymbol(sli.Sym)) {
+                // TODO(maybe): indicate failure with a sound
+                Debug.WriteLine("DClick symbol list: '" + sli.Sym.Label + "' not found");
+            }
             //codeListView.Focus();
         }
 

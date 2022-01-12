@@ -3192,18 +3192,38 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Scrolls the code list so that the specified label is shown.
+        /// Scrolls the code list so that the specified label is shown.  If the label can't
+        /// be found, nothing happens.
         /// </summary>
         /// <param name="sym">Label symbol.</param>
-        public void GoToLabel(Symbol sym) {
-            int offset = mProject.FindLabelOffsetByName(sym.Label);
-            if (offset >= 0) {
-                // TODO(someday): jump to symbol line, not arstart, for address region pre-labels
-                GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToCodeData),
-                    true);
+        public bool GoToSymbol(Symbol sym) {
+            bool found = false;
+
+            if (sym.SymbolSource == Symbol.Source.Platform ||
+                    sym.SymbolSource == Symbol.Source.Project) {
+                // Look for an EQU line for the project or platform symbol.
+                for (int i = 0; i < mProject.ActiveDefSymbolList.Count; i++) {
+                    if (mProject.ActiveDefSymbolList[i] == sym) {
+                        int offset = LineListGen.DefSymOffsetFromIndex(i);
+                        Debug.Assert(offset < 0);
+                        GoToLocation(new NavStack.Location(offset, 0,
+                            NavStack.GoToMode.JumpToCodeData), true);
+                        found = true;
+                        break;
+                    }
+                }
             } else {
-                Debug.WriteLine("DClick symbol: " + sym + ": label not found");
+                // Just look for a matching label.
+                int offset = mProject.FindLabelOffsetByName(sym.Label);
+                if (offset >= 0) {
+                    // TODO(someday):jump to symbol line, not arstart, for address region pre-labels
+                    GoToLocation(new NavStack.Location(offset, 0, NavStack.GoToMode.JumpToCodeData),
+                        true);
+                    found = true;
+                }
             }
+
+            return found;
         }
 
         public void SelectionChanged() {
