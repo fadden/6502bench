@@ -308,20 +308,23 @@ namespace PluginCommon {
         /// </summary>
         int Height { get; }
 
-        //void SetPixelIndex(int x, int y, byte colorIndex);
-        //int GetPixel(int x, int y);     // returns ARGB value
-
         /// <summary>
-        /// Returns a densely-packed array of color indices or ARGB values.
+        /// Returns a densely-packed array of color indices or ARGB values.  Color index
+        /// values may be remapped from what was originally set to improve compression.
+        ///
         /// Do not modify.
         /// </summary>
         byte[] GetPixels();
 
         /// <summary>
-        /// Returns the color palette as a series of 32-bit ARGB values.  Will be null for
-        /// direct-color images.
-        /// Do not modify.
+        /// Returns the color palette as a series of 32-bit ARGB values.  Duplicate entries
+        /// may have been merged to improve compression.
+        ///
+        /// Will be null for direct-color images.  Do not modify.
         /// </summary>
+        /// <remarks>
+        /// It's possible, but weird, for the array to have a length of zero.
+        /// </remarks>
         int[] GetPalette();
 
         // TODO(maybe): report pixel aspect ratio?

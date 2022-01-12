@@ -25,6 +25,10 @@ namespace CommonUtil {
     /// <remarks>
     /// This has only been tested with the GIF images created by the Windows Media GifEncoder,
     /// which are GIF89a with no global color table.
+    ///
+    /// References:
+    ///   https://www.w3.org/Graphics/GIF/spec-gif87.txt
+    ///   https://www.w3.org/Graphics/GIF/spec-gif89a.txt
     /// </remarks>
     public class UnpackedGif {
         //

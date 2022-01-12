@@ -886,7 +886,7 @@ namespace SourceGen {
 #if false
                     // try feeding the animated GIF into our GIF unpacker
                     using (MemoryStream ms = new MemoryStream()) {
-                        encoder.Save(ms);
+                        encoder.Save(ms, out dispWidth, out dispHeight);
                         Debug.WriteLine("TESTING");
                         UnpackedGif anim = UnpackedGif.Create(ms.GetBuffer());
                         anim.DebugDump();

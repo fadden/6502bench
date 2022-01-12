@@ -276,29 +276,29 @@ namespace RuntimeData.Nintendo {
         }
 
         private void SetPalette(VisBitmap8 vb, Palette pal) {
-            vb.AddColor(0, 0, 0, 0);                // 0=transparent
-            vb.AddColor(0xff, 0x01, 0x01, 0x01);    // 1=near black (so VB doesn't uniquify)
-            vb.AddColor(0xff, 0xfe, 0xfe, 0xfe);    // 2=near white
+            vb.SetColor((byte)Color.Transparent, 0x00, 0x00, 0x00, 0x00);
+            vb.SetColor((byte)Color.Black, 0xff, 0x00, 0x00, 0x00);
+            vb.SetColor((byte)Color.White, 0xff, 0xff, 0xff, 0xff);
 
             switch (pal) {
                 case Palette.Greyscale:
                 default:
-                    vb.AddColor(0xff, 0x00, 0x00, 0x00);    // black
-                    vb.AddColor(0xff, 0x80, 0x80, 0x80);    // dark grey
-                    vb.AddColor(0xff, 0xb0, 0xb0, 0xb0);    // medium grey
-                    vb.AddColor(0xff, 0xe0, 0xe0, 0xe0);    // light grey
+                    vb.SetColor((byte)Color.Color0, 0xff, 0x00, 0x00, 0x00);    // black
+                    vb.SetColor((byte)Color.Color1, 0xff, 0x80, 0x80, 0x80);    // dark grey
+                    vb.SetColor((byte)Color.Color2, 0xff, 0xb0, 0xb0, 0xb0);    // medium grey
+                    vb.SetColor((byte)Color.Color3, 0xff, 0xe0, 0xe0, 0xe0);    // light grey
                     break;
                 case Palette.Pinkish:
-                    vb.AddColor(0xff, 0x49, 0x99, 0xfe);    // sky blue
-                    vb.AddColor(0xff, 0xff, 0xbd, 0xaf);    // pinkish
-                    vb.AddColor(0xff, 0xcd, 0x50, 0x00);    // dark orange
-                    vb.AddColor(0xff, 0x00, 0x00, 0x00);    // black
+                    vb.SetColor((byte)Color.Color0, 0xff, 0x49, 0x99, 0xfe);    // sky blue
+                    vb.SetColor((byte)Color.Color1, 0xff, 0xff, 0xbd, 0xaf);    // pinkish
+                    vb.SetColor((byte)Color.Color2, 0xff, 0xcd, 0x50, 0x00);    // dark orange
+                    vb.SetColor((byte)Color.Color3, 0xff, 0x00, 0x00, 0x00);    // black
                     break;
                 case Palette.Greenish:
-                    vb.AddColor(0xff, 0x49, 0x99, 0xfe);    // sky blue
-                    vb.AddColor(0xff, 0x00, 0xa4, 0x00);    // medium green
-                    vb.AddColor(0xff, 0xfc, 0xfc, 0xfc);    // near white
-                    vb.AddColor(0xff, 0xff, 0x99, 0x2b);    // orange
+                    vb.SetColor((byte)Color.Color0, 0xff, 0x49, 0x99, 0xfe);    // sky blue
+                    vb.SetColor((byte)Color.Color1, 0xff, 0x00, 0xa4, 0x00);    // medium green
+                    vb.SetColor((byte)Color.Color2, 0xff, 0xfc, 0xfc, 0xfc);    // near white
+                    vb.SetColor((byte)Color.Color3, 0xff, 0xff, 0x99, 0x2b);    // orange
                     break;
             }
         }

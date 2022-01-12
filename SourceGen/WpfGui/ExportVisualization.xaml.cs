@@ -15,18 +15,16 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
-using CommonWPF;
 using Microsoft.Win32;
+
+using CommonUtil;
+using CommonWPF;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -157,9 +155,19 @@ namespace SourceGen.WpfGui {
                     GifBitmapEncoder encoder = new GifBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(outImage));
 
+#if false
+                    // try feeding the GIF into our GIF unpacker
+                    using (MemoryStream ms = new MemoryStream()) {
+                        encoder.Save(ms);
+                        Debug.WriteLine("TESTING");
+                        UnpackedGif anim = UnpackedGif.Create(ms.GetBuffer());
+                        anim.DebugDump();
+                    }
+#else
                     using (FileStream stream = new FileStream(pathName, FileMode.Create)) {
                         encoder.Save(stream);
                     }
+#endif
                 }
             } catch (Exception ex) {
                 // Error handling is a little sloppy, but this shouldn't fail often.

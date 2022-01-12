@@ -22,6 +22,9 @@ namespace PluginCommon {
     /// <summary>
     /// Bitmap with 8-bit palette indices, for use with visualization generators.
     /// </summary>
+    /// <remarks>
+    /// The bitmap is initially filled with color index 0.
+    /// </remarks>
     [Serializable]
     public class VisBitmap8 : IVisualization2d {
         public const int MAX_DIMENSION = 4096;
@@ -34,7 +37,7 @@ namespace PluginCommon {
 
         private byte[] mData;
         private int[] mPalette;
-        private int mNextColorIdx;
+        private int mMaxColorIndex;
 
 
         /// <summary>
@@ -51,10 +54,11 @@ namespace PluginCommon {
             Height = height;
 
             mData = new byte[width * height];
-            mPalette = new int[256];
-            mNextColorIdx = 0;
+            mPalette = new int[256];    // entries initialize to 0, i.e. transparent black
+            mMaxColorIndex = 0;
         }
 
+        //[Obsolete("use GetPixelIndex()")]
         public int GetPixel(int x, int y) {
             byte pix = mData[x + y * Width];
             return mPalette[pix];
@@ -75,9 +79,9 @@ namespace PluginCommon {
                 throw new ArgumentException("Bad x/y: " + x + "," + y + " (width=" + Width +
                     " height=" + Height + ")");
             }
-            if (colorIndex < 0 || colorIndex >= mNextColorIdx) {
+            if (colorIndex < 0 || colorIndex >= mMaxColorIndex) {
                 throw new ArgumentException("Bad color: " + colorIndex + " (nextCol=" +
-                    mNextColorIdx + ")");
+                    mMaxColorIndex + ")");
             }
             mData[x + y * Width] = colorIndex;
         }
@@ -87,9 +91,9 @@ namespace PluginCommon {
         /// </summary>
         /// <param name="colorIndex">Color index.</param>
         public void SetAllPixelIndices(byte colorIndex) {
-            if (colorIndex < 0 || colorIndex >= mNextColorIdx) {
+            if (colorIndex < 0 || colorIndex >= mMaxColorIndex) {
                 throw new ArgumentException("Bad color: " + colorIndex + " (nextCol=" +
-                    mNextColorIdx + ")");
+                    mMaxColorIndex + ")");
             }
             for (int i = 0; i < mData.Length; i++) {
                 mData[i] = colorIndex;
@@ -98,13 +102,15 @@ namespace PluginCommon {
 
         // IVisualization2d
         public byte[] GetPixels() {
+            // TODO: remap any duplicate colors to reduce size of GIF
             return mData;
         }
 
         // IVisualization2d
         public int[] GetPalette() {
-            int[] pal = new int[mNextColorIdx];
-            for (int i = 0; i < mNextColorIdx; i++) {
+            // TODO: remove any duplicate colors to reduce size of GIF
+            int[] pal = new int[mMaxColorIndex];
+            for (int i = 0; i < mMaxColorIndex; i++) {
                 pal[i] = mPalette[i];
             }
             return pal;
@@ -116,20 +122,21 @@ namespace PluginCommon {
         /// effect.
         /// </summary>
         /// <param name="color">32-bit ARGB color value.</param>
+        //[Obsolete("use SetColor()")]
         public void AddColor(int color) {
-            if (mNextColorIdx == 256) {
+            if (mMaxColorIndex == 256) {
                 Debug.WriteLine("Palette is full");
                 return;
             }
             // I'm expecting palettes to only have a few colors, so O(n^2) is fine for now.
-            for (int i = 0; i < mNextColorIdx; i++) {
+            for (int i = 0; i < mMaxColorIndex; i++) {
                 if (mPalette[i] == color) {
                     Debug.WriteLine("Color " + color.ToString("x6") +
                         " already exists in palette (" + i + ")");
                     return;
                 }
             }
-            mPalette[mNextColorIdx++] = color;
+            mPalette[mMaxColorIndex++] = color;
         }
 
         /// <summary>
@@ -140,8 +147,31 @@ namespace PluginCommon {
         /// <param name="r">Red value.</param>
         /// <param name="g">Green value.</param>
         /// <param name="b">Blue value.</param>
+        //[Obsolete("use SetColor()")]
         public void AddColor(byte a, byte r, byte g, byte b) {
             AddColor(Util.MakeARGB(a, r, g, b));
+        }
+
+        /// <summary>
+        /// Sets the Nth entry in the color palette.
+        /// </summary>
+        /// <remarks>
+        /// The size of the color palette will expand to hold the largest index.  For best
+        /// results, start with index 0 and count up, avoiding duplicates.
+        /// </remarks>
+        /// <param name="index">Palette index, 0-255.</param>
+        /// <param name="a">Alpha value.</param>
+        /// <param name="r">Red value.</param>
+        /// <param name="g">Green value.</param>
+        /// <param name="b">Blue value.</param>
+        public void SetColor(int index, byte a, byte r, byte g, byte b) {
+            if (index < 0 || index > 255) {
+                throw new ArgumentException("Invalid index: " + index);
+            }
+            mPalette[index] = Util.MakeARGB(a, r, g, b);
+            if (index >= mMaxColorIndex) {
+                mMaxColorIndex = index + 1;
+            }
         }
 
         /// <summary>
