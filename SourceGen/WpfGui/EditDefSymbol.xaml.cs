@@ -280,7 +280,7 @@ namespace SourceGen.WpfGui {
             if (mDefSymbolList.TryGetValue(trimLabel, out DefSymbol existing)) {
                 // We found a match.  See if we're just seeing the symbol we're editing.
                 //
-                // We only want to check the label, not the entire symbol, because otherwise
+                // We mostly want to check the label, not the entire symbol, because otherwise
                 // things can go funny when multiple edits are done without flushing the data
                 // back to the symbol table.  For example, when this is invoked from the
                 // Edit Project Symbol button in the instruction operand editor, the user might
@@ -289,6 +289,13 @@ namespace SourceGen.WpfGui {
                 // passed the edited DefSymbol, which no longer fully matches what's in the
                 // symbol table.
                 //
+                // We want to check the value as well, because of a weird case when the user
+                // edits an instruction operand with a user-modified symbol.  For example, if
+                // the operand needs to be "FOO-1", so the user hand-edited the label to FOO.
+                // This allows the user to "create project symbol" with the symbol as the initial
+                // value, but the symbol would be for address FOO not FOO-1.  (It would be best
+                // to disable "create project symbol" in this case.)
+                //
                 // TODO: we still don't handle the case where the user changes the label from
                 // FOO to FOO1 and then back to FOO without closing the instruction edit dialog.
                 // The problem is that we find a match for FOO in the symbol table without
@@ -296,8 +303,13 @@ namespace SourceGen.WpfGui {
                 // we need to pass in the original label as well as the recently-edited symbol,
                 // and allow the new name to match either.
 
+                // If there's no "previous" symbol, then any match means the label is not unique.
+                // Otherwise, we consider it unique if the label and value match what they were
+                // when this edit dialog was opened.
                 //labelUnique = (existing == mOldSym);
-                labelUnique = Asm65.Label.LABEL_COMPARER.Equals(existing.Label, mOldSym.Label);
+                labelUnique = mOldSym != null &&
+                    (Asm65.Label.LABEL_COMPARER.Equals(existing.Label, mOldSym.Label) &&
+                    existing.Value == mOldSym.Value);
             } else {
                 labelUnique = true;
             }
