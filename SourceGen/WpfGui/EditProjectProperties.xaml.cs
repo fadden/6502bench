@@ -656,8 +656,8 @@ namespace SourceGen.WpfGui {
         }
 
         private void NewSymbolButton_Click(object sender, RoutedEventArgs e) {
-            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms, null,
-                null);
+            EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms,
+                null, null, null);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 Debug.WriteLine("ADD: " + dlg.NewSym);
@@ -693,7 +693,7 @@ namespace SourceGen.WpfGui {
 
         private void DoEditSymbol(DefSymbol defSym) {
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter, mWorkProps.ProjectSyms,
-                defSym, null);
+                defSym, defSym, null);
             dlg.ShowDialog();
             if (dlg.DialogResult == true) {
                 // Label might have changed, so remove old before adding new.
@@ -886,7 +886,7 @@ namespace SourceGen.WpfGui {
         }
 
         private void MoveSingleItem(int selIndex, object selectedItem, int adj) {
-            string selected = (string)symbolFilesListBox.SelectedItem;
+            string selected = (string)selectedItem;
             PlatformSymbolIdentifiers.Remove(selected);
             PlatformSymbolIdentifiers.Insert(selIndex + adj, selected);
             symbolFilesListBox.SelectedIndex = selIndex + adj;

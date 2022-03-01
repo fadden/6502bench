@@ -1141,7 +1141,7 @@ namespace SourceGen {
         /// <param name="start">Offset of first byte in range.</param>
         /// <param name="end">Offset of last byte in range.</param>
         /// <param name="charTest">Character test delegate.</param>
-        /// <param name="limitHiBit">If set, the high bit in all character must be the
+        /// <param name="limitHiBit">If set, the high bit in all characters must be the
         ///   same.  Used to enforce a single encoding when "low or high ASCII" is used.</param>
         /// <returns>Number of strings found, or -1 if bad data identified.</returns>
         public static int RecognizeLen16Strings(byte[] fileData, int start, int end,

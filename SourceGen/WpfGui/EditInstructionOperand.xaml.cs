@@ -49,14 +49,19 @@ namespace SourceGen.WpfGui {
         public int SymbolEditOffsetResult { get; private set; }
 
         /// <summary>
-        /// Edited project property, or null if no changes were made.
+        /// Project symbol for this operand, when this dialog was opened.  Will be null if
+        /// there was no matching project symbol.  This is used as the "before" value for
+        /// updates to the project symbol set.
         /// </summary>
-        public DefSymbol ProjectPropertyResult { get; private set; }
+        public DefSymbol OrigProjectSymbolResult { get; private set; }
 
         /// <summary>
-        /// The project property that was modified, or null if none.
+        /// Edited project symbol, or null if no changes were made.  This is used as the "after"
+        /// value for updates to the project symbol.  This dialog is not allowed to delete
+        /// project symbols, so if this is null there's nothing to do.
         /// </summary>
-        public DefSymbol PrevProjectPropertyResult { get; private set; }
+        public DefSymbol ProjectSymbolResult { get; private set; }
+
 
         /// <summary>
         /// Updated label.
@@ -216,7 +221,7 @@ namespace SourceGen.WpfGui {
                 SymbolEditResult = mEditedLabel;
             }
 
-            ProjectPropertyResult = mEditedProjectSymbol;
+            ProjectSymbolResult = mEditedProjectSymbol;
 
             DialogResult = true;
         }
@@ -970,7 +975,7 @@ namespace SourceGen.WpfGui {
                     CreateEditProjectSymbolText = EDIT_PROJECT_SYMBOL;
 
                     mEditedProjectSymbol = (DefSymbol)firstProject;
-                    PrevProjectPropertyResult = mEditedProjectSymbol;
+                    OrigProjectSymbolResult = mEditedProjectSymbol;
                 } else {
                     ShowNarNoProjectMatch = true;
                     CreateEditProjectSymbolText = CREATE_PROJECT_SYMBOL;
@@ -1019,20 +1024,25 @@ namespace SourceGen.WpfGui {
         }
 
         private void EditProjectSymbol_Click(object sender, RoutedEventArgs e) {
-            DefSymbol origSym = mEditedProjectSymbol;
-            if (origSym == null) {
+            DefSymbol initVals = mEditedProjectSymbol;
+            if (initVals == null) {
                 // Need to start with a symbol so we can set the value field.
                 string symName = "SYM";
                 if (!string.IsNullOrEmpty(SymbolLabel) &&
                         Asm65.Label.ValidateLabel(SymbolLabel)) {
                     symName = SymbolLabel;
                 }
-                origSym = new DefSymbol(symName, mOperandValue, Symbol.Source.Project,
+                initVals = new DefSymbol(symName, mOperandValue, Symbol.Source.Project,
                     Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
             }
 
+            // Edit the symbol, locking the value so it can only apply to this operand.
+            // We want to pass in the symbol as it was before we made any edits, so that
+            // the user can always change the label back to what it was when this dialog
+            // was first opened.
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,
-                mProject.ProjectProps.ProjectSyms, origSym, null, false, true);
+                mProject.ProjectProps.ProjectSyms, OrigProjectSymbolResult, initVals, null,
+                false, true);
             if (dlg.ShowDialog() != true) {
                 return;
             }
@@ -1218,9 +1228,12 @@ namespace SourceGen.WpfGui {
                     DefSymbol.DirectionFlags.ReadWrite, null, string.Empty);
             }
 
+            // Unlike project symbols, we don't pass the original symbol value in.  This is
+            // because we update a local copy of the LV table immediately, and pass that in
+            // for the uniqueness checks.
             EditDefSymbol dlg = new EditDefSymbol(this, mFormatter,
-                mEditedLvTable.GetSortedByLabel(), initialVar, mProject.SymbolTable,
-                true, true);
+                mEditedLvTable.GetSortedByLabel(), mEditedLocalVar, initialVar,
+                mProject.SymbolTable, true, true);
             if (dlg.ShowDialog() == true) {
                 if (mEditedLocalVar != dlg.NewSym) {
                     // Integrate result.  Future edits will start with this.

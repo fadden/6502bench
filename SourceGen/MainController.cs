@@ -734,7 +734,7 @@ namespace SourceGen {
             DisasmProject proj = new DisasmProject();
             mDataPathName = dataPathName;
             mProjectPathName = string.Empty;
-            byte[] fileData = null;
+            byte[] fileData;
             try {
                 fileData = LoadDataFile(dataPathName);
             } catch (Exception ex) {
@@ -1070,7 +1070,7 @@ namespace SourceGen {
                 return;
             }
 
-            SystemDefSet sds = null;
+            SystemDefSet sds;
             try {
                 sds = SystemDefSet.ReadFile(sysDefsPath);
             } catch (Exception ex) {
@@ -1231,7 +1231,7 @@ namespace SourceGen {
                 cancel = (dataPathName == null);
                 return null;
             }
-            byte[] fileData = null;
+            byte[] fileData;
             try {
                 fileData = LoadDataFile(dataPathName);
             } catch (Exception ex) {
@@ -1877,7 +1877,6 @@ namespace SourceGen {
             int firstOffset = CodeLineList[selIndex].FileOffset;
             int lastOffset = CodeLineList[lastIndex].FileOffset;
             int nextOffset = lastOffset + CodeLineList[lastIndex].OffsetSpan;
-            AddressMap addrMap = mProject.AddrMap;
 
             // The offset of an arend directive is the last byte in the address region.  It
             // has a span length of zero because it's a directive, so if it's selected as
@@ -2246,7 +2245,7 @@ namespace SourceGen {
             } else {
                 // We allow the selection to include meta-data like .org and Notes.
                 //Debug.Assert(CodeLineList[selIndex].LineType == LineListGen.Line.Type.Data);
-                EditDataOperand(selOffset);
+                EditDataOperand();
             }
         }
 
@@ -2291,22 +2290,27 @@ namespace SourceGen {
                 Debug.WriteLine("No change to label");
             }
 
-            // Check for changes to a project property.  The dialog can create a new entry or
-            // modify an existing entry.
-            if (dlg.ProjectPropertyResult != null) {
-                DefSymbol oldSym = dlg.PrevProjectPropertyResult;
-                DefSymbol newSym = dlg.ProjectPropertyResult;
-                ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
-                // Add new entry, or replace existing entry.
-                if (oldSym != null) {
-                    newProps.ProjectSyms.Remove(oldSym.Label);
+            // Check for changes to a project symbol.  The dialog can create a new entry or
+            // modify an existing entry, but can't delete an entry.
+            if (dlg.ProjectSymbolResult != null) {
+                DefSymbol oldSym = dlg.OrigProjectSymbolResult;
+                DefSymbol newSym = dlg.ProjectSymbolResult;
+                if (oldSym == newSym) {
+                    Debug.WriteLine("No actual change to project symbol");
+                } else {
+                    // Generate a completely new set of project properties.
+                    ProjectProperties newProps = new ProjectProperties(mProject.ProjectProps);
+                    // Add new symbol entry, or replace existing entry.
+                    if (oldSym != null) {
+                        newProps.ProjectSyms.Remove(oldSym.Label);
+                    }
+                    newProps.ProjectSyms.Add(newSym.Label, newSym);
+                    UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
+                        mProject.ProjectProps, newProps);
+                    cs.Add(uc);
                 }
-                newProps.ProjectSyms.Add(newSym.Label, newSym);
-                UndoableChange uc = UndoableChange.CreateProjectPropertiesChange(
-                    mProject.ProjectProps, newProps);
-                cs.Add(uc);
             } else {
-                Debug.WriteLine("No change to project property");
+                Debug.WriteLine("No change to project symbol");
             }
 
             Debug.WriteLine("EditInstructionOperand: " + cs.Count + " changes");
@@ -2315,7 +2319,7 @@ namespace SourceGen {
             }
         }
 
-        private void EditDataOperand(int offset) {
+        private void EditDataOperand() {
             Debug.Assert(mMainWin.CodeListView_GetSelectionCount() > 0);
 
             TypedRangeSet trs = GroupedOffsetSetFromSelected();
@@ -2396,7 +2400,7 @@ namespace SourceGen {
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mFormatter,
-                mProject.ProjectProps.ProjectSyms, origDefSym, null);
+                mProject.ProjectProps.ProjectSyms, origDefSym, origDefSym, null);
 
             switch (col) {
                 case CodeListColumn.Operand:
@@ -2427,7 +2431,6 @@ namespace SourceGen {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
-            EntityCounts counts = SelectionAnalysis.mEntityCounts;
             // Single line, must be code or a RegWidth directive.
             return (SelectionAnalysis.mLineType == LineListGen.Line.Type.Code ||
                 SelectionAnalysis.mLineType == LineListGen.Line.Type.RegWidthDirective);
@@ -2455,7 +2458,6 @@ namespace SourceGen {
             if (SelectionAnalysis.mNumItemsSelected != 1) {
                 return false;
             }
-            EntityCounts counts = SelectionAnalysis.mEntityCounts;
             // Single line, must be a visualization set or a place where one can be created.
             LineListGen.Line.Type lineType = SelectionAnalysis.mLineType;
             return (lineType == LineListGen.Line.Type.VisualizationSet ||
@@ -2680,7 +2682,6 @@ namespace SourceGen {
                     Debug.Assert(thisAttr.DataDescriptor.Length == 1);
 
                     int nextOffset = rng.Low + 1;
-                    Anattrib nextAttr = mProject.GetAnattrib(nextOffset);
                     // This must match what GroupedOffsetSetFromSelected() does.
                     if (!mProject.UserLabels.ContainsKey(nextOffset) &&
                             !mProject.HasCommentNoteOrVis(nextOffset) &&
@@ -2963,7 +2964,6 @@ namespace SourceGen {
                     matchType = LineListGen.Line.Type.ArEndDirective;
                 }
                 // Find first instance of specified type.
-                LineListGen.Line tmpLine = CodeLineList[topLineIndex];
                 while (CodeLineList[topLineIndex].LineType != matchType) {
                     if (CodeLineList[topLineIndex].FileOffset > newLoc.Offset) {
                         // This can happen if the region got deleted.
@@ -3666,7 +3666,6 @@ namespace SourceGen {
                     // header area
                     len = 1;
                 }
-                Anattrib attr = mProject.GetAnattrib(offset);
                 Debug.Assert(len > 0);
                 for (int i = offset; i < offset + len; i++) {
                     rs.Add(i);

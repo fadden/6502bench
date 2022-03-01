@@ -141,9 +141,14 @@ namespace SourceGen.WpfGui {
         private Formatter mNumFormatter;
 
         /// <summary>
-        /// Old symbol value.  May be null.
+        /// Initial values for fields.  May be null.
         /// </summary>
-        private DefSymbol mOldSym;
+        private DefSymbol mInitialSym;
+
+        /// <summary>
+        /// Original symbol.  May be null if this is a new symbol.
+        /// </summary>
+        private DefSymbol mOrigSym;
 
         /// <summary>
         /// List of existing symbols, for uniqueness check.  The list will not be modified.
@@ -173,19 +178,30 @@ namespace SourceGen.WpfGui {
         /// Constructor, for editing a project or platform symbol.
         /// </summary>
         public EditDefSymbol(Window owner, Formatter formatter,
-                SortedList<string, DefSymbol> defList, DefSymbol defSym,
+                SortedList<string, DefSymbol> defList, DefSymbol origSym, DefSymbol initVals,
                 SymbolTable symbolTable)
-            : this(owner, formatter, defList, defSym, symbolTable, false, false) { }
+            : this(owner, formatter, defList, origSym, initVals, symbolTable, false, false) { }
 
         /// <summary>
         /// Constructor, for editing a local variable, or editing a project symbol with
         /// the value field locked.
         /// </summary>
+        /// <param name="owner">Parent window.</param>
+        /// <param name="formatter">Formatter object.</param>
+        /// <param name="defList">List of DefSymbols against which we test label uniqueness.</param>
+        /// <param name="origSym">Original symbol definition.  The new label is allowed to
+        ///   match this.</param>
+        /// <param name="initVals">Initial values for fields.  This might be null, might be
+        ///   the same as origSym, or might be the result of a previous unsaved edit.</param>
+        /// <param name="symbolTable">Full symbol table, for an extended uniqueness check
+        ///   used for local variables (which must not clash with user labels).</param>
+        /// <param name="isVariable">Set true when editing a local variable table entry.</param>
+        /// <param name="lockValueAndType">Set true to prevents edits to the value and type.</param>
         /// <remarks>
         /// TODO(someday): disable the "constant" radio button unless CPU=65816.
         /// </remarks>
         public EditDefSymbol(Window owner, Formatter formatter,
-                SortedList<string, DefSymbol> defList, DefSymbol defSym,
+                SortedList<string, DefSymbol> defList, DefSymbol origSym, DefSymbol initVals,
                 SymbolTable symbolTable, bool isVariable, bool lockValueAndType) {
             InitializeComponent();
             Owner = owner;
@@ -193,7 +209,8 @@ namespace SourceGen.WpfGui {
 
             mNumFormatter = formatter;
             mDefSymbolList = defList;
-            mOldSym = defSym;
+            mOrigSym = origSym;
+            mInitialSym = initVals;
             mSymbolTable = symbolTable;
             IsVariable = isVariable;
             mReadOnlyValueAndType = lockValueAndType;
@@ -215,24 +232,24 @@ namespace SourceGen.WpfGui {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            if (mOldSym != null) {
-                Label = mOldSym.GenerateDisplayLabel(mNumFormatter);
-                Value = mNumFormatter.FormatValueInBase(mOldSym.Value,
-                    mOldSym.DataDescriptor.NumBase);
-                if (mOldSym.HasWidth) {
-                    VarWidth = mOldSym.DataDescriptor.Length.ToString();
+            if (mInitialSym != null) {
+                Label = mInitialSym.GenerateDisplayLabel(mNumFormatter);
+                Value = mNumFormatter.FormatValueInBase(mInitialSym.Value,
+                    mInitialSym.DataDescriptor.NumBase);
+                if (mInitialSym.HasWidth) {
+                    VarWidth = mInitialSym.DataDescriptor.Length.ToString();
                 }
-                Comment = mOldSym.Comment;
+                Comment = mInitialSym.Comment;
 
-                if (mOldSym.IsConstant) {
+                if (mInitialSym.IsConstant) {
                     IsConstant = true;
                 } else {
                     IsAddress = true;
                 }
 
-                if (mOldSym.Direction == DefSymbol.DirectionFlags.Read) {
+                if (mInitialSym.Direction == DefSymbol.DirectionFlags.Read) {
                     IsReadChecked = true;
-                } else if (mOldSym.Direction == DefSymbol.DirectionFlags.Write) {
+                } else if (mInitialSym.Direction == DefSymbol.DirectionFlags.Write) {
                     IsWriteChecked = true;
                 } else {
                     IsReadChecked = IsWriteChecked = true;
@@ -279,37 +296,17 @@ namespace SourceGen.WpfGui {
 
             if (mDefSymbolList.TryGetValue(trimLabel, out DefSymbol existing)) {
                 // We found a match.  See if we're just seeing the symbol we're editing.
+                // If there's no "original" symbol, then the fact that we matched anything
+                // means the label is not unique.  Otherwise, we consider it unique if the
+                // label matches the original symbol.
                 //
-                // We mostly want to check the label, not the entire symbol, because otherwise
-                // things can go funny when multiple edits are done without flushing the data
-                // back to the symbol table.  For example, when this is invoked from the
-                // Edit Project Symbol button in the instruction operand editor, the user might
-                // edit the comment field of an existing project symbol, hit OK here, then try
-                // to edit it again before closing the operand editor.  In that case we get
-                // passed the edited DefSymbol, which no longer fully matches what's in the
-                // symbol table.
-                //
-                // We want to check the value as well, because of a weird case when the user
-                // edits an instruction operand with a user-modified symbol.  For example, if
-                // the operand needs to be "FOO-1", so the user hand-edited the label to FOO.
-                // This allows the user to "create project symbol" with the symbol as the initial
-                // value, but the symbol would be for address FOO not FOO-1.  (It would be best
-                // to disable "create project symbol" in this case.)
-                //
-                // TODO: we still don't handle the case where the user changes the label from
-                // FOO to FOO1 and then back to FOO without closing the instruction edit dialog.
-                // The problem is that we find a match for FOO in the symbol table without
-                // realizing that it was the original name before the edits began.  To fix this
-                // we need to pass in the original label as well as the recently-edited symbol,
-                // and allow the new name to match either.
-
-                // If there's no "previous" symbol, then any match means the label is not unique.
-                // Otherwise, we consider it unique if the label and value match what they were
-                // when this edit dialog was opened.
-                //labelUnique = (existing == mOldSym);
-                labelUnique = mOldSym != null &&
-                    (Asm65.Label.LABEL_COMPARER.Equals(existing.Label, mOldSym.Label) &&
-                    existing.Value == mOldSym.Value);
+                // We only need to check the label.  Since we're comparing the original
+                // symbol to the value from the symbol table, it should be a total match,
+                // but the other fields don't actually matter.  It's safer to let the Symbol
+                // class comparison operators do the work though.
+                labelUnique = (existing == mOrigSym);
+                //labelUnique = mOrigSym != null &&
+                //    Asm65.Label.LABEL_COMPARER.Equals(existing.Label, mOrigSym.Label);
             } else {
                 labelUnique = true;
             }
@@ -376,7 +373,7 @@ namespace SourceGen.WpfGui {
             bool valueUniqueValid = true;
             if (IsVariable && valueValid && widthValid) {
                 foreach (KeyValuePair<string, DefSymbol> kvp in mDefSymbolList) {
-                    if (kvp.Value != mOldSym &&
+                    if (kvp.Value != mOrigSym &&
                             DefSymbol.CheckOverlap(kvp.Value, thisValue, thisWidth, symbolType)) {
                         valueUniqueValid = false;
                         break;

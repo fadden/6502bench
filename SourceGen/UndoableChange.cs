@@ -501,8 +501,8 @@ namespace SourceGen {
         /// <summary>
         /// Creates an UndoableChange for a change to the project properties.
         /// </summary>
-        /// <param name="oldNote">Current note.</param>
-        /// <param name="newNote">New note.</param>
+        /// <param name="oldProps">Old property set.</param>
+        /// <param name="newProps">New property set.</param>
         /// <returns>Change record.</returns>
         public static UndoableChange CreateProjectPropertiesChange(ProjectProperties oldProps,
                 ProjectProperties newProps) {
