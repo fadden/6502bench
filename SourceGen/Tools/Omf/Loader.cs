@@ -336,7 +336,8 @@ namespace SourceGen.Tools.Omf {
                 SystemDefSet sds = SystemDefSet.ReadFile(sysDefsPath);
                 SystemDef sd = sds.FindEntryByName(IIGS_SYSTEM_DEF);
                 if (sd != null) {
-                    proj.ApplySystemDef(sd);
+                    proj.ApplySystemDef(sd);    // apply system definitions
+                    proj.AddrMap.Clear();       // remove default address map entry
                 } else {
                     Debug.WriteLine("Unable to find Apple IIgs system definition");
                 }

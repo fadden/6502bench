@@ -253,7 +253,7 @@ namespace SourceGen {
 
 
         /// <summary>
-        /// Constructs a new project.
+        /// Constructs a blank project.  Further initialization required.
         /// </summary>
         public DisasmProject() { }
 
@@ -364,8 +364,13 @@ namespace SourceGen {
 
         /// <summary>
         /// Pulls items of interest out of the system definition object and applies them
-        /// to the project.  Call this after LoadDataFile() for a new project.
+        /// to the project.  Call this after LoadDataFile() for a new project.  This will
+        /// create a full-file address map entry with the system-specified load address.
         /// </summary>
+        /// <remarks>
+        /// The OMF converter calls here before the data file has finished generating, so
+        /// it's possible for mFileData to be null here.
+        /// </remarks>
         /// <param name="sysDef">Target system definition.</param>
         public void ApplySystemDef(SystemDef sysDef) {
             CpuDef.CpuType cpuType = CpuDef.GetCpuTypeFromName(sysDef.Cpu);
@@ -389,7 +394,8 @@ namespace SourceGen {
 
             // Configure the load address.
             AddrMap.Clear();
-            if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && mFileData.Length > 2) {
+            if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && FileDataLength > 2 &&
+                    mFileData != null) {
                 // First two bytes are the load address, with the actual file data starting
                 // at +000002.  The first two bytes are non-addressable, so we leave them
                 // out of the map.
@@ -397,7 +403,7 @@ namespace SourceGen {
                 //AddressMap.AddResult addRes =
                 //    AddrMap.AddEntry(0, 2, loadAddr < 2 ? 0 : loadAddr - 2);
                 //Debug.Assert(addRes == AddressMap.AddResult.Okay);
-                AddressMap.AddResult addRes = AddrMap.AddEntry(2, mFileData.Length - 2, loadAddr);
+                AddressMap.AddResult addRes = AddrMap.AddEntry(2, FileDataLength - 2, loadAddr);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
 
                 OperandFormats[0] = FormatDescriptor.Create(2, FormatDescriptor.Type.NumericLE,
@@ -408,7 +414,7 @@ namespace SourceGen {
             } else {
                 int loadAddr = SystemDefaults.GetLoadAddress(sysDef);
                 AddressMap.AddResult addRes =
-                    AddrMap.AddEntry(0, mFileData.Length, loadAddr);
+                    AddrMap.AddEntry(0, FileDataLength, loadAddr);
                 Debug.Assert(addRes == AddressMap.AddResult.Okay);
             }
 
@@ -2572,6 +2578,11 @@ namespace SourceGen {
         /// <param name="affectedOffsets">Range set to update.</param>
         /// <param name="offset">Offset of first byte.</param>
         private void AddAffectedLine(RangeSet affectedOffsets, int offset) {
+            if (mAnattribs == null) {
+                // This is a weird edge case that happens with the OMF Converter tool, because
+                // we're stuffing things into a partially-formed project.
+                return;
+            }
             int len = 1;
             if (offset >= 0) {  // header comment doesn't have an Anattrib entry
                 len = mAnattribs[offset].Length;
