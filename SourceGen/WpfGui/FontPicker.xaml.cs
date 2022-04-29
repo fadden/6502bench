@@ -90,7 +90,7 @@ namespace SourceGen.WpfGui {
                     continue;
                 }
 
-                tmpList.Add(familyName, typ.FontFamily);
+                tmpList[familyName] = typ.FontFamily;
 
                 if (familyName.Equals(initialFamily)) {
                     SelectedFamily = typ.FontFamily;
