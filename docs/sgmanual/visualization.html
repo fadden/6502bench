@@ -251,16 +251,17 @@ straightforward fashion.</p>
     repeated as-is or flipped.</li>
 </ul>
 
-<h3>Atari Arcade : Atari/VisAVG</h3>
+<h3>Atari Arcade : Atari/VisAVG and Atari/VisDVG</h3>
 
-<p>Different versions of Atari's Analog Vector Graphics were used in
-several games, notably Battlezone, Tempest, and Star Wars.  The commands
+<p>Different versions of Atari's Analog Vector Graphics and
+Digital Vector Graphics were used in several games, notably Asteroids,
+Battlezone, Tempest, and Star Wars.  The commands
 drove a vector display monitor.  SourceGen visualizes them as 2D
 wireframes, which isn't a perfect fit since they can describe points as
 well as lines, but works fine for annotating a disassembly.</p>
 <p>The visualizer takes two arguments: the offset of the start of
 the commands to visualize, and the base address of vector RAM.  The latter
-is necessary to convert AVG JMP/JSR commands into offsets.</p>
+is needed to convert vector JMP/JSR commands into offsets.</p>
 
 <h3>Commodore 64 : Commodore/VisC64</h3>
 
@@ -296,6 +297,14 @@ It comes in two basic varieties:</p>
 <p>Bear in mind that the editor scales images to their maximum size, so
 a sprite that is doubled in both width and height will look exactly like
 a sprite that is not doubled at all.</p>
+
+<p>If multiple sprites are defined consecutively, at 64-byte intervals,
+they can be combined into a sprite sheet.  A single set of parameters
+for color and scaling is applied to all sprites.</p>
+
+<p>The visualizer also handles high-resolution and multi-color fonts,
+which are displayed in a grid.</p>
+
 
 <h3>Nintendo Entertainment System : Nintendo/VisNES</h3>
 
