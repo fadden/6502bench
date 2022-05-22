@@ -1,12 +1,16 @@
 # Runtime Data #
 
 Symbol files and extension scripts are split into directories by
-platform manufacturer.
+platform manufacturer.  General-purpose scripts are in the `Common`
+directory.
 
 A Visual Studio project (`RuntimeData.csproj`) exists in the source tree
-so you can edit scripts with IntelliSense and error highlighting.
-Everything in this directory is distributed as source, not in compiled
-form; all compilation occurs at run time.
+so you can edit platform-specific scripts with IntelliSense and error
+highlighting.  Everything in this directory is distributed as source,
+not in compiled form; all compilation occurs at run time.
+
+The `Tips` directory holds the files used by the "daily tips" feature,
+and `TestData` has some files used by the regression tests.
 
 ## SystemDefs.json ##
 
@@ -51,12 +55,10 @@ directory or project file directory, or they will not be loaded.
 All "RT:" identifier paths are relative to the RuntimeData directory. The
 GroupName string is not automatically added.
 
-
 ## Platform Symbol Files and Extension Scripts ##
 
-These are described in the "Advanced Topics" section of the manual
-([here](Help/advanced.html)).
-
+The format of these files is described in detail in the "Advanced Topics"
+section of the manual ([here](../../docs/sgmanual/advanced.html)).
 
 ## Misc Files ##
 
