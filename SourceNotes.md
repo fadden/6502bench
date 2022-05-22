@@ -2,15 +2,16 @@
 
 All of the code is written in C# .NET, using the (free to download) Visual
 Studio Community 2022 IDE as the primary development environment.  The user
-interface uses the WPF API, targeted at .NET Framework 4.6.2.  When
-installing Visual Studio, be sure to include ".NET Desktop Development".
+interface uses the WPF API, targeted at .NET Framework 4.6.2.
+To build the sources, clone the git repository and open "WorkBench.sln"
+in Visual Studio 2019 or later.  The Solution file is called
+"WorkBench.sln" rather than "6502bench.sln" because some things in
+Visual Studio got weird when it didn't start with a letter.
+
+When installing Visual Studio, be sure to include ".NET Desktop Development".
 You may also need to install the .NET Framework 4.6.2 "Dev Pack" (as a
 separate download, or via the "individual components" tab in the
 Visual Studio Installer).
-
-The Solution file is called "WorkBench.sln" rather than "6502bench.sln"
-because some things in Visual Studio got weird when it didn't start with a
-letter.
 
 The code style is closer to what Android uses than "standard" C#.  Lines
 are folded to fit 100 columns.
