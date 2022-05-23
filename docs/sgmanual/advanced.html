@@ -56,10 +56,10 @@ underscore, and consist entirely of alphanumeric ASCII characters
 required for line labels in SourceGen.)</p>
 <p>The next token can be one of:</p>
 <ul>
-  <li>@: general addresses</li>
-  <li>&lt;: read-only addresses</li>
-  <li>&gt;: write-only addresses</li>
-  <li>=: constants</li>
+  <li><code>@</code>: general addresses</li>
+  <li><code>&lt;</code>: read-only addresses</li>
+  <li><code>&gt;</code>: write-only addresses</li>
+  <li><code>=</code>: constants</li>
 </ul>
 <p>If an instruction references an address, and that address is outside
 the bounds of the file, the list of address symbols (i.e. everything
@@ -137,8 +137,10 @@ doesn't like that, you can put a ".txt" on the end while you're editing.)
 Make sure you create it in the same directory where your project file
 (the file that ends with ".dis65") lives.  Add a <code>*SYNOPSIS</code>,
 then add the desired symbols.</p>
-<p>Finally, add it to your project.  Select Edit &gt; Project Properties,
-switch to the Symbol Files tab, click Add Symbol Files from Project, and
+<p>Finally, add it to your project.  Select
+<samp>Edit &gt; Project Properties</samp>,
+switch to the <samp>Symbol Files</samp> tab, click
+<samp>Add Symbol Files from Project</samp>, and
 select your symbol file.  It should appear in the list with a
 "PROJ:" prefix.</p>
 
@@ -148,8 +150,8 @@ directory has a project-local symbol file, called "fdraw-exports".
 for which Amper-fdraw provides an Applesoft BASIC interface.)
 
 <p>NOTE: in the current version of SourceGen, changes to .sym65 files are
-not detected automatically.  Use File &gt; Reload External Files to
-import the changes.</p>
+not detected automatically.  Use <samp>File &gt; Reload External Files</samp>
+to import the changes.</p>
 
 
 <h2 id="extension-scripts">Extension Scripts</h2>
