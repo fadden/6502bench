@@ -3,127 +3,138 @@
 ;   Super Nintendo Entertainment System Development Manual
 ;   Registers | Super Famicom Development Wiki
 ;     https://wiki.superfamicom.org/registers
-; Copyright 2021 absindx
+;   Memory map - SNESdev Wiki
+;     https://snes.nesdev.org/wiki/Memory_map
+; Copyright 2021-2022 absindx
 ;   Follow the original license. (Apache 2.0)
 
 *SYNOPSIS Super NES registers
 
-*MULTI_MASK
+; I/O registers $xx2000
+;   bank = $00-$3F, $80-$BF
+;   page = $2000-$6F00
+;   %?0??????xxxxxxxxxxxxxxxx
+;   %010000000000000000000000	CompareMask  (0/1)
+;   %000000000000000000000000	CompareValue (1)
+;   %000000001111111111111111	AddressMask  (x)
+*MULTI_MASK %010000000000000000000000 %000000000000000000000000 %000000001111111111111111
 
 ; PPU registers (Address Bus B)
 
-INIDISP         @ $2100 ;W B--- FFFF  Initial settings for screen
-OBJSEL          @ $2101 ;W SSSN NAAA  Object size & Object data area designation
-OAMADDL         @ $2102 ;W AAAA AAAA  Address for accessing OAM (Low)
-OAMADDH         @ $2103 ;W P--- ---A  Address for accessing OAM (High)
-OAMDATA         @ $2104 ;W DDDD DDDD  Data for OAM write
-BGMODE          @ $2105 ;W SSSS PMMM  BG mode & Character size settings
-MOSAIC          @ $2106 ;W MMMM EEEE  Size & Screen designation for mosaic display
-BG1SC           @ $2107 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-1)
-BG2SC           @ $2108 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-2)
-BG3SC           @ $2109 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-3)
-BG4SC           @ $210A ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-4)
-BG12NBA         @ $210B ;W 2222 1111  BG character data area designation (BG-1, 2)
-BG34NBA         @ $210C ;W 4444 3333  BG character data area designation (BG-3, 4)
-BG1HOFS         @ $210D ;WW XXXX XXXX, ---X XXXX  H scroll value designation for BG-1
-BG1VOFS         @ $210E ;WW XXXX XXXX, ---X XXXX  V scroll value designation for BG-1
-BG2HOFS         @ $210F ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-2
-BG2VOFS         @ $2110 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-2
-BG3HOFS         @ $2111 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-3
-BG3VOFS         @ $2112 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-3
-BG4HOFS         @ $2113 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-4
-BG4VOFS         @ $2114 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-4
-VMAINC          @ $2115 ;W T--- GGII  VRAM address increment value designation
-VMADDL          @ $2116 ;W AAAA AAAA  Address for VRAM read and write (Low)
-VMADDH          @ $2117 ;W AAAA AAAA  Address for VRAM read and write (High)
-VMDATAL         @ $2118 ;W AAAA AAAA  Data for VRAM write (Low)
-VMDATAH         @ $2119 ;W AAAA AAAA  Data for VRAM write (High)
-M7SEL           @ $211A ;W SS-- --VH  Initial setting in screen Mode-7
-M7A             @ $211B ;WW AAAA AAAA, AAAA AAAA  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter A (Low, High)
-M7B             @ $211C ;WW BBBB BBBB, BBBB BBBB  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter B (Low, High)
-M7C             @ $211D ;WW CCCC CCCC, CCCC CCCC  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter C (Low, High)
-M7D             @ $211E ;WW DDDD DDDD, DDDD DDDD  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter D (Low, High)
-M7X             @ $211F ;WW XXXX XXXX, ---X XXXX  Rotation/Enlargement/Reduction in Mode-7, Center position X0 (Low, High)
-M7Y             @ $2120 ;WW YYYY YYYY, ---Y YYYY  Rotation/Enlargement/Reduction in Mode-7, Center position Y0 (Low, High)
-CGADD           @ $2121 ;W AAAA AAAA  Address for CG-RAM read and write
-CGDATA          @ $2122 ;WW DDDD DDDD, -DDD DDDD  Data for CG-RAM write
-W12SEL          @ $2123 ;W EIEI EIEI  Window mask settings (BG-1, 2)
-W34SEL          @ $2124 ;W EIEI EIEI  Window mask settings (BG-3, 4)
-WOBJSEL         @ $2125 ;W EIEI EIEI  Window mask settings (OBJ, Color)
-WH0             @ $2126 ;W PPPP PPPP  Window position designation (Window-1 left position)
-WH1             @ $2127 ;W PPPP PPPP  Window position designation (Window-1 right position)
-WH2             @ $2128 ;W PPPP PPPP  Window position designation (Window-2 left position)
-WH3             @ $2129 ;W PPPP PPPP  Window position designation (Window-2 right position)
-WBGLOG          @ $212A ;W 4433 2211  Mask logic settings for Window-1 & 2 on each screen
-WOBJLOG         @ $212B ;W ---- CCOO  Mask logic settings for Window-1 & 2 on each screen
-TM              @ $212C ;W ---O 4321  Main screen designation
-TS              @ $212D ;W ---O 4321  Sub screen designation
-TMW             @ $212E ;W ---O 4321  Window mask designation for main screen
-TSW             @ $212F ;W ---O 4321  Window mask designation for sub screen
-CGSWSEL         @ $2130 ;W MMSS --CD  Initial settings for fixed color addition on screen addition
-CGADSUB         @ $2131 ;W SEBO 4321  Addition/Subtraction & Subtraction designation for each BG screen OBJ & Background color
-COLDATA         @ $2132 ;W BGRD DDDD  Fixed color data for fixed color addition/subtraction
-SETINI          @ $2133 ;W SI-- PBOI  Screen initial setting
-MPYL            @ $2134 ;R MMMM MMMM  Multiplication result (Low)
-MPYM            @ $2135 ;R MMMM MMMM  Multiplication result (Middle)
-MPYH            @ $2136 ;R MMMM MMMM  Multiplication result (High)
-SLHV            @ $2137 ;- SSSS SSSS  Software latch for H/V counter
-OAMDATA         @ $2138 ;RR DDDD DDDD, DDDD DDDD  Read data from OAM
-VMDATAL         @ $2139 ;R DDDD DDDD  Read data from VRAM (Low)
-VMDATAH         @ $213A ;R DDDD DDDD  Read data from VRAM (High)
-CGDATA          @ $213B ;RR DDDD DDDD, -DDD DDDD  Read data from CG-RAM
-OPHCT           @ $213C ;RR HHHH HHHH, ---- ---H  H counter data by external or software latch
-OPVCT           @ $213D ;RR VVVV VVVV, ---- ---V  V counter data by external or software latch
-STAT77          @ $213E ;R TRM- VVVV  PPU status flag & Version number (5C77)
-STAT78          @ $213F ;R FL-D VVVV  PPU status flag & Version number (5C78)
+INIDISP         > $2100 ;W B--- FFFF  Initial settings for screen
+OBJSEL          > $2101 ;W SSSN NAAA  Object size & Object data area designation
+OAMADDL         > $2102 ;W AAAA AAAA  Address for accessing OAM (Low)
+OAMADDH         > $2103 ;W P--- ---A  Address for accessing OAM (High)
+OAMDATA         > $2104 ;W DDDD DDDD  Data for OAM write
+BGMODE          > $2105 ;W SSSS PMMM  BG mode & Character size settings
+MOSAIC          > $2106 ;W MMMM EEEE  Size & Screen designation for mosaic display
+BG1SC           > $2107 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-1)
+BG2SC           > $2108 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-2)
+BG3SC           > $2109 ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-3)
+BG4SC           > $210A ;W AAAA AASS  Address for storing SC-data of each BG & SC size designation (Mode 0-6) (BG-4)
+BG12NBA         > $210B ;W 2222 1111  BG character data area designation (BG-1, 2)
+BG34NBA         > $210C ;W 4444 3333  BG character data area designation (BG-3, 4)
+BG1HOFS         > $210D ;WW XXXX XXXX, ---X XXXX  H scroll value designation for BG-1
+BG1VOFS         > $210E ;WW XXXX XXXX, ---X XXXX  V scroll value designation for BG-1
+BG2HOFS         > $210F ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-2
+BG2VOFS         > $2110 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-2
+BG3HOFS         > $2111 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-3
+BG3VOFS         > $2112 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-3
+BG4HOFS         > $2113 ;WW XXXX XXXX, ---- --XX  H scroll value designation for BG-4
+BG4VOFS         > $2114 ;WW XXXX XXXX, ---- --XX  V scroll value designation for BG-4
+VMAINC          > $2115 ;W T--- GGII  VRAM address increment value designation
+VMADDL          > $2116 ;W AAAA AAAA  Address for VRAM read and write (Low)
+VMADDH          > $2117 ;W AAAA AAAA  Address for VRAM read and write (High)
+VMDATAL         > $2118 ;W AAAA AAAA  Data for VRAM write (Low)
+VMDATAH         > $2119 ;W AAAA AAAA  Data for VRAM write (High)
+M7SEL           > $211A ;W SS-- --VH  Initial setting in screen Mode-7
+M7A             > $211B ;WW AAAA AAAA, AAAA AAAA  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter A (Low, High)
+M7B             > $211C ;WW BBBB BBBB, BBBB BBBB  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter B (Low, High)
+M7C             > $211D ;WW CCCC CCCC, CCCC CCCC  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter C (Low, High)
+M7D             > $211E ;WW DDDD DDDD, DDDD DDDD  Rotation/Enlargement/Reduction in Mode-7, Matrix parameter D (Low, High)
+M7X             > $211F ;WW XXXX XXXX, ---X XXXX  Rotation/Enlargement/Reduction in Mode-7, Center position X0 (Low, High)
+M7Y             > $2120 ;WW YYYY YYYY, ---Y YYYY  Rotation/Enlargement/Reduction in Mode-7, Center position Y0 (Low, High)
+CGADD           > $2121 ;W AAAA AAAA  Address for CG-RAM read and write
+CGDATA          > $2122 ;WW DDDD DDDD, -DDD DDDD  Data for CG-RAM write
+W12SEL          > $2123 ;W EIEI EIEI  Window mask settings (BG-1, 2)
+W34SEL          > $2124 ;W EIEI EIEI  Window mask settings (BG-3, 4)
+WOBJSEL         > $2125 ;W EIEI EIEI  Window mask settings (OBJ, Color)
+WH0             > $2126 ;W PPPP PPPP  Window position designation (Window-1 left position)
+WH1             > $2127 ;W PPPP PPPP  Window position designation (Window-1 right position)
+WH2             > $2128 ;W PPPP PPPP  Window position designation (Window-2 left position)
+WH3             > $2129 ;W PPPP PPPP  Window position designation (Window-2 right position)
+WBGLOG          > $212A ;W 4433 2211  Mask logic settings for Window-1 & 2 on each screen
+WOBJLOG         > $212B ;W ---- CCOO  Mask logic settings for Window-1 & 2 on each screen
+TM              > $212C ;W ---O 4321  Main screen designation
+TS              > $212D ;W ---O 4321  Sub screen designation
+TMW             > $212E ;W ---O 4321  Window mask designation for main screen
+TSW             > $212F ;W ---O 4321  Window mask designation for sub screen
+CGSWSEL         > $2130 ;W MMSS --CD  Initial settings for fixed color addition on screen addition
+CGADSUB         > $2131 ;W SEBO 4321  Addition/Subtraction & Subtraction designation for each BG screen OBJ & Background color
+COLDATA         > $2132 ;W BGRD DDDD  Fixed color data for fixed color addition/subtraction
+SETINI          > $2133 ;W SI-- PBOI  Screen initial setting
+MPYL            < $2134 ;R MMMM MMMM  Multiplication result (Low)
+MPYM            < $2135 ;R MMMM MMMM  Multiplication result (Middle)
+MPYH            < $2136 ;R MMMM MMMM  Multiplication result (High)
+SLHV            < $2137 ;R ---- ----  Software latch for H/V counter
+OAMDATAREAD     < $2138 ;RR DDDD DDDD, DDDD DDDD  Read data from OAM
+VMDATALREAD     < $2139 ;R DDDD DDDD  Read data from VRAM (Low)
+VMDATAHREAD     < $213A ;R DDDD DDDD  Read data from VRAM (High)
+CGDATAREAD      < $213B ;RR DDDD DDDD, -DDD DDDD  Read data from CG-RAM
+OPHCT           < $213C ;RR HHHH HHHH, ---- ---H  H counter data by external or software latch
+OPVCT           < $213D ;RR VVVV VVVV, ---- ---V  V counter data by external or software latch
+STAT77          < $213E ;R TRM- VVVV  PPU status flag & Version number (5C77)
+STAT78          < $213F ;R FL-D VVVV  PPU status flag & Version number (5C78)
 APUIO0          @ $2140 ;RW DDDD DDDD  Communication port with APU
 APUIO1          @ $2141 ;RW DDDD DDDD  Communication port with APU
 APUIO2          @ $2142 ;RW DDDD DDDD  Communication port with APU
 APUIO3          @ $2143 ;RW DDDD DDDD  Communication port with APU
 WMDATA          @ $2180 ;RW DDDD DDDD  DATA to consecutively read from and write to WRAM
-WMADDL          @ $2181 ;W AAAA AAAA  Address to consecutively read and write WRAM (Low)
-WMADDM          @ $2182 ;W AAAA AAAA  Address to consecutively read and write WRAM (Middle)
-WMADDH          @ $2183 ;W ---- ---A  Address to consecutively read and write WRAM (High)
+WMADDL          > $2181 ;W AAAA AAAA  Address to consecutively read and write WRAM (Low)
+WMADDM          > $2182 ;W AAAA AAAA  Address to consecutively read and write WRAM (Middle)
+WMADDH          > $2183 ;W ---- ---A  Address to consecutively read and write WRAM (High)
+
+
 
 ; CPU registers (Internal)
 
-NMITIMEN        @ $4200 ;W N-VH ---C  Enable flag for V-Blank, Timer interrupt & Standard controller read
-WRIO            @ $4201 ;W DDDD DDDD  Programmable I/O port (Out port)
-WRMPYA          @ $4202 ;W AAAA AAAA  Multiplicand by multiplication
-WRMPYB          @ $4203 ;W BBBB BBBB  Multiplier by multiplication
-WRDIVL          @ $4204 ;W CCCC CCCC  Dividend by divide (Low)
-WRDIVH          @ $4205 ;W CCCC CCCC  Dividend by divide (High)
-WRDIVB          @ $4206 ;W BBBB BBBB  Divisor by divide
-HTIMEL          @ $4207 ;W HHHH HHHH  H-count timer settings (Low)
-HTIMEH          @ $4208 ;W ---- ---H  H-count timer settings (High)
-VTIMEL          @ $4209 ;W VVVV VVVV  V-count timer settings (Low)
-VTIMEH          @ $420A ;W ---- ---V  V-count timer settings (High)
-MDMAEN          @ $420B ;W 7654 3210  Channel designation for general purpose DMA & Trigger (start)
-HDMAEN          @ $420C ;W 7654 3210  Channel designation for H-DMA
-MEMSEL          @ $420D ;W ---- ---A  Access cycle designation in memory [2] area
-RDNMI           @ $4210 ;R N--- VVVV  NMI flag by V-Blank & Version number
-TIMEUP          @ $4211 ;R T--- ----  IRQ flag by H/V count timer
-HVBJOY          @ $4212 ;R VH-- ---C  H/V Blank flag & Standard controller enable flag
-RDIO            @ $4213 ;R DDDD DDDD  Programmable I/O port (In port)
-RDDIVL          @ $4214 ;R AAAA AAAA  Quotient of divide result (Low)
-RDDIVH          @ $4215 ;R AAAA AAAA  Quotient of divide result (High)
-RDMPYL          @ $4216 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (Low)
-RDMPYH          @ $4217 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (High)
-STDCNTRL1L      @ $4218 ;R AXLR ----  Data for standard controller 1 (Low)
-STDCNTRL1H      @ $4219 ;R BYST UDLR  Data for standard controller 1 (High)
-STDCNTRL2L      @ $421A ;R AXLR ----  Data for standard controller 2 (Low)
-STDCNTRL2H      @ $421B ;R BYST UDLR  Data for standard controller 2 (High)
-STDCNTRL3L      @ $421C ;R AXLR ----  Data for standard controller 3 (Low)
-STDCNTRL3H      @ $421D ;R BYST UDLR  Data for standard controller 3 (High)
-STDCNTRL4L      @ $421E ;R AXLR ----  Data for standard controller 4 (Low)
-STDCNTRL4H      @ $421F ;R BYST UDLR  Data for standard controller 4 (High)
+NMITIMEN        > $4200 ;W N-VH ---C  Enable flag for V-Blank, Timer interrupt & Standard controller read
+WRIO            > $4201 ;W DDDD DDDD  Programmable I/O port (Out port)
+WRMPYA          > $4202 ;W AAAA AAAA  Multiplicand by multiplication
+WRMPYB          > $4203 ;W BBBB BBBB  Multiplier by multiplication
+WRDIVL          > $4204 ;W CCCC CCCC  Dividend by divide (Low)
+WRDIVH          > $4205 ;W CCCC CCCC  Dividend by divide (High)
+WRDIVB          > $4206 ;W BBBB BBBB  Divisor by divide
+HTIMEL          > $4207 ;W HHHH HHHH  H-count timer settings (Low)
+HTIMEH          > $4208 ;W ---- ---H  H-count timer settings (High)
+VTIMEL          > $4209 ;W VVVV VVVV  V-count timer settings (Low)
+VTIMEH          > $420A ;W ---- ---V  V-count timer settings (High)
+MDMAEN          > $420B ;W 7654 3210  Channel designation for general purpose DMA & Trigger (start)
+HDMAEN          > $420C ;W 7654 3210  Channel designation for H-DMA
+MEMSEL          > $420D ;W ---- ---A  Access cycle designation in memory [2] area
+RDNMI           < $4210 ;R N--- VVVV  NMI flag by V-Blank & Version number
+TIMEUP          < $4211 ;R T--- ----  IRQ flag by H/V count timer
+HVBJOY          < $4212 ;R VH-- ---C  H/V Blank flag & Standard controller enable flag
+RDIO            < $4213 ;R DDDD DDDD  Programmable I/O port (In port)
+RDDIVL          < $4214 ;R AAAA AAAA  Quotient of divide result (Low)
+RDDIVH          < $4215 ;R AAAA AAAA  Quotient of divide result (High)
+RDMPYL          < $4216 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (Low)
+RDMPYH          < $4217 ;R CCCC CCCC  Product of multiplication result or remainder of divide result (High)
+STDCNTRL1L      < $4218 ;R AXLR ----  Data for standard controller 1 (Low)
+STDCNTRL1H      < $4219 ;R BYST UDLR  Data for standard controller 1 (High)
+STDCNTRL2L      < $421A ;R AXLR ----  Data for standard controller 2 (Low)
+STDCNTRL2H      < $421B ;R BYST UDLR  Data for standard controller 2 (High)
+STDCNTRL3L      < $421C ;R AXLR ----  Data for standard controller 3 (Low)
+STDCNTRL3H      < $421D ;R BYST UDLR  Data for standard controller 3 (High)
+STDCNTRL4L      < $421E ;R AXLR ----  Data for standard controller 4 (Low)
+STDCNTRL4H      < $421F ;R BYST UDLR  Data for standard controller 4 (High)
 
 
 
 ; Old Style Joypad Registers
 
 JOYSER0         @ $4016 ;R:---- --31 W:---- -xxL
-JOYSER1         @ $4017 ;R ---- --42
+JOYSER1         < $4017 ;R ---- --42
 
 
 
