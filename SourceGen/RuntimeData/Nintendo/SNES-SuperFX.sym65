@@ -1,0 +1,70 @@
+; 6502bench SNES Super FX registers symbol
+; Reference:
+;   Super Nintendo Entertainment System Development Manual
+; Copyright 2022 absindx
+;   Follow the original license. (Apache 2.0)
+
+*SYNOPSIS Super NES Super FX registers
+
+; GSU internal registers $xx3000
+;   bank = $00-$3F, $80-$BF
+;   %?0??????xxxxxxxxxxxxxxxx
+;   %010000000000000000000000   CompareMask  (0/1)
+;   %000000000000000000000000   CompareValue (1)
+;   %000000001111111111111111   AddressMask  (x)
+*MULTI_MASK %010000000000000000000000 %000000000000000000000000 %000000001111111111111111
+
+; General registers
+
+GSU_R0L         @ $3000 ;RW DDDD DDDD  Default source/destination register (Low)
+GSU_R0H         @ $3001 ;RW DDDD DDDD  Default source/destination register (High)
+GSU_R1L         @ $3002 ;RW DDDD DDDD  PLOT instruction, X coordinate (Low)
+GSU_R1H         @ $3003 ;RW DDDD DDDD  PLOT instruction, X coordinate (High)
+GSU_R2L         @ $3004 ;RW DDDD DDDD  PLOT instruction, Y coordinate (Low)
+GSU_R2H         @ $3005 ;RW DDDD DDDD  PLOT instruction, Y coordinate (High)
+GSU_R3L         @ $3006 ;RW DDDD DDDD  General register (Low)
+GSU_R3H         @ $3007 ;RW DDDD DDDD  General register (High)
+GSU_R4L         @ $3008 ;RW DDDD DDDD  LMULT instruction, lower 16 bits (Low)
+GSU_R4H         @ $3009 ;RW DDDD DDDD  LMULT instruction, lower 16 bits (High)
+GSU_R5L         @ $300A ;RW DDDD DDDD  General register (Low)
+GSU_R5H         @ $300B ;RW DDDD DDDD  General register (High)
+GSU_R6L         @ $300C ;RW DDDD DDDD  FMULT and LMULT instructions, multiplication (Low)
+GSU_R6H         @ $300D ;RW DDDD DDDD  FMULT and LMULT instructions, multiplication (High)
+GSU_R7L         @ $300E ;RW DDDD DDDD  MERGE instruction, source1 (Low)
+GSU_R7H         @ $300F ;RW DDDD DDDD  MERGE instruction, source1 (High)
+GSU_R8L         @ $3010 ;RW DDDD DDDD  MERGE instruction, source2 (Low)
+GSU_R8H         @ $3011 ;RW DDDD DDDD  MERGE instruction, source2 (High)
+GSU_R9L         @ $3012 ;RW DDDD DDDD  General register (Low)
+GSU_R9H         @ $3013 ;RW DDDD DDDD  General register (High)
+GSU_R10L        @ $3014 ;RW DDDD DDDD  General register (Low)
+GSU_R10H        @ $3015 ;RW DDDD DDDD  General register (High)
+GSU_R11L        @ $3016 ;RW DDDD DDDD  LINK instruction destination register (Low)
+GSU_R11H        @ $3017 ;RW DDDD DDDD  LINK instruction destination register (High)
+GSU_R12L        @ $3018 ;RW DDDD DDDD  LOOP instruction counter (Low)
+GSU_R12H        @ $3019 ;RW DDDD DDDD  LOOP instruction counter (High)
+GSU_R13L        @ $301A ;RW DDDD DDDD  LOOP instruction branch (Low)
+GSU_R13H        @ $301B ;RW DDDD DDDD  LOOP instruction branch (High)
+GSU_R14L        @ $301C ;RW AAAA AAAA  Game pak ROM address pointer (Low)
+GSU_R14H        @ $301D ;RW AAAA AAAA  Game pak ROM address pointer (High)
+GSU_R15L        @ $301E ;RW PPPP PPPP  Program counter (Low)
+GSU_R15H        @ $301F ;RW PPPP PPPP  Program counter (High)
+
+; Other registers
+
+GSU_SFRL        @ $3030 ;RW -RGO SCZ-  Flag register
+GSU_SFRH        @ $3031 ;RW I--B HL21  Status register
+GSU_PBR         @ $3034 ;RW AAAA AAAA  Program bank register
+GSU_ROMBR       < $3036 ;R AAAA AAAA  Game pak ROM bank register
+GSU_RAMBR       < $303C ;RW ---- ---A  Game pak RAM bank register
+GSU_CBRL        < $303E ;RW AAAA ----  Cache base register (Low)
+GSU_CBRH        < $303F ;RW AAAA AAAA  Cache base register (High)
+GSU_SCBR        > $3038 ;W AAAA AAAA  Screen base register
+GSU_SCMR        > $303A ;W --HE EHGG  Screen mode register
+;GSU_COLR       - $30xx ;- CCCC CCCC  Color register (Not accessible from Super NES)
+;GSU_POR        - $30xx ;- ---O FNDT  Plot option register (Not accessible from Super NES)
+GSU_BRAMR       > $3033 ;W ---- ---B  Back-up RAM register
+GSU_VCR         < $303B ;R VVVV VVVV  Version code register
+GSU_CFGR        > $3037 ;W I-S- ----  Config register
+GSU_CLSR        > $3039 ;W ---- ---C  Clock select register
+
+
