@@ -31,6 +31,7 @@ namespace SourceGen.Tests.WpfGui {
     /// Source generation test runner.
     /// </summary>
     public partial class GenTestRunner : Window, INotifyPropertyChanged {
+        // Full set of results from last run.
         private List<GenTest.GenTestResults> mLastResults;
 
         private BackgroundWorker mWorker;
@@ -208,7 +209,7 @@ namespace SourceGen.Tests.WpfGui {
                 outputTextBox.Text = string.Empty;
                 return;
             }
-            if (mLastResults == null && mLastResults.Count <= sel) {
+            if (mLastResults == null || mLastResults.Count <= sel) {
                 Debug.WriteLine("SelIndexChanged to " + sel + ", not available");
                 return;
             }
