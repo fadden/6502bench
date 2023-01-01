@@ -3,4 +3,5 @@ license.  The text below must be included in Derivative Works per the terms.]
 ----------
 
 This product contains source code or data files from 6502bench.  You can
-visit the project web page at https://6502bench.com/ .
+visit the project web page at https://6502bench.com/ or
+https://fadden.github.io/6502bench .
