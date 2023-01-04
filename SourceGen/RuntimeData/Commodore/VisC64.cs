@@ -124,14 +124,14 @@ namespace RuntimeData.Commodore {
                     new VisParamDescr("File offset (hex)",
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Number of items",
-                        P_COUNT, typeof(int), 1, 256, 0, 96),
+                        P_COUNT, typeof(int), 1, 512, 0, 96),
                 }),
             new VisDescr(VIS_GEN_MULTI_COLOR_FONT, "C64 Multi-Color Font", VisDescr.VisType.Bitmap,
                 new VisParamDescr[] {
                     new VisParamDescr("File offset (hex)",
                         P_OFFSET, typeof(int), 0, 0x00ffffff, VisParamDescr.SpecialMode.Offset, 0),
                     new VisParamDescr("Number of items",
-                        P_COUNT, typeof(int), 1, 256, 0, 96),
+                        P_COUNT, typeof(int), 1, 512, 0, 96),
                 }),
         };
 
