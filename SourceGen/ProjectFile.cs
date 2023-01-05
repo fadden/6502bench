@@ -54,6 +54,9 @@ namespace SourceGen {
         // may get lost as soon as they save the file.
         public const int CONTENT_VERSION = 5;
 
+        // Max JSON file length.
+        internal const int MAX_JSON_LENGTH = 64 * 1024 * 1024;
+
         private static readonly bool ADD_CRLF = true;
 
 
@@ -567,6 +570,7 @@ namespace SourceGen {
             }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
+            ser.MaxJsonLength = ProjectFile.MAX_JSON_LENGTH;    // increase max len beyond 2MB
             string cereal = ser.Serialize(spf);
             sb.Append(cereal);
 
@@ -586,6 +590,10 @@ namespace SourceGen {
         public static bool DeserializeProject(string cereal, DisasmProject proj,
                 FileLoadReport report) {
             JavaScriptSerializer ser = new JavaScriptSerializer();
+            // Increase max size of JSON data.  We need to make the deserialization limit larger
+            // than the serialization limit because we insert additional newlines to make the
+            // file more readable.  1/64th of max is probably about right. TODO: fix this properly.
+            ser.MaxJsonLength = ProjectFile.MAX_JSON_LENGTH + (ProjectFile.MAX_JSON_LENGTH / 64);
             SerializableProjectFile1 spf;
             try {
                 spf = ser.Deserialize<SerializableProjectFile1>(cereal);
