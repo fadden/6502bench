@@ -122,8 +122,8 @@ The zero-page argument for the Rockwell BBR/BBS instructions cannot be
 formatted.
 
 To learn about other areas for potential future development, visit the
-wiki section for the
-[current "TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
+wiki section for the current
+["TO DO" list](https://github.com/fadden/6502bench/wiki/TO-DO-List).
 
 To learn about the past, check the
 [change log](https://github.com/fadden/6502bench/wiki/Change-Log).
@@ -139,13 +139,13 @@ You need to have Microsoft .NET Framework v4.6.2 or later installed.  Most
 people will already have this.  If SourceGen doesn't seem to want to start,
 download the latest version (currently v4.8)
 [directly from Microsoft](https://dotnet.microsoft.com/download/dotnet-framework/net48).
-The framework requires Win7 SP1, Win8.1, or Win10 updated through at least
-the Anniversary Update (1607).  (One user who had trouble with the 4.7.2
-installer was able to get the 4.6.2 installer to work.)
+The framework requires Win7 SP1, Win8.1, Win10 updated through at least the
+Anniversary Update (1607), or Win11.  (One user who had trouble with the
+4.7.2 installer was able to get the 4.6.2 installer to work.)
 
-SourceGen does not currently run on Linux or Mac OS X.  My understanding is
-that .NET apps don't work under WINE, so it can only be run on a full
-Windows system emulation.
+SourceGen does not currently run on Linux or Mac OS.  My understanding is
+that WPF-based .NET apps don't work under Mono or WINE, so SourceGen can only
+be run on a full Windows system emulator.
 
 (SourceGen versions 1.0 and 1.1 used the WinForms API, which has been
 implemented for [Mono](https://www.mono-project.com/), but after
