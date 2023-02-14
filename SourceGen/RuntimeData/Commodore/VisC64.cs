@@ -433,7 +433,11 @@ namespace RuntimeData.Commodore {
         }
 
         private const byte TRANSPARENT = 16;
-        private const byte BORDER_COLOR = 17;
+#if SHOW_BORDER
+        private const byte BORDER_COLOR = 0;
+#else
+        private const byte BORDER_COLOR = TRANSPARENT;
+#endif
 
         // C64 colors, from http://unusedino.de/ec64/technical/misc/vic656x/colors/
         // (the ones on https://www.c64-wiki.com/wiki/Color looked wrong)
@@ -455,11 +459,6 @@ namespace RuntimeData.Commodore {
             vb.SetColor(14, 0xff, 0x6c, 0x5e, 0xb5);    // 14=light blue
             vb.SetColor(15, 0xff, 0x95, 0x95, 0x95);    // 15=light grey
             vb.SetColor(16, 0, 0, 0, 0);                // 16=transparent
-#if SHOW_BORDER
-            vb.SetColor(17, 0xff, 0x00, 0xd6, 0xff);    // 17=grid border
-#else
-            vb.SetColor(17, 0, 0, 0, 0);                // 17=grid border
-#endif
         }
     }
 }

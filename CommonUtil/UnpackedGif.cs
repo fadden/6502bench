@@ -346,6 +346,12 @@ namespace CommonUtil {
                     " height=" + grb.ImageHeight);
                 Debug.WriteLine("    localCT=" + grb.LocalColorTableFlag + " size=" +
                     grb.LocalColorTableSize + " itrl=" + grb.InterlaceFlag);
+                for (int i = 0; i < grb.LocalColorTable.Length; i += 3) {
+                    Debug.WriteLine("      " + (i / 3) + ": $" +
+                        grb.LocalColorTable[i].ToString("x2") + " $" +
+                        grb.LocalColorTable[i + 1].ToString("x2") + " $" +
+                        grb.LocalColorTable[i + 2].ToString("x2"));
+                }
             }
         }
     }
