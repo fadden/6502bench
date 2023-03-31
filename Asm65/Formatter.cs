@@ -1121,8 +1121,17 @@ namespace Asm65 {
             sb.Append(mHexDumpBuffer);
         }
 
+        /// <summary>
+        /// Formats up to 16 bytes of data and appends it to the StringBuilder.
+        /// </summary>
+        /// <param name="data">Reference to data.</param>
+        /// <param name="offset">Start offset.</param>
+        /// <param name="addr">Address to put at start of line.</param>
+        /// <param name="length">Number of bytes to format.</param>
+        /// <param name="sb">StringBuilder to append the data to.</param>
         public void FormatHexDump(byte[] data, int offset, int addr, int length,
                 StringBuilder sb) {
+            Debug.Assert(length <= 16);
             FormatHexDumpCommon(data, offset, addr, length);
             sb.Append(mHexDumpBuffer);
         }
