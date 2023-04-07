@@ -45,6 +45,7 @@ namespace SourceGen.WpfGui {
 
         /// <summary>
         /// Reference to main controller.  Needed to push settings out when Apply/OK is clicked.
+        /// TODO: use an Event instead?
         /// </summary>
         private MainController mMainCtrl;
 

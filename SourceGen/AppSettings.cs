@@ -187,6 +187,7 @@ namespace SourceGen {
         /// </summary>
         /// <returns></returns>
         public AppSettings GetCopy() {
+            // TODO: make this a copy constructor?
             AppSettings copy = new AppSettings();
             //copy.mSettings.EnsureCapacity(mSettings.Count);
             foreach (KeyValuePair<string, string> kvp in mSettings) {
@@ -202,7 +203,7 @@ namespace SourceGen {
         /// discarding the object itself, which is useful in case something has cached a
         /// reference to the singleton.
         /// </summary>
-        /// <param name="newSettings"></param>
+        /// <param name="newSettings">Object with new settings.</param>
         public void ReplaceSettings(AppSettings newSettings) {
             // Clone the new list, and stuff it into the old object.  This way the
             // objects aren't sharing lists.
@@ -213,8 +214,7 @@ namespace SourceGen {
         /// <summary>
         /// Merges settings from another settings object into this one.
         /// </summary>
-        /// <param name="settings"></param>
-        /// <param name="newSettings"></param>
+        /// <param name="newSettings">Object with new settings.</param>
         public void MergeSettings(AppSettings newSettings) {
             foreach (KeyValuePair<string, string> kvp in newSettings.mSettings) {
                 mSettings[kvp.Key] = kvp.Value;

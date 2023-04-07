@@ -35,8 +35,8 @@ limitations under the License.
         <system:String x:Key="str_OmfFileLibraryStr">a Library file</system:String>
         <system:String x:Key="str_OmfFileIndeterminateStr">a file of indeterminate type</system:String>
 
-        <system:String x:Key="str_OmfFileSummaryFmt">This is {0}, with {1} segment</system:String>
-        <system:String x:Key="str_OmfFileSummaryPlFmt">This is {0}, with {1} segments</system:String>
+        <system:String x:Key="str_OmfFileSummaryFmt">This is {0}, with {1} segment (double-click to examine):</system:String>
+        <system:String x:Key="str_OmfFileSummaryPlFmt">This is {0}, with {1} segments (double-click to examine):</system:String>
         <system:String x:Key="str_OmfFileNot">This is not an Apple II OMF file</system:String>
 
         <system:String x:Key="str_OmfLoaderFail">Unable to prepare data file for project.</system:String>

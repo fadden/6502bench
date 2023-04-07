@@ -42,7 +42,7 @@ limitations under the License.
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- DataGrid gives us Ctrl+A select-all and Ctrl+C text-copy built in. -->
+        <!-- DataGrid gives us Ctrl+A (select-all) and Ctrl+C (text-copy) built in. -->
         <DataGrid Name="hexDumpData" Grid.Row="0"
                   IsReadOnly="True"
                   ItemsSource="{Binding HexDumpLines}"
@@ -58,6 +58,8 @@ limitations under the License.
                   ScrollViewer.CanContentScroll="True"
                   VerticalScrollBarVisibility="Visible">
             <DataGrid.Columns>
+                <!-- Unqualified {Binding} creates a Binding object with default values.
+                This is how we reference the strings we get from the virtualized IList. -->
                 <DataGridTextColumn Header="Offset   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  Text"
                                     Width="491" Binding="{Binding}"/>
             </DataGrid.Columns>

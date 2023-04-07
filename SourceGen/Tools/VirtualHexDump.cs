@@ -33,7 +33,6 @@ namespace SourceGen.Tools {
     /// </remarks>
     public class VirtualHexDump : IList, INotifyCollectionChanged, INotifyPropertyChanged {
         /// <summary>
-        /// <summary>
         /// Data to display.  We currently require that the entire file fit in memory,
         /// which is reasonable because we impose a 2^24 (16MB) limit.
         /// </summary>

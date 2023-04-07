@@ -64,6 +64,12 @@ namespace PluginCommon {
             return mPalette[pix];
         }
 
+        /// <summary>
+        /// Gets the color index for a single pixel.
+        /// </summary>
+        /// <param name="x">X coordinate.</param>
+        /// <param name="y">Y coordinate.</param>
+        /// <returns>Color index.</returns>
         public byte GetPixelIndex(int x, int y) {
             return mData[x + y * Width];
         }

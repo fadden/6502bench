@@ -323,7 +323,8 @@ namespace PluginCommon {
         /// Will be null for direct-color images.  Do not modify.
         /// </summary>
         /// <remarks>
-        /// It's possible, but weird, for the array to have a length of zero.
+        /// It's possible, but weird, for the array to have a length of zero.  For best results
+        /// with GIF images, only one palette entry should be transparent.
         /// </remarks>
         int[] GetPalette();
 
