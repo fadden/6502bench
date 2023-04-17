@@ -186,7 +186,7 @@ namespace PluginCommon {
         /// <remarks>
         /// Might want a way to specify that the background shouldn't be drawn at all.
         /// </remarks>
-        /// <param name="vb">Bitma to draw on.</param>
+        /// <param name="vb">Bitmap to draw on.</param>
         /// <param name="ch">Character to draw.</param>
         /// <param name="xc">X coord of upper-left pixel.</param>
         /// <param name="yc">Y coord of upper-left pixel.</param>

@@ -315,6 +315,11 @@ namespace SourceGen {
         /// <param name="value">Setting value (integer enum index).</param>
         public void SetEnum(string name, Type enumType, int value) {
             string newVal = Enum.GetName(enumType, value);
+            if (newVal == null) {
+                // Shouldn't be possible if an enum value of the correct type is passed in.
+                Debug.WriteLine("Unable to get enum name type=" + enumType + " value=" + value);
+                return;
+            }
             if (!mSettings.TryGetValue(name, out string oldValue) || oldValue != newVal) {
                 mSettings[name] = newVal;
                 Dirty = true;
