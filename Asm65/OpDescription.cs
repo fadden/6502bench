@@ -750,13 +750,13 @@ namespace Asm65 {
             { OpName.SMB7, SMB_DESC },
         };
 
-        private static string BBR_DESC =
+        private const string BBR_DESC =
             "Branches to a relative address if the specified bit in memory is zero.";
-        private static string BBS_DESC =
+        private const string BBS_DESC =
             "Branches to a relative address if the specified bit in memory is one.";
-        private static string RMB_DESC =
+        private const string RMB_DESC =
             "Clears a bit in memory.";
-        private static string SMB_DESC =
+        private const string SMB_DESC =
             "Sets a bit in memory.";
 
 
