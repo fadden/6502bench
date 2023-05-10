@@ -1171,7 +1171,7 @@ namespace SourceGen {
                         " (" + mAnalyzerTags[i] + ")");
                     return false;
                 }
-                if (mAnattribs[offset].IsInstruction) {
+                if (mAnattribs[i].IsInstruction) {
                     LogW(offset, "SIDF rej: not for use with instructions");
                     return false;
                 }
