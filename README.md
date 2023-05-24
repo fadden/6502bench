@@ -143,9 +143,8 @@ The framework requires Win7 SP1, Win8.1, Win10 updated through at least the
 Anniversary Update (1607), or Win11.  (One user who had trouble with the
 4.7.2 installer was able to get the 4.6.2 installer to work.)
 
-SourceGen does not currently run on Linux or Mac OS.  My understanding is
-that WPF-based .NET apps don't work under Mono or WINE, so SourceGen can only
-be run on a full Windows system emulator.
+SourceGen does not currently run on Linux or Mac OS.  This may be changing
+with the development of [wine-mono](https://github.com/madewokherd/wine-mono).
 
 (SourceGen versions 1.0 and 1.1 used the WinForms API, which has been
 implemented for [Mono](https://www.mono-project.com/), but after
