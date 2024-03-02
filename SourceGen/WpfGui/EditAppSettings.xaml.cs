@@ -38,16 +38,17 @@ namespace SourceGen.WpfGui {
     /// </summary>
     public partial class EditAppSettings : Window, INotifyPropertyChanged {
         /// <summary>
+        /// Event that the controller can subscribe to if it wants to be notified when the
+        /// "Apply" or "OK" button is hit.
+        /// </summary>
+        public event SettingsAppliedHandler SettingsApplied;
+        public delegate void SettingsAppliedHandler();
+
+        /// <summary>
         /// Reference to main window.  Needed for examination of the code list font and
         /// column widths.
         /// </summary>
         private MainWindow mMainWin;
-
-        /// <summary>
-        /// Reference to main controller.  Needed to push settings out when Apply/OK is clicked.
-        /// TODO: use an Event instead?
-        /// </summary>
-        private MainController mMainCtrl;
 
         /// <summary>
         /// Copy of settings that we make changes to.  On "Apply" or "OK", this is pushed
@@ -103,14 +104,13 @@ namespace SourceGen.WpfGui {
         }
 
 
-        public EditAppSettings(Window owner, MainWindow mainWin, MainController mainCtrl,
-                Tab initialTab, AssemblerInfo.Id initialAsmId) {
+        public EditAppSettings(Window owner, MainWindow mainWin, Tab initialTab,
+                AssemblerInfo.Id initialAsmId) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mMainWin = mainWin;
-            mMainCtrl = mainCtrl;
             mInitialTab = initialTab;
             mInitialAsmId = initialAsmId;
 
@@ -204,13 +204,24 @@ namespace SourceGen.WpfGui {
                 // QueryVersions() can sometimes be slow under Win10 (mid 2019), possibly
                 // because of the built-in malware detection, so pop up a wait cursor.
                 Mouse.OverrideCursor = Cursors.Wait;
-                mMainCtrl.SetAppSettings(mSettings);
+                AppSettings.Global.ReplaceSettings(mSettings);
+                OnSettingsApplied();
                 AsmGen.AssemblerVersionCache.QueryVersions();
             } finally {
                 Mouse.OverrideCursor = null;
             }
 
             IsDirty = false;
+        }
+
+        /// <summary>
+        /// Raises the "settings applied" event.
+        /// </summary>
+        private void OnSettingsApplied() {
+            SettingsAppliedHandler handler = SettingsApplied;
+            if (handler != null) {
+                handler();
+            }
         }
 
 

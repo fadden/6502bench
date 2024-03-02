@@ -454,20 +454,6 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Replaces the contents of the global settings object with the new settings,
-        /// then applies them to the project.
-        /// </summary>
-        /// <param name="settings">New settings.</param>
-        public void SetAppSettings(AppSettings settings) {
-            AppSettings.Global.ReplaceSettings(settings);
-            ApplyAppSettings();
-
-            // We get called whenever Apply or OK is hit in the settings editor, so it's
-            // a pretty good time to save the settings out.
-            SaveAppSettings();
-        }
-
-        /// <summary>
         /// Sets the app window's location and size.  This should be called before the window has
         /// finished initialization.
         /// </summary>
@@ -1519,22 +1505,30 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Opens the application settings dialog.  All changes to settings are made directly
-        /// to the AppSettings.Global object.
+        /// Handles Edit &gt; App Settings.
         /// </summary>
         public void EditAppSettings() {
             ShowAppSettings(mMainWin, WpfGui.EditAppSettings.Tab.Unknown,
                 AsmGen.AssemblerInfo.Id.Unknown);
         }
 
+        /// <summary>
+        /// Opens the application settings dialog.  All changes to settings are made directly
+        /// to the AppSettings.Global object.
+        /// </summary>
         public void ShowAppSettings(Window owner, EditAppSettings.Tab initialTab,
                     AsmGen.AssemblerInfo.Id initialAsmId) {
-            // TODO: this can be done in a less-awkward way by subscribing to an event
-            EditAppSettings dlg = new EditAppSettings(owner, mMainWin, this,
-                initialTab, initialAsmId);
+            EditAppSettings dlg = new EditAppSettings(owner, mMainWin, initialTab, initialAsmId);
+            dlg.SettingsApplied += SetAppSettings;      // called when "Apply" is clicked
             dlg.ShowDialog();
+        }
 
-            // The settings code calls SetAppSettings() directly whenever "Apply" is hit.
+        /// <summary>
+        /// Applies settings to the project, and saves them to the settings files.
+        /// </summary>
+        private void SetAppSettings() {
+            ApplyAppSettings();
+            SaveAppSettings();
         }
 
         public void HandleCodeListDoubleClick(int row, int col) {
