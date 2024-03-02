@@ -165,7 +165,7 @@ namespace SourceGen.Tools.Omf {
                 }
                 first = false;
 
-                Debug.Assert(seg.FileLength > 0);
+                Debug.Assert(seg != null && seg.FileLength > 0);
 
                 SegmentList.Add(seg);
                 offset += seg.FileLength;

@@ -256,7 +256,7 @@ namespace SourceGen {
             // Load the settings from the file.  If this fails we have no way to tell the user,
             // so just keep going.
             LoadAppSettings();
-            SetAppWindowLocation();
+            SetAppWindowLocation();     // <-- this causes WindowLoaded to fire
         }
 
         /// <summary>
@@ -1529,6 +1529,7 @@ namespace SourceGen {
 
         public void ShowAppSettings(Window owner, EditAppSettings.Tab initialTab,
                     AsmGen.AssemblerInfo.Id initialAsmId) {
+            // TODO: this can be done in a less-awkward way by subscribing to an event
             EditAppSettings dlg = new EditAppSettings(owner, mMainWin, this,
                 initialTab, initialAsmId);
             dlg.ShowDialog();

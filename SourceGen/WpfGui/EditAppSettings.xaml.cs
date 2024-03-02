@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Win32;
 
 using Asm65;
@@ -30,7 +31,6 @@ using CommonUtil;
 using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
 using AssemblerConfig = SourceGen.AsmGen.AssemblerConfig;
 using ExpressionMode = Asm65.Formatter.FormatConfig.ExpressionMode;
-using System.Windows.Input;
 
 namespace SourceGen.WpfGui {
     /// <summary>
