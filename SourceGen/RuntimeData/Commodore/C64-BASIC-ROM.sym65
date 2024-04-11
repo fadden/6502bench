@@ -1,0 +1,183 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Project 64, 64MAP10.TXT, June 1996, etext #41
+;   http://unusedino.de/ec64/technical/project64/memory_maps.html
+;
+; - PageTable's C64 BASIC & KERNAL ROM Disassembly
+;   https://www.pagetable.com/c64ref/c64disasm/
+;
+; - "Mapping the Commodore 64", by Sheldon Leemon
+;   Compute! Publications Inc. (1984), ISBN 0-942386-23-X 
+;   https://archive.org/details/Compute_s_Mapping_the_Commodore_64
+
+*SYNOPSIS BASIC ROM ($a000-$bfff) labels (functions and vectors)
+
+coldStartVec    @ $a000 2    ;Cold Start Vector
+warmStartVec    @ $a002 2    ;Warm Start Vector
+fndfor          @ $a38a      ;Find FOR/GOSUB Entry on Stack
+bltu            @ $a3b8      ;Open Space in Memory
+getstk          @ $a3fb      ;Check Stack Depth
+reason          @ $a408      ;Check Memory Overlap
+omerr           @ $a435      ;Output ?OUT OF MEMORY Error
+error           @ $a437      ;Error Routine
+errfin          @ $a469      ;Break Entry
+ready           @ $a474      ;Restart BASIC
+main            @ $a480      ;Input & Identify BASIC Line
+main1           @ $a49c      ;Get Line Number & Tokenise Text
+inslin          @ $a4a2      ;Insert BASIC Text
+linkprg         @ $a533      ;Rechain Lines
+inlin           @ $a560      ;Input Line Into Buffer
+crunch          @ $a579      ;Tokenise Input Buffer
+fndlin          @ $a613      ;Search for Line Number
+scrtch          @ $a642      ;Perform new
+clear           @ $a65e      ;Perform clr
+stxpt           @ $a68e      ;Reset TXTPTR
+list            @ $a69c      ;Perform list
+qplop           @ $a717      ;Handle LIST Character
+for             @ $a742      ;Perform for
+newstt          @ $a7ae      ;BASIC Warm Start
+ckeol           @ $a7c4      ;Check End of Program
+gone            @ $a7e1      ;Prepare to execute statement
+gone3           @ $a7ed      ;Perform BASIC Keyword
+restor3         @ $a81d      ;Perform restore
+stop            @ $a82c      ;Perform stop, end, break
+cont            @ $a857      ;Perform cont
+run             @ $a871      ;Perform run
+gosub           @ $a883      ;Perform gosub
+goto            @ $a8a0      ;Perform goto
+return          @ $a8d2      ;Perform return
+data            @ $a8f8      ;Perform data
+datan           @ $a906      ;Search for Next Statement / Line
+if              @ $a928      ;Perform if
+rem             @ $a93b      ;Perform rem
+ongoto          @ $a94b      ;Perform on
+linget          @ $a96b      ;Fetch linnum From BASIC
+let             @ $a9a5      ;Perform let
+putint          @ $a9c4      ;Assign Integer
+ptflpt          @ $a9d6      ;Assign Floating Point
+putstr          @ $a9d9      ;Assign String
+puttim          @ $a9e3      ;Assign TI$
+getspt          @ $aa2c      ;Add Digit to FAC#1
+printn          @ $aa80      ;Perform print#
+cmd             @ $aa86      ;Perform cmd
+strdon          @ $aa9a      ;Print String From Memory
+print           @ $aaa0      ;Perform print
+varop           @ $aab8      ;Output Variable
+crdo            @ $aad7      ;Output CR/LF
+comprt          @ $aae8      ;Handle comma, TAB(, SPC(
+strout          @ $ab1e      ;Output String
+outspc          @ $ab3b      ;Output Format Character
+doagin          @ $ab4d      ;Handle Bad Data
+get             @ $ab7b      ;Perform get
+inputn          @ $aba5      ;Perform input#
+input           @ $abbf      ;Perform input
+bufful          @ $abea      ;Read Input Buffer
+qinlin          @ $abf9      ;Do Input Prompt
+read            @ $ac06      ;Perform read
+rdget           @ $ac35      ;General Purpose Read Routine
+next            @ $ad1e      ;Perform next
+donext          @ $ad61      ;Check Valid Loop
+frmnum          @ $ad8a      ;Confirm Result
+frmevl          @ $ad9e      ;Evaluate Expression in Text
+eval            @ $ae83      ;Evaluate Single Term
+qdot            @ $aead      ;Continue Expression
+parchk          @ $aef1      ;Expression in Brackets
+chkcls          @ $aef7      ;Confirm Character
+synerr          @ $af08      ;Output ?SYNTAX Error
+domin           @ $af0d      ;Set up NOT Function
+rsvvar          @ $af14      ;Identify Reserved Variable
+isvar           @ $af28      ;Search for Variable
+tisasc          @ $af48      ;Convert TI to ASCII String
+isfun           @ $afa7      ;Identify Function Type
+strfun          @ $afb1      ;Evaluate String Function
+numfun          @ $afd1      ;Evaluate Numeric Function
+orop            @ $afe6      ;Perform or, and
+dorel           @ $b016      ;Perform <, =, >
+numrel          @ $b01b      ;Numeric Comparison
+strrel          @ $b02e      ;String Comparison
+dim             @ $b07e      ;Perform dim
+ptrget          @ $b08b      ;Identify Variable
+ordvar          @ $b0e7      ;Locate Ordinary Variable
+notfns          @ $b11d      ;Create New Variable
+notevl          @ $b128      ;Create Variable
+aryget          @ $b194      ;Allocate Array Pointer Space
+facinx          @ $b1aa      ;FAC#1 to Integer in (AC/YR)
+intidx          @ $b1b2      ;Evaluate Text for Integer
+ayint           @ $b1bf      ;FAC#1 to Positive Integer
+isary           @ $b1d1      ;Get Array Parameters
+fndary          @ $b218      ;Find Array
+bserr           @ $b245      ;?BAD SUBSCRIPT/?ILLEGAL QUANTITY
+notfdd          @ $b261      ;Create Array
+inlpn2          @ $b30e      ;Locate Element in Array
+umult           @ $b34c      ;Number of Bytes in Subscript
+fre             @ $b37d      ;Perform fre
+givayf          @ $b391      ;Convert Integer in (AC/YR) to Flpt
+pos             @ $b39e      ;Perform pos
+errdir          @ $b3a6      ;Confirm Program Mode
+getfnm          @ $b3e1      ;Check Syntax of FN
+fndoer          @ $b3f4      ;Perform fn
+strd            @ $b465      ;Perform str$
+strlit          @ $b487      ;Set Up String
+putnw1          @ $b4d5      ;Save String Descriptor
+getspa          @ $b4f4      ;Allocate Space for String
+garbag          @ $b526      ;Garbage Collection
+dvars           @ $b5bd      ;Search for Next String
+grbpas          @ $b606      ;Collect a String
+cat             @ $b63d      ;Concatenate Two Strings
+movins          @ $b67a      ;Store String in High RAM
+frestr          @ $b6a3      ;Perform String Housekeeping
+frefac          @ $b6db      ;Clean Descriptor Stack
+chrd            @ $b6ec      ;Perform chr$
+leftd           @ $b700      ;Perform left$
+rightd          @ $b72c      ;Perform right$
+midd            @ $b737      ;Perform mid$
+pream           @ $b761      ;Pull sTring Parameters
+len             @ $b77c      ;Perform len
+len1            @ $b782      ;Exit String Mode
+asc             @ $b78b      ;Perform asc
+gtbytc          @ $b79b      ;Evaluate Text to 1 Byte in XR
+val             @ $b7ad      ;Perform val
+strval          @ $b7b5      ;Convert ASCII String to Flpt
+getnum          @ $b7eb      ;Get parameters for POKE/WAIT
+getadr          @ $b7f7      ;Convert FAC#1 to Integer in LINNUM
+peek            @ $b80d      ;Perform peek
+poke            @ $b824      ;Perform poke
+wait            @ $b82d      ;Perform wait
+faddh           @ $b849      ;Add 0.5 to FAC#1
+fsub            @ $b850      ;Perform Subtraction
+fadd5           @ $b862      ;Normalise Addition
+fadd            @ $b867      ;Perform Addition
+negfac          @ $b947      ;2's Complement FAC#1
+overr           @ $b97e      ;Output ?OVERFLOW Error
+mulshf          @ $b983      ;Multiply by Zero Byte
+log             @ $b9ea      ;Perform log
+fmult           @ $ba28      ;Perform Multiply
+mulply          @ $ba59      ;Multiply by a Byte
+conupk          @ $ba8c      ;Load FAC#2 From Memory
+muldiv          @ $bab7      ;Test Both Accumulators
+mldvex          @ $bad4      ;Overflow / Underflow
+mul10           @ $bae2      ;Multiply FAC#1 by 10
+div10           @ $bafe      ;Divide FAC#1 by 10
+fdiv            @ $bb07      ;Divide FAC#2 by Flpt at (AC/YR)
+fdivt           @ $bb0f      ;Divide FAC#2 by FAC#1
+movfm           @ $bba2      ;Load FAC#1 From Memory
+mov2f           @ $bbc7      ;Store FAC#1 in Memory
+movfa           @ $bbfc      ;Copy FAC#2 into FAC#1
+movaf           @ $bc0c      ;Copy FAC#1 into FAC#2
+round           @ $bc1b      ;Round FAC#1
+sign            @ $bc2b      ;Check Sign of FAC#1
+sgn             @ $bc39      ;Perform sgn
+abs             @ $bc58      ;Perform abs
+fcomp           @ $bc5b      ;Compare FAC#1 With Memory
+qint            @ $bc9b      ;Convert FAC#1 to Integer
+int             @ $bccc      ;Perform int
+fin             @ $bcf3      ;Convert ASCII String to a Number in FAC#1
+inprt           @ $bdc2      ;Output 'IN' and Line Number
+fout            @ $bddd      ;Convert FAC#1 to ASCII String
+foutim          @ $be68      ;Convert TI to String
+sqr             @ $bf71      ;Perform sqr
+fpwrt           @ $bf7b      ;Perform power ($)
+negop           @ $bfb4      ;Negate FAC#1
+exp             @ $bfed      ;Perform exp (continued in KERNAL)

@@ -1,0 +1,88 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Project 64, 64MAP10.TXT, June 1996, etext #41
+;   http://unusedino.de/ec64/technical/project64/memory_maps.html
+;
+; - "Mapping the Commodore 64", by Sheldon Leemon
+;   Compute! Publications Inc. (1984), ISBN 0-942386-23-X 
+;   https://archive.org/details/Compute_s_Mapping_the_Commodore_64
+
+*SYNOPSIS RAM locations used by BASIC
+
+ADRAY1          @ $0003 2    ;Vector: Convert FAC to Integer in (A/Y) ($b1aa)
+ADRAY2          @ $0005 2    ;Vector: Convert int in (A/Y) to float in (FAC) ($b391)
+CHARAC          @ $0007      ;Search Character/Temporary Integer during INT
+ENDCHR          @ $0008      ;Flag: Scan for Quote at end of String
+INTEGR          @ $0007      ;Temporary Integer during OR/AND
+TRMPOS          @ $0009      ;Screen Column for last TAB
+VERCK           @ $000a      ;Flag: 0 = Load, 1 = Verify
+COUNT           @ $000b      ;Input Buffer Pointer/Number of Subscripts
+DIMFLG          @ $000c      ;Flag: Default Array dimension
+VALTYP          @ $000d      ;Data type Flag: $00 = Numeric, $FF = String
+INTFLG          @ $000e      ;Data type Flag: $00 = Floating point, $80 = Integer
+GARBFL          @ $000f      ;Flag: DATA scan/List Quote/Garbage collection
+SUBFLG          @ $0010      ;Flag: Subscript reference/User Function call
+INPFLG          @ $0011      ;Input Flag: $00 = INPUT, $40 = GET, $98 = READ
+TANSGN          @ $0012      ;Flag: TAN sign/Comparative result
+CHANNL          @ $0013      ;File number of current Input Device
+LINNUM          @ $0014 2    ;Temporary: Integer value
+TEMPPT          @ $0016      ;Pointer: Temporary String Stack
+LASTPT          @ $0017 2    ;Last temporary String Address
+TEMPST          @ $0019 9    ;Stack for temporary Strings
+INDEX1          @ $0022 2    ;First Utility Pointer
+INDEX2          @ $0024 2    ;Second Utility Pointer
+RESHO           @ $0026 5    ;Floating point product of Multiply and Divide
+TXTTAB          @ $002b 2    ;Pointer: Start of BASIC Text Area ($0801)
+VARTAB          @ $002d 2    ;Pointer: Start of BASIC Variables
+ARYTAB          @ $002f 2    ;Pointer: Start of BASIC Arrays
+STREND          @ $0031 2    ;Pointer: End of BASIC Arrays + 1
+FRETOP          @ $0033 2    ;Pointer: Bottom of String space
+FRESPC          @ $0035 2    ;Utility String Pointer
+MEMSIZ          @ $0037 2    ;Pointer: Highest Address available to BASIC ($a000)
+CURLIN          @ $0039 2    ;Current BASIC Line number
+OLDLIN          @ $003b 2    ;Previous BASIC Line number
+OLDTXT          @ $003d 2    ;Pointer: BASIC Statement for CONT
+DATLIN          @ $003f 2    ;Current DATA Line number
+DATPTR          @ $0041 2    ;Pointer: Used by READ - current DATA Item Address
+INPPTR          @ $0043 2    ;Pointer: Temporary storage of Pointer during INPUT Routine
+VARNAM          @ $0045 2    ;Name of Variable being sought in Variable Table
+VARPNT          @ $0047 2    ;Pointer: to value of (VARNAM) if Int, to descriptor if Str
+FORPNT          @ $0049 2    ;Pointer: Index Variable for FOR/NEXT loop
+VARTXT          @ $004b 2    ;Temporary storage for TXTPTR during READ, INPUT and GET
+OPMASK          @ $004d      ;Mask used during FRMEVL
+TEMPF3          @ $004e 2    ;Temporary storage for FLPT value
+FOUR6           @ $0053      ;Length of String Variable during Garbage collection
+JMPER           @ $0054 3    ;jmp used in Function Evaluation
+TEMPF1          @ $0057 10   ;Temporary storage for FLPT value
+TEMPF2          @ $005c      ;Temporary storage for FLPT value
+FACEXP          @ $0061      ;FAC Exponent
+FACHO           @ $0062 4    ;FAC Mantissa
+FACSGN          @ $0066      ;FAC Sign
+SGNFLG          @ $0067      ;Pointer: Series Evaluation Constant
+BITS            @ $0068      ;Bit Overflow Area during normalisation Routine
+ARGEXP          @ $0069      ;AFAC Exponent
+ARGHO           @ $006a 4    ;AFAC Mantissa
+ARGSGN          @ $006e      ;AFAC Sign
+ARISGN          @ $006f      ;Sign of result of Arithmetic Evaluation
+FACOV           @ $0070      ;FAC low-order rounding
+FBUFPT          @ $0071 2    ;Pointer: Used during CRUNCH/ASCII conversion
+CHRGET          @ $0073      ;Subroutine: Get next Byte of BASIC Text
+CHRGOT          @ $0079      ;Entry to Get same Byte again
+TXTPTR          @ $007a 2    ;Pointer: Current Byte of BASIC Text
+RNDX            @ $008b 5    ;Floating RND Function Seed Value
+BSTACK          @ $013f      ;BASIC Stack Area
+BUF             @ $0200      ;BASIC Input Buffer (Input Line from Screen)
+IERROR          @ $0300 2    ;Vector: BASIC Error ($e38b)
+IMAIN           @ $0302 2    ;Vector: BASIC Input Line ($a483)
+ICRNCH          @ $0304 2    ;Vector: BASIC Tokenise ($a57c)
+IQPLOP          @ $0306 2    ;Vector: BASIC LIST ($a71a)
+IGONE           @ $0308 2    ;Vector: BASIC Character ($a7e4)
+IEVAL           @ $030a 2    ;Vector: BASIC Token ($ae86)
+SAREG           @ $030c      ;Storage for 6510 Accumulator during SYS
+SXREG           @ $030d      ;Storage for 6510 X-Register during SYS
+SYREG           @ $030e      ;Storage for 6510 Y-Register during SYS
+SPREG           @ $030f      ;Storage for 6510 Status Register during SYS
+USRPOK          @ $0310      ;USR Function JMP Instruction ($4c)
+USRADD          @ $0311      ;USR Address ($LB,$MB)

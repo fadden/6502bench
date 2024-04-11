@@ -1,0 +1,309 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Commodore 1541 / OC-118 Disk Drive Memory Map (v1.3, Jan 18, 1995)
+;   https://ist.uwaterloo.ca/~schepers/MJK/ascii/1541map.txt
+;
+; - Commodore 1541 drive memory map
+;   https://sta.c64.org/cbm1541mem.html
+;
+; - DOS 2.6 ROM LISTINGS (v1.0, Feb 11, 2000)
+;   http://www.ffd2.com/fridge/docs/1541dis.html
+;
+; - CBM DOS ROM disassembly and memory variables for Commodore 1541 drive
+;   https://g3sl.github.io/c1541rom.html
+
+*SYNOPSIS 1541 ROM and memory-mapped I/O labels
+
+via1PortB       @ $1800      ;VIA1: port B serial bus
+via1PortA       @ $1801      ;VIA1: port A. Read to ack interrupt from ATN IN going high
+via1PortBddr    @ $1802      ;VIA1: port B data direction reg
+via1PortAddr    @ $1803      ;VIA1: port A data direction reg
+via1Timer       @ $1805      ;VIA1: Timer
+via2PortB       @ $1c00      ;VIA2: PB, control port B
+via2PortA       @ $1c01      ;VIA2: PA, port A (data to and from read/write head)
+via2PortBddr    @ $1c02      ;VIA2: CB, data direction port B
+via2PortAddr    @ $1c03      ;VIA2: A, data direction port A
+timerLo         @ $1c04      ;Timer low byte
+timerHi         @ $1c05      ;Timer high byte, write to start timer
+timerStartValLo @ $1c06      ;Timer starting value low byte
+timerStartValHi @ $1c07      ;Timer starting value high byte
+timerCtrl       @ $1c0b      ;Timer control register
+auxCtrl         @ $1c0c      ;Auxiliary control register
+interruptStatus @ $1c0d      ;Interrupt status register
+interruptCtrl   @ $1c0e      ;Interrupt control register                         
+ledOnCurrDrive  @ $c100      ;Turn LED on for current drive
+ledOn           @ $c118      ;Turn LED on
+clrErrors       @ $c123      ;Clear error flags
+prepLedFlash    @ $c12c      ;Prepare for LED flash after error
+interpretCmd    @ $c146      ;Interpret command from computer
+prepError       @ $c194      ;Prepare error msg after executing command
+clrInputBuf     @ $c1bd      ;Erase input buffer
+outErrorMsg     @ $c1c8      ;Output error msg (track and sector 0)
+chkInputLine    @ $c1d1      ;Check input line
+srchInputBuf    @ $c268      ;Search character in input buffer
+chkLineLen      @ $c2b3      ;Check line length
+clrInputFlags   @ $c2dc      ;Clear flags for command input
+prsrvDriveNum   @ $c312      ;Preserve drive number
+searchDriveNum  @ $c33c      ;Search for drive number
+getDriveNum     @ $c368      ;Get drive number
+reserveDriveNum @ $c38f      ;Reverse drive number
+chkFileType     @ $c398      ;Check given file type
+chkDriveNum     @ $c3bd      ;Check given drive number
+verifyDriveNum  @ $c3ca      ;Verify drive number
+searchDir       @ $c44f      ;Search for file in directory
+testInitDrive   @ $c63d      ;Test and initalise drive
+fnInDirBuf      @ $c66e      ;Name of file in directory buffer
+putFnInWorkBuf  @ $c688      ;Copy filename to work buffer
+searchEndOfName @ $c6a6      ;Search for end of name in command
+clrDirOutputBuf @ $c7ac      ;Clear Directory Output Buffer
+hdrWithDiskName @ $c7b7      ;Create header with disk name
+printBlocksFree @ $c806      ;Print 'blocks free.'
+deleteCmd       @ $c823      ;Perform S - Scratch command
+deleteFile      @ $c87d      ;Erase file
+deleteEntry     @ $c8b6      ;Erase dir entry
+formatCmd       @ $c8c6      ;Format disk
+copyCmd         @ $c8f0      ;Perform C - Copy command
+renameCmd       @ $ca88      ;Perform R - Rename command
+presentCmd      @ $cacc      ;Check if file present
+memoryCmd       @ $caf8      ;Perform M - Memory command
+memReadCmd      @ $cb20      ;M-R memory read
+memWriteCmd     @ $cb50      ;M-W memory write
+userCmd         @ $cb5c      ;Perform U - User command
+openDirAccChnl  @ $cb84      ;Open direct access channel, number
+blockCmd        @ $cc1b      ;Perform B - Block/Buffer command
+parseBlkParams  @ $cc6f      ;Get parameters from block commands
+blockFreeCmd    @ $ccf5      ;B-F block free
+blockAllocCmd   @ $cd03      ;B-A block allocate
+readBlockToBuf  @ $cd36      ;Read block to buffer
+getBufByte      @ $cd3c      ;Get byte from buffer
+readBlock       @ $cd42      ;Read block from disk
+blkReadCmd      @ $cd56      ;B-R block read
+blkReadInPlace  @ $cd5f      ;U1, Block read without changing buffer pointer
+blkWriteCmd     @ $cd73      ;B-W block write
+blkWriteInPlace @ $cd97      ;U2, Block write without changing buffer pointer
+blkExecCmd      @ $cda3      ;B-E block execute
+blkPtrCmd       @ $cdbd      ;B-P block pointer
+openChnl        @ $cdd2      ;Open channel
+chkBufNum       @ $cdf2      ;Check buffer number and open channel
+setRelFilePtr   @ $ce0e      ;Set pointer for REL file
+div254          @ $ce6e      ;Divide by 254
+div120          @ $ce71      ;Divide by 120
+eraseWrkMem     @ $ced9      ;Erase work storage
+chgBuf          @ $cf8c      ;Change buffer
+writeInBuf      @ $cf9b      ;Write data in buffer
+writeByteInBuf  @ $cff1      ;Write data byte in buffer
+initCmd         @ $d005      ;Perform I - Initalise command
+readBam         @ $d00e      ;Read BAM from disk
+loadBam         @ $d042      ;Load BAM
+calcFree        @ $d075      ;Calculate blocks free
+readBlock       @ $d0c3      ;Read block
+writeBlock      @ $d0c7      ;Write block
+openReadChnl    @ $d0eb      ;Open channel for reading
+openWriteChnl   @ $d107      ;Open channel for writing
+checkForRel     @ $d125      ;Check for file type REL
+getBufChnlNums  @ $d12f      ;Get buffer and channel numbers
+getByteFromBuf  @ $d137      ;Get a byte from buffer
+getByteNextBlk  @ $d156      ;Get byte and read next block
+writeToBufBlk   @ $d19d      ;Write byte in buffer and block
+incBufPtrs      @ $d1c6      ;Increment buffer pointer
+getDriveNum     @ $d1d3      ;Get drive number
+findWChnlBuf    @ $d1df      ;Find write channel and buffer
+findRChnlBuf    @ $d1e2      ;Find read channel and buffer
+closeChnl       @ $d227      ;Close channel
+freeBuf         @ $d25a      ;Free buffer
+findBuf         @ $d28e      ;Find buffer
+closeAllChnls   @ $d307      ;Close all channels
+closeAllDChnls  @ $d313      ;Close all channels of other drives
+findChnlAlloc   @ $d37f      ;Find channel and allocate
+getByteOutput   @ $d39b      ;Get byte for output
+readNextBlk     @ $d44d      ;Read next block
+readBlk         @ $d460      ;Read block
+writeBlk        @ $d464      ;Write block
+allocBufandRead @ $d475      ;Allocate buffer and read block
+allocBlk        @ $d486      ;Allocate new block
+writeDirBlk     @ $d48d      ;Write dir block
+setBufPtr       @ $d4c8      ;Set buffer pointer
+closeIntChnl    @ $d4da      ;Close internal channel
+setBufPtr2      @ $d4e8      ;Set buffer pointer
+getByteFromBuf2 @ $d4f6      ;Get byte from buffer
+chkTSnums       @ $d506      ;Check track and sector numbers
+getTSForJob     @ $d552      ;Get track and sector numbers for current job
+chkValidTSNums  @ $d55f      ;Check for vaild track and sector numbers
+errorDosMismtch @ $d572      ;DOS mismatch error
+readBlk2        @ $d586      ;Read block
+writeBlk2       @ $d58a      ;Write block
+verifyExe       @ $d599      ;Verify execution
+verifyExeNoWait @ $d5a6      ;Verify execution (without wait)
+attempts        @ $d5c6      ;Additional attempts for read errors
+moveHeadHalfTrk @ $d676      ;Move head by half a track
+moveHeadOneTrk  @ $d693      ;Move head one track in or out
+multiAttemptCmd @ $d6a6      ;Attempt command execution multiple times
+parmsToCtrl     @ $d6d0      ;Transmit param to disk controller
+enterFileInDir  @ $d6e4      ;Enter file in dir
+open            @ $d7b4      ;OPEN command, secondary addr 15
+checkAstr       @ $d7c7      ;Check '*' Last file
+checkDolr       @ $d7f3      ;Check '$' Directory
+checkHash       @ $d815      ;Check '#' Channel
+openOverwrite   @ $d8f5      ;Open a file with overwriting (@)
+openRead        @ $d9a0      ;Open file for reading
+openWrite       @ $d9e3      ;Open file for writing
+chkTypetrl      @ $da09      ;Check file type and control mode
+prepAppend      @ $da2a      ;Preparation for append
+openDir         @ $da55      ;Open directory
+closeRoutine    @ $dac0      ;Close routine
+closeFile       @ $db02      ;Close file
+writeLastBlk    @ $db62      ;Write last block
+dirEntry        @ $dba5      ;Directory entry
+readBlkAllocBuf @ $dc46      ;Read block, allocate buffer
+resetPtr        @ $dcb6      ;Reset pointer
+makeNewBlk      @ $dcda      ;Construct a new block
+writeSideSecBlk @ $dd8d      ;Write byte in side-sector block
+verifyWriteCmd  @ $ddab      ;Verify command code for writing
+writeRelBlk     @ $ddf1      ;Write a block of a REL file
+writeForNextTrk @ $ddfd      ;Write bytes for following track
+getTSnums       @ $de0c      ;Get following track and sector numbers
+folTrkLastBlk   @ $de19      ;Following track for last block
+zeroBufPtr      @ $de2b      ;buffer pointer to zero
+getTSnums2      @ $de3b      ;Get track and sector
+getTSfromBuf    @ $de95      ;Get following track and sector from buffer
+copyBuf         @ $dea5      ;Copy buffer contents
+eraseBuf        @ $dec1      ;Erase buffer Y
+getSideSecNum   @ $ded2      ;Get side-sector number
+setBufPtrToSS   @ $dedc      ;Set buffer pointer to side-sector
+getSSandBufPtr  @ $def8      ;Get side sector and buffer pointer
+readSS          @ $df1b      ;Read side-sector
+writeSS         @ $df21      ;Write side-sector
+setBufInSS      @ $df45      ;Set buffer pointer in side-sector
+blocksInRelFile @ $df4c      ;Calculate number of blocks in a REL file
+verifySSinBuf   @ $df66      ;Verify side-sector in buffer
+getBufNum       @ $df93      ;Get buffer number
+nextRecInRel    @ $dfd0      ;Get next record in REL file
+writeBlkGetNext @ $e03c      ;Write block and read next block
+writeByteInRec  @ $e07c      ;Write a byte in a record
+writeByteInRel  @ $e0ab      ;Write byte in REL file
+zeroFillRec     @ $e0f3      ;Fill record with 0s
+writeBufNumTbl  @ $e105      ;Write buffer number in table
+getByteFromRel  @ $e120      ;Get byte from REL file
+getLastSS       @ $e1cb      ;Get last side-sector
+positionCmd     @ $e207      ;Perform P - Position command
+blksToRecords   @ $e2e2      ;Divide data blocks into records
+prtToNextRec    @ $e304      ;Set pointer to next record
+expandSS        @ $e31c      ;Expand side-sector
+writeSSallocNxt @ $e44e      ;Write side-sector and allocate new
+prepErrNumMsg   @ $e60a      ;Prepare error number and message
+errorMsgToBuf   @ $e645      ;Print error message into error buffer
+talk3           @ $e680      ;TALK
+listen          @ $e688      ;LISTEN
+binToPetscii    @ $e69b      ;Convert BIN to petscii (error message buffer)
+bcdToPetscii    @ $e6ab      ;Convert BCD to petscii (error message buffer)
+writeOK         @ $e6bc      ;Write OK in buffer
+trk0ErrorToBuf  @ $e6c1      ;Print error on track 00,00 to error buffer
+curTrkErrToBuf  @ $e6c7      ;Print error on current track to error buffer
+errMsgToBuf     @ $e706      ;Write error message string to buffer
+tokenIntoBuf    @ $e754      ;Get character and in buffer
+getErrMsgChar   @ $e767      ;Get a char of the error message
+incPtr          @ $e775      ;Increment pointer
+usrExecCmd      @ $e7a3      ;Perform & - USR file execute command
+genChecksum     @ $e84b      ;Generate checksum
+serialIrq       @ $e853      ;IRQ routine for serial bus
+serialService   @ $e85b      ;Service the serial bus
+serialSend      @ $e909      ;Send data
+serialDataOutLo @ $e99c      ;DATA OUT lo
+serialDataOutHi @ $e9a5      ;DATA OUT hi
+serialClkOutHi  @ $e9ae      ;CLOCK OUT hi
+serialClkOutLo  @ $e9b7      ;CLOCK OUT lo
+readIEEE        @ $e9c0      ;Read IEEE port
+getByteFromBus  @ $e9c9      ;Get data byte from bus
+getByteWithEOI  @ $e9f2      ;Accept byte with EOI
+acceptData      @ $ea2e      ;Accept data from serial bus
+testATN         @ $ea59      ;Test for ATN
+ledFlash        @ $ea6e      ;Flash LED for hardware defects, self-test
+reset           @ $eaa0      ;Power-up RESET routine
+wait            @ $ebff      ;Wait loop
+loadDir         @ $ec9e      ;Load dir
+transmitDirLine @ $ed59      ;Transmit dir line
+getByteFromBuf3 @ $ed67      ;Get byte from buffer
+validateCmd     @ $ed84      ;Perform V - Validate command
+bamAlloc        @ $ede5      ;Allocate file blocks in BAM
+formatCmd2      @ $ee0d      ;Perform N - New (Format) command
+createBAM       @ $eeb7      ;Create BAM
+writeBAM        @ $eef4      ;Write BAM if needed
+setBAMptr       @ $ef3a      ;Set buffer pointer for BAM
+getDirBlksFree  @ $ef4d      ;Get number of free blocks for dir
+markBlkFree     @ $ef5c      ;Mark block as free
+markBAMchanges  @ $ef88      ;Set flag for BAM changed
+markBlkAlloc    @ $ef90      ;Mark block as allocated
+delBAMsecBit    @ $efcf      ;Erase bit for sector in BAM entry
+updateBAM       @ $eff1      ;Write BAM after change
+delBAMbuf       @ $f005      ;Erase BAM buffer
+clearBAM        @ $f0d1      ;Crear BAM
+getBAMbufNum    @ $f10f      ;Get buffer number for BAM
+bamBufNum       @ $f119      ;Buffer number for BAM
+findFreeBlkAloc @ $f11e      ;Find and allocate free block
+findFreeSecAloc @ $f1a9      ;Find free sector and allocate
+findFreeSectors @ $f1fa      ;Find free sectors in current track
+verFreeBAMblks  @ $f220      ;Verify number of free blocks in BAM
+numSecsPerTrk   @ $f24b      ;Establish number of sectors per track
+initCtrl        @ $f259      ;Initialise disk controller
+irqCtrl         @ $f2b0      ;IRQ routine for disk controller
+headTransport   @ $f2f9      ;Head transport
+execInBuf       @ $f36e      ;Execute program in buffer
+bump            @ $f37c      ;Bump, find track 1 (head at stop)
+initPtrInBuf    @ $f393      ;Initialise pointer in buffer
+readBlkHdr      @ $f3b1      ;Read block header, verify ID
+prsrvBlkHdr     @ $f410      ;Preserve block header
+okInQueue       @ $f418      ;Work Return value $01 (OK) into queue
+error0bInQueue  @ $f41b      ;Work Return value $0b (READ ERROR) into queue
+error09InQueue  @ $f41e      ;Work Return value $09 (READ ERROR) into queue
+optimizeJob     @ $f423      ;Job optimisation
+readSec         @ $f4d1      ;Read sector
+findBlkStart    @ $f50a      ;Find start of data block
+readBlkHdr2     @ $f510      ;Read block header
+waitSync        @ $f556      ;Wait for SYNC
+writeBlk3       @ $f575      ;Write data block to disk
+calcBufParity   @ $f5e9      ;Calculate parity for data buffer
+gcrToBin        @ $f5f2      ;Convert buffer of GCR data into binary
+findSec         @ $f6ca      ;Command code for find sector
+bytesToGcrBytes @ $f6d0      ;Convert 4 binary bytes to 5 GCR bytes
+gcrTable        @ $f77f 16   ;GCR (5-bit) nybble table
+gcrBytesToBytes @ $f7e6      ;Convert 5 GCR bytes to 4 binary bytes
+tblGCRToBinHi   @ $f8a0 64   ;Conversion table GCR to binary - high nybble
+tblGCRToBinLo   @ $f8c0 64   ;Conversion table GCR to binary - low nybble
+decod69GcrBytes @ $f8e0      ;Decode 69 GCR bytes
+blkHdrToGcr     @ $f934      ;Convert block header to GCR code
+errEntry        @ $f969      ;Error entry disk controller
+motorOn         @ $f97e      ;Turn drive motor on
+motorOff        @ $f98f      ;Turn drive motor off
+jobLoop         @ $f99c      ;Job loop disk controller
+moveHeadNextTrk @ $fa05      ;Move head to next track
+calNumSteps     @ $fa1c      ;Calculate number of head steps
+nudgeStepper    @ $fa3b      ;Move stepper motor short distance
+loadHead        @ $fa4e      ;Load head
+prepFastHeadMov @ $fa7b      ;Prepare fast head movement
+fastHeadMov     @ $fa97      ;Fast head movement
+prepSlowHeadMov @ $faa5      ;Prepare slow head movement
+formatRoutine   @ $fac7      ;Formatting
+writeSyncs      @ $fda3      ;Write SYNC 10240 times, erase track
+writeByteFill   @ $fdc3      ;Read/write ($621/$622) times
+formatErrRetry  @ $fdd3      ;Attempt counter for formatting
+cpyOvflwDataBuf @ $fdf5      ;Copy data from overflow buffer
+switchToRead    @ $fe00      ;Switch to reading
+write55Fill     @ $fe0e      ;Write $55 10240 times
+buf0HdrToGcr    @ $fe30      ;Convert header in buffer 0 to GCR code
+irdMainSystem   @ $fe67      ;Interrupt routine
+jmpToVNMI       @ $fee7      ;From UI command $eb22, to reset
+diagPatch       @ $feea      ;Patch for diagnostic routine from $ea7a
+serialBusDelay  @ $fef3      ;Delay loop for serial bus in 1541 mode, from $e97d
+serialOutPatch  @ $fefb      ;Patch for data output to serial bus, from $e980
+switch1540_1541 @ $ff01 2    ;U9 vector, switch 1540/1541
+resetPatch      @ $ff10      ;Patch for reset routine, from $eaa4
+listenPatch     @ $ff20      ;Patch for listen to serial bus, from $e9dc
+vecFormat       @ $ffe6 2    ;vector for format
+vecOff          @ $ffe8 2    ;vector for $f98f
+vecUblkkrd      @ $ffea 2    ;vector for $cd5f
+vecUblkwt       @ $ffec 2    ;vector for $cd97
+vecNMI          @ $fffa 2    ;vector to $ff01
+vecInit         @ $fffc 2    ;vector to $eaa0
+vecIrq          @ $fffe 2    ;vector to $fe67
