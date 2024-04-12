@@ -99,8 +99,8 @@ driveNum        @ $007f      ;Drive number (on 1541 always 00)
 curTrk          @ $0080      ;Current Track number
 curSec          @ $0081      ;Current Sector number
 chnlNum         @ $0082      ;Channel number (Logical index)
-2ndAddr         @ $0083      ;Secondary address
-2ndAddrOriginal @ $0084      ;Original Secondary address $6f
+scndAddr        @ $0083      ;Secondary address
+scndAddrOrig    @ $0084      ;Original Secondary address $6f
 curDataByte     @ $0085      ;Current Data byte $3f
 tmpArea4        @ $0086 9    ;Temp Results area
 curBufPtr       @ $0094 2    ;Current dir buffer pointer
