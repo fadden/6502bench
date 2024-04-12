@@ -1,0 +1,203 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Commodore 1541 / OC-118 Disk Drive Memory Map (v1.3, Jan 18, 1995)
+;   https://ist.uwaterloo.ca/~schepers/MJK/ascii/1541map.txt
+;
+; - Commodore 1541 drive memory map
+;   https://sta.c64.org/cbm1541mem.html
+;
+; - DOS 2.6 ROM LISTINGS (v1.0, Feb 11, 2000)
+;   http://www.ffd2.com/fridge/docs/1541dis.html
+;
+; - CBM DOS ROM disassembly and memory variables for Commodore 1541 drive
+;   https://g3sl.github.io/c1541rom.html
+
+*SYNOPSIS 1541 RAM locations used by the 1541 ROM
+
+cmdCodeBuf0     @ $0000      ;Command code for buffer 0
+cmdCodeBuf1     @ $0001      ;Command code for buffer 1
+cmdCodeBuf2     @ $0002      ;Command code for buffer 2
+cmdCodeBuf3     @ $0003      ;Command code for buffer 3
+cmdCodeBuf4     @ $0004      ;Command code for buffer 4
+trkBuf0         @ $0006      ;Track buffer 0
+secBuf0         @ $0007      ;Sector buffer 0
+trkBuf1         @ $0008      ;Track buffer 1
+secBuf1         @ $0009      ;Sector buffer 1
+trkBuf2         @ $000a      ;Track buffer 2
+secBuf2         @ $000b      ;Sector buffer 2
+trkBuf3         @ $000c      ;Track buffer 3
+secBuf3         @ $000d      ;Sector buffer 3
+trkBuf4         @ $000e      ;Track buffer 4
+secBuf4         @ $000f      ;Sector buffer 4
+d0DiskID        @ $0012      ;Disk ID, drive 0
+d1DiskID        @ $0014      ;Disk ID, drive 1
+hbID            @ $0016      ;Header block: ID
+hbTrk           @ $0018      ;Header block: Track
+hbSec           @ $0019      ;Header block: Sector
+hbParity        @ $001a      ;Header block: Parity
+diskChgD0       @ $001c      ;Flag for disk change, drive 0 01
+diskChgD1       @ $001d      ;Flag for disk change, drive 1 01
+writeProtD0     @ $001e      ;Flag for write protect sense, drive 0 01
+writeProtD1     @ $001f      ;Flag for write protect sense, drive 1
+d0Status        @ $0020      ;Drive 0 status (disk and step motor)
+d1Status        @ $0021      ;Drive 1 status (disk and step motor)
+d0CurTrk        @ $0022      ;Current track for drive 0
+driveType       @ $0023      ;Flag for 1541 (0), 1540 (not 0)
+gcrWorkArea     @ $0024      ;Scratch pad of GCR conversion
+ptrTmpMem       @ $002e 2    ;Pointer for temporary storage
+bufPtrCtrl      @ $0030 2    ;Buffer pointer for disk controller
+ptrCurTrk       @ $0032 2    ;Pointer: active track
+ptrCurSec       @ $0033 2    ;Pointer: active sector
+ptrLastConvByte @ $0034 2    ;Pointer to last converted byte
+convByteCnt     @ $0036      ;Byte counter for GCR/BIN conversion
+byteStartBlk    @ $0038      ;Constant 7, ID mark for start of data block
+byteStartBlkHdr @ $0039      ;Constant 8, ID mark for start of block header
+dataBufParity   @ $003a      ;Parity for data buffer
+motorFlag       @ $003d      ;Motor flag
+curDrive        @ $003e      ;Active drive (FF, if not active)
+ctrlBufNum      @ $003f      ;Buffer number for disk controller
+gcrConvByteCnt  @ $0040      ;Byte counter for GCR conversion
+workCnt         @ $0041      ;Number of next work in queue (0 - 5)
+destTrk         @ $0042      ;Destination track (to move R/W head to)
+secPerTrk       @ $0043      ;Number of sectors per track for formatting
+tmpArea         @ $0044      ;Temp. work area; Scratch pad
+tmpArea2        @ $0045      ;Work code temp. storage
+byteBlkID       @ $0047      ;Data block ID char, default 07.
+headMoveCnt     @ $0048      ;Counter for head movement
+headStepCnt     @ $004a      ;Step counter for head transport
+lastReadSec     @ $004c      ;Last read sector
+nextSec         @ $004d      ;Next sector
+gcrConvBufPtr   @ $004e 2    ;Pointer to buffer for GCR->BIN conversion
+gcrFormatFlag   @ $0050      ;Flag for GCR format (0=BIN, 1=GCR)
+curFormatTrk    @ $0051      ;Current track number for formatting FF
+gcrConvBytesBuf @ $0052 4    ;Storage for 4 BIN bytes for GCR coding
+gcrConvStore    @ $0056 5    ;Storage for 5 GCR bytes
+headAccSteps    @ $005e      ;Number of steps for head motor accel/decl
+headAccFactor   @ $005f      ;accelerating/decl. factor 04
+headMoveVec     @ $0062 2    ;Pointer to routine for head movement $fa05
+headStepsMin    @ $0064      ;Minimum number of steps C8
+nmiVec          @ $0065 2    ;Pointer to start of NMI routine ($eb2e)
+nmiInProc       @ $0067      ;Flag: NMI in process
+diskInitInProc  @ $0068      ;Flag for disk initialisation
+secDivStepSize  @ $0069      ;Step size for sector division $0a
+numReadAttempts @ $006a      ;Number of read attempts 5
+ptrStartJumpTbl @ $006b 2    ;Pointer: Start of Jump table for U commands $ffea
+ptrStartBitmap  @ $006d 2    ;Pointer: Start of bitmap $0400
+ptrMBcmds       @ $006f 2    ;Pointer to address for M & B commands
+tmpArea3        @ $0071 4    ;Temp work area
+indPtrVar       @ $0075 2    ;Indirect pointer variable ($0100)
+listenAddr      @ $0077      ;Listener address (Device number + $20)
+talkAddr        @ $0078      ;Talker address (Device number + $40)
+curListenFlag   @ $0079      ;Flag: Active listener
+curTalkFlag     @ $007a      ;Flag: Active talker
+atnRecevFlag    @ $007c      ;Flag for ATN from serial bus receiving
+atnActiveFlag   @ $007d      ;Flag for ATN on serial bus active
+lastPrg         @ $007e      ;Last handled program
+driveNum        @ $007f      ;Drive number (on 1541 always 00)
+curTrk          @ $0080      ;Current Track number
+curSec          @ $0081      ;Current Sector number
+chnlNum         @ $0082      ;Channel number (Logical index)
+scndAddr        @ $0083      ;Secondary address
+scndAddrOrig    @ $0084      ;Original Secondary address $6f
+curDataByte     @ $0085      ;Current Data byte $3f
+tmpArea4        @ $0086 9    ;Temp Results area
+curBufPtr       @ $0094 2    ;Current dir buffer pointer
+ptrNxtByteBuf0  @ $0099 2    ;Pointer: Next byte in buffer 0 $0300
+ptrNxtByteBuf1  @ $009b 2    ;Pointer: Next byte in buffer 1 $0400
+ptrNxtByteBuf2  @ $009d 2    ;Pointer: Next byte in buffer 2 $0500
+ptrNxtByteBuf3  @ $009f 2    ;Pointer: Next byte in buffer 3 $0600
+ptrNxtByteBuf4  @ $00a1 2    ;Pointer: Next byte in buffer 4 $0700
+ptrNxtByteCmdBf @ $00a3 2    ;Pointer: Next byte in command buffer $0200
+prtNxtByteErrBf @ $00a5 2    ;Pointer: Next byte in error message buffer $02d6
+tblBufChnls     @ $00a7      ;Table: buffer channel assignments
+tblLoBufRecNum  @ $00b5 6    ;Table: lo bytes of record numbers for each buffer
+tblHiBufRecNum  @ $00bb 6    ;Table: hi bytes of record numbers for each buffer
+relWritePtr     @ $00c1      ;Write pointer for REL file
+relRecLen       @ $00c7      ;Table: Record length for REL file
+tblSideSecs     @ $00cd 6    ;Table: Side sectors
+relInRecPtr     @ $00d4      ;Pointer in record for REL file
+sideSecNum      @ $00d5      ;Side sector number
+blkPrtSideSec   @ $00d6      ;Pointer to data block in side sector
+relToRecPtr2    @ $00d7      ;Pointer to record in REL file
+dirSectors      @ $00d8      ;Directory sectors
+indexDir        @ $00dd      ;Index: Directory
+defaultDrive    @ $00e2      ;Default disk drive 00
+chnlStatus      @ $00f2      ;Channel status
+flatEOI         @ $00f8      ;Flag for EOI
+currWorkBufNum  @ $00f9      ;Current work (Buffer number)
+lruTable        @ $00fa 5    ;Least recently used table
+d0ReadyFlag     @ $00ff      ;Flag: FF = drive 0 not ready (No disk), 00 = ready
+d1ReadyFlag     @ $0100      ;Flag: FF = drive 1 not ready (No disk), 00 = ready
+d0FormatMarker  @ $0101      ;DOS version from t18 for drive 0
+d1FormatMarker  @ $0102      ;DOS version from t18 for drive 1
+cmdStrBuf       @ $0200 42   ;Buffer for command string
+cmdCode         @ $022a      ;Command code
+chnl1Index      @ $022b      ;Logical index, channel 0
+chnl2Index      @ $022c      ;Logical index, channel 1
+chnl3Index      @ $022d      ;Logical index, channel 2
+chnlsLastRWbyte @ $022e 6    ;Last read/written byte for each channel
+chnlsLastChar   @ $0244 6    ;Pointer: Last char on channel
+curFileType     @ $024a      ;Type of active file
+strLen          @ $024b      ;String length
+tmpChnlNum      @ $024c      ;Temp. channel number (secondary address)
+curWork         @ $024d      ;Current work with drive number
+workAreaForSec  @ $024e      ;Work area to find the best sector
+bufAlloc        @ $024f      ;Buffer allocated
+d0BamChangFlag  @ $0251      ;Flag: BAM changed, drive 0
+d1BamChangFlag  @ $0252      ;Flag: BAM changed, drive 1
+dirEntryFndFlag @ $0253      ;Flag for directory entry found
+dirOutputFlag   @ $0254      ;Flag for directory output
+cmdWaitFlag     @ $0255      ;Flag: Waiting for command
+lastUsedBuf     @ $0257      ;Last used buffer
+recordLen       @ $0258      ;Record length
+sideSecTrk      @ $0259      ;Track of side sector
+sideSecSec      @ $025a      ;Sector of side sector
+lastWorkBufs    @ $025b 5    ;Last work (buffers)
+dirSecBufs      @ $0260 5    ;Directory sector (buffers)
+fileDirIdxBufs  @ $0266 5    ;File's index in directory (buffers)
+ledFlashCnt     @ $026c      ;Counter for LED flash
+ledFlashMask    @ $026d      ;Error LED mask for flashing
+driveForLastPrg @ $026e      ;Drive for last program
+secForLastPrg   @ $026f      ;sector for last program
+writeLindx      @ $0270      ;Write LINDX
+readLindx       @ $0271      ;Read LINDX
+inputLineLen    @ $0274      ;Length of input line
+charToProcess   @ $0275      ;Char to interpret
+endOfCmdBufFN   @ $0276      ;Index: End of filename in command buffer
+numOfFNs        @ $0278      ;Number of filenames
+tblPtrFNs       @ $027a 6    ;Pointer table: filenames
+fileTrk         @ $0280      ;Track of a file
+fileSec         @ $0285      ;Sector of a file
+patternFlag     @ $028a      ;Flag: wild cards
+fileStrmImage   @ $028b      ;File stream image
+numDriveSrches  @ $028c      ;Number of drives to look for
+driveSearchFlag @ $028d      ;Flag: Looking for drive
+driveWthLastErr @ $028e      ;drive with last write/open error, used as default drive
+foundInDirFlag  @ $028f      ;Flag: Found in directory
+dirSec          @ $0290      ;Directory sector
+sec1stAvailFile @ $0291      ;Sector for first available file
+idx1stAvailFile @ $0292      ;Index (in directory) for first available file
+zeroIfLastBlk   @ $0293      ;=0 if last block
+curBufIndex     @ $0294      ;Current buffer-index
+filesCnt        @ $0295      ;Counter: Files
+typeFlag        @ $0296      ;Flag: Name matching wild cards
+fileMode        @ $0297      ;Active file mode (R or W)
+jobReturnFlag   @ $0298      ;Flag: job return
+recoveryPtr     @ $0299 2    ;Pointer for recovery
+totalTrkOffset  @ $029a      ;Total tracks offset
+lastBamUpdtPtr  @ $029b 2    ;Pointer: BAM last update
+bamImgTrackNum  @ $029d 2    ;Track # of BAM image (drive 0/1)
+bamImg          @ $02a1 16   ;BAM image
+dirOutputBuf    @ $02b1 36   ;Buffer for directory output
+errMsgBuf       @ $02d5 36   ;Buffer for error message
+noWriteBamFlag  @ $02f9      ;Flag: Don't write BAM
+numFreeBlksLo   @ $02fa 2    ;Number of free blocks, lo for drives 0 and 1
+numFreeBlksHi   @ $02fc 2    ;Number of free blocks, hi for drives 0 and 1
+stepperPhase    @ $02fe 2    ;Current phase of head stepper motor
+buffer0         @ $0300 256  ;Buffer 0
+buffer1         @ $0400 256  ;Buffer 1
+buffer2         @ $0500 256  ;Buffer 2
+buffer3         @ $0600 256  ;Buffer 3
+buffer4         @ $0700 256  ;Buffer 4

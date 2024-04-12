@@ -1,0 +1,139 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Project 64, 64MAP10.TXT, June 1996, etext #41
+;   http://unusedino.de/ec64/technical/project64/memory_maps.html
+;
+; - "Mapping the Commodore 64", by Sheldon Leemon
+;   Compute! Publications Inc. (1984), ISBN 0-942386-23-X 
+;   https://archive.org/details/Compute_s_Mapping_the_Commodore_64
+
+*SYNOPSIS RAM locations used by the KERNAL
+
+STATUS          @ $0090      ;Kernal I/O Status Word ST
+STKEY           @ $0091      ;Flag: $7f = STOP key
+SVXT            @ $0092      ;Timing Constant for Tape
+VERCKK          @ $0093      ;Flag: 0 = Load, 1 = Verify
+C3PO            @ $0094      ;Flag: Serial Bus - Output Character buffered
+BSOUR           @ $0095      ;Buffered Character for Serial Bus
+SYNO            @ $0096      ;Cassette Sync. number
+TEMPX           @ $0097      ;Temporary storage of X Register during CHRIN
+TEMPY           @ $0097      ;Temporary storage of Y Register during RS232 fetch
+LDTND           @ $0098      ;Number of Open Files/Index to File Table
+DFLTN           @ $0099      ;Default Input Device (0)
+DFLTO           @ $009a      ;Default Output Device (3)
+PRTY            @ $009b      ;Parity of Byte Output to Tape
+DPSW            @ $009c      ;Flag: Byte received from Tape
+MSGFLG          @ $009d      ;Set error message mode
+FNMIDX          @ $009e      ;Index to Cassette File name/Header ID for Tape write
+PTR1            @ $009e      ;Tape Error log pass 1
+PTR2            @ $009f      ;Tape Error log pass 2
+TIME            @ $00a0      ;Real-time jiffy Clock, Update Routine: UDTIMK ($f69b)
+TSFCNT          @ $00a3      ;Bit Counter Tape Read or Write/Serial Bus
+TBTCNT          @ $00a4      ;Pulse Counter Tape Read or Write/Serial Bus shift Counter
+CNTDN           @ $00a5      ;Tape Synchronising count down
+BUFPNT          @ $00a6 2    ;Pointer: Tape I/O buffer
+INBIT           @ $00a7      ;RS232 temporary for received Bit/Tape
+BITC1           @ $00a8      ;RS232 Input Bit count/Tape temporary
+RINONE          @ $00a9      ;RS232 Flag: Start Bit check/Tape temporary
+RIDATA          @ $00aa      ;RS232 Input Byte Buffer/Tape temporary
+RIPRTY          @ $00ab      ;RS232 Input parity/Tape temporary
+SAL             @ $00ac 2    ;Pointer: Tape Buffer/Screen scrolling
+EAL             @ $00ae      ;Tape End Address/End of Program
+CMPO            @ $00b0      ;Tape timing Constants
+TAPE1           @ $00b2 2    ;Pointer: Start Address of Tape Buffer ($033c)
+BITTS           @ $00b4      ;RS232 Write bit count/Tape Read timing Flag
+NXTBIT          @ $00b5      ;RS232 Next Bit to send/Tape Read - End of Tape
+RODATA          @ $00b6      ;RS232 Output Byte Buffer/Tape Read Error Flag
+FNLEN           @ $00b7      ;Number of Characters in Filename
+LA              @ $00b8      ;Current File - Logical File number
+SA              @ $00b9      ;Current File - Secondary Address
+FA              @ $00ba      ;Current File - First Address (Device number)
+FNADR           @ $00bb 2    ;Pointer: Current File name Address
+ROPRTY          @ $00bd      ;RS232 Output Parity/Tape Byte to be Input or Output
+FSBLK           @ $00be      ;Tape Input/Output Block count
+MYCH            @ $00bf      ;Serial Word Buffer
+CAS1            @ $00c0      ;Tape Motor Switch
+STAL            @ $00c1      ;Start Address for LOAD and Cassette Write
+MEMUSS          @ $00c3 2    ;Pointer: Type 3 Tape LOAD and general use
+LSTX            @ $00c5      ;Matrix value of last Key pressed; No Key = $40
+NDX             @ $00c6      ;Number of Characters in Keyboard Buffer queue
+RVS             @ $00c7      ;Flag: Reverse On/Off; On = $01, Off = $00
+INDX            @ $00c8 2    ;Pointer: End of Line for Input
+LXSP            @ $00c9      ;Cursor X/Y (Line/Column) position at start of Input
+SFDX            @ $00cb      ;Flag: Print shifted Characters
+BLNSW           @ $00cc      ;Flag: Cursor blink; $00 = Enabled, $01 = Disabled
+BLNCT           @ $00cd      ;Timer: Count down for Cursor blink toggle
+GDBLN           @ $00ce      ;Character under Cursor while Cursor Inverted
+BLNON           @ $00cf      ;Flag: Cursor Status; $00 = Off, $01 = On
+CRSW            @ $00d0      ;Flag: Input from Screen = $03, or Keyboard = $00
+PNT             @ $00d1 2    ;Pointer: Current Screen Line Address
+PNTR            @ $00d3      ;Cursor Column on current Line, including Wrap-round Line, if any
+QTSW            @ $00d4      ;Flag: Editor in Quote Mode; $00 = Not
+LNMX            @ $00d5      ;Current logical Line length: 39 or 79
+TBLX            @ $00d6      ;Current Screen Line number of Cursor
+SCHAR           @ $00d7      ;Screen value of current Input Character/Last Character Output
+INSRT           @ $00d8      ;Count of number of inserts outstanding
+LDTB1           @ $00d9      ;Screen Line link Table/Editor temporaries
+USER            @ $00f3 2    ;Pointer: Current Colour RAM Location
+KEYTAB          @ $00f5 2    ;Vector: Current Keyboard decoding Table ($eb81)
+RIBUF           @ $00f7 2    ;RS232 Input Buffer Pointer
+ROBUF           @ $00f9 2    ;RS232 Output Buffer Pointer
+FREKZP          @ $00fb      ;Free Zero Page space for User Programs
+BASZPT          @ $00ff      ;BASIC temporary Data Area
+ASCWRK          @ $00ff      ;Assembly Area for Floating point to ASCII conversion
+LAT             @ $0259 10   ;Kernal Table: Active logical File numbers
+FAT             @ $0263 10   ;Kernal Table: Active File First Addresses
+SAT             @ $026d 10   ;Kernal Table: Active File Secondary Addresses
+KEYD            @ $0277 10   ;Keyboard Buffer Queue (FIFO)
+MEMSTR          @ $0281 2    ;Pointer: Bottom of Memory for Operating System ($0800)
+MEMSIZ2         @ $0283 2    ;Pointer: Top of Memory for Operating System ($a000)
+TIMOUT          @ $0285      ;Serial IEEE Bus timeout defeat Flag
+COLOR           @ $0286      ;Current Character Colour code
+GDCOL           @ $0287      ;Background Colour under Cursor
+HIBASE          @ $0288      ;High Byte of Screen Memory Address ($04)
+XMAX            @ $0289      ;Maximum number of Bytes in Keyboard Buffer ($0a)
+RPTFLG          @ $028a      ;Flag: Repeat keys setting
+KOUNT           @ $028b      ;Repeat Key: Speed Counter ($04)
+DELAY           @ $028c      ;Repeat Key: First repeat delay Counter ($10)
+SHFLAG          @ $028d      ;flags for shift, CBM, CTRL
+LSTSHF          @ $028e      ;Last Shift Key used for debouncing
+KEYLOG          @ $028f 2    ;Vector: Routine to determine Keyboard table to use
+MODE            @ $0291      ;Flag: Upper/Lower Case change
+AUTODN          @ $0292      ;Flag: Auto scroll down: $00 = Disabled ($00)
+M51CTR          @ $0293      ;RS232 Pseudo 6551 control Register Image
+M51CDR          @ $0294      ;RS232 Pseudo 6551 command Register Image
+M51AJB          @ $0295      ;RS232 Non-standard Bits/Second
+RSSTAT          @ $0297      ;RS232 Pseudo 6551 Status Register Image
+BITNUM          @ $0298      ;RS232 Number of Bits left to send
+BAUDOF          @ $0299      ;RS232 Baud Rate; Full Bit time microseconds
+RIDBE           @ $029b      ;RS232 Index to End of Input Buffer
+RIDBS           @ $029c 2    ;RS232 Pointer: High Byte of Address of Input Buffer
+RODBS           @ $029d 2    ;RS232 Pointer: High Byte of Address of Output Buffer
+RODBE           @ $029e      ;RS232 Index to End of Output Buffer
+IRQTMP          @ $029f 2    ;Temporary store for IRQ Vector during Tape operations
+ENABL           @ $02a1      ;RS232 Enables
+TODSNS          @ $02a2      ;TOD sense during Tape I/O
+TRDTMP          @ $02a3      ;Temporary storage during Tape READ
+TD1IRQ          @ $02a4      ;Temporary D1IRQ Indicator during Tape READ
+TLNIDX          @ $02a5      ;Temporary for Line Index
+TVSFLG          @ $02a6      ;Flag: TV Standard: $00 = NTSC, $01 = PAL
+CINV            @ $0314 2    ;Vector: Hardware IRQ Interrupt ($ea31)
+CNBINV          @ $0316 2    ;Vector: BRK Instruction Interrupt ($fe66)
+NMINV           @ $0318 2    ;Vector: Hardware NMI Interrupt ($fe47)
+IOPEN2          @ $031a 2    ;Vector: Kernal OPEN Routine ($f34a)
+ICLOSE2         @ $031c 2    ;Vector: Kernal CLOSE Routine ($f291)
+ICHKIN2         @ $031e 2    ;Vector: Kernal CHKIN Routine ($f20e)
+ICKOUT2         @ $0320 2    ;Vector: Kernal CHKOUT Routine ($f250)
+ICLRCH2         @ $0322 2    ;Vector: Kernal CLRCHN Routine ($f333)
+IBASIN2         @ $0324 2    ;Vector: Kernal CHRIN Routine ($f157)
+IBSOUT2         @ $0326 2    ;Vector: Kernal CHROUT Routine ($f1ca)
+ISTOP2          @ $0328 2    ;Vector: Kernal STOP Routine ($f6ed)
+IGETIN2         @ $032a 2    ;Vector: Kernal GETIN Routine ($f13e)
+ICLALL2         @ $032c 2    ;Vector: Kernal CLALL Routine ($f32f)
+USRCMD2         @ $032e 2    ;User Defined Vector ($fe66)
+ILOAD2          @ $0330 2    ;Vector: Kernal LOAD Routine ($f4a5)
+ISAVE2          @ $0332 2    ;Vector: Kernal SAVE Routine ($f5ed)
+TBUFFR          @ $033c 192  ;start of Tape I/O Buffer
+VICSCN          @ $0400 1024 ;start of Default Screen Video Matrix

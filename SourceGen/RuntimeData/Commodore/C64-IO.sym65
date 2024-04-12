@@ -11,114 +11,114 @@
 
 *SYNOPSIS Commodore 64 memory-mapped I/O addresses (and color ram)
 
-D6510           @ $0000     ;6510 I/O Data Direction Register
-R6510           @ $0001     ;ROM/IO Banking and Cassette I/O
-SPOX            @ $D000     ;Sprite 0 X Pos
-SPOY            @ $D001     ;Sprite 0 Y Pos
-SP1X            @ $D002     ;Sprite 1 X Pos
-SP1Y            @ $D003     ;Sprite 1 Y Pos
-SP2X            @ $D004     ;Sprite 2 X Pos
-SP2Y            @ $D005     ;Sprite 2 Y Pos
-SP3X            @ $D006     ;Sprite 3 X Pos
-SP3Y            @ $D007     ;Sprite 3 Y Pos
-SP4X            @ $D008     ;Sprite 4 X Pos
-SP4Y            @ $D009     ;Sprite 4 Y Pos
-SP5X            @ $D00A     ;Sprite 5 X Pos
-SP5Y            @ $D00B     ;Sprite 5 Y Pos
-SP6X            @ $D00C     ;Sprite 6 X Pos
-SP6Y            @ $D00D     ;Sprite 6 Y Pos
-SP7X            @ $D00E     ;Sprite 7 X Pos
-SP7Y            @ $D00F     ;Sprite 7 Y Pos
-MSIGX           @ $D010     ;Sprites 0-7 X Pos 9th bit
-SCROLY          @ $D011     ;VIC Control Register
-RASTER          @ $D012     ;Read Raster / Write Raster Value for Compare
-LPENX           @ $D013     ;Light Pen/Gun Latch X Pos (divided by 2)
-LPENY           @ $D014     ;Light Pen/Gun Latch Y Pos
-SPENA           @ $D015     ;Sprites 0-7 display Enable (1 = enable)
-SCROLX          @ $D016     ;VIC Control Register
-YXPAND          @ $D017     ;Sprites 0-7 Expand 2x Vertical
-VMCSB           @ $D018     ;VIC Memory Control Register
-VICIRQ          @ $D019     ;VIC Interrupt Flag Register
-IRQMSK          @ $D01A     ;IRQ Mask Register (1 = Interrupt Enable)
-SPBGPR          @ $D01B     ;Sprite to Background Display Priority
-SPMC            @ $D01C     ;Sprites 0-7 Multi-Color Mode Select
-XXPAND          @ $D01D     ;Sprites 0-7 Expand 2x Horizontal
-SPSPCL          @ $D01E     ;Sprite to Sprite Collision Detect
-SPBGCL          @ $D01F     ;Sprite to Background Collision Detect
-EXTCOL          @ $D020     ;Border Color
-BGCOL0          @ $D021     ;Background Color 0 (screen color)
-BGCOL1          @ $D022     ;Background Color 1
-BGCOL2          @ $D023     ;Background Color 2
-BGCOL3          @ $D024     ;Background Color 3
-SPMC0           @ $D025     ;Sprite Multi-Color Register 0
-SPMC1           @ $D026     ;Sprite Multi-Color Register 1
-SP0CL           @ $D027     ;Sprite 0 Color
-SP1CL           @ $D028     ;Sprite 1 Color
-SP2CL           @ $D029     ;Sprite 2 Color
-SP3CL           @ $D02A     ;Sprite 3 Color
-SP4CL           @ $D02B     ;Sprite 4 Color
-SP5CL           @ $D02C     ;Sprite 5 Color
-SP6CL           @ $D02D     ;Sprite 6 Color
-SP7CL           @ $D02E     ;Sprite 7 Color
-FRELO1          > $D400     ;Voice 1 Frequency - Low-Byte
-FREHI1          > $D401     ;Voice 1 Frequency - High-Byte
-PWLO1           > $D402     ;Voice 1 Pulse Waveform Width - Low-Byte
-PWHI1           > $D403     ;Voice 1 Pulse Waveform Width - High-Nybble
-VCREG1          > $D404     ;Voice 1 Control Register
-ATDCY1          > $D405     ;Voice 1 Attack / Decay
-SUREL1          > $D406     ;Voice 1 Sustain / Release
-FRELO2          > $D407     ;Voice 2 Frequency - Low-Byte
-FREHI2          > $D408     ;Voice 2 Frequency - High-Byte
-PWLO2           > $D409     ;Voice 2 Pulse Waveform Width - Low-Byte
-PWHI2           > $D40A     ;Voice 2 Pulse Waveform Width - High-Nybble
-VCREG2          > $D40B     ;Voice 2 Control Register
-ATDCY2          > $D40C     ;Voice 2 Attack / Decay
-SUREL2          > $D40D     ;Voice 2 Sustain / Release
-FRELO3          > $D40E     ;Voice 3 Frequency - Low-Byte
-FREHI3          > $D40F     ;Voice 3 Frequency - High-Byte
-PWLO3           > $D410     ;Voice 3 Pulse Waveform Width - Low-Byte
-PWHI3           > $D411     ;Voice 3 Pulse Waveform Width - High-Nybble
-VCREG3          > $D412     ;Voice 3 Control Register
-ATDCY3          > $D413     ;Voice 3 Attack/Decay
-SUREL3          > $D414     ;Voice 3 Sustain / Release
-CUTLO           > $D415     ;Filter Cutoff Frequency Low-Nybble
-CUTHI           > $D416     ;Filter Cutoff Frequency High-Byte
-RESON           > $D417     ;Filter Resonance / Voice Input
-SIGVOL          > $D418     ;Select Filter Mode and Volume
-POTX            > $D419     ;Analog/Digital Converter Game Paddle 1
-POTY            > $D41A     ;Analog/Digital Converter Game Paddle 2
-RANDOM          < $D41B     ;Voice 3 Oscillator output
-ENV3            < $D41C     ;Voice 3 Envelope output
-colorRam        @ $D800     ;Color RAM nybbles ($d800-$dbff)
-CIAPRA          @ $DC00     ;CIA1 Data Port A (Keyboard, Joystick, Paddles, Light-Pen)
-CIAPRB          @ $DC01     ;CIA1 Data Port B (Keyboard, Joysticks, Paddles)
-CIDDRA          @ $DC02     ;CIA1 Data Direction Register - Port A
-CIDDRB          @ $DC03     ;CIA1 Data Direction Register - Port B
-TIMALO          @ $DC04     ;CIA1 Timer A Low-Byte
-TIMAHI          @ $DC05     ;CIA1 Timer A High-Byte
-TIMBLO          @ $DC06     ;CIA1 Timer B Low-Byte
-TIMBHI          @ $DC07     ;CIA1 Timer B High-Byte
-TODTEN          @ $DC08     ;CIA1 Time-of-Day Clock 1/10 Seconds
-TODSEC          @ $DC09     ;CIA1 Time-of-Day Clock Seconds
-TODMIN          @ $DC0A     ;CIA1 Time-of-Day Clock Minutes
-TODHRS          @ $DC0B     ;CIA1 Time-of-Day Clock Hours + AM/PM Flag (Bit 7)
-CIASDR          @ $DC0C     ;CIA1 Synchronous Serial I/O Data Buffer
-CIAICR          @ $DC0D     ;CIA1 CIA Interrupt Control Register
-CIACRA          @ $DC0E     ;CIA1 CIA Control Register A
-CIACRB          @ $DC0F     ;CIA1 CIA Control Register B
-CI2PRA          @ $DD00     ;CIA2 Data Port A (Serial Bus RS-232, VIC Memory Control)
-CI2PRB          @ $DD01     ;CIA2 Data Port B (User Port, RS-232)
-C2DDRA          @ $DD02     ;CIA2 Data Direction Register - Port A
-C2DDRB          @ $DD03     ;CIA2 Data Direction Register - Port B
-TI2ALO          @ $DD04     ;CIA2 Timer A Low-Byte
-TI2AHI          @ $DD05     ;CIA2 Timer A High-Byte
-TI2BLO          @ $DD06     ;CIA2 Timer B Low-Byte
-TI2BHI          @ $DD07     ;CIA2 Timer B High-Byte
-TO2TEN          @ $DD08     ;CIA2 Time-of-Day Clock 1/10 Seconds
-TO2SEC          @ $DD09     ;CIA2 Time-of-Day Clock Seconds
-TO2MIN          @ $DD0A     ;CIA2 Time-of-Day Clock Minutes
-TO2HRS          @ $DD0B     ;CIA2 Time-of-Day Clock Hours + AM/PM Flag (Bit 7)
-CI2SDR          @ $DD0C     ;CIA2 Synchronous Serial I/O Data Buffer
-CI2ICR          @ $DD0D     ;CIA2 CIA Interrupt Control Register
-CI2CRA          @ $DD0E     ;CIA2 CIA Control Register A
-CI2CRB          @ $DD0F     ;CIA2 CIA Control Register B
+D6510           @ $0000      ;6510 I/O Data Direction Register
+R6510           @ $0001      ;ROM/IO Banking and Cassette I/O
+SPOX            @ $D000      ;Sprite 0 X Pos
+SPOY            @ $D001      ;Sprite 0 Y Pos
+SP1X            @ $D002      ;Sprite 1 X Pos
+SP1Y            @ $D003      ;Sprite 1 Y Pos
+SP2X            @ $D004      ;Sprite 2 X Pos
+SP2Y            @ $D005      ;Sprite 2 Y Pos
+SP3X            @ $D006      ;Sprite 3 X Pos
+SP3Y            @ $D007      ;Sprite 3 Y Pos
+SP4X            @ $D008      ;Sprite 4 X Pos
+SP4Y            @ $D009      ;Sprite 4 Y Pos
+SP5X            @ $D00A      ;Sprite 5 X Pos
+SP5Y            @ $D00B      ;Sprite 5 Y Pos
+SP6X            @ $D00C      ;Sprite 6 X Pos
+SP6Y            @ $D00D      ;Sprite 6 Y Pos
+SP7X            @ $D00E      ;Sprite 7 X Pos
+SP7Y            @ $D00F      ;Sprite 7 Y Pos
+MSIGX           @ $D010      ;Sprites 0-7 X Pos 9th bit
+SCROLY          @ $D011      ;VIC Control Register
+RASTER          @ $D012      ;Read Raster / Write Raster Value for Compare
+LPENX           @ $D013      ;Light Pen/Gun Latch X Pos (divided by 2)
+LPENY           @ $D014      ;Light Pen/Gun Latch Y Pos
+SPENA           @ $D015      ;Sprites 0-7 display Enable (1 = enable)
+SCROLX          @ $D016      ;VIC Control Register
+YXPAND          @ $D017      ;Sprites 0-7 Expand 2x Vertical
+VMCSB           @ $D018      ;VIC Memory Control Register
+VICIRQ          @ $D019      ;VIC Interrupt Flag Register
+IRQMSK          @ $D01A      ;IRQ Mask Register (1 = Interrupt Enable)
+SPBGPR          @ $D01B      ;Sprite to Background Display Priority
+SPMC            @ $D01C      ;Sprites 0-7 Multi-Color Mode Select
+XXPAND          @ $D01D      ;Sprites 0-7 Expand 2x Horizontal
+SPSPCL          @ $D01E      ;Sprite to Sprite Collision Detect
+SPBGCL          @ $D01F      ;Sprite to Background Collision Detect
+EXTCOL          @ $D020      ;Border Color
+BGCOL0          @ $D021      ;Background Color 0 (screen color)
+BGCOL1          @ $D022      ;Background Color 1
+BGCOL2          @ $D023      ;Background Color 2
+BGCOL3          @ $D024      ;Background Color 3
+SPMC0           @ $D025      ;Sprite Multi-Color Register 0
+SPMC1           @ $D026      ;Sprite Multi-Color Register 1
+SP0CL           @ $D027      ;Sprite 0 Color
+SP1CL           @ $D028      ;Sprite 1 Color
+SP2CL           @ $D029      ;Sprite 2 Color
+SP3CL           @ $D02A      ;Sprite 3 Color
+SP4CL           @ $D02B      ;Sprite 4 Color
+SP5CL           @ $D02C      ;Sprite 5 Color
+SP6CL           @ $D02D      ;Sprite 6 Color
+SP7CL           @ $D02E      ;Sprite 7 Color
+FRELO1          > $D400      ;Voice 1 Frequency - Low-Byte
+FREHI1          > $D401      ;Voice 1 Frequency - High-Byte
+PWLO1           > $D402      ;Voice 1 Pulse Waveform Width - Low-Byte
+PWHI1           > $D403      ;Voice 1 Pulse Waveform Width - High-Nybble
+VCREG1          > $D404      ;Voice 1 Control Register
+ATDCY1          > $D405      ;Voice 1 Attack / Decay
+SUREL1          > $D406      ;Voice 1 Sustain / Release
+FRELO2          > $D407      ;Voice 2 Frequency - Low-Byte
+FREHI2          > $D408      ;Voice 2 Frequency - High-Byte
+PWLO2           > $D409      ;Voice 2 Pulse Waveform Width - Low-Byte
+PWHI2           > $D40A      ;Voice 2 Pulse Waveform Width - High-Nybble
+VCREG2          > $D40B      ;Voice 2 Control Register
+ATDCY2          > $D40C      ;Voice 2 Attack / Decay
+SUREL2          > $D40D      ;Voice 2 Sustain / Release
+FRELO3          > $D40E      ;Voice 3 Frequency - Low-Byte
+FREHI3          > $D40F      ;Voice 3 Frequency - High-Byte
+PWLO3           > $D410      ;Voice 3 Pulse Waveform Width - Low-Byte
+PWHI3           > $D411      ;Voice 3 Pulse Waveform Width - High-Nybble
+VCREG3          > $D412      ;Voice 3 Control Register
+ATDCY3          > $D413      ;Voice 3 Attack/Decay
+SUREL3          > $D414      ;Voice 3 Sustain / Release
+CUTLO           > $D415      ;Filter Cutoff Frequency Low-Nybble
+CUTHI           > $D416      ;Filter Cutoff Frequency High-Byte
+RESON           > $D417      ;Filter Resonance / Voice Input
+SIGVOL          > $D418      ;Select Filter Mode and Volume
+POTX            > $D419      ;Analog/Digital Converter Game Paddle 1
+POTY            > $D41A      ;Analog/Digital Converter Game Paddle 2
+RANDOM          < $D41B      ;Voice 3 Oscillator output
+ENV3            < $D41C      ;Voice 3 Envelope output
+colorRam        @ $D800 1024 ;Color RAM nybbles ($d800-$dbff)
+CIAPRA          @ $DC00      ;CIA1 Data Port A (Keyboard, Joystick, Paddles, Light-Pen)
+CIAPRB          @ $DC01      ;CIA1 Data Port B (Keyboard, Joysticks, Paddles)
+CIDDRA          @ $DC02      ;CIA1 Data Direction Register - Port A
+CIDDRB          @ $DC03      ;CIA1 Data Direction Register - Port B
+TIMALO          @ $DC04      ;CIA1 Timer A Low-Byte
+TIMAHI          @ $DC05      ;CIA1 Timer A High-Byte
+TIMBLO          @ $DC06      ;CIA1 Timer B Low-Byte
+TIMBHI          @ $DC07      ;CIA1 Timer B High-Byte
+TODTEN          @ $DC08      ;CIA1 Time-of-Day Clock 1/10 Seconds
+TODSEC          @ $DC09      ;CIA1 Time-of-Day Clock Seconds
+TODMIN          @ $DC0A      ;CIA1 Time-of-Day Clock Minutes
+TODHRS          @ $DC0B      ;CIA1 Time-of-Day Clock Hours + AM/PM Flag (Bit 7)
+CIASDR          @ $DC0C      ;CIA1 Synchronous Serial I/O Data Buffer
+CIAICR          @ $DC0D      ;CIA1 CIA Interrupt Control Register
+CIACRA          @ $DC0E      ;CIA1 CIA Control Register A
+CIACRB          @ $DC0F      ;CIA1 CIA Control Register B
+CI2PRA          @ $DD00      ;CIA2 Data Port A (Serial Bus RS-232, VIC Memory Control)
+CI2PRB          @ $DD01      ;CIA2 Data Port B (User Port, RS-232)
+C2DDRA          @ $DD02      ;CIA2 Data Direction Register - Port A
+C2DDRB          @ $DD03      ;CIA2 Data Direction Register - Port B
+TI2ALO          @ $DD04      ;CIA2 Timer A Low-Byte
+TI2AHI          @ $DD05      ;CIA2 Timer A High-Byte
+TI2BLO          @ $DD06      ;CIA2 Timer B Low-Byte
+TI2BHI          @ $DD07      ;CIA2 Timer B High-Byte
+TO2TEN          @ $DD08      ;CIA2 Time-of-Day Clock 1/10 Seconds
+TO2SEC          @ $DD09      ;CIA2 Time-of-Day Clock Seconds
+TO2MIN          @ $DD0A      ;CIA2 Time-of-Day Clock Minutes
+TO2HRS          @ $DD0B      ;CIA2 Time-of-Day Clock Hours + AM/PM Flag (Bit 7)
+CI2SDR          @ $DD0C      ;CIA2 Synchronous Serial I/O Data Buffer
+CI2ICR          @ $DD0D      ;CIA2 CIA Interrupt Control Register
+CI2CRA          @ $DD0E      ;CIA2 CIA Control Register A
+CI2CRB          @ $DD0F      ;CIA2 CIA Control Register B

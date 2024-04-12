@@ -1,0 +1,251 @@
+; See the LICENSE file for distribution terms (Apache 2.0).
+;
+; Parts adapted from multiple sources:
+;
+; - Project 64, 64MAP10.TXT, June 1996, etext #41
+;   http://unusedino.de/ec64/technical/project64/memory_maps.html
+;
+; - PageTable's C64 BASIC & KERNAL ROM Disassembly
+;   https://www.pagetable.com/c64ref/c64disasm/
+;
+; - "Mapping the Commodore 64", by Sheldon Leemon
+;   Compute! Publications Inc. (1984), ISBN 0-942386-23-X 
+;   https://archive.org/details/Compute_s_Mapping_the_Commodore_64
+
+*SYNOPSIS KERNAL ROM ($e000-$ffff) labels (functions and some of the vectors)
+
+; Note: BASIC too big to fit into $a000-$bfff, so some additional BASIC support
+;       spills over into the start of the KERNAL ROM.
+
+expCont         @ $e000      ;EXP continued From BASIC ROM
+polyx           @ $e043      ;Series Evaluation
+rmulc           @ $e08d      ;Constants for RND
+rnd             @ $e097      ;Perform rnd
+bioerr          @ $e0f9      ;Handle I/O Error in BASIC
+bchout          @ $e10c      ;Output Character
+bchin           @ $e112      ;Input Character
+bckout          @ $e118      ;Set Up For Output
+bckin           @ $e11e      ;Set Up For Input
+bgetin          @ $e124      ;Get One Character
+sys             @ $e12a      ;Perform sys
+savet           @ $e156      ;Perform save
+verfyt          @ $e165      ;Perform verify / load
+opent           @ $e1be      ;Perform open
+closet          @ $e1c7      ;Perform close
+slpara          @ $e1d4      ;Get Parameters For LOAD/SAVE
+combyt          @ $e200      ;Get Next One Byte Parameter
+deflt           @ $e206      ;Check Default Parameters
+cmmerr          @ $e20e      ;Check For Comma
+ocpara          @ $e219      ;Get Parameters For OPEN/CLOSE
+cos             @ $e264      ;Perform cos
+sin             @ $e26b      ;Perform sin
+tan             @ $e2b4      ;Perform tan
+atn             @ $e30e      ;Perform atn
+bassft          @ $e37b      ;BASIC Warm Start RUNSTOP-RESTORE
+init            @ $e394      ;BASIC Cold Start
+initat          @ $e3a2      ;CHRGET For Zero-page
+initcz          @ $e3bf      ;Initialize BASIC RAM
+initms          @ $e422      ;Output Power-Up Message
+bvtrs           @ $e447 12   ;Table of BASIC Vectors (for $300)
+initv           @ $e453      ;Initialize Vectors
+words           @ $e45f      ;Power-Up Message
+chkoutCallPatch @ $e4ad      ;Patch for BASIC Call to CHKOUT
+rstCharColor    @ $e4da      ;Reset Character Colour
+pauseTapeFind   @ $e4e0      ;Pause After Finding Tape File
+rs232Timing     @ $e4ec 20   ;RS-232 Timing Table
+iobase2         @ $e500      ;Get I/O Address
+screen2         @ $e505      ;Get Screen Size
+plot2           @ $e50a      ;Put / Get Row And Column
+cint1           @ $e518      ;Initialize I/O
+clrScrn         @ $e544      ;Clear Screen
+homeCur         @ $e566      ;Home Cursor
+setScrnPtrs     @ $e56c      ;Set Screen Pointers
+ioDefaultsAlt   @ $e59a      ;Set I/O Defaults (Unused Entry)
+ioDefaults      @ $e5a0      ;Set I/O Defaults
+lp2             @ $e5b4      ;Get Character From Keyboard Buffer
+keyInput        @ $e5ca      ;Input From Keyboard
+keyScrnInput    @ $e632      ;Input From Screen or Keyboard
+quotesTest      @ $e684      ;Quotes Test
+scrnPrntInit    @ $e691      ;Set Up Screen Print
+advanceCur      @ $e6b6      ;Advance Cursor
+retreatCur      @ $e6ed      ;Retreat Cursor
+backPrevLine    @ $e701      ;Back on to Previous Line
+outputToScrn    @ $e716      ;Output to Screen
+unshiftChars    @ $e72a      ;unshifted characters
+shiftedChars    @ $e7d4      ;shifted characters
+nextLine        @ $e87c      ;Go to Next Line
+outputCR        @ $e891      ;Output <CR>
+chkLineDec      @ $e8a1      ;Check Line Decrement
+chkLineInc      @ $e8b3      ;Check Line Increment
+setColorCode    @ $e8cb      ;Set Colour Code
+colorCodeTbl    @ $e8da 16   ;Colour Code Table
+scrnScroll      @ $e8ea      ;Scroll Screen
+openSpace       @ $e965      ;Open A Space On The Screen
+moveLine        @ $e9c8      ;Move A Screen Line
+syncColorXfer   @ $e9e0      ;Syncronise Colour Transfer
+setSOL          @ $e9f0      ;Set Start of Line
+clearLine       @ $e9ff      ;Clear Screen Line
+printToScrn     @ $ea13      ;Print To Screen
+syncColPntr     @ $ea24      ;Syncronise Colour Pointer
+defaultIrqEntry @ $ea31      ;Main IRQ Entry Point
+scnkey2         @ $ea87      ;Scan Keyboard
+processKey      @ $eadd      ;Process Key Image
+graphTextCntrl  @ $ec44      ;Graphics/Text Control
+shiftRunEq      @ $ece7      ;Shift-Run Equivalent
+loScrnLineAddr  @ $ecf0      ;Low Byte Screen Line Addresses
+talk2           @ $ed09      ;Send TALK Command on Serial Bus
+listn2          @ $ed0c      ;Send LISTEN Command on Serial Bus
+serialSend      @ $ed40      ;Send Data On Serial Bus
+flagErrors      @ $edad      ;Flag Errors
+flagDevNotPres  @ $edad      ;Status #80 - device not present
+flagWriteTout   @ $edb0      ;Status #03 - write timeout
+secnd2          @ $edb9      ;Send LISTEN Secondary Address
+clrAtn          @ $edbe      ;Clear ATN
+tksa2           @ $edc7      ;Send TALK Secondary Address
+waitForClock    @ $edcc      ;Wait For Clock
+ciout2          @ $eddd      ;Send Serial Deferred
+untalk2         @ $edef      ;Send UNTALK / UNLISTEN
+unlsn2          @ $edfe      ;Unlisten
+acptr2          @ $ee13      ;Receive From Serial Bus
+serialClkOn     @ $ee85      ;Serial Clock On
+serialClkOff    @ $ee8e      ;Serial Clock Off
+serialOutput1   @ $ee97      ;Serial Output 1
+serialOutput0   @ $eea0      ;Serial Output 0
+serialGet       @ $eea9      ;Get Serial Data And Clock In
+delay1ms        @ $eeb3      ;Delay 1 ms
+rs232Send       @ $eebb      ;RS-232 Send
+rs232SendByte   @ $ef06      ;Send New RS-232 Byte
+noDataSetRdy    @ $ef2e      ;No DSR / No CTS Error
+disableTimer    @ $ef39      ;Disable Timer
+bitCount        @ $ef4a      ;Compute Bit Count
+rs232Recv       @ $ef59      ;RS-232 Receive
+rs232RecvInit   @ $ef7e      ;Set Up To Receive
+rs232ProcByte   @ $ef90      ;Process RS-232 Byte
+rs232Submit     @ $efe1      ;Submit to RS-232
+noDsrError      @ $f00d      ;No DSR (Data Set Ready) Error
+rs232SendToBuf  @ $f017      ;Send to RS-232 Buffer
+rs232Input      @ $f04d      ;Input From RS-232
+rs232Get        @ $f086      ;Get From RS-232
+serialBusIdle   @ $f0a4      ;Serial Bus Idle
+prtMsgIfDirect  @ $f12b      ;Print Message if Direct
+prtMsg          @ $f12f      ;Print Message
+getin3          @ $f13e      ;Get a byte
+chrin3          @ $f157      ;Input a byte
+getFromIO       @ $f199      ;Get From Tape / Serial / RS-232
+chrout3         @ $f1ca      ;Output One Character
+chkin3          @ $f20e      ;Set Input Device
+chkout3         @ $f250      ;Set Output Device
+close3          @ $f291      ;Close File
+findFile        @ $f30f      ;Find File
+setFileParms    @ $f31f      ;Set File values
+clall3          @ $f32f      ;Abort All Files
+clrchn3         @ $f333      ;Restore Default I/O
+open3           @ $f34a      ;Open File
+setSecondary    @ $f3d5      ;Send Secondary Address
+rs232Open       @ $f409      ;Open RS-232
+load2           @ $f49e      ;Load RAM
+serialLoadFile  @ $f4b8      ;Load File From Serial Bus
+tapeLoadFile    @ $f533      ;Load File From Tape
+printSearching  @ $f5af      ;Print SEARCHING
+printFilename   @ $f5c1      ;Print Filename
+printLoading    @ $f5d2      ;Print LOADING / VERIFYING
+save            @ $f5dd      ;Save RAM
+serialSave      @ $f5fa      ;Save to Serial Bus
+tapeSave        @ $f659      ;Save to Tape
+printSaving     @ $f68f      ;Print SAVING
+udtim2          @ $f69b      ;Bump Clock
+rdtim2          @ $f6dd      ;Get Time
+settim2         @ $f6e4      ;Set Time
+stop            @ $f6ed      ;Check STOP Key
+findTapeHdr     @ $f72c      ;Find Any Tape Header
+writeTapeHdr    @ $f76a      ;Write Tape Header
+getBufAddr      @ $f7d0      ;Get Buffer Address
+headerStartEnd  @ $f7d7      ;Set Buffer Stat / End Pointers
+findSpecTapeHdr @ $f7ea      ;Find Specific Tape Header
+bumpTapePtr     @ $f80d      ;Bump Tape Pointer
+printPressPlay  @ $f817      ;Print PRESS PLAY ON TAPE
+chkTapeStatus   @ $f82e      ;Check Tape Status
+printPressRecrd @ $f838      ;Print PRESS RECORD...
+initTapeRead    @ $f841      ;Initiate Tape Read
+initTapeWrite   @ $f864      ;Initiate Tape Write
+tapeOperEntry   @ $f875      ;Common Tape Code
+chkTapeStop     @ $f8d0      ;Check Tape Stop
+setReadTiming   @ $f8e2      ;Set Read Timing
+readTapeBits    @ $f92c      ;Read Tape Bits
+storeTapeChars  @ $fa60      ;Store Tape Characters
+rstTapePtr      @ $fb8e      ;Reset Tape Pointer
+newCharSetup    @ $fb97      ;New Character Setup
+sendTapeTone    @ $fba6      ;Send Tone to Tape
+writeTapeData   @ $fbc8      ;Write Data to Tape
+tapeIrqEntry    @ $fbcd      ;IRQ Entry Point
+writeTapeLeader @ $fc57      ;Write Tape Leader
+restoreIrq      @ $fc93      ;Restore Normal IRQ
+setIrqVec       @ $fcb8      ;Set IRQ Vector
+stopTapeMotor   @ $fcca      ;Kill Tape Motor
+chkRwPtr        @ $fcd1      ;Check Read / Write Pointer
+bumpRwPtr       @ $fcdb      ;Bump Read / Write Pointer
+resetEntry      @ $fce2      ;Power-Up RESET Entry
+cartridgeCheck  @ $fd02      ;Check For 8-ROM
+restor2         @ $fd15      ;Restore Kernal Vectors (at $0314)
+vector2         @ $fd1a      ;Change Vectors For User
+ramtas2         @ $fd50      ;Initialise System Constants
+ioinit2         @ $fda3      ;Initialise I/O
+enableTimer     @ $fddd      ;Enable Timer
+setnam2         @ $fdf9      ;Set Filename
+setlfs2         @ $fe00      ;Set Logical File Parameters
+readst2         @ $fe07      ;Get I/O Status Word
+setmsg2         @ $fe18      ;Control OS Messages
+settmo2         @ $fe21      ;Set IEEE Timeout
+memtop2         @ $fe25      ;Read / Set Top of Memory
+membot2         @ $fe34      ;Read / Set Bottom of Memory
+nmiHandler      @ $fe43      ;NMI Transfer Entry
+basicWarmStart  @ $fe66      ;Warm Start Basic BRK
+exitInterrupt   @ $febc      ;Exit Interrupt
+rs232NmiIn      @ $fed6      ;NMI RS-232 In
+rs232NmiOut     @ $ff07      ;NMI RS-232 Out
+irqEntryAlt     @ $ff43      ;Fake IRQ Entry
+irqEntry        @ $ff48      ;IRQ Entry
+cint2           @ $ff5b      ;Initialize screen editor
+kernalVer       @ $ff80      ;Kernal Version Number 03
+cint            @ $ff81      ;Init Editor & Video Chips ($ff5b)
+ioinit          @ $ff84      ;Init I/O Devices  Ports & Timers ($fda3)
+ramtas          @ $ff87      ;Init Ram & Buffers ($fd50)
+restor          @ $ff8a      ;Restore Vectors ($fd15)
+vector          @ $ff8d      ;Change Vectors For User ($fd1a)
+setmsg          @ $ff90      ;Control OS Messages ($fe18)
+secnd           @ $ff93      ;Send SA After Listen ($edb9)
+tksa            @ $ff96      ;Send SA After Talk ($edc7)
+memtop          @ $ff99      ;Set/Read System RAM Top ($fe25)
+membot          @ $ff9c      ;Set/Read System RAM Bottom ($fe34)
+scnkey          @ $ff9f      ;Scan Keyboard ($ea87)
+settmo          @ $ffa2      ;Set Timeout In IEEE ($fe21)
+acptr           @ $ffa5      ;Handshake Serial Byte In ($ee13)
+ciout           @ $ffa8      ;Handshake Serial Byte Out ($eddd)
+untalk          @ $ffab      ;Command Serial Bus UNTALK ($edef)
+unlsn           @ $ffae      ;Command Serial Bus UNLISTEN ($edfe)
+listn           @ $ffb1      ;Command Serial Bus LISTEN ($ed0c)
+talk            @ $ffb4      ;Command Serial Bus TALK ($ed09)
+readst          @ $ffb7      ;Read I/O Status Word ($fe07)
+setlfs          @ $ffba      ;Set Logical File Parameters ($fe00)
+setnam          @ $ffbd      ;Set Filename ($fdf9)
+iopen           @ $ffc0      ;Open Vector $f34a ($031a->$f34a)
+iclose          @ $ffc3      ;Close Vector $f291 ($031c->$f291)
+ichkin          @ $ffc6      ;Set Input $f20e ($031e->$f20e)
+ichkout         @ $ffc9      ;Set Output $f250 ($0320->$f250)
+iclrch          @ $ffcc      ;Restore I/O Vector $f333 ($0322->$f333)
+ichrin          @ $ffcf      ;Input Vector chrin $f157 ($0324->$f157)
+ichrout         @ $ffd2      ;Output Vector chrout $f1ca ($0326->$f1ca)
+load            @ $ffd5      ;Load RAM From Device ($f49e)
+save2           @ $ffd8      ;Save RAM To Device ($f5dd)
+settim          @ $ffdb      ;Set Real-Time Clock ($f6e4)
+rdtim           @ $ffde      ;Read Real-Time Clock ($f6dd)
+istop3          @ $ffe1      ;Test-Stop Vector $f6ed ($0328->$f6ed)
+igetin          @ $ffe4      ;Get From Keyboad $f13e ($032a->$f13e)
+iclall          @ $ffe7      ;Close All Channels And Files $f32f ($032c->$f32f)
+udtim           @ $ffea      ;Increment Real-Time Clock ($f69b)
+screen          @ $ffed      ;Return Screen Organization ($e505)
+plot            @ $fff0      ;Read / Set Cursor X/Y Position ($e50a)
+iobase          @ $fff3      ;Return I/O Base Address ($e500)
+nmiVector       @ $fffa 2    ;Non-Maskable Interrupt Hardware Vector ($fe43)
+resetVector     @ $fffc 2    ;System Rest (RES) Hardware Vector ($fce2)
+irqVector       @ $fffe 2    ;Maskable Interrupt Request and Break Hardware Vectors ($ff48)
