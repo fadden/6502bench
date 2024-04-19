@@ -44,7 +44,7 @@ namespace SourceGen.WpfGui {
 
             GenerateMonoFontList(initialFamily);
 
-            int selIndex = 0;
+            int selIndex = -1;
             string sizeStr = initialSize.ToString();
             for (int i = 0; i < sizeComboBox.Items.Count; i++) {
                 ComboBoxItem item = (ComboBoxItem)sizeComboBox.Items[i];
@@ -52,6 +52,10 @@ namespace SourceGen.WpfGui {
                     selIndex = i;
                     break;
                 }
+            }
+            if (selIndex < 0) {
+                // Size is not one of the standard combo box items.
+                sizeComboBox.Text = initialSize.ToString();
             }
             sizeComboBox.SelectedIndex = selIndex;
         }
@@ -114,7 +118,21 @@ namespace SourceGen.WpfGui {
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             ComboBoxItem item = (ComboBoxItem)sizeComboBox.SelectedItem;
-            SelectedSize = int.Parse((string)item.Content);
+            if (item != null) {
+                SelectedSize = int.Parse((string)item.Content);
+            } else {
+                // Catch bad font sizes when "OK" is hit.  Not as nice as disabling the OK
+                // button on bad input, but much simpler.
+                try {
+                    SelectedSize = int.Parse(sizeComboBox.Text);
+                } catch (FormatException) {
+                    SelectedSize = -1;      // trigger next test
+                }
+                if (SelectedSize < 3 || SelectedSize > 64) {
+                    sizeErrMsg.Visibility = Visibility.Visible;
+                    return;
+                }
+            }
             DialogResult = true;
         }
     }

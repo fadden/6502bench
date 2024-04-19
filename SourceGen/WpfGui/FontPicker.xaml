@@ -56,15 +56,20 @@ limitations under the License.
         </ListBox>
 
         <TextBlock Text="Font size:" Margin="0,8,0,0"/>
-        <ComboBox Name="sizeComboBox" IsReadOnly="True" Margin="0,4,0,0" Width="75"
-                  HorizontalAlignment="Left">
-            <!-- these are parsed directly, so only use numeric values -->
-            <ComboBoxItem>8</ComboBoxItem>
-            <ComboBoxItem>10</ComboBoxItem>
-            <ComboBoxItem>12</ComboBoxItem>
-            <ComboBoxItem>16</ComboBoxItem>
-            <ComboBoxItem>20</ComboBoxItem>
-        </ComboBox>
+        <StackPanel Orientation="Horizontal">
+            <ComboBox Name="sizeComboBox" Margin="0,4,0,0" Width="75"
+                      HorizontalAlignment="Left" IsEditable="True">
+                <!-- these are parsed directly, so only use numeric values -->
+                <ComboBoxItem>8</ComboBoxItem>
+                <ComboBoxItem>10</ComboBoxItem>
+                <ComboBoxItem>12</ComboBoxItem>
+                <ComboBoxItem>14</ComboBoxItem>
+                <ComboBoxItem>16</ComboBoxItem>
+                <ComboBoxItem>20</ComboBoxItem>
+            </ComboBox>
+            <TextBlock Name="sizeErrMsg" Margin="8,6,0,0" Text="Must be an integer from 3 to 64."
+                       Foreground="Red" Visibility="Hidden"/>
+        </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
             <Button Name="okButton" Content="OK" IsDefault="True"
