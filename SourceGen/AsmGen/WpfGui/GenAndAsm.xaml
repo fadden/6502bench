@@ -75,7 +75,7 @@ limitations under the License.
             <DockPanel Grid.Column="3" Grid.Row="2">
                 <TextBlock DockPanel.Dock="Left" Margin="0,1,0,0">Work directory:</TextBlock>
                 <TextBox DockPanel.Dock="Right" Name="workDirectoryTextBox" Margin="8,0,0,0"
-                         Text="C:\this\that\theother"/>
+                         IsReadOnly="True" Text="C:\this\that\theother"/>
             </DockPanel>
         </Grid>
 

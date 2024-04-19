@@ -57,7 +57,7 @@ limitations under the License.
             </Style>
 
             <RoutedUICommand x:Key="AboutCmd" Text="About..."/>
-            <RoutedUICommand x:Key="AssembleCmd" Text="Assemble...">
+            <RoutedUICommand x:Key="AssembleCmd" Text="Generate Assembly...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Shift+A</KeyGesture>
                 </RoutedUICommand.InputGestures>
