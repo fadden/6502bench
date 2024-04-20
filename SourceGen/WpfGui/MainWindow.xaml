@@ -136,6 +136,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="FormatAddressTableCmd" Text="Format Address Table..."/>
+            <RoutedUICommand x:Key="GenerateLabelsCmd" Text="Generate Label File..."/>
             <RoutedUICommand x:Key="GotoCmd" Text="Go To...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+G</KeyGesture>
@@ -284,6 +285,8 @@ limitations under the License.
                         CanExecute="CanFormatAsWord" Executed="FormatAsWordCmd_Executed"/>
         <CommandBinding Command="{StaticResource FormatAddressTableCmd}"
                         CanExecute="CanFormatAddressTable" Executed="FormatAddressTableCmd_Executed"/>
+        <CommandBinding Command="{StaticResource GenerateLabelsCmd}"
+                        CanExecute="IsProjectOpen" Executed="GenerateLabelsCmd_Executed"/>
         <CommandBinding Command="{StaticResource GotoCmd}"
                         CanExecute="IsProjectOpen" Executed="GotoCmd_Executed"/>
         <CommandBinding Command="{StaticResource GotoLastChangeCmd}"
@@ -392,8 +395,8 @@ limitations under the License.
                 </MenuItem>
                 <Separator/>
                 <MenuItem Command="{StaticResource AssembleCmd}"/>
-                <!--<MenuItem Command="Print"/>-->
                 <MenuItem Command="{StaticResource ExportCmd}"/>
+                <MenuItem Command="{StaticResource GenerateLabelsCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource ReloadExternalFilesCmd}"/>
                 <Separator/>

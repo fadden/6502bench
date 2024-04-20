@@ -2557,6 +2557,47 @@ namespace SourceGen {
             }
         }
 
+        public void GenerateLabels() {
+            GenerateLabels dlg = new GenerateLabels(mMainWin);
+            if (dlg.ShowDialog() == false) {
+                return;
+            }
+
+            string ext;
+            string filter;
+            switch (dlg.Format) {
+                case LabelFileGenerator.LabelFmt.VICE:
+                    ext = ".vs";
+                    filter = "VICE commands (*.vs)|*.vs";
+                    break;
+                default:
+                    Debug.Assert(false, "bad format");
+                    return;
+            }
+
+            SaveFileDialog fileDlg = new SaveFileDialog() {
+                Filter = filter,
+                FilterIndex = 1,
+                ValidateNames = true,
+                AddExtension = true,    // doesn't add extension if non-ext file exists
+                FileName = "labels" + ext
+            };
+            if (fileDlg.ShowDialog() != true) {
+                return;
+            }
+            string pathName = Path.GetFullPath(fileDlg.FileName);
+            try {
+                using (StreamWriter writer = new StreamWriter(pathName, false)) {
+                    LabelFileGenerator gen = new LabelFileGenerator(mProject,
+                        dlg.Format, dlg.IncludeAutoLabels);
+                    gen.Generate(writer);
+                }
+            } catch (Exception ex) {
+                MessageBox.Show("Error: " + ex.Message, "Failed", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         public void Find() {
             FindBox dlg = new FindBox(mMainWin, mFindString);
             if (dlg.ShowDialog() == true) {

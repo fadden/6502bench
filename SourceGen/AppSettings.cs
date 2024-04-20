@@ -127,6 +127,10 @@ namespace SourceGen {
         public const string SRCGEN_LONG_LABEL_NEW_LINE = "srcgen-long-label-new-line";
         public const string SRCGEN_SHOW_CYCLE_COUNTS = "srcgen-show-cycle-counts";
 
+        // Label file generation settings.
+        public const string LABGEN_FORMAT = "labgen-format";
+        public const string LABGEN_INCLUDE_AUTO = "labgen-include-auto";
+
         // Assembler settings prefix
         public const string ASM_CONFIG_PREFIX = "asm-config-";
 

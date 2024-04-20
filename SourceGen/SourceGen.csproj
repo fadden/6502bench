@@ -79,6 +79,7 @@
     <Compile Include="DailyTips.cs" />
     <Compile Include="Exporter.cs" />
     <Compile Include="FormattedOperandCache.cs" />
+    <Compile Include="LabelFileGenerator.cs" />
     <Compile Include="LocalVariableLookup.cs" />
     <Compile Include="MessageList.cs" />
     <Compile Include="Sgec.cs" />
@@ -187,6 +188,9 @@
     </Compile>
     <Compile Include="WpfGui\FormatAddressTable.xaml.cs">
       <DependentUpon>FormatAddressTable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WpfGui\GenerateLabels.xaml.cs">
+      <DependentUpon>GenerateLabels.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfGui\GotoBox.xaml.cs">
       <DependentUpon>GotoBox.xaml</DependentUpon>
@@ -410,6 +414,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfGui\FormatAddressTable.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\GenerateLabels.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

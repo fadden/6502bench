@@ -1332,6 +1332,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.FormatAddressTable();
         }
 
+        private void GenerateLabelsCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.GenerateLabels();
+        }
+
         private void GotoCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.Goto();
         }
