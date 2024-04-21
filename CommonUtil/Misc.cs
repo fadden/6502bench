@@ -42,10 +42,10 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// Usage:
-        ///   AppDomain.CurrentDomain.UnhandledException +=
-        ///       new UnhandledExceptionEventHandler(CommonUtil.Misc.CrashReporter);
+        ///   <code>AppDomain.CurrentDomain.UnhandledException +=
+        ///       new UnhandledExceptionEventHandler(CommonUtil.Misc.CrashReporter);</code>
         ///
-        /// Thanks: https://stackoverflow.com/a/21308327/294248
+        /// Thanks: <see href="https://stackoverflow.com/a/21308327/294248"/>.
         /// </remarks>
         public static void CrashReporter(object sender, UnhandledExceptionEventArgs e) {
             const string CRASH_PATH = @"CrashLog.txt";
@@ -80,7 +80,7 @@ namespace CommonUtil {
         /// faster than setting array elements individually.
         /// </summary>
         /// <remarks>
-        /// From https://stackoverflow.com/a/18659408/294248
+        /// From <see href="https://stackoverflow.com/a/18659408/294248"/>.
         ///
         /// Invokes Array.Copy() on overlapping elements.  Other approaches involve using
         /// Buffer.BlockCopy or unsafe code.  Apparently .NET Core has an Array.Fill(), but

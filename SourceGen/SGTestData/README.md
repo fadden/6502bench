@@ -34,17 +34,19 @@ be opened as the project file.
 ### Overriding Settings ###
 
 All tests are run with a fixed set of app settings, so that the tests look
-the same regardless of how the assemblers are configured.  For example,
-upper-case conversion is disabled, and cycle counts are not shown.
+the same regardless of how the assemblers are configured in the app settings
+file.  For example, upper-case conversion is disabled, and cycle counts are
+not shown.
 
 Sometimes a test will want to exercise one of these settings, so we need
 a way to tell the test harness to override the default.  We do this by
-creating project symbols.
+creating project symbols:
 
-| Name                   | Value | Description
-| ---------------------- | ----- | -------------------------------------------|
-| __ENABLE_LABEL_NEWLINE | any   | Puts long labels on their own line         |
-| __ENABLE_CYCLE_COUNTS  | any   | Adds cycle count to end-of-line comments   |
+| Name                       | Value | Description
+| -------------------------- | ----- | -------------------------------------------|
+| __ENABLE_LABEL_NEWLINE     | any   | Puts long labels on their own line         |
+| __ENABLE_ALL_LABEL_NEWLINE | any   | Puts all labels on their own line          |
+| __ENABLE_CYCLE_COUNTS      | any   | Adds cycle count to end-of-line comments   |
 
 ### Execution ###
 
@@ -74,7 +76,7 @@ the "retain output" box in the test harness, the directory and its contents
 will remain.  This allows you to examine the outputs when investigating
 failures.
 
-As a safety measure, the directory will NOT be removed if it contains files
+As a safety measure, a directory will NOT be removed if it contains files
 that the test harness doesn't recognize.
 
 ### Updating Tests ###
@@ -115,4 +117,3 @@ for a full explanation.
 
 Some test projects and data files for exercising the visualization generators.
 Not part of a formal test; load the projects and eyeball the results.
-

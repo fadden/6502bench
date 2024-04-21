@@ -820,10 +820,20 @@ limitations under the License.
                     <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
                     <CheckBox Content="Show cycle counts in comments" Margin="4,8,0,0"
                               IsChecked="{Binding ShowCycleCountsAsm}"/>
-                    <CheckBox Content="Put long labels on separate line" Margin="4,8,0,0"
-                              IsChecked="{Binding LongLabelNewLine}"/>
-                    <CheckBox Content="Identify assembler in output" Margin="4,8,0,0"
+                    <CheckBox Content="Identify assembler in output" Margin="4,6,0,0"
                               IsChecked="{Binding AddIdentComment}"/>
+                    <StackPanel Orientation="Vertical" Margin="10,6,0,0">
+                        <TextBlock Text="Put labels on their own line..."/>
+                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
+                                     Content="Only when required"
+                                     IsChecked="{Binding LabelPlacement_PreferSameLine}"/>
+                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
+                                     Content="When the label is wider than the field"
+                                     IsChecked="{Binding LabelPlacement_SplitIfTooLong}"/>
+                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
+                                     Content="Whenever possible"
+                                     IsChecked="{Binding LabelPlacement_PreferSeparateLine}"/>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
 

@@ -112,8 +112,8 @@ namespace SourceGen.Tools.WpfGui {
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
             // Restore chart settings.
-            CpuDef.CpuType type = (CpuDef.CpuType)AppSettings.Global.GetEnum(
-                AppSettings.INSTCH_MODE, typeof(CpuDef.CpuType), (int)CpuDef.CpuType.Cpu6502);
+            CpuDef.CpuType type =
+                AppSettings.Global.GetEnum(AppSettings.INSTCH_MODE, CpuDef.CpuType.Cpu6502);
             ShowUndocumented = AppSettings.Global.GetBool(AppSettings.INSTCH_SHOW_UNDOC, true);
 
             int index = 0;
@@ -146,8 +146,7 @@ namespace SourceGen.Tools.WpfGui {
             }
 
             // Push current choice to settings.
-            AppSettings.Global.SetEnum(AppSettings.INSTCH_MODE, typeof(CpuDef.CpuType),
-                (int)item.Type);
+            AppSettings.Global.SetEnum(AppSettings.INSTCH_MODE, item.Type);
             AppSettings.Global.SetBool(AppSettings.INSTCH_SHOW_UNDOC, mShowUndocumented);
 
             // Populate the items source.

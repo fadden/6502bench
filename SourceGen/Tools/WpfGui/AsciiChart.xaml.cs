@@ -55,8 +55,7 @@ namespace SourceGen.Tools.WpfGui {
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
             // Restore chart mode setting.
-            ChartMode mode = (ChartMode)AppSettings.Global.GetEnum(
-                AppSettings.ASCCH_MODE, typeof(ChartMode), (int)ChartMode.Standard);
+            ChartMode mode = AppSettings.Global.GetEnum(AppSettings.ASCCH_MODE, ChartMode.Standard);
             int index = 0;
             for (int i = 0; i < ChartModeItems.Length; i++) {
                 if (ChartModeItems[i].Mode == mode) {
@@ -87,7 +86,7 @@ namespace SourceGen.Tools.WpfGui {
                 return;
             }
 
-            AppSettings.Global.SetEnum(AppSettings.ASCCH_MODE, typeof(ChartMode), (int)item.Mode);
+            AppSettings.Global.SetEnum(AppSettings.ASCCH_MODE, item.Mode);
 
             //
             // Draw box contents.

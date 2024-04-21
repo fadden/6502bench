@@ -55,17 +55,15 @@ namespace SourceGen.WpfGui {
             Owner = owner;
             DataContext = this;
 
-            Format =
-                (LabelFileGenerator.LabelFmt)AppSettings.Global.GetEnum(AppSettings.LABGEN_FORMAT,
-                typeof(LabelFileGenerator.LabelFmt), (int)LabelFileGenerator.LabelFmt.VICE);
+            Format = AppSettings.Global.GetEnum(AppSettings.LABGEN_FORMAT,
+                LabelFileGenerator.LabelFmt.VICE);
             UpdateFormats();
             mIncludeAutoLabels = AppSettings.Global.GetBool(AppSettings.LABGEN_INCLUDE_AUTO, false);
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
             // Save settings.
-            AppSettings.Global.SetEnum(AppSettings.LABGEN_FORMAT,
-                typeof(LabelFileGenerator.LabelFmt), (int)Format);
+            AppSettings.Global.SetEnum(AppSettings.LABGEN_FORMAT, Format);
             AppSettings.Global.SetBool(AppSettings.LABGEN_INCLUDE_AUTO, mIncludeAutoLabels);
             DialogResult = true;
         }

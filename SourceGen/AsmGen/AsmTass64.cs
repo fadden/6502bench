@@ -73,9 +73,9 @@ namespace SourceGen.AsmGen {
         private string mWorkDirectory;
 
         /// <summary>
-        /// If set, long labels get their own line.
+        /// Influences whether labels are put on their own line.
         /// </summary>
-        private bool mLongLabelNewLine;
+        private GenCommon.LabelPlacement mLabelNewLine;
 
         /// <summary>
         /// Output column widths.
@@ -201,7 +201,8 @@ namespace SourceGen.AsmGen {
             mFileNameBase = fileNameBase;
             Settings = settings;
 
-            mLongLabelNewLine = Settings.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
+            mLabelNewLine = Settings.GetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                    GenCommon.LabelPlacement.SplitIfTooLong);
 
             AssemblerConfig config = AssemblerConfig.GetConfig(settings,
                 AssemblerInfo.Id.Tass64);
@@ -777,7 +778,9 @@ namespace SourceGen.AsmGen {
                     !string.Equals(opcode, sDataOpNames.VarDirective,
                         StringComparison.InvariantCultureIgnoreCase)) {
 
-                if (mLongLabelNewLine && label.Length >= mColumnWidths[0]) {
+                if (mLabelNewLine == GenCommon.LabelPlacement.PreferSeparateLine ||
+                        (mLabelNewLine == GenCommon.LabelPlacement.SplitIfTooLong &&
+                            label.Length >= mColumnWidths[0])) {
                     mOutStream.WriteLine(label);
                     label = string.Empty;
                 }

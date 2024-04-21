@@ -23,11 +23,19 @@ using Asm65;
 using CommonUtil;
 
 namespace SourceGen.AsmGen {
+    /// <summary>
+    /// Code common to all assembly source generators.
+    /// </summary>
     public class GenCommon {
+        public enum LabelPlacement {
+            Unknown = 0,
+            PreferSameLine,
+            SplitIfTooLong,
+            PreferSeparateLine,
+        }
+
         /// <summary>
         /// Generates assembly source.
-        /// 
-        /// This code is common to all generators.
         /// </summary>
         /// <param name="gen">Reference to generator object (presumably the caller).</param>
         /// <param name="sw">Text output sink.</param>

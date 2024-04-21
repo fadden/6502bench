@@ -75,8 +75,7 @@ namespace SourceGen.Tools.WpfGui {
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
             // Restore chart mode setting.
-            ChartMode mode = (ChartMode)AppSettings.Global.GetEnum(
-                AppSettings.A2SC_MODE, typeof(ChartMode), (int)ChartMode.HiRes1_L);
+            ChartMode mode = AppSettings.Global.GetEnum(AppSettings.A2SC_MODE, ChartMode.HiRes1_L);
             int index = 0;
             for (int i = 0; i < ChartModeItems.Length; i++) {
                 if (ChartModeItems[i].Mode == mode) {
@@ -107,7 +106,7 @@ namespace SourceGen.Tools.WpfGui {
                 return;
             }
 
-            AppSettings.Global.SetEnum(AppSettings.A2SC_MODE, typeof(ChartMode), (int)item.Mode);
+            AppSettings.Global.SetEnum(AppSettings.A2SC_MODE, item.Mode);
 
             string text;
             switch (item.Mode) {

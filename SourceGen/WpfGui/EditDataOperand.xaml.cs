@@ -293,8 +293,7 @@ namespace SourceGen.WpfGui {
             AnalyzeStringRanges(item.Mode);
             UpdateControls();
 
-            AppSettings.Global.SetEnum(AppSettings.OPED_DEFAULT_STRING_ENCODING,
-                typeof(TextScanMode), (int)item.Mode);
+            AppSettings.Global.SetEnum(AppSettings.OPED_DEFAULT_STRING_ENCODING, item.Mode);
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e) {
@@ -780,9 +779,8 @@ namespace SourceGen.WpfGui {
 
             // Get the previous mode selected in the combo box.  If the format descriptor
             // doesn't specify a string, we'll use this.
-            TextScanMode textMode = (TextScanMode)AppSettings.Global.GetEnum(
-                AppSettings.OPED_DEFAULT_STRING_ENCODING, typeof(TextScanMode),
-                (int)TextScanMode.LowHighAscii);
+            TextScanMode textMode = AppSettings.Global.GetEnum(
+                AppSettings.OPED_DEFAULT_STRING_ENCODING, TextScanMode.LowHighAscii);
 
             if (dfd == null) {
                 radioDefaultFormat.IsChecked = true;

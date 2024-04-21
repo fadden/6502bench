@@ -430,7 +430,8 @@ namespace SourceGen.Tests {
 
             // Don't break lines with long labels.  That way we can redefine "long"
             // without breaking our tests.  (This is purely cosmetic.)
-            settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false);
+            settings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                GenCommon.LabelPlacement.PreferSameLine);
 
             // This could be on or off.  Off seems less distracting.
             settings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
@@ -455,17 +456,23 @@ namespace SourceGen.Tests {
         }
 
         /// <summary>
-        /// Applies app setting overrides that were specified in the project settings.
+        /// Applies app setting overrides that were specified in the project properties.
         /// </summary>
         private void ApplyProjectSettings(AppSettings settings, DisasmProject project) {
             // We could probably make this a more general mechanism, but that would strain
             // things a bit, since we need to know the settings name, bool/int/string, and
             // desired value.  Easier to just have a set of named features.
             const string ENABLE_LABEL_NEWLINE = "__ENABLE_LABEL_NEWLINE";
+            const string ENABLE_ALL_LABEL_NEWLINE = "__ENABLE_ALL_LABEL_NEWLINE";
             const string ENABLE_CYCLE_COUNTS = "__ENABLE_CYCLE_COUNTS";
 
             if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_LABEL_NEWLINE)) {
-                settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, true);
+                settings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                    GenCommon.LabelPlacement.SplitIfTooLong);
+            }
+            if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_ALL_LABEL_NEWLINE)) {
+                settings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                    GenCommon.LabelPlacement.PreferSeparateLine);
             }
             if (project.ProjectProps.ProjectSyms.ContainsKey(ENABLE_CYCLE_COUNTS)) {
                 settings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, true);

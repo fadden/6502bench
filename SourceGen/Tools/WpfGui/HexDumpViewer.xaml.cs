@@ -111,8 +111,8 @@ namespace SourceGen.Tools.WpfGui {
             AsciiOnlyDump = AppSettings.Global.GetBool(AppSettings.HEXD_ASCII_ONLY, false);
 
             // Restore conv mode setting.
-            CharConvMode mode = (CharConvMode)AppSettings.Global.GetEnum(
-                AppSettings.HEXD_CHAR_CONV, typeof(CharConvMode), (int)CharConvMode.Ascii);
+            CharConvMode mode =
+                AppSettings.Global.GetEnum(AppSettings.HEXD_CHAR_CONV, CharConvMode.Ascii);
             int index = 0;
             for (int i = 0; i < CharConvItems.Length; i++) {
                 if (CharConvItems[i].Mode == mode) {
@@ -156,8 +156,7 @@ namespace SourceGen.Tools.WpfGui {
 
             // Keep app settings up to date.
             AppSettings.Global.SetBool(AppSettings.HEXD_ASCII_ONLY, mAsciiOnlyDump);
-            AppSettings.Global.SetEnum(AppSettings.HEXD_CHAR_CONV, typeof(CharConvMode),
-                (int)item.Mode);
+            AppSettings.Global.SetEnum(AppSettings.HEXD_CHAR_CONV, item.Mode);
 
             mFormatter = new Formatter(config);
             HexDumpLines.Reformat(mFormatter);

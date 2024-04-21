@@ -550,10 +550,8 @@ namespace SourceGen {
             // but we're only doing this on the template file, which should be small.
             tmplStr = tmplStr.Replace("$ProjectName$", mProject.DataFileName);
             tmplStr = tmplStr.Replace("$AppVersion$", App.ProgramVersion.ToString());
-            string expModeStr = ((Formatter.FormatConfig.ExpressionMode)
-                AppSettings.Global.GetEnum(AppSettings.FMT_EXPRESSION_MODE,
-                    typeof(Formatter.FormatConfig.ExpressionMode),
-                    (int)Formatter.FormatConfig.ExpressionMode.Unknown)).ToString();
+            string expModeStr = AppSettings.Global.GetEnum(AppSettings.FMT_EXPRESSION_MODE,
+                    Formatter.FormatConfig.ExpressionMode.Unknown).ToString();
             tmplStr = tmplStr.Replace("$ExpressionStyle$", expModeStr);
             string dateStr = DateTime.Now.ToString("yyyy/MM/dd");
             string timeStr = DateTime.Now.ToString("HH:mm:ss zzz");

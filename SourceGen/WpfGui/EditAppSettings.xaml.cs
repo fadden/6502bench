@@ -31,6 +31,7 @@ using CommonUtil;
 using AssemblerInfo = SourceGen.AsmGen.AssemblerInfo;
 using AssemblerConfig = SourceGen.AsmGen.AssemblerConfig;
 using ExpressionMode = Asm65.Formatter.FormatConfig.ExpressionMode;
+using LabelPlacement = SourceGen.AsmGen.GenCommon.LabelPlacement;
 
 namespace SourceGen.WpfGui {
     /// <summary>
@@ -280,8 +281,8 @@ namespace SourceGen.WpfGui {
             UpperOperandXY = mSettings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
 
             Debug.Assert(clipboardFormatComboBox.Items.Count == sClipboardFormatItems.Length);
-            int clipIndex = mSettings.GetEnum(AppSettings.CLIP_LINE_FORMAT,
-                typeof(MainController.ClipLineFormat), 0);
+            int clipIndex = (int)mSettings.GetEnum(AppSettings.CLIP_LINE_FORMAT,
+                MainController.ClipLineFormat.AssemblerSource);
             if (clipIndex >= 0 && clipIndex < sClipboardFormatItems.Length) {
                 // require Value == clipIndex because we're lazy and don't want to search
                 Debug.Assert((int)sClipboardFormatItems[clipIndex].Value == clipIndex);
@@ -414,8 +415,7 @@ namespace SourceGen.WpfGui {
         private void ClipboardFormatComboBox_SelectionChanged(object sender,
                 SelectionChangedEventArgs e) {
             ClipboardFormatItem item = (ClipboardFormatItem)clipboardFormatComboBox.SelectedItem;
-            mSettings.SetEnum(AppSettings.CLIP_LINE_FORMAT, typeof(MainController.ClipLineFormat),
-                (int)item.Value);
+            mSettings.SetEnum(AppSettings.CLIP_LINE_FORMAT, item.Value);
             IsDirty = true;
         }
 
@@ -757,14 +757,6 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
             }
         }
-        public bool LongLabelNewLine {
-            get { return mSettings.GetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, false); }
-            set {
-                mSettings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, value);
-                OnPropertyChanged();
-                IsDirty = true;
-            }
-        }
         public bool AddIdentComment {
             get { return mSettings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false); }
             set {
@@ -772,6 +764,58 @@ namespace SourceGen.WpfGui {
                 OnPropertyChanged();
                 IsDirty = true;
             }
+        }
+
+        // label placement radio buttons
+        public bool LabelPlacement_PreferSameLine {
+            get {
+                LabelPlacement place = mSettings.GetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.SplitIfTooLong);
+                return place == LabelPlacement.PreferSameLine;
+            }
+            set {
+                if (value) {
+                    mSettings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.PreferSameLine);
+                    LabelPlacementChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        public bool LabelPlacement_SplitIfTooLong {
+            get {
+                LabelPlacement place = mSettings.GetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.SplitIfTooLong);
+                return place == LabelPlacement.SplitIfTooLong;
+            }
+            set {
+                if (value) {
+                    mSettings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.SplitIfTooLong);
+                    LabelPlacementChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        public bool LabelPlacement_PreferSeparateLine {
+            get {
+                LabelPlacement place = mSettings.GetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.SplitIfTooLong);
+                return place == LabelPlacement.PreferSeparateLine;
+            }
+            set {
+                if (value) {
+                    mSettings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                        LabelPlacement.PreferSeparateLine);
+                    LabelPlacementChanged();
+                    IsDirty = true;
+                }
+            }
+        }
+        private void LabelPlacementChanged() {
+            OnPropertyChanged(nameof(LabelPlacement_PreferSameLine));
+            OnPropertyChanged(nameof(LabelPlacement_SplitIfTooLong));
+            OnPropertyChanged(nameof(LabelPlacement_PreferSeparateLine));
         }
 
         private void Loaded_AsmConfig() {

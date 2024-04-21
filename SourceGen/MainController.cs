@@ -345,7 +345,8 @@ namespace SourceGen {
             settings.SetString(AppSettings.FMT_OPERAND_PREFIX_LONG, "f:");
 
             settings.SetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, true);
-            settings.SetBool(AppSettings.SRCGEN_LONG_LABEL_NEW_LINE, true);
+            settings.SetEnum(AppSettings.SRCGEN_LABEL_NEW_LINE,
+                AsmGen.GenCommon.LabelPlacement.SplitIfTooLong);
 
 #if DEBUG
             settings.SetBool(AppSettings.DEBUG_MENU_ENABLED, true);
@@ -1462,10 +1463,8 @@ namespace SourceGen {
                 return;
             }
 
-            ClipLineFormat format = (ClipLineFormat)AppSettings.Global.GetEnum(
-                    AppSettings.CLIP_LINE_FORMAT,
-                    typeof(ClipLineFormat),
-                    (int)ClipLineFormat.AssemblerSource);
+            ClipLineFormat format = AppSettings.Global.GetEnum(AppSettings.CLIP_LINE_FORMAT,
+                    ClipLineFormat.AssemblerSource);
 
             int[] rightWidths = new int[] { 16, 6, 16, 80 };
 
