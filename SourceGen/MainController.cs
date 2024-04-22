@@ -2566,8 +2566,8 @@ namespace SourceGen {
             string filter;
             switch (dlg.Format) {
                 case LabelFileGenerator.LabelFmt.VICE:
-                    ext = ".vs";
-                    filter = "VICE commands (*.vs)|*.vs";
+                    ext = ".lbl";
+                    filter = "VICE labels (*.lbl)|*.lbl";
                     break;
                 default:
                     Debug.Assert(false, "bad format");

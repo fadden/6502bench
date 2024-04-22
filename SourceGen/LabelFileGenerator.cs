@@ -70,7 +70,15 @@ namespace SourceGen {
             // VICE format is "add_label <address> <label>", but may be abbreviated "al".
             // We could also use ACME format ("labelname = $1234 ; Maybe a comment").
             foreach (Symbol sym in symList) {
-                outStream.WriteLine("al " + sym.Value.ToString("x6") + " " + sym.Label);
+                string label = sym.LabelWithoutTag;
+                if (sym.IsNonUnique) {
+                    // Use the cc65 convention for local labels.
+                    label = '@' + label;
+                }
+                // The cc65 docs (https://www.cc65.org/doc/debugging-4.html) say all labels
+                // must be prefaced with '.'.
+                label = '.' + label;
+                outStream.WriteLine("al " + sym.Value.ToString("x6") + " " + label);
             }
         }
     }

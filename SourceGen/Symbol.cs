@@ -84,6 +84,7 @@ namespace SourceGen {
         /// <remarks>
         /// Non-unique labels have extra stuff at the end to make them unique.  That is
         /// included here, so that the Label field is still viable as a unique identifier.
+        /// Use <see cref="LabelWithoutTag"/> to get just the label.
         /// </remarks>
         public string Label { get; private set; }
 
