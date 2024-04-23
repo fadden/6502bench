@@ -209,12 +209,6 @@ counts are inserted into end-of-line comments.  This works the same as
 the option in the <samp>Code View</samp> tab, but applies to generated
 source code rather than the on-screen display.</p>
 
-<p>If <samp>put long labels on separate line</samp> is checked, labels
-that are longer than the label column are placed on their own line.  This
-looks a bit nicer because otherwise the opcode gets pushed out of alignment.
-(Some assemblers get bent out of shape if you split an equate
-directive, so those might stay on one line.)</p>
-
 <p>If you enable <samp>identify assembler in output</samp>, a comment will be
 added to the top of the generated assembly output that identifies the
 target assembler and version.  It also shows the command-line options
@@ -222,6 +216,22 @@ passed to the assembler.  This can be very helpful if the source
 file is sent to other people, since it may not otherwise be obvious from
 the source file what the intended target assembler is, or what options
 are required to process the file correctly.</p>
+
+<p>Labels can generally be placed either on the same line as a code or data
+operand, or on the line before it.  Placing them on the same line makes
+the output a bit more compact, but if the label is longer than the label
+column is wide, the subsequent fields can be pushed out of alignment.
+The placement is configurable.  Labels can be output on their own line:</p>
+<ol>
+  <li>Only when required - labels will not be placed on a separate line
+    unless the assembler requires them to be.</li>
+  <li>When the label is wider than the field - labels will only be
+    placed on a separate line when they don't fit in the label column.</li>
+  <li>Whenever possible - labels are always placed on a separate line
+    when they are allowed to be.  Most assemblers require that the label
+    be on the same line as assignment pseudo-ops,
+    e.g. "<code>FOO = $1000</code>".</li>
+</ol>
 
 
 <h2 id="project-properties">Project Properties</h2>
