@@ -143,8 +143,8 @@ The framework requires Win7 SP1, Win8.1, Win10 updated through at least the
 Anniversary Update (1607), or Win11.  (One user who had trouble with the
 4.7.2 installer was able to get the 4.6.2 installer to work.)
 
-SourceGen does not currently run on Linux or Mac OS.  This may be changing
-with the development of [wine-mono](https://github.com/madewokherd/wine-mono).
+SourceGen does not run natively on Linux or Mac OS.  It is reported
+to work with recent versions (v9+) of the [Wine emulation layer](https://winehq.org/).
 
 (SourceGen versions 1.0 and 1.1 used the WinForms API, which has been
 implemented for [Mono](https://www.mono-project.com/), but after
