@@ -67,16 +67,21 @@ namespace SourceGen {
             // Sort alphabetically.  Not necessary, but it could make a "diff" easier to read.
             symList.Sort((a, b) => Symbol.Compare(Symbol.SymbolSortField.Name, true, a, b));
 
+            Debug.Assert(mFormat == LabelFmt.VICE);
+
             // VICE format is "add_label <address> <label>", but may be abbreviated "al".
             // We could also use ACME format ("labelname = $1234 ; Maybe a comment").
             foreach (Symbol sym in symList) {
-                string label = sym.LabelWithoutTag;
+                // VICE only keeps one copy of each label, so local labels need to include the
+                // uniquifier.  The UNIQUE_TAG_CHAR may not be accepted, so replace it with '_'.
+                string label = sym.Label;
+                label = label.Replace(Symbol.UNIQUE_TAG_CHAR, '_');
                 if (sym.IsNonUnique) {
-                    // Use the cc65 convention for local labels.
+                    // Add the cc65 prefix convention for local labels.
                     label = '@' + label;
                 }
                 // The cc65 docs (https://www.cc65.org/doc/debugging-4.html) say all labels
-                // must be prefaced with '.'.
+                // must be prefaced with '.'.  VICE rejects labels that start with a letter.
                 label = '.' + label;
                 outStream.WriteLine("al " + sym.Value.ToString("x6") + " " + label);
             }
