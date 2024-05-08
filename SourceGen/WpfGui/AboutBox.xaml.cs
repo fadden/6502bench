@@ -15,6 +15,7 @@
  */
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace SourceGen.WpfGui {
@@ -37,6 +38,17 @@ namespace SourceGen.WpfGui {
         public string OsPlatform {
             get {
                 return "OS: " + System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+            }
+        }
+
+        /// <summary>
+        /// Runtime information, for display.
+        /// </summary>
+        public string RuntimeInfo {
+            get {
+                return "Runtime: " + RuntimeInformation.FrameworkDescription + ", " +
+                    "OS-arch " + RuntimeInformation.OSArchitecture + ", proc-arch " +
+                    RuntimeInformation.ProcessArchitecture;
             }
         }
 

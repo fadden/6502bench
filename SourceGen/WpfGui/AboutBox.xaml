@@ -49,12 +49,13 @@ limitations under the License.
                     BorderThickness="0" HorizontalAlignment="Left"
                     Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                     Click="WebSiteButton_Click"/>
-            <TextBlock Text="Copyright 2022 faddenSoft" Margin="0,0,0,0"/>
+            <TextBlock Text="Copyright 2024 faddenSoft" Margin="0,0,0,0"/>
             <TextBlock Text="Created by Andy McFadden"/>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0">
             <TextBlock Text="{Binding OsPlatform, FallbackValue=OS: blah blah blah}"/>
+            <TextBlock Text="{Binding RuntimeInfo, FallbackValue=RunTime: blah blah}"/>
             <TextBlock Text="Assertions and extended validation are enabled"
                        Visibility="{Binding DebugMessageVisibility}"/>
             <TextBlock Text="Legal stuff:" Margin="0,8,0,0"/>
