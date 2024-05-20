@@ -162,6 +162,18 @@ namespace SourceGen.WpfGui {
         }
         private bool mUseRelativeAddressing;
 
+        public bool DisallowInwardRes {
+            get { return mDisallowInwardRes; }
+            set { mDisallowInwardRes = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mDisallowInwardRes;
+
+        public bool DisallowOutwardRes {
+            get { return mDisallowOutwardRes; }
+            set { mDisallowOutwardRes = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mDisallowOutwardRes;
+
         /// <summary>
         /// Pre-label input TextBox.
         /// </summary>
@@ -309,6 +321,8 @@ namespace SourceGen.WpfGui {
                     AddressText = Asm65.Address.AddressToString(curRegion.Address, false);
                 }
                 PreLabelText = curRegion.PreLabel;
+                DisallowInwardRes = curRegion.DisallowInward;
+                DisallowOutwardRes = curRegion.DisallowOutward;
                 UseRelativeAddressing = curRegion.IsRelative;
 
                 OperationStr = (string)FindResource("str_HdrEdit");
@@ -323,6 +337,7 @@ namespace SourceGen.WpfGui {
                     // to fixed.
                     mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
                         curRegion.Length, curRegion.Address, curRegion.PreLabel,
+                        curRegion.DisallowInward, curRegion.DisallowOutward,
                         curRegion.IsRelative);
                     option1Summ = (string)FindResource("str_OptEditAsIsSummary");
                     option1Msg = (string)FindResource("str_OptEditAsIs");
@@ -332,6 +347,7 @@ namespace SourceGen.WpfGui {
                         option2Msg = (string)FindResource("str_OptEditAndFix");
                         mResultEntry2 = new AddressMap.AddressMapEntry(curRegion.Offset,
                             curRegion.ActualLength, curRegion.Address, curRegion.PreLabel,
+                            curRegion.DisallowInward, curRegion.DisallowOutward,
                             curRegion.IsRelative);
                     } else {
                         option2Summ = string.Empty;
@@ -347,10 +363,10 @@ namespace SourceGen.WpfGui {
                     // first action is disabled.
                     mResultEntry1 = new AddressMap.AddressMapEntry(curRegion.Offset,
                         selectionLen, curRegion.Address, curRegion.PreLabel,
-                        curRegion.IsRelative);
+                        curRegion.DisallowInward, curRegion.DisallowOutward, curRegion.IsRelative);
                     mResultEntry2 = new AddressMap.AddressMapEntry(curRegion.Offset,
                         curRegion.Length, curRegion.Address, curRegion.PreLabel,
-                        curRegion.IsRelative);
+                        curRegion.DisallowInward, curRegion.DisallowOutward, curRegion.IsRelative);
 
                     option1Summ = (string)FindResource("str_OptResizeSummary");
                     string fmt = (string)FindResource("str_OptResize");
@@ -396,6 +412,8 @@ namespace SourceGen.WpfGui {
                     AddressText = Asm65.Address.AddressToString(newEntry.Address, false);
                 }
                 PreLabelText = string.Empty;
+                DisallowInwardRes = false;
+                DisallowOutwardRes = false;
                 UseRelativeAddressing = false;
 
                 OperationStr = (string)FindResource("str_HdrCreate");
@@ -417,7 +435,8 @@ namespace SourceGen.WpfGui {
                 // a fixed region with the same start offset, but can't create a float there.
                 if (ares1 == AddressMap.AddResult.Okay) {
                     mResultEntry1 = new AddressMap.AddressMapEntry(newEntry.Offset,
-                        newRegion1.ActualLength, newEntry.Address, string.Empty, false);
+                        newRegion1.ActualLength, newEntry.Address,
+                        string.Empty, false, false, false);
 
                     option1Summ = (string)FindResource("str_CreateFixedSummary");
                     string fmt = (string)FindResource("str_CreateFixed");
@@ -439,7 +458,8 @@ namespace SourceGen.WpfGui {
                 }
                 if (ares2 == AddressMap.AddResult.Okay) {
                     mResultEntry2 = new AddressMap.AddressMapEntry(newEntry.Offset,
-                        AddressMap.FLOATING_LEN, newEntry.Address, string.Empty, false);
+                        AddressMap.FLOATING_LEN, newEntry.Address,
+                        string.Empty, false, false, false);
 
                     option2Summ = (string)FindResource("str_CreateFloatingSummary");
                     string fmt = (string)FindResource("str_CreateFloating");
@@ -615,7 +635,8 @@ namespace SourceGen.WpfGui {
 
             // Combine base entry with pre-label string and relative addressing checkbox.
             ResultEntry = new AddressMap.AddressMapEntry(baseEntry.Offset,
-                baseEntry.Length, addr, PreLabelText, UseRelativeAddressing);
+                baseEntry.Length, addr, PreLabelText,
+                DisallowInwardRes, DisallowOutwardRes, UseRelativeAddressing);
             Debug.WriteLine("Dialog result: " + ResultEntry);
             DialogResult = true;
         }

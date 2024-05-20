@@ -187,6 +187,10 @@ limitations under the License.
                 <StackPanel>
                     <CheckBox Content="Use relative addressing"
                               IsChecked="{Binding UseRelativeAddressing}"/>
+                    <CheckBox Content="Disallow inbound address resolution" Margin="0,8,0,0"
+                              IsChecked="{Binding DisallowInwardRes}"/>
+                    <CheckBox Content="Disallow outbound address resolution" Margin="0,4,0,0"
+                              IsChecked="{Binding DisallowOutwardRes}"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                         <TextBlock Text="Pre-label:"/>

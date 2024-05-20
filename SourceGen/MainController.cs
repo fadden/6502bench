@@ -1924,8 +1924,7 @@ namespace SourceGen {
                 }
 
                 // Create a prototype entry with the various values.
-                newEntry = new AddressMap.AddressMapEntry(firstOffset,
-                    selectedLen, addr, string.Empty, false);
+                newEntry = new AddressMap.AddressMapEntry(firstOffset, selectedLen, addr);
                 Debug.WriteLine("New entry prototype: " + newEntry);
             }
 

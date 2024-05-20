@@ -245,6 +245,8 @@ namespace SourceGen {
             public int Addr { get; set; }
             public int Length { get; set; }
             public string PreLabel { get; set; }
+            public bool DisallowInward { get; set; }
+            public bool DisallowOutward { get; set; }
             public bool IsRelative { get; set; }
 
             public SerAddressMapEntry() {
@@ -257,6 +259,8 @@ namespace SourceGen {
                 Addr = ent.Address;
                 Length = ent.Length;
                 PreLabel = ent.PreLabel;
+                DisallowInward = ent.DisallowInward;
+                DisallowOutward = ent.DisallowOutward;
                 IsRelative = ent.IsRelative;
             }
         }
@@ -689,7 +693,8 @@ namespace SourceGen {
             proj.AddrMap.Clear();
             foreach (SerAddressMapEntry addr in spf.AddressMap) {
                 AddressMap.AddResult addResult = proj.AddrMap.AddEntry(addr.Offset,
-                    addr.Length, addr.Addr, addr.PreLabel, addr.IsRelative);
+                    addr.Length, addr.Addr, addr.PreLabel,
+                    addr.DisallowInward, addr.DisallowOutward, addr.IsRelative);
                 if (addResult != CommonUtil.AddressMap.AddResult.Okay) {
                     string msg = "off=+" + addr.Offset.ToString("x6") + " len=" +
                         (addr.Length == CommonUtil.AddressMap.FLOATING_LEN ?

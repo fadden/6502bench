@@ -39,18 +39,19 @@ namespace CommonUtil {
     /// There are three basic API modes:
     /// (1) Structural.  Add, modify, and remove regions.  Needed by the "edit region" dialog.
     ///     This matches exactly with the contents of the project file.
-    /// (2) Hierarchical.  Used when converting an offset to an address, which can't be
+    /// (2) Hierarchical.  Used when converting an address to an offset, which can't be
     ///     accomplished with a simple map because we need to take into account the offset of
-    ///     the reference.  The tree best represents the relationship between regions.
+    ///     the reference, and when determining the address of an offset.  The tree best
+    ///     represents the relationship between regions.
     /// (3) Linear.  When generating assembly sources or the display list, we need to identify
     ///     the lines that have an address change event (even if the address doesn't change).
     ///     This will be done as we walk through the code.  For easy interaction with an
     ///     iterator, we flatten it out.
     ///
     /// These are different enough that it's best to use three different data structures.  The
-    /// list of regions is the primary structure, and the other two are generated from it.  Changes
-    /// to the map are very infrequent, and analyzing the file contents may hit the map
-    /// frequently, so we want to optimize for "read" accesses.
+    /// structural list of regions is the primary structure, and the other two are generated from
+    /// it.  Changes to the map are very infrequent, and analyzing the file contents may hit
+    /// the map frequently, so we want to optimize for "read" accesses.
     ///
     /// A region can be uniquely identified by {offset,length}.  There can be multiple regions
     /// starting at a given offset, or ending at a given offset, but we disallow regions that
@@ -121,6 +122,16 @@ namespace CommonUtil {
             public string PreLabel { get; private set; }
 
             /// <summary>
+            /// Should we prevent address resolution from entering this region?
+            /// </summary>
+            public bool DisallowInward { get; private set; }
+
+            /// <summary>
+            /// Should we prevent address resolution from traversing outside this region?
+            /// </summary>
+            public bool DisallowOutward { get; private set; }
+
+            /// <summary>
             /// Should we try to generate the directive with an operand that is relative to
             /// the current PC?
             /// </summary>
@@ -130,20 +141,31 @@ namespace CommonUtil {
             public bool IsRelative { get; private set; }
 
             /// <summary>
-            /// Constructor.
+            /// Simple constructor.
             /// </summary>
-            public AddressMapEntry(int offset, int len, int addr, string preLabel, bool isRelative) {
+            public AddressMapEntry(int offset, int len, int addr)
+                : this(offset, len, addr, string.Empty, false, false, false)
+                { }
+
+            /// <summary>
+            /// Full constructor.
+            /// </summary>
+            public AddressMapEntry(int offset, int len, int addr, string preLabel,
+                    bool disallowInward, bool disallowOutward, bool isRelative) {
                 Offset = offset;
                 Length = len;
                 Address = addr;
                 PreLabel = preLabel;
+                DisallowInward = disallowInward;
+                DisallowOutward = disallowOutward;
                 IsRelative = isRelative;
             }
 
             public override string ToString() {
                 return "[AddrMapEnt: +" + Offset.ToString("x6") + " len=$" + Length.ToString("x4") +
                     " addr=$" + Address.ToString("x4") + " preLab='" + PreLabel +
-                    "' isRel=" + IsRelative + "]";
+                    "' disIn=" + DisallowInward + " disOut=" + DisallowOutward +
+                    " isRel=" + IsRelative + "]";
             }
 
             public static bool operator ==(AddressMapEntry a, AddressMapEntry b) {
@@ -155,7 +177,8 @@ namespace CommonUtil {
                 }
                 // All fields must be equal.
                 return a.Offset == b.Offset && a.Length == b.Length && a.Address == b.Address &&
-                    a.PreLabel == b.PreLabel && a.IsRelative == b.IsRelative;
+                    a.PreLabel == b.PreLabel && a.DisallowInward == b.DisallowInward &&
+                    a.DisallowOutward == b.DisallowOutward && a.IsRelative == b.IsRelative;
             }
             public static bool operator !=(AddressMapEntry a, AddressMapEntry b) {
                 return !(a == b);
@@ -164,7 +187,8 @@ namespace CommonUtil {
                 return obj is AddressMapEntry && this == (AddressMapEntry)obj;
             }
             public override int GetHashCode() {
-                return Offset ^ Length ^ Address ^ PreLabel.GetHashCode() ^ (IsRelative ? 1 : 0);
+                return Offset ^ Length ^ Address ^ PreLabel.GetHashCode() ^
+                    (DisallowInward ? 1 : 0) ^ (DisallowOutward ? 2 : 0) ^ (IsRelative ? 4 : 0);
             }
         }
 
@@ -225,9 +249,11 @@ namespace CommonUtil {
             /// <summary>
             /// Full constructor.
             /// </summary>
-            public AddressRegion(int offset, int len, int addr, string preLabel, bool isRelative,
+            public AddressRegion(int offset, int len, int addr, string preLabel,
+                    bool disallowInward, bool disallowOutward, bool isRelative,
                     int actualLen, int preLabelAddr)
-                    : base(offset, len, addr, preLabel, isRelative) {
+                    : base(offset, len, addr, preLabel, disallowInward, disallowOutward, isRelative)
+                {
                 ActualLength = actualLen;
                 PreLabelAddress = preLabelAddr;
 
@@ -238,13 +264,14 @@ namespace CommonUtil {
             /// Basic constructor.  Not for use when len==FLOATING_LEN.
             /// </summary>
             public AddressRegion(int offset, int len, int addr)
-                    : this(offset, len, addr, string.Empty, false, len, NON_ADDR) {
+                    : this(offset, len, addr, string.Empty, false, false, false, len, NON_ADDR) {
                 Debug.Assert(len != FLOATING_LEN);
             }
 
             public override string ToString() {
-                return "[AddrRegion: +" + Offset.ToString("x6") + " len=$" +
-                    Length.ToString("x4") + " addr=$" + Address.ToString("x4") +
+                return "[AddrRegion: +" + Offset.ToString("x6") +
+                    " len=" + (Length == FLOATING_LEN ? "float" : "$" + Length.ToString("x4")) +
+                    " addr=" + (Address == NON_ADDR ? "NA" : "$" + Address.ToString("x4")) +
                     " actualLen=$" + ActualLength.ToString("x4") + " isRel=" + IsRelative + "]";
             }
         }
@@ -283,7 +310,7 @@ namespace CommonUtil {
             foreach (AddressMapEntry ent in entries) {
                 // TODO(maybe): suppress Regenerate() call in AddEntry while we work
                 AddResult result = AddEntry(ent.Offset, ent.Length, ent.Address, ent.PreLabel,
-                    ent.IsRelative);
+                    ent.DisallowInward, ent.DisallowOutward, ent.IsRelative);
                 if (result != AddResult.Okay) {
                     throw new Exception("Unable to add entry (" + result + "): " + ent);
                 }
@@ -360,16 +387,20 @@ namespace CommonUtil {
         /// </summary>
         /// <remarks>
         /// We need to verify:
-        /// - offset &gt;= 0
-        /// - offset &lt; total length of file
-        /// - either length is floating, or:
-        ///   - length > 0
-        ///   - length &lt; total length of file
-        ///   - offset + length &lt; total length of file
-        /// - either address is NON_ADDR, or:
-        ///   - addr &gt; 0
-        ///   - addr &lt;= ADDR_MAX
-        /// - preLabel is not null
+        /// <list type="bullet">
+        /// <item>offset &gt;= 0</item>
+        /// <item>offset &lt; total length of file</item>
+        /// <item>either length is floating, or:<list type="bullet">
+        ///   <item>length &gt; 0</item>
+        ///   <item>length &lt; total length of file</item>
+        ///   <item>offset + length &lt; total length of file</item>
+        ///   </list></item>
+        /// <item>either address is NON_ADDR, or:<list type="bullet">
+        ///   <item>addr &gt; 0</item>
+        ///   <item>addr &lt;= ADDR_MAX</item>
+        ///   </list></item>
+        /// <item>preLabel is not null</item>
+        /// </list>
         ///
         /// We might want to limit the length to fit within a single 64K bank, unless it's
         /// a non-addressable region.  That would probably be better as a warning than an error.
@@ -390,7 +421,7 @@ namespace CommonUtil {
         /// <param name="addr">Address of region start.</param>
         /// <returns>Failure code.</returns>
         public AddResult AddEntry(int offset, int length, int addr) {
-            return AddEntry(offset, length, addr, string.Empty, false);
+            return AddEntry(offset, length, addr, string.Empty, false, false, false);
         }
 
         /// <summary>
@@ -402,7 +433,7 @@ namespace CommonUtil {
             // Slightly inefficient to extract the fields and reassemble them, which we can
             // avoid since instances are immutable, but it's not worth coding around.
             return AddEntry(entry.Offset, entry.Length, entry.Address, entry.PreLabel,
-                entry.IsRelative);
+                entry.DisallowInward, entry.DisallowOutward, entry.IsRelative);
         }
 
         /// <summary>
@@ -412,11 +443,15 @@ namespace CommonUtil {
         /// <param name="length">Length of region, or FLOATING_LEN for a floating end point.</param>
         /// <param name="addr">Address of region start.</param>
         /// <param name="preLabel">Pre-region label.</param>
+        /// <param name="disallowInward">True if address resolution should not enter this
+        ///   region.</param>
+        /// <param name="disallowOutward">True if address resolution should not traverse outside
+        ///   of this region.</param>
         /// <param name="isRelative">True if code generator should output relative
         ///   assembler directive operand.</param>
         /// <returns>Failure code.</returns>
         public AddResult AddEntry(int offset, int length, int addr, string preLabel,
-                bool isRelative) {
+                bool disallowInward, bool disallowOutward, bool isRelative) {
             if (!ValidateArgs(offset, length, addr, preLabel)) {
                 Debug.WriteLine("AddEntry: invalid arg");
                 return AddResult.InvalidValue;
@@ -425,7 +460,7 @@ namespace CommonUtil {
             AddResult result = FindAddIndex(offset, length, out insIdx);
             if (result == AddResult.Okay) {
                 AddressMapEntry newEntry = new AddressMapEntry(offset, length, addr,
-                    preLabel, isRelative);
+                    preLabel, disallowInward, disallowOutward, isRelative);
                 mMapEntries.Insert(insIdx, newEntry);
                 Regenerate();
             }
@@ -678,6 +713,11 @@ namespace CommonUtil {
                 Parent = parent;
                 // all other fields null/false
             }
+
+            public override string ToString() {
+                return "[TreeNode children=" + Children.Count +
+                    ", Region=" + Region.ToString() + "]";
+            }
         }
 
         /// <summary>
@@ -696,7 +736,7 @@ namespace CommonUtil {
             // explicitly is caught here.  It also avoids the need to special-case the top
             // part of the file.
             AddressRegion globalReg = new AddressRegion(0, mSpanLength, NON_ADDR, string.Empty,
-                false, mSpanLength, NON_ADDR);
+                false, false, false, mSpanLength, NON_ADDR);
             TreeNode topNode = new TreeNode(globalReg, null);
 
             // Generate the children of this node.
@@ -753,7 +793,8 @@ namespace CommonUtil {
                         }
                     }
                     AddressRegion fixedReg = new AddressRegion(childEnt.Offset,
-                        FLOATING_LEN, childEnt.Address, childEnt.PreLabel, childEnt.IsRelative,
+                        FLOATING_LEN, childEnt.Address, childEnt.PreLabel,
+                        childEnt.DisallowInward, childEnt.DisallowOutward, childEnt.IsRelative,
                         nextStart - childEnt.Offset, preLabelAddr);
                     children.Add(new TreeNode(fixedReg, parent));
 
@@ -762,7 +803,8 @@ namespace CommonUtil {
                     // Add this region to the list, and check for descendants.
                     AddressRegion newReg = new AddressRegion(childEnt.Offset,
                         childEnt.Length, childEnt.Address, childEnt.PreLabel,
-                        childEnt.IsRelative, childEnt.Length, preLabelAddr);
+                        childEnt.DisallowInward, childEnt.DisallowOutward, childEnt.IsRelative,
+                        childEnt.Length, preLabelAddr);
                     TreeNode thisNode = new TreeNode(newReg, parent);
                     children.Add(thisNode);
 
@@ -833,7 +875,12 @@ namespace CommonUtil {
                     return offset;
                 }
 
-                // Didn't find it.  Move up one level, but ignore the branch we've already checked.
+                if (startNode.Region.DisallowOutward) {
+                    return -1;      // can't look at parent or siblings of this node
+                }
+
+                // Didn't find it.  Move up one level, but ignore the branch we've already checked
+                // (for efficiency).  We need to start checking the "disallow inward" flag.
                 ignoreNode = startNode;
                 startNode = startNode.Parent;
                 if (startNode == null) {
@@ -851,10 +898,17 @@ namespace CommonUtil {
         /// <param name="targetAddr">Address to find.</param>
         /// <returns>Offset, or -1 if not found.</returns>
         private int FindAddress(TreeNode node, TreeNode ignore, int targetAddr) {
+            // We can ignore the DisallowInward flag on the current node, because we're already
+            // in it.  We don't want to descend into a child with the flag set.  (It's okay to
+            // ascend into a parent that has it set, but that's not handled here.)
+
             if (node.Children != null) {
                 foreach (TreeNode childNode in node.Children) {
                     if (childNode == ignore) {
                         continue;
+                    }
+                    if (childNode.Region.DisallowInward) {
+                        continue;       // can't look at siblings with DisallowInward set
                     }
                     int offset = FindAddress(childNode, null, targetAddr);
                     if (offset >= 0) {
@@ -876,7 +930,8 @@ namespace CommonUtil {
             }
 
             // We span the correct range of addresses.  See if the requested address
-            // falls into a hole spanned by a child.
+            // falls into a hole spanned by a child.  (This is independent of DisallowInward,
+            // since it's a hole in the address space whether we look at it or not.)
             if (node.Children != null) {
                 int subPosn = targetAddr - region.Address;     // position of target inside node
                 foreach (TreeNode childNode in node.Children) {
@@ -923,7 +978,8 @@ namespace CommonUtil {
         }
 
         /// <summary>
-        /// Recursively descends into the tree to find the node that contains the offset.
+        /// Recursively descends into the tree to find the node that contains the offset.  The
+        /// deepest child node that spans the offset will be returned.
         /// </summary>
         /// <param name="offset">File offset.</param>
         /// <param name="node">Node to examine.</param>
@@ -1260,6 +1316,12 @@ namespace CommonUtil {
                     if (change.IsSynthetic) {
                         sb.Append(" (auto-generated)");
                     }
+                    if (change.Region.DisallowInward) {
+                        sb.Append(" [!in]");
+                    }
+                    if (change.Region.DisallowOutward) {
+                        sb.Append(" [!out]");
+                    }
                     sb.Append(CRLF);
 
                     prevOffset = change.Offset;
@@ -1330,6 +1392,9 @@ namespace CommonUtil {
 
         #region Unit tests
 
+        // Unit test primitives.  Set "result" to true at start of test; these will set it to
+        // false on failure.
+
         private static void Test_Expect(AddResult expected, ref bool result, AddResult actual) {
             if (expected != actual) {
                 Debug.WriteLine("test failed (expected=" + expected + ", actual=" + actual + ")");
@@ -1342,7 +1407,6 @@ namespace CommonUtil {
                 result = false;
             }
         }
-
         private static void Test_Expect(int expected, ref bool result, int actual) {
             if (expected != actual) {
                 Debug.WriteLine("test failed (expected=$" + expected.ToString("x4") + "/" +
@@ -1351,12 +1415,14 @@ namespace CommonUtil {
             }
         }
 
+        // Test equality and hashcode ops on AddressMapEntry.
         private static bool Test_Primitives() {
             bool result = true;
 
-            AddressMapEntry ent1 = new AddressMapEntry(0, 1, 2, "three", true);
-            AddressMapEntry ent2 = new AddressMapEntry(0, 1, 2, "three", true);
-            AddressMapEntry ent3 = new AddressMapEntry(0, 1, 2, "three-A", true);
+            AddressMapEntry ent1 = new AddressMapEntry(0, 1, 2, "three", false, false, true);
+            AddressMapEntry ent2 = new AddressMapEntry(0, 1, 2, "three", false, false, true);
+            AddressMapEntry ent3 = new AddressMapEntry(0, 1, 2, "three-A", false, false, true);
+            AddressMapEntry ent4 = new AddressMapEntry(0, 1, 2, "three-A", false, true, true);
 
             result &= ent1 == ent2;
             result &= ent1 != ent3;
@@ -1364,11 +1430,14 @@ namespace CommonUtil {
             Test_Expect(true, ref result, result);
 
             AddressRegion reg1 = new AddressRegion(ent1.Offset, ent1.Length, ent1.Address,
-                ent1.PreLabel, ent1.IsRelative, ent1.Length, 0);
+                ent1.PreLabel, ent1.DisallowInward, ent1.DisallowOutward, ent1.IsRelative,
+                ent1.Length, 0);
             AddressRegion reg2 = new AddressRegion(ent2.Offset, ent2.Length, ent2.Address,
-                ent2.PreLabel, ent2.IsRelative, ent2.Length, 0);
+                ent2.PreLabel, ent2.DisallowInward, ent2.DisallowOutward, ent2.IsRelative,
+                ent2.Length, 0);
             AddressRegion reg3 = new AddressRegion(ent3.Offset, ent3.Length, ent3.Address,
-                ent3.PreLabel, ent3.IsRelative, ent3.Length, 0);
+                ent3.PreLabel, ent3.DisallowInward, ent3.DisallowOutward, ent3.IsRelative,
+                ent3.Length, 0);
 
             result &= reg1 == reg2;
             result &= reg1 == ent1;
@@ -1377,33 +1446,37 @@ namespace CommonUtil {
             result &= reg3 != ent1;
             result &= reg1.Equals(ent2);
             result &= ent3 != reg1;
+            result &= ent3 != ent4;
             Test_Expect(true, ref result, result);
 
             result &= ent1.GetHashCode() == ent2.GetHashCode();
             result &= ent2.GetHashCode() != ent3.GetHashCode();
+            result &= ent3.GetHashCode() != ent4.GetHashCode();
             Test_Expect(true, ref result, result);
 
             return result;
         }
 
+        // Test the AddressMap FindRegion() method.
         private static bool Test_Find() {
             const int mapLen = 0x1000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
-            const int off0 = 0x000100;
+            // Map with three nested regions.
+            const int off0 = 0x000100;          // region 0: +000100-000fff $2100-$2fff
             const int len0 = 0x0f00;
             const int adr0 = 0x2100;
-            const int off1 = 0x000200;
+            const int off1 = 0x000200;          // region 1: +000200-0005ff $2200-$25ff
             const int len1 = 0x0400;
             const int adr1 = 0x2200;
-            const int off2 = 0x000400;
+            const int off2 = 0x000400;          // region 2: +000400-0005ff* $2400-25ff
             const int len2 = FLOATING_LEN;
             const int adr2 = 0x2400;
 
-            AddressMapEntry ent0 = new AddressMapEntry(off0, len0, adr0, string.Empty, false);
-            AddressMapEntry ent1 = new AddressMapEntry(off1, len1, adr1, string.Empty, false);
-            AddressMapEntry ent2 = new AddressMapEntry(off2, len2, adr2, string.Empty, false);
+            AddressMapEntry ent0 = new AddressMapEntry(off0, len0, adr0);
+            AddressMapEntry ent1 = new AddressMapEntry(off1, len1, adr1);
+            AddressMapEntry ent2 = new AddressMapEntry(off2, len2, adr2);
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(ent0));
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(ent1));
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(ent2));
@@ -1425,18 +1498,20 @@ namespace CommonUtil {
             return result;
         }
 
+        // Test basic behavior in a simple linear map.
         private static bool Test_SimpleLinear() {
             const int mapLen = 0x8000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
-            const int off0 = 0x000000;
+            // Simple map with no gaps at start or between.
+            const int off0 = 0x000000;          // region 0: +000000-0001ff $1000-$11ff
             const int len0 = 0x0200;
             const int adr0 = 0x1000;
-            const int off1 = 0x000200;
+            const int off1 = 0x000200;          // region 1: +000200-0006ff $1200-$16ff
             const int len1 = 0x0500;
             const int adr1 = 0x1200;
-            const int off2 = 0x000700;
+            const int off2 = 0x000700;          // region 3: +000700-0009ff $1700-$19ff
             const int len2 = 0x0300;
             const int adr2 = 0x1700;
 
@@ -1465,6 +1540,7 @@ namespace CommonUtil {
             Test_Expect(true, ref result, map.RemoveEntry(off0, mapLen));
             Test_Expect(false, ref result, map.RemoveEntry(off0, mapLen));
 
+            // Check some address mappings.
             Test_Expect(adr0, ref result, map.OffsetToAddress(off0));
             Test_Expect(adr1, ref result, map.OffsetToAddress(off1));
             Test_Expect(adr2, ref result, map.OffsetToAddress(off2));
@@ -1487,25 +1563,26 @@ namespace CommonUtil {
             return result;
         }
 
+        // Test with floating region, and region with non-addressable gap.
         private static bool Test_SimpleFloatGap() {
             const int mapLen = 0x8000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
-            const int off0 = 0x001000;
+            // Map has a non-addressable gap at the start; region #2 is nested non-addr.
+            // Regions 0 and 1 have overlapping address spaces.
+            const int off0 = 0x001000;          // region 0: +001000-003fff* $1000-$3fff
             const int len0 = FLOATING_LEN;
             const int adr0 = 0x1000;
-            const int off1 = 0x004000;
+            const int off1 = 0x004000;          // region 1: +004000-006fff $1200-51ff
             const int len1 = 0x3000;
             const int adr1 = 0x1200;
-            const int off2 = 0x005000;
+            const int off2 = 0x005000;          // region 2: +005000-0050ff N/A
             const int len2 = 0x0100;
             const int adr2 = NON_ADDR;
 
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(off0, len0, adr0));
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(off1, len1, adr1));
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(off0, len0, adr0));
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(off1, len1, adr1));
 
             // Try to remove the implicit no-address zone.
             Test_Expect(false, ref result, map.RemoveEntry(0, off0));
@@ -1534,42 +1611,43 @@ namespace CommonUtil {
             return result;
         }
 
+        // Test construction with various nesting scenarios.
         private static bool Test_Nested() {
             AddressMap map = new AddressMap(0x8000);
             bool result = true;
             // Nested with shared start offset.
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000100, 0x0400, 0x4000, "preA0", false));
+                map.AddEntry(0x000100, 0x0400, 0x4000, "preA0", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000100, 0x0100, 0x7000, "preA1", false));
+                map.AddEntry(0x000100, 0x0100, 0x7000, "preA1", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000100, 0x0300, 0x5000, "preA2", false));
+                map.AddEntry(0x000100, 0x0300, 0x5000, "preA2", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000100, 0x0200, 0x6000, "preA3", false));
+                map.AddEntry(0x000100, 0x0200, 0x6000, "preA3", false, false, false));
             // Add a couple of floaters.
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x0000ff, FLOATING_LEN, 0x30ff, "preA4", false));
+                map.AddEntry(0x0000ff, FLOATING_LEN, 0x30ff, "preA4", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000101, FLOATING_LEN, 0x3101, "preA5", false));
+                map.AddEntry(0x000101, FLOATING_LEN, 0x3101, "preA5", false, false, false));
             Test_Expect(AddResult.OverlapFloating, ref result,
-                map.AddEntry(0x000100, FLOATING_LEN, 0x3100, "preA6", false));
+                map.AddEntry(0x000100, FLOATING_LEN, 0x3100, "preA6", false, false, false));
 
             // Nested with shared end offset.
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000fff, FLOATING_LEN, 0x3fff, "preB0", false));
+                map.AddEntry(0x000fff, FLOATING_LEN, 0x3fff, "preB0", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001200, 0x0200, 0x6000, "preB1", false));
+                map.AddEntry(0x001200, 0x0200, 0x6000, "preB1", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001000, 0x0400, 0x4000, "preB2", false));
+                map.AddEntry(0x001000, 0x0400, 0x4000, "preB2", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001100, 0x0300, 0x5000, "preB3", false));
+                map.AddEntry(0x001100, 0x0300, 0x5000, "preB3", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001300, 0x0100, 0x7000, "preB4", false));
+                map.AddEntry(0x001300, 0x0100, 0x7000, "preB4", false, false, false));
             // Single-byte region at start and end.
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001200, 1, 0x8200, "preB5", false));
+                map.AddEntry(0x001200, 1, 0x8200, "preB5", false, false, false));
             Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x0013ff, 1, 0x83ff, "preB6", false));
+                map.AddEntry(0x0013ff, 1, 0x83ff, "preB6", false, false, false));
 
             // Nested with no common edge, building from outside-in.
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x002000, 0x0800, 0x4000));
@@ -1607,20 +1685,27 @@ namespace CommonUtil {
             return result;
         }
 
+        // Look up addresses from different initial regions.
         private static bool Test_Cross() {
             const int mapLen = 0x4000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
+            // Region 0: +000000-001fff $8000-9fff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, 0x2000, 0x8000));
+            // Region 1: +002000-003fff $8000-9fff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x002000, 0x2000, 0x8000));
+            // Region 2: +002100-0022ff $e100-e2ff (overlaps with region 1).
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x002100, 0x0200, 0xe100));
+            // Region 3: +003100-0032ff $f100-f2ff (overlaps with region 1).
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x003100, 0x0200, 0xf100));
 
+            // Look up address in region 3, from different regions.
             Test_Expect(0x003105, ref result, map.AddressToOffset(0x000000, 0xf105));
             Test_Expect(0x003105, ref result, map.AddressToOffset(0x002100, 0xf105));
             Test_Expect(0x003105, ref result, map.AddressToOffset(0x003100, 0xf105));
 
+            // Look up address in region 2, from different regions.
             Test_Expect(0x002105, ref result, map.AddressToOffset(0x000000, 0xe105));
             Test_Expect(0x002105, ref result, map.AddressToOffset(0x002100, 0xe105));
             Test_Expect(0x002105, ref result, map.AddressToOffset(0x003100, 0xe105));
@@ -1643,28 +1728,29 @@ namespace CommonUtil {
             return result;
         }
 
+        // Test resolution across nested regions with no shared start/end.
         private static bool Test_Pyramids() {
             const int mapLen = 0xc000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
-            // Pyramid shape, all regions start at same address except last.
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x000000, 0x6000, 0x8000));
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x001000, 0x4000, 0x8000));
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x002000, 0x2000, 0x7fff));
+            // Nested pyramid shape, all regions start at same address except last.
+            // Region 0: +000000-005fff $8000-dfff
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, 0x6000, 0x8000));
+            // Region 1: +001000-005fff $8000-bfff
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x001000, 0x4000, 0x8000));
+            // Region 2: +002000-003fff $7fff-9ffe
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x002000, 0x2000, 0x7fff));
 
             // Second pyramid.
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x006000, 0x6000, 0x8000));
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x007000, 0x4000, 0x8000));
-            Test_Expect(AddResult.Okay, ref result,
-                map.AddEntry(0x008000, 0x2000, 0x8000));
+            // Region 3: +006000-00bfff $8000-dfff
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x006000, 0x6000, 0x8000));
+            // Region 4: +007000-00afff $8000-bfff
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x007000, 0x4000, 0x8000));
+            // Region 5: +008000-009fff $8000-9fff
+            Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x008000, 0x2000, 0x8000));
 
-            // Children take priority over the start node.
+            // Children take priority over the start node.  These all resolve in region 2.
             Test_Expect(0x002001, ref result, map.AddressToOffset(0x000000, 0x8000));
             Test_Expect(0x003000, ref result, map.AddressToOffset(0x000000, 0x8fff));
             Test_Expect(0x002001, ref result, map.AddressToOffset(0x001000, 0x8000));
@@ -1672,19 +1758,26 @@ namespace CommonUtil {
             Test_Expect(0x002001, ref result, map.AddressToOffset(0x002000, 0x8000));
             Test_Expect(0x002000, ref result, map.AddressToOffset(0x000000, 0x7fff));
 
+            // These resolve in region 0.
             Test_Expect(0x005000, ref result, map.AddressToOffset(0x000000, 0xd000));
             Test_Expect(0x005000, ref result, map.AddressToOffset(0x003000, 0xd000));
 
+            // These fail because $c000-cfff only exists in region 0, and maps to
+            // offsets +004000-004fff, but region 1 (its child) spans the same range
+            // of offsets with different addresses.
             Test_Expect(-1, ref result, map.AddressToOffset(0x000000, 0xc000));
             Test_Expect(-1, ref result, map.AddressToOffset(0x000000, 0xcfff));
 
+            // These resolve in region 5.
             Test_Expect(0x008000, ref result, map.AddressToOffset(0x006000, 0x8000));
             Test_Expect(0x008000, ref result, map.AddressToOffset(0x007000, 0x8000));
             Test_Expect(0x008000, ref result, map.AddressToOffset(0x008000, 0x8000));
             Test_Expect(0x008000, ref result, map.AddressToOffset(0x00bfff, 0x8000));
 
-            // $7fff doesn't exist in second chunk, so we have to go back to first to find it.
+            // $7fff doesn't exist in second pyramid, so we have to go back to first to find it.
             Test_Expect(0x002000, ref result, map.AddressToOffset(0x008000, 0x7fff));
+            // Address $a000 exists in region 4, at offset +009000, but that's overlapped
+            // by region 5 (its child) with a different address.
             Test_Expect(-1, ref result, map.AddressToOffset(0x008000, 0xa000));
 
             // inside
@@ -1703,28 +1796,38 @@ namespace CommonUtil {
             return result;
         }
 
+        // Test some region overlap edge cases.
         private static bool Test_OddOverlap() {
             const int mapLen = 0x1000;
             AddressMap map = new AddressMap(mapLen);
             bool result = true;
 
-            // Top region spans full map.
+            // Top region spans full map.     +000000-000fff $1000-1fff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, mapLen, 0x1000));
-            // Parent region covers next two.
+            // Parent region covers next two. +000000-0003ff $1000-13ff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000000, 0x0400, 0x1000));
-            // Floating region.
+            // Floating region.               +000100-0001ff* $2000-20ff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000100, FLOATING_LEN, 0x2000));
-            // Fixed region follows.
+            // Fixed region follows.          +000200-0002ff $3000-30ff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000200, 0x0100, 0x3000));
 
-            //string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
-            //Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
+
+            Test_Expect(0x00017f, ref result, map.AddressToOffset(0x000000, 0x207f));
+            Test_Expect(0x00027f, ref result, map.AddressToOffset(0x000000, 0x307f));
+            Test_Expect(0x000180, ref result, map.AddressToOffset(0x000000, 0x2080));
 
             // Add a region that starts in the middle of the floating region (becoming
             // a sibling), and ends after the fixed region (becoming its parent).
+            //                                +000180-00037f $4000-41ff
             Test_Expect(AddResult.Okay, ref result, map.AddEntry(0x000180, 0x0200, 0x4000));
-            // Remove it.
+
+            Test_Expect(0x00017f, ref result, map.AddressToOffset(0x000000, 0x207f));
+            Test_Expect(0x00027f, ref result, map.AddressToOffset(0x000000, 0x307f));
+            Test_Expect(-1, ref result, map.AddressToOffset(0x000000, 0x2080));
+
+            // Remove the region we just added.  The float region should flex back out.
             Test_Expect(true, ref result, map.RemoveEntry(0x000180, 0x0200));
+            Test_Expect(0x000180, ref result, map.AddressToOffset(0x000000, 0x2080));
 
             // Add a region that starts in the middle of the floating region and ends after
             // the parent.  Since this crosses the parent's end boundary and doesn't share
@@ -1733,6 +1836,151 @@ namespace CommonUtil {
                 map.AddEntry(0x000180, 0x0400, 0x4000));
 
             result &= map.DebugValidate();
+            return result;
+        }
+
+        // Test interaction between isolated regions.
+        private static bool Test_Isolation() {
+            const int mapLen = 0x8000;
+            bool result = true;
+
+            const int off0 = 0x001000;          // region 0: +001000-003fff $1000-$3fff
+            const int len0 = 0x3000;
+            const int adr0 = 0x1000;
+            const int off1 = 0x002000;          // region 1: +002000-002fff $2000-$2fff
+            const int len1 = 0x1000;
+            const int adr1 = 0x2000;
+            const int off2 = 0x004000;          // region 2: +004000-006fff $4000-$6fff
+            const int len2 = 0x3000;
+            const int adr2 = 0x4000;
+            const int off3 = 0x005000;          // region 3: +005000-005fff $8000-$8fff
+            const int len3 = 0x1000;
+            const int adr3 = 0x8000;
+
+            // Map: all open
+            AddressMap map = new AddressMap(mapLen);
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off0, len0, adr0, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off1, len1, adr1, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off2, len2, adr2, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off3, len3, adr3, string.Empty, false, false, false));
+
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x5005));     // hole
+
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x001000, 0x2005));   // 0 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x001000, 0x4005));   // 0 -> 2
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x001000, 0x8005));   // 0 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x002000, 0x1005));   // 1 -> 0
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x002000, 0x4005));   // 1 -> 2
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x002000, 0x8005));   // 1 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x004000, 0x1005));   // 2 -> 0
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x004000, 0x2005));   // 2 -> 1
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x004000, 0x8005));   // 2 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x005000, 0x1005));   // 3 -> 0
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x005000, 0x2005));   // 3 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x005000, 0x4005));   // 3 -> 2
+
+            // Map: inner regions 1 and 3 disallow inward
+            map = new AddressMap(mapLen);
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off0, len0, adr0, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off1, len1, adr1, string.Empty, true, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off2, len2, adr2, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off3, len3, adr3, string.Empty, true, false, false));
+
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x2005));         // 0 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x001000, 0x4005));   // 0 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x8005));         // 0 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x002000, 0x1005));   // 1 -> 0
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x002000, 0x4005));   // 1 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x8005));         // 1 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x004000, 0x1005));   // 2 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x004000, 0x2005));         // 2 -> 1
+            Test_Expect(-1, ref result, map.AddressToOffset(0x004000, 0x8005));         // 2 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x005000, 0x1005));   // 3 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x2005));         // 3 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x005000, 0x4005));   // 3 -> 2
+
+            // Map: inner regions 1 and 3 disallow outward
+            map = new AddressMap(mapLen);
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off0, len0, adr0, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off1, len1, adr1, string.Empty, false, true, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off2, len2, adr2, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off3, len3, adr3, string.Empty, false, true, false));
+
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x001000, 0x2005));   // 0 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x001000, 0x4005));   // 0 -> 2
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x001000, 0x8005));   // 0 -> 3
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x1005));         // 1 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x4005));         // 1 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x8005));         // 1 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x004000, 0x1005));   // 2 -> 0
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x004000, 0x2005));   // 2 -> 1
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x004000, 0x8005));   // 2 -> 3
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x1005));         // 3 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x2005));         // 3 -> 1
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x4005));         // 3 -> 2
+
+            // Map: region 0 disallows inward and outward
+            map = new AddressMap(mapLen);
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off0, len0, adr0, string.Empty, true, true, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off1, len1, adr1, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off2, len2, adr2, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off3, len3, adr3, string.Empty, false, false, false));
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x001000, 0x1005));   // 0 -> 0
+
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x001000, 0x2005));   // 0 -> 1
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x4005));         // 0 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x8005));         // 0 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x002000, 0x1005));   // 1 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x4005));         // 1 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x8005));         // 1 -> 3
+            Test_Expect(-1, ref result, map.AddressToOffset(0x004000, 0x1005));         // 2 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x004000, 0x2005));         // 2 -> 1
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x004000, 0x8005));   // 2 -> 3
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x1005));         // 3 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x2005));         // 3 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x005000, 0x4005));   // 3 -> 2
+
+            // Map: region 3 disallows inward and outward
+            map = new AddressMap(mapLen);
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off0, len0, adr0, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off1, len1, adr1, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off2, len2, adr2, string.Empty, false, false, false));
+            Test_Expect(AddResult.Okay, ref result,
+                map.AddEntry(off3, len3, adr3, string.Empty, true, true, false));
+            Test_Expect(0x005005, ref result, map.AddressToOffset(0x005000, 0x8005));   // 3 -> 3
+
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x001000, 0x2005));   // 0 -> 1
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x001000, 0x4005));   // 0 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x001000, 0x8005));         // 0 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x002000, 0x1005));   // 1 -> 0
+            Test_Expect(0x004005, ref result, map.AddressToOffset(0x002000, 0x4005));   // 1 -> 2
+            Test_Expect(-1, ref result, map.AddressToOffset(0x002000, 0x8005));         // 1 -> 3
+            Test_Expect(0x001005, ref result, map.AddressToOffset(0x004000, 0x1005));   // 2 -> 0
+            Test_Expect(0x002005, ref result, map.AddressToOffset(0x004000, 0x2005));   // 2 -> 1
+            Test_Expect(-1, ref result, map.AddressToOffset(0x004000, 0x8005));         // 2 -> 3
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x1005));         // 3 -> 0
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x2005));         // 3 -> 1
+            Test_Expect(-1, ref result, map.AddressToOffset(0x005000, 0x4005));         // 3 -> 2
+
             return result;
         }
 
@@ -1746,6 +1994,11 @@ namespace CommonUtil {
             ok &= Test_Cross();
             ok &= Test_Pyramids();
             ok &= Test_OddOverlap();
+            ok &= Test_Isolation();
+
+            // Do this to get a visualization:
+            //string mapStr = map.FormatAddressMap();     // DEBUG - format the map and
+            //Debug.WriteLine(mapStr);                    // DEBUG - print it to the console
 
             Debug.WriteLine("AddressMap: test complete (ok=" + ok + ")");
             return ok;

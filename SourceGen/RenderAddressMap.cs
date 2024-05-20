@@ -87,6 +87,12 @@ namespace SourceGen {
                         sb.Append(change.Region.PreLabel);
                         sb.Append("'");
                     }
+                    if (change.Region.DisallowInward) {
+                        sb.Append(" [!in]");
+                    }
+                    if (change.Region.DisallowOutward) {
+                        sb.Append(" [!out]");
+                    }
 
                     sb.Append(CRLF);
 
