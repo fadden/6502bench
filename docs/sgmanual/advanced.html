@@ -322,7 +322,9 @@ once, so there's no reason to treat them as separate projects. Currently,
 the best way to deal with this is to concatenate the files into a single
 file, and operate on that.</p>
 
+
 <h2 id="overlap">Overlapping Address Spaces</h2>
+
 <p>Some programs use memory overlays, where multiple parts of the
 code run in the same address in RAM.  Others use bank switching to access
 parts of the program that reside in separate physical RAM or ROM,
@@ -382,6 +384,16 @@ it is referring to.</p>
 <p>This searches all children and all siblings before checking the parent.
 If we hit the top of the tree without finding a match, we conclude
 that the reference is to an external address.</p>
+
+<p>The tree search can be pruned with the
+"disallow inbound address resolution" and
+"disallow outbound address resolution" flags, which can be set in
+the address region edit dialog
+(<a href="intro-details.html#region-isolation">more info here</a>).
+When inbound resolution is disabled,
+parents and siblings will not search into a region.  When outbound
+resolution is disabled, the search will not ascend to the region's parent.
+Note that neither option prevents descent into a region's children.</p>
 
 
 <h2 id="reloc-data">OMF Relocation Dictionaries</h2>

@@ -43,10 +43,10 @@ a way to tell the test harness to override the default.  We do this by
 creating project symbols:
 
 | Name                       | Value | Description
-| -------------------------- | ----- | -------------------------------------------|
-| __ENABLE_LABEL_NEWLINE     | any   | Puts long labels on their own line         |
-| __ENABLE_ALL_LABEL_NEWLINE | any   | Puts all labels on their own line          |
-| __ENABLE_CYCLE_COUNTS      | any   | Adds cycle count to end-of-line comments   |
+| -------------------------- | ----- | -----------------------------------------|
+| __ENABLE_LABEL_NEWLINE     | any   | Puts long labels on their own line       |
+| __ENABLE_ALL_LABEL_NEWLINE | any   | Puts all labels on their own line        |
+| __ENABLE_CYCLE_COUNTS      | any   | Adds cycle count to end-of-line comments |
 
 ### Execution ###
 
@@ -90,6 +90,7 @@ If you want to add or update a test, follow these steps:
     into the Expected directory, replacing any existing copies.
  4. Run the test harness.  This should now report success, and will
     remove the tmpNNNNN directory.
+ 5. Run "git diff" to verify that the changes match your expectations.
 
 Be sure to have the version of the cross-assembler identified at the top
 of this document configured.

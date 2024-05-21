@@ -523,6 +523,7 @@ namespace SourceGen {
         /// variables.
         /// </summary>
         /// <param name="addr">Address to find.</param>
+        /// <param name="effect">Memory effect type to match against.</param>
         /// <returns>First matching symbol found, or null if nothing matched.</returns>
         public Symbol FindNonVariableByAddress(int addr, OpDef.MemoryEffect effect) {
             bool tryRead, tryWrite;
@@ -540,6 +541,7 @@ namespace SourceGen {
                 return null;
             }
 
+            // The mSymbolsBy{Read,Write}Address tables don't include local vars or constants.
             Symbol sym = null;
             if (tryRead) {
                 mSymbolsByReadAddress.TryGetValue(addr, out sym);
@@ -549,11 +551,10 @@ namespace SourceGen {
             }
 
             if (sym == null) {
-                // Nothing matched, check the match groups.
+                // Nothing matched, check the mask groups.
                 foreach (KeyValuePair<DefSymbol.MultiAddressMask, MaskGroup> kvp in mMaskGroups) {
                     DefSymbol.MultiAddressMask multiMask = kvp.Key;
                     if ((addr & multiMask.CompareMask) == multiMask.CompareValue) {
-                        MaskGroup group = kvp.Value;
                         DefSymbol defSym = kvp.Value.Find(addr, tryRead, tryWrite);
                         if (defSym != null) {
                             sym = defSym;
@@ -563,6 +564,53 @@ namespace SourceGen {
                 }
             }
             return sym;
+        }
+
+        /// <summary>
+        /// Searches the table for project/platform symbols with matching address values.  Ignores
+        /// constants and variables.
+        /// </summary>
+        /// <param name="addr">Address to find.</param>
+        /// <param name="effect">Memory effect type to match against.</param>
+        /// <returns>First matching symbol found, or null if nothing matched.</returns>
+        public Symbol FindProjPlatPreByAddress(int addr, OpDef.MemoryEffect effect) {
+            bool tryRead, tryWrite;
+            if (effect == OpDef.MemoryEffect.Read) {
+                tryRead = true;
+                tryWrite = false;
+            } else if (effect == OpDef.MemoryEffect.Write) {
+                tryRead = false;
+                tryWrite = true;
+            } else if (effect == OpDef.MemoryEffect.ReadModifyWrite ||
+                    effect == OpDef.MemoryEffect.None) {
+                tryRead = tryWrite = true;
+            } else {
+                Debug.Assert(false);
+                return null;
+            }
+
+            // We don't have a pair of tables for this, so just do a linear walk through
+            // the symbol table.  This is inefficient, but the current use case is very rare.
+            foreach (KeyValuePair<string,Symbol> kvp in mSymbols) {
+                if (!(kvp.Value is DefSymbol)) {
+                    continue;
+                }
+                DefSymbol defSym = (DefSymbol)kvp.Value;
+                if (defSym.SymbolSource != Symbol.Source.Project &&
+                        defSym.SymbolSource != Symbol.Source.Platform &&
+                        defSym.SymbolSource != Symbol.Source.AddrPreLabel) {
+                    continue;
+                }
+                if (addr >= defSym.Value && addr < defSym.Value + defSym.DataDescriptor.Length) {
+                    if ((tryRead && (defSym.Direction & DefSymbol.DirectionFlags.Read) != 0) ||
+                            (tryWrite && (defSym.Direction & DefSymbol.DirectionFlags.Write) != 0))
+                    {
+                        return defSym;
+                    }
+                }
+            }
+            // Do we need to check the mask groups?
+            return null;
         }
 
         public override string ToString() {

@@ -14,16 +14,21 @@
 ; regions 1-4.
 ;
 *       =       $0800
-BANK    =       $c080
+BANK    =       $ffc0
+; EDIT: create project symbol THREE_K for $3000
         jsr     region1
         jsr     region2
         jsr     region3
         jsr     region4
 
-        lda     inner1
-        lda     inner2
-        lda     inner3
-        lda     inner4
+; EDIT: create project symbols for $8000/9000/a000/b000, len=256
+; These should resolve to the user labels (for 1/2) or the project
+; symbols (for 3/4).  We use an offset from the base address to ensure
+; that the range is being taken into account.
+        lda     inner1a
+        lda     inner2a
+        lda     inner3a
+        lda     inner4a
 
 ; Local reference, can use "do not follow" to avoid mid-instruction branch.
 self    lda     $eaea
@@ -91,7 +96,7 @@ inner1_pre                          ;*
         .logical region1+$8000      ;*
 inner1  ldx     inner1              ;*
         ldy     #$aa
-        ldy     finish1
+inner1a ldy     finish1
         ldy     finish2
         ldy     finish3
         ldy     finish4
@@ -137,7 +142,7 @@ inner2_pre                          ;*
 inner2  ldx     inner2              ;*
         ldy     #$aa
         ldy     finish1
-        ldy     finish2
+inner2a ldy     finish2
         ldy     finish3
         ldy     finish4
         rts
@@ -149,6 +154,10 @@ finish2 ldy     finish2             ;*
         ldx     region2
         ldx     region3
         ldx     region4
+        lda     inner1
+        lda     inner2
+        lda     inner3
+        lda     inner4
         pla
         rts
 
@@ -179,7 +188,7 @@ inner3  ldx     inner3              ;*
         ldy     #$aa
         ldy     finish1
         ldy     finish2
-        ldy     finish3
+inner3a ldy     finish3
         ldy     finish4
         rts
 inner3_end                          ;*
@@ -190,6 +199,10 @@ finish3 ldy     finish3             ;*
         ldx     region2
         ldx     region3
         ldx     region4
+        lda     inner1
+        lda     inner2
+        lda     inner3
+        lda     inner4
         pla
         rts
 
@@ -221,7 +234,7 @@ inner4  ldx     inner4              ;*
         ldy     finish1
         ldy     finish2
         ldy     finish3
-        ldy     finish4
+inner4a ldy     finish4
         rts
 inner4_end                          ;*
         .endlogical
@@ -231,6 +244,10 @@ finish4 ldy     finish4             ;*
         ldx     region2
         ldx     region3
         ldx     region4
+        lda     inner1
+        lda     inner2
+        lda     inner3
+        lda     inner4
         pla
         rts
 

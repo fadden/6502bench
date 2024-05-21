@@ -1,26 +1,32 @@
         .cpu    "6502"
+THREE_K =       $3000      ;project symbol test
+IN_1    =       $9000
+IN_2    =       $a000
+IN_3    =       $b000
+IN_4    =       $c000
+
 *       =       $0800
         jsr     region1
         jsr     region2
-        jsr     $3000
+        jsr     THREE_K
         jsr     $4000
-        lda     inner1
-        lda     inner2
-        lda     $b000
-        lda     $c000
+        lda     L9005
+        lda     LA008
+        lda     IN_3+11
+        lda     IN_4+14
 self    .byte   $ad,$ea
 L081A   nop
         jsr     altbnk1
         jsr     altbnk2
         jmp     done
 
-altbnk1 bit     $c080
+altbnk1 bit     $ffc0
         lda     self+1
         bne     L081A
         rts
 
         .logical *+$0000
-altbnk2 bit     $c080
+altbnk2 bit     $ffc0
         lda     $0819
         bne     $081a
         ldx     $081b
@@ -106,7 +112,7 @@ inner1_pre
         .logical $9000
 inner1  ldx     inner1
         ldy     #$aa
-        ldy     finish1
+L9005   ldy     finish1
         ldy     finish2
         ldy     $302b
         ldy     $402b
@@ -116,12 +122,12 @@ inner1  ldx     inner1
 finish1 ldy     finish1
         ldx     region1
         ldx     region2
-        ldx     $3000
+        ldx     THREE_K
         ldx     $4000
         lda     inner1
         lda     inner2
-        lda     $b000
-        lda     $c000
+        lda     IN_3
+        lda     IN_4
         pla
         rts
 
@@ -146,7 +152,7 @@ inner2_pre
 inner2  ldx     inner2
         ldy     #$aa
         ldy     $102b
-        ldy     finish2
+LA008   ldy     finish2
         ldy     $302b
         ldy     $402b
         rts
@@ -155,12 +161,16 @@ inner2  ldx     inner2
 finish2 ldy     finish2
         ldx     $1000
         ldx     region2
-        ldx     $3000
+        ldx     THREE_K
         ldx     $4000
+        lda     IN_1
+        lda     inner2
+        lda     IN_3
+        lda     IN_4
         pla
         rts
 
-        .fill   196,$00
+        .fill   184,$00
         .here
 
         .logical $3000
@@ -192,10 +202,14 @@ finish3 ldy     finish3
         ldx     region2
         ldx     region3
         ldx     $4000
+        lda     inner1
+        lda     inner2
+        lda     inner3
+        lda     IN_4
         pla
         rts
 
-        .fill   196,$00
+        .fill   184,$00
         .here
 
         .logical $4000
@@ -218,19 +232,23 @@ inner4  ldx     inner4
         ldy     $102b
         ldy     $202b
         ldy     $302b
-        ldy     finish4
+X_checkit ldy   finish4
         rts
 
         .here
 finish4 ldy     finish4
         ldx     $1000
         ldx     $2000
-        ldx     $3000
+        ldx     THREE_K
         ldx     region4
+        lda     IN_1
+        lda     IN_2
+        lda     IN_3
+        lda     inner4
         pla
         rts
 
-        .fill   196,$00
+        .fill   184,$00
         .here
         .logical $0000
         .byte   $ff

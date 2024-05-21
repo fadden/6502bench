@@ -653,8 +653,36 @@ within the file.  The process is straightforward if the address only
 appears once, but when overlays cause multiple parts of the file to have
 the same address, the operand target may be in different places depending
 on where the call is being made from.
-The algorithm for resolving addresses is described
-in the <a href="advanced.html#overlap">advanced topics</a> section.</p>
+The algorithm for resolving addresses is described in the
+<a href="advanced.html#overlap">advanced topics</a> section.</p>
+
+
+<h3 id="region-isolation">Isolation</h3>
+
+<p>Code in regions that have been relocated will usually be able to
+access code and data in other regions.  However, sometimes code is
+destined to be executed in an independent address space, such as a
+disk drive controller, or is part of a bank-switched ROM that puts
+multiple regions at the same address.  In such cases, you wouldn't
+want the address operand of, say, a <code>JSR</code> to resolve to
+a symbol in a different region.</p>
+
+<p>The address resolution behavior for a given region can be modified
+with the "disallow inbound address resolution" and
+"disallow outbound address resolution" checkboxes.  The former
+prevents other regions from searching for matches in the current
+region, and the latter prevents the current region from searching
+other regions.  (The algorithm is described in the
+<a href="advanced.html#overlap">advanced topics</a> section.)</p>
+
+<p>In some rare cases it may be useful to allow resolution to work
+in one direction.  For example, suppose ROM bank #1 has a table of
+<code>JMP</code> instructions for bank #2 that it will copy out to
+RAM.  The table should be placed into its own address region, with
+outbound resolution disabled, because we don't want it to try to
+jump to locations in our bank #1 code.  It's useful to leave inbound
+resolution enabled so that we can reference the table from the code
+that copies it to RAM.</p>
 
 
 <h3 id="non-addr">Non-Addressable Areas</h3>

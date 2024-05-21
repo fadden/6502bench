@@ -1445,12 +1445,12 @@ namespace SourceGen {
                     //
                     // It might seem unwise to examine the full symbol table, because it has
                     // non-project non-platform symbols in it.  However, any matching user
-                    // labels would have been applied already.  Also, we want to ensure that
-                    // conflicting user labels take precedence, e.g. creating a user label "COUT"
-                    // will prevent a platform symbol with the same name from being visible.
-                    // Using the full symbol table is potentially a tad less efficient than
-                    // looking for a match exclusively in project/platform symbols, but it's
-                    // the correct thing to do.
+                    // labels would have been applied already (unless blocked by address region
+                    // isolation).  Also, we want to ensure that conflicting user labels take
+                    // precedence, e.g. creating a user label "COUT" will prevent a platform
+                    // symbol with the same name from being visible.  Using the full symbol
+                    // table is potentially a tad less efficient than looking for a match
+                    // exclusively in project/platform symbols, but it's the correct thing to do.
                     OpDef op = CpuDef.GetOpDef(FileData[offset]);
                     accType = op.MemEffect;
                     address = attr.OperandAddress;
@@ -1508,7 +1508,11 @@ namespace SourceGen {
                         } else {
                             Debug.WriteLine("GeneratePlatform not applying at +" +
                                 offset.ToString("x6") + ": " + sym);
-                            sym = null;
+                            // Do a secondary scan, looking only at project/platform/pre-labels.
+                            sym = SymbolTable.FindProjPlatPreByAddress(address, accType);
+                            if (sym != null) {
+                                Debug.WriteLine(" ...found matching proj/plat: " + sym);
+                            }
                         }
                     }
 

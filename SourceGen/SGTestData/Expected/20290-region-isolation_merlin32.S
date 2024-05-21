@@ -1,25 +1,31 @@
+THREE_K  equ   $3000      ;project symbol test
+IN_1     equ   $9000
+IN_2     equ   $a000
+IN_3     equ   $b000
+IN_4     equ   $c000
+
          org   $0800
          jsr   region1
          jsr   region2
-         jsr   $3000
+         jsr   THREE_K
          jsr   $4000
-         lda   inner1
-         lda   inner2
-         lda   $b000
-         lda   $c000
+         lda   L9005
+         lda   LA008
+         lda   IN_3+11
+         lda   IN_4+14
 self     dfb   $ad,$ea
 L081A    nop
          jsr   altbnk1
          jsr   altbnk2
          jmp   done
 
-altbnk1  bit   $c080
+altbnk1  bit   $ffc0
          lda   self+1
          bne   L081A
          rts
 
          org   *+$0000
-altbnk2  bit   $c080
+altbnk2  bit   $ffc0
          lda   $0819
          bne   $081a
          ldx   $081b
@@ -104,7 +110,7 @@ inner1_pre
          org   $9000
 inner1   ldx   inner1
          ldy   #$aa
-         ldy   finish1
+L9005    ldy   finish1
          ldy   finish2
          ldy   $302b
          ldy   $402b
@@ -114,12 +120,12 @@ inner1   ldx   inner1
 finish1  ldy   finish1
          ldx   region1
          ldx   region2
-         ldx   $3000
+         ldx   THREE_K
          ldx   $4000
          lda   inner1
          lda   inner2
-         lda   $b000
-         lda   $c000
+         lda   IN_3
+         lda   IN_4
          pla
          rts
 
@@ -143,7 +149,7 @@ inner2_pre
 inner2   ldx   inner2
          ldy   #$aa
          ldy   $102b
-         ldy   finish2
+LA008    ldy   finish2
          ldy   $302b
          ldy   $402b
          rts
@@ -152,12 +158,16 @@ inner2   ldx   inner2
 finish2  ldy   finish2
          ldx   $1000
          ldx   region2
-         ldx   $3000
+         ldx   THREE_K
          ldx   $4000
+         lda   IN_1
+         lda   inner2
+         lda   IN_3
+         lda   IN_4
          pla
          rts
 
-         ds    196
+         ds    184
 
          org   $3000
 region3  lda   region3
@@ -188,10 +198,14 @@ finish3  ldy   finish3
          ldx   region2
          ldx   region3
          ldx   $4000
+         lda   inner1
+         lda   inner2
+         lda   inner3
+         lda   IN_4
          pla
          rts
 
-         ds    196
+         ds    184
 
          org   $4000
 region4  lda   region4
@@ -213,18 +227,22 @@ inner4   ldx   inner4
          ldy   $102b
          ldy   $202b
          ldy   $302b
-         ldy   finish4
+_checkit ldy   finish4
          rts
 
          org   $402b
 finish4  ldy   finish4
          ldx   $1000
          ldx   $2000
-         ldx   $3000
+         ldx   THREE_K
          ldx   region4
+         lda   IN_1
+         lda   IN_2
+         lda   IN_3
+         lda   inner4
          pla
          rts
 
-         ds    196
+         ds    184
          org   $0000
          dfb   $ff
