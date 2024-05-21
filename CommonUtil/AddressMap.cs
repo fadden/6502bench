@@ -272,7 +272,9 @@ namespace CommonUtil {
                 return "[AddrRegion: +" + Offset.ToString("x6") +
                     " len=" + (Length == FLOATING_LEN ? "float" : "$" + Length.ToString("x4")) +
                     " addr=" + (Address == NON_ADDR ? "NA" : "$" + Address.ToString("x4")) +
-                    " actualLen=$" + ActualLength.ToString("x4") + " isRel=" + IsRelative + "]";
+                    " actualLen=$" + ActualLength.ToString("x4") +
+                    " disIn=" + DisallowInward + " disOut=" + DisallowOutward + " isRel=" +
+                    IsRelative + "]";
             }
         }
 

@@ -52,7 +52,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 5;
+        public const int CONTENT_VERSION = 6;
 
         // Max JSON file length.
         internal const int MAX_JSON_LENGTH = 64 * 1024 * 1024;

@@ -1122,9 +1122,19 @@ namespace SourceGen {
                             comment += " (auto-generated)";
                         }
 #else
-                        string comment = string.Empty;
+                        string cstr = string.Empty;
                         if (change.IsSynthetic) {
-                            comment = mFormatter.FormatEolComment("(auto-generated)");
+                            cstr += " (auto-generated)";
+                        }
+                        if (region.DisallowInward) {
+                            cstr += " [!in]";
+                        }
+                        if (region.DisallowOutward) {
+                            cstr += " [!out]";
+                        }
+                        string comment = string.Empty;
+                        if (cstr.Length > 0) {
+                            comment = mFormatter.FormatEolComment(cstr.Substring(1));
                         }
 #endif
                         newLine.Parts = FormattedParts.CreateFullDirective(string.Empty,

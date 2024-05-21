@@ -660,9 +660,10 @@ namespace SourceGen.AsmGen {
                         StringComparison.InvariantCultureIgnoreCase)) {
                 label += ':';
 
-                if (mLabelNewLine == GenCommon.LabelPlacement.PreferSeparateLine ||
-                        (mLabelNewLine == GenCommon.LabelPlacement.SplitIfTooLong &&
-                            label.Length >= mColumnWidths[0])) {
+                if (!string.IsNullOrEmpty(opcode) &&
+                        (mLabelNewLine == GenCommon.LabelPlacement.PreferSeparateLine ||
+                            (mLabelNewLine == GenCommon.LabelPlacement.SplitIfTooLong &&
+                                label.Length >= mColumnWidths[0]))) {
                     mOutStream.WriteLine(label);
                     label = string.Empty;
                 }

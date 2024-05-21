@@ -1438,8 +1438,10 @@ namespace SourceGen {
                         attr.OperandAddress >= 0 && attr.OperandOffset < 0) {
                     // This is an instruction that hasn't been explicitly formatted.  It
                     // has an operand address, but not an offset, meaning it's a reference
-                    // to an address outside the scope of the file. See if it has a
-                    // platform symbol definition.
+                    // to an address outside the scope of the file -or- a reference to an address
+                    // region that we're not supposed to interact with (DisallowInbound on it
+                    // or DisallowOutbound on us). See if it has a platform symbol definition,
+                    // or perhaps an address region pre-label.
                     //
                     // It might seem unwise to examine the full symbol table, because it has
                     // non-project non-platform symbols in it.  However, any matching user
@@ -1493,10 +1495,20 @@ namespace SourceGen {
                     if (sym == null && checkNearby && (address & 0xffff) < 0xffff &&
                             address > 0x0000ff) {
                         sym = SymbolTable.FindNonVariableByAddress(address + 1, accType);
-                        if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
-                                sym.SymbolSource != Symbol.Source.Platform) {
-                            Debug.WriteLine("Applying non-platform in GeneratePlatform: " + sym);
-                            // should be okay to do this
+                    }
+                    if (sym != null && sym.SymbolSource != Symbol.Source.Project &&
+                            sym.SymbolSource != Symbol.Source.Platform &&
+                            sym.SymbolSource != Symbol.Source.AddrPreLabel) {
+                        // If we matched to something other than a project/platform symbol or
+                        // pre-label (which are expected to be outside the file area), make sure
+                        // we're not doing an invalid cross-region reference.
+                        if (AddrMap.AddressToOffset(offset, sym.Value) >= 0) {
+                            Debug.WriteLine("GeneratePlatform applying non-platform at +" +
+                                offset.ToString("x6") + ": " + sym);
+                        } else {
+                            Debug.WriteLine("GeneratePlatform not applying at +" +
+                                offset.ToString("x6") + ": " + sym);
+                            sym = null;
                         }
                     }
 

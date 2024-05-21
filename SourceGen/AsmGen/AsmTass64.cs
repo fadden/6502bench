@@ -772,7 +772,7 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public void OutputLine(string label, string opcode, string operand, string comment) {
             // Break the line if the label is long and it's not a .EQ/.VAR directive.
-            if (!string.IsNullOrEmpty(label) &&
+            if (!string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(opcode) &&
                     !string.Equals(opcode, sDataOpNames.EquDirective,
                         StringComparison.InvariantCultureIgnoreCase) &&
                     !string.Equals(opcode, sDataOpNames.VarDirective,

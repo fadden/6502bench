@@ -607,7 +607,8 @@ namespace SourceGen.AsmGen {
         // IGenerator
         public void OutputLine(string label, string opcode, string operand, string comment) {
             // Split long label, but not on EQU directives (confuses the assembler).
-            if (!string.IsNullOrEmpty(label) && !string.Equals(opcode, sDataOpNames.EquDirective,
+            if (!string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(opcode) &&
+                    !string.Equals(opcode, sDataOpNames.EquDirective,
                         StringComparison.InvariantCultureIgnoreCase)) {
                 if (mLabelNewLine == GenCommon.LabelPlacement.PreferSeparateLine ||
                         (mLabelNewLine == GenCommon.LabelPlacement.SplitIfTooLong &&
