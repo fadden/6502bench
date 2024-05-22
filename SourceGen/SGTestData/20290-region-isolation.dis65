@@ -232,7 +232,7 @@
 },
 
 "Comments":{
-},
+"9":"operand label set manually"},
 
 "LongComments":{
 },
@@ -396,7 +396,13 @@
 "LabelAnno":"None"}},
 
 "OperandFormats":{
-},
+"9":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"region4",
+"Part":"Low"}}},
 
 "LvTables":{
 },

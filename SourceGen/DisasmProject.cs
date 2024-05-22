@@ -1550,7 +1550,7 @@ namespace SourceGen {
             //
             // We want to tag both.  So if "LDA $1000" becomes "LDA label-2", we want to
             // add a numeric reference to the code at $1000, and a symbolic reference to the
-            // labe at $1002, that point back to the LDA instruction.  These are presented
+            // label at $1002, that point back to the LDA instruction.  These are presented
             // slightly differently to the user.  For a symbolic reference with no adjustment,
             // we don't add the (redundant) numeric reference.
             //
@@ -1647,6 +1647,12 @@ namespace SourceGen {
                                 adj = mAnattribs[symOffset].Address -
                                     mAnattribs[operandOffset].Address;
                             }
+
+                            // TODO: to handle pre-labels correctly, we need to associate an
+                            // XrefSet with an address region, and add the reference there.  We
+                            // currently attach it to the offset of the first byte in the region,
+                            // which means you don't see anything in the references window when
+                            // the pre-label line is selected.
 
                             AddXref(symOffset, new XrefSet.Xref(offset, true, xrefType, accType,
                                 accessFlags, adj));

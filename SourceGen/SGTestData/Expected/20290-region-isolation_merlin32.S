@@ -8,7 +8,7 @@ IN_4     equ   $c000
          jsr   region1
          jsr   region2
          jsr   THREE_K
-         jsr   $4000
+         jsr   region4    ;operand label set manually
          lda   L9005
          lda   LA008
          lda   IN_3+11

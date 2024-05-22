@@ -106,7 +106,7 @@ namespace SourceGen {
 
             public override string ToString() {
                 return "Xref off=+" + Offset.ToString("x6") + " sym=" + IsByName +
-                    " type=" + Type + " accType= " + AccType + " flags=" + Flags +
+                    " type=" + Type + " accType=" + AccType + " flags=" + Flags +
                     " adj=" + Adjustment;
             }
         }

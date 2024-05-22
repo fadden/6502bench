@@ -3947,7 +3947,8 @@ namespace SourceGen {
                 return;
             }
             int lineIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
-            LineListGen.Line.Type type = CodeLineList[lineIndex].LineType;
+            LineListGen.Line line = CodeLineList[lineIndex];
+            LineListGen.Line.Type type = line.LineType;
             if (type != LineListGen.Line.Type.Code &&
                     type != LineListGen.Line.Type.Data &&
                     type != LineListGen.Line.Type.EquDirective &&
@@ -3960,10 +3961,10 @@ namespace SourceGen {
 
             // Find the appropriate xref set.
             if (type == LineListGen.Line.Type.LocalVariableTable) {
-                DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(CodeLineList[lineIndex]);
+                DefSymbol defSym = CodeLineList.GetLocalVariableFromLine(line);
                 xrefs = (defSym == null) ? null : defSym.Xrefs;
             } else {
-                int offset = CodeLineList[lineIndex].FileOffset;
+                int offset = line.FileOffset;
                 if (offset < 0) {
                     // EQU in header
                     int index = LineListGen.DefSymIndexFromOffset(offset);
