@@ -653,6 +653,12 @@ limitations under the License.
                                  VerticalAlignment="Center" Margin="{StaticResource TBS}"
                                  Text=".placeho" MaxLength="12"
                                  FontFamily="{StaticResource GeneralMonoFont}"/>
+                        <TextBlock Grid.Column="4" Grid.Row="3" Text="Binary include:"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Name="binaryIncludeTextBox" Grid.Column="5" Grid.Row="3"
+                                 VerticalAlignment="Center" Margin="{StaticResource TBS}"
+                                 Text=".placeho" MaxLength="12"
+                                 FontFamily="{StaticResource GeneralMonoFont}"/>
                         <TextBlock Grid.Column="6" Grid.Row="3" Text="Bulk data:"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBox Name="denseTextBox" Grid.Column="7" Grid.Row="3"

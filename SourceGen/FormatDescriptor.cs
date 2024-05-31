@@ -62,7 +62,8 @@ namespace SourceGen {
             Dense,              // raw data, represented as compactly as possible
             Fill,               // fill memory with a value
             Uninit,             // uninitialized data storage area
-            Junk                // contents of memory are not interesting
+            Junk,               // contents of memory are not interesting
+            BinaryInclude       // file contents will be loaded from external file during asm
         }
 
         /// <summary>
@@ -171,6 +172,19 @@ namespace SourceGen {
         /// </summary>
         public WeakSymbolRef SymbolRef { get; private set; }
 
+        /// <summary>
+        /// Optional extra data, used for special cases like BinaryInclude.  May be null.
+        /// </summary>
+        /// <remarks>
+        /// It's unfortunate that we have this field for every object, even though very few
+        /// will actually make use of it.  The SymbolRef field has a very specific purpose
+        /// and shouldn't be used to hold it (asserts and other logic gets upset).  Storing
+        /// the filenames in a separate table has some advantages, but requires integrating
+        /// changes with the undo/redo mechanism, and the space savings doesn't justify the
+        /// complexity cost.
+        /// </remarks>
+        public string Extra { get; private set; }
+
         // Crude attempt to see how effective the prefab object creation is.  Note we create
         // these for DefSymbols, so there will be one prefab for every platform symbol entry.
         public static int DebugCreateCount { get; private set; }
@@ -191,6 +205,7 @@ namespace SourceGen {
             Debug.Assert(length > 0);
             Debug.Assert(length <= MAX_NUMERIC_LEN || !IsNumeric);
             Debug.Assert(fmt != Type.Default || length == 1);
+            Debug.Assert(fmt != Type.BinaryInclude);
             Debug.Assert(subFmt == SubType.None || (fmt != Type.Junk) ^ IsJunkSubType(subFmt));
 
             Length = length;
@@ -211,6 +226,22 @@ namespace SourceGen {
             FormatType = isBigEndian ? Type.NumericBE : Type.NumericLE;
             FormatSubType = SubType.Symbol;
             SymbolRef = sym;
+        }
+
+        /// <summary>
+        /// Constructor for item with arbitrary string data.
+        /// </summary>
+        /// <param name="length">Length, in bytes.</param>
+        /// <param name="fmt">Format type.</param>
+        /// <param name="str">String data.</param>
+        private FormatDescriptor(int length, Type fmt, string stringData) {
+            Debug.Assert(length > 0);
+            Debug.Assert(fmt == Type.BinaryInclude);
+            Debug.Assert(!string.IsNullOrEmpty(stringData));
+            Length = length;
+            FormatType = fmt;
+            FormatSubType = SubType.None;
+            Extra = stringData;
         }
 
         /// <summary>
@@ -268,6 +299,18 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Returns a descriptor with arbitrary string data.
+        /// </summary>
+        /// <param name="length">Length, in bytes.</param>
+        /// <param name="fmt">Format type.</param>
+        /// <param name="str">String data.</param>
+        /// <returns>New or pre-allocated descriptor.</returns>
+        public static FormatDescriptor Create(int length, Type fmt, string str) {
+            DebugCreateCount++;
+            return new FormatDescriptor(length, fmt, str);
+        }
+
+        /// <summary>
         /// True if the descriptor is okay to use on an instruction operand.  The CPU only
         /// understands little-endian numeric values, so that's all we allow.
         /// </summary>
@@ -276,8 +319,8 @@ namespace SourceGen {
                 switch (FormatType) {
                     case Type.Default:
                     case Type.NumericLE:
-                    //case Type.NumericBE:
                         return true;
+                    //case Type.NumericBE:
                     default:
                         return false;
                 }
@@ -506,6 +549,9 @@ namespace SourceGen {
                         case Type.Junk:
                             retstr += "unaligned junk";
                             break;
+                        case Type.BinaryInclude:
+                            retstr += "binary include";
+                            break;
                         default:
                             // strings handled earlier
                             retstr += "???";
@@ -571,7 +617,7 @@ namespace SourceGen {
 
         public override string ToString() {
             return "[FmtDesc: len=" + Length + " fmt=" + FormatType + " sub=" + FormatSubType +
-                " sym=" + SymbolRef + "]";
+                " sym=" + SymbolRef + " xtra=" + Extra + "]";
         }
 
 
@@ -583,7 +629,8 @@ namespace SourceGen {
                 return false;   // one is null
             }
             return a.Length == b.Length && a.FormatType == b.FormatType &&
-                a.FormatSubType == b.FormatSubType && a.SymbolRef == b.SymbolRef;
+                a.FormatSubType == b.FormatSubType && a.SymbolRef == b.SymbolRef &&
+                a.Extra == b.Extra;
         }
         public static bool operator !=(FormatDescriptor a, FormatDescriptor b) {
             return !(a == b);
@@ -599,6 +646,9 @@ namespace SourceGen {
             hashCode ^= Length;
             hashCode ^= (int)FormatType;
             hashCode ^= (int)FormatSubType;
+            if (Extra != null) {
+                hashCode ^= Extra.GetHashCode();
+            }
             return hashCode;
         }
 

@@ -273,6 +273,17 @@ you can mark it as <samp>Junk</samp>.  If it appears to be adding bytes
 to reach a power-of-two address boundary, you can designate it as an alignment
 directive.  If you have multiple regions selected, only the alignment
 options that work for all regions will be shown.</p>
+<p>If you want to import a section of the file as a binary file, rather
+than representing it in the assembly source, you can set the region as
+a <samp>Binary Include</samp>.  These sections must be for a single
+unbroken section of the file.  Assign a filename to use for the output
+file.  Filenames may be partial paths, but may not reference directories
+above the project directory (with "..") or include double quotes (which
+would require escaping in the assembler output).  Each binary include
+directive must output to a different filename (case-insensitive).  During
+assembly source generation, existing files will only be overwritten if
+they have the same length as the binary include; if they have a different
+length, an error will be reported.</p>
 
 <p>The <samp>String</samp> items are enabled or disabled depending on
 whether the data you have selected is in the appropriate format.  For example,

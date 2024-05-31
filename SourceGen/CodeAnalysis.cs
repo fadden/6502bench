@@ -1189,6 +1189,9 @@ namespace SourceGen {
             if (type == DataType.Fill && subType != DataSubType.None) {
                 throw new PluginException("SIDF rej: fill data must use subType=None");
             }
+            if (type == DataType.BinaryInclude && subType != DataSubType.None) {
+                throw new PluginException("SIDF rej: binary-include data must use subType=None");
+            }
 
             if (isStringType && !isStringSub) {
                 throw new PluginException("SIDF rej: bad type/subType combo: type=" +
@@ -1275,6 +1278,8 @@ namespace SourceGen {
                     return FormatDescriptor.Type.Uninit;
                 case DataType.Dense:
                     return FormatDescriptor.Type.Dense;
+                case DataType.BinaryInclude:
+                    return FormatDescriptor.Type.BinaryInclude;
                 default:
                     Debug.Assert(false);
                     throw new PluginException("Instr format rej: unknown format type " + pluginType);

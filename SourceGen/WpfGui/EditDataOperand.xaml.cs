@@ -266,6 +266,12 @@ namespace SourceGen.WpfGui {
             UpdateControls();
         }
 
+        private void BinaryIncludeTextBox_TextChanged(object sender, TextChangedEventArgs e) {
+            radioBinaryInclude.IsChecked = true;
+            // Update OK button based on filename validity.
+            UpdateControls();
+        }
+
         /// <summary>
         /// Sets the string encoding combo box to an item that matches the specified mode.  If
         /// the mode can't be found, an arbitrary entry will be chosen.
@@ -376,6 +382,10 @@ namespace SourceGen.WpfGui {
                 }
             }
             IsValid = isOk;
+
+            if (radioBinaryInclude.IsChecked == true) {
+                IsValid &= AsmGen.BinaryInclude.ValidatePathName(binaryIncludeTextBox.Text);
+            }
 
             // If dense hex with a limit is selected, check the value.
             if (radioDenseHexLimited.IsChecked == true) {
@@ -514,6 +524,9 @@ namespace SourceGen.WpfGui {
                     radioFill.IsEnabled = false;
                 }
             }
+
+            // We can't handle multiple ranges because we need to set the filename.
+            radioBinaryInclude.IsEnabled = (mSelection.RangeCount == 1);
         }
 
         /// <summary>
@@ -901,6 +914,11 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.Type.Junk:
                     preferredFormat = radioJunk;
                     break;
+                case FormatDescriptor.Type.BinaryInclude:
+                    preferredFormat = radioBinaryInclude;
+                    binaryIncludeTextBox.Text =
+                        AsmGen.BinaryInclude.ConvertPathNameFromStorage(dfd.Extra);
+                    break;
                 default:
                     // Should not be here.
                     Debug.Assert(false);
@@ -1077,6 +1095,10 @@ namespace SourceGen.WpfGui {
                 type = FormatDescriptor.Type.Junk;
                 JunkAlignmentItem comboItem = (JunkAlignmentItem)junkAlignComboBox.SelectedItem;
                 subType = comboItem.FormatSubType;
+            } else if (radioBinaryInclude.IsChecked == true) {
+                type = FormatDescriptor.Type.BinaryInclude;
+                // path will be extracted directly by subroutine
+                Debug.Assert(mSelection.RangeCount == 1);
             } else if (radioStringMixed.IsChecked == true) {
                 type = FormatDescriptor.Type.StringGeneric;
                 subType = charSubType;
@@ -1176,7 +1198,13 @@ namespace SourceGen.WpfGui {
             // The one exception to this is ASCII values for non-string data, because we have
             // to dig the low vs. high value out of the data itself.
             FormatDescriptor dfd;
-            if (subType == FormatDescriptor.SubType.Symbol) {
+            if (type == FormatDescriptor.Type.BinaryInclude) {
+                // Special case.  We know there can be only one of these, so just grab the
+                // filename directly instead of passing it in as a rare argument.
+                string storePath =
+                    AsmGen.BinaryInclude.ConvertPathNameToStorage(binaryIncludeTextBox.Text);
+                dfd = FormatDescriptor.Create(chunkLength, type, storePath);
+            } else if (subType == FormatDescriptor.SubType.Symbol) {
                 dfd = FormatDescriptor.Create(chunkLength, symbolRef,
                     type == FormatDescriptor.Type.NumericBE);
             } else {

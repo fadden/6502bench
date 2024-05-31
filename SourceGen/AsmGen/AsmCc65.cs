@@ -52,6 +52,11 @@ namespace SourceGen.AsmGen {
         public int StartOffset { get { return 0; } }
 
         /// <summary>
+        /// List of binary include sections found in the project.
+        /// </summary>
+        private List<BinaryInclude.Excision> mBinaryIncludes = new List<BinaryInclude.Excision>();
+
+        /// <summary>
         /// Working directory, i.e. where we write our output file(s).
         /// </summary>
         private string mWorkDirectory;
@@ -138,6 +143,8 @@ namespace SourceGen.AsmGen {
                 { "Dense", ".byte" },           // really just just comma-separated bytes
                 { "Uninit", ".res" },
                 //Junk
+                //Align
+                { "BinaryInclude", ".incbin" },
                 { "StrGeneric", ".byte" },
                 //StrReverse
                 { "StrNullTerm", ".asciiz" },
@@ -262,7 +269,7 @@ namespace SourceGen.AsmGen {
             }
             mOutStream = null;
 
-            return new GenerationResults(pathNames, string.Empty);
+            return new GenerationResults(pathNames, string.Empty, mBinaryIncludes);
         }
 
         private void GenerateLinkerScript(StreamWriter sw) {
@@ -469,6 +476,12 @@ namespace SourceGen.AsmGen {
                         opcodeStr = operandStr = null;
                         OutputDenseHex(offset, length, labelStr, commentStr);
                     }
+                    break;
+                case FormatDescriptor.Type.BinaryInclude:
+                    opcodeStr = sDataOpNames.BinaryInclude;
+                    string biPath = BinaryInclude.ConvertPathNameFromStorage(dfd.Extra);
+                    operandStr = '"' + biPath + '"';
+                    mBinaryIncludes.Add(new BinaryInclude.Excision(offset, length, biPath));
                     break;
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:

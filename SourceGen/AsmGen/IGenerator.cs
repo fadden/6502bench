@@ -288,10 +288,13 @@ namespace SourceGen.AsmGen {
     public class GenerationResults {
         public List<string> PathNames { get; private set; }
         public string ExtraOptions { get; private set; }
+        public List<BinaryInclude.Excision> BinaryIncludes { get; private set; }
 
-        public GenerationResults(List<string> pathNames, string extraOptions) {
+        public GenerationResults(List<string> pathNames, string extraOptions,
+                List<BinaryInclude.Excision> binaryIncludes) {
             PathNames = CommonUtil.Container.CopyStringList(pathNames);
             ExtraOptions = extraOptions;
+            BinaryIncludes = binaryIncludes;
         }
     }
 }

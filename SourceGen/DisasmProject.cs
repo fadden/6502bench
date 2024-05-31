@@ -152,7 +152,7 @@ namespace SourceGen {
 
 
         /// <summary>
-        /// The contents of the 65xx data file.
+        /// The contents of the 65xx data file.  Do not modify.
         /// </summary>
         public byte[] FileData { get { return mFileData; } }
         private byte[] mFileData;

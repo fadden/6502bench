@@ -285,6 +285,24 @@ namespace SourceGen.AsmGen.WpfGui {
                 return;
             }
 
+            // Generate binary includes.
+            if (!BinaryInclude.PrepareList(res.BinaryIncludes, mWorkDirectory,
+                    out string failMsg)) {
+                MessageBox.Show(this, "Failed processing binary includes: " + failMsg,
+                    Res.Strings.ERR_FILE_GENERIC_CAPTION,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            } else {
+                foreach (BinaryInclude.Excision exc in res.BinaryIncludes) {
+                    if (!BinaryInclude.GenerateOutputFile(exc, mProject.FileData,
+                            out string failMsg2)) {
+                        MessageBox.Show(this, "Failed processing binary include at +" +
+                                exc.Offset.ToString("x6") + ": " + failMsg2,
+                            Res.Strings.ERR_FILE_GENERIC_CAPTION,
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+
             ResetElements();
             mGenerationResults = res;
             previewFileComboBox.Items.Clear();

@@ -454,7 +454,8 @@ namespace PluginCommon {
         Dense,
         Fill,
         Uninit,
-        Junk
+        Junk,
+        BinaryInclude
     }
 
     /// <summary>

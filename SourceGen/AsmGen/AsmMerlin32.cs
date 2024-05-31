@@ -133,6 +133,7 @@ namespace SourceGen.AsmGen {
                 { "Uninit", "ds" },
                 //Junk
                 //Align
+                //BinaryInclude
                 { "StrGeneric", "asc" },
                 { "StrReverse", "rev" },
                 //StrNullTerm
@@ -243,7 +244,8 @@ namespace SourceGen.AsmGen {
             }
             mOutStream = null;
 
-            return new GenerationResults(pathNames, string.Empty);
+            return new GenerationResults(pathNames, string.Empty,
+                new List<BinaryInclude.Excision>());
         }
 
         // IGenerator
@@ -316,6 +318,7 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.Uninit:
                 case FormatDescriptor.Type.Junk:
+                case FormatDescriptor.Type.BinaryInclude:   // not supported, gen minimal output
                     int fillVal = Helper.CheckRangeHoldsSingleValue(data, offset, length);
                     if (fillVal >= 0) {
                         opcodeStr = sDataOpNames.Fill;

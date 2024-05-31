@@ -695,6 +695,7 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.Type.Fill:
                 case FormatDescriptor.Type.Uninit:
                 case FormatDescriptor.Type.Junk:
+                case FormatDescriptor.Type.BinaryInclude:
                 default:
                     // Unexpected; used to be data?
                     break;

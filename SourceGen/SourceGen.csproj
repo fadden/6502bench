@@ -74,6 +74,7 @@
     <Compile Include="AsmGen\AssemblerConfig.cs" />
     <Compile Include="AsmGen\AssemblerInfo.cs" />
     <Compile Include="AsmGen\AssemblerVersion.cs" />
+    <Compile Include="AsmGen\BinaryInclude.cs" />
     <Compile Include="AsmGen\GenCommon.cs" />
     <Compile Include="AsmGen\IAssembler.cs" />
     <Compile Include="AsmGen\IGenerator.cs" />

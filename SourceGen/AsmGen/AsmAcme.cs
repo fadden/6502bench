@@ -57,6 +57,11 @@ namespace SourceGen.AsmGen {
         public int StartOffset { get { return 0; } }
 
         /// <summary>
+        /// List of binary include sections found in the project.
+        /// </summary>
+        private List<BinaryInclude.Excision> mBinaryIncludes = new List<BinaryInclude.Excision>();
+
+        /// <summary>
         /// Working directory, i.e. where we write our output file(s).
         /// </summary>
         private string mWorkDirectory;
@@ -139,6 +144,7 @@ namespace SourceGen.AsmGen {
                 { "Uninit", "!skip" },
                 //Junk
                 { "Align", "!align" },
+                { "BinaryInclude", "!binary" },
                 { "StrGeneric", "!text" },       // can use !xor for high ASCII
                 //StrReverse
                 //StrNullTerm
@@ -303,7 +309,7 @@ namespace SourceGen.AsmGen {
             }
             mOutStream = null;
 
-            return new GenerationResults(pathNames, string.Empty);
+            return new GenerationResults(pathNames, string.Empty, mBinaryIncludes);
         }
 
         /// <summary>
@@ -482,6 +488,12 @@ namespace SourceGen.AsmGen {
                         opcodeStr = operandStr = null;
                         OutputDenseHex(offset, length, labelStr, commentStr);
                     }
+                    break;
+                case FormatDescriptor.Type.BinaryInclude:
+                    opcodeStr = sDataOpNames.BinaryInclude;
+                    string biPath = BinaryInclude.ConvertPathNameFromStorage(dfd.Extra);
+                    operandStr = '"' + biPath + '"';
+                    mBinaryIncludes.Add(new BinaryInclude.Excision(offset, length, biPath));
                     break;
                 case FormatDescriptor.Type.StringGeneric:
                 case FormatDescriptor.Type.StringReverse:

@@ -2352,6 +2352,7 @@ namespace SourceGen {
                     Debug.WriteLine("No change to data formats");
                 }
             }
+
         }
 
         public void EditProjectProperties(WpfGui.EditProjectProperties.Tab initialTab) {

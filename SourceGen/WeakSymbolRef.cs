@@ -79,13 +79,13 @@ namespace SourceGen {
         public bool IsVariable { get { return VarType != LocalVariableType.NotVar; } }
 
         /// <summary>
-        /// Constructor.
+        /// Standard constructor.
         /// </summary>
         public WeakSymbolRef(string label, Part part) :
             this(label, part, LocalVariableType.NotVar) { }
 
         /// <summary>
-        /// Constructor.
+        /// Constructor for local variable table references.
         /// </summary>
         public WeakSymbolRef(string label, Part part, LocalVariableType varType) {
             Debug.Assert(label != null);

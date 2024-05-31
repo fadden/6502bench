@@ -23,6 +23,10 @@ using System.Web.Script.Serialization;
 
 using CommonUtil;
 
+// TODO: experiment with serialization options that exclude default values, such as null
+//   strings, from the serialized output
+// TODO: switch to System.Text.Json.JsonSerializer (with WriteIndented=true).
+
 namespace SourceGen {
     /// <summary>
     /// Load and save project data from/to a ".dis65" file.
@@ -312,6 +316,7 @@ namespace SourceGen {
             public string Format { get; set; }
             public string SubFormat { get; set; }
             public SerWeakSymbolRef SymbolRef { get; set; }
+            public string Extra { get; set; }
 
             public SerFormatDescriptor() { }
             public SerFormatDescriptor(FormatDescriptor dfd) {
@@ -320,6 +325,9 @@ namespace SourceGen {
                 SubFormat = dfd.FormatSubType.ToString();
                 if (dfd.SymbolRef != null) {
                     SymbolRef = new SerWeakSymbolRef(dfd.SymbolRef);
+                }
+                if (dfd.Extra != null) {
+                    Extra = dfd.Extra;
                 }
             }
         }
@@ -1087,9 +1095,14 @@ namespace SourceGen {
                     ": " + sfd.Format + "/" + sfd.SubFormat);
                 return false;
             }
-            if (sfd.SymbolRef == null) {
+            if (sfd.Extra != null) {
+                // Descriptor with extra data.
+                dfd = FormatDescriptor.Create(sfd.Length, format, sfd.Extra);
+            } else if (sfd.SymbolRef == null) {
+                // Simple descriptor.
                 dfd = FormatDescriptor.Create(sfd.Length, format, subFormat);
             } else {
+                // Descriptor with symbolic reference.
                 WeakSymbolRef.Part part;
                 try {
                     part = (WeakSymbolRef.Part)Enum.Parse(

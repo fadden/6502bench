@@ -81,6 +81,7 @@ namespace SourceGen {
             public string Uninit { get; private set; }
             public string Junk { get; private set; }
             public string Align { get; private set; }
+            public string BinaryInclude { get; private set; }
             public string StrGeneric { get; private set; }
             public string StrReverse { get; private set; }
             public string StrLen8 { get; private set; }
@@ -133,6 +134,7 @@ namespace SourceGen {
                     a.Uninit == b.Uninit &&
                     a.Junk == b.Junk &&
                     a.Align == b.Align &&
+                    a.BinaryInclude == b.BinaryInclude &&
                     a.StrGeneric == b.StrGeneric &&
                     a.StrReverse == b.StrReverse &&
                     a.StrLen8 == b.StrLen8 &&
@@ -247,6 +249,7 @@ namespace SourceGen {
                 { "Uninit", ".ds" },
                 { "Junk", ".junk" },
                 { "Align", ".align" },
+                { "BinaryInclude", ".incbin" },
 
                 { "StrGeneric", ".str" },
                 { "StrReverse", ".rstr" },
@@ -280,6 +283,7 @@ namespace SourceGen {
                 case FormatDescriptor.Type.Fill:
                 case FormatDescriptor.Type.Uninit:
                 case FormatDescriptor.Type.Junk:
+                case FormatDescriptor.Type.BinaryInclude:
                     return 1;
                 case FormatDescriptor.Type.Dense: {
                         // no delimiter, two output bytes per input byte
@@ -388,6 +392,11 @@ namespace SourceGen {
                             //GenerateTextLines(text, "", "", po, outList);
                             //po = outList[subIndex];
                         }
+                        break;
+                    case FormatDescriptor.Type.BinaryInclude:
+                        po.Opcode = opNames.BinaryInclude;
+                        string biPath = AsmGen.BinaryInclude.ConvertPathNameFromStorage(dfd.Extra);
+                        po.Operand = '"' + biPath + "'";
                         break;
                     default:
                         Debug.Assert(false);

@@ -148,8 +148,16 @@ limitations under the License.
         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
             <RadioButton Name="radioJunk" GroupName="Main" Content="_Junk bytes, end aligned to"
                          Checked="MainGroup_CheckedChanged"/>
-            <ComboBox Name="junkAlignComboBox" Margin="8,-5,0,0" Width="200"
+            <ComboBox Name="junkAlignComboBox" Margin="6,-4,0,0" Width="200"
                       ItemsSource="{Binding JunkAlignmentItems}" DisplayMemberPath="Description"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+            <RadioButton Name="radioBinaryInclude" GroupName="Main" Content="Binary include, filename:"
+                         Checked="MainGroup_CheckedChanged"/>
+            <TextBox Name="binaryIncludeTextBox" Margin="6,-2,0,0" Width="240"
+                     FontFamily="{StaticResource GeneralMonoFont}"
+                     TextChanged="BinaryIncludeTextBox_TextChanged"/>
+
         </StackPanel>
 
         <TextBlock Text="String" Margin="0,12,0,0"/>

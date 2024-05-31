@@ -1365,6 +1365,7 @@ namespace SourceGen.WpfGui {
                 new TextBoxPropertyMap(uninitTextBox, "Uninit"),
                 new TextBoxPropertyMap(junkTextBox, "Junk"),
                 new TextBoxPropertyMap(alignTextBox, "Align"),
+                new TextBoxPropertyMap(binaryIncludeTextBox, "BinaryInclude"),
                 new TextBoxPropertyMap(strGenericTextBox, "StrGeneric"),
                 new TextBoxPropertyMap(strReverseTextBox, "StrReverse"),
                 new TextBoxPropertyMap(strLen8TextBox, "StrLen8"),
