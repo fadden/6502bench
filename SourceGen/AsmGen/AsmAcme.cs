@@ -230,28 +230,28 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
-            config.mSuppressImpliedAcc = true;
+            config.SuppressImpliedAcc = true;
 
-            config.mOperandWrapLen = 64;
-            config.mForceDirectOpcodeSuffix = "+1";
-            config.mForceAbsOpcodeSuffix = "+2";
-            config.mForceLongOpcodeSuffix = "+3";
-            config.mForceDirectOperandPrefix = string.Empty;
-            config.mForceAbsOperandPrefix = string.Empty;
-            config.mForceLongOperandPrefix = string.Empty;
-            config.mLocalVariableLabelPrefix = ".";
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = ";";
-            config.mNonUniqueLabelPrefix = "@";
-            config.mCommaSeparatedDense = false;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
+            config.OperandWrapLen = 64;
+            config.ForceDirectOpcodeSuffix = "+1";
+            config.ForceAbsOpcodeSuffix = "+2";
+            config.ForceLongOpcodeSuffix = "+3";
+            config.ForceDirectOperandPrefix = string.Empty;
+            config.ForceAbsOperandPrefix = string.Empty;
+            config.ForceLongOperandPrefix = string.Empty;
+            config.LocalVariableLabelPrefix = ".";
+            config.EndOfLineCommentDelimiter = ";";
+            config.FullLineCommentDelimiterBase = ";";
+            config.BoxLineCommentDelimiter = ";";
+            config.NonUniqueLabelPrefix = "@";
+            config.CommaSeparatedDense = false;
+            config.ExprMode = Formatter.FormatConfig.ExpressionMode.Common;
 
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
             charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
             charSet.Set(CharEncoding.Encoding.HighAscii,
                 new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
-            config.mCharDelimiters = charSet;
+            config.CharDelimiters = charSet;
         }
 
         // IGenerator

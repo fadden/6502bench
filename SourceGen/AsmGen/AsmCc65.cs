@@ -207,25 +207,25 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
-            config.mOperandWrapLen = 64;
-            config.mForceDirectOpcodeSuffix = string.Empty;
-            config.mForceAbsOpcodeSuffix = string.Empty;
-            config.mForceLongOpcodeSuffix = string.Empty;
-            config.mForceDirectOperandPrefix = "z:";    // zero
-            config.mForceAbsOperandPrefix = "a:";       // absolute
-            config.mForceLongOperandPrefix = "f:";      // far
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = ";";
-            config.mNonUniqueLabelPrefix = "@";
-            config.mCommaSeparatedDense = true;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Cc65;
+            config.OperandWrapLen = 64;
+            config.ForceDirectOpcodeSuffix = string.Empty;
+            config.ForceAbsOpcodeSuffix = string.Empty;
+            config.ForceLongOpcodeSuffix = string.Empty;
+            config.ForceDirectOperandPrefix = "z:";    // zero
+            config.ForceAbsOperandPrefix = "a:";       // absolute
+            config.ForceLongOperandPrefix = "f:";      // far
+            config.EndOfLineCommentDelimiter = ";";
+            config.FullLineCommentDelimiterBase = ";";
+            config.BoxLineCommentDelimiter = ";";
+            config.NonUniqueLabelPrefix = "@";
+            config.CommaSeparatedDense = true;
+            config.ExprMode = Formatter.FormatConfig.ExpressionMode.Cc65;
 
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
             charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
             charSet.Set(CharEncoding.Encoding.HighAscii,
                 new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
-            config.mCharDelimiters = charSet;
+            config.CharDelimiters = charSet;
         }
 
         // IGenerator

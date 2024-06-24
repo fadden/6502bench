@@ -468,7 +468,7 @@ namespace SourceGen {
                 FormatDescriptor dfd, byte[] data, int offset, out string popcode) {
 
             StringOpFormatter.ReverseMode revMode = StringOpFormatter.ReverseMode.Forward;
-            Formatter.DelimiterSet delSet = formatter.Config.mStringDelimiters;
+            Formatter.DelimiterSet delSet = formatter.Config.StringDelimiters;
             Formatter.DelimiterDef delDef;
 
             CharEncoding.Convert charConv;
@@ -736,7 +736,7 @@ namespace SourceGen {
                 string selOp;
                 if (dfd.SymbolRef.ValuePart == WeakSymbolRef.Part.Bank) {
                     symbolValue = (sym.Value >> 16) & 0xff;
-                    if (formatter.Config.mBankSelectBackQuote) {
+                    if (formatter.Config.BankSelectBackQuote) {
                         selOp = "`";
                     } else {
                         selOp = "^";

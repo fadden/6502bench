@@ -253,27 +253,27 @@ namespace SourceGen.AsmGen {
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
             // Must be lower case when --case-sensitive is used.
-            config.mUpperOpcodes = false;
-            config.mUpperPseudoOpcodes = false;
-            config.mUpperOperandA = false;
-            config.mUpperOperandS = false;
-            config.mUpperOperandXY = false;
-            config.mOperandWrapLen = 64;
+            config.UpperOpcodes = false;
+            config.UpperPseudoOpcodes = false;
+            config.UpperOperandA = false;
+            config.UpperOperandS = false;
+            config.UpperOperandXY = false;
+            config.OperandWrapLen = 64;
 
-            config.mBankSelectBackQuote = true;
+            config.BankSelectBackQuote = true;
 
-            config.mForceDirectOpcodeSuffix = string.Empty;
-            config.mForceAbsOpcodeSuffix = string.Empty;
-            config.mForceLongOpcodeSuffix = string.Empty;
-            config.mForceDirectOperandPrefix = string.Empty;
-            config.mForceAbsOperandPrefix = "@w";       // word
-            config.mForceLongOperandPrefix = "@l";      // long
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = ";";
-            config.mNonUniqueLabelPrefix = "";      // should be '_', but that's a valid label char
-            config.mCommaSeparatedDense = true;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Common;
+            config.ForceDirectOpcodeSuffix = string.Empty;
+            config.ForceAbsOpcodeSuffix = string.Empty;
+            config.ForceLongOpcodeSuffix = string.Empty;
+            config.ForceDirectOperandPrefix = string.Empty;
+            config.ForceAbsOperandPrefix = "@w";       // word
+            config.ForceLongOperandPrefix = "@l";      // long
+            config.EndOfLineCommentDelimiter = ";";
+            config.FullLineCommentDelimiterBase = ";";
+            config.BoxLineCommentDelimiter = ";";
+            config.NonUniqueLabelPrefix = "";      // should be '_', but that's a valid label char
+            config.CommaSeparatedDense = true;
+            config.ExprMode = Formatter.FormatConfig.ExpressionMode.Common;
         }
 
         // IGenerator
@@ -296,7 +296,7 @@ namespace SourceGen.AsmGen {
             charDelimSet.Set(CharEncoding.Encoding.HighAscii,
                 new Formatter.DelimiterDef(string.Empty, '\'', '\'', " | $80"));
 
-            config.mCharDelimiters = charDelimSet;
+            config.CharDelimiters = charDelimSet;
 
             SourceFormatter = new Formatter(config);
 

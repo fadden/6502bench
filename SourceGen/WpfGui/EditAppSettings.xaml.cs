@@ -1171,14 +1171,13 @@ namespace SourceGen.WpfGui {
 
                 gen.GetDefaultDisplayFormat(out PseudoOp.PseudoOpNames unused,
                     out Asm65.Formatter.FormatConfig formatConfig);
-                formatConfig.Normalize();
 
                 DisplayPresets[i + 2] = new DisplayFormatPreset((int)asmInfo.AssemblerId,
-                    asmInfo.Name, formatConfig.mForceAbsOpcodeSuffix,
-                    formatConfig.mForceLongOpcodeSuffix, formatConfig.mForceAbsOperandPrefix,
-                    formatConfig.mForceLongOperandPrefix, formatConfig.mNonUniqueLabelPrefix,
-                    formatConfig.mLocalVariableLabelPrefix, formatConfig.mCommaSeparatedDense,
-                    formatConfig.mExpressionMode);
+                    asmInfo.Name, formatConfig.ForceAbsOpcodeSuffix,
+                    formatConfig.ForceLongOpcodeSuffix, formatConfig.ForceAbsOperandPrefix,
+                    formatConfig.ForceLongOperandPrefix, formatConfig.NonUniqueLabelPrefix,
+                    formatConfig.LocalVariableLabelPrefix, formatConfig.CommaSeparatedDense,
+                    formatConfig.ExprMode);
             }
         }
 

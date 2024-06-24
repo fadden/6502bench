@@ -192,25 +192,25 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
-            config.mOperandWrapLen = 64;
-            config.mForceDirectOpcodeSuffix = string.Empty;
-            config.mForceAbsOpcodeSuffix = ":";
-            config.mForceLongOpcodeSuffix = "l";
-            config.mForceDirectOperandPrefix = string.Empty;
-            config.mForceAbsOperandPrefix = string.Empty;
-            config.mForceLongOperandPrefix = string.Empty;
-            config.mLocalVariableLabelPrefix = "]";
-            config.mEndOfLineCommentDelimiter = ";";
-            config.mFullLineCommentDelimiterBase = ";";
-            config.mBoxLineCommentDelimiter = string.Empty;
-            config.mNonUniqueLabelPrefix = ":";
-            config.mCommaSeparatedDense = false;
-            config.mExpressionMode = Formatter.FormatConfig.ExpressionMode.Merlin;
+            config.OperandWrapLen = 64;
+            config.ForceDirectOpcodeSuffix = string.Empty;
+            config.ForceAbsOpcodeSuffix = ":";
+            config.ForceLongOpcodeSuffix = "l";
+            config.ForceDirectOperandPrefix = string.Empty;
+            config.ForceAbsOperandPrefix = string.Empty;
+            config.ForceLongOperandPrefix = string.Empty;
+            config.LocalVariableLabelPrefix = "]";
+            config.EndOfLineCommentDelimiter = ";";
+            config.FullLineCommentDelimiterBase = ";";
+            config.BoxLineCommentDelimiter = string.Empty;
+            config.NonUniqueLabelPrefix = ":";
+            config.CommaSeparatedDense = false;
+            config.ExprMode = Formatter.FormatConfig.ExpressionMode.Merlin;
 
             Formatter.DelimiterSet charSet = new Formatter.DelimiterSet();
             charSet.Set(CharEncoding.Encoding.Ascii, Formatter.SINGLE_QUOTE_DELIM);
             charSet.Set(CharEncoding.Encoding.HighAscii, Formatter.DOUBLE_QUOTE_DELIM);
-            config.mCharDelimiters = charSet;
+            config.CharDelimiters = charSet;
         }
 
         // IGenerator; executes on background thread

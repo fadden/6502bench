@@ -1045,6 +1045,7 @@ namespace SourceGen {
                 //
                 // TODO: integrate into FormattedOperandCache so we don't have to
                 //   regenerate them unless they change.  Use the MLC as the dependency.
+                //   Better: create FormattedMLCCache, use the MLC and Formatter.
                 if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
                     List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
                     StringListToLines(formatted, offset, Line.Type.Note,

@@ -23,24 +23,26 @@ using AddressMode = Asm65.OpDef.AddressMode;
 namespace Asm65 {
     /// <summary>
     /// Functions used for formatting bits of 65xx code into human-readable form.
+    /// </summary>
+    /// <remarks>
+    /// <para>There are a variety of ways to format a given thing, based on personal preference
+    /// (e.g. whether opcodes are upper- or lower-case) and assembler syntax requirements.</para>
     /// 
-    /// There are a variety of ways to format a given thing, based on personal preference
-    /// (e.g. whether opcodes are upper- or lower-case) and assembler syntax requirements.
-    /// 
-    /// The functions in this class serve two purposes: (1) produce consistent output
+    /// <para>The functions in this class serve two purposes: (1) produce consistent output
     /// throughout the program; (2) cache format strings and other components to reduce
     /// string manipulation overhead.  Note the caching is per-Formatter, so it's best to
-    /// create just one and share it around.
+    /// create just one and share it around.</para>
     /// 
-    /// The configuration of a Formatter may not be altered once created.  This is important
+    /// <para>The configuration of a Formatter may not be altered once created.  This is important
     /// in situations where we compute output size in one pass and generate it in another,
     /// because it guarantees that a given Formatter object will produce the same number of
-    /// lines of output.
+    /// lines of output.</para>
     ///
-    /// NOTE: if the CpuDef changes, the cached values in the Formatter will become invalid
+    /// <para>NOTE: if the CpuDef changes, the cached values in the Formatter will become invalid
     /// (e.g. mOpcodeStrings).  Discard the Formatter and create a new one.  (This could be
-    /// fixed by keying off of the OpDef instead of OpDef.Opcode, but that's less convenient.)
-    /// </summary>
+    /// fixed by keying off of the OpDef instead of OpDef.Opcode, but that's less
+    /// convenient.)</para>
+    /// </remarks>
     public class Formatter {
         // Default wrap point for long operands.  This potentially affects both on-screen
         // display and source code generation.
@@ -50,49 +52,82 @@ namespace Asm65 {
         /// Various format configuration options.  Fill one of these out and pass it to
         /// the Formatter constructor.
         /// </summary>
-        public struct FormatConfig {
-            // alpha case for some case-insensitive items
-            public bool mUpperHexDigits;        // display hex values in upper case?
-            public bool mUpperOpcodes;          // display opcodes in upper case?
-            public bool mUpperPseudoOpcodes;    // display pseudo-opcodes in upper case?
-            public bool mUpperOperandA;         // display acc operand in upper case?
-            public bool mUpperOperandS;         // display stack operand in upper case?
-            public bool mUpperOperandXY;        // display index register operand in upper case?
+        public class FormatConfig {
+            //
+            // Cosmetic changes.
+            //
 
-            public bool mAddSpaceLongComment;   // insert space after delimiter for long comments?
+            /// <summary>Display hex values in upper case?</summary>
+            public bool UpperHexDigits { get; set; } = false;
+            /// <summary>Display opcodes in upper case?</summary>
+            public bool UpperOpcodes { get; set; } = false;
+            /// <summary>Display pseudo-opcodes in upper case?</summary>
+            public bool UpperPseudoOpcodes { get; set; } = false;
+            /// <summary>Display acc operand in upper case?</summary>
+            public bool UpperOperandA { get; set; } = false;
+            /// <summary>Display stack operand in upper case?</summary>
+            public bool UpperOperandS { get; set; } = false;
+            /// <summary>Display index register operand in upper case?</summary>
+            public bool UpperOperandXY { get; set; } = false;
 
-            // functional changes to assembly output
-            public bool mSuppressHexNotation;       // omit '$' before hex digits
-            public bool mSuppressImpliedAcc;        // emit just "LSR" rather than "LSR A"?
-            public bool mBankSelectBackQuote;       // use '`' rather than '^' for bank selector?
+            /// <summary>Insert space after delimiter for long comments?</summary>
+            public bool AddSpaceLongComment { get; set; } = false;
 
-            public string mForceDirectOperandPrefix;    // these may be null or empty
-            public string mForceAbsOpcodeSuffix;
-            public string mForceAbsOperandPrefix;
-            public string mForceDirectOpcodeSuffix;
-            public string mForceLongOpcodeSuffix;
-            public string mForceLongOperandPrefix;
+            //
+            // Functional changes to assembly output.
+            //
 
-            public string mLocalVariableLabelPrefix;    // e.g. Merlin 32 puts ']' before var names
-            public string mNonUniqueLabelPrefix;        // e.g. ':' or '@' before local label
+            /// <summary>Omit '$' before hex digits?</summary>
+            public bool SuppressHexNotation { get; set; } = false;
+            /// <summary>Emit just "LSR" rather than "LSR A"?</summary>
+            public bool SuppressImpliedAcc { get; set; } = false;
+            /// <summary>Use '`' rather than '^' for bank selector?</summary>
+            public bool BankSelectBackQuote { get; set; } = false;
 
-            public string mEndOfLineCommentDelimiter;   // usually ';'
-            public string mFullLineCommentDelimiterBase; // usually ';' or '*', WITHOUT extra space
-            public string mBoxLineCommentDelimiter;     // usually blank or ';'
+            /// <summary>String to prefix operand with to force DP addressing.</summary>
+            public string ForceDirectOperandPrefix { get; set; } = string.Empty;
+            /// <summary>String to suffix opcode with to force abs addressing.</summary>
+            public string ForceAbsOpcodeSuffix { get; set; } = string.Empty;
+            /// <summary>String to prefix operand with to force abs addressing.</summary>
+            public string ForceAbsOperandPrefix { get; set; } = string.Empty;
+            /// <summary>String to suffix opcode with to force DP addressing.</summary>
+            public string ForceDirectOpcodeSuffix { get; set; } = string.Empty;
+            /// <summary>String to suffix opcode with to force long addressing.</summary>
+            public string ForceLongOpcodeSuffix { get; set; } = string.Empty;
+            /// <summary>String to prefix operand with to force long addressing.</summary>
+            public string ForceLongOperandPrefix { get; set; } = string.Empty;
 
-            // delimiter patterns for single character constants
-            public DelimiterSet mCharDelimiters;
-            public DelimiterSet mStringDelimiters;
+            /// <summary>String to prefix label with to indicate a local var.</summary>
+            public string LocalVariableLabelPrefix { get; set; } = string.Empty;
+            /// <summary>String to prefix label with to indicate a non-unique label.</summary>
+            public string NonUniqueLabelPrefix { get; set; } = string.Empty;
 
-            // point at which we wrap long operands; zero uses default
-            public int mOperandWrapLen;
+            /// <summary>String to prefix an end-of-line comment.</summary>
+            public string EndOfLineCommentDelimiter { get; set; } = string.Empty;
+            /// <summary>String to prefix a full-line comment.</summary>
+            public string FullLineCommentDelimiterBase { get; set; } = string.Empty;
+            /// <summary>String to prefix a box comment line.</summary>
+            public string BoxLineCommentDelimiter { get; set; } = string.Empty;
 
-            // miscellaneous
-            public bool mSpacesBetweenBytes;            // "20edfd" vs. "20 ed fd"
-            public bool mCommaSeparatedDense;           // "20edfd" vs. "$20,$ed,$fd"
+            /// <summary>Delimiter patterns for single-character constants.</summary>
+            public DelimiterSet CharDelimiters { get; set; } = new DelimiterSet();
+            /// <summary>Delimiter patterns for string constants.</summary>
+            public DelimiterSet StringDelimiters { get; set; } = new DelimiterSet();
 
-            // hex dumps
-            public bool mHexDumpAsciiOnly;              // disallow non-ASCII chars in hex dumps?
+            //
+            // Miscellaneous.
+            //
+
+            /// <summary>Character position at which operands wrap; 0 == default.</summary>
+            public int OperandWrapLen = DEFAULT_OPERAND_WRAP_LEN;
+
+            /// <summary>Add spaces between bytes in the Bytes column?</summary>
+            public bool SpacesBetweenBytes { get; set; } = false;   // "20edfd" vs. "20 ed fd"
+            /// <summary>Use comma-separated hex values for dense hex format?</summary>
+            public bool CommaSeparatedDense { get; set; } = false;  // "20edfd" vs. "$20,$ed,$fd"
+
+            /// <summary>Use only ASCII characters in hex dumps (e.g. no middle-dots)?</summary>
+            public bool HexDumpAsciiOnly { get; set; } = false;
             public enum CharConvMode {
                 // TODO(maybe): just pass in a CharEncoding.Convert delegate
                 Unknown = 0,
@@ -101,12 +136,67 @@ namespace Asm65 {
                 C64Petscii,
                 C64ScreenCode
             };
-            public CharConvMode mHexDumpCharConvMode;   // character conversion mode for dumps
+            /// <summary>Character conversion mode for hex dumps.</summary>
+            public CharConvMode HexDumpCharConvMode = CharConvMode.Unknown;
 
-            // This determines what operators are available and what their precedence is.
-            // Hopefully we don't need a separate mode for every assembler in existence.
             public enum ExpressionMode { Unknown = 0, Common, Cc65, Merlin };
-            public ExpressionMode mExpressionMode;      // symbol rendering mode
+            /// <summary>
+            /// This determines what operators are available and what their precedence is.  Used
+            /// when generating expressions for operands.
+            /// </summary>
+            public ExpressionMode ExprMode = ExpressionMode.Unknown;
+
+
+            /// <summary>
+            /// Constructor.  All booleans default to false, all strings to empty.
+            /// </summary>
+            public FormatConfig() { }
+
+            /// <summary>
+            /// Copy constructor.
+            /// </summary>
+            /// <param name="src">Source format config object.</param>
+            public FormatConfig(FormatConfig src) {
+                UpperHexDigits = src.UpperHexDigits;
+                UpperOpcodes = src.UpperOpcodes;
+                UpperPseudoOpcodes = src.UpperPseudoOpcodes;
+                UpperOperandA = src.UpperOperandA;
+                UpperOperandS = src.UpperOperandS;
+                UpperOperandXY = src.UpperOperandXY;
+
+                AddSpaceLongComment = src.AddSpaceLongComment;
+
+                SuppressHexNotation = src.SuppressHexNotation;
+                SuppressImpliedAcc = src.SuppressImpliedAcc;
+                BankSelectBackQuote = src.BankSelectBackQuote;
+
+                ForceDirectOperandPrefix = src.ForceDirectOperandPrefix;
+                ForceAbsOpcodeSuffix = src.ForceAbsOpcodeSuffix;
+                ForceAbsOperandPrefix = src.ForceAbsOperandPrefix;
+                ForceDirectOpcodeSuffix = src.ForceDirectOpcodeSuffix;
+                ForceLongOpcodeSuffix = src.ForceLongOpcodeSuffix;
+                ForceLongOperandPrefix = src.ForceLongOperandPrefix;
+
+                LocalVariableLabelPrefix = src.LocalVariableLabelPrefix;
+                NonUniqueLabelPrefix = src.NonUniqueLabelPrefix;
+
+                EndOfLineCommentDelimiter = src.EndOfLineCommentDelimiter;
+                FullLineCommentDelimiterBase = src.FullLineCommentDelimiterBase;
+                BoxLineCommentDelimiter = src.BoxLineCommentDelimiter;
+
+                CharDelimiters = new DelimiterSet(src.CharDelimiters);
+                StringDelimiters = new DelimiterSet(src.StringDelimiters);
+
+                OperandWrapLen = src.OperandWrapLen;
+
+                SpacesBetweenBytes = src.SpacesBetweenBytes;
+                CommaSeparatedDense = src.CommaSeparatedDense;
+
+                HexDumpAsciiOnly = src.HexDumpAsciiOnly;
+                HexDumpCharConvMode = src.HexDumpCharConvMode;
+
+                ExprMode = src.ExprMode;
+            }
 
             // Deserialization helper.
             public static ExpressionMode ParseExpressionMode(string str) {
@@ -117,47 +207,6 @@ namespace Asm65 {
                     }
                 }
                 return em;
-            }
-
-            // TODO: FormatConfig should be a class with properties so we can avoid this nonsense
-            public void Normalize() {
-                if (mForceDirectOperandPrefix == null) {
-                    mForceDirectOperandPrefix = string.Empty;
-                }
-                if (mForceAbsOpcodeSuffix == null) {
-                    mForceAbsOpcodeSuffix = string.Empty;
-                }
-                if (mForceAbsOperandPrefix == null) {
-                    mForceAbsOperandPrefix = string.Empty;
-                }
-                if (mForceDirectOpcodeSuffix == null) {
-                    mForceDirectOpcodeSuffix = string.Empty;
-                }
-                if (mForceLongOpcodeSuffix == null) {
-                    mForceLongOpcodeSuffix = string.Empty;
-                }
-                if (mForceLongOperandPrefix == null) {
-                    mForceLongOperandPrefix = string.Empty;
-                }
-                if (mLocalVariableLabelPrefix == null) {
-                    mLocalVariableLabelPrefix = string.Empty;
-                }
-                if (mNonUniqueLabelPrefix == null) {
-                    mNonUniqueLabelPrefix = string.Empty;
-                }
-                if (mEndOfLineCommentDelimiter == null) {
-                    mEndOfLineCommentDelimiter = string.Empty;
-                }
-                if (mFullLineCommentDelimiterBase == null) {
-                    mFullLineCommentDelimiterBase = string.Empty;
-                }
-                if (mBoxLineCommentDelimiter == null) {
-                    mBoxLineCommentDelimiter = string.Empty;
-                }
-
-                if (mOperandWrapLen == 0) {
-                    mOperandWrapLen = DEFAULT_OPERAND_WRAP_LEN;
-                }
             }
         }
 
@@ -240,12 +289,33 @@ namespace Asm65 {
                 new Dictionary<CharEncoding.Encoding, DelimiterDef>();
 
             /// <summary>
+            /// Constructor.  Set is initially empty.
+            /// </summary>
+            public DelimiterSet() { }
+
+            /// <summary>
+            /// Copy constructor.
+            /// </summary>
+            /// <param name="src">Source set.</param>
+            public DelimiterSet(DelimiterSet src) {
+                foreach (KeyValuePair<CharEncoding.Encoding, DelimiterDef> kvp in src.mDelimiters) {
+                    mDelimiters[kvp.Key] = kvp.Value;
+                }
+            }
+
+            /// <summary>
             /// Returns the specified DelimiterDef, or null if not found.
             /// </summary>
+            /// <param name="enc">Delimiter encoding to retrieve.</param>
             public DelimiterDef Get(CharEncoding.Encoding enc) {
                 mDelimiters.TryGetValue(enc, out DelimiterDef def);
                 return def;
             }
+            /// <summary>
+            /// Sets the specified DelimiterDef.
+            /// </summary>
+            /// <param name="enc">Delimiter encoding to change.</param>
+            /// <param name="def">New delimiter definition.</param>
             public void Set(CharEncoding.Encoding enc, DelimiterDef def) {
                 mDelimiters[enc] = def;
             }
@@ -377,7 +447,6 @@ namespace Asm65 {
             public override int GetHashCode() {
                 return mDelimiters.GetHashCode();
             }
-
         }
 
         #endregion Text Delimiters
@@ -397,7 +466,7 @@ namespace Asm65 {
         /// <summary>
         /// Get a copy of the format config.
         /// </summary>
-        public FormatConfig Config { get { return mFormatConfig; } }
+        public FormatConfig Config { get { return new FormatConfig(mFormatConfig); } }
 
         // Cached bits and pieces.
         char mHexFmtChar;
@@ -446,7 +515,7 @@ namespace Asm65 {
         /// </summary>
         public char[] HexDigits {
             get {
-                return mFormatConfig.mUpperHexDigits ? sHexCharsUpper : sHexCharsLower;
+                return mFormatConfig.UpperHexDigits ? sHexCharsUpper : sHexCharsLower;
             }
         }
 
@@ -454,7 +523,7 @@ namespace Asm65 {
         /// String to put between the operand and the end-of-line comment.
         /// </summary>
         public string EndOfLineCommentDelimiter {
-            get { return mFormatConfig.mEndOfLineCommentDelimiter; }
+            get { return mFormatConfig.EndOfLineCommentDelimiter; }
         }
 
         /// <summary>
@@ -470,14 +539,14 @@ namespace Asm65 {
         /// as a comment.
         /// </summary>
         public string BoxLineCommentDelimiter {
-            get { return mFormatConfig.mBoxLineCommentDelimiter; }
+            get { return mFormatConfig.BoxLineCommentDelimiter; }
         }
 
         /// <summary>
         /// Prefix for non-unique address labels.
         /// </summary>
         public string NonUniqueLabelPrefix {
-            get { return mFormatConfig.mNonUniqueLabelPrefix; }
+            get { return mFormatConfig.NonUniqueLabelPrefix; }
         }
 
         /// <summary>
@@ -486,14 +555,14 @@ namespace Asm65 {
         /// assume the assembler shifts the operand before applying the adjustment.
         /// </summary>
         public FormatConfig.ExpressionMode ExpressionMode {
-            get { return mFormatConfig.mExpressionMode; }
+            get { return mFormatConfig.ExprMode; }
         }
 
         /// <summary>
         /// Point at which to wrap long operands, such as strings and dense hex.
         /// </summary>
         public int OperandWrapLen {
-            get { return mFormatConfig.mOperandWrapLen; }
+            get { return mFormatConfig.OperandWrapLen; }
         }
 
 
@@ -502,18 +571,16 @@ namespace Asm65 {
         /// do as much work as possible here.
         /// </summary>
         public Formatter(FormatConfig config) {
-            mFormatConfig = config;     // copy struct
+            mFormatConfig = new FormatConfig(config);       // make a copy
 
-            mFormatConfig.Normalize();
-
-            if (string.IsNullOrEmpty(mFormatConfig.mNonUniqueLabelPrefix)) {
-                mFormatConfig.mNonUniqueLabelPrefix = "@";
+            if (string.IsNullOrEmpty(mFormatConfig.NonUniqueLabelPrefix)) {
+                mFormatConfig.NonUniqueLabelPrefix = "@";
             }
 
-            if (mFormatConfig.mAddSpaceLongComment) {
-                mFullLineCommentDelimiterPlus = mFormatConfig.mFullLineCommentDelimiterBase + " ";
+            if (mFormatConfig.AddSpaceLongComment) {
+                mFullLineCommentDelimiterPlus = mFormatConfig.FullLineCommentDelimiterBase + " ";
             } else {
-                mFullLineCommentDelimiterPlus = mFormatConfig.mFullLineCommentDelimiterBase;
+                mFullLineCommentDelimiterPlus = mFormatConfig.FullLineCommentDelimiterBase;
             }
 
             // Prep the static parts of the hex dump buffer.
@@ -524,31 +591,31 @@ namespace Asm65 {
             mHexDumpBuffer[6] = ':';
 
             // Resolve boolean flags to character or string values.
-            if (mFormatConfig.mUpperHexDigits) {
+            if (mFormatConfig.UpperHexDigits) {
                 mHexFmtChar = 'X';
             } else {
                 mHexFmtChar = 'x';
             }
-            if (mFormatConfig.mSuppressHexNotation) {
+            if (mFormatConfig.SuppressHexNotation) {
                 mHexPrefix = "";
             } else {
                 mHexPrefix = "$";
             }
-            if (mFormatConfig.mSuppressImpliedAcc) {
+            if (mFormatConfig.SuppressImpliedAcc) {
                 mAccChar = "";
-            } else if (mFormatConfig.mUpperOperandA) {
+            } else if (mFormatConfig.UpperOperandA) {
                 mAccChar = "A";
             } else {
                 mAccChar = "a";
             }
-            if (mFormatConfig.mUpperOperandXY) {
+            if (mFormatConfig.UpperOperandXY) {
                 mXregChar = 'X';
                 mYregChar = 'Y';
             } else {
                 mXregChar = 'x';
                 mYregChar = 'y';
             }
-            if (mFormatConfig.mUpperOperandS) {
+            if (mFormatConfig.UpperOperandS) {
                 mSregChar = 'S';
             } else {
                 mSregChar = 's';
@@ -560,13 +627,13 @@ namespace Asm65 {
             }
 
             // process the delimiter patterns
-            DelimiterSet chrDelim = mFormatConfig.mCharDelimiters;
+            DelimiterSet chrDelim = mFormatConfig.CharDelimiters;
             if (chrDelim == null) {
                 Debug.WriteLine("NOTE: char delimiters not set");
                 chrDelim = DelimiterSet.GetDefaultCharDelimiters();
             }
 
-            switch (mFormatConfig.mHexDumpCharConvMode) {
+            switch (mFormatConfig.HexDumpCharConvMode) {
                 case FormatConfig.CharConvMode.Ascii:
                     mHexDumpCharConv = CharEncoding.ConvertAscii;
                     break;
@@ -676,7 +743,7 @@ namespace Asm65 {
                 return FormatHexValue(value, 2);
             }
 
-            DelimiterDef delimDef = mFormatConfig.mCharDelimiters.Get(enc);
+            DelimiterDef delimDef = mFormatConfig.CharDelimiters.Get(enc);
             if (delimDef == null) {
                 return FormatHexValue(value, 2);
             }
@@ -738,8 +805,8 @@ namespace Asm65 {
         /// specified.
         /// </summary>
         public string FormatVariableLabel(string label) {
-            if (!string.IsNullOrEmpty(mFormatConfig.mLocalVariableLabelPrefix)) {
-                return mFormatConfig.mLocalVariableLabelPrefix + label;
+            if (!string.IsNullOrEmpty(mFormatConfig.LocalVariableLabelPrefix)) {
+                return mFormatConfig.LocalVariableLabelPrefix + label;
             } else {
                 return label;
             }
@@ -806,22 +873,22 @@ namespace Asm65 {
         public string FormatMnemonic(string mnemonic, OpDef.WidthDisambiguation wdis) {
             string opcodeStr = mnemonic;
             if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceDirectOpcodeSuffix)) {
-                    opcodeStr += mFormatConfig.mForceDirectOpcodeSuffix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceDirectOpcodeSuffix)) {
+                    opcodeStr += mFormatConfig.ForceDirectOpcodeSuffix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceAbsOpcodeSuffix)) {
-                    opcodeStr += mFormatConfig.mForceAbsOpcodeSuffix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceAbsOpcodeSuffix)) {
+                    opcodeStr += mFormatConfig.ForceAbsOpcodeSuffix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceLong ||
                        wdis == OpDef.WidthDisambiguation.ForceLongMaybe) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceLongOpcodeSuffix)) {
-                    opcodeStr += mFormatConfig.mForceLongOpcodeSuffix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceLongOpcodeSuffix)) {
+                    opcodeStr += mFormatConfig.ForceLongOpcodeSuffix;
                 }
             } else {
                 Debug.Assert(wdis == OpDef.WidthDisambiguation.None);
             }
-            if (mFormatConfig.mUpperOpcodes) {
+            if (mFormatConfig.UpperOpcodes) {
                 opcodeStr = opcodeStr.ToUpperInvariant();
             }
             return opcodeStr;
@@ -839,16 +906,16 @@ namespace Asm65 {
             string wdisStr = string.Empty;
 
             if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceDirectOperandPrefix)) {
-                    wdisStr = mFormatConfig.mForceDirectOperandPrefix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceDirectOperandPrefix)) {
+                    wdisStr = mFormatConfig.ForceDirectOperandPrefix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceAbsOperandPrefix)) {
-                    wdisStr = mFormatConfig.mForceAbsOperandPrefix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceAbsOperandPrefix)) {
+                    wdisStr = mFormatConfig.ForceAbsOperandPrefix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceLong) {
-                if (!string.IsNullOrEmpty(mFormatConfig.mForceLongOperandPrefix)) {
-                    wdisStr = mFormatConfig.mForceLongOperandPrefix;
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceLongOperandPrefix)) {
+                    wdisStr = mFormatConfig.ForceLongOperandPrefix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceLongMaybe) {
                 // Don't add a width disambiguator to an operand that is unambiguously long.
@@ -957,7 +1024,7 @@ namespace Asm65 {
         /// <returns>Formatted string.</returns>
         public string FormatPseudoOp(string opstr) {
             if (!mPseudoOpStrings.TryGetValue(opstr, out string result)) {
-                if (mFormatConfig.mUpperPseudoOpcodes) {
+                if (mFormatConfig.UpperPseudoOpcodes) {
                     result = mPseudoOpStrings[opstr] = opstr.ToUpperInvariant();
                 } else {
                     result = mPseudoOpStrings[opstr] = opstr;
@@ -975,7 +1042,7 @@ namespace Asm65 {
 
             StringBuilder sb = new StringBuilder(len * 7);
             for (int i = 0; i < len; i++) {
-                if (i != 0 && mFormatConfig.mSpacesBetweenBytes) {
+                if (i != 0 && mFormatConfig.SpacesBetweenBytes) {
                     sb.Append(' ');
                 }
                 // e.g. "{0:x2}"
@@ -1037,10 +1104,10 @@ namespace Asm65 {
         /// <returns>Formatted string.</returns>
         public string FormatEolComment(string comment) {
             if (string.IsNullOrEmpty(comment) ||
-                    string.IsNullOrEmpty(mFormatConfig.mEndOfLineCommentDelimiter)) {
+                    string.IsNullOrEmpty(mFormatConfig.EndOfLineCommentDelimiter)) {
                 return comment;
             } else {
-                return mFormatConfig.mEndOfLineCommentDelimiter + comment;
+                return mFormatConfig.EndOfLineCommentDelimiter + comment;
             }
         }
 
@@ -1052,9 +1119,9 @@ namespace Asm65 {
         /// <param name="length">Number of bytes to print.</param>
         /// <returns>Formatted data string.</returns>
         public string FormatDenseHex(byte[] data, int offset, int length) {
-            char[] hexChars = mFormatConfig.mUpperHexDigits ? sHexCharsUpper : sHexCharsLower;
+            char[] hexChars = mFormatConfig.UpperHexDigits ? sHexCharsUpper : sHexCharsLower;
             char[] text;
-            if (mFormatConfig.mCommaSeparatedDense) {
+            if (mFormatConfig.CommaSeparatedDense) {
                 text = new char[length * 4 - 1];
                 for (int i = 0; i < length; i++) {
                     byte val = data[offset + i];
@@ -1086,7 +1153,7 @@ namespace Asm65 {
         /// </remarks>
         public int CharsPerDenseByte {
             get {
-                if (mFormatConfig.mCommaSeparatedDense) {
+                if (mFormatConfig.CommaSeparatedDense) {
                     return 4;
                 } else {
                     return 2;
@@ -1145,7 +1212,7 @@ namespace Asm65 {
             const int dataCol = 8;
             const int asciiCol = 57;
 
-            char[] hexChars = mFormatConfig.mUpperHexDigits ? sHexCharsUpper : sHexCharsLower;
+            char[] hexChars = mFormatConfig.UpperHexDigits ? sHexCharsUpper : sHexCharsLower;
             char[] outBuf = mHexDumpBuffer;
 
             int skip = addr & 0x0f;     // we skip this many entries...
@@ -1192,7 +1259,7 @@ namespace Asm65 {
             char ch = mHexDumpCharConv(val);
             if (ch != CharEncoding.UNPRINTABLE_CHAR) {
                 return ch;
-            } else if (mFormatConfig.mHexDumpAsciiOnly) {
+            } else if (mFormatConfig.HexDumpAsciiOnly) {
                 return '.';
             } else {
                 // Certain values make the hex dump ListView freak out in WinForms, but work

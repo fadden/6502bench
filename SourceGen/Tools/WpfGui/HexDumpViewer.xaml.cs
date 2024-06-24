@@ -150,9 +150,9 @@ namespace SourceGen.Tools.WpfGui {
                 // initializing
                 return;
             }
-            config.mHexDumpCharConvMode = item.Mode;
+            config.HexDumpCharConvMode = item.Mode;
 
-            config.mHexDumpAsciiOnly = AsciiOnlyDump;
+            config.HexDumpAsciiOnly = AsciiOnlyDump;
 
             // Keep app settings up to date.
             AppSettings.Global.SetBool(AppSettings.HEXD_ASCII_ONLY, mAsciiOnlyDump);

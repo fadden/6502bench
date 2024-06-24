@@ -492,25 +492,25 @@ namespace SourceGen {
             mFormatterConfig = new Formatter.FormatConfig();
             AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
                 ref mFormatterConfig);
-            mFormatterConfig.mEndOfLineCommentDelimiter = ";";
-            mFormatterConfig.mFullLineCommentDelimiterBase = ";";
-            mFormatterConfig.mBoxLineCommentDelimiter = string.Empty;
+            mFormatterConfig.EndOfLineCommentDelimiter = ";";
+            mFormatterConfig.FullLineCommentDelimiterBase = ";";
+            mFormatterConfig.BoxLineCommentDelimiter = string.Empty;
 
-            mFormatterConfig.mNonUniqueLabelPrefix =
+            mFormatterConfig.NonUniqueLabelPrefix =
                 settings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
-            mFormatterConfig.mLocalVariableLabelPrefix =
+            mFormatterConfig.LocalVariableLabelPrefix =
                 settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
-            mFormatterConfig.mCommaSeparatedDense =
+            mFormatterConfig.CommaSeparatedDense =
                 settings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, true);
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
             if (chrDelCereal != null) {
-                mFormatterConfig.mCharDelimiters =
+                mFormatterConfig.CharDelimiters =
                     Formatter.DelimiterSet.Deserialize(chrDelCereal);
             }
             string strDelCereal = settings.GetString(AppSettings.FMT_STRING_DELIM, null);
             if (strDelCereal != null) {
-                mFormatterConfig.mStringDelimiters =
+                mFormatterConfig.StringDelimiters =
                     Formatter.DelimiterSet.Deserialize(strDelCereal);
             }
 

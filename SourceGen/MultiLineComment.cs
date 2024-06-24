@@ -95,7 +95,7 @@ namespace SourceGen {
         /// <returns>Array of formatted strings.</returns>
         public List<string> FormatText(Asm65.Formatter formatter, string textPrefix) {
             const char boxChar = '*';
-            const char spcRep = '\u2219';
+            const char spcRep = '\u2219';   // BULLET OPERATOR
             string workString = string.IsNullOrEmpty(textPrefix) ? Text : textPrefix + Text;
             List<string> lines = new List<string>();
 

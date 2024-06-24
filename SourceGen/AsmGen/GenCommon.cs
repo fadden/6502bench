@@ -295,7 +295,7 @@ namespace SourceGen.AsmGen {
             }
             if (gen.Quirks.BankZeroAbsPBRRestrict) {
                 // Hack to avoid having to define a new FormatConfig.ExpressionMode for 64tass.
-                // Get rid of this 64tass gets its own exp mode.
+                // Get rid of this if 64tass gets its own exp mode.
                 opFlags |= PseudoOp.FormatNumericOpFlags.Is64Tass;
             }
 
@@ -494,36 +494,36 @@ namespace SourceGen.AsmGen {
         /// <param name="config">Format config struct.</param>
         public static void ConfigureFormatterFromSettings(AppSettings settings,
                 ref Formatter.FormatConfig config) {
-            config.mUpperHexDigits =
+            config.UpperHexDigits =
                 settings.GetBool(AppSettings.FMT_UPPER_HEX_DIGITS, false);
-            config.mUpperOpcodes =
+            config.UpperOpcodes =
                 settings.GetBool(AppSettings.FMT_UPPER_OP_MNEMONIC, false);
-            config.mUpperPseudoOpcodes =
+            config.UpperPseudoOpcodes =
                 settings.GetBool(AppSettings.FMT_UPPER_PSEUDO_OP_MNEMONIC, false);
-            config.mUpperOperandA =
+            config.UpperOperandA =
                 settings.GetBool(AppSettings.FMT_UPPER_OPERAND_A, false);
-            config.mUpperOperandS =
+            config.UpperOperandS =
                 settings.GetBool(AppSettings.FMT_UPPER_OPERAND_S, false);
-            config.mUpperOperandXY =
+            config.UpperOperandXY =
                 settings.GetBool(AppSettings.FMT_UPPER_OPERAND_XY, false);
-            config.mSpacesBetweenBytes =
+            config.SpacesBetweenBytes =
                 settings.GetBool(AppSettings.FMT_SPACES_BETWEEN_BYTES, false);
-            config.mAddSpaceLongComment =
+            config.AddSpaceLongComment =
                 settings.GetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
-            config.mOperandWrapLen =
+            config.OperandWrapLen =
                 settings.GetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 0);
 
-            config.mForceAbsOpcodeSuffix =
+            config.ForceAbsOpcodeSuffix =
                 settings.GetString(AppSettings.FMT_OPCODE_SUFFIX_ABS, string.Empty);
-            config.mForceLongOpcodeSuffix =
+            config.ForceLongOpcodeSuffix =
                 settings.GetString(AppSettings.FMT_OPCODE_SUFFIX_LONG, string.Empty);
-            config.mForceAbsOperandPrefix =
+            config.ForceAbsOperandPrefix =
                 settings.GetString(AppSettings.FMT_OPERAND_PREFIX_ABS, string.Empty);
-            config.mForceLongOperandPrefix =
+            config.ForceLongOperandPrefix =
                 settings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG, string.Empty);
 
             string exprMode = settings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
-            config.mExpressionMode = Formatter.FormatConfig.ParseExpressionMode(exprMode);
+            config.ExprMode = Formatter.FormatConfig.ParseExpressionMode(exprMode);
 
             // Not doing the delimiter patterns here, because what's in the config file is
             // intended for on-screen display, and hence likely to be unsuited for an assembler.
