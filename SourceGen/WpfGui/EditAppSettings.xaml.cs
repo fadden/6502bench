@@ -1020,15 +1020,44 @@ namespace SourceGen.WpfGui {
                     OnPropertyChanged();
                     bool doSave = true;
                     if (value.Length > 0) {
-                        char ch = value[0];
+                        char ch = value[0];     // disallow A-Za-z_
                         doSave = !((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
                             ch == '_');
                     }
                     if (doSave) {
                         mSettings.SetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, value);
                     } else {
+                        // Ignore the requested change.
                         // TODO(someday): add a validation rule
                         Debug.WriteLine("NOTE: quietly rejecting non-unique prefix '" +
+                            value + "'");
+                    }
+                    UpdateDisplayFormatQuickCombo();
+                    IsDirty = true;
+                }
+            }
+        }
+        private string mFullLineCommentDelim;
+        public string FullLineCommentDelim {
+            get { return mFullLineCommentDelim; }
+            set {
+                if (mFullLineCommentDelim != value) {
+                    mFullLineCommentDelim = value;
+                    OnPropertyChanged();
+                    bool doSave = true;
+                    if (value.Length == 0) {
+                        doSave = false;         // don't allow this to be blank
+                    } else {
+                        char ch = value[0];     // disallow A-Za-z_
+                        doSave = !((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+                            ch == '_');
+                    }
+                    if (doSave) {
+                        mSettings.SetString(AppSettings.FMT_FULL_COMMENT_DELIM, value);
+                    } else {
+                        // Ignore the requested change.
+                        // TODO(someday): add a validation rule
+                        Debug.WriteLine("NOTE: quietly rejecting full-line comment delim '" +
                             value + "'");
                     }
                     UpdateDisplayFormatQuickCombo();
@@ -1133,14 +1162,15 @@ namespace SourceGen.WpfGui {
             public string OperandPrefixAbs { get; private set; }
             public string OperandPrefixLong { get; private set; }
             public string NonUniqueLabelPrefix { get; private set; }
+            public string FullLineCommentDelim { get; private set; }
             public string LocalVarPrefix { get; private set; }
             public bool CommaSeparatedBulkData { get; private set; }
             public ExpressionMode ExpressionStyle { get; private set; }
 
             public DisplayFormatPreset(int id, string name, string opcSuffixAbs,
                     string opcSuffixLong, string operPrefixAbs, string operPrefixLong,
-                    string nonUniqueLabelPrefix, string localVarPrefix, bool commaSepBulkData,
-                    ExpressionMode expStyle) {
+                    string nonUniqueLabelPrefix, string fullLineCommentDelim,
+                    string localVarPrefix, bool commaSepBulkData, ExpressionMode expStyle) {
                 Ident = id;
                 Name = name;
                 OpcodeSuffixAbs = opcSuffixAbs;
@@ -1148,6 +1178,7 @@ namespace SourceGen.WpfGui {
                 OperandPrefixAbs = operPrefixAbs;
                 OperandPrefixLong = operPrefixLong;
                 NonUniqueLabelPrefix = nonUniqueLabelPrefix;
+                FullLineCommentDelim = fullLineCommentDelim;
                 LocalVarPrefix = localVarPrefix;
                 CommaSeparatedBulkData = commaSepBulkData;
                 ExpressionStyle = expStyle;
@@ -1160,11 +1191,11 @@ namespace SourceGen.WpfGui {
             DisplayPresets = new DisplayFormatPreset[AssemblerList.Count + 2];
             DisplayPresets[0] = new DisplayFormatPreset(DisplayFormatPreset.ID_CUSTOM,
                 (string)FindResource("str_PresetCustom"), string.Empty, string.Empty,
-                string.Empty, string.Empty, string.Empty, string.Empty, true,
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true,
                 ExpressionMode.Unknown);
             DisplayPresets[1] = new DisplayFormatPreset(DisplayFormatPreset.ID_DEFAULT,
                 (string)FindResource("str_PresetDefault"), string.Empty, "l", "a:", "f:",
-                string.Empty, string.Empty, true, ExpressionMode.Common);
+                string.Empty, ";", string.Empty, true, ExpressionMode.Common);
             for (int i = 0; i < AssemblerList.Count; i++) {
                 AssemblerInfo asmInfo = AssemblerList[i];
                 AsmGen.IGenerator gen = AssemblerInfo.GetGenerator(asmInfo.AssemblerId);
@@ -1176,6 +1207,7 @@ namespace SourceGen.WpfGui {
                     asmInfo.Name, formatConfig.ForceAbsOpcodeSuffix,
                     formatConfig.ForceLongOpcodeSuffix, formatConfig.ForceAbsOperandPrefix,
                     formatConfig.ForceLongOperandPrefix, formatConfig.NonUniqueLabelPrefix,
+                    formatConfig.FullLineCommentDelimiterBase,
                     formatConfig.LocalVariableLabelPrefix, formatConfig.CommaSeparatedDense,
                     formatConfig.ExprMode);
             }
@@ -1198,6 +1230,8 @@ namespace SourceGen.WpfGui {
                 mSettings.GetString(AppSettings.FMT_OPERAND_PREFIX_LONG, string.Empty);
             NonUniqueLabelPrefix =
                 mSettings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
+            FullLineCommentDelim =
+                mSettings.GetString(AppSettings.FMT_FULL_COMMENT_DELIM, ";");
             LocalVarPrefix =
                 mSettings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
 
@@ -1279,6 +1313,7 @@ namespace SourceGen.WpfGui {
             OperandPrefixAbs = preset.OperandPrefixAbs;
             OperandPrefixLong = preset.OperandPrefixLong;
             NonUniqueLabelPrefix = preset.NonUniqueLabelPrefix;
+            FullLineCommentDelim = preset.FullLineCommentDelim;
             LocalVarPrefix = preset.LocalVarPrefix;
             CommaSeparatedBulkData = preset.CommaSeparatedBulkData;
 
@@ -1305,6 +1340,7 @@ namespace SourceGen.WpfGui {
                         OperandPrefixAbs == preset.OperandPrefixAbs &&
                         OperandPrefixLong == preset.OperandPrefixLong &&
                         NonUniqueLabelPrefix == preset.NonUniqueLabelPrefix &&
+                        FullLineCommentDelim == preset.FullLineCommentDelim &&
                         LocalVarPrefix == preset.LocalVarPrefix &&
                         CommaSeparatedBulkData == preset.CommaSeparatedBulkData &&
                         expMode == preset.ExpressionStyle) {

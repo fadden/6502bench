@@ -241,6 +241,9 @@ namespace SourceGen {
             sb.Append(";varPfx='");
             sb.Append(mFormatter.Config.LocalVariableLabelPrefix);
             sb.Append('\'');
+            sb.Append(";flcd='");
+            sb.Append(mFormatter.Config.FullLineCommentDelimiterBase);
+            sb.Append('\'');
             sb.Append(";labelBrk=");
             sb.Append(LongLabelNewLine.ToString());
             sb.Append(";notes=");

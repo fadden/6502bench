@@ -493,7 +493,6 @@ namespace SourceGen {
             AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
                 ref mFormatterConfig);
             mFormatterConfig.EndOfLineCommentDelimiter = ";";
-            mFormatterConfig.FullLineCommentDelimiterBase = ";";
             mFormatterConfig.BoxLineCommentDelimiter = string.Empty;
 
             mFormatterConfig.NonUniqueLabelPrefix =

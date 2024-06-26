@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.7.3-dev2
          .setcpu "65816"
          .org    $1000
          .a8

@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":4,
+"_ContentVersion":6,
 "FileDataLength":23,
 "FileDataCrc32":-1829154192,
 "ProjectProps":{
@@ -25,7 +25,12 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":4096}],
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
@@ -37,11 +42,7 @@
 },
 
 "LongComments":{
-"-2147483647":{
-"Text":"6502bench SourceGen v1.7.3-dev2",
-"BoxMode":false,
-"MaxWidth":80,
-"BackgroundColor":0}},
+},
 
 "Notes":{
 },

@@ -525,6 +525,9 @@ namespace SourceGen.AsmGen {
             string exprMode = settings.GetString(AppSettings.FMT_EXPRESSION_MODE, string.Empty);
             config.ExprMode = Formatter.FormatConfig.ParseExpressionMode(exprMode);
 
+            config.FullLineCommentDelimiterBase =
+                settings.GetString(AppSettings.FMT_FULL_COMMENT_DELIM, ";");
+
             // Not doing the delimiter patterns here, because what's in the config file is
             // intended for on-screen display, and hence likely to be unsuited for an assembler.
 

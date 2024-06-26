@@ -1,4 +1,4 @@
-;Project file was edited to force ASCII formatting for some operands.
+*Project file was edited to force ASCII formatting for some operands.
          org   $1000
          clc
          xce

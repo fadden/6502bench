@@ -1,4 +1,4 @@
-;Edited to have duplicate labels (PROJ_ZERO, DPCODE).
+*Edited to have duplicate labels (PROJ_ZERO, DPCODE).
 CONST_ZERO equ $f0        ;project const
 
 PROJ_ZERO equ  $00        ;project addr
@@ -56,8 +56,8 @@ L103C    lda   #$fe
          ldy   $12
          lda   (]CONST0,S),y
          sta   (]CONST0+3,S),y
-;Test name redefinition.  This is mostly of interest for assemblers without
-;redefinable variables, but also of interest to the cross-reference window.
+*Test name redefinition.  This is mostly of interest for assemblers without
+*redefinable variables, but also of interest to the cross-reference window.
 ]PTR     equ   $20        ;#1
          ldx   ]PTR
 ]PTR     equ   $22        ;#2

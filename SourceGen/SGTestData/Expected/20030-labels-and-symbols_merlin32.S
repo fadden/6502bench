@@ -1,5 +1,5 @@
-;Project was edited to add a label in the middle of a dense hex region, and add
-;a duplicate label.
+*Project was edited to add a label in the middle of a dense hex region, and add
+*a duplicate label.
 BMI      equ   $30        ;opcode mnemonic
 zip      equ   $cd
 absl     equ   $1029

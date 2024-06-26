@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.7.3-dev2
         !cpu    65816
 *       =       $1000
         !as

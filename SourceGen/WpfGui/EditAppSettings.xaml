@@ -147,7 +147,7 @@ limitations under the License.
             <TabItem Name="textDelimitersTab" Header="Text Delimiters">
                 <DockPanel LastChildFill="False">
                     <TextBlock DockPanel.Dock="Top" Margin="4,0,0,0"
-                               Text="Select pseudo-op names for display. This does not affect source code generation. Blank entries get a default value."/>
+                               Text="Configure character and string constant delimiters. This does not affect source code generation."/>
 
                     <Grid DockPanel.Dock="Top" Height="240" Margin="4,0">
 
@@ -501,6 +501,14 @@ limitations under the License.
                         </StackPanel>
 
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
+                            <TextBlock Text="Full-line comment delimiter:"/>
+                            <TextBox Width="14" MaxLength="1" Margin="8,1,0,0"
+                                     Text="{Binding FullLineCommentDelim, UpdateSourceTrigger=PropertyChanged,
+                                        FallbackValue=;}"
+                                     FontFamily="{StaticResource GeneralMonoFont}"/>
+                        </StackPanel>
+
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,4,0,0">
                             <TextBlock Text="Non-unique label prefix:"/>
                             <TextBox Width="14" MaxLength="1" Margin="8,1,0,0"
                                      Text="{Binding NonUniqueLabelPrefix, UpdateSourceTrigger=PropertyChanged,

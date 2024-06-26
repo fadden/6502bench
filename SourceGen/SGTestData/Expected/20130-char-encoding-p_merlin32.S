@@ -1,4 +1,4 @@
-;Projected edited to format non-char operands as chars.
+*Projected edited to format non-char operands as chars.
          org   $1000
          lda   #'A'
          lda   #"A"

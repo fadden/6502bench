@@ -1,4 +1,4 @@
-;Project file was edited to get zero-length strings and reverse DCI.
+*Project file was edited to get zero-length strings and reverse DCI.
          org   $1000
          rts
 

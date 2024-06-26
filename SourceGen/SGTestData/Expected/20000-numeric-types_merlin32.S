@@ -1,5 +1,5 @@
-;Project file was edited to get all big-endian data types, and to have an
-;incorrect .junk alignment directive.
+*Project file was edited to get all big-endian data types, and to have an
+*incorrect .junk alignment directive.
          org   $1000
          bit   L1448
          jsr   L14A8
@@ -70,7 +70,7 @@ UserLabel ds   8,$84
 L1448    ds    8,$85
          ds    16,$86
          asc   8787878787878787
-;long comment
+*long comment
          asc   8787878787878787
          ds    16,$88
          ds    8,$89

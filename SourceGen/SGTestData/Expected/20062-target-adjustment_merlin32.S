@@ -1,4 +1,3 @@
-;6502bench SourceGen v1.7.3-dev2
          org   $1000
          nop
 L1001    bit   L1001

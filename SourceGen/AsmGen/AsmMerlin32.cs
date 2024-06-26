@@ -201,7 +201,7 @@ namespace SourceGen.AsmGen {
             config.ForceLongOperandPrefix = string.Empty;
             config.LocalVariableLabelPrefix = "]";
             config.EndOfLineCommentDelimiter = ";";
-            config.FullLineCommentDelimiterBase = ";";
+            config.FullLineCommentDelimiterBase = "*";
             config.BoxLineCommentDelimiter = string.Empty;
             config.NonUniqueLabelPrefix = ":";
             config.CommaSeparatedDense = false;

@@ -62,6 +62,7 @@ namespace SourceGen {
         public const string FMT_OPERAND_PREFIX_ABS = "fmt-operand-prefix-abs";
         public const string FMT_OPERAND_PREFIX_LONG = "fmt-operand-prefix-long";
         public const string FMT_EXPRESSION_MODE = "fmt-expression-mode";
+        public const string FMT_FULL_COMMENT_DELIM = "fmt-full-comment-delim";
 
         public const string FMT_PSEUDO_OP_NAMES = "fmt-pseudo-op-names";
         public const string FMT_CHAR_DELIM = "fmt-char-delim";

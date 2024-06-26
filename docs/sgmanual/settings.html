@@ -128,11 +128,17 @@ You may specify values for all of them or none of them.</p>
 <p>Different assemblers have different ways of forming expressions.
 Sometimes the rules allow expressions to be written simply, other times
 explicit grouping with parenthesis is required.  Select whichever style
-you are most comfortable with.</p>
+you are most comfortable with.
+(64tass and ACME use the "common"
+expression style, cc65 and Merlin 32 have their own unique styles.)</p>
+
+<p>The character used to start a full-line comment is usually
+'<code>;</code>', but can be changed here.</p>
 
 <p>Non-unique labels are identified with a prefix character, typically
-'@' or ':'.  The default is '@', but you can configure it to any character
-that isn't valid for the start of a label.  (64tass uses '_' for locals,
+'<code>@</code>' or '<code>:</code>'.  The default is '<code>@</code>',
+but you can configure it to any character that isn't valid for the start
+of a label.  (64tass uses '<code>_</code>' for locals,
 but that's a valid label start character, and so isn't allowed here.)
 The setting affects label editing as well as display.</p>
 
@@ -147,9 +153,7 @@ required, the latter is more readable.</p>
 <p>The "quick set" pop-up configures the fields on the left side of the
 tab to match the conventions of the specified assembler.  Select your
 preferred assembler in the combo box to set the fields.  The setting
-automatically switches to "custom" when you edit a field.
-(64tass and ACME use the "common"
-expression style, cc65 and Merlin 32 have their own unique styles.)</p>
+automatically changes to "custom" when you modify a field.</p>
 
 <p>The <samp>add spaces in Bytes column</samp> checkbox changes the format
 of the hex data in the code list "bytes" column from dense
