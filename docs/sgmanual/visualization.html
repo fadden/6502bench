@@ -225,8 +225,15 @@ Neither has any effect on black &amp; white bitmaps.</p>
 half-pixel shifts are not represented.</p>
 
 <p>The VisShapeTable script renders Applesoft shape tables, which can
-have multiple vector shapes.  The only parameter other than the offset
-is the shape number.</p>
+have multiple vector shapes.  There are two generators:</p>
+<ul>
+  <li><b>Shape Table</b> - full table.  Set the offset to the first
+    byte of the table, and set the image index to the desired shape
+    index.  (Note: indices here start at zero, but in Applesoft programs
+    they start at 1.)</li>
+  <li><b>Shape Table Shape</b> - single shape.  Set the offset to the
+    first byte of the shape definition.</li>
+</ul>
 
 
 <h3>Atari 2600 : Atari/Vis2600</h3>
