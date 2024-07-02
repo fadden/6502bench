@@ -21,31 +21,38 @@ using Asm65;
 
 namespace SourceGen {
     /// <summary>
-    /// Holds a cache of formatted lines.
+    /// Holds a cache of formatted operands that may span multiple lines.
     /// </summary>
     /// <remarks>
-    /// This is intended for multi-line items with lengths that are non-trivial to compute,
-    /// such as long comments (which have to do word wrapping) and strings (which may
-    /// be a mix of characters and hex data).  The on-demand line formatter needs to be able
-    /// to render the Nth line of a multi-line string, and will potentially be very
-    /// inefficient if it has to render lies 0 through N-1 as well.  (Imagine the list is
-    /// rendered from end to start...)  Single-line items, and multi-line items that are
-    /// easy to generate at an arbitrary offset (dense hex), aren't stored here.
+    /// <para>This is intended for multi-line items with line counts that are non-trivial to
+    /// compute, such as strings which may be a mix of characters and hex data.  The on-demand
+    /// line formatter needs to be able to render the Nth line of a multi-line operand, and will
+    /// potentially be very inefficient if it has to render lines 0 through N-1 as well.  (Imagine
+    /// the list is rendered from end to start...)  Single-line items, and multi-line items that
+    /// are easy to generate at an arbitrary offset (dense hex), aren't stored here.</para>
     ///
-    /// The trick is knowing when the cached data must be invalidated.  For example, a
-    /// fully formatted string line must be invalidated if:
-    ///  - The Formatter changes (different delimiter definition)
-    ///  - The FormatDescriptor changes (different length, different text encoding, different
-    ///    type of string)
-    ///  - The PseudoOpNames table changes (potentially altering the pseudo-op string used)
+    /// <para>The trick is knowing when the cached data must be invalidated.  For example, a
+    /// fully formatted string line must be invalidated if:</para>
+    /// <list type="bullet">
+    ///   <item>The Formatter changes (different delimiter definition)</item>
+    ///   <item>The FormatDescriptor changes (different length, different text encoding, different
+    ///     type of string)</item>
+    ///   <item>The PseudoOpNames table changes (potentially altering the pseudo-op
+    ///     string used)</item>
+    /// </list>
     ///
-    /// Doing a full .equals() on the various items would reduce performance, so we use a
+    /// <para>Doing a full .equals() on the various items would reduce performance, so we use a
     /// simple test on reference equality when possible, and expect that the client will try
-    /// to ensure that the various bits that are depended upon don't get replaced unnecessarily.
+    /// to ensure that the various bits that are depended upon don't get replaced
+    /// unnecessarily.</para>
+    /// <para>We don't make much of an effort to purge stale entries, since that can only happen
+    /// when the operand at a specific offset changes to something that doesn't require fancy
+    /// formatting.  The total memory required for all entries is relatively small.</para>
     /// </remarks>
     public class FormattedOperandCache {
-        private const bool VERBOSE = false;
-
+        /// <summary>
+        /// One entry in the cache.
+        /// </summary>
         private class FormattedStringEntry {
             public List<string> Lines { get; private set; }
             public string PseudoOpcode { get; private set; }
@@ -91,6 +98,9 @@ namespace SourceGen {
             }
         }
 
+        /// <summary>
+        /// Cached entries, keyed by file offset.
+        /// </summary>
         private Dictionary<int, FormattedStringEntry> mStringEntries =
             new Dictionary<int, FormattedStringEntry>();
 
@@ -102,20 +112,23 @@ namespace SourceGen {
         /// <param name="formatter">Formatter dependency.</param>
         /// <param name="formatDescriptor">FormatDescriptor dependency.</param>
         /// <param name="pseudoOpNames">PseudoOpNames dependency.</param>
-        /// <param name="PseudoOpcode">Pseudo-op for this string.</param>
-        /// <returns>A reference to the string list.  The caller must not modify the
-        ///   list.</returns>
+        /// <param name="PseudoOpcode">Result: pseudo-op for this string.</param>
+        /// <returns>A reference to the string list, or null if the entry is absent or invalid.
+        ///   The caller must not modify the list.</returns>
         public List<string> GetStringEntry(int offset, Formatter formatter,
                 FormatDescriptor formatDescriptor, PseudoOp.PseudoOpNames pseudoOpNames,
                 out string PseudoOpcode) {
             PseudoOpcode = null;
             if (!mStringEntries.TryGetValue(offset, out FormattedStringEntry entry)) {
+                DebugNotFoundCount++;
                 return null;
             }
             if (!entry.CheckDeps(formatter, formatDescriptor, pseudoOpNames)) {
                 //Debug.WriteLine("  stale entry at +" + offset.ToString("x6"));
+                DebugFoundStaleCount++;
                 return null;
             }
+            DebugFoundValidCount++;
             PseudoOpcode = entry.PseudoOpcode;
             return entry.Lines;
         }
@@ -136,6 +149,18 @@ namespace SourceGen {
             FormattedStringEntry fse = new FormattedStringEntry(lines, pseudoOpcode,
                 formatter, formatDescriptor, pseudoOpNames);
             mStringEntries[offset] = fse;
+        }
+
+        // Some counters for evaluating efficacy.
+        public int DebugFoundValidCount { get; private set; }
+        public int DebugFoundStaleCount { get; private set; }
+        public int DebugNotFoundCount { get; private set; }
+        public void DebugResetCounters() {
+            DebugFoundValidCount = DebugFoundStaleCount = DebugNotFoundCount = 0;
+        }
+        public void DebugLogCounters() {
+            Debug.WriteLine("Operand cache: valid=" + DebugFoundValidCount + ", stale=" +
+                DebugFoundStaleCount + ", missing=" + DebugNotFoundCount);
         }
     }
 }

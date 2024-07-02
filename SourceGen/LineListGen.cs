@@ -71,10 +71,15 @@ namespace SourceGen {
         private PseudoOp.PseudoOpNames mPseudoOpNames;
 
         /// <summary>
-        /// Cache of previously-formatted data.  The data is stored with references to
+        /// Cache of previously-formatted operand data.  The data is stored with references to
         /// dependencies, so it should not be necessary to explicitly clear this.
         /// </summary>
-        private FormattedOperandCache mFormattedLineCache;
+        private FormattedOperandCache mFormattedLineCache = new FormattedOperandCache();
+
+        /// <summary>
+        /// Cache of previous-formatted multi-line comment strings.
+        /// </summary>
+        private FormattedMlcCache mFormattedMlcCache = new FormattedMlcCache();
 
         /// <summary>
         /// Local variable table data extractor.
@@ -472,7 +477,6 @@ namespace SourceGen {
             mPseudoOpNames = opNames;
 
             mLineList = new List<Line>();
-            mFormattedLineCache = new FormattedOperandCache();
             mShowCycleCounts = AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS,
                 false);
             mLvLookup = new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
@@ -963,7 +967,7 @@ namespace SourceGen {
         private void GenerateLineList(int startOffset, int endOffset, List<Line> lines) {
             //Debug.WriteLine("GenerateRange [+" + startOffset.ToString("x6") + ",+" +
             //    endOffset.ToString("x6") + "]");
-
+            DebugResetCacheCounters();
 
             Debug.Assert(startOffset >= 0);
             Debug.Assert(endOffset >= startOffset);
@@ -1053,7 +1057,14 @@ namespace SourceGen {
                     spaceAdded = true;
                 }
                 if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
-                    List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
+                    List<string> formatted = mFormattedMlcCache.GetStringEntry(offset, longComment,
+                        mFormatter);
+                    if (formatted == null) {
+                        Debug.WriteLine("Render " + longComment);
+                        formatted = longComment.FormatText(mFormatter, string.Empty);
+                        mFormattedMlcCache.SetStringEntry(offset, formatted, longComment,
+                            mFormatter);
+                    }
                     StringListToLines(formatted, offset, Line.Type.LongComment,
                         longComment.BackgroundColor, NoteColorMultiplier, lines);
                     spaceAdded = true;
@@ -1271,7 +1282,7 @@ namespace SourceGen {
                 } else {
                     Debug.Assert(attr.DataDescriptor != null);
                     if (attr.DataDescriptor.IsString) {
-                        // See if we've already got this one.
+                        // String operand.  See if we've already formatted this one.
                         List<string> strLines = mFormattedLineCache.GetStringEntry(offset,
                             mFormatter, attr.DataDescriptor, mPseudoOpNames, out string popcode);
                         if (strLines == null) {
@@ -1358,6 +1369,8 @@ namespace SourceGen {
                     }
                 }
             }
+
+            DebugLogCacheCounters();
         }
 
         /// <summary>
@@ -1751,6 +1764,15 @@ namespace SourceGen {
             }
 
             return partsArray;
+        }
+
+        public void DebugResetCacheCounters() {
+            mFormattedLineCache.DebugResetCounters();
+            mFormattedMlcCache.DebugResetCounters();
+        }
+        public void DebugLogCacheCounters() {
+            mFormattedLineCache.DebugLogCounters();
+            mFormattedMlcCache.DebugLogCounters();
         }
     }
 }

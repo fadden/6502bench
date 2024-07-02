@@ -81,6 +81,7 @@
     <Compile Include="AsmGen\LabelLocalizer.cs" />
     <Compile Include="DailyTips.cs" />
     <Compile Include="Exporter.cs" />
+    <Compile Include="FormattedMlcCache.cs" />
     <Compile Include="FormattedOperandCache.cs" />
     <Compile Include="LabelFileGenerator.cs" />
     <Compile Include="LocalVariableLookup.cs" />
