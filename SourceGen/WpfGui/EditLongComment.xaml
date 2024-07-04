@@ -56,12 +56,24 @@ limitations under the License.
                  FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Visible"
                  AcceptsReturn="True" TextWrapping="Wrap"/>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,0">
-            <TextBlock Text="Maximum line width:" Margin="0,3,0,0"/>
-            <ComboBox Name="maxWidthComboBox" Width="75" Margin="8,0,0,0"
-                      ItemsSource="{Binding LineWidthItems}" SelectionChanged="MaxWidthComboBox_SelectionChanged"/>
-            <CheckBox Content="Render in _box" Margin="40,4,0,0" IsChecked="{Binding RenderInBox}"/>
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0" Content="Enable fancy formatting" Margin="0,4,0,0"
+                      IsChecked="{Binding IsFancyEnabled}"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal"
+                        IsEnabled="{Binding Path=IsFancyEnabled, Converter={StaticResource InvertBool}}">
+                <TextBlock Text="Line width:" Margin="0,3,0,0"/>
+                <ComboBox Name="maxWidthComboBox" Width="75" Margin="8,0,0,0"
+                          ItemsSource="{Binding LineWidthItems}" SelectionChanged="MaxWidthComboBox_SelectionChanged"/>
+            </StackPanel>
+            <CheckBox Grid.Column="2" Content="Render in _box" Margin="0,4,0,0"
+                      IsEnabled="{Binding Path=IsFancyEnabled, Converter={StaticResource InvertBool}}"
+                      IsChecked="{Binding RenderInBox}"/>
+        </Grid>
 
         <TextBlock Grid.Row="3" Text="Expected output:" Margin="0,20,0,0"/>
         <TextBox Name="displayTextBox" Grid.Row="4"

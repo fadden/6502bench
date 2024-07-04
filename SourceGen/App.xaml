@@ -17,9 +17,12 @@ limitations under the License.
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SourceGen"
+             xmlns:common="clr-namespace:CommonWPF;assembly=CommonWPF"
              StartupUri="WpfGui/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <common:InverseBooleanConverter x:Key="InvertBool"/>
+
             <FontFamily x:Key="GeneralMonoFont">Consolas</FontFamily>
 
             <!-- gradient background for bitmap images -->

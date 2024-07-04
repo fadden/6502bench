@@ -28,6 +28,12 @@ namespace SourceGen.WpfGui {
     /// Long comment editor.
     /// </summary>
     public partial class EditLongComment : Window, INotifyPropertyChanged {
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         /// <summary>
         /// Get or set the multi-line comment object.  On exit, will be set to null if
         /// the user wants to delete the comment.
@@ -36,6 +42,22 @@ namespace SourceGen.WpfGui {
 
         private Asm65.Formatter mFormatter;
 
+        /// <summary>
+        /// Checkbox state for fancy-mode toggle.
+        /// </summary>
+        public bool IsFancyEnabled {
+            get { return mIsFancyEnabled; }
+            set {
+                mIsFancyEnabled = value;
+                OnPropertyChanged();
+                FormatInput();
+            }
+        }
+        private bool mIsFancyEnabled;
+
+        /// <summary>
+        /// Checkbox state for basic-mode boxing.
+        /// </summary>
         public bool RenderInBox {
             get { return mRenderInBox; }
             set {
@@ -60,7 +82,7 @@ namespace SourceGen.WpfGui {
         private string mUserInput;
 
         /// <summary>
-        /// Generated text output.  This is bound to the output TextBox.
+        /// Generated text output.  This is bound to the output TextBox, for display.
         /// </summary>
         public string TextOutput {
             get { return mTextOutput; }
@@ -71,30 +93,31 @@ namespace SourceGen.WpfGui {
         }
         private string mTextOutput;
 
-        // INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         /// <summary>
         /// ItemsSource for line width combo box.
         /// </summary>
         public int[] LineWidthItems { get; } = new int[] { 30, 40, 64, 80 };
 
 
+        /// <summary>
+        /// Dialog constructor.  Pass in the current formatter object.
+        /// </summary>
         public EditLongComment(Window owner, Asm65.Formatter formatter) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             mFormatter = formatter;
-            LongComment = new MultiLineComment(string.Empty);
+            LongComment = new MultiLineComment(true);
         }
 
+        /// <summary>
+        /// Configures dialog controls after the window finishes loading.
+        /// </summary>
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             Debug.Assert(LongComment != null);
             UserInput = LongComment.Text;
+            IsFancyEnabled = LongComment.IsFancy;
             RenderInBox = LongComment.BoxMode;
 
             // Try to find a match for the max width specified in the MLC.
@@ -133,7 +156,8 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Formats entryTextBox.Text into displayTextBox.Text.
+        /// Formats entryTextBox.Text into displayTextBox.Text.  This is done every time the
+        /// user makes a change to the text entry box.
         /// </summary>
         private void FormatInput() {
             if (!IsLoaded) {
@@ -170,7 +194,7 @@ namespace SourceGen.WpfGui {
             if (maxWidthComboBox.SelectedItem == null) {
                 return null;    // still initializing
             }
-            return new MultiLineComment(UserInput, RenderInBox,
+            return new MultiLineComment(UserInput, IsFancyEnabled, RenderInBox,
                 (int)maxWidthComboBox.SelectedItem);
         }
     }

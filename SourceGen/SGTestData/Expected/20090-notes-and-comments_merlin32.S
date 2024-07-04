@@ -77,8 +77,56 @@ plataddr equ   $3000      ;address only in platform file
          lda   #$0d
          lda   #$0e
          lda   #$0f
-         bit   plataddr   ;Pull in plataddr to see the comment on the platform file entry.
-         rts
+         jmp   L1062
 
+         dfb   $ea
 bytes    hex   000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f ;Comment at the end of a lengthy bulk hex item might overflow various things, but could be wrapped.
          hex   000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f
+
+L1062    bit   plataddr   ;Pull in plataddr to see the comment on the platform file entry.
+*CRLFA triv
+*ial fancy 
+*comment.  
+*Nothing sp
+*ecial abou
+*t it at al
+*l.  Go on 
+*about your
+* business.
+*CRLFCRLF
+         lda   #$10
+         lda   #$11
+         lda   #$12
+         lda   #$13
+         lda   #$14
+         lda   #$15
+         lda   #$16
+         lda   #$17
+         lda   #$18
+         lda   #$19
+         lda   #$1a
+         lda   #$1b
+         lda   #$1c
+         lda   #$1d
+         lda   #$1e
+         lda   #$1f
+         lda   #$20
+         lda   #$21
+         lda   #$22
+         lda   #$23
+         lda   #$24
+         lda   #$25
+         lda   #$26
+         lda   #$27
+         lda   #$28
+         lda   #$29
+         lda   #$2a
+         lda   #$2b
+         lda   #$2c
+         lda   #$2d
+         lda   #$2e
+         lda   #$2f
+         jmp   :L10A8
+
+:L10A8   rts
+

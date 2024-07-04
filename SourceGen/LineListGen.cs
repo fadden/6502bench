@@ -77,11 +77,6 @@ namespace SourceGen {
         private FormattedOperandCache mFormattedLineCache = new FormattedOperandCache();
 
         /// <summary>
-        /// Cache of previous-formatted multi-line comment strings.
-        /// </summary>
-        private FormattedMlcCache mFormattedMlcCache = new FormattedMlcCache();
-
-        /// <summary>
         /// Local variable table data extractor.
         /// </summary>
         private LocalVariableLookup mLvLookup;
@@ -1057,14 +1052,7 @@ namespace SourceGen {
                     spaceAdded = true;
                 }
                 if (mProject.LongComments.TryGetValue(offset, out MultiLineComment longComment)) {
-                    List<string> formatted = mFormattedMlcCache.GetStringEntry(offset, longComment,
-                        mFormatter);
-                    if (formatted == null) {
-                        Debug.WriteLine("Render " + longComment);
-                        formatted = longComment.FormatText(mFormatter, string.Empty);
-                        mFormattedMlcCache.SetStringEntry(offset, formatted, longComment,
-                            mFormatter);
-                    }
+                    List<string> formatted = longComment.FormatText(mFormatter, string.Empty);
                     StringListToLines(formatted, offset, Line.Type.LongComment,
                         longComment.BackgroundColor, NoteColorMultiplier, lines);
                     spaceAdded = true;
@@ -1768,11 +1756,9 @@ namespace SourceGen {
 
         public void DebugResetCacheCounters() {
             mFormattedLineCache.DebugResetCounters();
-            mFormattedMlcCache.DebugResetCounters();
         }
         public void DebugLogCacheCounters() {
             mFormattedLineCache.DebugLogCounters();
-            mFormattedMlcCache.DebugLogCounters();
         }
     }
 }

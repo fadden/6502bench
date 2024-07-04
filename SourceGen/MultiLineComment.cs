@@ -21,10 +21,13 @@ using System.Text;
 
 namespace SourceGen {
     /// <summary>
-    /// Representation of a multi-line comment, which is a string plus some format directives.
-    /// Used for long comments and notes.
+    /// <para>Representation of a multi-line comment, which is a string plus some format options.
+    /// Used for long comments and notes.</para>
     /// 
-    /// Instances are immutable.
+    /// <para>Instances are effectively immutable, as the text and options can't be modified
+    /// after the object is created.  The object does cache the result of the last FormatText()
+    /// call, which is determined in part by the Formatter argument, which can change between
+    /// calls.</para>
     /// </summary>
     public class MultiLineComment {
         /// <summary>
@@ -36,6 +39,12 @@ namespace SourceGen {
         /// Unformatted text.
         /// </summary>
         public string Text { get; private set; }
+
+        /// <summary>
+        /// True if this uses "fancy" formatting.  If set, the BoxMode and MaxWidth properties
+        /// are ignored.
+        /// </summary>
+        public bool IsFancy { get; private set; }
 
         /// <summary>
         /// Set to true to render text surrounded by a box of ASCII characters.
@@ -57,27 +66,50 @@ namespace SourceGen {
         /// </summary>
         private const char BASIC_BOX_CHAR = '*';
 
+        private const int DEFAULT_WIDTH = 80;
+        private const int MIN_WIDTH = 8;
+
 
         /// <summary>
-        /// Constructor.  Object will have a max width of 80 and not be boxed.
+        /// Constructor.  By default, comments use basic formatting, have a basic-mode max
+        /// width of 80, and aren't boxed.
         /// </summary>
+        /// <remarks>
+        /// We'd actually prefer to have fancy formatting be the default, but that does the
+        /// wrong thing when deserializing older projects.
+        /// </remarks>
         /// <param name="text">Unformatted comment text.</param>
         public MultiLineComment(string text) {
             Debug.Assert(text != null);     // empty string is okay
             Text = text;
+            IsFancy = false;
             BoxMode = false;
-            MaxWidth = 80;
+            MaxWidth = DEFAULT_WIDTH;
             BackgroundColor = CommonWPF.Helper.ZeroColor;
+        }
+
+        /// <summary>
+        /// Constructor.  Used when creating an empty MLC for editing.
+        /// </summary>
+        /// <param name="isFancy">True if we want to be in "fancy" mode initially.</param>
+        public MultiLineComment(bool isFancy) : this(string.Empty) {
+            IsFancy = isFancy;
         }
 
         /// <summary>
         /// Constructor.  Used for long comments.
         /// </summary>
         /// <param name="text">Unformatted text.</param>
-        /// <param name="boxMode">Set to true to enable box mode.</param>
-        /// <param name="maxWidth">Maximum line width.</param>
-        public MultiLineComment(string text, bool boxMode, int maxWidth) : this(text) {
-            Debug.Assert((!boxMode && maxWidth > 1) || (boxMode && maxWidth > 5));
+        /// <param name="isFancy">True if we're using fancy format mode.</param>
+        /// <param name="boxMode">For basic mode, set to true to enable box mode.</param>
+        /// <param name="maxWidth">For basic mode, maximum line width.</param>
+        public MultiLineComment(string text, bool isFancy, bool boxMode, int maxWidth)
+                : this(text) {
+            if (maxWidth < MIN_WIDTH) {
+                Debug.Assert(false, "unexpectedly small max width");
+                maxWidth = MIN_WIDTH;
+            }
+            IsFancy = isFancy;
             BoxMode = boxMode;
             MaxWidth = maxWidth;
         }
@@ -91,14 +123,46 @@ namespace SourceGen {
             BackgroundColor = bkgndColor;
         }
 
+        private List<string> mPreviousRender = null;
+        private Asm65.Formatter mPreviousFormatter = null;
+        private string mPreviousPrefix = null;
+
         /// <summary>
         /// Generates one or more lines of formatted text.
         /// </summary>
         /// <param name="formatter">Formatter, with comment delimiters.</param>
         /// <param name="textPrefix">String to prepend to text before formatting.  If this
         ///   is non-empty, comment delimiters aren't emitted.  (Used for notes.)</param>
-        /// <returns>Array of formatted strings.</returns>
+        /// <returns>List of formatted strings.  Do not modify the list.</returns>
         public List<string> FormatText(Asm65.Formatter formatter, string textPrefix) {
+            if (mPreviousRender != null && formatter == mPreviousFormatter &&
+                    textPrefix == mPreviousPrefix) {
+                // We rendered this with the same formatter before.  Return the list.  It would
+                // be safer to clone the list, but I'm not expecting the caller to edit it.
+                return mPreviousRender;
+            }
+            List<string> lines;
+            if (IsFancy) {
+                Debug.Assert(string.IsNullOrEmpty(textPrefix));
+                lines = FormatFancyText(formatter);
+            } else {
+                lines = FormatSimpleText(formatter, textPrefix);
+            }
+            // Cache result.
+            mPreviousRender = lines;
+            mPreviousFormatter = formatter;
+            mPreviousPrefix = textPrefix;
+            return lines;
+        }
+
+        /// <summary>
+        /// Generates one or more lines of formatted text, using the basic formatter.
+        /// </summary>
+        /// <param name="formatter">Formatter, with comment delimiters.</param>
+        /// <param name="textPrefix">String to prepend to text before formatting.  If this
+        ///   is non-empty, comment delimiters aren't emitted.  (Used for notes.)</param>
+        /// <returns>List of formatted strings.</returns>
+        private List<string> FormatSimpleText(Asm65.Formatter formatter, string textPrefix) {
             const char spcRep = '\u2219';   // BULLET OPERATOR
             string workString = string.IsNullOrEmpty(textPrefix) ? Text : textPrefix + Text;
             List<string> lines = new List<string>();
@@ -263,6 +327,20 @@ namespace SourceGen {
             return lines;
         }
 
+        /// <summary>
+        /// Generates one or more lines of formatted text, using the fancy formatter.
+        /// </summary>
+        /// <param name="formatter">Formatter, with comment delimiters.</param>
+        /// <returns>List of formatted strings.</returns>
+        private List<string> FormatFancyText(Asm65.Formatter formatter) {
+            List<string> lines = new List<string>();
+            string mod = Text.Replace("\r\n", "CRLF");
+            for (int i = 0; i < mod.Length; i += 10) {
+                lines.Add(formatter.FullLineCommentDelimiterPlus +
+                    mod.Substring(i, Math.Min(10, mod.Length - i)));
+            }
+            return lines;
+        }
 
         public override string ToString() {
             return "MLC box=" + BoxMode + " width=" + MaxWidth + " text='" + Text + "'";

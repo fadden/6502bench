@@ -52,6 +52,7 @@ namespace SourceGen {
         public class SerMultiLineComment {
             // NOTE: Text must be CRLF at line breaks.
             public string Text { get; set; }
+            public bool IsFancy { get; set; }
             public bool BoxMode { get; set; }
             public int MaxWidth { get; set; }
             public int BackgroundColor { get; set; }
@@ -59,6 +60,7 @@ namespace SourceGen {
             public SerMultiLineComment() { }
             public SerMultiLineComment(MultiLineComment mlc) {
                 Text = mlc.Text;
+                IsFancy = mlc.IsFancy;
                 BoxMode = mlc.BoxMode;
                 MaxWidth = mlc.MaxWidth;
                 BackgroundColor = CommonWPF.Helper.ColorToInt(mlc.BackgroundColor);
@@ -288,7 +290,7 @@ namespace SourceGen {
                 mlc = new MultiLineComment(smlc.Text,
                     CommonWPF.Helper.ColorFromInt(smlc.BackgroundColor));
             } else {
-                mlc = new MultiLineComment(smlc.Text, smlc.BoxMode, smlc.MaxWidth);
+                mlc = new MultiLineComment(smlc.Text, smlc.IsFancy, smlc.BoxMode, smlc.MaxWidth);
             }
             return true;
         }

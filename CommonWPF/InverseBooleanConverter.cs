@@ -20,7 +20,7 @@ namespace CommonWPF {
     /// <summary>
     /// A value inverter for negating a boolean value (value --> !value).
     /// 
-    /// See https://stackoverflow.com/questions/1039636/how-to-bind-inverse-boolean-properties-in-wpf
+    /// From <see href="https://stackoverflow.com/a/1039681/294248"/>.
     /// </summary>
     [ValueConversion(typeof(bool), typeof(bool))]
     public class InverseBooleanConverter : IValueConverter {
