@@ -242,7 +242,6 @@ namespace SourceGen.AsmGen {
             config.LocalVariableLabelPrefix = ".";
             config.EndOfLineCommentDelimiter = ";";
             config.FullLineCommentDelimiterBase = ";";
-            config.BoxLineCommentDelimiter = ";";
             config.NonUniqueLabelPrefix = "@";
             config.CommaSeparatedDense = false;
             config.ExprMode = Formatter.FormatConfig.ExpressionMode.Common;
@@ -286,14 +285,14 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    OutputLine(SourceFormatter.FullLineCommentDelimiterPlus +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
                         "acme", mAsmVersion, AsmAcme.OPTIONS));
                 }
 
                 if (HasNonZeroBankCode()) {
                     // don't try
-                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    OutputLine(SourceFormatter.FullLineCommentDelimiterPlus +
                         "ACME can't handle 65816 code that lives outside bank zero");
                     int firstAddr = Project.AddrMap.OffsetToAddress(0);
                     AddressMap.AddressRegion fakeRegion = new AddressMap.AddressRegion(0,

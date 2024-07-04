@@ -216,7 +216,6 @@ namespace SourceGen.AsmGen {
             config.ForceLongOperandPrefix = "f:";      // far
             config.EndOfLineCommentDelimiter = ";";
             config.FullLineCommentDelimiterBase = ";";
-            config.BoxLineCommentDelimiter = ";";
             config.NonUniqueLabelPrefix = "@";
             config.CommaSeparatedDense = true;
             config.ExprMode = Formatter.FormatConfig.ExpressionMode.Cc65;
@@ -259,7 +258,7 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    OutputLine(SourceFormatter.FullLineCommentDelimiterPlus +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
                         "cc65", mAsmVersion,
                         AsmCc65.OPTIONS + " -C " + Path.GetFileName(cfgName)));

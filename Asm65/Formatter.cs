@@ -106,8 +106,6 @@ namespace Asm65 {
             public string EndOfLineCommentDelimiter { get; set; } = string.Empty;
             /// <summary>String to prefix a full-line comment.</summary>
             public string FullLineCommentDelimiterBase { get; set; } = string.Empty;
-            /// <summary>String to prefix a box comment line.</summary>
-            public string BoxLineCommentDelimiter { get; set; } = string.Empty;
 
             /// <summary>Delimiter patterns for single-character constants.</summary>
             public DelimiterSet CharDelimiters { get; set; } = new DelimiterSet();
@@ -182,7 +180,6 @@ namespace Asm65 {
 
                 EndOfLineCommentDelimiter = src.EndOfLineCommentDelimiter;
                 FullLineCommentDelimiterBase = src.FullLineCommentDelimiterBase;
-                BoxLineCommentDelimiter = src.BoxLineCommentDelimiter;
 
                 CharDelimiters = new DelimiterSet(src.CharDelimiters);
                 StringDelimiters = new DelimiterSet(src.StringDelimiters);
@@ -502,6 +499,7 @@ namespace Asm65 {
         // Generated format strings for hex values.
         private string[] mHexValueFormats = new string[4];
 
+        // Comment delimiter char plus optional space.
         private string mFullLineCommentDelimiterPlus;
 
         // Buffer to use when generating hex dump lines.
@@ -520,26 +518,25 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// String to put between the operand and the end-of-line comment.
+        /// String to put between the operand and the end-of-line comment.  Usually one character.
         /// </summary>
         public string EndOfLineCommentDelimiter {
             get { return mFormatConfig.EndOfLineCommentDelimiter; }
         }
 
         /// <summary>
-        /// String to put at the start of a line with a full-line comment.
+        /// Full-line comment delimiter.  Usually one character.
         /// </summary>
-        public string FullLineCommentDelimiter {
-            get { return mFullLineCommentDelimiterPlus; }
+        public string FullLineCommentDelimiterBase {
+            get { return mFormatConfig.FullLineCommentDelimiterBase; }
         }
 
         /// <summary>
-        /// String to put at the start of a line that has a box comment.  This is usually
-        /// blank, as it's only needed if the assembler doesn't recognize the box character
-        /// as a comment.
+        /// String to put at the start of a line with a full-line comment.  Delimiter plus
+        /// optional space.
         /// </summary>
-        public string BoxLineCommentDelimiter {
-            get { return mFormatConfig.BoxLineCommentDelimiter; }
+        public string FullLineCommentDelimiterPlus {
+            get { return mFullLineCommentDelimiterPlus; }
         }
 
         /// <summary>

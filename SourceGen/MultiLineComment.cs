@@ -52,6 +52,11 @@ namespace SourceGen {
         /// </summary>
         public Color BackgroundColor { get; private set; }
 
+        /// <summary>
+        /// Box character to use for "basic" formatting.
+        /// </summary>
+        private const char BASIC_BOX_CHAR = '*';
+
 
         /// <summary>
         /// Constructor.  Object will have a max width of 80 and not be boxed.
@@ -94,7 +99,6 @@ namespace SourceGen {
         ///   is non-empty, comment delimiters aren't emitted.  (Used for notes.)</param>
         /// <returns>Array of formatted strings.</returns>
         public List<string> FormatText(Asm65.Formatter formatter, string textPrefix) {
-            const char boxChar = '*';
             const char spcRep = '\u2219';   // BULLET OPERATOR
             string workString = string.IsNullOrEmpty(textPrefix) ? Text : textPrefix + Text;
             List<string> lines = new List<string>();
@@ -103,9 +107,14 @@ namespace SourceGen {
             if (!string.IsNullOrEmpty(textPrefix)) {
                 linePrefix = string.Empty;
             } else if (BoxMode) {
-                linePrefix = formatter.BoxLineCommentDelimiter;
+                if (formatter.FullLineCommentDelimiterBase.Length == 1 &&
+                        formatter.FullLineCommentDelimiterBase[0] == BASIC_BOX_CHAR) {
+                    linePrefix = string.Empty;
+                } else {
+                    linePrefix = formatter.FullLineCommentDelimiterBase;
+                }
             } else {
-                linePrefix = formatter.FullLineCommentDelimiter;
+                linePrefix = formatter.FullLineCommentDelimiterPlus;
             }
 
             StringBuilder sb = new StringBuilder(MaxWidth);
@@ -119,7 +128,7 @@ namespace SourceGen {
             string boxLine, spaces;
             if (BoxMode) {
                 for (int i = 0; i < MaxWidth - linePrefix.Length; i++) {
-                    sb.Append(boxChar);
+                    sb.Append(BASIC_BOX_CHAR);
                 }
                 boxLine = sb.ToString();
                 sb.Clear();
@@ -159,13 +168,13 @@ namespace SourceGen {
                     string str = workString.Substring(startIndex, i - startIndex);
                     if (DebugShowRuler) { str = str.Replace(' ', spcRep); }
                     if (BoxMode) {
-                        if (str == "" + boxChar) {
+                        if (str == "" + BASIC_BOX_CHAR) {
                             // asterisk on a line by itself means "output row of asterisks"
                             str = linePrefix + boxLine;
                         } else {
                             int padLen = lineWidth - str.Length;
-                            str = linePrefix + boxChar + " " + str +
-                                spaces.Substring(0, padLen + 1) + boxChar;
+                            str = linePrefix + BASIC_BOX_CHAR + " " + str +
+                                spaces.Substring(0, padLen + 1) + BASIC_BOX_CHAR;
                         }
                     } else {
                         str = linePrefix + str;
@@ -191,7 +200,7 @@ namespace SourceGen {
                         string str = workString.Substring(startIndex, i - startIndex);
                         if (DebugShowRuler) { str = str.Replace(' ', spcRep); }
                         if (BoxMode) {
-                            str = linePrefix + boxChar + " " + str + " " + boxChar;
+                            str = linePrefix + BASIC_BOX_CHAR + " " + str + " " + BASIC_BOX_CHAR;
                         } else {
                             str = linePrefix + str;
                         }
@@ -209,8 +218,8 @@ namespace SourceGen {
                         if (DebugShowRuler) { str = str.Replace(' ', spcRep); }
                         if (BoxMode) {
                             int padLen = lineWidth - str.Length;
-                            str = linePrefix + boxChar + " " + str +
-                                spaces.Substring(0, padLen + 1) + boxChar;
+                            str = linePrefix + BASIC_BOX_CHAR + " " + str +
+                                spaces.Substring(0, padLen + 1) + BASIC_BOX_CHAR;
                         } else {
                             str = linePrefix + str;
                         }
@@ -239,8 +248,8 @@ namespace SourceGen {
                 if (DebugShowRuler) { str = str.Replace(' ', spcRep); }
                 if (BoxMode) {
                     int padLen = lineWidth - str.Length;
-                    str = linePrefix + boxChar + " " + str +
-                        spaces.Substring(0, padLen + 1) + boxChar;
+                    str = linePrefix + BASIC_BOX_CHAR + " " + str +
+                        spaces.Substring(0, padLen + 1) + BASIC_BOX_CHAR;
                 } else {
                     str = linePrefix + str;
                 }

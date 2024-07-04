@@ -270,7 +270,6 @@ namespace SourceGen.AsmGen {
             config.ForceLongOperandPrefix = "@l";      // long
             config.EndOfLineCommentDelimiter = ";";
             config.FullLineCommentDelimiterBase = ";";
-            config.BoxLineCommentDelimiter = ";";
             config.NonUniqueLabelPrefix = "";      // should be '_', but that's a valid label char
             config.CommaSeparatedDense = true;
             config.ExprMode = Formatter.FormatConfig.ExpressionMode.Common;
@@ -321,7 +320,7 @@ namespace SourceGen.AsmGen {
                 mOutStream = sw;
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
-                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    OutputLine(SourceFormatter.FullLineCommentDelimiterPlus +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
                         "64tass", mAsmVersion, AsmTass64.BASE_OPTIONS + extraOptions));
                 }

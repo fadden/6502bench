@@ -202,7 +202,6 @@ namespace SourceGen.AsmGen {
             config.LocalVariableLabelPrefix = "]";
             config.EndOfLineCommentDelimiter = ";";
             config.FullLineCommentDelimiterBase = "*";
-            config.BoxLineCommentDelimiter = string.Empty;
             config.NonUniqueLabelPrefix = ":";
             config.CommaSeparatedDense = false;
             config.ExprMode = Formatter.FormatConfig.ExpressionMode.Merlin;
@@ -240,7 +239,7 @@ namespace SourceGen.AsmGen {
 
                 if (Settings.GetBool(AppSettings.SRCGEN_ADD_IDENT_COMMENT, false)) {
                     // No version-specific stuff yet.  We're generating code for v1.0.
-                    OutputLine(SourceFormatter.FullLineCommentDelimiter +
+                    OutputLine(SourceFormatter.FullLineCommentDelimiterPlus +
                         string.Format(Res.Strings.GENERATED_FOR_VERSION_FMT,
                             "Merlin 32", mAsmVersion, string.Empty));
                 }

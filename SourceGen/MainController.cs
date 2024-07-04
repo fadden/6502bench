@@ -488,12 +488,11 @@ namespace SourceGen {
             Debug.WriteLine("ApplyAppSettings...");
             AppSettings settings = AppSettings.Global;
 
-            // Set up the formatter.
+            // Set up the formatter with default values.
             mFormatterConfig = new Formatter.FormatConfig();
             AsmGen.GenCommon.ConfigureFormatterFromSettings(AppSettings.Global,
                 ref mFormatterConfig);
             mFormatterConfig.EndOfLineCommentDelimiter = ";";
-            mFormatterConfig.BoxLineCommentDelimiter = string.Empty;
 
             mFormatterConfig.NonUniqueLabelPrefix =
                 settings.GetString(AppSettings.FMT_NON_UNIQUE_LABEL_PREFIX, string.Empty);
