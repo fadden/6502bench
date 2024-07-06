@@ -1677,7 +1677,7 @@ namespace SourceGen.WpfGui {
             toggleInstructionChartMenuItem.IsChecked = mMainCtrl.IsInstructionChartOpen;
         }
         private void DebugMenu_SubmenuOpened(object sender, RoutedEventArgs e) {
-            debugCommentRulersMenuItem.IsChecked = MultiLineComment.DebugShowRuler;
+            debugCommentRulersMenuItem.IsChecked = mMainCtrl.DebugLongComments;
             debugKeepAliveHackMenuItem.IsChecked = !Sandbox.ScriptManager.UseKeepAliveHack;
             debugSecuritySandboxMenuItem.IsChecked = mMainCtrl.UseMainAppDomainForPlugins;
             debugAnalysisTimersMenuItem.IsChecked = mMainCtrl.IsDebugAnalysisTimersOpen;

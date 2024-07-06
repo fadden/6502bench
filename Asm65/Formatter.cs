@@ -72,6 +72,8 @@ namespace Asm65 {
 
             /// <summary>Insert space after delimiter for long comments?</summary>
             public bool AddSpaceLongComment { get; set; } = false;
+            /// <summary>Enable debug mode for long comments?</summary>
+            public bool DebugLongComments { get; set; } = false;
 
             //
             // Functional changes to assembly output.
@@ -163,6 +165,7 @@ namespace Asm65 {
                 UpperOperandXY = src.UpperOperandXY;
 
                 AddSpaceLongComment = src.AddSpaceLongComment;
+                DebugLongComments = src.DebugLongComments;
 
                 SuppressHexNotation = src.SuppressHexNotation;
                 SuppressImpliedAcc = src.SuppressImpliedAcc;
@@ -540,6 +543,13 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// If true, enable debug mode when rendering long comments.
+        /// </summary>
+        public bool DebugLongComments {
+            get { return mFormatConfig.DebugLongComments; }
+        }
+
+        /// <summary>
         /// Prefix for non-unique address labels.
         /// </summary>
         public string NonUniqueLabelPrefix {
@@ -565,7 +575,7 @@ namespace Asm65 {
 
         /// <summary>
         /// Constructor.  Initializes various fields based on the configuration.  We want to
-        /// do as much work as possible here.
+        /// pre-compute as many things as possible, to speed up formatting.
         /// </summary>
         public Formatter(FormatConfig config) {
             mFormatConfig = new FormatConfig(config);       // make a copy
@@ -573,7 +583,9 @@ namespace Asm65 {
             if (string.IsNullOrEmpty(mFormatConfig.NonUniqueLabelPrefix)) {
                 mFormatConfig.NonUniqueLabelPrefix = "@";
             }
-
+            if (string.IsNullOrEmpty(mFormatConfig.FullLineCommentDelimiterBase)) {
+                mFormatConfig.FullLineCommentDelimiterBase = "!";
+            }
             if (mFormatConfig.AddSpaceLongComment) {
                 mFullLineCommentDelimiterPlus = mFormatConfig.FullLineCommentDelimiterBase + " ";
             } else {

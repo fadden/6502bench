@@ -500,6 +500,7 @@ namespace SourceGen {
                 settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
             mFormatterConfig.CommaSeparatedDense =
                 settings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, true);
+            mFormatterConfig.DebugLongComments = DebugLongComments;
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);
             if (chrDelCereal != null) {
@@ -4721,6 +4722,11 @@ namespace SourceGen {
 
         #region Debug features
 
+        /// <summary>
+        /// If set, show rulers and visible spaces in long comments.
+        /// </summary>
+        internal bool DebugLongComments { get; private set; } = false;
+
         public void Debug_ExtensionScriptInfo() {
             string info = mProject.DebugGetLoadedScriptInfo();
 
@@ -4793,12 +4799,15 @@ namespace SourceGen {
         }
 
         public void Debug_ToggleCommentRulers() {
-            MultiLineComment.DebugShowRuler = !MultiLineComment.DebugShowRuler;
-            // Don't need to repeat the analysis, but we do want to save/restore the
-            // selection and top position when the comment fields change size.
-            UndoableChange uc =
-                UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DataOnly);
-            ApplyChanges(new ChangeSet(uc), false);
+            DebugLongComments = !DebugLongComments;
+            mFormatterConfig.DebugLongComments = DebugLongComments;
+            mFormatterConfig.AddSpaceLongComment = !DebugLongComments;
+            mFormatterCpuDef = null;        // force mFormatter refresh on next analysis
+            if (CodeLineList != null) {
+                UndoableChange uc =
+                    UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DisplayOnly);
+                ApplyChanges(new ChangeSet(uc), false);
+            }
         }
 
         public void Debug_ToggleKeepAliveHack() {

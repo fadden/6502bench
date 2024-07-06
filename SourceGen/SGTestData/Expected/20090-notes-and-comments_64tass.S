@@ -89,16 +89,10 @@ bytes   .byte   $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f 
         .byte   $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f
 
 L1062   bit     plataddr   ;Pull in plataddr to see the comment on the platform file entry.
-;CRLFA triv
-;ial fancy 
-;comment.  
-;Nothing sp
-;ecial abou
-;t it at al
-;l.  Go on 
-;about your
-; business.
-;CRLFCRLF
+;
+;A trivial fancy comment.  Nothing special about it at all.  Go on about your
+;business.
+;
         lda     #$10
         lda     #$11
         lda     #$12
