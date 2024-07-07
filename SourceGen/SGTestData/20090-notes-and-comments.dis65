@@ -122,6 +122,34 @@
 "IsFancy":true,
 "BoxMode":false,
 "MaxWidth":80,
+"BackgroundColor":0},
+
+"103":{
+"Text":"Check for surrogate pair splitting. 1/2 should be split:\r\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxxxxxxxxxxxxxxxxxxx12x\r\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzUnicode_Character_“😊”_(U+1F60A)",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"105":{
+"Text":"Test \\[width].  This line has the default width of 80, so things break way out here.\r\nLines with width=8, width=10, and width=*: [width=8]012345678901234567890123456789[width=10]012345678901234567890123456789[width=*]012345678901234567890123456789\r\n",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"109":{
+"Text":"[br]\r\nTesting \\[br] blank lines.[br][br]\r\n[br]three above, one below\r\n[br]\r\n",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"107":{
+"Text":"Test \\[hr] and \\[hr char=\u0027#\u0027].[hr][hr]x[hr char=\u0027#\u0027]y",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
 "BackgroundColor":0}},
 
 "Notes":{
