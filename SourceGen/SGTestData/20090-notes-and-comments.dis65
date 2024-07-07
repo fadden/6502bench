@@ -150,6 +150,34 @@
 "IsFancy":true,
 "BoxMode":false,
 "MaxWidth":80,
+"BackgroundColor":0},
+
+"111":{
+"Text":"[hr]\r\nFull width box, with default char.\r\n[box]stuff in the box zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz aaaa bbb    cccc[/box]\r\n[box char=\u0027;\u0027]Explicit char=\u0027;\u0027.[/box]\r\nNow with reduced width and char=\u0027#\u0027.\r\n[width=10][box char=\u0027#\u0027]A much smaller box.[/box]\r\n[width=*]\r\n[box char=\u0027*\u0027]\r\nWidth changes are illegal inside[width=20]a box (with char=\u0027*\u0027).  Word wrap at the end.\r\n[/box]",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"113":{
+"Text":"Simple URL [url]https://example.com/[/url], fancier URL [url=https://example.com/]link text[/url].\r\n[box]In a box [url]https://example.com/[/url].[/box]\r\n\r\nA URL may not [url]have a [box]...[/box] tag[/url] inside.\r\nNor may it have [url]an [hr], [br], or [width=2] tag[/url].\r\nLine wrapping the contents of a URL link area should work [url=https://example.com]+this is the area inside+[/url].\r\n",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"115":{
+"Text":"[BOX]ALL CAPS [URL=HTTPS://EXAMPLE.COM/]FOR EVERYTHING[/URL][HR][/BOX]\r\n[BR]\r\n[WIDTH=10]SHORT LINES\r\n[BOX CHAR=\u0027X\u0027]BOXED[/BOX]\r\n",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"117":{
+"Text":"[width=20]\r\nTest some folding with \\[width=20].\r\n01234567890123456789\r\n012345678901234567-89\r\n0123456789012345678 9\r\n 1234567890123456789\r\n-1234567890123456789\r\n -234567890123456789\r\n",
+"IsFancy":true,
+"BoxMode":false,
+"MaxWidth":80,
 "BackgroundColor":0}},
 
 "Notes":{

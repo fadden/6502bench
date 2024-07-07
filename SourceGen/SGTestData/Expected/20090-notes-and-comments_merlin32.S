@@ -124,9 +124,63 @@ L1062    bit   plataddr   ;Pull in plataddr to see the comment on the platform f
 *three above, one below
 
          lda   #$14
+*-------------------------------------------------------------------------------
+*Full width box, with default char.
+********************************************************************************
+* stuff in the box zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz aaaa bbb  *
+* cccc                                                                         *
+********************************************************************************
+*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+*; Explicit char=';'.                                                          ;
+*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+*Now with reduced width and char='#'.
+*#########
+*# A     #
+*# much  #
+*# small #
+*# er    #
+*# box.  #
+*#########
+*******************************************************************************
+* Width changes are illegal inside[width=20]a box (with char='*').  Word wrap *
+* at the end.                                                                 *
+*******************************************************************************
          lda   #$15
+*Simple URL https://example.com/, fancier URL link text (https://example.com/).
+********************************************************************************
+* In a box https://example.com/.                                               *
+********************************************************************************
+*
+*A URL may not have a [box]...[/box] tag inside.
+*Nor may it have an [hr], [br], or [width=2] tag.
+*Line wrapping the contents of a URL link area should work +this is the area
+*inside+ (https://example.com).
          lda   #$16
+********************************************************************************
+* ALL CAPS FOR EVERYTHING (HTTPS://EXAMPLE.COM/)                               *
+********************************************************************************
+********************************************************************************
+
+*SHORT
+*LINES
+*XXXXXXXXX
+*X BOXED X
+*XXXXXXXXX
          lda   #$17
+*Test some folding
+*with [width=20].
+*0123456789012345678
+*9
+*012345678901234567-
+*89
+*0123456789012345678
+*9
+* 123456789012345678
+*9
+*-123456789012345678
+*9
+* -
+*234567890123456789
          lda   #$18
          lda   #$19
          lda   #$1a

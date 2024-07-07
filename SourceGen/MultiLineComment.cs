@@ -152,11 +152,17 @@ namespace SourceGen {
                 return mPreviousRender;
             }
             List<string> lines;
-            if (IsFancy) {
-                Debug.Assert(string.IsNullOrEmpty(textPrefix));
-                lines = FormatFancyText(formatter);
-            } else {
-                lines = FormatSimpleText(formatter, textPrefix);
+            try {
+                if (IsFancy) {
+                    Debug.Assert(string.IsNullOrEmpty(textPrefix));
+                    lines = FormatFancyText(formatter);
+                } else {
+                    lines = FormatSimpleText(formatter, textPrefix);
+                }
+            } catch (Exception ex) {
+                Debug.WriteLine("FormatText failed: " + ex);
+                lines = new List<string>();
+                lines.Add("Internal error: " + ex.Message);
             }
             // Cache result.
             mPreviousRender = lines;
@@ -335,12 +341,25 @@ namespace SourceGen {
         /// <summary>
         /// Input data source.
         /// </summary>
+        /// <remarks>
+        /// <para>When we encounter a tag, we create a new DataSource that has the contents of
+        /// the tag in it, and skip over the full original extent.  This is especially handy for
+        /// generated text, e.g. [url=x] link text, where the source isn't simply a subset of
+        /// the original.</para>
+        /// <para>Various bits of state are also stored here, so that we can prevent
+        /// inappropriate nesting and track options set by the format tags.</para>
+        /// </remarks>
         private class DataSource {
             private string mString;
             private int mPosn;
 
             public string Text => mString;
-            public char this[int i] { get { return mString[i]; } }
+            public char this[int i] {
+                get {
+                    Debug.Assert(i >= 0 && i < mString.Length);
+                    return mString[i];
+                }
+            }
             public int Posn { get { return mPosn; } set { mPosn = value; } }
             public int Length => mString.Length;
             public char CurChar => mString[mPosn];
@@ -348,17 +367,19 @@ namespace SourceGen {
             // These are true if the text is appearing inside start/end tags.
             public bool InBox { get; set; }
             public bool InUrl { get; set; }
-            public bool InSym { get; set; }
 
             public bool InsideElement { get { return InBox || InsideNonBoxElement; } }
-            public bool InsideNonBoxElement { get { return InUrl || InSym; } }
+            public bool InsideNonBoxElement { get { return InUrl; } }
 
-            // If true, don't prefix lines with the comment delimiter.
+            // If true, don't prefix lines with the comment delimiter (used for [br]).
             public bool SuppressPrefix { get; set; }
 
             // True if using default char (comment delimiter) for boxes.
             public bool BoxCharIsDefault { get; set; } = true;
             public char BoxChar { get; set; } = '?';
+
+            // If true, don't inset text inside a box (used for [hr]).
+            public bool FullWidth { get; set; } = false;
 
             public DataSource(string str, int posn, DataSource outer) {
                 mString = str;
@@ -368,10 +389,10 @@ namespace SourceGen {
                     // Inherit the values from the "outer" source.
                     InBox = outer.InBox;
                     InUrl = outer.InUrl;
-                    InSym = outer.InSym;
                     SuppressPrefix = outer.SuppressPrefix;
                     BoxCharIsDefault = outer.BoxCharIsDefault;
                     BoxChar = outer.BoxChar;
+                    FullWidth = outer.FullWidth;
                 }
             }
 
@@ -384,38 +405,47 @@ namespace SourceGen {
                     return false;
                 }
                 for (int i = 0; i < str.Length; i++) {
+                    // Shouldn't need to worry about InvariantCultureIgnoreCase since this is
+                    // only used for tags.
                     if (char.ToUpper(str[i]) != char.ToUpper(mString[mPosn + offset + i])) {
                         return false;
                     }
                 }
                 return true;
             }
+
+            /// <summary>
+            /// Returns the position of the matching string.  The search starts at the current
+            /// position, and is case-insensitive.
+            /// </summary>
+            public int FindNext(string str) {
+                return Text.IndexOf(str, mPosn, StringComparison.InvariantCultureIgnoreCase);
+            }
         }
         private Stack<DataSource> mSourceStack = new Stack<DataSource>();
         private StringBuilder mLineBuilder = new StringBuilder(MAX_WIDTH);
 
-        //private const char DEFAULT_CHAR = '\0';
         private const char DEFAULT_RULE_CHAR = '-';
 
         private int mLineWidth;
-        private char mBoxCharActual;
-        private string mLinePrefix, mBoxPrefix;
+        private string mLinePrefix;
         private bool mDebugMode;
 
 
         /// <summary>
         /// Calculates the width of the usable text area, given the current attributes.
         /// </summary>
-        private int CalcTextWidth(DataSource source) {
+        private int CalcTextWidth(DataSource source, bool forceFullWidth = false) {
+            bool fullWidth = source.FullWidth | forceFullWidth;
             if (source.InBox) {
                 if (source.BoxCharIsDefault) {
-                    // Leave space for left/right box edges.
-                    return mLineWidth - mBoxPrefix.Length - 4;
+                    // Leave space for left/right box edges, no comment delimiter.
+                    return mLineWidth - (fullWidth ? 2 : 4);
                 } else {
                     // Also leave space for a leading comment delimiter, even if the chosen
                     // box char happens to match the current delimiter.  It might not match when
                     // it's rendered for asm gen, and we don't want the output to change.
-                    return mLineWidth - mBoxPrefix.Length - 5;
+                    return mLineWidth - (fullWidth ? 3 : 5);
                 }
             } else {
                 return mLineWidth - mLinePrefix.Length;
@@ -435,8 +465,7 @@ namespace SourceGen {
             mSourceStack.Clear();
 
             mLinePrefix = formatter.FullLineCommentDelimiterPlus;   // does not change
-            mBoxPrefix = formatter.FullLineCommentDelimiterBase;    // changes if box char set
-            mBoxCharActual = mBoxPrefix[0];
+            //mBoxPrefix = "! ";                                      // changes with [box]
 
             DataSource source = new DataSource(Text, 0, null);
             int textWidth = CalcTextWidth(source);
@@ -493,7 +522,7 @@ namespace SourceGen {
                     }
                 } else if (thisCh == '[' && !escapeNext) {
                     // Start of format tag?
-                    if (TryParseTag(source, out int skipLen, out DataSource subSource,
+                    if (TryParseTag(source, formatter, out int skipLen, out DataSource subSource,
                             out bool requireLineStart)) {
                         if (requireLineStart && outIndex != 0) {
                             OutputLine(outBuf, outIndex, source, lines);
@@ -521,6 +550,7 @@ namespace SourceGen {
                 // We need to add a character to the out buffer.  Will this put us over the limit?
                 if (outIndex == textWidth) {
                     int outputCount;
+                    int adj = 0;
                     if (outBreakIndex <= 0) {
                         // No break found, or break char was at start of line.  Just chop what
                         // we have.
@@ -532,11 +562,10 @@ namespace SourceGen {
                         // Break was a hyphen or space.
                         outputCount = outBreakIndex;
 
-                    }
-                    int adj = 0;
-                    if (outBuf[outputCount] == '-') {
-                        // Break was a hyphen, include it.
-                        adj = 1;
+                        if (outBuf[outputCount] == '-') {
+                            // Break was a hyphen, include it.
+                            adj = 1;
+                        }
                     }
 
                     // Output everything up to the break point, but not the break char itself
@@ -556,6 +585,7 @@ namespace SourceGen {
                     }
                     outIndex -= outputCount;
                     outBreakIndex = -1;
+                    Debug.Assert(outIndex >= 0);
 
                     // If we're at the start of a line, eat all leading spaces.  (This is what
                     // the WPF TextEdit dialog does when word-wrapping.)
@@ -576,6 +606,7 @@ namespace SourceGen {
                     outBreakIndex = outIndex;
                 }
 
+                Debug.Assert(outIndex >= 0 && outIndex < outBuf.Length);
                 outBuf[outIndex++] = source[source.Posn++];
             }
 
@@ -599,13 +630,30 @@ namespace SourceGen {
             Debug.Assert(length >= 0);
             mLineBuilder.Clear();
             if (source.InBox) {
-                mLineBuilder.Append(mBoxPrefix);
-                mLineBuilder.Append(outBuf, 0, length);
-                int trailingCount = mLineWidth - mBoxPrefix.Length - length - 1;
-                if (trailingCount > 0) {
-                    mLineBuilder.Append(SPACES, 0, trailingCount);
+                // If the box character doesn't match the comment delimiter, output the
+                // comment delimiter.
+                bool boxMatchesCmt = (mLinePrefix[0] == source.BoxChar);
+                if (!boxMatchesCmt) {
+                    mLineBuilder.Append(mLinePrefix[0]);
                 }
-                mLineBuilder.Append(mBoxCharActual);
+                mLineBuilder.Append(source.BoxChar);
+                if (!source.FullWidth) {
+                    mLineBuilder.Append(' ');       // inset text, unless we're doing an [hr]
+                }
+                mLineBuilder.Append(outBuf, 0, length);
+                // Fill out the rest of the line with spaces, then add the final char.
+                int trailingCount = mLineWidth - mLineBuilder.Length;
+                // Line is one char shorter when the box character is specified and it matches
+                // the comment.  (If the box character isn't specified then it always matches
+                // the comment; if the box doesn't match the comment then we're shoved over one
+                // char because the comment delimiter is present.)
+                if (!source.BoxCharIsDefault && boxMatchesCmt) {
+                    trailingCount--;
+                }
+                if (trailingCount > 1) {
+                    mLineBuilder.Append(SPACES, 0, trailingCount - 1);
+                }
+                mLineBuilder.Append(source.BoxChar);
             } else {
                 if (!source.SuppressPrefix) {
                     mLineBuilder.Append(mLinePrefix);
@@ -620,10 +668,8 @@ namespace SourceGen {
         }
 
         private enum Tag {
-            Unknown = 0, Break, HorizRule, Width,
-            BoxStart, BoxEnd, UrlStart, UrlEnd, SymStart, SymEnd
+            Unknown = 0, Break, HorizRule, Width, BoxStart, UrlStart
         }
-
         private class TagMatch {
             public string mPatStr;
             public Tag mTag;
@@ -638,11 +684,7 @@ namespace SourceGen {
             new TagMatch("hr", Tag.HorizRule),
             new TagMatch("width", Tag.Width),
             new TagMatch("box", Tag.BoxStart),
-            new TagMatch("/box", Tag.BoxEnd),
             new TagMatch("url", Tag.UrlStart),
-            new TagMatch("/url", Tag.UrlEnd),
-            new TagMatch("sym", Tag.SymStart),
-            new TagMatch("/sym", Tag.SymEnd),
         };
 
         /// <summary>
@@ -653,13 +695,14 @@ namespace SourceGen {
         /// appropriate.</para>
         /// </remarks>
         /// <param name="source">Input data source.</param>
+        /// <param name="formatter">Output formatter.</param>
         /// <param name="skipLen">Number of characters to advance in data source.</param>
         /// <param name="subSource">Result: data source with tag contents.  May be null.</param>
         /// <param name="requireLineStart">Result: if true, and the output buffer has characters
         ///   in it, they must be flushed before continuing.</param>
         /// <returns>True if the tag was successfully parsed.</returns>
-        private bool TryParseTag(DataSource source, out int skipLen, out DataSource subSource,
-                out bool requireLineStart) {
+        private bool TryParseTag(DataSource source, Asm65.Formatter formatter,
+                out int skipLen, out DataSource subSource, out bool requireLineStart) {
             skipLen = 0;
             requireLineStart = false;
             subSource = null;
@@ -675,18 +718,21 @@ namespace SourceGen {
             if (tag != Tag.Unknown) {
                 // Look for the end.
                 for (int endpos = source.Posn + 2; endpos < source.Length; endpos++) {
-                    if (source[endpos] == ']') {
+                    char ch = source[endpos];
+                    if (ch == ']') {
                         // Found the end of the tag.
                         tagStr = source.Text.Substring(source.Posn, endpos - source.Posn + 1);
+                        break;
+                    } else if (ch == '\r' || ch == '\n') {
+                        // Stop looking if we hit a line break mid-tag.
                         break;
                     }
                 }
             }
             if (tagStr == null) {
-                Debug.WriteLine("Unterminated match at " + source.Posn + ": " + tag);
                 return false;
             }
-            Debug.WriteLine("Probable match at " + source.Posn + ": " + tag + " '" + tagStr + "'");
+            //Debug.WriteLine("Initial match at " + source.Posn + ": " + tag + " '" + tagStr + "'");
 
             bool eatNextIfNewline = false;
             switch (tag) {
@@ -695,9 +741,8 @@ namespace SourceGen {
                     if (tagStr.Length != brWidth) {
                         return false;
                     }
-                    if (source.InBox) {
-                        Debug.WriteLine("Can't use [br] inside a box");
-                        return false;
+                    if (source.InsideElement) {
+                        return false;       // can't use inside a box
                     }
                     skipLen = brWidth;
                     // Just a blank line, but with "suppress prefix" enabled.
@@ -715,20 +760,21 @@ namespace SourceGen {
                     } else {
                         defaultCh = DEFAULT_RULE_CHAR;
                     }
-                    char hrChar = HandleHorizRule(tagStr, defaultCh, out skipLen);
-                    if (hrChar == '\0') {
+                    if (!HandleHorizRule(tagStr, defaultCh, out skipLen, out char hrChar)) {
                         return false;
                     }
-                    int ruleWidth = CalcTextWidth(source);
+                    int ruleWidth = CalcTextWidth(source, true);
                     StringBuilder rulerSb = new StringBuilder(ruleWidth);
                     for (int i = 0; i < ruleWidth; i++) {
                         rulerSb.Append(hrChar);
                     }
+                    rulerSb.Append("\r\n");
                     subSource = new DataSource(rulerSb.ToString(), 0, source);
+                    subSource.FullWidth = true;
                     requireLineStart = eatNextIfNewline = true;
                     break;
                 case Tag.Width:
-                    if (source.InsideNonBoxElement) {
+                    if (source.InsideElement) {
                         return false;
                     }
                     int newWidth = HandleWidth(tagStr, out skipLen);
@@ -737,6 +783,32 @@ namespace SourceGen {
                     }
                     requireLineStart = eatNextIfNewline = true;
                     mLineWidth = newWidth;
+                    break;
+                case Tag.BoxStart:
+                    if (source.InsideElement) {
+                        return false;
+                    }
+                    char defBoxChar = formatter.FullLineCommentDelimiterBase[0];
+                    if (!HandleBox(tagStr, source, defBoxChar, out skipLen, out char boxChar,
+                            out bool isBoxCharDef, out string insideBox)) {
+                        return false;
+                    }
+                    requireLineStart = eatNextIfNewline = true;
+                    subSource = new DataSource(insideBox, 0, source);
+                    subSource.InBox = true;
+                    subSource.BoxChar = boxChar;
+                    subSource.BoxCharIsDefault = isBoxCharDef;
+                    break;
+                case Tag.UrlStart:
+                    if (source.InsideNonBoxElement) {
+                        return false;
+                    }
+                    if (!HandleUrl(tagStr, source, out skipLen, out string showText)) {
+                        return false;
+                    }
+                    requireLineStart = eatNextIfNewline = false;
+                    subSource = new DataSource(showText, 0, source);
+                    subSource.InUrl = true;
                     break;
                 default:
                     return false;
@@ -758,18 +830,17 @@ namespace SourceGen {
 
             return true;
         }
-
         /// <summary>
         /// Parses an [hr] or [hr char='x'] tag.  Returns the ruler char, or '\0' on error.
         /// </summary>
-        private static char HandleHorizRule(string tagStr, char defaultChar, out int skipLen) {
+        private static bool HandleHorizRule(string tagStr, char defaultChar, out int skipLen,
+                out char hrChar) {
             const string simpleForm = "[hr]";
             const string prefix = "[hr char='";
             const string suffix = "']";
-            const char FAILED = '\0';
+            hrChar = '\0';
             skipLen = tagStr.Length;
 
-            char hrChar;
             if (tagStr.Equals(simpleForm, StringComparison.OrdinalIgnoreCase)) {
                 // use default char
                 hrChar = defaultChar;
@@ -777,16 +848,16 @@ namespace SourceGen {
                 // char explicitly set
                 int charStrLen = tagStr.Length - prefix.Length - suffix.Length;
                 if (charStrLen != 1) {
-                    return FAILED;
+                    return false;
                 }
                 if (!tagStr.EndsWith(suffix, StringComparison.InvariantCultureIgnoreCase)) {
-                    return FAILED;
+                    return false;
                 }
                 hrChar = tagStr[prefix.Length];
             } else {
-                return FAILED;
+                return false;
             }
-            return hrChar;
+            return true;
         }
 
         /// <summary>
@@ -820,6 +891,89 @@ namespace SourceGen {
             }
             skipLen = tagStr.Length;
             return newWidth;
+        }
+
+        /// <summary>
+        /// Parses a [box]...[/box] tag, which could also be [box char='x'].
+        /// </summary>
+        private static bool HandleBox(string tagStr, DataSource source, char defBoxChar,
+                out int skipLen, out char boxChar, out bool isBoxCharDef, out string insideBox) {
+            const string startTagDefault = "[box]";
+            const string startTagPrefix = "[box char='";
+            const string startTagSuffix = "']";
+            const string endTag = "[/box]";
+            skipLen = 0;
+            boxChar = '?';
+            isBoxCharDef = false;
+            insideBox = "!!!";
+
+            if (tagStr.Equals(startTagDefault, StringComparison.InvariantCultureIgnoreCase)) {
+                boxChar = defBoxChar;
+                isBoxCharDef = true;
+            } else if (tagStr.StartsWith(startTagPrefix,
+                            StringComparison.InvariantCultureIgnoreCase) &&
+                        tagStr.EndsWith(startTagSuffix,
+                            StringComparison.InvariantCultureIgnoreCase) &&
+                        tagStr.Length == startTagPrefix.Length + 1 + startTagSuffix.Length) {
+                boxChar = tagStr[startTagPrefix.Length];
+                isBoxCharDef = false;
+            } else {
+                return false;
+            }
+
+            int boxEndPosn = source.FindNext(endTag);
+            if (boxEndPosn < 0) {
+                return false;
+            }
+
+            int innerLen = boxEndPosn - (source.Posn + tagStr.Length);
+            skipLen = tagStr.Length + innerLen + endTag.Length;
+            insideBox = "[hr]" + source.Text.Substring(source.Posn + tagStr.Length, innerLen) +
+                "[hr]";
+
+            return true;
+        }
+
+        /// <summary>
+        /// Parses a [url]...[/url] tag, which could also be [url=xyzzy].
+        /// </summary>
+        private static bool HandleUrl(string tagStr, DataSource source,
+                out int skipLen, out string showText) {
+            const string simpleStart = "[url]";
+            const string linkStartPrefix = "[url=";
+            const string linkStartSuffix = "]";
+            const string endTag = "[/url]";
+            skipLen = 0;
+            showText = string.Empty;
+
+            string linkStr;
+            if (tagStr.Equals(simpleStart, StringComparison.InvariantCultureIgnoreCase)) {
+                // The text is also the link.
+                linkStr = string.Empty;
+            } else if (tagStr.StartsWith(linkStartPrefix,
+                            StringComparison.InvariantCultureIgnoreCase) &&
+                        tagStr.EndsWith(linkStartSuffix,
+                            StringComparison.InvariantCultureIgnoreCase) &&
+                        tagStr.Length > linkStartPrefix.Length + linkStartSuffix.Length) {
+                // URI is specified in tag.
+                linkStr = tagStr.Substring(linkStartPrefix.Length,
+                    tagStr.Length - (linkStartPrefix.Length + linkStartSuffix.Length));
+            } else {
+                return false;
+            }
+
+            int urlEndPosn = source.FindNext(endTag);
+            if (urlEndPosn < 0) {
+                return false;
+            }
+
+            int innerLen = urlEndPosn - (source.Posn + tagStr.Length);
+            skipLen = tagStr.Length + innerLen + endTag.Length;
+            showText = source.Text.Substring(source.Posn + tagStr.Length, innerLen);
+            if (!string.IsNullOrEmpty(linkStr)) {
+                showText += " (" + linkStr + ")";
+            }
+            return true;
         }
 
         #endregion Fancy
