@@ -43,19 +43,22 @@ explains a bit more.
 
 Steps:
 
- 1. Run Debug &gt; Source Generation Tests to verify that the code generation
+ 1. Update the version number in `SourceGen/App.xaml.cs`.
+ 2. Run Debug &gt; Source Generation Tests to verify that the code generation
     tests pass.  This requires that all cross-assemblers be installed and
     configured.
- 2. Remove any existing `DIST_Release` directory from the top level.
- 3. In Visual Studio, change the build configuration to Release, and the startup project
-	to MakeDist.
- 4. Do a full clean build.
- 5. Hit F5 to start MakeDist.  Click "Build" to generate a release build.  The files will be
-	copied into `DIST_Release`.
- 6. Create an empty ZIP file (e.g. `6502bench123d1.zip`).
- 7. Copy all files from `DIST_Release` into it.
- 8. Submit all changes to git, push them to the server.
- 9. Create a new release on github.  Drag the ZIP file into it.
- 10. Update/close any issues that have been addressed by the new release.
+ 3. Remove any existing `DIST_Release` directory from the top level.
+ 4. In Visual Studio, change the build configuration to Release, and the
+	startup project to MakeDist.
+ 5. Do a full clean build.
+ 6. Hit F5 to start MakeDist.  Click "Build" to generate a release build.  The
+	files will be copied into `DIST_Release`.
+ 7. Create an empty ZIP file (e.g. `6502bench123d1.zip`).
+ 8. Copy all files from `DIST_Release` into it.
+ 9. Submit all changes to git, push them to the server.
+ 10. Create a new release on github.  Drag the ZIP file into it.
+ 11. Update/close any issues that have been addressed by the new release.
+	 Add the change notes to the wiki page.
 
-Version numbers should follow the semantic versioning scheme: v1.2.3, v1.2.3-dev1, etc.
+Version numbers should follow the semantic versioning scheme: v1.2.3,
+v1.2.3-dev1, etc.
