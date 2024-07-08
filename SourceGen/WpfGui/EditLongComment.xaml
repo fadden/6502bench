@@ -82,9 +82,10 @@ limitations under the License.
                  FontFamily="{StaticResource GeneralMonoFont}" VerticalScrollBarVisibility="Visible"
                  IsReadOnly="True" Background="#f8f8f8"/>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-            <Button Content="OK" IsDefault="True" Width="70" Click="OkButton_Click"/>
-            <Button Content="Cancel" IsCancel="True" Width="70" Margin="4,0,0,0"/>
-        </StackPanel>
+        <DockPanel Grid.Row="5" LastChildFill="False" Margin="0,8,0,0">
+            <Button Content="Format Help" DockPanel.Dock="Left" Width="100" Click="FormatHelp_Click"/>
+            <Button Content="Cancel" DockPanel.Dock="Right" IsCancel="True" Width="70" Margin="4,0,0,0"/>
+            <Button Content="OK" DockPanel.Dock="Right" IsDefault="True" Width="70" Click="OkButton_Click"/>
+        </DockPanel>
     </Grid>
 </Window>

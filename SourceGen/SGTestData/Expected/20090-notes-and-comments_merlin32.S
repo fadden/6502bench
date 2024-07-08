@@ -165,6 +165,8 @@ L1062    bit   plataddr   ;Pull in plataddr to see the comment on the platform f
 *LINES
 *XXXXXXXXX
 *X BOXED X
+*X-------X
+*X STUFF X
 *XXXXXXXXX
          lda   #$17
 *Test some folding

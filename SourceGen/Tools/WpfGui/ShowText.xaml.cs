@@ -66,6 +66,7 @@ namespace SourceGen.Tools.WpfGui {
         private void Window_KeyEventHandler(object sender, KeyEventArgs e) {
             if (e.Key == Key.Escape) {
                 Close();
+                e.Handled = true;
             }
         }
     }

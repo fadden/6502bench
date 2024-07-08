@@ -361,24 +361,18 @@ editor.</p>
 
 
 <h2 id="long-comment">Edit Long Comment</h2>
+
 <p>Long comments can be arbitrarily long and span multiple lines.  They
 will be word-wrapped at a line width of your choosing.  They're always
 drawn with a fixed-width font, so you can create ASCII-art diagrams.
 Comment delimiters are added automatically at the start of each line.</p>
-<p>For a true retro look you can "box" the comment with asterisks.  You
-can create a full-width row of asterisks by putting a '*' on a line by
-itself.  (Assembly source generators are allowed to use a character
-other than '*' for the output, e.g. they might use a full set of
-box outline characters, though that's somewhat against the spirit of
-the thing.  Regardless, a solo '*' results in a line.)</p>
+
 <p>The bottom window will update automatically as you type, showing what
 the output is expected to look like.  The actual assembler source output
 will depend on features of the target assembler, such as comment
 delimiter choices and maximum line length limitations.  For example,
-Merlin allows a leading '*' to indicate a comment, while cc65 does not,
-so cc65 code uses ";*' instead.  Because the length limitation affects
-the length of the line, not just the comment text, an asterisk-boxed
-comment will have one fewer character per line in cc65 output.</p>
+Merlin allows a leading '*' to indicate a full-line comment, while most
+others use ";'.</p>
 
 <p>Clear the text field to delete the comment.</p>
 <p>You can use <kbd class="key">Ctrl+Enter</kbd> as a keyboard shortcut
@@ -387,6 +381,88 @@ for <samp>OK</samp>.</p>
 <p>The long comment at the very top of the project is special, as it's
 not associated with a file offset.  If you delete it, you can get it
 back by using <samp>Edit &gt; Edit Header Comment</samp>.</p>
+
+<p>Recent versions of SourceGen support "fancy" formatting tags, which
+are embedded in the comment like BBCode or HTML.  You can choose to
+use "classic" or "fancy" formatting by clicking the
+<samp>Enable Fancy Formatting</samp> checkbox.</p>
+
+<h3>Classic Formatting</h3>
+
+<p>If fancy formatting is disabled, you can set the line width for the
+comment block from the choices in the pop-up menu.  If you want to
+wrap the comment in a box of asterisks, check the
+<samp>Render In Box</samp> checkbox.</p>
+<p>For boxed text, most assemblers don't accept '*' as a full-line comment
+delimiter, so the actual delimiter will be output at the start of each
+line.  This reduces the width of the box by 1 for those assemblers and
+the on-screen display.</p>
+<p>Within a box, putting '*' on a line by itself causes a full line of
+asterisks to be output.</p>
+
+<h3>Fancy Formatting</h3>
+
+<p>If fancy formatting is enabled, the width and box controls are disabled
+in the dialog.  The features are available with embedded formatting
+commands.</p>
+<p>The supported tags are:</p>
+<ul>
+  <li><code>[width=nn]</code>: sets the line width to the specified value.
+    The minimum width is 8, maximum is 128.  The special value '*' sets
+    the width to the default (80).  This is the total width of the output,
+    so the actual text width will be slightly smaller because of comment
+    delimiters and box edges.</li>
+  <li><code>[br]</code>: breaks up the output with a totally blank line.
+    The line won't even have a comment delimiter.</li>
+  <li><code>[box]...[/box]</code>: formats the text inside the tags in
+    a box.  The box frame will be composed of comment delimiters (usually
+    '<code>;</code>' or '<code>*</code>').</li>
+  <li><code>[box char='#']</code>: alternate form of <code>[box]</code>
+    that allows the frame character to be specified.  Because lines will
+    need to be prefixed with a comment delimiter, the box width is
+    reduced by one.  If the specified character happens to match the
+    comment delimiter, the comment delimiter will be omitted, but the
+    width will still be reduced so that the inside of the box is the same
+    width regardless of assembler configuration.</li>
+  <li><code>[hr]</code>: outputs a horizontal line of characters, using
+    the comment char.</li>
+  <li><code>[hr char='-']</code>: outputs a horizontal line of characters,
+    using the specified char.</li>
+  <li><code>[url]https://example.com/[/url]</code>: outputs a URL.</li>
+  <li><code>[url=https://example.com/]link text[/url]</code>: outputs
+    the link text followed by the URL.</li>
+</ul>
+
+<p>The <code>width</code> and <code>br</code> tags are not allowed in
+boxes, but the <code>hr</code> and <code>url</code> tags are.</p>
+
+<p>For example, the text:</p>
+<pre>
+[width=20][box]
+Hello, world!
+[hr char='-']
+The quick brown fox jumps over the lazy dog.
+[/box]
+</pre>
+<p>will be formatted as:</p>
+<pre>
+********************
+* Hello, world!    *
+*------------------*
+* The quick brown  *
+* fox jumps over   *
+* the lazy dog.    *
+********************
+</pre>
+
+<p>Incomplete or malformed format tags will be output as written.  To
+avoid confusing the parser, the left bracket can be escaped with a
+backslash, e.g. "<code>\[br]</code>" will appear in the output as
+"<code>[br]</code>".</p>
+
+<p>A quick reference for the format tags can be accessed with the
+<samp>Format Help</samp> button.</p>
+
 
 <h2 id="data-bank">Edit Data Bank (65816 only)</h2>
 

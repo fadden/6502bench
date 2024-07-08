@@ -197,5 +197,27 @@ namespace SourceGen.WpfGui {
             return new MultiLineComment(UserInput, IsFancyEnabled, RenderInBox,
                 (int)maxWidthComboBox.SelectedItem);
         }
+
+        private const string HELP_TEXT =
+            "Fancy formatting tags:\r\n" +
+            "  [width=nn] sets the width to the specified value; '*' sets to default (80).\r\n" +
+            "  [br] breaks up the output with a totally blank line.\r\n" +
+            "  [box]...[/box] puts text in a box, using the comment char for the frame.\r\n" +
+            "  [box char='#']...[/box] puts text in a box, using the specified char.\r\n" +
+            "  [hr] outputs a horizontal line of characters, using the comment char.\r\n" +
+            "  [hr char='-'] outputs a horizontal rule, using the specified char.\r\n" +
+            "  [url]https://example.com/[/url] outputs a URL.\r\n" +
+            "  [url=https://example.com/]link text[/url] outputs a URL with separate link text.\r\n" +
+            "\r\n" +
+            "[width=nn] and [br] are not allowed in boxes, but [hr] and [url] are.\r\n" +
+            "\r\n" +
+            "If fancy mode is disabled, the Line Width and Render In Box controls are enabled,\r\n" +
+            "and will be used to format the text.  Formatting tags are ignored.\r\n";
+
+        private void FormatHelp_Click(object sender, RoutedEventArgs e) {
+            Tools.WpfGui.ShowText dialog = new Tools.WpfGui.ShowText(this, HELP_TEXT);
+            dialog.Title = "Format Help";
+            dialog.ShowDialog();
+        }
     }
 }
