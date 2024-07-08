@@ -376,6 +376,7 @@ namespace SourceGen.WpfGui {
             bool isBigEndian;
 
             // Identify the offset where each set of data starts.
+            Debug.Assert(mSelection.Count % div == 0);
             int span = mSelection.Count / div;
             int lowOff, highOff, bankOff;
             int stride;
@@ -461,10 +462,7 @@ namespace SourceGen.WpfGui {
                 offsets[index++] = tup.Value;
             }
 
-            int adj = 0;
-            if (IsAdjustedForReturn) {
-                adj = 1;
-            }
+            int adj = IsAdjustedForReturn ? 1 : 0;      // RTS/RTL adjustment
 
             // Walk through the file data, generating addresses as we go.
             byte[] fileData = mProject.FileData;
@@ -483,20 +481,28 @@ namespace SourceGen.WpfGui {
                     bank = (byte) bankConst;
                 }
 
+                // This is the target address.
                 int addr = ((bank << 16) | (high << 8) | low) + adj;
 
+                // Map it to a target label.  Start by looking for an offset inside file bounds.
                 int targetOffset = mProject.AddrMap.AddressToOffset(offsets[0], addr);
+                string targetLabel = null;
                 if (targetOffset < 0) {
-                    // Address not within file bounds.
-                    // TODO(maybe): look for matching platform/project symbols
-                    AddPreviewItem(addr, -1, Res.Strings.INVALID_ADDRESS);
+                    // Address not within file bounds; check for a matching project/platform symbol.
+                    // The method we're calling will potentially return globals and locals, but
+                    // those should have been found by AddressToOffset.
+                    Symbol ppsym = mProject.SymbolTable.FindNonVariableByAddress(addr,
+                        OpDef.MemoryEffect.ReadModifyWrite);
+                    if (ppsym != null) {
+                        targetLabel = ppsym.Label;
+                        AddPreviewItem(addr, -1, targetLabel);
+                    }
                 } else {
                     // Note the same target offset may appear more than once.
                     targetOffsets.Add(targetOffset);
 
                     // If there's a user-defined label there already, use it.  Otherwise, we'll
                     // need to generate one.
-                    string targetLabel;
                     if (mProject.UserLabels.TryGetValue(targetOffset, out Symbol sym)) {
                         targetLabel = sym.Label;
                         AddPreviewItem(addr, targetOffset, targetLabel);
@@ -509,14 +515,16 @@ namespace SourceGen.WpfGui {
                         Symbol tmpSym = AutoLabel.GenerateUniqueForAddress(addr,
                             mProject.SymbolTable, "T");
                         // tmpSym was returned as an auto-label, make it a user label instead
-                        // (with global scope)
+                        // (with global scope).
                         tmpSym = new Symbol(tmpSym.Label, tmpSym.Value, Symbol.Source.User,
                             Symbol.Type.GlobalAddr, Symbol.LabelAnnotation.Generated);
                         newLabels[targetOffset] = tmpSym;       // overwrites previous
                         targetLabel = tmpSym.Label;
                         AddPreviewItem(addr, targetOffset, "(+) " + targetLabel);
                     }
+                }
 
+                if (targetLabel != null) {
                     if (IsSplitTable) {
                         // Now we need to create format descriptors for the addresses where we
                         // extracted the low, high, and bank values.
@@ -542,6 +550,8 @@ namespace SourceGen.WpfGui {
                         newDfds.Add(offsets[0 + i * stride], FormatDescriptor.Create(stride,
                             new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Low), isBigEndian));
                     }
+                } else {
+                    AddPreviewItem(addr, -1, Res.Strings.INVALID_ADDRESS);
                 }
             }
 
@@ -549,9 +559,9 @@ namespace SourceGen.WpfGui {
             NewUserLabels = newLabels;
             AllTargetOffsets = targetOffsets;
 
-            // Don't show ready if all addresses are invalid.  It's okay if some work and
+            // Don't show ready if all entries are invalid.  It's okay if some work and
             // some don't.
-            mOutputReady = (AllTargetOffsets.Count > 0);
+            mOutputReady = (NewFormatDescriptors.Count > 0);
         }
 
         private void AddPreviewItem(int addr, int offset, string label) {

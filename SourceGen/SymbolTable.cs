@@ -520,7 +520,7 @@ namespace SourceGen {
 
         /// <summary>
         /// Searches the table for symbols with matching address values.  Ignores constants and
-        /// variables.
+        /// variables.  This does take the width of project/platform symbols into account.
         /// </summary>
         /// <param name="addr">Address to find.</param>
         /// <param name="effect">Memory effect type to match against.</param>
