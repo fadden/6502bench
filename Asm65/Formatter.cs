@@ -119,7 +119,7 @@ namespace Asm65 {
             //
 
             /// <summary>Character position at which operands wrap; 0 == default.</summary>
-            public int OperandWrapLen = DEFAULT_OPERAND_WRAP_LEN;
+            public int OperandWrapLen { get; set; } = 0;
 
             /// <summary>Add spaces between bytes in the Bytes column?</summary>
             public bool SpacesBetweenBytes { get; set; } = false;   // "20edfd" vs. "20 ed fd"
@@ -137,14 +137,14 @@ namespace Asm65 {
                 C64ScreenCode
             };
             /// <summary>Character conversion mode for hex dumps.</summary>
-            public CharConvMode HexDumpCharConvMode = CharConvMode.Unknown;
+            public CharConvMode HexDumpCharConvMode { get; set; } = CharConvMode.Unknown;
 
             public enum ExpressionMode { Unknown = 0, Common, Cc65, Merlin };
             /// <summary>
             /// This determines what operators are available and what their precedence is.  Used
             /// when generating expressions for operands.
             /// </summary>
-            public ExpressionMode ExprMode = ExpressionMode.Unknown;
+            public ExpressionMode ExprMode { get; set; } = ExpressionMode.Unknown;
 
 
             /// <summary>
@@ -569,7 +569,8 @@ namespace Asm65 {
         /// Point at which to wrap long operands, such as strings and dense hex.
         /// </summary>
         public int OperandWrapLen {
-            get { return mFormatConfig.OperandWrapLen; }
+            get { return mFormatConfig.OperandWrapLen == 0 ?
+                    DEFAULT_OPERAND_WRAP_LEN : mFormatConfig.OperandWrapLen; }
         }
 
 
