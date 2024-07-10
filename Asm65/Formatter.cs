@@ -119,7 +119,7 @@ namespace Asm65 {
             //
 
             /// <summary>Character position at which operands wrap; 0 == default.</summary>
-            public int OperandWrapLen { get; set; } = 0;
+            public int OperandWrapLen { get; set; } = DEFAULT_OPERAND_WRAP_LEN;
 
             /// <summary>Add spaces between bytes in the Bytes column?</summary>
             public bool SpacesBetweenBytes { get; set; } = false;   // "20edfd" vs. "20 ed fd"
@@ -569,8 +569,7 @@ namespace Asm65 {
         /// Point at which to wrap long operands, such as strings and dense hex.
         /// </summary>
         public int OperandWrapLen {
-            get { return mFormatConfig.OperandWrapLen == 0 ?
-                    DEFAULT_OPERAND_WRAP_LEN : mFormatConfig.OperandWrapLen; }
+            get { return mFormatConfig.OperandWrapLen; }
         }
 
 
@@ -591,6 +590,9 @@ namespace Asm65 {
                 mFullLineCommentDelimiterPlus = mFormatConfig.FullLineCommentDelimiterBase + " ";
             } else {
                 mFullLineCommentDelimiterPlus = mFormatConfig.FullLineCommentDelimiterBase;
+            }
+            if (config.OperandWrapLen <= 0) {
+                config.OperandWrapLen = DEFAULT_OPERAND_WRAP_LEN;
             }
 
             // Prep the static parts of the hex dump buffer.
