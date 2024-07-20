@@ -994,7 +994,7 @@ namespace SourceGen {
                 return false;   // one is null
             }
             return a.Text.Equals(b.Text) && a.BoxMode == b.BoxMode && a.MaxWidth == b.MaxWidth
-                && a.BackgroundColor == b.BackgroundColor;
+                && a.BackgroundColor == b.BackgroundColor && a.IsFancy == b.IsFancy;
         }
         public static bool operator !=(MultiLineComment a, MultiLineComment b) {
             return !(a == b);
@@ -1003,7 +1003,8 @@ namespace SourceGen {
             return obj is MultiLineComment && this == (MultiLineComment)obj;
         }
         public override int GetHashCode() {
-            return Text.GetHashCode() ^ MaxWidth ^ (BoxMode ? 1 : 0) ^ BackgroundColor.GetHashCode();
+            return Text.GetHashCode() ^ MaxWidth ^ (BoxMode ? 1 : 0) ^ (IsFancy ? 2 : 0) ^
+                BackgroundColor.GetHashCode();
         }
     }
 }
