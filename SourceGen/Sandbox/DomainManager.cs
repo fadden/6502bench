@@ -79,10 +79,10 @@ namespace SourceGen.Sandbox {
                 Debug.WriteLine("Setting keep-alive timer...");
                 mKeepAliveTimer = new Timer(60 * 1000);
                 mKeepAliveTimer.Elapsed += (source, e) => {
-                    // I don't know if there's a shutdown race.  The dispose code stops the timer
-                    // before clearing the other fields, but I don't know if the Stop() code
-                    // waits for the currently-executing timer event to finish.  So wrap
-                    // everything in try/catch.
+                    // The Timer docs say that Elapsed events can occur after Stop(), because
+                    // the signal to raise Elapsed is queued on a thread pool thread.  Instead
+                    // of being careful we just wrap it in try/catch, since nothing bad happens
+                    // if this fails.
                     try {
                         int result = mPluginManager.Instance.Ping(1000);
                         Debug.WriteLine("KeepAlive tid=" +

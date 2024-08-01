@@ -30,7 +30,7 @@ you prefer hexadecimal values to be shown in upper case.  None of them
 affect the way the project analyzes code and data, though they may affect
 the way generated assembly sources look.</p>
 
-<p>The settings editor is divided into four tabs.  Changes don't take
+<p>The settings editor is divided into five tabs.  Changes don't take
 effect until you hit <samp>Apply</samp> or <samp>OK</samp>.</p>
 
 
@@ -84,6 +84,10 @@ controls.)</p>
 
 <h3 id="appset-textdelim">Text Delimiters</h3>
 
+<p>These options change the way the code list looks on screen.  They
+do not affect generated code, which must use the delimiter characters
+specified by the chosen assembler.</p>
+
 <p>Character and string operands are shown surrounded by quotes, e.g.
 <code>LDA #'*'</code> or <code>.STR "Hello, world!"</code>.  It's
 handy to be able to tell at a glance how characters are encoded, so
@@ -92,8 +96,8 @@ supported character encoding.</p>
 <p>String operands may contain a mixture of text and hexadecimal values.
 For example, in ASCII data, the control characters for linefeed and
 carriage return ($0a and $0d) are considered part of the string, but
-don't have a printable symbol.  (Unicode defines some glpyhs, but they
-don't look very good at smaller font sizes.)</p>
+don't have a printable symbol.  (Unicode defines some "control picture"
+glyphs, but they don't look very good at smaller font sizes.)</p>
 <p>If one of the delimiter characters appears in the string itself,
 the character will be output as hex to avoid confusion.  For this
 reason, it's generally wise to use delimiter characters that aren't
@@ -104,9 +108,6 @@ copy and paste (with <kbd class="key">Ctrl+C</kbd> /
 <p>For character operands, the prefix and suffix are added to the start
 and end of the operand.  For string operands, the prefix is added to the
 start of the first line, and suffixes aren't allowed.</p>
-<p>These options change the way the code list looks on screen.  They
-do not affect generated code, which must use the delimiter characters
-specified by the chosen assembler.</p>
 
 <p>The "quick set" pop-up can be used to set the fields for a few
 common configurations.  The default set uses curly quotes with a few
@@ -189,9 +190,9 @@ in the combo box to set the fields.  The setting automatically switches to
 <p>These settings configure cross-assemblers and modify assembly source
 generation in various ways.</p>
 <p>To configure an assembler, select it in the pop-up menu.  The fields
-will initially contain assembler-specific default values.  All of
-the values in the Assembler Configuration box may be configured
-differently for each assembler.</p>
+will initially contain assembler-specific default values.  The values
+in the Assembler-Specific Configuration box may be configured
+independently for each assembler.</p>
 <p>The "executable" box holds the full path to the cross-assembler
 executable.</p>
 <ul>
@@ -207,6 +208,8 @@ is less than 1, or isn't a valid number, 1 will be used.  These are
 not hard stops: if the contents of a field are too wide, the contents
 of the next column will be pushed over.  (The comment field width is
 not currently being used, but may be used to fold lines in the future.)</p>
+
+<p>The Code Generation Settings affect all assemblers.</p>
 
 <p>When <samp>show cycle counts in comments</samp> is checked, cycle
 counts are inserted into end-of-line comments.  This works the same as
@@ -328,8 +331,9 @@ character encoding (e.g. you can default string operands to PETSCII),
 this setting will determine which encoding is preferred in generated
 sources.</p>
 <p>The <samp>min chars for string detection</samp> setting determines how
-many ASCII characters need to appear consecutively for the data analyzer to
-declare it a string.  Shorter values are prone to false-positive
+many printable characters (based on the default text encoding setting)
+need to appear consecutively for the data analyzer to
+decide it's a string.  Shorter values are prone to false-positive
 identifications, longer values miss out on short strings.  You can also
 set it to "none" to disable automatic string identification.</p>
 <p>The <samp>auto-label style</samp> setting determines the format for

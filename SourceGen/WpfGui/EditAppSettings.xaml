@@ -759,7 +759,7 @@ limitations under the License.
 
             <TabItem Name="asmConfigTab" Header="Asm Config">
                 <StackPanel>
-                    <GroupBox Header="Assembler Configuration" Padding="2,4">
+                    <GroupBox Header="Assembler-Specific Configuration" Padding="2,4">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -771,12 +771,14 @@ limitations under the License.
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="0" Grid.Row="0" Text="Assembler:"
-                                       HorizontalAlignment="Right" Margin="0,5,4,0"/>
-                            <ComboBox Name="asmConfigComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True"
-                                      Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"
-                                      ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"
-                                      SelectionChanged="AsmConfigComboBox_SelectionChanged"/>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+                                <TextBlock Text="Select assembler to configure:"
+                                           HorizontalAlignment="Right" Margin="0,7,4,0"/>
+                                <ComboBox Name="asmConfigComboBox" Grid.Column="1" Grid.Row="0" IsReadOnly="True"
+                                          Width="150" HorizontalAlignment="Left" Margin="0,4,0,20"
+                                          ItemsSource="{Binding AssemblerList}" DisplayMemberPath="Name"
+                                          SelectionChanged="AsmConfigComboBox_SelectionChanged"/>
+                            </StackPanel>
 
                             <TextBlock Grid.Column="0" Grid.Row="1" Text="Executable:"
                                        HorizontalAlignment="Right" Margin="0,0,4,0"/>
@@ -831,23 +833,26 @@ limitations under the License.
                         </Grid>
                     </GroupBox>
 
-                    <TextBlock Text="General code generation:" Margin="4,16,0,0"/>
-                    <CheckBox Content="Show cycle counts in comments" Margin="4,8,0,0"
-                              IsChecked="{Binding ShowCycleCountsAsm}"/>
-                    <CheckBox Content="Identify assembler in output" Margin="4,6,0,0"
-                              IsChecked="{Binding AddIdentComment}"/>
-                    <StackPanel Orientation="Vertical" Margin="10,6,0,0">
-                        <TextBlock Text="Put labels on their own line..."/>
-                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
-                                     Content="Only when required"
-                                     IsChecked="{Binding LabelPlacement_PreferSameLine}"/>
-                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
-                                     Content="When the label is wider than the field"
-                                     IsChecked="{Binding LabelPlacement_SplitIfTooLong}"/>
-                        <RadioButton GroupName="labelLineGroup" Margin="0,4,0,0"
-                                     Content="Whenever possible"
-                                     IsChecked="{Binding LabelPlacement_PreferSeparateLine}"/>
-                    </StackPanel>
+                    <GroupBox Header="Code Generation Settings" Padding="2,4" Margin="0,8,0,0">
+                        <StackPanel>
+                            <CheckBox Content="Show cycle counts in comments"
+                                      IsChecked="{Binding ShowCycleCountsAsm}"/>
+                            <CheckBox Content="Identify assembler in output" Margin="0,4,0,0"
+                                      IsChecked="{Binding AddIdentComment}"/>
+                            <StackPanel Orientation="Vertical" Margin="0,6,0,0">
+                                <TextBlock Text="Put labels on their own line..."/>
+                                <RadioButton GroupName="labelLineGroup" Margin="4,4,0,0"
+                                             Content="Only when required"
+                                             IsChecked="{Binding LabelPlacement_PreferSameLine}"/>
+                                <RadioButton GroupName="labelLineGroup" Margin="4,4,0,0"
+                                             Content="When the label is wider than the field"
+                                             IsChecked="{Binding LabelPlacement_SplitIfTooLong}"/>
+                                <RadioButton GroupName="labelLineGroup" Margin="4,4,0,0"
+                                             Content="Whenever possible"
+                                             IsChecked="{Binding LabelPlacement_PreferSeparateLine}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </TabItem>
 
