@@ -212,7 +212,7 @@ namespace SourceGen.WpfGui {
             "[width=nn] and [br] are not allowed in boxes, but [hr] and [url] are.\r\n" +
             "\r\n" +
             "If fancy mode is disabled, the Line Width and Render In Box controls are enabled,\r\n" +
-            "and will be used to format the text.  Formatting tags are ignored.\r\n";
+            "and will be used to format the text.  Formatting tags are not recognized.\r\n";
 
         private void FormatHelp_Click(object sender, RoutedEventArgs e) {
             Tools.WpfGui.ShowText dialog = new Tools.WpfGui.ShowText(this, HELP_TEXT);
