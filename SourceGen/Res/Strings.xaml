@@ -32,6 +32,9 @@ limitations under the License.
     <system:String x:Key="str_AsmMismatchDataFmt">Assembled output does not match: offset +{0:x6} has value ${1:x2}, expected ${2:x2}.</system:String>
     <system:String x:Key="str_AsmMismatchLengthFmt">Assembled output does not match: length is {0}, expected {1}.</system:String>
     <system:String x:Key="str_AsmOutputNotFound">Expected output file wasn't created</system:String>
+    <system:String x:Key="str_AutoSave1Min">60 seconds</system:String>
+    <system:String x:Key="str_AutoSave5Min">5 minutes</system:String>
+    <system:String x:Key="str_AutoSaveOff">disabled</system:String>
     <system:String x:Key="str_ClipformatAllColumns">All Columns</system:String>
     <system:String x:Key="str_ClipformatAssemblerSource">Assembler Source</system:String>
     <system:String x:Key="str_ClipformatDisassembly">Disassembly</system:String>

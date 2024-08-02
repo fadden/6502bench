@@ -135,6 +135,12 @@ limitations under the License.
                                       IsChecked="{Binding ShowCycleCountsScreen}"/>
                             <CheckBox Content="Use &quot;dark&quot; color scheme" Margin="0,4"
                                       IsChecked="{Binding DarkColorScheme}"/>
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Margin="0,3,0,0">Auto-save interval:</TextBlock>
+                                <ComboBox Name="autoSaveComboBox" IsReadOnly="True" Margin="8,0,0,0"
+                                          ItemsSource="{Binding AutoSaveItems}" DisplayMemberPath="Title"
+                                          SelectionChanged="AutoSaveComboBox_SelectionChanged"/>
+                            </DockPanel>
                         </StackPanel>
                     </GroupBox>
 

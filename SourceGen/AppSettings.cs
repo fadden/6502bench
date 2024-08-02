@@ -75,7 +75,9 @@ namespace SourceGen {
 
         public const string CLIP_LINE_FORMAT = "clip-line-format";
 
+        // Project open/save settings.
         public const string PRVW_RECENT_PROJECT_LIST = "prvw-recent-project-list";
+        public const string PROJ_AUTO_SAVE_INTERVAL = "proj-auto-save-interval";
 
         public const string SKIN_DARK_COLOR_SCHEME = "skin-dark-color-scheme";
 

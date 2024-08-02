@@ -45,6 +45,12 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AsmMismatchLengthFmt");
         public static string ASM_OUTPUT_NOT_FOUND =
             (string)Application.Current.FindResource("str_AsmOutputNotFound");
+        public static string AUTO_SAVE_OFF =
+            (string)Application.Current.FindResource("str_AutoSaveOff");
+        public static string AUTO_SAVE_1_MIN =
+            (string)Application.Current.FindResource("str_AutoSave1Min");
+        public static string AUTO_SAVE_5_MIN =
+            (string)Application.Current.FindResource("str_AutoSave5Min");
         public static string CONFIRMATION_NEEDED =
             (string)Application.Current.FindResource("str_ConfirmationNeeded");
         public static string DATA_BANK_AUTO_FMT =

@@ -241,7 +241,7 @@ namespace SourceGen.WpfGui {
             }
         }
         // NOTE: in the current implementation, the array index must match the enum value
-        private static ClipboardFormatItem[] sClipboardFormatItems = {
+        private static readonly ClipboardFormatItem[] sClipboardFormatItems = {
             new ClipboardFormatItem(Res.Strings.CLIPFORMAT_ASSEMBLER_SOURCE,
                 MainController.ClipLineFormat.AssemblerSource),
             new ClipboardFormatItem(Res.Strings.CLIPFORMAT_DISASSEMBLY,
@@ -253,6 +253,26 @@ namespace SourceGen.WpfGui {
         public ClipboardFormatItem[] ClipboardFormatItems {
             get { return sClipboardFormatItems; }
         }
+
+        /// <summary>
+        /// Entries for the auto-save combo box.
+        /// </summary>
+        public class AutoSaveItem {
+            public string Title { get; private set; }
+            public int Interval { get; private set; }
+
+            public AutoSaveItem(string title, int interval) {
+                Title = title;
+                Interval = interval;
+            }
+        }
+        private static readonly AutoSaveItem[] sAutoSaveItems = {
+            new AutoSaveItem(Res.Strings.AUTO_SAVE_OFF, 0),
+            new AutoSaveItem(Res.Strings.AUTO_SAVE_1_MIN, 60),
+            new AutoSaveItem(Res.Strings.AUTO_SAVE_5_MIN, 300),
+        };
+        public AutoSaveItem[] AutoSaveItems { get { return sAutoSaveItems; } }
+
 
         private void Loaded_CodeView() {
             // Column widths.  We called CaptureColumnWidths() during init, so this
@@ -288,6 +308,17 @@ namespace SourceGen.WpfGui {
                 Debug.Assert((int)sClipboardFormatItems[clipIndex].Value == clipIndex);
                 clipboardFormatComboBox.SelectedIndex = clipIndex;
             }
+
+            // Look for a matching auto-save interval.
+            int autoSaveInterval = mSettings.GetInt(AppSettings.PROJ_AUTO_SAVE_INTERVAL, 0);
+            int autoSaveIndex = 1;      // show a non-disabled value if we don't find a match
+            for (int i = 0; i < sAutoSaveItems.Length; i++) {
+                if (sAutoSaveItems[i].Interval == autoSaveInterval) {
+                    autoSaveIndex = i;
+                    break;
+                }
+            }
+            autoSaveComboBox.SelectedIndex = autoSaveIndex;
 
             EnableDebugMenu = mSettings.GetBool(AppSettings.DEBUG_MENU_ENABLED, false);
         }
@@ -416,6 +447,12 @@ namespace SourceGen.WpfGui {
                 SelectionChangedEventArgs e) {
             ClipboardFormatItem item = (ClipboardFormatItem)clipboardFormatComboBox.SelectedItem;
             mSettings.SetEnum(AppSettings.CLIP_LINE_FORMAT, item.Value);
+            IsDirty = true;
+        }
+
+        private void AutoSaveComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            AutoSaveItem item = (AutoSaveItem)autoSaveComboBox.SelectedItem;
+            mSettings.SetInt(AppSettings.PROJ_AUTO_SAVE_INTERVAL, item.Interval);
             IsDirty = true;
         }
 

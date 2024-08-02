@@ -325,6 +325,8 @@ namespace SourceGen {
             // values here when that isn't the case.  The point at which the setting is
             // actually used is expected to do something reasonable by default.
 
+            settings.SetInt(AppSettings.PROJ_AUTO_SAVE_INTERVAL, 60);   // enabled by default
+
             settings.SetBool(AppSettings.SYMWIN_SHOW_USER, true);
             settings.SetBool(AppSettings.SYMWIN_SHOW_NON_UNIQUE, false);
             settings.SetBool(AppSettings.SYMWIN_SHOW_PROJECT, true);
@@ -1073,6 +1075,7 @@ namespace SourceGen {
             bool ok = PrepareNewProject(Path.GetFullPath(dlg.DataFileName), dlg.SystemDef);
             if (ok) {
                 FinishPrep();
+                SaveProjectAs();
             }
         }
 
