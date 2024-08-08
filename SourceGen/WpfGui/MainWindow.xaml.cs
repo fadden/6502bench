@@ -867,45 +867,49 @@ namespace SourceGen.WpfGui {
         /// StatusChanged event fires.
         /// </summary>
         /// <remarks>
-        /// Sample steps to reproduce problem:
-        ///  1. add or remove a note
-        ///  2. hit the down-arrow key
+        /// <para>Sample steps to reproduce problem:
+        /// <list type="number">
+        ///  <item>add or remove a Note</item>
+        ///  <item>hit the down-arrow key</item>
+        /// </list></para>
         ///
-        /// This causes the ListView's contents to change enough that the keyboard position
+        /// <para>This causes the ListView's contents to change enough that the keyboard position
         /// is reset to zero, so attempting to move cursor up or down with an arrow key causes
         /// the ListView position to jump to the top of the file.  The keyboard navigation
-        /// appears to be independent of which element(s) are selected.
+        /// appears to be independent of which element(s) are selected.</para>
         ///
-        /// The workaround for this is to set the focus to the specific item where you want the
-        /// keyboard to be after making a change to the list.  This isn't quite so simple,
+        /// <para>The workaround for this is to set the focus to the specific item where you want
+        /// the keyboard to be after making a change to the list.  This isn't quite so simple,
         /// because at the point where we're restoring the selection flags, the UI elements
         /// haven't yet been generated.  We need to wait for a "status changed" event to arrive
-        /// from the ItemContainerGenerator.
+        /// from the ItemContainerGenerator.</para>
         ///
-        /// This: http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html
-        /// formed the basis of my initial solution.  The blog post was about a different problem,
+        /// <para>The blog post
+        /// <see href="http://cytivrat.blogspot.com/2011/05/selecting-first-item-in-wpf-listview.html"/>
+        /// formed the basis of my initial solution.  The post was about a different problem,
         /// where you'd have to hit the down-arrow twice after the control was first created
         /// because the focus is on the control rather than the item.  The same approach applies
-        /// here as well.
+        /// here as well.</para>
         ///
-        /// Unfortunately, grabbing focus like this on every update causes problems with the
+        /// <para>Unfortunately, grabbing focus like this on every update causes problems with the
         /// GridSplitters.  As soon as the splitter start to move, the ListView grabs focus and
         /// prevents them from moving more than a few pixels.  The workaround was to do nothing
         /// while the splitters are being moved.  This didn't solve the problem completely,
         /// e.g. you couldn't move the splitters with the arrow keys by more than one step
         /// because the ListView gets a StatusChanged event and steals focus away, but at least the
-        /// mouse worked.  (See issue #52 and https://stackoverflow.com/q/58652064/294248.)
+        /// mouse worked.  (See issue #52 and
+        /// <see href="https://stackoverflow.com/q/58652064/294248"/>.)</para>
         ///
-        /// Unfortunately, this update didn't solve other problems created by the initial solution,
-        /// because setting the item focus clears multi-select.  If you held shift down while
-        /// hitting down-arrow, things would work fine until you reached the bottom of the
-        /// screen, at which point the virtual UI stuff would cause the item container generator
-        /// to do work and change state.  (See issue #105.)
+        /// <para>Unfortunately, this update didn't solve other problems created by the initial
+        /// solution, because setting the item focus clears multi-select.  If you held shift
+        /// down while hitting down-arrow, things would work fine until you reached the bottom of
+        /// the screen, at which point the virtual UI stuff would cause the item container
+        /// generator to do work and change state.  (See issue #105.)</para>
         ///
-        /// The current approach is to set an explicit "refocus needed" boolean when we make
+        /// <para>The current approach is to set an explicit "refocus needed" boolean when we make
         /// changes to the list, and ignore the "status changed" events in other circumstances.
         /// This seems to have the correct behavior (so far).
-        /// Hat tip to https://stackoverflow.com/a/53666203/294248
+        /// Hat tip to <see href="https://stackoverflow.com/a/53666203/294248"/></para>
         /// </remarks>
         private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e) {
             if (!mCodeViewRefocusNeeded) {

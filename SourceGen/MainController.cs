@@ -22,6 +22,7 @@ using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Win32;
 
 using Asm65;
@@ -53,7 +54,7 @@ namespace SourceGen {
         private string mProjectPathName;
 
         /// <summary>
-        /// Data backing the code list.
+        /// Data backing the code list.  Will be null if the project is not open.
         /// </summary>
         public LineListGen CodeLineList { get; private set; }
 
@@ -241,8 +242,13 @@ namespace SourceGen {
 
         #region Init and settings
 
+        /// <summary>
+        /// Constructor, called from the main window code.
+        /// </summary>
         public MainController(MainWindow win) {
             mMainWin = win;
+
+            CreateAutoSaveTimer();
 
             ScriptManager.UseKeepAliveHack = true;
         }
@@ -590,7 +596,7 @@ namespace SourceGen {
             mMainWin.DoShowCycleCounts =
                 AppSettings.Global.GetBool(AppSettings.FMT_SHOW_CYCLE_COUNTS, false);
 
-            // Finally, update the display list generator with all the fancy settings.
+            // Update the display list generator with all the fancy settings.
             if (CodeLineList != null) {
                 // Regenerate the display list with the latest formatter config and
                 // pseudo-op definition.  (These are set as part of the refresh.)
@@ -598,6 +604,9 @@ namespace SourceGen {
                     UndoableChange.CreateDummyChange(UndoableChange.ReanalysisScope.DisplayOnly);
                 ApplyChanges(new ChangeSet(uc), false);
             }
+
+            // If auto-save was enabled or disabled, create or remove the recovery file.
+            RefreshRecoveryFile();
         }
 
         private void SetCodeLineListColorMultiplier() {
@@ -714,6 +723,208 @@ namespace SourceGen {
         }
 
         #endregion Init and settings
+
+
+        #region Auto-save
+
+        private string mRecoveryPathName = string.Empty;
+        private Stream mRecoveryStream = null;
+
+        private DispatcherTimer mAutoSaveTimer = null;
+        private DateTime mLastEditWhen = DateTime.Now;
+        private DateTime mLastAutoSaveWhen = DateTime.Now;
+
+
+        /// <summary>
+        /// Creates an interval timer that fires an event on the GUI thread.
+        /// </summary>
+        private void CreateAutoSaveTimer() {
+            mAutoSaveTimer = new DispatcherTimer();
+            mAutoSaveTimer.Tick += new EventHandler(AutoSaveTick);
+            mAutoSaveTimer.Interval = TimeSpan.FromSeconds(5);
+        }
+
+        /// <summary>
+        /// Resets the auto-save timer to the configured interval.  Has no effect if the timer
+        /// isn't currently running.
+        /// </summary>
+        private void ResetAutoSaveTimer() {
+            if (mAutoSaveTimer.IsEnabled) {
+                // Setting the Interval resets the timer.
+                mAutoSaveTimer.Interval = mAutoSaveTimer.Interval;
+            }
+        }
+
+        /// <summary>
+        /// Handles the auto-save timer event.
+        /// </summary>
+        /// <remarks>
+        /// We're using a DispatcherTimer, which appears to execute as part of the dispatcher,
+        /// not a System.Timers.Timer thread, which runs asynchronously.  So not only do we not
+        /// have to worry about SynchronizationObjects, it seems likely that this won't fire
+        /// after the timer is disabled.
+        /// </remarks>
+        private void AutoSaveTick(object sender, EventArgs e) {
+            try {
+                if (mRecoveryStream == null) {
+                    Debug.WriteLine("AutoSave tick: no recovery file");
+                    return;
+                }
+                if (mLastEditWhen <= mLastAutoSaveWhen) {
+                    Debug.WriteLine("AutoSave tick: recovery file is current (edit at " +
+                        mLastEditWhen + ", auto-save at " + mLastAutoSaveWhen + ")");
+                    return;
+                }
+                if (!mProject.IsDirty) {
+                    // This may seem off, because of the following scenario: open a file, make a
+                    // single edit, wait for auto-save, then hit Undo.  Changes have been made,
+                    // but the project is now back to its original form, so IsDirty is false.  If
+                    // we don't auto-save now, the recovery file will have a newer modification
+                    // date than the project file, but will be stale.
+                    //
+                    // Technically, we don't need to update the recovery file, because the base
+                    // project file has the correct and complete project.  There's no real need
+                    // for us to save another copy.  If we crash, we'll have a stale recovery file
+                    // with a newer timestamp, but we could handle that by back-dating the file
+                    // timestamp or simply by truncating the recovery stream.
+                    //
+                    // The real reason for this test is that we don't want to auto-save if the
+                    // user is being good about manual saves.
+                    if (mRecoveryStream.Length != 0) {
+                        Debug.WriteLine("AutoSave tick: project not dirty, truncating recovery");
+                        mRecoveryStream.SetLength(0);
+                    } else {
+                        Debug.WriteLine("AutoSave tick: project not dirty");
+                    }
+                    mLastAutoSaveWhen = mLastEditWhen;      // bump this so earlier test fires
+                    return;
+                }
+
+                // The project is dirty, and we haven't auto-saved since the last change was
+                // made.  Serialize the project to the recovery file.
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                DateTime startWhen = DateTime.Now;
+                mRecoveryStream.Position = 0;
+                mRecoveryStream.SetLength(0);
+                if (!ProjectFile.SerializeToStream(mProject, mRecoveryStream,
+                        out string errorMessage)) {
+                    Debug.WriteLine("AutoSave FAILED: " + errorMessage);
+                }
+                mRecoveryStream.Flush();    // flush is very important, timing is not; try Async?
+                mLastAutoSaveWhen = DateTime.Now;
+                Debug.WriteLine("AutoSave tick: recovery file updated: " + mRecoveryStream.Length +
+                    " bytes (" + (mLastAutoSaveWhen - startWhen).TotalMilliseconds + " ms)");
+            } catch (Exception ex) {
+                // Not expected, but let's not crash just because auto-save is broken.
+                Debug.WriteLine("AutoSave FAILED ENTIRELY: " + ex);
+            } finally {
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        /// <summary>
+        /// Creates or deletes the recovery file, based on the current app settings.
+        /// </summary>
+        /// <remarks>
+        /// This is called when a new project is created, an existing project is opened, the
+        /// app settings are updated, or Save As is used to change the project name.
+        /// </remarks>
+        private void RefreshRecoveryFile() {
+            if (mProject == null) {
+                // Project not open, nothing to do.
+                return;
+            }
+
+            int interval = AppSettings.Global.GetInt(AppSettings.PROJ_AUTO_SAVE_INTERVAL, 0);
+            if (interval <= 0) {
+                // We don't want a recovery file.  If one exists, close it and remove it.
+                if (mRecoveryStream != null) {
+                    Debug.WriteLine("Recovery: auto-save is disabled");
+                    DiscardRecoveryFile();
+                    Debug.Assert(string.IsNullOrEmpty(mRecoveryPathName));
+                } else {
+                    Debug.WriteLine("Recovery: auto-save is disabled, file was not open");
+                }
+                mAutoSaveTimer.Stop();
+            } else {
+                // Configure auto-save.  We need to update the interval in case it was changed
+                // by an app settings update.
+                mAutoSaveTimer.Interval = TimeSpan.FromSeconds(interval);
+                // Force an initial auto-save (on next timer tick) if the project is dirty, in
+                // case auto-save was previously disabled.
+                mLastAutoSaveWhen = mLastEditWhen.AddSeconds(-1);
+
+                string pathName = GenerateRecoveryPathName();
+                if (!string.IsNullOrEmpty(mRecoveryPathName) && pathName == mRecoveryPathName) {
+                    // File is open and the filename hasn't changed.  Nothing to do.
+                    Debug.Assert(mRecoveryStream != null);
+                    Debug.WriteLine("Recovery: open, no changes");
+                } else {
+                    if (mRecoveryStream != null) {
+                        Debug.WriteLine("Recovery: closing '" + mRecoveryPathName +
+                            "' in favor of '" + pathName + "'");
+                        DiscardRecoveryFile();
+                    }
+                    Debug.WriteLine("Recovery: opening '" + pathName + "'");
+                    PrepareRecoveryFile();
+                }
+                mAutoSaveTimer.Start();
+            }
+        }
+
+        private string GenerateRecoveryPathName() {
+            if (string.IsNullOrEmpty(mProjectPathName)) {
+                return string.Empty;
+            } else {
+                return mProjectPathName + "_rec";
+            }
+        }
+
+        /// <summary>
+        /// Creates the recovery file, overwriting any existing file.  If auto-save is disabled
+        /// (indicated by an empty recovery file name), this does nothing.
+        /// </summary>
+        private void PrepareRecoveryFile() {
+            Debug.Assert(mRecoveryStream == null);
+            Debug.Assert(string.IsNullOrEmpty(mRecoveryPathName));
+
+            string pathName = GenerateRecoveryPathName();
+            try {
+                mRecoveryStream = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write);
+                mRecoveryPathName = pathName;
+            } catch (Exception ex) {
+                MessageBox.Show(mMainWin, "Failed to create recovery file '" +
+                    pathName + "': " + ex.Message, "File Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// If we have a recovery file, close and delete it.  This does nothing if the recovery
+        /// file is not currently open.
+        /// </summary>
+        private void DiscardRecoveryFile() {
+            if (mRecoveryStream == null) {
+                Debug.Assert(string.IsNullOrEmpty(mRecoveryPathName));
+                return;
+            }
+            Debug.WriteLine("Recovery: discarding recovery file '" + mRecoveryPathName + "'");
+            mRecoveryStream.Close();
+            try {
+                File.Delete(mRecoveryPathName);
+            } catch (Exception ex) {
+                MessageBox.Show(mMainWin, "Failed to delete recovery file '" +
+                    mRecoveryPathName + "': " + ex.Message, "File Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Discard our internal state.
+            }
+            mRecoveryStream = null;
+            mRecoveryPathName = string.Empty;
+            mAutoSaveTimer.Stop();
+        }
+
+        #endregion Auto-save
 
 
         #region Project management
@@ -935,6 +1146,9 @@ namespace SourceGen {
             // ListView's selection index could be referencing a line off the end.
             // (This may not be necessary with WPF, because the way highlights work changed.)
             UpdateSelectionHighlight();
+
+            // Bump the edit timestamp so the auto-save will run.
+            mLastEditWhen = DateTime.Now;
         }
 
         /// <summary>
@@ -1046,6 +1260,9 @@ namespace SourceGen {
 
         #region Main window UI event handlers
 
+        /// <summary>
+        /// Handles creation of a new project.
+        /// </summary>
         public void NewProject() {
             if (!CloseProject()) {
                 return;
@@ -1076,6 +1293,7 @@ namespace SourceGen {
             if (ok) {
                 FinishPrep();
                 SaveProjectAs();
+                RefreshRecoveryFile();
             }
         }
 
@@ -1180,6 +1398,7 @@ namespace SourceGen {
             mProjectPathName = mProject.ProjectPathName = projPathName;
             mDataPathName = dataPathName;
             FinishPrep();
+            RefreshRecoveryFile();
         }
 
         /// <summary>
@@ -1300,6 +1519,8 @@ namespace SourceGen {
             // Success, record the path name.
             mProjectPathName = mProject.ProjectPathName = pathName;
 
+            RefreshRecoveryFile();
+
             // add it to the title bar
             UpdateTitle();
             return true;
@@ -1338,6 +1559,9 @@ namespace SourceGen {
 
             // Seems like a good time to save this off too.
             SaveAppSettings();
+
+            // The project file is saved, no need to auto-save for a while.
+            ResetAutoSaveTimer();
 
             return true;
         }
@@ -1410,6 +1634,7 @@ namespace SourceGen {
             }
             mDataPathName = null;
             mProjectPathName = null;
+            CodeLineList = null;
 
             // We may get a "selection changed" message as things are being torn down.  Clear
             // these so we don't try to remove the highlight from something that doesn't exist.
@@ -1422,6 +1647,8 @@ namespace SourceGen {
             mGenerationLog = null;
 
             UpdateTitle();
+
+            DiscardRecoveryFile();
 
             // Not necessary, but it lets us check the memory monitor to see if we got
             // rid of everything.

@@ -268,6 +268,7 @@ namespace SourceGen.WpfGui {
         }
         private static readonly AutoSaveItem[] sAutoSaveItems = {
             new AutoSaveItem(Res.Strings.AUTO_SAVE_OFF, 0),
+            //new AutoSaveItem("5 seconds!", 5),      // DEBUG
             new AutoSaveItem(Res.Strings.AUTO_SAVE_1_MIN, 60),
             new AutoSaveItem(Res.Strings.AUTO_SAVE_5_MIN, 300),
         };

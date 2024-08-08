@@ -75,15 +75,6 @@ namespace SourceGen {
         public static bool SerializeToFile(DisasmProject proj, string pathName,
                 out string errorMessage) {
             try {
-                string serializedData = SerializableProjectFile1.SerializeProject(proj);
-                if (ADD_CRLF) {
-                    // Add some line breaks.  This looks awful, but it makes text diffs
-                    // much more useful.
-                    serializedData = TextUtil.NonQuoteReplace(serializedData, "{", "{\r\n");
-                    serializedData = TextUtil.NonQuoteReplace(serializedData, "},", "},\r\n");
-                    serializedData = TextUtil.NonQuoteReplace(serializedData, ",", ",\r\n");
-                }
-
                 // Check to see if the project file is read-only.  We want to fail early
                 // so we don't leave our .TMP file sitting around -- the File.Delete() call
                 // will fail if the destination is read-only.
@@ -93,14 +84,14 @@ namespace SourceGen {
                         pathName));
                 }
 
-                // The BOM is not required or recommended for UTF-8 files, but anecdotal
-                // evidence suggests that it's sometimes useful.  Shouldn't cause any harm
-                // to have it in the project file.  The explicit Encoding.UTF8 argument
-                // causes it to appear -- WriteAllText normally doesn't.
-                //
                 // Write to a temp file, then rename over original after write has succeeded.
                 string tmpPath = pathName + ".TMP";
-                File.WriteAllText(tmpPath, serializedData, Encoding.UTF8);
+                using (FileStream stream = new FileStream(tmpPath, FileMode.OpenOrCreate,
+                        FileAccess.Write, FileShare.None)) {
+                    if (!SerializeToStream(proj, stream, out errorMessage)) {
+                        return false;
+                    }
+                }
                 if (File.Exists(pathName)) {
                     File.Delete(pathName);
                 }
@@ -111,6 +102,36 @@ namespace SourceGen {
                 errorMessage = ex.Message;
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Serializes the project and writes it to the specified stream.
+        /// </summary>
+        /// <param name="proj">Project to serialize.</param>
+        /// <param name="stream">Stream to write data to.  Will not be seeked or truncated, and
+        ///   will be left open.</param>
+        /// <param name="errorMessage">Human-readable error string, or an empty string if all
+        ///   went well.</param>
+        /// <returns>True on success.</returns>
+        public static bool SerializeToStream(DisasmProject proj, Stream stream,
+                out string errorMessage) {
+            string serializedData = SerializableProjectFile1.SerializeProject(proj);
+            if (ADD_CRLF) {
+                // Add some line breaks.  This looks awful, but it makes text diffs
+                // much more useful.
+                serializedData = TextUtil.NonQuoteReplace(serializedData, "{", "{\r\n");
+                serializedData = TextUtil.NonQuoteReplace(serializedData, "},", "},\r\n");
+                serializedData = TextUtil.NonQuoteReplace(serializedData, ",", ",\r\n");
+            }
+
+            // Use UTF-8 encoding, with a byte-order mark.  It's not required or recommended,
+            // but it's harmless, and might help something decide that the file is UTF-8.
+            using (StreamWriter sw = new StreamWriter(stream, Encoding.UTF8, 4096, true)) {
+                sw.Write(serializedData);
+            }
+
+            errorMessage = string.Empty;
+            return true;
         }
 
         /// <summary>
