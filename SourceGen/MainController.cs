@@ -727,12 +727,17 @@ namespace SourceGen {
 
         #region Auto-save
 
-        private string mRecoveryPathName = string.Empty;
-        private Stream mRecoveryStream = null;
+        private const string RECOVERY_EXT_ADD = "_rec";
+        private const string RECOVERY_EXT = ProjectFile.FILENAME_EXT + RECOVERY_EXT_ADD;
 
-        private DispatcherTimer mAutoSaveTimer = null;
-        private DateTime mLastEditWhen = DateTime.Now;
-        private DateTime mLastAutoSaveWhen = DateTime.Now;
+        private string mRecoveryPathName = string.Empty;    // path to recovery file, or empty str
+        private Stream mRecoveryStream = null;              // stream for recovery file, or null
+
+        private DispatcherTimer mAutoSaveTimer = null;      // auto-save timer, may be disabled
+        private DateTime mLastEditWhen = DateTime.Now;      // timestamp of last user edit
+        private DateTime mLastAutoSaveWhen = DateTime.Now;  // timestamp of last auto-save
+
+        private bool mAutoSaveDeferred = false;
 
 
         /// <summary>
@@ -827,12 +832,31 @@ namespace SourceGen {
         /// Creates or deletes the recovery file, based on the current app settings.
         /// </summary>
         /// <remarks>
-        /// This is called when a new project is created, an existing project is opened, the
-        /// app settings are updated, or Save As is used to change the project name.
+        /// <para>This is called when:</para>
+        /// <list type="bullet">
+        ///   <item>a new project is created</item>
+        ///   <item>an existing project is opened</item>
+        ///   <item>app settings are updated</item>
+        ///   <item>Save As is used to change the project path</item>
+        ///   <item>the project is saved for the first time after a recovery file decision (i.e.
+        ///     while mAutoSaveDeferred is true)</item>
+        /// </list>
         /// </remarks>
         private void RefreshRecoveryFile() {
             if (mProject == null) {
                 // Project not open, nothing to do.
+                return;
+            }
+            if (mProject.IsReadOnly) {
+                // Changes cannot be made, so there's no need for a recovery file.  Also, we
+                // might be in read-only mode because the project is already open and has a
+                // recovery file opened by another process.
+                Debug.WriteLine("Recovery: project is read-only, not creating recovery file");
+                Debug.Assert(mRecoveryStream == null);
+                return;
+            }
+            if (mAutoSaveDeferred) {
+                Debug.WriteLine("Recovery: auto-save deferred, not touching recovery file");
                 return;
             }
 
@@ -855,7 +879,7 @@ namespace SourceGen {
                 // case auto-save was previously disabled.
                 mLastAutoSaveWhen = mLastEditWhen.AddSeconds(-1);
 
-                string pathName = GenerateRecoveryPathName();
+                string pathName = GenerateRecoveryPathName(mProjectPathName);
                 if (!string.IsNullOrEmpty(mRecoveryPathName) && pathName == mRecoveryPathName) {
                     // File is open and the filename hasn't changed.  Nothing to do.
                     Debug.Assert(mRecoveryStream != null);
@@ -866,18 +890,18 @@ namespace SourceGen {
                             "' in favor of '" + pathName + "'");
                         DiscardRecoveryFile();
                     }
-                    Debug.WriteLine("Recovery: opening '" + pathName + "'");
+                    Debug.WriteLine("Recovery: creating '" + pathName + "'");
                     PrepareRecoveryFile();
                 }
                 mAutoSaveTimer.Start();
             }
         }
 
-        private string GenerateRecoveryPathName() {
-            if (string.IsNullOrEmpty(mProjectPathName)) {
+        private static string GenerateRecoveryPathName(string pathName) {
+            if (string.IsNullOrEmpty(pathName)) {
                 return string.Empty;
             } else {
-                return mProjectPathName + "_rec";
+                return pathName + RECOVERY_EXT_ADD;
             }
         }
 
@@ -889,7 +913,7 @@ namespace SourceGen {
             Debug.Assert(mRecoveryStream == null);
             Debug.Assert(string.IsNullOrEmpty(mRecoveryPathName));
 
-            string pathName = GenerateRecoveryPathName();
+            string pathName = GenerateRecoveryPathName(mProjectPathName);
             try {
                 mRecoveryStream = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write);
                 mRecoveryPathName = pathName;
@@ -922,6 +946,64 @@ namespace SourceGen {
             mRecoveryStream = null;
             mRecoveryPathName = string.Empty;
             mAutoSaveTimer.Stop();
+        }
+
+        /// <summary>
+        /// Asks the user if they want to use the recovery file, if one is present and non-empty.
+        /// Both files must exist.
+        /// </summary>
+        /// <param name="projPathName">Path to project file we're trying to open</param>
+        /// <param name="recoveryPath">Path to recovery file.</param>
+        /// <param name="pathToUse">Result: path the user wishes to use.  If we didn't ask the
+        ///   user to choose, because the recovery file was empty or in use by another process,
+        ///   this will be an empty string.</param>
+        /// <param name="asReadOnly">Result: true if project should be opened read-only.</param>
+        /// <returns>False if the user cancelled the operation, true to continue.</returns>
+        private bool HandleRecoveryChoice(string projPathName, string recoveryPath,
+                out string pathToUse, out bool asReadOnly) {
+            pathToUse = string.Empty;
+            asReadOnly = false;
+
+            try {
+                using (FileStream stream = new FileStream(recoveryPath, FileMode.Open,
+                        FileAccess.ReadWrite, FileShare.None)) {
+                    if (stream.Length == 0) {
+                        // Recovery file exists, but is empty and not open by another process.
+                        // Ignore it.  (We could delete it here, but there's no need.)
+                        Debug.WriteLine("Recovery: found existing zero-length file (ignoring)");
+                        return true;
+                    }
+                }
+            } catch (Exception ex) {
+                // Unable to open recovery file.  This is probably happening because another
+                // process has the file open.
+                Debug.WriteLine("Unable to open recovery file: " + ex.Message);
+                MessageBoxResult mbr = MessageBox.Show(mMainWin,
+                    "The project has a recovery file that can't be opened, possibly because the " +
+                    "project is currently open by another copy of the application.  Do you wish " +
+                    "to open the file read-only?",
+                    "Unable to Open", MessageBoxButton.OKCancel, MessageBoxImage.Hand);
+                if (mbr == MessageBoxResult.OK) {
+                    asReadOnly = true;
+                    return true;
+                } else {
+                    asReadOnly = false;
+                    return false;
+                }
+            }
+
+            RecoveryChoice dlg = new RecoveryChoice(mMainWin, projPathName, recoveryPath);
+            if (dlg.ShowDialog() != true) {
+                return false;
+            }
+            if (dlg.UseRecoveryFile) {
+                Debug.WriteLine("Recovery: user chose recovery file");
+                pathToUse = recoveryPath;
+            } else {
+                Debug.WriteLine("Recovery: user chose project file");
+                pathToUse = projPathName;
+            }
+            return true;
         }
 
         #endregion Auto-save
@@ -1342,11 +1424,33 @@ namespace SourceGen {
             DisasmProject newProject = new DisasmProject();
             newProject.UseMainAppDomainForPlugins = UseMainAppDomainForPlugins;
 
+            // Is there a recovery file?
+            mAutoSaveDeferred = false;
+            string recoveryPath = GenerateRecoveryPathName(projPathName);
+            string openPath = projPathName;
+            if (File.Exists(recoveryPath)) {
+                // Found a recovery file.
+                bool ok = HandleRecoveryChoice(projPathName, recoveryPath, out string pathToUse,
+                    out bool asReadOnly);
+                if (!ok) {
+                    // Open has been cancelled.
+                    return;
+                }
+                if (!string.IsNullOrEmpty(pathToUse)) {
+                    // One was chosen.  This should be the case unless the recovery file was
+                    // empty, or was open by a different process.
+                    Debug.WriteLine("Open: user chose '" + pathToUse + "', deferring auto-save");
+                    openPath = pathToUse;
+                    mAutoSaveDeferred = true;
+                }
+                newProject.IsReadOnly |= asReadOnly;
+            }
+
             // Deserialize the project file.  I want to do this before loading the data file
             // in case we decide to store the data file name in the project (e.g. the data
             // file is a disk image or zip archive, and we need to know which part(s) to
             // extract).
-            if (!ProjectFile.DeserializeFromFile(projPathName, newProject,
+            if (!ProjectFile.DeserializeFromFile(openPath, newProject,
                     out FileLoadReport report)) {
                 // Should probably use a less-busy dialog for something simple like
                 // "permission denied", but the open file dialog handles most simple
@@ -1363,11 +1467,16 @@ namespace SourceGen {
             // locate it manually, repeating the process until successful or canceled.
             const string UNKNOWN_FILE = "UNKNOWN";
             string dataPathName;
-            if (projPathName.Length <= ProjectFile.FILENAME_EXT.Length) {
-                dataPathName = UNKNOWN_FILE;
-            } else {
+            if (projPathName.EndsWith(ProjectFile.FILENAME_EXT,
+                    StringComparison.InvariantCultureIgnoreCase)) {
                 dataPathName = projPathName.Substring(0,
                     projPathName.Length - ProjectFile.FILENAME_EXT.Length);
+            } else if (projPathName.EndsWith(RECOVERY_EXT,
+                    StringComparison.InvariantCultureIgnoreCase)) {
+                dataPathName = projPathName.Substring(0,
+                    projPathName.Length - RECOVERY_EXT.Length);
+            } else {
+                dataPathName = UNKNOWN_FILE;
             }
             byte[] fileData;
             while ((fileData = FindValidDataFile(ref dataPathName, newProject,
@@ -1391,7 +1500,7 @@ namespace SourceGen {
                     return;
                 }
 
-                newProject.IsReadOnly = dlg.WantReadOnly;
+                newProject.IsReadOnly |= dlg.WantReadOnly;
             }
 
             mProject = newProject;
@@ -1539,6 +1648,7 @@ namespace SourceGen {
         }
 
         private bool DoSave(string pathName) {
+            Debug.Assert(!mProject.IsReadOnly);     // save commands should be disabled
             Debug.WriteLine("SAVING " + pathName);
             if (!ProjectFile.SerializeToFile(mProject, pathName, out string errorMessage)) {
                 MessageBox.Show(Res.Strings.ERR_PROJECT_SAVE_FAIL + ": " + errorMessage,
@@ -1559,6 +1669,11 @@ namespace SourceGen {
 
             // Seems like a good time to save this off too.
             SaveAppSettings();
+
+            if (mAutoSaveDeferred) {
+                mAutoSaveDeferred = false;
+                RefreshRecoveryFile();
+            }
 
             // The project file is saved, no need to auto-save for a while.
             ResetAutoSaveTimer();

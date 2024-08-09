@@ -238,6 +238,9 @@
     <Compile Include="UndoableChange.cs" />
     <Compile Include="DisplayListSelection.cs" />
     <Compile Include="WeakSymbolRef.cs" />
+    <Compile Include="WpfGui\RecoveryChoice.xaml.cs">
+      <DependentUpon>RecoveryChoice.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfGui\ShowWireframeAnimation.xaml.cs">
       <DependentUpon>ShowWireframeAnimation.xaml</DependentUpon>
     </Compile>
@@ -473,6 +476,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Res\Strings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WpfGui\RecoveryChoice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

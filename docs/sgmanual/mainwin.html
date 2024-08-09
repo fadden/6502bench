@@ -34,13 +34,13 @@ project.</p>
 <p><strong>NOTE:</strong> Support for very large 65816 programs is
 incomplete.  The maximum size for a data file is limited to 1 MiB.</p>
 
-<p>The first time you save the project (with <samp>File &gt; Save</samp>),
-you will be prompted for the project name.  It's best to use the
-data file's name with "<samp>.dis65</samp>" added, so this will be set as
-the default.  The data file's name is not stored in the project file,
-so if you pick a different name, or save the project in a different
-directory, you will have to select the data file manually whenever you
-open the project.</p>
+<p>The application will ask you to save the new project to a file.
+It's best to use the data file's name with "<samp>.dis65</samp>" added,
+so this will be set as the default.  The data file's name is not stored
+in the project file, so if you pick a different name, or save the project
+in a different directory, you will have to select the data file manually
+whenever you open the project.  (You can cancel the dialog to proceed
+without creating a project file, but certain features will be unavailable.)</p>
 
 
 <h2 id="opening">Opening an Existing Project</h2>
@@ -66,6 +66,30 @@ also be given the opportunity to simply cancel loading the project.</p>
 in the application settings.  You can access them from
 <samp>File &gt; Recent Projects</samp>.  If no project is open, buttons
 that open the two most-recently-opened projects will be available.</p>
+
+
+<h2 id="saving">Saving a Project</h2>
+
+<p>You can save your project with <samp>File &gt; Save</samp>, or by
+hitting <kbd class="key">Ctrl+S</kbd>.  To save the project to a different
+file, use <samp>File &gt; Save As</samp>, but bear in mind that the data
+file is expected to have the same name as the project file, minus the
+".dis65" extension.</p>
+
+<p>If auto-save is enabled in the application settings, a "recovery" file
+will be created and updated periodically.  This file has the same name as
+the project file, but with "_rec" added.  The recovery file is only updated
+if the project has been edited but not saved, and the auto-save timer is reset
+whenever the project is manually saved, so if you're diligent about saving
+your work the file may never be written to.</p>
+
+<p>When a project is opened, if a recovery file exists, the file will be
+checked to see if it's empty or open in a different process.  In the former
+case it will be ignored, in the latter you will be asked if you want to
+open the project read-only.  If the file is non-empty and not in use, you
+will be given the opportunity to choose which file to use.  After making a
+choice, the auto-save feature will be disabled until the first manual save
+is made.</p>
 
 
 <h2 id="working">Working With a Project</h2>
