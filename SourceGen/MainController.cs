@@ -746,7 +746,7 @@ namespace SourceGen {
         private void CreateAutoSaveTimer() {
             mAutoSaveTimer = new DispatcherTimer();
             mAutoSaveTimer.Tick += new EventHandler(AutoSaveTick);
-            mAutoSaveTimer.Interval = TimeSpan.FromSeconds(5);
+            mAutoSaveTimer.Interval = TimeSpan.FromSeconds(30); // place-holder, overwritten later
         }
 
         /// <summary>
@@ -862,7 +862,7 @@ namespace SourceGen {
 
             int interval = AppSettings.Global.GetInt(AppSettings.PROJ_AUTO_SAVE_INTERVAL, 0);
             if (interval <= 0) {
-                // We don't want a recovery file.  If one exists, close it and remove it.
+                // We don't want a recovery file.  If one is open, close it and remove it.
                 if (mRecoveryStream != null) {
                     Debug.WriteLine("Recovery: auto-save is disabled");
                     DiscardRecoveryFile();
