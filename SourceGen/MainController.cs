@@ -890,8 +890,13 @@ namespace SourceGen {
                             "' in favor of '" + pathName + "'");
                         DiscardRecoveryFile();
                     }
-                    Debug.WriteLine("Recovery: creating '" + pathName + "'");
-                    PrepareRecoveryFile();
+                    if (!string.IsNullOrEmpty(pathName)) {
+                        Debug.WriteLine("Recovery: creating '" + pathName + "'");
+                        PrepareRecoveryFile();
+                    } else {
+                        // Must be a new project that has never been saved.
+                        Debug.WriteLine("Recovery: project name not set, can't create recovery file");
+                    }
                 }
                 mAutoSaveTimer.Start();
             }
@@ -911,6 +916,7 @@ namespace SourceGen {
         /// </summary>
         private void PrepareRecoveryFile() {
             Debug.Assert(mRecoveryStream == null);
+            Debug.Assert(!string.IsNullOrEmpty(mProjectPathName));
             Debug.Assert(string.IsNullOrEmpty(mRecoveryPathName));
 
             string pathName = GenerateRecoveryPathName(mProjectPathName);
