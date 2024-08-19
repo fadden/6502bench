@@ -152,13 +152,13 @@ CopyData  lda   #&lt;addrs               ;get pointer into
 
         <p>The process can be improved by keeping track of the flags in the
         6502 status register.  For example, in the code fragment shown
-        earlier, <code>BMI</code> conditional branch instruction is used.
+        earlier, the <code>BMI</code> conditional branch instruction is used.
         A simple tracing algorithm would both follow the branch and fall
         through to the following instruction.  However, the code that precedes
         the <code>BMI</code> ensures that the branch is always taken, so a
         clever disassembler would only trace that path.</p>
 
-        <p>(The situation is worse on the 65816, because the length of
+        <p>(This is even more important on the 65816, because the length of
         certain instructions is determined by the values of the processor
         status flags.)</p>
 

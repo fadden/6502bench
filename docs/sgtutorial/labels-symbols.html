@@ -94,13 +94,13 @@
         can greatly improve the readability of the code: something like
         <code>JSR DrawSprite</code> is far more helpful for human readers.
         Further, once the code has been disassembled to source code, using symbols
-        instead of fixed addresses makes it easier to alter the program or re-use
-        the code.</p>
+        instead of fixed addresses makes it easier to alter the program or reuse
+        the code in another project.</p>
 
         <p>When the target address of instructions like <code>JSR</code> and
         <code>LDA</code> falls within the scope of the data file, SourceGen classifies
         the reference as <i>internal</i>, and automatically adds a generic
-        symbolic label (e.g. <code>L1000</code>).  This can be edited if desired.</p>
+        symbolic label (e.g. <code>L1000</code>).  The label can be edited if desired.</p>
     </div>
 </div>
 
@@ -367,7 +367,7 @@
 		button is selected automatically if you start a label with '@' (or
 		whatever character you have configured).  Click <samp>OK</samp>.</p>
 		<p>You now have two lines with the same label.  In some cases the
-        assembly source generator need to may "promote" them to globals, or
+        assembly source generator may need to "promote" them to globals, or
         rename them to make them unique, depending on what your preferred assembler
         allows.</p>
     </div>

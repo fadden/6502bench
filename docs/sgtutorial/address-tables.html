@@ -96,7 +96,8 @@
         <samp>Select File</samp> and navigate to the 6502bench Examples directory.
         In the "A2-Amper-fdraw" directory, select the file "AMPERFDRAW#061d60"
         (just ignore the existing .dis65 file).
-        Click <samp>OK</samp> to create the project.</p>
+        Click <samp>OK</samp> to create the project.  Click <samp>Cancel</samp>
+        to skip saving the project file.</p>
     </div>
 </div>
 
@@ -145,7 +146,7 @@
     <div class="grid-item-text">
         <p>As it happens, the start address of the code
         is $1D60 -- the last four digits of the filename -- so let's make that
-        change.  Double-click the initial <code>.ORG</code> statement,
+        change.  Double-click the initial <code>.ADDRS</code> statement,
         and change it from $2000 to $1D60.  We can now see that $1D70 starts
         right after this initial chunk of code.</p>
     </div>
@@ -212,7 +213,7 @@
         <code>&lt;FUNC-152</code>, you forgot to select the high part.)</p>
 
         <p>We've now changed the first entry in the address table to a
-        symbolic reference, which is helps someone reading the code to
+        symbolic reference, which will help someone reading the code to
         understand what is being referenced.  You could repeat these
         steps (tag as code, set label, change address bytes to symbols)
         for the remaining items, but there's an easier way.</p>

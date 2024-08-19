@@ -2111,7 +2111,6 @@ namespace SourceGen {
         /// <summary>
         /// Returns the next redo operation, and moves the pointer to the next item.
         /// </summary>
-        /// <returns></returns>
         public ChangeSet PopRedoSet() {
             if (!CanRedo) {
                 throw new Exception("Can't redo");

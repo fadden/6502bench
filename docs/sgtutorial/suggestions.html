@@ -93,12 +93,14 @@ suggestions to help you on your way.</p>
     disassembled code before, this is the time to play with different
     conventions, like whether to use MixedCase or underscore_separated
     or SCREAMING_CAPS for labels.</li>
-    <li>Use the program thoroughly.  Understand all of what it does.</li>
+    <li>Use the program you're disassembling thoroughly before you start.
+    Understand all of what it does.</li>
     <li>Start with easily identifiable subroutines.  If a chunk of code is
     reading from the keyboard, you can make reasonable guesses about the
     purpose of the code that interacts with it.
     The start of the program is often the hardest place to begin, because it
-    usually just initializes a bunch of stuff you haven't identified.</li>
+    usually just initializes a bunch of stuff you haven't identified.
+    Work bottom-up.</li>
     <li>Expect to figure out little pieces.  Use what you learn from these
     to figure out other little pieces.  It's a jigsaw puzzle, not a book.</li>
     <li>Don't get discouraged if there's a ton of code that you can't make
@@ -114,8 +116,8 @@ Begin each project by finding the code.  Identify external
 entry points, format tables of addresses, and find JSRs that are
 followed by inline data.  Use an extension script to handle the
 inlines so you won't keep tripping over them.  If parts of the program
-are relocated to a different address, set the appropriate address
-overrides.</p>
+are relocated to a different address, create the appropriate address
+regions.</p>
 <p>Code start tags are rarely needed, and code end tags are almost
 never needed.  You shouldn't have to spend a lot of time manually
 tagging things.  If a piece of code isn't being found, it's usually

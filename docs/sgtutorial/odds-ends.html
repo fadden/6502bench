@@ -141,17 +141,11 @@
     <div class="grid-item-text">
         <p>Continuing on, the code at $2086 touches a few consecutive locations
         that have auto-generated labels.</p>
-    </div>
-</div>
-
-<div class="grid-container">
-    <div class="grid-item-image">
-        <img src="images/t2-2081-stuff.png" alt="t2-2081-stuff"/>
-    </div>
     <div class="grid-item-text">
         <p>Edit the label on line $2081, setting it to <kbd>STUFF</kbd>.
-        Notice how the references to $2081 through $2084 have changed from
-        auto-generated labels to references to <code>STUFF</code>.</p>
+        The operand label on line $2086 also changed.  But what if we want
+        to treat these as a single four-byte item?</p>
+    </div>
     </div>
 </div>
 
@@ -160,25 +154,34 @@
         <img src="images/t2-seek-nearby.png" alt="t2-seek-nearby"/>
     </div>
     <div class="grid-item-text">
-        <p>For some projects this may be undesirable.  Use
-        <samp>Edit &gt; Project Properties</samp>, then in the
-        <samp>Analysis Parameters</samp> box un-check
+        <p>Use <samp>Edit &gt; Project Properties</samp>, then in the
+        <samp>Analysis Parameters</samp> box check
         <samp>Seek nearby targets</samp>, and click <samp>OK</samp>.</p>
     </div>
 </div>
 
 <div class="grid-container">
+    <div class="grid-item-image">
+        <img src="images/t2-2081-stuff.png" alt="t2-2081-stuff"/>
+    </div>
+
     <div class="grid-item-text">
-        <p>You'll notice that the references to $2081 and later have switched
-        back to auto labels.  If you scroll up, you'll see that the references to
+        <p>You'll notice that the references to $2081 and later are now
+        also references to <code>STUFF</code>.  The nearby-target behavior
+        is often useful, because it lets you avoid explicitly labeling every
+        part of a multi-byte data item.  References to the byte before
+        a string or array are automatically resolved to <code>LABEL-1</code>.
+        You can use <samp>Edit &gt; Undo</samp> to turn it back off:
+        changes to project properties are added to the undo/redo buffer
+        just like any other change to the project.</p>
+        <p>(This feature used to be enabled by default, but is now
+        disabled for new projects because it can be more distracting than
+        helpful for some types of code.)
+
+        <p>If you scroll up, you'll see that the references to
         <code>PTR1+1</code> and <code>PTR2+1</code> were
         not affected, because local variables use explicit widths rather
-        than the "nearby" logic.</p>
-        <p>The nearby-target behavior is generally desirable, because it lets you
-        avoid explicitly labeling every part of a multi-byte data item.  For now,
-        use <samp>Edit &gt; Undo</samp> to switch it back on.
-        (Changes to project properties are added to the undo/redo buffer
-        just like any other change to the project.)</p>
+        than the "nearby target" logic.</p>
     </div>
 </div>
 
@@ -187,10 +190,11 @@
         <img src="images/t2-2092.png" alt="t2-2092"/>
     </div>
     <div class="grid-item-text">
-        <p>The code at $2092 looks a bit strange.  <code>LDX</code>, then a
-        <code>BIT</code> with a weird symbol, then another <code>LDX</code>.  If
-        you look at the "bytes" column, you'll notice that the three-byte
-        <code>BIT</code> instruction has only one byte on its line.</p>
+        <p>While we're here, the code at $2092 looks a bit strange.
+        <code>LDX</code>, then a <code>BIT</code> with a weird symbol, then
+        another <code>LDX</code>.  If you look at the "Bytes" column, you'll
+        notice that the three-byte <code>BIT</code> instruction has only one
+        byte on its line.</p>
     </div>
 </div>
 
@@ -199,9 +203,9 @@
         <p>The trick here is that the <code>LDX #$01</code> is embedded inside the
         <code>BIT</code> instruction.  When the code runs through here, X is set
         to $00, then the <code>BIT</code> instruction sets some flags, then the
-        <code>STA</code> runs.  Several lines down there's a <code>BNE</code>
-        to $2095, which is in the middle of the <code>BIT</code> instruction.
-        It loads X with $01, then also continues to the <code>STA</code>.</p>
+        following <code>STA</code> runs.  Several lines down at $20A4 there's a
+        <code>BNE</code> to $2095, which is in the middle of the <code>BIT</code>
+        instruction.  It loads X with $01, then also continues to the <code>STA</code>.</p>
         <p>Embedded instructions are unusual but not unheard-of.  (This trick is
         used extensively in Microsoft BASICs, such as Applesoft.)  When you see the
         extra symbol in the opcode field, you need to look closely at what's going

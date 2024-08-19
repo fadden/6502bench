@@ -96,14 +96,14 @@
         <p>Start a new project with the <samp>Generic 6502</samp> profile,
         and from the SourceGen Tutorial directory select "Tutorial5".
         We'll need to load an extension script from
-        the project directory, so immediately save the project, using the
+        the project directory, so go ahead and save the project, using the
         default name ("Tutorial5.dis65").</p>
 
         <p>Normally a project will give you some sort of hint as to the data
         format, e.g. the graphics might be a platform-specific sprite.  For
         non-standard formats you can glean dimensions from the drawing code.  For
         the purposes of this tutorial we're just using a simple monochrome bitmap
-        format, with 8 pixels per byte, and we'll know that our images are for
+        format, with 8 pixels per byte, and we know that our images are for
         a Tic-Tac-Toe game.  The 'X' and the 'O' are 8x8, the game board is 40x40.
         The bitmaps are sprites with transparency, so pixels are either solid
         or transparent.</p>
@@ -147,7 +147,7 @@
         (that way, if you change the address, your visualizations don't break).
         This is followed by the bitmap's width in bytes, and the bitmap's height.
         Because we have 8 pixels per byte, we're currently showing an 8x1 image.
-        We'll come back to row stride.</p>
+        (We'll come back to look at row stride in a bit.)</p>
     </div>
 </div>
 

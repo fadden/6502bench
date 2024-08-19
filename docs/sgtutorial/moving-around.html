@@ -99,7 +99,7 @@
             <li>Symbols.  All known symbols.  The buttons at the top allow you
             to filter out symbol types that you're not interested in.</li>
             <li>Info.  Information about the selected line.  For code, this
-            will have a summary of the instruction.</li>
+            will include a summary of the instruction's behavior.</li>
         </ol>
     </div>
 </div>
@@ -151,8 +151,9 @@
             <li>Address 1017 and label L1017 were highlighted.  When you select
             a line with an operand that targets an in-file address, the target
             address is highlighted.</li>
-            <li>An entry appeared in the References window.  This tells you that the
-            only reference to L1002 is a branch from address $100B.</li>
+            <li>An entry appeared in the References window.  This tells you
+            that the only reference to L1002 is a branch from address $1009.  The
+            branch operand on line $1009 was also highlighted.</li>
             <li>The Info window filled with a bunch of text that describes the
             line format and some details about the LDA instruction.</li>
         </ul>
@@ -224,9 +225,10 @@
         on opcodes or lines in the side windows, the locations are added to a
         navigation history.  The arrows let you move forward and backward
         through it.</p>
-        <p>The "Nav Backward" feature is bound to the 4th button found on some
-        mice (usually found on the side, activated with the thumb).  This can
-        be used to navigate quickly through a project using only the mouse.</p>
+        <p>The "Nav Backward" feature is usually bound to the 4th button found
+        on some mice (generally found on the side, activated with the thumb).
+        This can be used to navigate quickly through a project using only the
+        mouse.</p>
     </div>
 </div>
 

@@ -93,7 +93,9 @@
         <p>An earlier tutorial demonstrated how to manually mark bytes as
         inline data.  We're going to do it a faster way.  For this tutorial,
         start a new project with the <samp>Generic 6502</samp> profile, and
-        in the SourceGen Examples/Tutorial directory select "Tutorial4".</p>
+        in the SourceGen Examples/Tutorial directory select "Tutorial4" as
+        the data file.
+        You can choose to save the project file or not.</p>
         <!--<p>We'll need to load scripts from the project directory, so we have to
         save the project.  <samp>File &gt; Save</samp>,
         use the default name ("Tutorial4.dis65").</p>-->
@@ -125,9 +127,10 @@
     </div>
     <div class="grid-item-text">
         <p>Nothing happened.  If you look at the script with an editor (and you
-        know some C#), you'll see that it's looking for a <code>JSR</code> to a
-        function that begins with certain prefixes.  For ASCII length-delimited
-        strings, the prefix is <code>InA1_</code>.  So let's set a label.</p>
+        know some C#), you'll see that it's looking for <code>JSR</code>
+        instructions that call functions whose names begin with certain strings.
+        For ASCII strings prefixed with a 1-byte length, the appropriate
+        function name prefix is <code>InA1_</code>.  So let's set a label.</p>
     </div>
 </div>
 
@@ -149,9 +152,9 @@
     <div class="grid-item-text">
         <p>This time, double-click the <code>JSR</code> <i>operand</i>
         ("<samp>L1036</samp>") to edit the operand.
-        Click <samp>Create Label</samp>, and enter <kbd>InA1_PrintString</kbd>.
-        Remember that labels are case-sensitive;
-        you must enter it exactly as shown.  Hit <samp>OK</samp> to accept the label,
+        Click <samp>Create Label</samp>, and enter "<kbd>InA1_PrintString</kbd>".
+        Remember that labels are case-sensitive; you must enter it exactly
+        as shown (note the lower-case 'n').  Hit <samp>OK</samp> to accept the label,
         and <samp>OK</samp> to close the operand editor.</p>
     </div>
 </div>
@@ -177,9 +180,9 @@
         <p>Double-click the operand on line $100D ("<code>L1037</code>"),
         click <samp>Create Label</samp>,
         and set the label to "<kbd>InAZ_PrintString1</kbd>".
-        Hit <samp>OK</samp> twice.  That formatted the first one and got us
-        to the next <code>JSR</code>, at $1019.  Repeat the process on line $1019
-        ("<code>L1038</code>"), setting the label to
+        Hit <samp>OK</samp> twice.  That formatted the string that followed,
+        and got us to the next <code>JSR</code>, at $1019.  Repeat the
+        process on line $1019 ("<code>L1038</code>"), setting the label to
         "<kbd>InAZ_PrintString2</kbd>".</p>
     </div>
 </div>
@@ -192,14 +195,14 @@
         <p>The last <code>JSR</code>, at $1025, is followed by a 16-bit
         pointer.  Edit the operand, and use <samp>Create Label</samp> to
         set the label at the target address to "<kbd>InWA_StringPtr</kbd>".
-        Because the bytes were formatted as an address and not a just a
-        16-bit value, a label was generated automatically.</p>
+        This causes the two bytes to be formatted as a 16-bit address,
+        rather than just a 16-bit value, so a label was generated
+        automatically at the target address ("<code>L102B</code>").</p>
 
-        <p>What we'd really like to do in this case is to have it format the
-        16-bit address as a pointer, and format the data it points to as
-        a null-terminated string.  The StdInline script doesn't know how to
-        do that though, so you'd need to write a custom script.  (Scripts
-        can format multiple data items, add symbolic references to labels
+        <p>It would be even more helpful if it formatted the data at $102B
+        as a null-terminated string.  The basic StdInline script doesn't
+        happen to do that, but it's possible to do it with a custom script.
+        (Scripts can format multiple data items, add symbolic references to labels
         and constants, and chase pointers around.)</p>
 
         <p>The entire project is now nicely formatted.  In a real project the
@@ -207,7 +210,9 @@
         instructions.  There would likely be multiple <code>JSR</code>s to the print function,
         so labeling a single function entry point could format dozens of inline
         strings and clean up the disassembly automatically.  The reason for
-        allowing wildcard names is that some functions may have multiple
+        using name prefixes like <code>InAZ_</code>, rather than full function
+        names, is that there may be more than one function with the same stack
+        mechanics.  Also, some functions may have multiple
         entry points or chain through different locations.</p>
     </div>
 </div>

@@ -91,7 +91,7 @@
     </div>
     <div class="grid-item-text">
         <p>Let's move on to the code at $203D.  It starts by storing a couple of
-        values into direct page address $02/03.  This appears to be setting up a
+        values into zero page addresses $02/03.  This appears to be setting up a
         pointer to $2063, which is a data area inside the file.  So let's make it
         official.</p>
     </div>
@@ -158,8 +158,8 @@
         <img src="images/t2-20a7.png" alt="t2-20a7"/>
     </div>
     <div class="grid-item-text">
-        <p>Double-click on the <code>JSR</code> opcode on line $2045 to jump to
-        <samp>L20A7</samp>.
+        <p>Double-click on the <code>JSR</code> opcode on line $2045 to jump
+        way down to <samp>L20A7</samp>.
         The code here just loads a value from $3000 into the accumulator
         and returns, so not much to see here.  Hit the back-arrow in the
         toolbar to jump back to the <code>JSR</code>.</p>
@@ -256,7 +256,8 @@
         <samp>Edit &gt; Settings</samp> to open the app settings panel.
         In the <samp>Miscellaneous</samp> group on the right side, click the
         <samp>Show cycle counts for instructions</samp> checkbox, then click
-        <samp>OK</samp>.  (There's also a toolbar button for this.)</p>
+        <samp>OK</samp>.  (There's also a toolbar button that toggles it
+        on and off.)</p>
     </div>
 </div>
 
@@ -287,7 +288,8 @@
         The following instruction, <code>ORA #$80</code>, cleared the 'Z' flag and
         set the 'N' flag, so a <code>BMI</code> would also be an always-taken branch.)</p>
 
-        <p>The cycle-count comments can be added to generated source code as well.</p>
+        <p>The cycle-count comments can be added to generated source code as well,
+        with an application setting in the <code>Asm Config</code> tab.</p>
         <p>If you add an end-of-line comment, it appears after the cycle count.
         (Try it.)</p>
     </div>
