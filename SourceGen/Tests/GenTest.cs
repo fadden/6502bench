@@ -456,6 +456,8 @@ namespace SourceGen.Tests {
             // This could be on or off.  Off seems less distracting.
             settings.SetBool(AppSettings.SRCGEN_SHOW_CYCLE_COUNTS, false);
 
+            settings.SetBool(AppSettings.SRCGEN_OMIT_IMPLIED_ACC_OPERAND, false);
+
             IEnumerator<AssemblerInfo> iter = AssemblerInfo.GetInfoEnumerator();
             while (iter.MoveNext()) {
                 AssemblerInfo.Id asmId = iter.Current.AssemblerId;

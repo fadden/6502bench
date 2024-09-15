@@ -803,6 +803,14 @@ namespace SourceGen.WpfGui {
                 IsDirty = true;
             }
         }
+        public bool OmitImpliedAccOperand {
+            get { return mSettings.GetBool(AppSettings.SRCGEN_OMIT_IMPLIED_ACC_OPERAND, false); }
+            set {
+                mSettings.SetBool(AppSettings.SRCGEN_OMIT_IMPLIED_ACC_OPERAND, value);
+                OnPropertyChanged();
+                IsDirty = true;
+            }
+        }
 
         // label placement radio buttons
         public bool LabelPlacement_PreferSameLine {

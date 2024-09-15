@@ -845,6 +845,8 @@ limitations under the License.
                                       IsChecked="{Binding ShowCycleCountsAsm}"/>
                             <CheckBox Content="Identify assembler in output" Margin="0,4,0,0"
                                       IsChecked="{Binding AddIdentComment}"/>
+                            <CheckBox Content="Omit implied accumulator operands if allowed" Margin="0,4,0,0"
+                                      IsChecked="{Binding OmitImpliedAccOperand}"/>
                             <StackPanel Orientation="Vertical" Margin="0,6,0,0">
                                 <TextBlock Text="Put labels on their own line..."/>
                                 <RadioButton GroupName="labelLineGroup" Margin="4,4,0,0"

@@ -214,7 +214,7 @@ not hard stops: if the contents of a field are too wide, the contents
 of the next column will be pushed over.  (The comment field width is
 not currently being used, but may be used to fold lines in the future.)</p>
 
-<p>The Code Generation Settings affect all assemblers.</p>
+<p>The next section, Code Generation Settings, affects all assemblers.</p>
 
 <p>When <samp>show cycle counts in comments</samp> is checked, cycle
 counts are inserted into end-of-line comments.  This works the same as
@@ -228,6 +228,15 @@ passed to the assembler.  This can be very helpful if the source
 file is sent to other people, since it may not otherwise be obvious from
 the source file what the intended target assembler is, or what options
 are required to process the file correctly.</p>
+
+<p>Some 6502 instructions have an "implied" accumulator address mode, e.g.
+<code>LSR</code> and <code>ASL</code>.  The operand may be shown as
+"<code>A</code>" to make the address mode explicit, but it can also be
+omitted.  Some assemblers require it to be present, some require it to be
+absent, most allow either.  By default, the operand is shown, but enabling
+<samp>omit implied accumulator operands if allowed</samp> will cause it to
+be omitted on-screen, in the instruction chart, and in source generated for
+assemblers that don't require it to be present.</p>
 
 <p>Labels can generally be placed either on the same line as a code or data
 operand, or on the line before it.  Placing them on the same line makes

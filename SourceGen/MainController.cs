@@ -508,6 +508,8 @@ namespace SourceGen {
                 settings.GetString(AppSettings.FMT_LOCAL_VARIABLE_PREFIX, string.Empty);
             mFormatterConfig.CommaSeparatedDense =
                 settings.GetBool(AppSettings.FMT_COMMA_SEP_BULK_DATA, true);
+            mFormatterConfig.SuppressImpliedAcc =
+                settings.GetBool(AppSettings.SRCGEN_OMIT_IMPLIED_ACC_OPERAND, false);
             mFormatterConfig.DebugLongComments = DebugLongComments;
 
             string chrDelCereal = settings.GetString(AppSettings.FMT_CHAR_DELIM, null);

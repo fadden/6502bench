@@ -230,7 +230,7 @@ namespace SourceGen.AsmGen {
         /// Configures the assembler-specific format items.
         /// </summary>
         private void SetFormatConfigValues(ref Formatter.FormatConfig config) {
-            config.SuppressImpliedAcc = true;
+            config.SuppressImpliedAcc = true;       // implied acc not allowed
 
             config.OperandWrapLen = 64;
             config.ForceDirectOpcodeSuffix = "+1";

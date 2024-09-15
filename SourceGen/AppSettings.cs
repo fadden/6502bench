@@ -129,6 +129,7 @@ namespace SourceGen {
         public const string SRCGEN_ADD_IDENT_COMMENT = "srcgen-add-ident-comment";
         public const string SRCGEN_LABEL_NEW_LINE = "srcgen-label-new-line";
         public const string SRCGEN_SHOW_CYCLE_COUNTS = "srcgen-show-cycle-counts";
+        public const string SRCGEN_OMIT_IMPLIED_ACC_OPERAND = "srcgen-omit-implied-acc-operand";
 
         // Label file generation settings.
         public const string LABGEN_FORMAT = "labgen-format";
