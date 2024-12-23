@@ -1042,9 +1042,8 @@ namespace SourceGen {
                 // and require word-wrap, so it's easiest just to render them fully here.
                 // Set "spaceAdded" to true so arstart doesn't try to add one after the comment.
                 //
-                // TODO: integrate into FormattedOperandCache so we don't have to
-                //   regenerate them unless they change.  Use the MLC as the dependency.
-                //   Better: create FormattedMLCCache, use the MLC and Formatter.
+                // MultiLineComment now caches the previous render, and will return it from
+                // the FormatText() call if the arguments match.
                 if (mProject.Notes.TryGetValue(offset, out MultiLineComment noteData)) {
                     List<string> formatted = noteData.FormatText(mFormatter, "NOTE: ");
                     StringListToLines(formatted, offset, Line.Type.Note,
