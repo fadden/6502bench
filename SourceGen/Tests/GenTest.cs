@@ -417,7 +417,8 @@ namespace SourceGen.Tests {
             while (iter.MoveNext()) {
                 AssemblerInfo info = iter.Current;
                 AssemblerVersion version = AssemblerVersionCache.GetVersion(info.AssemblerId);
-                ReportProgress("  " + info.Name + " v" + version.VersionStr);
+                ReportProgress("  " + info.Name + " v" +
+                    (version != null ? version.VersionStr : "UNAVAILABLE"));
             }
             ReportProgress("\n");
         }

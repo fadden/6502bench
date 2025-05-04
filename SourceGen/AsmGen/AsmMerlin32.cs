@@ -19,6 +19,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Asm65;
 using CommonUtil;
@@ -32,6 +33,7 @@ namespace SourceGen.AsmGen {
     /// </summary>
     public class GenMerlin32 : IGenerator {
         private const string ASM_FILE_SUFFIX = "_merlin32.S";   // must start with underscore
+        private const string OUT_FILE_SUFFIX = "_merlin32";
 
         // IGenerator
         public DisasmProject Project { get; private set; }
@@ -115,6 +117,7 @@ namespace SourceGen.AsmGen {
 
         // Interesting versions.
         private static CommonUtil.Version V1_0 = new CommonUtil.Version(1, 0);
+        private static CommonUtil.Version V1_2 = new CommonUtil.Version(1, 2);
 
 
         // Pseudo-op string constants.
@@ -249,6 +252,17 @@ namespace SourceGen.AsmGen {
             mOutStream = null;
 
             return new GenerationResults(pathNames, string.Empty, mBinaryIncludes);
+        }
+
+        // IGenerator
+        public void OutputAsmConfig() {
+            // Merlin v1.2 requires TYP and DSK directives.
+            if (mAsmVersion >= V1_2) {
+                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp("DSK"),
+                    mFileNameBase + OUT_FILE_SUFFIX, string.Empty);
+                OutputLine(string.Empty, SourceFormatter.FormatPseudoOp("TYP"),
+                    "BIN", string.Empty);
+            }
         }
 
         // IGenerator
@@ -496,11 +510,6 @@ namespace SourceGen.AsmGen {
                 sb.Append(SourceFormatter.FormatHexValue(Project.FileData[offset + i], 2));
             }
             operand = sb.ToString();
-        }
-
-        // IGenerator
-        public void OutputAsmConfig() {
-            // nothing to do (though we could emit "xc off" for 6502)
         }
 
         // IGenerator
@@ -831,6 +840,12 @@ namespace SourceGen.AsmGen {
             return new AssemblerConfig(string.Empty, new int[] { 9, 6, 11, 74 });
         }
 
+        // Stdout: "C:\Src\WorkBench\Merlin32.exe v 1.0, (c) Brutal Deluxe ..."
+        //         "C:\Src\WorkBench\Merlin32.exe v 1.2 beta 1, (c) Brutal Deluxe ..."
+        // Other platforms may not have the ".exe".  Start at first occurrence of " v ".
+        private static string sVersionPattern = @" v (\d.\d)( [^,]+)?,";
+        private static Regex sVersionRegex = new Regex(sVersionPattern);
+
         // IAssembler
         public AssemblerVersion QueryVersion() {
             AssemblerConfig config =
@@ -846,20 +861,14 @@ namespace SourceGen.AsmGen {
                 return null;
             }
 
-            // Stdout: "C:\Src\WorkBench\Merlin32.exe v 1.0, (c) Brutal Deluxe ..."
-            // Other platforms may not have the ".exe".  Find first occurrence of " v ".
-
-            const string PREFIX = " v ";    // not expecting this to appear in the path
             string str = cmd.Stdout;
-            int start = str.IndexOf(PREFIX);
-            int end = (start < 0) ? -1 : str.IndexOf(',', start);
+            MatchCollection matches = sVersionRegex.Matches(str);
 
-            if (start < 0 || end < 0 || start + PREFIX.Length >= end) {
+            if (matches.Count != 1) {
                 Debug.WriteLine("Couldn't find version in " + str);
                 return null;
             }
-            start += PREFIX.Length;
-            string versionStr = str.Substring(start, end - start);
+            string versionStr = matches[0].Groups[1].Value;
             CommonUtil.Version version = CommonUtil.Version.Parse(versionStr);
             if (!version.IsValid) {
                 return null;
