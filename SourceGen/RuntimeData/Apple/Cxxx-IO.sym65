@@ -43,7 +43,7 @@ RDPAGE2         @ $C01C     ;R bit 7: using page 2?
 RDHIRES         @ $C01D     ;R bit 7: using hi-res graphics?
 ALTCHARSET      @ $C01E     ;R bit 7: using alt char set?
 RD80VID         @ $C01F     ;R bit 7: using 80 columns?
-TAPEOUT         @ $C020     ;RW toggle caseette tape output
+TAPEOUT         @ $C020     ;RW toggle cassette tape output
 MONOCOLOR       @ $C021     ;W color/mono
 TBCOLOR         @ $C022     ;RW screen color (low is BG, high is FG)
 VGCINT          @ $C023     ;R VGC interrupts

@@ -946,17 +946,41 @@ namespace SourceGen.WpfGui {
             } else if (attr.OperandAddress >= 0) {
                 ShowNarExternalSymbol = true;
 
-                // There can be multiple symbols with the same value, so we walk through the
+                // There can be multiple symbols with the same address, so we walk through the
                 // list and identify the first matching platform and project symbols.  We're
-                // only interested in address symbols, not constants.
+                // only interested in address symbols, not constants.  Identifying both project
+                // and platform can be helpful for the user who might be wondering why the platform
+                // symbol isn't appearing.
                 Symbol firstPlatform = null;
                 Symbol firstProject = null;
+
+                // Start by doing a symbol table lookup, which will give us the correct answer
+                // when there are overlapping multi-byte values and masks.
+                Symbol lsym = mProject.SymbolTable.FindNonVariableByAddress(attr.OperandAddress,
+                        OpDef.MemoryEffect.ReadModifyWrite);    // just guess at the mem effect
+                if (lsym == null) {
+                    // Nothing currently defined.
+                } else if (lsym.SymbolSource == Symbol.Source.Platform) {
+                    firstPlatform = lsym;
+                } else if (lsym.SymbolSource == Symbol.Source.Project) {
+                    firstProject = lsym;
+                } else {
+                    Debug.Assert(false, "was expecting project or platform for external addr");
+                }
+
+                // Now walk the table to find whichever we didn't find earlier.  Project symbols
+                // have priority on overlaps, so we should just be looking for platform syms here.
                 foreach (Symbol sym in mProject.SymbolTable) {
-                    if (sym.Value == attr.OperandAddress && !sym.IsConstant) {
+                    if (sym.IsConstant || !(sym is DefSymbol)) {
+                        continue;
+                    }
+                    int width = ((DefSymbol)sym).DataDescriptor.Length;
+                    if (attr.OperandAddress >= sym.Value &&
+                            attr.OperandAddress < sym.Value + width) {
                         if (firstPlatform == null && sym.SymbolSource == Symbol.Source.Platform) {
                             firstPlatform = sym;
                         } else if (firstProject == null &&
-                                    sym.SymbolSource == Symbol.Source.Project) {
+                                sym.SymbolSource == Symbol.Source.Project) {
                             firstProject = sym;
                         }
 
@@ -1147,13 +1171,14 @@ namespace SourceGen.WpfGui {
         /// Configures the UI in the Local Variable box at load time.
         /// </summary>
         private void LocalVariables_Loaded() {
-            if (!mOpDef.IsDirectPageInstruction && !mOpDef.IsStackRelInstruction) {
+            if (mOpDef.IsDirectPageInstruction) {
+                LvMatchFoundText = LV_MATCH_FOUND_ADDRESS;
+            } else if (mOpDef.IsStackRelInstruction) {
+                LvMatchFoundText = LV_MATCH_FOUND_CONSTANT;
+            } else {
                 ShowLvNotApplicable = true;
                 return;
             }
-
-            LvMatchFoundText = mOpDef.IsDirectPageInstruction ?
-                LV_MATCH_FOUND_ADDRESS : LV_MATCH_FOUND_CONSTANT;
 
             LocalVariableLookup lvLookup =
                 new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
