@@ -102,6 +102,11 @@ limitations under the License.
                     <KeyGesture>Ctrl+N</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="EditOperandTargetLabelCmd" Text="Edit Operand Target Label...">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Shift+L</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="EditProjectPropertiesSymbolsCmd">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>F6</KeyGesture>
@@ -263,6 +268,8 @@ limitations under the License.
                         CanExecute="CanEditNote" Executed="EditNoteCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditOperandCmd}"
                         CanExecute="CanEditOperand" Executed="EditOperandCmd_Executed"/>
+        <CommandBinding Command="{StaticResource EditOperandTargetLabelCmd}"
+                        CanExecute="CanEditOperandTargetLabel" Executed="EditOperandTargetLabelCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditProjectPropertiesSymbolsCmd}"
                         CanExecute="IsProjectOpen" Executed="EditProjectPropertiesSymbolsCmd_Executed"/>
         <CommandBinding Command="{StaticResource EditProjectSymbolCmd}"
@@ -436,6 +443,7 @@ limitations under the License.
                 <MenuItem Command="{StaticResource EditCommentCmd}" InputGestureText="Ctrl+;"/>
                 <MenuItem Command="{StaticResource EditLongCommentCmd}"/>
                 <MenuItem Command="{StaticResource EditNoteCmd}"/>
+                <MenuItem Command="{StaticResource EditOperandTargetLabelCmd}"/>
                 <MenuItem Command="{StaticResource EditAddressCmd}"/>
                 <MenuItem Command="{StaticResource EditStatusFlagsCmd}"/>
                 <MenuItem Command="{StaticResource EditDataBankCmd}"/>

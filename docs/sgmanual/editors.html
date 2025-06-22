@@ -338,6 +338,24 @@ CODE     LDA     LABEL+2
 <p>With the label out of the way, the data can be formatted as desired.</p>
 
 
+<h2 id="operand-target-label">Edit Operand Target Label</h2>
+
+<p>This is an Actions menu shortcut that is equivalent to moving to the
+address specified by the operand and editing the label there.  For example,
+if you use this on the line <code>LDA $1234</code>, it would open the
+label edit dialog for the line at address $1234.</p>
+<p>When used on references to addresses outside the scope of the file, the
+project symbol editor will be opened instead.  This does not currently
+allow editing of local variable table entries.</p>
+<p>This also works for data items formatted as 16- or 24-bit addresses.</p>
+<p>Note: the target address is taken from the operand even when a symbol is
+provided.  For example, sometimes jump tables will encode (address - 1)
+for the benefit of a PHA/RTS combination, so the entry for <code>FOO</code>
+will appear as <samp>FOO-1</samp>.  The operand target is actually
+<code>FOO-1</code>, so using this feature won't edit the <code>FOO</code>
+label but instead try to add a new one at the previous address.</p>
+
+
 <h2 id="comment">Edit Comment</h2>
 <p>Enter an end-of-line (EOL) comment, or leave the text field blank to
 delete it.  EOL comments may be placed on instruction and data lines, but

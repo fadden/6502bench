@@ -875,7 +875,7 @@ namespace SourceGen {
         /// project file.)
         /// </summary>
         /// <param name="index">Index into DisasmProject.ActiveDefSymbolListlist.</param>
-        /// <returns>Synthetic file offset.  Value will be < 0.</returns>
+        /// <returns>Synthetic file offset.  Value will be &lt; 0.</returns>
         public static int DefSymOffsetFromIndex(int index) {
             Debug.Assert(index >= 0 && index < (1 << 24));
             return index - (1 << 24);

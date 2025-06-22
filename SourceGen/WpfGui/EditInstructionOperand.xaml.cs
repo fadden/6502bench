@@ -912,23 +912,24 @@ namespace SourceGen.WpfGui {
         private void NumericReferences_Loaded() {
             SymbolEditOffsetResult = -1;
 
+            if (!MainController.GetOperandTargetOffset(mProject, mOffset, out bool isInternal,
+                    out int internalTargetOffset, out Symbol externalSym, out int unused1,
+                    out bool unused2)) {
+                // Probably an immediate operand.
+                ShowNarNotAddress = true;
+                return;
+            }
+
             Anattrib attr = mProject.GetAnattrib(mOffset);
-
-            if (attr.OperandOffset >= 0) {
+            if (isInternal) {
                 // Operand target is inside the file.
-                ShowNarEditLabel = true;
+                Debug.Assert(internalTargetOffset >= 0);
 
-                // Seek back to the start of the instruction or data item if the operand points
-                // into the middle of one.  This is *not* the same as the "nearby" search,
-                // which will traverse multiple items to find a match.
-                // TODO: this can create a situation where the code list shows FUBAR-1 but we
-                // edit an earlier label, if the earlier label has a multi-byte format that
-                // includes the target address.  (An example can be found in 20200-ui-edge-cases.)
-                mEditedLabelOffset =
-                    DataAnalysis.GetBaseOperandOffset(mProject, attr.OperandOffset);
+                ShowNarEditLabel = true;
+                mEditedLabelOffset = internalTargetOffset;
                 mLabelTargetAddress = mProject.GetAnattrib(mEditedLabelOffset).Address;
                 if (mProject.UserLabels.TryGetValue(mEditedLabelOffset, out Symbol sym)) {
-                    // Has a label.
+                    // Has a user label.
                     ShowNarCurrentLabel = true;
                     if (mEditedLabelOffset != attr.OperandOffset) {
                         NarLabelOffsetText = string.Format(CURRENT_LABEL_ADJUSTED_FMT,
@@ -940,10 +941,11 @@ namespace SourceGen.WpfGui {
                     mEditedLabel = sym;
                     CreateEditLabelText = EDIT_LABEL;
                 } else {
+                    // Does not have a user label.  Probably has an auto label.
                     NarLabelOffsetText = CURRENT_LABEL;
                     CreateEditLabelText = CREATE_LABEL;
                 }
-            } else if (attr.OperandAddress >= 0) {
+            } else {
                 ShowNarExternalSymbol = true;
 
                 // There can be multiple symbols with the same address, so we walk through the
@@ -956,14 +958,12 @@ namespace SourceGen.WpfGui {
 
                 // Start by doing a symbol table lookup, which will give us the correct answer
                 // when there are overlapping multi-byte values and masks.
-                Symbol lsym = mProject.SymbolTable.FindNonVariableByAddress(attr.OperandAddress,
-                        OpDef.MemoryEffect.ReadModifyWrite);    // just guess at the mem effect
-                if (lsym == null) {
+                if (externalSym == null) {
                     // Nothing currently defined.
-                } else if (lsym.SymbolSource == Symbol.Source.Platform) {
-                    firstPlatform = lsym;
-                } else if (lsym.SymbolSource == Symbol.Source.Project) {
-                    firstProject = lsym;
+                } else if (externalSym.SymbolSource == Symbol.Source.Platform) {
+                    firstPlatform = externalSym;
+                } else if (externalSym.SymbolSource == Symbol.Source.Project) {
+                    firstProject = externalSym;
                 } else {
                     Debug.Assert(false, "was expecting project or platform for external addr");
                 }
@@ -1005,9 +1005,6 @@ namespace SourceGen.WpfGui {
                     ShowNarNoProjectMatch = true;
                     CreateEditProjectSymbolText = CREATE_PROJECT_SYMBOL;
                 }
-            } else {
-                // Probably an immediate operand.
-                ShowNarNotAddress = true;
             }
         }
 

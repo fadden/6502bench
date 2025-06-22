@@ -1122,6 +1122,10 @@ namespace SourceGen.WpfGui {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditOperand();
         }
 
+        private void CanEditOperandTargetLabel(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditOperandTargetLabel();
+        }
+
         private void CanEditProjectSymbol(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = IsProjectOpen() && mMainCtrl.CanEditProjectSymbol();
         }
@@ -1286,6 +1290,10 @@ namespace SourceGen.WpfGui {
 
         private void EditOperandCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.EditOperand();
+        }
+
+        private void EditOperandTargetLabelCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.EditOperandTargetLabel();
         }
 
         private void EditProjectPropertiesCmd_Executed(object sender, ExecutedRoutedEventArgs e) {

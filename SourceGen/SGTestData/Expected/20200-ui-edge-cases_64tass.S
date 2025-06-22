@@ -3,6 +3,7 @@
         .cdef   $20,$7e,$20
 FOOZP   =       $f0
 OVERL   =       $3000
+projover =      $3100      ;replaced by proj symbol w/same name, diff addr (no match)
 FOO     =       $f000
 FOO_5   =       $f005
 
@@ -45,8 +46,10 @@ next1   lda     addr1
         sta     FOO_5
         sta     FOO+8
         ldx     OVERL
+        ldx     projover
+        ldx     $4000
         ldx     line1
-        ldx     line2
+        ldx     line2+1
         ldx     L221C
         ldx     L221C+1
         ldx     line2+35
@@ -67,8 +70,10 @@ bitsy   .byte   $2c
         .word   FOO_5
         .word   FOO+9
         .word   OVERL
+        .word   projover
+        .word   $4000
         .word   line1
-        .word   line2
+        .word   line2+5
         .word   L221C
         .word   line2+33
         .word   zf4

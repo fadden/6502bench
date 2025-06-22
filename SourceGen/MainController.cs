@@ -60,7 +60,6 @@ namespace SourceGen {
 
         #endregion Project state
 
-
         /// <summary>
         /// Reference back to MainWindow object.
         /// </summary>
@@ -238,7 +237,6 @@ namespace SourceGen {
                 return mProject.ProjectProps.AnalysisParams.AnalyzeUncategorizedData;
             }
         }
-
 
         #region Init and settings
 
@@ -726,7 +724,6 @@ namespace SourceGen {
 
         #endregion Init and settings
 
-
         #region Auto-save
 
         private const string RECOVERY_EXT_ADD = "_rec";
@@ -1015,7 +1012,6 @@ namespace SourceGen {
         }
 
         #endregion Auto-save
-
 
         #region Project management
 
@@ -2114,7 +2110,8 @@ namespace SourceGen {
                 // If it's an Address or Symbol, we can try to resolve
                 // the value.  (Symbols should have been resolved by the
                 // previous clause, but Address entries would not have been.)
-                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
+                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset,
+                    out int unused);
                 if (operandOffset >= 0) {
                     if (!testOnly) {
                         GoToLocation(new NavStack.Location(operandOffset, 0,
@@ -2373,7 +2370,9 @@ namespace SourceGen {
         public void EditLabel() {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int offset = CodeLineList[selIndex].FileOffset;
-
+            DoEditLabel(offset);
+        }
+        private void DoEditLabel(int offset) {
             Anattrib attr = mProject.GetAnattrib(offset);
             int addr = attr.Address;
             if (attr.IsNonAddressable) {
@@ -2408,6 +2407,158 @@ namespace SourceGen {
                         oldUserValue, dlg.LabelSym);
                     ChangeSet cs = new ChangeSet(uc);
                     ApplyUndoableChanges(cs);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines the address and offset referenced by an instruction or data operand.
+        /// </summary>
+        /// <remarks>
+        /// <para>There are five distinct situations (see issue #166):</para>
+        /// <list type="number">
+        ///   <item>instruction, target address is inside file</item>
+        ///   <item>instruction, target address is outside file</item>
+        ///   <item>instruction, target is a zero-page address currently defined in an LVT</item>
+        ///   <item>data item with address operand, target address is inside file</item>
+        ///   <item>data item with address operand, target address is outside file</item>
+        /// </list>
+        /// <para>For the case of wanting to edit the label at the target location, the caller
+        /// will either need to open the LVT editor, the user label editor, or the project
+        /// symbol editor.  Determining priority in the event of a conflict is up to the
+        /// caller.</para>
+        /// <para>It is possible to have an LVT entry and also an internal or external reference
+        /// to zero-page (e.g. zero page is included in the file, or there's a project/platform
+        /// symbol for the address).  We don't currently try to handle LVT entries.</para>
+        /// <para>Sometimes instruction operands are formatted with an explicit symbol.  We pay
+        /// no attention to that here.  This causes us to differ from the Ctrl+J "jump to operand"
+        /// behavior, which prefers to jump to symbols when available.</para>
+        /// <para>This currently ignores explicit symbolic references, and goes directly to
+        /// the address referenced.  If you have a jump table that includes address FOO, but
+        /// encodes it as FOO-1 (for RTS), we will set a label on FOO-1.</para>
+        /// </remarks>
+        /// <param name="project">Disassembly project.</param>
+        /// <param name="selOffset">File offset of selection.</param>
+        /// <param name="isInternal">Result: true if target is internal.</param>
+        /// <param name="internalTargetOffset">Result: offset of target in project file.</param>
+        /// <param name="externalSym">Result: first matching project/platform symbol,
+        ///     if any.</param>
+        /// <param name="externalAddr">Result: decoded external address.</param>
+        /// <returns>True if a target was found.</returns>
+        public static bool GetOperandTargetOffset(DisasmProject project, int selOffset,
+                out bool isInternal, out int internalTargetOffset, out Symbol externalSym,
+                out int externalAddr, out bool isLV) {
+            isInternal = isLV = false;
+            internalTargetOffset = externalAddr = -1;
+            externalSym = null;
+
+            Anattrib attr = project.GetAnattrib(selOffset);
+            if (attr.IsInstructionStart) {
+                if (!attr.IsInstructionWithOperand) {
+                    return false;
+                }
+                if (attr.OperandOffset >= 0) {
+                    // Internal address.  Walk back to start of line if necessary.
+                    isInternal = true;
+                    internalTargetOffset =
+                        DataAnalysis.GetBaseOperandOffset(project, attr.OperandOffset);
+                } else if (attr.OperandAddress >= 0) {
+                    // External address.  Do a symbol table lookup, which will give us the correct
+                    // answer when there are overlapping multi-byte values and masks.  If we don't
+                    // find a match, we still want to return "true" so that the caller can offer
+                    // to create a new project symbol.
+                    externalSym = project.SymbolTable.FindNonVariableByAddress(attr.OperandAddress,
+                        OpDef.MemoryEffect.ReadModifyWrite);    // could get effect from op
+                    externalAddr = attr.OperandAddress;
+                } else {
+                    // Probably an immediate operand, nothing to do.
+                    return false;
+                }
+
+                // TODO(someday): see if a local variable is defined for this operand.
+                OpDef opDef = project.CpuDef.GetOpDef(project.FileData[selOffset]);
+                if ((opDef.IsDirectPageInstruction || opDef.IsStackRelInstruction) &&
+                        attr.DataDescriptor != null && attr.DataDescriptor.HasSymbol &&
+                        attr.DataDescriptor.SymbolRef.IsVariable) {
+                    // The operand is formatted as a local variable.
+                    isLV = true;
+                }
+
+                //Debug.WriteLine("Instr ref: offset=+" + internalTargetOffset.ToString("x6") +
+                //    " extSym=" + externalSym);
+                return true;
+            } else if (attr.IsDataStart || attr.IsInlineDataStart) {
+                // If it's address or symbol, get the target offset.  This only works for
+                // internal addresses.
+                int operandOffset = DataAnalysis.GetDataOperandOffset(project, selOffset,
+                    out int extAddr);
+                if (operandOffset >= 0) {
+                    // Internal address reference.  Walk back to start of line if necessary.
+                    isInternal = true;
+                    internalTargetOffset =
+                        DataAnalysis.GetBaseOperandOffset(project, operandOffset);
+                } else if (extAddr >= 0) {
+                    // External address reference.
+                    externalSym = project.SymbolTable.FindNonVariableByAddress(extAddr,
+                        OpDef.MemoryEffect.ReadModifyWrite);    // mem effect unknowable
+                    externalAddr = extAddr;
+                } else {
+                    return false;
+                }
+                //Debug.WriteLine("Data ref: offset=+" + internalTargetOffset.ToString("x6") +
+                //    " extSym=" + externalSym);
+                return true;
+            } else {
+                Debug.Assert(false, "should be some sort of start");
+                return false;
+            }
+        }
+
+        public bool CanEditOperandTargetLabel() {
+            if (SelectionAnalysis.mNumItemsSelected != 1) {
+                return false;
+            }
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int selOffset = CodeLineList[selIndex].FileOffset;
+            return GetOperandTargetOffset(mProject, selOffset, out bool unused1,
+                out int unused2, out Symbol unused3, out int unused4, out bool unused5);
+        }
+
+        public void EditOperandTargetLabel() {
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int selOffset = CodeLineList[selIndex].FileOffset;
+            if (!GetOperandTargetOffset(mProject, selOffset, out bool isInternal,
+                    out int internalLabelOffset, out Symbol externalSym, out int externalAddr,
+                    out bool isLV)) {
+                Debug.Assert(false, "should not be here");
+                return;
+            }
+            Debug.WriteLine("EOTL: isInternal=" + isInternal + " intOff=+" +
+                internalLabelOffset.ToString("x6") + " extSym=" + externalSym +
+                " extAddr=" + externalAddr + " isLV=" + isLV);
+
+            // Operand targets can be internal or external, and can be in an LVT.  Internal
+            // address user labels have the highest priority, LVTs are next, then external
+            // project/platform symbols.
+            if (isInternal) {
+                Debug.Assert(internalLabelOffset >= 0);
+                DoEditLabel(internalLabelOffset);
+            } else if (isLV) {
+                // Formatted as a local variable, do nothing.
+                // TODO(someday): make this edit the specific symbol in the table
+            } else {
+                // Create or edit project symbol.
+                if (externalSym != null && externalSym.SymbolSource == Symbol.Source.Project) {
+                    // Edit existing project symbol.
+                    DoEditProjectSymbol(CodeListColumn.Label, (DefSymbol)externalSym);
+                } else {
+                    // Platform symbol or nothing at all.  Create a new project symbol.
+                    // (Should we refuse to act if there's only a platform symbol?  Could be
+                    // confusing if they think they're editing the platform, but it's also
+                    // convenient to be able to create the project sym here.)
+                    DefSymbol initVals = new DefSymbol("SYM", externalAddr, Symbol.Source.Project,
+                        Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
+                    DoEditProjectSymbol(CodeListColumn.Label, initVals);
                 }
             }
         }
@@ -2743,6 +2894,9 @@ namespace SourceGen {
             int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
             int symIndex = LineListGen.DefSymIndexFromOffset(CodeLineList[selIndex].FileOffset);
             DefSymbol origDefSym = mProject.ActiveDefSymbolList[symIndex];
+            DoEditProjectSymbol(col, origDefSym);
+        }
+        private void DoEditProjectSymbol(CodeListColumn col, DefSymbol origDefSym) {
             Debug.Assert(origDefSym.SymbolSource == Symbol.Source.Project);
 
             EditDefSymbol dlg = new EditDefSymbol(mMainWin, mFormatter,
@@ -3919,7 +4073,8 @@ namespace SourceGen {
             } else if (attr.IsDataStart || attr.IsInlineDataStart) {
                 // If it's an Address or Symbol, we can try to resolve
                 // the value.
-                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset);
+                int operandOffset = DataAnalysis.GetDataOperandOffset(mProject, line.FileOffset,
+                    out int unused);
                 if (operandOffset >= 0) {
                     return CodeLineList.FindCodeDataIndexByOffset(operandOffset);
                 }

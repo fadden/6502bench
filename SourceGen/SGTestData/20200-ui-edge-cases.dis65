@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":6,
-"FileDataLength":183,
-"FileDataCrc32":-593505978,
+"FileDataLength":193,
+"FileDataCrc32":960553569,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -132,7 +132,7 @@
 {
 "Offset":53,
 "Addr":8704,
-"Length":130,
+"Length":140,
 "PreLabel":"",
 "DisallowInward":false,
 "DisallowOutward":false,
@@ -197,16 +197,16 @@
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"182":{
+"192":{
 "Label":"done",
-"Value":8833,
+"Value":8843,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"157":{
+"163":{
 "Label":"bitsy",
-"Value":8808,
+"Value":8814,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"}},
@@ -260,7 +260,7 @@
 "SymbolRef":null,
 "Extra":null},
 
-"137":{
+"143":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Symbol",
@@ -270,7 +270,7 @@
 
 "Extra":null},
 
-"155":{
+"161":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Symbol",
@@ -278,27 +278,6 @@
 "Label":"bitsy",
 "Part":"Low"},
 
-"Extra":null},
-
-"163":{
-"Length":2,
-"Format":"NumericLE",
-"SubFormat":"Address",
-"SymbolRef":null,
-"Extra":null},
-
-"165":{
-"Length":2,
-"Format":"NumericLE",
-"SubFormat":"Address",
-"SymbolRef":null,
-"Extra":null},
-
-"167":{
-"Length":2,
-"Format":"NumericLE",
-"SubFormat":"Address",
-"SymbolRef":null,
 "Extra":null},
 
 "169":{
@@ -332,6 +311,41 @@
 "177":{
 "Length":2,
 "Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null},
+
+"179":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null},
+
+"181":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null},
+
+"183":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null},
+
+"185":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null},
+
+"187":{
+"Length":2,
+"Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"line2",
@@ -339,7 +353,7 @@
 
 "Extra":null},
 
-"179":{
+"189":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Address",

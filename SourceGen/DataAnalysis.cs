@@ -317,8 +317,10 @@ namespace SourceGen {
         /// </summary>
         /// <param name="proj">Project reference.</param>
         /// <param name="offset">Offset of data item.</param>
+        /// <param name="address">Result: decoded address.</param>
         /// <returns>Operand offset, or -1 if not applicable.</returns>
-        public static int GetDataOperandOffset(DisasmProject proj, int offset) {
+        public static int GetDataOperandOffset(DisasmProject proj, int offset, out int address) {
+            address = -1;
             Anattrib attr = proj.GetAnattrib(offset);
             if (!attr.IsDataStart && !attr.IsInlineDataStart) {
                 return -1;
@@ -335,7 +337,7 @@ namespace SourceGen {
 
             // Treat like an absolute address.  Convert the operand
             // to an address, then resolve the file offset.
-            int address = RawData.GetWord(proj.FileData, offset, dfd.Length,
+            address = RawData.GetWord(proj.FileData, offset, dfd.Length,
                     (dfd.FormatType == FormatDescriptor.Type.NumericBE));
             if (dfd.Length < 3) {
                 // Add the program bank where the data bank should go.  Not perfect but

@@ -1,5 +1,6 @@
 FOOZP    equ   $f0
 OVERL    equ   $3000
+projover equ   $3100      ;replaced by proj symbol w/same name, diff addr (no match)
 FOO      equ   $f000
 FOO_5    equ   $f005
 
@@ -39,8 +40,10 @@ next1    lda   addr1
          sta   FOO_5
          sta   FOO+8
          ldx   OVERL
+         ldx   projover
+         ldx   $4000
          ldx   line1
-         ldx   line2
+         ldx   line2+1
          ldx   L221C
          ldx   L221C+1
          ldx   line2+35
@@ -61,8 +64,10 @@ bitsy    dfb   $2c
          dw    FOO_5
          dw    FOO+9
          dw    OVERL
+         dw    projover
+         dw    $4000
          dw    line1
-         dw    line2
+         dw    line2+5
          dw    L221C
          dw    line2+33
          dw    zf4

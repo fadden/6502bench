@@ -45,7 +45,7 @@ namespace SourceGen {
     ///
     /// To reduce confusion, the fact that something has been de-duped should be obvious.
     ///
-    /// A few quick clicks in the 2019-local-variables test should confirm these.
+    /// A few quick clicks in the 20150-local-variables test should confirm these.
     /// </remarks>
     public class LocalVariableLookup {
         /// <summary>

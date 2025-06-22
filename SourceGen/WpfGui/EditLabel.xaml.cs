@@ -39,7 +39,7 @@ namespace SourceGen.WpfGui {
         private int mUniqueTag;
 
         /// <summary>
-        /// Address we are editing the label for.
+        /// Address we are editing the label for.  This is needed when creating the Symbol result.
         /// </summary>
         private int mAddress;
 
@@ -150,6 +150,10 @@ namespace SourceGen.WpfGui {
             } else {
                 NonAddrWarningVis = Visibility.Collapsed;
             }
+
+#if DEBUG
+            this.Title += " (" + formatter.FormatAddress(address, true) + ")";
+#endif
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

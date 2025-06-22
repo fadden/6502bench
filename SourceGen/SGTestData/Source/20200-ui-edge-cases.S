@@ -41,7 +41,9 @@ addr2   asc     '?'
 FOO     equ     $f000
 FOO_5   equ     $f005
 FOOZP   equ     $f0
-OVERL   equ     $3000
+plataddr equ    $3000
+OVERL   equ     $3100
+NOLAB   equ     $4000
 
 ; Define a slice of zero page inside the program.
         org     $f4             ;EDIT: add this
@@ -61,11 +63,13 @@ next1
         sta     FOO             ;external addr
         sta     FOO_5           ;external addr (overlaps w/FOO)
         sta     FOO+8           ;external addr (range)
+        ldx     plataddr        ;external addr, platform only
         ldx     OVERL           ;external addr, plat and proj
+        ldx     NOLAB           ;external addr, no symbol
         ldx     line1           ;internal addr
-        ldx     line2           ;internal addr
-        ldx     line3           ;internal addr with offset, line start
-        ldx     line3+1         ;internal addr with offset, inside line
+        ldx     line2+1         ;internal addr with offset
+        ldx     line3           ;internal addr, auto label
+        ldx     line3+1         ;internal addr, auto label, offset
         ldx     line4+7         ;EDIT: set operand symbol "line2"
 
 ; EDIT: add local variable entry "foo_f0", value $f0, width 2
@@ -88,9 +92,11 @@ bitsy   bit     $ffa9           ;EDIT: set label "bitsy" on BIT instruction
         dw      FOO
         dw      FOO_5
         dw      FOO+9
+        dw      plataddr
         dw      OVERL
+        dw      NOLAB
         dw      line1
-        dw      line2
+        dw      line2+5
         dw      line3
         dw      line4+5         ;EDIT: set operand symbol "line2"
         dw      zf4
