@@ -152,7 +152,7 @@ namespace SourceGen.WpfGui {
             }
 
 #if DEBUG
-            this.Title += " (" + formatter.FormatAddress(address, true) + ")";
+            this.Title += " ($" + formatter.FormatAddress(address, address > 0xffff) + ")";
 #endif
         }
 

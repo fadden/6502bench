@@ -353,7 +353,9 @@ provided.  For example, sometimes jump tables will encode (address - 1)
 for the benefit of a PHA/RTS combination, so the entry for <code>FOO</code>
 will appear as <samp>FOO-1</samp>.  The operand target is actually
 <code>FOO-1</code>, so using this feature won't edit the <code>FOO</code>
-label but instead try to add a new one at the previous address.</p>
+label but instead try to add a new one at the previous address.  The
+feature does back up to the start of a line, however, so it won't try
+to split an instruction or multi-byte data item.</p>
 
 
 <h2 id="comment">Edit Comment</h2>

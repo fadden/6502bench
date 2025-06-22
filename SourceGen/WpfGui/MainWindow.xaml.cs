@@ -1701,6 +1701,12 @@ namespace SourceGen.WpfGui {
 
         #region References panel
 
+        public bool IsEnabledReferencesListCopyOut {
+            get { return mIsEnabledReferencesListCopyOut; }
+            set { mIsEnabledReferencesListCopyOut = value; OnPropertyChanged(); }
+        }
+        private bool mIsEnabledReferencesListCopyOut = false;
+
         public class ReferencesListItem {
             public int OffsetValue { get; private set; }
             public string Offset { get; private set; }
@@ -1723,6 +1729,16 @@ namespace SourceGen.WpfGui {
         public ObservableCollection<ReferencesListItem> ReferencesList { get; private set; } =
             new ObservableCollection<ReferencesListItem>();
 
+        internal void ReferencesListClear() {
+            ReferencesList.Clear();
+            IsEnabledReferencesListCopyOut = false;
+        }
+
+        internal void ReferencesListAdd(ReferencesListItem newItem) {
+            ReferencesList.Add(newItem);
+            IsEnabledReferencesListCopyOut = true;
+        }
+
         private void ReferencesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
             if (!referencesGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
                     out object item)) {
@@ -1735,6 +1751,17 @@ namespace SourceGen.WpfGui {
             mMainCtrl.GoToLocation(new NavStack.Location(rli.OffsetValue, 0,
                 NavStack.GoToMode.JumpToCodeData), true);
             //codeListView.Focus();
+        }
+
+        // Copy everything in the references list to a stand-alone window.
+        private void ReferencesListCopyOut_Click(object sender, RoutedEventArgs e) {
+            List<ReferenceTable.ReferenceTableItem> newItems =
+                new List<ReferenceTable.ReferenceTableItem>();
+            foreach (ReferencesListItem item in ReferencesList) {
+                newItems.Add(new ReferenceTable.ReferenceTableItem(item.OffsetValue,
+                    item.Offset, item.Addr, item.Type));
+            }
+            mMainCtrl.ShowReferenceTable(newItems);
         }
 
         #endregion References panel

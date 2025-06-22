@@ -116,6 +116,11 @@ namespace SourceGen {
         public bool IsInstructionChartOpen { get { return mInstructionChartDialog != null; } }
 
         /// <summary>
+        /// Reference table window.  Tied to the current project.
+        /// </summary>
+        private ReferenceTable mReferenceTableDialog;
+
+        /// <summary>
         /// List of recently-opened projects.
         /// </summary>
         public List<string> RecentProjectPaths = new List<string>(MAX_RECENT_PROJECTS);
@@ -1701,6 +1706,7 @@ namespace SourceGen {
             mAsciiChartDialog?.Close();
             mInstructionChartDialog?.Close();
             mHexDumpDialog?.Close();
+            mReferenceTableDialog?.Close();
             mShowAnalysisTimersDialog?.Close();
             mShowAnalyzerOutputDialog?.Close();
             mShowUndoRedoHistoryDialog?.Close();
@@ -1742,6 +1748,7 @@ namespace SourceGen {
 
             // Close modeless dialogs that depend on project.
             mHexDumpDialog?.Close();
+            mReferenceTableDialog?.Close();
             mShowAnalysisTimersDialog?.Close();
             mShowAnalyzerOutputDialog?.Close();
             mShowUndoRedoHistoryDialog?.Close();
@@ -4448,7 +4455,7 @@ namespace SourceGen {
         /// be a problem.
         /// </summary>
         private void UpdateReferencesPanel() {
-            mMainWin.ReferencesList.Clear();
+            mMainWin.ReferencesListClear();
 
             if (mMainWin.CodeListView_GetSelectionCount() != 1) {
                 // Nothing selected, or multiple lines selected.
@@ -4545,7 +4552,7 @@ namespace SourceGen {
                     (xr.IsByName ? "Sym " : "Oth ") + typeStr + idxStr +
                         formatter.FormatAdjustment(-xr.Adjustment));
 
-                mMainWin.ReferencesList.Add(rli);
+                mMainWin.ReferencesListAdd(rli);
             }
 
             // TODO(maybe): set the selection to something, instead of just inheriting it?
@@ -5224,6 +5231,24 @@ namespace SourceGen {
             Tools.WpfGui.ShowText dlg = new Tools.WpfGui.ShowText(mMainWin, mapStr);
             dlg.Title = "Address Map";
             dlg.ShowDialog();
+        }
+
+        /// <summary>
+        /// Shows a table of references in a non-modial dialog window.  If the window is already
+        /// being displayed, the contents are replaced.
+        /// </summary>
+        public void ShowReferenceTable(List<ReferenceTable.ReferenceTableItem> items) {
+            if (mReferenceTableDialog == null) {
+                // Create without owner so it doesn't have to be in front of main window.
+                mReferenceTableDialog = new ReferenceTable(null, this);
+                mReferenceTableDialog.Closing += (sender, e) => {
+                    Debug.WriteLine("Reference table dialog closed");
+                    mReferenceTableDialog = null;
+                };
+                mReferenceTableDialog.Show();
+            }
+
+            mReferenceTableDialog.SetItems(items);
         }
 
         #endregion Tools

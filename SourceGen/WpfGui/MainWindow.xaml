@@ -591,6 +591,7 @@ limitations under the License.
                 </Grid.RowDefinitions>
 
                 <GroupBox Grid.Row="0" Header="References">
+                    <Grid>
                     <DataGrid Name="referencesGrid" IsReadOnly="True"
                               ItemsSource="{Binding ReferencesList}"
                               FontFamily="{StaticResource GeneralMonoFont}"
@@ -608,6 +609,11 @@ limitations under the License.
                             <DataGridTextColumn Header="Type" Width="119" Binding="{Binding Type}"/>
                         </DataGrid.Columns>
                     </DataGrid>
+                    <Button Content="Copy Out" Width="70" Height="19" Margin="2"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            IsEnabled="{Binding IsEnabledReferencesListCopyOut}"
+                            Click="ReferencesListCopyOut_Click"/>
+                    </Grid>
                 </GroupBox>
 
                 <GroupBox Grid.Row="2" Header="Notes">
