@@ -345,8 +345,8 @@ address specified by the operand and editing the label there.  For example,
 if you use this on the line <code>LDA $1234</code>, it would open the
 label edit dialog for the line at address $1234.</p>
 <p>When used on references to addresses outside the scope of the file, the
-project symbol editor will be opened instead.  This does not currently
-allow editing of local variable table entries.</p>
+project symbol editor will be opened instead.  This works for project symbols
+and local variable table entries.</p>
 <p>This also works for data items formatted as 16- or 24-bit addresses.</p>
 <p>Note: the target address is taken from the operand even when a symbol is
 provided.  For example, sometimes jump tables will encode (address - 1)

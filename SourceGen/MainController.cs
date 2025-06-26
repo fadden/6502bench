@@ -2482,7 +2482,8 @@ namespace SourceGen {
                     return false;
                 }
 
-                // TODO(someday): see if a local variable is defined for this operand.
+                // See if a local variable is defined for this operand.
+                // TODO(maybe): we don't currently get this far for 65816 stack relative stuff.
                 OpDef opDef = project.CpuDef.GetOpDef(project.FileData[selOffset]);
                 if ((opDef.IsDirectPageInstruction || opDef.IsStackRelInstruction) &&
                         attr.DataDescriptor != null && attr.DataDescriptor.HasSymbol &&
@@ -2551,8 +2552,8 @@ namespace SourceGen {
                 Debug.Assert(internalLabelOffset >= 0);
                 DoEditLabel(internalLabelOffset);
             } else if (isLV) {
-                // Formatted as a local variable, do nothing.
-                // TODO(someday): make this edit the specific symbol in the table
+                // Formatted as a local variable, edit individual symbol.
+                DoEditLVOperand(selOffset);
             } else {
                 // Create or edit project symbol.
                 if (externalSym != null && externalSym.SymbolSource == Symbol.Source.Project) {
@@ -2566,6 +2567,72 @@ namespace SourceGen {
                     DefSymbol initVals = new DefSymbol("SYM", externalAddr, Symbol.Source.Project,
                         Symbol.Type.ExternalAddr, FormatDescriptor.SubType.None);
                     DoEditProjectSymbol(CodeListColumn.Label, initVals);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Edits the local variable referenced by an instruction operand.
+        /// </summary>
+        /// <remarks>
+        /// This is used by the "edit operand target label" feature.  Double-clicking on an LVT
+        /// entry edits the whole table rather than a single entry.
+        /// </remarks>
+        /// <param name="selOffset">Offset of instruction.</param>
+        private void DoEditLVOperand(int selOffset) {
+            OpDef opDef = mProject.CpuDef.GetOpDef(mProject.FileData[selOffset]);
+            if (!opDef.IsDirectPageInstruction && !opDef.IsStackRelInstruction) {
+                Debug.Assert(false);
+                return;
+            }
+            Anattrib attr = mProject.GetAnattrib(selOffset);
+            if (!attr.DataDescriptor.SymbolRef.IsVariable) {
+                Debug.Assert(false);
+                return;
+            }
+            int operandValue = attr.OperandAddress;
+            if (operandValue < 0) {
+                Debug.Assert(false);
+                return;
+            }
+
+            // Find the table in which the symbol is defined.
+            LocalVariableLookup lvLookup =
+                new LocalVariableLookup(mProject.LvTables, mProject, null, false, false);
+            int lvTableOffset = lvLookup.GetDefiningTableOffset(selOffset,
+                attr.DataDescriptor.SymbolRef);
+            if (lvTableOffset < 0) {
+                Debug.Assert(false, "LV table not found");
+                return;
+            }
+            LocalVariableTable lvt = mProject.LvTables[lvTableOffset];
+
+            // The SymbolRef is a weak reference, by label.  Get the actual symbol definition
+            // from the table.  Because of the de-duplication stuff, we need to use the general
+            // LV lookup function (I think).
+            DefSymbol sym = lvLookup.GetSymbol(selOffset, operandValue,
+                opDef.IsDirectPageInstruction ? Symbol.Type.ExternalAddr : Symbol.Type.Constant);
+            if (sym == null) {
+                Debug.Assert(false, "LV sym not found");
+                return;
+            }
+            // Un-de-duplicate the label.
+            DefSymbol origSym = lvLookup.GetOriginalForm(sym);
+
+            EditDefSymbol dlg = new EditDefSymbol(mMainWin, mFormatter,
+                lvt.GetSortedByLabel(), origSym, origSym,
+                mProject.SymbolTable, true, true);
+            if (dlg.ShowDialog() == true) {
+                if (origSym != dlg.NewSym) {
+                    // A change as made.  Clone the table, replace the entry, and store the table.
+                    Debug.Assert(dlg.NewSym != null);
+                    ChangeSet cs = new ChangeSet(1);
+                    LocalVariableTable editedLvTable = new LocalVariableTable(lvt);
+                    editedLvTable.AddOrReplace(dlg.NewSym);
+                    UndoableChange uc = UndoableChange.CreateLocalVariableTableChange(lvTableOffset,
+                        lvt, editedLvTable);
+                    cs.Add(uc);
+                    ApplyUndoableChanges(cs);
                 }
             }
         }

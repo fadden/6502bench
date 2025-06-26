@@ -702,7 +702,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Format the symbol and adjustment using common expression syntax.
+        /// Format the symbol and adjustment using common expression syntax (ACME, 64tass).
         /// </summary>
         private static void FormatNumericSymbolCommon(Formatter formatter, Symbol sym,
                 Dictionary<string, string> labelMap, FormatDescriptor dfd,
@@ -864,7 +864,11 @@ namespace SourceGen {
                 }
 
                 // Starting with a '(' makes it look like an indirect operand, so we need
-                // to prefix the expression with a no-op addition.
+                // to prefix the expression with a no-op addition.  In most cases we could
+                // use a unary '+', but ACME rejects data operands like "+(absl >> 8)-16"
+                // (see test 20030-labels-and-symbols).  (Check flags & Is64Tass here?)
+                // TODO: this is only ambiguous for instruction operands; data operands don't need
+                // special treatment.
                 if (sb[0] == '(' && (flags & FormatNumericOpFlags.HasHashPrefix) == 0) {
                     sb.Insert(0, "0+");
                 }

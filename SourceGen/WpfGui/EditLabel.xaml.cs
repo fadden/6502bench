@@ -80,6 +80,12 @@ namespace SourceGen.WpfGui {
         }
         string mLabelText;
 
+        public string EnterLabelText {
+            get { return mEnterLabelText; }
+            set { mEnterLabelText = value; OnPropertyChanged(); }
+        }
+        string mEnterLabelText;
+
         // Radio buttons.
         public bool mIsNonUniqueChecked, mIsNonUniqueEnabled;
         public bool IsNonUniqueChecked {
@@ -144,16 +150,14 @@ namespace SourceGen.WpfGui {
 
             string fmt = (string)FindResource("str_NonUniqueLocalFmt");
             NonUniqueButtonLabel = string.Format(fmt, mFormatter.NonUniqueLabelPrefix);
+            fmt = (string)FindResource("str_EnterLabelFmt");
+            EnterLabelText = string.Format(fmt, formatter.FormatAddress(address, address > 0xffff));
 
             if (mAddress == Address.NON_ADDR) {
                 NonAddrWarningVis = Visibility.Visible;
             } else {
                 NonAddrWarningVis = Visibility.Collapsed;
             }
-
-#if DEBUG
-            this.Title += " ($" + formatter.FormatAddress(address, address > 0xffff) + ")";
-#endif
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

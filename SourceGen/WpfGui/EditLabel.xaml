@@ -30,6 +30,7 @@ limitations under the License.
 
     <Window.Resources>
         <system:String x:Key="str_NonUniqueLocalFmt">_Non-unique local ('{0}')</system:String>
+        <system:String x:Key="str_EnterLabelFmt">Enter label for ${0}:</system:String>
     </Window.Resources>
 
     <Grid Margin="8">
@@ -43,7 +44,7 @@ limitations under the License.
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
-            <TextBlock Text="Enter label:"/>
+            <TextBlock Text="{Binding EnterLabelText, FallbackValue=Enter label for $1234:}"/>
             <TextBox Name="labelTextBox" Margin="0,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
                      Text="{Binding LabelText, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Name="maxLengthLabel" Text="• Must be 2-32 characters long (or blank to remove)"
