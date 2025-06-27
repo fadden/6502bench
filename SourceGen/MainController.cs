@@ -2545,6 +2545,48 @@ namespace SourceGen {
                 internalLabelOffset.ToString("x6") + " extSym=" + externalSym +
                 " extAddr=" + externalAddr + " isLV=" + isLV);
 
+            // Check to see if a symbol has been explicitly set.  If so, we want to edit the
+            // label at the address for that symbol, or the project symbol entry, rather than
+            // using the numeric value of the operand to do the determination.  This feels better
+            // because you're editing the label shown on screen in the operand field.
+            if (mProject.OperandFormats.TryGetValue(selOffset, out FormatDescriptor dfd) &&
+                    dfd.FormatType == FormatDescriptor.Type.NumericLE &&
+                    dfd.FormatSubType == FormatDescriptor.SubType.Symbol) {
+                // Symbol formats are weak references, so we need to look the label up in the
+                // symbol table to ensure that it exists.  Non-local label references will have
+                // the uniquification string appended.
+                string label = dfd.SymbolRef.Label;
+                bool didEdit = false;
+                if (mProject.SymbolTable.TryGetNonVariableValue(label, out Symbol foundSym)) {
+                    if (foundSym.SymbolSource == Symbol.Source.User) {
+                        // Edit the label at the target address.
+                        int labelOffset = mProject.FindLabelOffsetByName(label);
+                        if (labelOffset >= 0) {
+                            DoEditLabel(labelOffset);
+                            didEdit = true;
+                        } else {
+                            Debug.Assert(false, "Can't edit symbol " + foundSym);
+                        }
+                    } else if (foundSym.SymbolSource == Symbol.Source.Project) {
+                        // Edit the symbol we found.
+                        Debug.Assert(foundSym is DefSymbol);
+                        DoEditProjectSymbol(CodeListColumn.Label, (DefSymbol)foundSym);
+                        didEdit = true;
+                    } else {
+                        // Could be a platform symbol, or we managed to get something odd in here.
+                        // Whatever the case, fall through to the "uneditable" case.
+                    }
+                }
+                if (!didEdit) {
+                    // If we can't edit it for whatever reason, just open the appropriate Edit
+                    // Operand dialog, so they can fix the symbol name.  Seems more appropriate
+                    // than posting an error dialog or quietly doing nothing.
+                    Debug.WriteLine("Unable to cleverly edit '" + label + "', doing EO");
+                    EditOperand();
+                }
+                return;
+            }
+
             // Operand targets can be internal or external, and can be in an LVT.  Internal
             // address user labels have the highest priority, LVTs are next, then external
             // project/platform symbols.

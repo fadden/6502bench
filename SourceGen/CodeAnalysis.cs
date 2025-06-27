@@ -1082,7 +1082,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Sets the format of an instruction operand.
+        /// Sets the format of an instruction operand.  Invoked from extension script.
         /// </summary>
         /// <param name="offset">Offset of opcode.</param>
         /// <param name="subType">Format sub-type.</param>
