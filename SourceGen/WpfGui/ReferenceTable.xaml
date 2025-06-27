@@ -24,9 +24,13 @@ limitations under the License.
         Title="Reference List"
         Width="400" Height="300" MinWidth="180" MinHeight="120" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="True"
-        PreviewKeyDown="Window_KeyEventHandler">
+        PreviewKeyDown="Window_KeyEventHandler" Closing="Window_Closing">
 
     <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <DataGrid Name="tableDataGrid" IsReadOnly="True"
                 ItemsSource="{Binding ReferencesList}"
                 FontFamily="{StaticResource GeneralMonoFont}"
@@ -44,5 +48,10 @@ limitations under the License.
                 <DataGridTextColumn Header="Type" Width="119" Binding="{Binding Type}"/>
             </DataGrid.Columns>
         </DataGrid>
+
+        <StackPanel Grid.Row="1" Margin="0,5,0,0" Orientation="Horizontal">
+            <!-- Bind the checkbox directly to the window's Topmost property. -->
+            <CheckBox Content="Always on top" IsChecked="{Binding Path=Topmost}"/>
+        </StackPanel>
     </Grid>
 </Window>

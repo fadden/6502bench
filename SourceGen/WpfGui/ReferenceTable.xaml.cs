@@ -47,6 +47,9 @@ namespace SourceGen.WpfGui {
             }
         }
 
+        // Remember setting for duration of execution.
+        private static bool sAlwaysOnTop = true;
+
         public ObservableCollection<ReferenceTableItem> ReferencesList { get; private set; } =
             new ObservableCollection<ReferenceTableItem>();
 
@@ -58,6 +61,7 @@ namespace SourceGen.WpfGui {
             DataContext = this;
 
             mMainCtrl = mainCtrl;
+            Topmost = sAlwaysOnTop;
         }
 
         /// <summary>
@@ -76,6 +80,11 @@ namespace SourceGen.WpfGui {
                 Close();
                 e.Handled = true;
             }
+        }
+
+        // Remember the "always on top" setting.
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+            sAlwaysOnTop = Topmost;
         }
 
         private void ReferencesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
