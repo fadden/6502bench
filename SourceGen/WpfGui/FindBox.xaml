@@ -19,6 +19,7 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Find..."
@@ -26,13 +27,19 @@ limitations under the License.
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         ContentRendered="Window_ContentRendered"
         PreviewKeyDown="Window_KeyEventHandler">
+
+    <Window.Resources>
+        <system:String x:Key="str_FindTitle">Find...</system:String>
+        <system:String x:Key="str_FindAllTitle">Find All...</system:String>
+    </Window.Resources>
+
     <StackPanel Margin="8">
         <StackPanel Orientation="Horizontal">
             <TextBox Name="findTextBox" Width="200" Text="{Binding TextToFind}"/>
             <Button Content="Find" Width="70" IsDefault="True" Margin="16,0,0,0"
                     Click="OkButton_Click"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding DirectionVis}">
             <RadioButton Content="_Forward" IsChecked="{Binding IsForward}"/>
             <RadioButton Content="_Backward" Margin="16,0,0,0" IsChecked="{Binding IsBackward}"/>
         </StackPanel>

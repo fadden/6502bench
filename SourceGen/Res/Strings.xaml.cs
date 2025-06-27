@@ -181,6 +181,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_FileFilterText");
         public static string FILE_INFO_FMT =
             (string)Application.Current.FindResource("str_FileInfoFmt");
+        public static string FIND_ALL_CAPTION =
+            (string)Application.Current.FindResource("str_FindAllCaption");
+        public static string FIND_ALL_NO_MATCH =
+            (string)Application.Current.FindResource("str_FindAllNoMatch");
         public static string FIND_REACHED_START =
             (string)Application.Current.FindResource("str_FindReachedStart");
         public static string FIND_REACHED_START_CAPTION =

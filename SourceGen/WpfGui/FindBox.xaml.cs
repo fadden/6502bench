@@ -48,6 +48,8 @@ namespace SourceGen.WpfGui {
             set { mIsBackward = value; OnPropertyChanged(); }
         }
 
+        public Visibility DirectionVis { get; set; }
+
         // INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
@@ -58,13 +60,20 @@ namespace SourceGen.WpfGui {
         /// <summary>
         /// Constructor.  Pass in the last string searched for, to use as the initial value.
         /// </summary>
-        public FindBox(Window owner, string findStr) {
+        public FindBox(Window owner, string findStr, bool isFindAll) {
             InitializeComponent();
             Owner = owner;
             DataContext = this;
 
             Debug.Assert(findStr != null);
             TextToFind = findStr;
+            if (isFindAll) {
+                DirectionVis = Visibility.Collapsed;
+                Title = (string)FindResource("str_FindAllTitle");
+            } else {
+                DirectionVis = Visibility.Visible;
+                Title = (string)FindResource("str_FindTitle");
+            }
 
             if (sLastSearchBackward) {
                 IsBackward = true;

@@ -16,7 +16,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
@@ -27,23 +29,30 @@ namespace SourceGen.WpfGui {
     /// Side window with references to the project.  This could be copied out of the References
     /// panel or generated from a "find all" command.
     /// </summary>
-    public partial class ReferenceTable : Window {
+    public partial class ReferenceTable : Window, INotifyPropertyChanged {
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "") {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public class ReferenceTableItem {
-            public int OffsetValue { get; private set; }
+            public NavStack.Location Location { get; private set; }
             public string Offset { get; private set; }
             public string Addr { get; private set; }
-            public string Type { get; private set; }
+            public string Text { get; private set; }
 
-            public ReferenceTableItem(int offsetValue, string offset, string addr, string type) {
-                OffsetValue = offsetValue;
+            public ReferenceTableItem(NavStack.Location location,
+                    string offset, string addr, string text) {
+                Location = location;
                 Offset = offset;
                 Addr = addr;
-                Type = type;
+                Text = text;
             }
 
             public override string ToString() {
-                return "[ReferenceTableItem: off=" + Offset + " addr=" + Addr + " type=" +
-                    Type + "]";
+                return "[ReferenceTableItem: loc=" + Location + " addr=" + Addr + " text=" +
+                    Text + "]";
             }
         }
 
@@ -53,7 +62,14 @@ namespace SourceGen.WpfGui {
         public ObservableCollection<ReferenceTableItem> ReferencesList { get; private set; } =
             new ObservableCollection<ReferenceTableItem>();
 
+        public string CountText {
+            get { return mCountText; }
+            set { mCountText = value; OnPropertyChanged(); }
+        }
+        private string mCountText;
+
         private MainController mMainCtrl;
+
 
         public ReferenceTable(Window owner, MainController mainCtrl) {
             InitializeComponent();
@@ -64,6 +80,13 @@ namespace SourceGen.WpfGui {
             Topmost = sAlwaysOnTop;
         }
 
+        private void SetCount(int count) {
+            string fmt = (count == 1) ?
+                (string)FindResource("str_EntryCountSingleFmt") :
+                (string)FindResource("str_EntryCountPluralFmt");
+            CountText = string.Format(fmt, count);
+        }
+
         /// <summary>
         /// Replaces the existing list of items with a new list.
         /// </summary>
@@ -72,6 +95,7 @@ namespace SourceGen.WpfGui {
             foreach (ReferenceTableItem item in items) {
                 ReferencesList.Add(item);
             }
+            SetCount(ReferencesList.Count);
         }
 
         // Catch ESC key.
@@ -83,10 +107,11 @@ namespace SourceGen.WpfGui {
         }
 
         // Remember the "always on top" setting.
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void Window_Closing(object sender, CancelEventArgs e) {
             sAlwaysOnTop = Topmost;
         }
 
+        // Move the main window code list to the selected item.
         private void ReferencesList_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
             if (!tableDataGrid.GetClickRowColItem(e, out int unusedRow, out int unusedCol,
                     out object item)) {
@@ -96,8 +121,7 @@ namespace SourceGen.WpfGui {
             ReferenceTableItem rli = (ReferenceTableItem)item;
 
             // Jump to the offset, then shift the focus back to the code list.
-            mMainCtrl.GoToLocation(new NavStack.Location(rli.OffsetValue, 0,
-                NavStack.GoToMode.JumpToCodeData), true);
+            mMainCtrl.GoToLocation(rli.Location, true);
         }
     }
 }

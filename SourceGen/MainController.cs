@@ -3220,7 +3220,7 @@ namespace SourceGen {
         }
 
         public void Find() {
-            FindBox dlg = new FindBox(mMainWin, mFindString);
+            FindBox dlg = new FindBox(mMainWin, mFindString, false);
             if (dlg.ShowDialog() == true) {
                 mFindString = dlg.TextToFind;
                 mFindStartIndex = -1;
@@ -3302,6 +3302,58 @@ namespace SourceGen {
             mFindStartIndex = -1;
 
             //mMainWin.CodeListView_Focus();
+        }
+
+        // Finds all matches in the file.  Does not alter the the current position.
+        public void FindAll() {
+            FindBox dlg = new FindBox(mMainWin, mFindString, true);
+            if (dlg.ShowDialog() == false) {
+                return;
+            }
+            mFindString = dlg.TextToFind;
+            string SEARCH_SEP_STR = "" + LineListGen.SEARCH_SEP;
+
+            List<ReferenceTable.ReferenceTableItem> items =
+                new List<ReferenceTable.ReferenceTableItem>();
+            for (int index = 0; index < CodeLineList.Count; index++) {
+                string searchStr = CodeLineList.GetSearchString(index);
+                int matchPos = searchStr.IndexOf(mFindString,
+                    StringComparison.InvariantCultureIgnoreCase);
+                if (matchPos >= 0) {
+                    int offset = CodeLineList[index].FileOffset;
+                    string offsetStr, addrStr, msgStr;
+
+                    if (offset >= 0) {
+                        offsetStr = mFormatter.FormatOffset24(offset);
+                        Anattrib attr = mProject.GetAnattrib(offset);
+                        if (attr.Address >= 0) {
+                            addrStr = mFormatter.FormatAddress(attr.Address, attr.Address > 0xffff);
+                        } else {
+                            addrStr = string.Empty;
+                        }
+                    } else {
+                        offsetStr = "-";
+                        addrStr = string.Empty;
+                    }
+                    msgStr = searchStr.Replace(SEARCH_SEP_STR, "  ");
+                    // Create a reference table entry.
+                    int lineDelta = index - CodeLineList.FindLineIndexByOffset(offset);
+                    bool isNote = (CodeLineList[index].LineType == LineListGen.Line.Type.Note);
+                    NavStack.Location loc = new NavStack.Location(offset, lineDelta,
+                        isNote ? NavStack.GoToMode.JumpToNote : NavStack.GoToMode.JumpToAdjIndex);
+
+                    items.Add(new ReferenceTable.ReferenceTableItem(loc,
+                        offsetStr, addrStr, msgStr));
+                }
+            }
+
+            if (items.Count > 0) {
+                ShowReferenceTable(items);
+            } else {
+                MessageBox.Show(Res.Strings.FIND_ALL_NO_MATCH,
+                    Res.Strings.FIND_ALL_CAPTION, MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
         }
 
         public bool CanFormatAsWord() {

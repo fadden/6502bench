@@ -125,6 +125,11 @@ limitations under the License.
                     <KeyGesture>Ctrl+Shift+E</KeyGesture>
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
+            <RoutedUICommand x:Key="FindAllCmd" Text="Find All">
+                <RoutedUICommand.InputGestures>
+                    <KeyGesture>Ctrl+Shift+F</KeyGesture>
+                </RoutedUICommand.InputGestures>
+            </RoutedUICommand>
             <RoutedUICommand x:Key="FindNextCmd" Text="Find Next">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>F3</KeyGesture>
@@ -284,6 +289,8 @@ limitations under the License.
                         CanExecute="IsProjectOpen" Executed="ExportCmd_Executed"/>
         <CommandBinding Command="Find"
                         CanExecute="IsProjectOpen" Executed="FindCmd_Executed"/>
+        <CommandBinding Command="{StaticResource FindAllCmd}"
+                        CanExecute="IsProjectOpen" Executed="FindAllCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindNextCmd}"
                         CanExecute="IsProjectOpen" Executed="FindNextCmd_Executed"/>
         <CommandBinding Command="{StaticResource FindPreviousCmd}"
@@ -434,6 +441,7 @@ limitations under the License.
                 <MenuItem Command="Find"/>
                 <MenuItem Command="{StaticResource FindNextCmd}"/>
                 <MenuItem Command="{StaticResource FindPreviousCmd}"/>
+                <MenuItem Command="{StaticResource FindAllCmd}"/>
                 <Separator/>
                 <MenuItem Command="{StaticResource ViewAddressMapCmd}"/>
             </MenuItem>

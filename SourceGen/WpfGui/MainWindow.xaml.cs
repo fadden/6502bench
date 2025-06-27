@@ -1328,6 +1328,10 @@ namespace SourceGen.WpfGui {
             mMainCtrl.Find();
         }
 
+        private void FindAllCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
+            mMainCtrl.FindAll();
+        }
+
         private void FindNextCmd_Executed(object sender, ExecutedRoutedEventArgs e) {
             mMainCtrl.FindNext();
         }
@@ -1758,7 +1762,9 @@ namespace SourceGen.WpfGui {
             List<ReferenceTable.ReferenceTableItem> newItems =
                 new List<ReferenceTable.ReferenceTableItem>();
             foreach (ReferencesListItem item in ReferencesList) {
-                newItems.Add(new ReferenceTable.ReferenceTableItem(item.OffsetValue,
+                NavStack.Location loc = new NavStack.Location(item.OffsetValue, 0,
+                    NavStack.GoToMode.JumpToCodeData);
+                newItems.Add(new ReferenceTable.ReferenceTableItem(loc,
                     item.Offset, item.Addr, item.Type));
             }
             mMainCtrl.ShowReferenceTable(newItems);

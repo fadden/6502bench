@@ -568,6 +568,8 @@ namespace SourceGen {
             return line.Parts;
         }
 
+        public const char SEARCH_SEP = '\u203b';  // REFERENCE MARK
+
         /// <summary>
         /// Returns a string with the concatenation of the searchable portions of the line.
         /// Different sections are separated with an unlikely unicode character.  The goal
@@ -579,17 +581,15 @@ namespace SourceGen {
         public string GetSearchString(int index) {
             Line line = mLineList[index];
             if (line.SearchString == null) {
-                const char sep = '\u203b';  // REFERENCE MARK
-
                 FormattedParts parts = GetFormattedParts(index);
                 StringBuilder sb = new StringBuilder();
                 // Some parts may be null, e.g. for long comments.  Append() can deal.
                 sb.Append(parts.Label);
-                sb.Append(sep);
+                sb.Append(SEARCH_SEP);
                 sb.Append(parts.Opcode);
-                sb.Append(sep);
+                sb.Append(SEARCH_SEP);
                 sb.Append(parts.Operand);
-                sb.Append(sep);
+                sb.Append(SEARCH_SEP);
                 sb.Append(parts.Comment);
                 line.SearchString = sb.ToString();
             }

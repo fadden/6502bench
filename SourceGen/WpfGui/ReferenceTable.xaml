@@ -19,12 +19,18 @@ limitations under the License.
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Reference List"
         Width="400" Height="300" MinWidth="180" MinHeight="120" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="True"
         PreviewKeyDown="Window_KeyEventHandler" Closing="Window_Closing">
+
+    <Window.Resources>
+        <system:String x:Key="str_EntryCountSingleFmt">{0} entry</system:String>
+        <system:String x:Key="str_EntryCountPluralFmt">{0} entries</system:String>
+    </Window.Resources>
 
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -45,13 +51,16 @@ limitations under the License.
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Offset" Width="53" Binding="{Binding Offset}"/>
                 <DataGridTextColumn Header="Addr" Width="53" Binding="{Binding Addr}"/>
-                <DataGridTextColumn Header="Type" Width="119" Binding="{Binding Type}"/>
+                <DataGridTextColumn Header="Text" Width="*" Binding="{Binding Text}"/>
             </DataGrid.Columns>
         </DataGrid>
 
         <StackPanel Grid.Row="1" Margin="0,5,0,0" Orientation="Horizontal">
             <!-- Bind the checkbox directly to the window's Topmost property. -->
             <CheckBox Content="Always on top" IsChecked="{Binding Path=Topmost}"/>
+            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                <TextBlock Text="{Binding CountText, FallbackValue=MM entries}"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>
