@@ -348,14 +348,16 @@ label edit dialog for the line at address $1234.</p>
 project symbol editor will be opened instead.  This works for project symbols
 and local variable table entries.</p>
 <p>This also works for data items formatted as 16- or 24-bit addresses.</p>
-<p>Note: the target address is taken from the operand even when a symbol is
-provided.  For example, sometimes jump tables will encode (address - 1)
-for the benefit of a PHA/RTS combination, so the entry for <code>FOO</code>
-will appear as <samp>FOO-1</samp>.  The operand target is actually
-<code>FOO-1</code>, so using this feature won't edit the <code>FOO</code>
-label but instead try to add a new one at the previous address.  The
-feature does back up to the start of a line, however, so it won't try
-to split an instruction or multi-byte data item.</p>
+<p>Note: the target address is taken from the operand unless a symbol has
+been explicitly set.  For example, sometimes jump tables will encode
+(address - 1) for the benefit of a PHA/RTS combination, so it's useful to
+set the operand to the symbol <samp>FOO</samp> to make it appear as
+<samp>FOO-1</samp> in the output.
+In any event, the feature will always back up to the start
+of a line, so it won't try to split an instruction or multi-byte data item.
+(If you actually want to split an auto-detected string, use
+<kbd class="key">Ctrl+D</kbd> to toggle auto-detection off and back on
+before and after editing the label.)</p>
 
 
 <h2 id="comment">Edit Comment</h2>
