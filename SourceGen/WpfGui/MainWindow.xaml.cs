@@ -571,6 +571,9 @@ namespace SourceGen.WpfGui {
                 AppSettings.Global.GetString(AppSettings.NOTEWIN_COL_WIDTHS, null));
             RestoreColumnWidths(symbolsGrid,
                 AppSettings.Global.GetString(AppSettings.SYMWIN_COL_WIDTHS, null));
+
+            // Force the Notes text column width to be '*', i.e. fill the panel.
+            notesGrid.Columns[1].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
         }
         private void RestoreColumnWidths(GridView gv, string str) {
             int[] widths = null;
