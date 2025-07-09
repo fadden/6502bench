@@ -171,6 +171,11 @@ namespace SourceGen.WpfGui {
                 // initial offset so we stay within current segment if there are overlapping
                 // address ranges.
                 int offset = mProject.AddrMap.AddressToOffset(mInitialOffset, addr);
+                if (offset < 0) {
+                    // Retry, ignoring region isolation.  Otherwise, if the selection is in a
+                    // region that disallows outward resolution, you can't goto most addresses.
+                    offset = mProject.AddrMap.AddressToOffset(mInitialOffset, addr, true);
+                }
                 if (offset >= 0) {
                     TargetOffset = offset;
                 }

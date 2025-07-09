@@ -865,8 +865,10 @@ namespace CommonUtil {
         /// </remarks>
         /// <param name="srcOffset">Offset of the address reference.</param>
         /// <param name="targetAddr">Address to look up.</param>
+        /// <param name="alwaysAllowOutward">If true, allow outward searches even if in regions
+        ///   marked as isolated.</param>
         /// <returns>The file offset, or -1 if the address falls outside the file.</returns>
-        public int AddressToOffset(int srcOffset, int targetAddr) {
+        public int AddressToOffset(int srcOffset, int targetAddr, bool alwaysAllowOutward = false) {
             TreeNode startNode = OffsetToNode(srcOffset, mTopNode);
 
             TreeNode ignoreNode = null;
@@ -877,7 +879,7 @@ namespace CommonUtil {
                     return offset;
                 }
 
-                if (startNode.Region.DisallowOutward) {
+                if (startNode.Region.DisallowOutward && !alwaysAllowOutward) {
                     return -1;      // can't look at parent or siblings of this node
                 }
 
