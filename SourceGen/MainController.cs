@@ -2474,9 +2474,22 @@ namespace SourceGen {
                     // answer when there are overlapping multi-byte values and masks.  If we don't
                     // find a match, we still want to return "true" so that the caller can offer
                     // to create a new project symbol.
-                    externalSym = project.SymbolTable.FindNonVariableByAddress(attr.OperandAddress,
+                    //
+                    // TODO: this symbol table lookup call does not correctly handle isolated
+                    //       address regions.  It can return a user label with a matching address
+                    //       that shouldn't be visible, because user labels have higher priority
+                    //       than project symbols.  We currently work around this by ignoring
+                    //       user label results.
+                    Symbol sym = project.SymbolTable.FindNonVariableByAddress(attr.OperandAddress,
                         OpDef.MemoryEffect.ReadModifyWrite);    // could get effect from op
                     externalAddr = attr.OperandAddress;
+                    if (sym is DefSymbol) {
+                        externalSym = sym;
+                    } else {
+                        // This can happen if we're in an isolated address region that blocks
+                        // output resolution.  Ignore the result.  (We still set externalAddr for
+                        // the benefit of the project symbol creation dialog's initial values.)
+                    }
                 } else {
                     // Probably an immediate operand, nothing to do.
                     return false;

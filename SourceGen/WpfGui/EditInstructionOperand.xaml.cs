@@ -960,6 +960,12 @@ namespace SourceGen.WpfGui {
                 // when there are overlapping multi-byte values and masks.
                 if (externalSym == null) {
                     // Nothing currently defined.
+                    //
+                    // This can currently happen if we're in an isolated address region that blocks
+                    // output resolution.  The target address is effectively external, but
+                    // a user label exists with the address, so our symbol search finds a match
+                    // that overrules the external symbol.  Happily, the upcoming project/platform
+                    // symbol search works around this.  (GetOperandTargetOffset() needs fixing.)
                 } else if (externalSym.SymbolSource == Symbol.Source.Platform) {
                     firstPlatform = externalSym;
                 } else if (externalSym.SymbolSource == Symbol.Source.Project) {
