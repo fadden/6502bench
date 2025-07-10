@@ -2459,6 +2459,11 @@ namespace SourceGen {
             internalTargetOffset = externalAddr = -1;
             externalSym = null;
 
+            if (selOffset < 0) {
+                // Header comment or equate selected.
+                return false;
+            }
+
             Anattrib attr = project.GetAnattrib(selOffset);
             if (attr.IsInstructionStart) {
                 if (!attr.IsInstructionWithOperand) {
