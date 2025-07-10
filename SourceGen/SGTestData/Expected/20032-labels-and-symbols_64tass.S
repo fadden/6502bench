@@ -170,9 +170,9 @@ _L103D  jmp     _targ+1
 
 _L1040  jml     _targ-1
 
-        jml     _targ
+_L1044  jml     _targ
 
-        jml     _targ+1
+_L1048  jml     _targ+1
 
 _calls  jsr     _L1016
         jsr     _L1028
@@ -185,8 +185,8 @@ _calls  jsr     _L1016
         jsr     _L103A
         jsr     _L103D
         jsr     _L1040
-        jsr     $1044
-        jsr     $1048
+        jsr     _L1044
+        jsr     _L1048
         brl     _L118E
 
 _bulk   .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f ;bulky
@@ -209,6 +209,23 @@ _L118E  lda     #<thirty2+2
         lda     #(thirty2 & $ffff)+3
         lda     #((thirty2 >> 8) & $ffff)+4
         lda     #thirty2 >> 16
+before  nop
+        lda     before
+        lda     <before
+        lda     <before+1
+        lda     (<before+2)
+        lda     (<before+3),y
+        lda     [<before+4],y
+        lda     [<before+5]
+        lda     <before+6,x
+        lda     (zip+7,x)
+        lda     before-$10f8,y
+        lda     <after+6
+        lda     (<after+7),y
+after   ldx     <after+8,y
+        ldy     <after+9,x
+        pei     (zip+4)
+        nop
         rts
 
         .here

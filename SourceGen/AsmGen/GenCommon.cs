@@ -240,12 +240,13 @@ namespace SourceGen.AsmGen {
             if (op.IsWidthPotentiallyAmbiguous) {
                 wdis = OpDef.GetWidthDisambiguation(instrLen, operand);
             }
+            // Some DP addressing modes are ambiguous to one-pass assemblers.
             if (gen.Quirks.SinglePassAssembler && wdis == OpDef.WidthDisambiguation.None &&
                     (op.AddrMode == OpDef.AddressMode.DP ||
-                        op.AddrMode == OpDef.AddressMode.DPIndexX) ||
-                        op.AddrMode == OpDef.AddressMode.DPIndexY) {
+                        op.AddrMode == OpDef.AddressMode.DPIndexX ||
+                        op.AddrMode == OpDef.AddressMode.DPIndexY)) {
                 // Could be a forward reference to a direct-page label.  For ACME, we don't
-                // care if it's forward or not.
+                // care if it's forward or not, only that it's referencing a user label.
                 if ((gen.Quirks.SinglePassNoLabelCorrection && IsLabelReference(gen, offset)) ||
                         IsForwardLabelReference(gen, offset)) {
                     wdis = OpDef.WidthDisambiguation.ForceDirect;
@@ -343,6 +344,18 @@ namespace SourceGen.AsmGen {
                     formattedOperand = PseudoOp.FormatNumericOperand(formatter, proj.SymbolTable,
                         lvLookup, gen.Localizer.LabelMap, dfd,
                         offset, operandForSymbol, operandLen, opFlags);
+                    // Handle special case for DP args with non-DP labels.
+                    if (gen.Quirks.ByteSelectionIsShift && wdis == OpDef.WidthDisambiguation.None &&
+                            op.IsDirectPageInstruction && dfd.SymbolRef != null) {
+                        // The '<' operator is effectively a no-op, so "LDA <LABEL" won't be a DP
+                        // instruction unless LABEL is < $100.  We need to add an explicit mask in
+                        // that case.
+                        Debug.Assert(operand < 0x100);      // actual operand in code is DP
+                        if (proj.SymbolTable.TryGetNonVariableValue(dfd.SymbolRef.Label,
+                                out Symbol sym) && sym.Value > 0xff) {
+                            wdis = OpDef.WidthDisambiguation.ForceDirect;
+                        }
+                    }
                 }
             } else {
                 // Show operand value in hex.

@@ -104,6 +104,10 @@ calls   jsr     L1015
         !text   "he quick brown fox jumps over the lazy dogs."
 
 L1160   adc     #BMI1
+        lda+1   <targ-1
+        lda+1   <targ+1
+        lda+1   <targ-1,x
+        lda     (<targ+4),y
         rts
 
         }

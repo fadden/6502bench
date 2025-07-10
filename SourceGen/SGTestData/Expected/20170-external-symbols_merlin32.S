@@ -119,7 +119,7 @@ L1000    lda   CodeWrap+255
          lda   $4000
          lda   $4001
          lda   BankWrap+8
-         lda   <BankWrap-$ffe8
+         lda   <BankWrap-$ffe8&$ff
          nop
          lda   ReadOnly
          lda   ReadOnly+1

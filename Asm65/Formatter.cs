@@ -88,6 +88,8 @@ namespace Asm65 {
 
             /// <summary>String to prefix operand with to force DP addressing.</summary>
             public string ForceDirectOperandPrefix { get; set; } = string.Empty;
+            /// <summary>String to suffix operand with to force DP addressing.</summary>
+            public string ForceDirectOperandSuffix { get; set; } = string.Empty;
             /// <summary>String to suffix opcode with to force abs addressing.</summary>
             public string ForceAbsOpcodeSuffix { get; set; } = string.Empty;
             /// <summary>String to prefix operand with to force abs addressing.</summary>
@@ -172,6 +174,7 @@ namespace Asm65 {
                 BankSelectBackQuote = src.BankSelectBackQuote;
 
                 ForceDirectOperandPrefix = src.ForceDirectOperandPrefix;
+                ForceDirectOperandSuffix = src.ForceDirectOperandSuffix;
                 ForceAbsOpcodeSuffix = src.ForceAbsOpcodeSuffix;
                 ForceAbsOperandPrefix = src.ForceAbsOperandPrefix;
                 ForceDirectOpcodeSuffix = src.ForceDirectOpcodeSuffix;
@@ -915,19 +918,23 @@ namespace Asm65 {
         private string GenerateOperandFormat(OpDef.AddressMode addrMode,
                 OpDef.WidthDisambiguation wdis) {
             string fmt;
-            string wdisStr = string.Empty;
+            string pfxStr = string.Empty;
+            string dpsfxStr = string.Empty;
 
             if (wdis == OpDef.WidthDisambiguation.ForceDirect) {
                 if (!string.IsNullOrEmpty(mFormatConfig.ForceDirectOperandPrefix)) {
-                    wdisStr = mFormatConfig.ForceDirectOperandPrefix;
+                    pfxStr = mFormatConfig.ForceDirectOperandPrefix;
+                }
+                if (!string.IsNullOrEmpty(mFormatConfig.ForceDirectOperandSuffix)) {
+                    dpsfxStr = mFormatConfig.ForceDirectOperandSuffix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceAbs) {
                 if (!string.IsNullOrEmpty(mFormatConfig.ForceAbsOperandPrefix)) {
-                    wdisStr = mFormatConfig.ForceAbsOperandPrefix;
+                    pfxStr = mFormatConfig.ForceAbsOperandPrefix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceLong) {
                 if (!string.IsNullOrEmpty(mFormatConfig.ForceLongOperandPrefix)) {
-                    wdisStr = mFormatConfig.ForceLongOperandPrefix;
+                    pfxStr = mFormatConfig.ForceLongOperandPrefix;
                 }
             } else if (wdis == OpDef.WidthDisambiguation.ForceLongMaybe) {
                 // Don't add a width disambiguator to an operand that is unambiguously long.
@@ -940,35 +947,29 @@ namespace Asm65 {
                 case AddressMode.AbsLong:
                 case AddressMode.BlockMove:
                 case AddressMode.StackAbs:
-                case AddressMode.DP:
-                case AddressMode.DPPCRel:           // BBR/BBS
+                case AddressMode.DPPCRel:           // BBR/BBS (syntax varies)
                 case AddressMode.PCRel:
                 case AddressMode.PCRelLong:         // BRL
                 case AddressMode.StackInt:          // COP and two-byte BRK
                 case AddressMode.StackPCRelLong:    // PER
                 case AddressMode.WDM:
-                    fmt = wdisStr + "{0}";
+                    fmt = pfxStr + "{0}";
                     break;
                 case AddressMode.AbsIndexX:
                 case AddressMode.AbsIndexXLong:
-                case AddressMode.DPIndexX:
-                    fmt = wdisStr + "{0}," + mXregChar;
+                    fmt = pfxStr + "{0}," + mXregChar;
                     break;
-                case AddressMode.DPIndexY:
                 case AddressMode.AbsIndexY:
-                    fmt = wdisStr + "{0}," + mYregChar;
+                    fmt = pfxStr + "{0}," + mYregChar;
                     break;
                 case AddressMode.AbsIndexXInd:
-                case AddressMode.DPIndexXInd:
-                    fmt = wdisStr + "({0}," + mXregChar + ")";
+                    fmt = pfxStr + "({0}," + mXregChar + ")";
                     break;
                 case AddressMode.AbsInd:
-                case AddressMode.DPInd:
                 case AddressMode.StackDPInd:        // PEI
                     fmt = "({0})";
                     break;
                 case AddressMode.AbsIndLong:
-                case AddressMode.DPIndLong:
                     // IIgs monitor uses "()" for AbsIndLong, E&L says "[]".  Assemblers
                     // seem to expect the latter.
                     fmt = "[{0}]";
@@ -976,11 +977,31 @@ namespace Asm65 {
                 case AddressMode.Acc:
                     fmt = mAccChar;
                     break;
+                case AddressMode.DP:
+                    fmt = pfxStr + "{0}" + dpsfxStr;
+                    break;
+                case AddressMode.DPIndexX:
+                    fmt = pfxStr + "{0}" + dpsfxStr + "," + mXregChar;
+                    break;
+                case AddressMode.DPIndexY:
+                    fmt = pfxStr + "{0}" + dpsfxStr + "," + mYregChar;
+                    break;
+                case AddressMode.DPIndexXInd:
+                    fmt = pfxStr + "({0}" + dpsfxStr + "," + mXregChar + ")";
+                    break;
+                case AddressMode.DPInd:
+                    fmt = "({0}" + dpsfxStr + ")";
+                    break;
+                case AddressMode.DPIndLong:
+                    // IIgs monitor uses "()" for AbsIndLong, E&L says "[]".  Assemblers
+                    // seem to expect the latter.
+                    fmt = "[{0}" + dpsfxStr + "]";
+                    break;
                 case AddressMode.DPIndIndexY:
-                    fmt = "({0})," + mYregChar;
+                    fmt = "({0}" + dpsfxStr + ")," + mYregChar;
                     break;
                 case AddressMode.DPIndIndexYLong:
-                    fmt = "[{0}]," + mYregChar;
+                    fmt = "[{0}" + dpsfxStr + "]," + mYregChar;
                     break;
                 case AddressMode.Imm:
                 case AddressMode.ImmLongA:
@@ -1021,7 +1042,7 @@ namespace Asm65 {
         /// <returns>Formatted string.</returns>
         public string FormatOperand(OpDef op, string contents, OpDef.WidthDisambiguation wdis) {
             Debug.Assert(((int)op.AddrMode & 0xff) == (int) op.AddrMode);
-            int key = (int) op.AddrMode | ((int)wdis << 8);
+            int key = (int) op.AddrMode | ((int)wdis << 8);     // form unique cache key
 
             if (!mOperandFormats.TryGetValue(key, out string format)) {
                 format = mOperandFormats[key] = GenerateOperandFormat(op.AddrMode, wdis);

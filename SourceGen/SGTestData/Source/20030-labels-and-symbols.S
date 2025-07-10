@@ -131,4 +131,8 @@ next
 
 :skiphex
         adc     #$30            ;set to BMI to test constant vs. instr
+        lda     <target0&$ff
+        lda     <target2&$ff
+        lda     <target0&$ff,x
+        lda     (<target2+3&$ff),y
         rts

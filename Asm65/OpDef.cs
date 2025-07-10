@@ -124,7 +124,7 @@ namespace Asm65 {
         /// </summary>
         public enum WidthDisambiguation : byte {
             None = 0,
-            ForceDirect,    // only needed for forward DP label refs in single-pass assemblers
+            ForceDirect,    // mainly needed for forward DP label refs in single-pass assemblers
             ForceAbs,
             ForceLong,
             ForceLongMaybe  // add opcode suffix but not operand prefix

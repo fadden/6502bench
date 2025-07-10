@@ -280,6 +280,12 @@ namespace SourceGen.AsmGen {
         /// track the emulation bit?
         /// </summary>
         public bool TracksSepRepNotEmu { get; set; }
+
+        /// <summary>
+        /// Do the byte selection operators ('&lt;', '&gt;', '^') act as shifts that don't
+        /// reduce the value to 8 bits?
+        /// </summary>
+        public bool ByteSelectionIsShift { get; set; }
     }
 
     /// <summary>

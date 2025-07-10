@@ -162,9 +162,9 @@ start    clc
 
 :L1040   jml   :targ-1
 
-         jml   :targ
+:L1044   jml   :targ
 
-         jml   :targ+1
+:L1048   jml   :targ+1
 
 :calls   jsr   :L1016
          jsr   :L1028
@@ -177,8 +177,8 @@ start    clc
          jsr   :L103A
          jsr   :L103D
          jsr   :L1040
-         jsr   $1044
-         jsr   $1048
+         jsr   :L1044
+         jsr   :L1048
          brl   :L118E
 
 :bulk    hex   808182838485868788898a8b8c8d8e8f808182838485868788898a8b8c8d8e8f ;bulky
@@ -197,5 +197,22 @@ start    clc
          lda   #thirty2+3
          lda   #>thirty2+$400
          lda   #^thirty2
+before   nop
+         lda   before
+         lda   <before&$ff
+         lda   <before+1&$ff
+         dfb   $b2,$a1
+         lda   (<before+3&$ff),y
+         lda   [<before+4&$ff],y
+         dfb   $a7,$a4
+         lda   <before+6&$ff,x
+         lda   (zip+7,x)
+         lda   before-$10f8,y
+         lda   <after+6&$ff
+         lda   (<after+7&$ff),y
+after    ldx   <after+8&$ff,y
+         ldy   <after+9&$ff,x
+         pei   (zip+4)
+         nop
          rts
 

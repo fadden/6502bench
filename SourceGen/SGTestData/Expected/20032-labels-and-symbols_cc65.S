@@ -167,9 +167,9 @@ start:   clc
 
 @L1040:  jml     @targ-1
 
-         jml     @targ
+@L1044:  jml     @targ
 
-         jml     @targ+1
+@L1048:  jml     @targ+1
 
 @calls:  jsr     @L1016
          jsr     @L1028
@@ -182,8 +182,8 @@ start:   clc
          jsr     @L103A
          jsr     @L103D
          jsr     @L1040
-         jsr     $1044
-         jsr     $1048
+         jsr     @L1044
+         jsr     @L1048
          brl     @L118E
 
 @bulk:   .byte   $80,$81,$82,$83,$84,$85,$86,$87,$88,$89,$8a,$8b,$8c,$8d,$8e,$8f ;bulky
@@ -206,5 +206,22 @@ start:   clc
          lda     #thirty2 & $ffff +3
          lda     #thirty2 >> 8 & $ffff +4
          lda     #thirty2 >> 16
+before:  nop
+         lda     before
+         lda     <before
+         lda     <before+1
+         lda     (<before+2)
+         lda     (<before+3),y
+         lda     [<before+4],y
+         lda     [<before+5]
+         lda     <before+6,x
+         lda     (zip+7,x)
+         lda     before-$10f8,y
+         lda     z:<after+6
+         lda     (<after+7),y
+after:   ldx     <after+8,y
+         ldy     <after+9,x
+         pei     (zip+4)
+         nop
          rts
 

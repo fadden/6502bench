@@ -178,6 +178,7 @@ namespace SourceGen.AsmGen {
 
             Quirks.NoPcRelBankWrap = true;
             Quirks.TracksSepRepNotEmu = true;
+            Quirks.ByteSelectionIsShift = true;
 
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
@@ -200,6 +201,7 @@ namespace SourceGen.AsmGen {
             config.ForceAbsOpcodeSuffix = ":";
             config.ForceLongOpcodeSuffix = "l";
             config.ForceDirectOperandPrefix = string.Empty;
+            config.ForceDirectOperandSuffix = "&$ff";
             config.ForceAbsOperandPrefix = string.Empty;
             config.ForceLongOperandPrefix = string.Empty;
             config.LocalVariableLabelPrefix = "]";
@@ -841,9 +843,10 @@ namespace SourceGen.AsmGen {
         }
 
         // Stdout: "C:\Src\WorkBench\Merlin32.exe v 1.0, (c) Brutal Deluxe ..."
-        //         "C:\Src\WorkBench\Merlin32.exe v 1.2 beta 1, (c) Brutal Deluxe ..."
+        //         "...              Merlin32.exe v 1.2 beta 1, (c) Brutal Deluxe ..."
+        //         "...              Merlin32_119.exe v1.1.9, (c) Brutal Deluxe ..."
         // Other platforms may not have the ".exe".  Start at first occurrence of " v ".
-        private static string sVersionPattern = @" v (\d.\d)( [^,]+)?,";
+        private static string sVersionPattern = @" v *(\d.\d)(.\d)?( [^,]+)?,";
         private static Regex sVersionRegex = new Regex(sVersionPattern);
 
         // IAssembler

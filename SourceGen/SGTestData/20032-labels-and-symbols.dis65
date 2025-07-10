@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":4,
-"FileDataLength":695,
-"FileDataCrc32":1242388944,
+"_ContentVersion":6,
+"FileDataLength":729,
+"FileDataCrc32":-707037586,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -27,7 +27,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"opcode mnemonic",
 "HasWidth":false,
@@ -44,7 +45,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"should be replaced by user label",
 "HasWidth":false,
@@ -61,7 +63,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"same val as projalso",
 "HasWidth":false,
@@ -78,7 +81,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"same val as projalso",
 "HasWidth":false,
@@ -95,7 +99,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"replaces platform symbol",
 "HasWidth":false,
@@ -112,7 +117,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"32-bit constant test",
 "HasWidth":false,
@@ -126,11 +132,21 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":74565},
+"Addr":74565,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false},
 
 {
 "Offset":279,
-"Addr":4096}],
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
@@ -145,6 +161,7 @@
 "LongComments":{
 "-2147483647":{
 "Text":"Project was edited to add a label in the middle of a dense hex region, and add a duplicate label.",
+"IsFancy":false,
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0}},
@@ -223,25 +240,18 @@
 "Type":"LocalOrGlobalAddr",
 "LabelAnno":"None"},
 
-"358":{
-"Label":"calls",
-"Value":4175,
+"694":{
+"Label":"before",
+"Value":4511,
 "Source":"User",
-"Type":"LocalOrGlobalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"410":{
-"Label":"badmid",
-"Value":4227,
+"721":{
+"Label":"after",
+"Value":4538,
 "Source":"User",
-"Type":"LocalOrGlobalAddr",
-"LabelAnno":"None"},
-
-"362":{
-"Label":"badmidi",
-"Value":4179,
-"Source":"User",
-"Type":"LocalOrGlobalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
@@ -251,7 +261,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "6":{
 "Length":2,
@@ -259,7 +271,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "8":{
 "Length":2,
@@ -267,7 +281,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "10":{
 "Length":2,
@@ -275,7 +291,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "12":{
 "Length":2,
@@ -283,7 +301,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "14":{
 "Length":2,
@@ -291,7 +311,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "16":{
 "Length":2,
@@ -299,7 +321,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "18":{
 "Length":2,
@@ -307,7 +331,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "20":{
 "Length":2,
@@ -315,7 +341,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "22":{
 "Length":2,
@@ -323,7 +351,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "24":{
 "Length":2,
@@ -331,7 +361,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "26":{
 "Length":2,
@@ -339,7 +371,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "28":{
 "Length":2,
@@ -347,7 +381,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "30":{
 "Length":2,
@@ -355,7 +391,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "47":{
 "Length":3,
@@ -363,7 +401,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "50":{
 "Length":3,
@@ -371,7 +411,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "53":{
 "Length":3,
@@ -379,7 +421,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "56":{
 "Length":3,
@@ -387,7 +431,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "59":{
 "Length":3,
@@ -395,7 +441,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "62":{
 "Length":2,
@@ -403,7 +451,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "64":{
 "Length":3,
@@ -411,7 +461,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "67":{
 "Length":4,
@@ -419,7 +471,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "71":{
 "Length":3,
@@ -427,7 +481,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "74":{
 "Length":4,
@@ -435,7 +491,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "78":{
 "Length":3,
@@ -443,7 +501,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "81":{
 "Length":4,
@@ -451,7 +511,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "85":{
 "Length":3,
@@ -459,7 +521,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "88":{
 "Length":4,
@@ -467,7 +531,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "92":{
 "Length":3,
@@ -475,7 +541,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "95":{
 "Length":4,
@@ -483,7 +551,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "99":{
 "Length":3,
@@ -491,7 +561,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "102":{
 "Length":4,
@@ -499,7 +571,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "106":{
 "Length":3,
@@ -507,7 +581,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "109":{
 "Length":4,
@@ -515,7 +591,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "115":{
 "Length":3,
@@ -523,7 +601,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "118":{
 "Length":3,
@@ -531,7 +611,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "121":{
 "Length":3,
@@ -539,7 +621,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "124":{
 "Length":3,
@@ -547,7 +631,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "127":{
 "Length":3,
@@ -555,7 +641,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "130":{
 "Length":3,
@@ -563,7 +651,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "133":{
 "Length":3,
@@ -571,7 +661,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "136":{
 "Length":3,
@@ -579,7 +671,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "139":{
 "Length":3,
@@ -587,7 +681,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "142":{
 "Length":3,
@@ -595,7 +691,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "145":{
 "Length":3,
@@ -603,7 +701,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "148":{
 "Length":3,
@@ -611,7 +711,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "151":{
 "Length":3,
@@ -619,7 +721,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "154":{
 "Length":3,
@@ -627,7 +731,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "157":{
 "Length":3,
@@ -635,7 +741,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "160":{
 "Length":3,
@@ -643,7 +751,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "163":{
 "Length":3,
@@ -651,7 +761,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "166":{
 "Length":3,
@@ -659,7 +771,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "169":{
 "Length":3,
@@ -667,7 +781,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "174":{
 "Length":1,
@@ -675,7 +791,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "175":{
 "Length":1,
@@ -683,7 +801,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "176":{
 "Length":1,
@@ -691,7 +811,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "177":{
 "Length":1,
@@ -699,7 +821,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "178":{
 "Length":1,
@@ -707,7 +831,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "179":{
 "Length":1,
@@ -715,7 +841,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "180":{
 "Length":2,
@@ -723,7 +851,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "182":{
 "Length":2,
@@ -731,7 +861,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "184":{
 "Length":2,
@@ -739,7 +871,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "186":{
 "Length":2,
@@ -747,7 +881,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "188":{
 "Length":2,
@@ -755,7 +891,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absl",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "190":{
 "Length":2,
@@ -763,7 +901,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "192":{
 "Length":2,
@@ -771,7 +911,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "194":{
 "Length":2,
@@ -779,7 +921,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "196":{
 "Length":2,
@@ -787,7 +931,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "198":{
 "Length":2,
@@ -795,7 +941,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "200":{
 "Length":2,
@@ -803,7 +951,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "202":{
 "Length":2,
@@ -811,7 +961,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "204":{
 "Length":2,
@@ -819,7 +971,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "206":{
 "Length":2,
@@ -827,7 +981,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "208":{
 "Length":2,
@@ -835,7 +991,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "210":{
 "Length":2,
@@ -843,7 +1001,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "212":{
 "Length":3,
@@ -851,7 +1011,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "215":{
 "Length":3,
@@ -859,7 +1021,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "218":{
 "Length":3,
@@ -867,7 +1031,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "221":{
 "Length":3,
@@ -875,7 +1041,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "224":{
 "Length":3,
@@ -883,7 +1051,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "227":{
 "Length":3,
@@ -891,7 +1061,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "230":{
 "Length":4,
@@ -899,7 +1071,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"zip",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "234":{
 "Length":4,
@@ -907,7 +1081,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "238":{
 "Length":4,
@@ -915,7 +1091,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"absh",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "242":{
 "Length":4,
@@ -923,7 +1101,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "246":{
 "Length":4,
@@ -931,7 +1111,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "250":{
 "Length":4,
@@ -939,7 +1121,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "254":{
 "Length":3,
@@ -947,7 +1131,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "257":{
 "Length":3,
@@ -955,7 +1141,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"biggie",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "260":{
 "Length":3,
@@ -963,19 +1151,23 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"start",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "263":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "266":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "269":{
 "Length":3,
@@ -983,7 +1175,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"skipdata",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "301":{
 "Length":3,
@@ -991,7 +1185,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "307":{
 "Length":3,
@@ -999,7 +1195,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "310":{
 "Length":3,
@@ -1007,7 +1205,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "316":{
 "Length":3,
@@ -1015,7 +1215,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "319":{
 "Length":2,
@@ -1023,7 +1225,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "323":{
 "Length":2,
@@ -1031,7 +1235,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "325":{
 "Length":3,
@@ -1039,7 +1245,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "331":{
 "Length":3,
@@ -1047,7 +1255,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "334":{
 "Length":3,
@@ -1055,7 +1265,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "340":{
 "Length":3,
@@ -1063,7 +1275,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "343":{
 "Length":4,
@@ -1071,7 +1285,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "351":{
 "Length":4,
@@ -1079,29 +1295,16 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"targ",
-"Part":"Low"}},
+"Part":"Low"},
 
-"388":{
-"Length":3,
-"Format":"NumericLE",
-"SubFormat":"Symbol",
-"SymbolRef":{
-"Label":"badmidi",
-"Part":"Low"}},
-
-"391":{
-"Length":3,
-"Format":"NumericLE",
-"SubFormat":"Symbol",
-"SymbolRef":{
-"Label":"badmid",
-"Part":"Low"}},
+"Extra":null},
 
 "397":{
 "Length":112,
 "Format":"Dense",
 "SubFormat":"None",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "677":{
 "Length":2,
@@ -1109,7 +1312,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "679":{
 "Length":2,
@@ -1117,7 +1322,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "681":{
 "Length":2,
@@ -1125,7 +1332,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"Bank"}},
+"Part":"Bank"},
+
+"Extra":null},
 
 "683":{
 "Length":2,
@@ -1133,7 +1342,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"BMI",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "685":{
 "Length":3,
@@ -1141,7 +1352,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "688":{
 "Length":3,
@@ -1149,7 +1362,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "691":{
 "Length":3,
@@ -1157,7 +1372,149 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"thirty2",
-"Part":"Bank"}}},
+"Part":"Bank"},
+
+"Extra":null},
+
+"698":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"700":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"702":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"704":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"706":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"708":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"710":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"712":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"zip",
+"Part":"Low"},
+
+"Extra":null},
+
+"714":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"before",
+"Part":"Low"},
+
+"Extra":null},
+
+"717":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"after",
+"Part":"Low"},
+
+"Extra":null},
+
+"719":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"after",
+"Part":"Low"},
+
+"Extra":null},
+
+"721":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"after",
+"Part":"Low"},
+
+"Extra":null},
+
+"723":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"after",
+"Part":"Low"},
+
+"Extra":null},
+
+"725":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"zip",
+"Part":"Low"},
+
+"Extra":null}},
 
 "LvTables":{
 },

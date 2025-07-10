@@ -228,5 +228,28 @@ t4c     jml     target2
         lda     #>thirty2 + 1024
         lda     #^thirty2
 
+; test direct-page access with a non-DP label, forward and backward, with adjustments
+before  nop
+
+        lda     before
+        lda     <before&$ff
+
+        lda     <before+1&$ff
+        lda     (<before+2&$ff)
+        lda     (<before+3&$ff),y
+        lda     [<before+4&$ff],y
+        lda     [<before+5&$ff]
+        lda     <before+6&$ff,x
+        lda     (<zip+7&$ff,x)                  ;all versions of Merlin 32 fail
+        lda     <before+8&$ff,y
+
+        lda     <after&$ff
+        lda     (<after+1&$ff),y
+        ldx     <after+2&$ff,y
+        ldy     <after+3&$ff,x
+        pei     (<zip+4&$ff)
+
+after   nop
+
         rts
 

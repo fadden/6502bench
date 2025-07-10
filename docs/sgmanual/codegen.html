@@ -330,8 +330,11 @@ target assembler doesn't handle it.</p>
 <a href="https://www.brutaldeluxe.fr/products/crossdevtools/merlin/">[web site]</a>
 <a href="https://github.com/apple2accumulator/merlin32/issues">[bug tracker]</a>
 </p>
+<p>The history is somewhat complicated, as there are two different versions
+of Merlin v1.1, updated by different authors.  These are referred to as
+the "official" and "forked" versions.</p>
 
-<p>Bugs:</p>
+<p>Bugs (present in v1.0; unclear if/when these have been fixed):</p>
 <ul>
   <li>PC relative branches don't wrap around at bank boundaries.</li>
   <li>For some failures, an exit code of zero is returned.</li>
@@ -357,6 +360,8 @@ target assembler doesn't handle it.</p>
   <li>The byte selection operators  ('&lt;', '&gt;', '^') are actually
     word-selection operators, yielding 16-bit values when wide registers
     are enabled on the 65816.</li>
+  <li>It's not possible to force direct-page addressing with a modifier.
+    "&amp;$ff" must be added to the operand.</li>
   <li>Values loaded into registers are implicitly mod 256 or 65536.  There
     is no need to explicitly mask an expression.</li>
   <li>The assembler tracks register widths when it sees SEP/REP instructions,
