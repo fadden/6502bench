@@ -206,13 +206,13 @@ before   nop
          lda   [<before+4&$ff],y
          dfb   $a7,$a4
          lda   <before+6&$ff,x
-         lda   (zip+7,x)
+         dfb   $a1,$a6
          lda   before-$10f8,y
          lda   <after+6&$ff
          lda   (<after+7&$ff),y
 after    ldx   <after+8&$ff,y
          ldy   <after+9&$ff,x
-         pei   (zip+4)
+         dfb   $d4,$c4
          nop
          rts
 

@@ -2,7 +2,7 @@
 {
 "_ContentVersion":6,
 "FileDataLength":729,
-"FileDataCrc32":-707037586,
+"FileDataCrc32":-1745845873,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -1451,7 +1451,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"zip",
+"Label":"before",
 "Part":"Low"},
 
 "Extra":null},
@@ -1511,7 +1511,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"zip",
+"Label":"after",
 "Part":"Low"},
 
 "Extra":null}},
