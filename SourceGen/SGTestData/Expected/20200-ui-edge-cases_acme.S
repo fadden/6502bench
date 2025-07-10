@@ -63,7 +63,7 @@ next1   lda     addr1
         bcc     bitsy+1
 bitsy   !byte   $2c
         lda     #$ff
-        jmp     done
+        jmp     @L228B
 
         !word   FOO
         !word   FOO_5
@@ -78,6 +78,22 @@ bitsy   !byte   $2c
         !word   zf4
         !byte   $80
 
-done    rts
+@L228B  nop
+        jmp     @L22A8
+
+        !byte   $4c
+        !byte   $8b
+        !text   $22,"L9",$22,"L"
+        !byte   $95
+        !byte   $22
+        !byte   $4c
+        !byte   $00
+        !byte   $30
+        !byte   $ea
+        !text   "L9",$22,"L"
+        !byte   $00
+        !text   "1LLLLLL"
+
+@L22A8  rts
 
         }

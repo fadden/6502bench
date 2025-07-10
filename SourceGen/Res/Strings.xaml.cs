@@ -31,6 +31,10 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_AbbrevStackRelative");
         public static string ANALYZER_TAG_MULTI_CHK =
             (string)Application.Current.FindResource("str_AnalyzerTagMultiChk");
+        public static string ANALYZER_TAG_JMP_TABLE_CAPTION =
+            (string)Application.Current.FindResource("str_AnalyzerTagJmpTableCaption");
+        public static string ANALYZER_TAG_JMP_TABLE_FMT =
+            (string)Application.Current.FindResource("str_AnalyzerTagJmpTableFmt");
         public static string ASM_LATEST_VERSION =
             (string)Application.Current.FindResource("str_AsmLatestVersion");
         public static string ASM_MATCH_FAILURE =

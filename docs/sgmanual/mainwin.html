@@ -532,8 +532,17 @@ or simply by hitting <kbd class="key">Ctrl+D</kbd>.  Hit that, tag the
 byte or bytes, then hit it again to re-enable the
 string &amp; fill analyzer.</p>
 <p>Another approach is to use the <samp>Toggle Single-Byte Format</samp>
-menu item to "flatten" the item, explicitly formatting everything as
-individual hex bytes.</p>
+action (<kbd class="key">Ctrl+B</kbd>) to "flatten" the item, explicitly
+formatting everything as individual hex bytes.  This formats the bytes
+as data, however, so it's not recommended for sections that you think
+are actually code.</p>
+
+<p>As a special case, if you tag the start of an absolute JMP instruction
+($4C) as code, the next several bytes will be checked to see if they hold
+a consecutive series of JMPs.  If so, you will be offered the opportunity
+to tag all of them at once.  This can be convenient for "jump tables".
+The forward scan will halt if formatted data or mis-placed labels are
+encountered.</p>
 
 
 <h3 id="address-table">Format Address Table</h3>

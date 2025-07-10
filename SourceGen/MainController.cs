@@ -4310,6 +4310,14 @@ namespace SourceGen {
         public void MarkAsType(CodeAnalysis.AnalyzerTag atag, bool firstByteOnly) {
             RangeSet sel;
 
+            if (atag == CodeAnalysis.AnalyzerTag.Code && SelectionAnalysis.mNumItemsSelected == 1) {
+                // We're applying a code tag to a single line.  Analyze the file to see if special
+                // handling for jump tables can be applied here.
+                if (TryMarkJumpTable(out bool cancel) || cancel) {
+                    return;
+                }
+            }
+
             if (firstByteOnly) {
                 sel = new RangeSet();
                 foreach (int index in mMainWin.CodeDisplayList.SelectedIndices) {
@@ -4335,6 +4343,98 @@ namespace SourceGen {
                 sel = OffsetSetFromSelected();
             }
 
+            DoMarkAsType(atag, sel);
+        }
+
+        /// <summary>
+        /// Attempts special handling for "jump tables", i.e. chunks of code with multiple
+        /// consecutive JMP abs instructions.
+        /// </summary>
+        /// <remarks>
+        /// The current scan will skip over already-formatted JMP instructions to look for more
+        /// beyond.  This is extended behavior to make it easier to tag something when the first
+        /// JMP is already tagged.  However, if it only finds one unformatted entry it won't fire.
+        /// The user really ought to be tagging the first unformatted $4c byte; it might be better
+        /// to require this.
+        /// </remarks>
+        /// <param name="cancel">Result: true if user asked to cancel the operation.</param>
+        /// <returns>True if a jump table was found and processed.</returns>
+        private bool TryMarkJumpTable(out bool cancel) {
+            cancel = false;
+            int selIndex = mMainWin.CodeListView_GetFirstSelectedIndex();
+            int offset = CodeLineList[selIndex].FileOffset;
+            byte JMP = OpDef.OpJMP_Abs.Opcode;      // 0x4c
+
+            RangeSet sel = new RangeSet();
+            while (offset + 2 < mProject.FileDataLength) {
+                if (mProject.FileData[offset] != JMP) {
+                    break;
+                }
+                Anattrib attr0 = mProject.GetAnattrib(offset);
+                bool isInst = attr0.IsInstructionStart;
+                bool halt = false;
+
+                // Confirm that all bytes are data/inline-data, or are part of a previously-known
+                // JMP instruction.
+                for (int i = 0; i < 2; i++) {
+                    Anattrib attr = mProject.GetAnattrib(offset + i);
+                    if (attr.IsInstruction && !isInst) {
+                        halt = true;    // found instruction, but offset+0 wasn't an inst start
+                        break;
+                    }
+
+                    // Don't continue if a user label is defined here, unless it's on the JMP
+                    // opcode byte.
+                    if (i != 0 && mProject.UserLabels.TryGetValue(offset + i, out Symbol unused)) {
+                        halt = true;
+                        break;
+                    }
+                    // Don't continue if any byte has been formatted.
+                    if (mProject.OperandFormats.TryGetValue(offset + i, out FormatDescriptor unu)) {
+                        halt = true;
+                        break;
+                    }
+                }
+                if (halt) {
+                    break;
+                }
+
+                // If not already marked as an instruction, add the JMP opcode byte to the set.
+                if (!attr0.IsInstructionStart) {
+                    Debug.WriteLine("JumpTab: adding offset +" + offset.ToString("x6"));
+                    sel.Add(offset);
+                }
+
+                offset += 3;
+            }
+            if (sel.Count <= 1) {
+                // Didn't find anything to do, or found only one entry.  Let the general code
+                // handle it.
+                return false;
+            }
+
+            // Ask the user to confirm.
+            string msg = string.Format(Res.Strings.ANALYZER_TAG_JMP_TABLE_FMT, sel.Count);
+            MessageBoxResult result =
+                MessageBox.Show(msg, Res.Strings.ANALYZER_TAG_JMP_TABLE_CAPTION,
+                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            switch (result) {
+                case MessageBoxResult.Cancel:
+                default:
+                    cancel = true;
+                    return false;
+                case MessageBoxResult.No:
+                    return false;
+                case MessageBoxResult.Yes:
+                    DoMarkAsType(CodeAnalysis.AnalyzerTag.Code, sel);
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Generates the change set for analyzer tag updates.
+        /// </summary>
+        private void DoMarkAsType(CodeAnalysis.AnalyzerTag atag, RangeSet sel) {
             TypedRangeSet newSet = new TypedRangeSet();
             TypedRangeSet undoSet = new TypedRangeSet();
 

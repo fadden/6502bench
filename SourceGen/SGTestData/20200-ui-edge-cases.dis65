@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":6,
-"FileDataLength":193,
-"FileDataCrc32":960553569,
+"FileDataLength":222,
+"FileDataCrc32":1648676931,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -132,7 +132,7 @@
 {
 "Offset":53,
 "Addr":8704,
-"Length":140,
+"Length":169,
 "PreLabel":"",
 "DisallowInward":false,
 "DisallowOutward":false,
@@ -193,13 +193,6 @@
 "49":{
 "Label":"zf4",
 "Value":244,
-"Source":"User",
-"Type":"GlobalAddr",
-"LabelAnno":"None"},
-
-"192":{
-"Label":"done",
-"Value":8843,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},

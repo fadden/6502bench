@@ -25,6 +25,8 @@ limitations under the License.
     <system:String x:Key="str_AbbrevConstant">Const</system:String>
     <system:String x:Key="str_AbbrevStackRelative">StkRl</system:String>
     <system:String x:Key="str_AnalyzerTagMultiChk">Setting start/stop tags on multiple consecutive bytes is rarely a good idea. Continue?</system:String>
+    <system:String x:Key="str_AnalyzerTagJmpTableCaption">Format As Jump Table?</system:String>
+    <system:String x:Key="str_AnalyzerTagJmpTableFmt">Found {0} consecutive JMP instructions. Do you want to format all of them, rather than just the first?</system:String>
     <system:String x:Key="str_AsmLatestVersion">[latest version]</system:String>
     <system:String x:Key="str_AsmMatchFailure">output DOES NOT match data file</system:String>
     <system:String x:Key="str_AsmMatchSuccess">output matches data file</system:String>

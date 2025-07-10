@@ -58,7 +58,7 @@ next1    lda   addr1
          bcc   bitsy+1
 bitsy    dfb   $2c
          lda   #$ff
-         jmp   done
+         jmp   :L228B
 
          dw    FOO
          dw    FOO_5
@@ -73,5 +73,21 @@ bitsy    dfb   $2c
          dw    zf4
          dfb   $80
 
-done     rts
+:L228B   nop
+         jmp   :L22A8
+
+         dfb   $4c
+         dfb   $8b
+         asc   '"L9"L'
+         dfb   $95
+         dfb   $22
+         dfb   $4c
+         dfb   $00
+         dfb   $30
+         dfb   $ea
+         asc   'L9"L'
+         dfb   $00
+         asc   '1LLLLLL'
+
+:L22A8   rts
 

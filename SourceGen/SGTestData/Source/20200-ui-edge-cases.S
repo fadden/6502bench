@@ -86,7 +86,7 @@ next1
         bcc     bitsy+1         ;EDIT: set symbol "bitsy"
 bitsy   bit     $ffa9           ;EDIT: set label "bitsy" on BIT instruction
 
-        jmp     done
+        jmp     next2
 
 ; EDIT: format as 16-bit addresses
         dw      FOO
@@ -102,4 +102,18 @@ bitsy   bit     $ffa9           ;EDIT: set label "bitsy" on BIT instruction
         dw      zf4
         dfb     $80
 
-done    rts
+next2   nop
+
+; jump table
+        jmp     next3
+        jmp     next2
+        jmp     next1
+self    jmp     self
+        jmp     plataddr
+        nop
+        jmp     next1
+        jmp     OVERL
+        jmp     $4c4c
+        jmp     $4c4c
+
+next3   rts
