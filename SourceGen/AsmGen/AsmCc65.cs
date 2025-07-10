@@ -773,6 +773,7 @@ namespace SourceGen.AsmGen {
                 // Does this fit the narrow definition of what we can do with a macro?
                 Debug.Assert(dfd.FormatType == FormatDescriptor.Type.StringGeneric);
                 if (stropf.Lines.Count == 1 && !stropf.HasEscapedText) {
+                    const string MACRO_NAME = "HiAscii";
                     if (!mHighAsciiMacroOutput) {
                         mHighAsciiMacroOutput = true;
                         // Output a macro for high-ASCII strings.
@@ -783,13 +784,13 @@ namespace SourceGen.AsmGen {
                         // recognizes characters and numbers, so it should be possible to
                         // mix strings, string delimiters, and control chars so long as the
                         // argument count is not exceeded.
-                        OutputLine(".macro", "HiAscii", "Arg", string.Empty);
+                        OutputLine(".macro", MACRO_NAME, "Arg", string.Empty);
                         OutputLine(string.Empty, ".repeat", ".strlen(Arg), I", string.Empty);
                         OutputLine(string.Empty, ".byte", ".strat(Arg, I) | $80", string.Empty);
                         OutputLine(string.Empty, ".endrep", string.Empty, string.Empty);
                         OutputLine(".endmacro", string.Empty, string.Empty, string.Empty);
                     }
-                    opcodeStr = formatter.FormatPseudoOp("HiAscii");
+                    opcodeStr = MACRO_NAME;
                 } else {
                     // didn't work out, dump hex
                     OutputNoJoy(offset, dfd.Length, labelStr, commentStr);

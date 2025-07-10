@@ -252,6 +252,13 @@ namespace SourceGen {
             sb.Append(GenerateImageFiles.ToString());
             sb.Append(";opWrap=");
             sb.Append(mFormatter.Config.OperandWrapLen);
+            sb.Append(";upper=");
+            if (mFormatter.Config.UpperHexDigits) { sb.Append('D'); }
+            if (mFormatter.Config.UpperOpcodes) { sb.Append('O'); }
+            if (mFormatter.Config.UpperPseudoOpcodes) { sb.Append('P'); }
+            if (mFormatter.Config.UpperOperandA) { sb.Append('A'); }
+            if (mFormatter.Config.UpperOperandS) { sb.Append('S'); }
+            if (mFormatter.Config.UpperOperandXY) { sb.Append('X'); }
 
             // Not included: pseudo-op definitions; delimiter definitions
 
