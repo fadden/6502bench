@@ -191,6 +191,8 @@ namespace SourceGen.AsmGen {
             // Special handling for forward references to zero-page labels is required.
             Quirks.SinglePassAssembler = true;
 
+            Quirks.NoSignedDecimalImm = true;
+
             mWorkDirectory = workDirectory;
             mFileNameBase = fileNameBase;
             Settings = settings;

@@ -81,5 +81,33 @@ more_ascii dfb 'h'
          dfb   $fd
          dfb   ","
 
-L10A4    rts
+*Signed-decimal tests.  All of these must be formatted as signed decimal; this
+*may require hand-editing or modifications to the instruction operand editor.
+L10A4    nop
+         lda   #0
+         lda   #1
+         lda   #127
+         lda   #-128
+         lda   #-1
+         lda   1
+         lda   254
+         lda:  1
+         lda   65534
+         jmp   4311
+
+         dfb   0
+         dfb   1
+         dfb   127
+         dfb   -128
+         dfb   -1
+         dw    1
+         dw    -2
+         ddb   2
+         ddb   -3
+         adr   66051
+         adr   -259
+         adrl  16909060
+         adrl  -66052
+
+         rts
 

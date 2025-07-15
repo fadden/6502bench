@@ -62,7 +62,7 @@
         lda     #$fe
         lda     #$ff
 
-        jmp     end
+        jmp     next1
 
 ; Continuing with ASCII
 :ascii
@@ -96,4 +96,34 @@
         dfb     $fd
         dfb     ","
 
-end     rts
+; Signed-decimal tests.  All operands should be formatted as signed.  This
+; will require hand-editing or tweaking the operand editor.
+next1   nop
+        lda     #$00                    ;these should format as signed
+        lda     #$01
+        lda     #$7f
+        lda     #$80
+        lda     #$ff
+
+        lda     $01                     ;these should appear unsigned
+        lda     $fe
+        lda:    $0001
+        lda     $fffe
+        jmp     :skipdat1
+
+        dfb     $00                     ;all of these should appear signed
+        dfb     $01
+        dfb     $7f
+        dfb     $80
+        dfb     $ff
+        dw      $0001
+        dw      $fffe
+        dw      $0200                   ;big-endian
+        dw      $fdff                   ;big-endian
+        adr     $010203
+        adr     $fffefd
+        adrl    $01020304
+        adrl    $fffefdfc
+:skipdat1
+
+        rts

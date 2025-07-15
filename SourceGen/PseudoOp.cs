@@ -299,11 +299,14 @@ namespace SourceGen {
 
         /// <summary>
         /// Generates a pseudo-op statement for the specified data operation.
-        /// 
+        /// </summary>
+        /// <remarks>
         /// For most operations, only one output line will be generated.  For larger items,
         /// like dense hex, the value may be split into multiple lines.  The sub-index
         /// indicates which line should be formatted.
-        /// </summary>
+        ///
+        /// This is used for the on-screen formatting.  Assembly generators do their own thing.
+        /// </remarks>
         /// <param name="formatter">Format definition.</param>
         /// <param name="opNames">Table of pseudo-op names.</param>
         /// <param name="symbolTable">Project symbol table.</param>
@@ -352,13 +355,13 @@ namespace SourceGen {
                         po.Opcode = opNames.GetDefineData(length);
                         operand = RawData.GetWord(data, offset, length, false);
                         po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap,
-                            dfd, operand, length, FormatNumericOpFlags.None);
+                            dfd, operand, length, FormatNumericOpFlags.AllowSignedDecimal);
                         break;
                     case FormatDescriptor.Type.NumericBE:
                         po.Opcode = opNames.GetDefineBigData(length);
                         operand = RawData.GetWord(data, offset, length, true);
                         po.Operand = FormatNumericOperand(formatter, symbolTable, labelMap,
-                            dfd, operand, length, FormatNumericOpFlags.None);
+                            dfd, operand, length, FormatNumericOpFlags.AllowSignedDecimal);
                         break;
                     case FormatDescriptor.Type.Fill:
                         po.Opcode = opNames.Fill;
@@ -560,6 +563,7 @@ namespace SourceGen {
             HasHashPrefix           = 1 << 2,   // operand has a leading '#', reducing ambiguity
             OmitLabelPrefixSuffix   = 1 << 3,   // don't show annotation char or non-unique prefix
             Is64Tass                = 1 << 4,   // hack to allow 64tass to keep using "common" exp
+            AllowSignedDecimal      = 1 << 5,   // argument may be formatted as signed
         }
 
         /// <summary>
@@ -643,6 +647,12 @@ namespace SourceGen {
                     return formatter.FormatHexValue(operandValue, hexMinLen);
                 case FormatDescriptor.SubType.Decimal:
                     return formatter.FormatDecimalValue(operandValue);
+                case FormatDescriptor.SubType.SignedDecimal:
+                    if ((flags & FormatNumericOpFlags.AllowSignedDecimal) != 0) {
+                        return formatter.FormatSignedDecimalValue(operandValue, operandLen);
+                    } else {
+                        return formatter.FormatDecimalValue(operandValue);
+                    }
                 case FormatDescriptor.SubType.Binary:
                     return formatter.FormatBinaryValue(operandValue, hexMinLen * 4);
                 case FormatDescriptor.SubType.Ascii:

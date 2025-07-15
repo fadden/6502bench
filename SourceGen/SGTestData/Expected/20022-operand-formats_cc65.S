@@ -25,5 +25,12 @@
          lda     #$6868
          lda     f:'h'
          lda     f:'H' | $80
+         nop
+         lda     #0
+         lda     #1
+         lda     #32767
+         lda     #32768
+         lda     #65535
+         lda     16776957
          rts
 

@@ -286,6 +286,11 @@ namespace SourceGen.AsmGen {
         /// reduce the value to 8 bits?
         /// </summary>
         public bool ByteSelectionIsShift { get; set; }
+
+        /// <summary>
+        /// Does the assembler not accept signed decimal values for immediate instructions?
+        /// </summary>
+        public bool NoSignedDecimalImm { get; set; }
     }
 
     /// <summary>

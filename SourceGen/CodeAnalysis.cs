@@ -1296,6 +1296,8 @@ namespace SourceGen {
                     return FormatDescriptor.SubType.Hex;
                 case DataSubType.Decimal:
                     return FormatDescriptor.SubType.Decimal;
+                case DataSubType.SignedDecimal:
+                    return FormatDescriptor.SubType.SignedDecimal;
                 case DataSubType.Binary:
                     return FormatDescriptor.SubType.Binary;
                 case DataSubType.Address:

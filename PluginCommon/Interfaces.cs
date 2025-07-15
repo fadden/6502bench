@@ -471,6 +471,7 @@ namespace PluginCommon {
         // For NumericLE/BE
         Hex,
         Decimal,
+        SignedDecimal,
         Binary,
         Address,
         Symbol,

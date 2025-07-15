@@ -839,6 +839,9 @@ namespace SourceGen.WpfGui {
                             case FormatDescriptor.SubType.Decimal:
                                 radioSimpleDataDecimal.IsChecked = true;
                                 break;
+                            case FormatDescriptor.SubType.SignedDecimal:
+                                radioSimpleDataSignedDecimal.IsChecked = true;
+                                break;
                             case FormatDescriptor.SubType.Binary:
                                 radioSimpleDataBinary.IsChecked = true;
                                 break;
@@ -1004,6 +1007,8 @@ namespace SourceGen.WpfGui {
                     subType = FormatDescriptor.SubType.Hex;
                 } else if (radioSimpleDataDecimal.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Decimal;
+                } else if (radioSimpleDataSignedDecimal.IsChecked == true) {
+                    subType = FormatDescriptor.SubType.SignedDecimal;
                 } else if (radioSimpleDataBinary.IsChecked == true) {
                     subType = FormatDescriptor.SubType.Binary;
                 } else if (radioSimpleDataAscii.IsChecked == true) {

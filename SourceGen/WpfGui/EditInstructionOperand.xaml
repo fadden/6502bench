@@ -83,6 +83,8 @@ limitations under the License.
                                  IsChecked="{Binding FormatHex}"/>
                     <RadioButton GroupName="Main" Content="_Decimal" Margin="0,2,0,0"
                                  IsChecked="{Binding FormatDecimal}"/>
+                    <RadioButton GroupName="Main" Content="Signed _Decimal" Margin="0,2,0,0"
+                                 IsEnabled="{Binding IsFormatSignedDecimalAllowed}" IsChecked="{Binding FormatSignedDecimal}"/>
                     <RadioButton GroupName="Main" Content="_Binary" Margin="0,2,0,0"
                                  IsChecked="{Binding FormatBinary}"/>
                     <RadioButton GroupName="Main" Content="_ASCII (low or high) character" Margin="0,2,0,0"

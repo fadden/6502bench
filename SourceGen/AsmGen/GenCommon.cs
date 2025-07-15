@@ -286,6 +286,9 @@ namespace SourceGen.AsmGen {
                     op.AddrMode == OpDef.AddressMode.ImmLongA ||
                     op.AddrMode == OpDef.AddressMode.ImmLongXY) {
                 opFlags |= PseudoOp.FormatNumericOpFlags.HasHashPrefix;
+                if (!gen.Quirks.NoSignedDecimalImm) {
+                    opFlags |= PseudoOp.FormatNumericOpFlags.AllowSignedDecimal;
+                }
             }
             if ((opFlags & PseudoOp.FormatNumericOpFlags.IsPcRel) != 0) {
                 int branchDist = attr.Address - attr.OperandAddress;

@@ -37,4 +37,14 @@
         ldal    $000068     ;'h'
         ldal    $0000c8     ;"h"
 
+; Signed-decimal tests.
+        nop
+        lda     #$0000
+        lda     #$0001
+        lda     #$7fff
+        lda     #$8000
+        lda     #$ffff
+
+        ldal    $fffefd
+
         rts

@@ -79,6 +79,7 @@ namespace SourceGen {
             // NumericLE/BE; default is "raw", which can have a context-specific display format
             Hex,
             Decimal,
+            SignedDecimal,
             Binary,
             Address,            // wants to be an address, but no symbol defined
             Symbol,             // symbolic ref; replace with Expression, someday?
@@ -128,6 +129,8 @@ namespace SourceGen {
             Type.NumericLE, SubType.Hex);
         private static FormatDescriptor ONE_DECIMAL = new FormatDescriptor(1,
             Type.NumericLE, SubType.Decimal);
+        private static FormatDescriptor ONE_SIGNED_DECIMAL = new FormatDescriptor(1,
+            Type.NumericLE, SubType.SignedDecimal);
         private static FormatDescriptor ONE_BINARY = new FormatDescriptor(1,
             Type.NumericLE, SubType.Binary);
         private static FormatDescriptor ONE_LOW_ASCII = new FormatDescriptor(1,
@@ -274,6 +277,8 @@ namespace SourceGen {
                             return ONE_HEX;
                         case SubType.Decimal:
                             return ONE_DECIMAL;
+                        case SubType.SignedDecimal:
+                            return ONE_SIGNED_DECIMAL;
                         case SubType.Binary:
                             return ONE_BINARY;
                         case SubType.Ascii:
@@ -408,6 +413,7 @@ namespace SourceGen {
                     case SubType.Hex:
                         return 16;
                     case SubType.Decimal:
+                    case SubType.SignedDecimal:
                         return 10;
                     case SubType.Binary:
                         return 2;
@@ -426,7 +432,7 @@ namespace SourceGen {
         public static SubType GetSubTypeForBase(int numBase) {
             switch (numBase) {
                 case 2: return SubType.Binary;
-                case 10: return SubType.Decimal;
+                case 10: return SubType.Decimal;    // no SignedDecimal; not needed for DefSym
                 case 16: return SubType.Hex;
                 default:
                     Debug.Assert(false);
@@ -563,6 +569,9 @@ namespace SourceGen {
                     break;
                 case SubType.Decimal:
                     retstr += "numeric, Decimal";
+                    break;
+                case SubType.SignedDecimal:
+                    retstr += "numeric, Signed Decimal";
                     break;
                 case SubType.Binary:
                     retstr += "numeric, Binary";

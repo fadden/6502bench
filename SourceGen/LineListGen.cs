@@ -1440,7 +1440,8 @@ namespace SourceGen {
             } else if (op.AddrMode == OpDef.AddressMode.Imm ||
                     op.AddrMode == OpDef.AddressMode.ImmLongA ||
                     op.AddrMode == OpDef.AddressMode.ImmLongXY) {
-                opFlags = PseudoOp.FormatNumericOpFlags.HasHashPrefix;
+                opFlags = PseudoOp.FormatNumericOpFlags.HasHashPrefix |
+                          PseudoOp.FormatNumericOpFlags.AllowSignedDecimal;
             }
             if (op.IsAbsolutePBR) {
                 opFlags |= PseudoOp.FormatNumericOpFlags.IsAbsolutePBR;

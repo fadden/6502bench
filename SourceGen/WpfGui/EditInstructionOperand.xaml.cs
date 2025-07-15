@@ -389,6 +389,9 @@ namespace SourceGen.WpfGui {
                 case FormatDescriptor.SubType.Decimal:
                     sb.Append(mFormatter.FormatDecimalValue(operandValue));
                     break;
+                case FormatDescriptor.SubType.SignedDecimal:
+                    sb.Append(mFormatter.FormatSignedDecimalValue(operandValue, dfd.Length - 1));
+                    break;
                 case FormatDescriptor.SubType.Binary:
                     sb.Append(mFormatter.FormatBinaryValue(operandValue, 8));
                     break;
@@ -483,6 +486,18 @@ namespace SourceGen.WpfGui {
             set { mFormatDecimal = value; OnPropertyChanged(); UpdateControls(); }
         }
         private bool mFormatDecimal;
+
+        public bool IsFormatSignedDecimalAllowed {
+            get { return mIsFormatSignedDecimalAllowed; }
+            set { mIsFormatSignedDecimalAllowed = value; OnPropertyChanged(); }
+        }
+        private bool mIsFormatSignedDecimalAllowed;
+
+        public bool FormatSignedDecimal {
+            get { return mFormatSignedDecimal; }
+            set { mFormatSignedDecimal = value; OnPropertyChanged(); UpdateControls(); }
+        }
+        private bool mFormatSignedDecimal;
 
         public bool FormatBinary {
             get { return mFormatBinary; }
@@ -618,7 +633,9 @@ namespace SourceGen.WpfGui {
             } else {
                 IsFormatAsciiAllowed = IsFormatPetsciiAllowed = IsFormatScreenCodeAllowed =
                     false;
+
             }
+            IsFormatSignedDecimalAllowed = mOpDef.IsImmediate;
 
             SymbolLabel = string.Empty;
             FormatPartLow = true;       // could default to high for MVN/MVP
@@ -639,6 +656,9 @@ namespace SourceGen.WpfGui {
                             break;
                         case FormatDescriptor.SubType.Decimal:
                             FormatDecimal = true;
+                            break;
+                        case FormatDescriptor.SubType.SignedDecimal:
+                            FormatSignedDecimal = true;
                             break;
                         case FormatDescriptor.SubType.Binary:
                             FormatBinary = true;
@@ -760,6 +780,8 @@ namespace SourceGen.WpfGui {
                 subType = FormatDescriptor.SubType.Hex;
             } else if (FormatDecimal) {
                 subType = FormatDescriptor.SubType.Decimal;
+            } else if (FormatSignedDecimal) {
+                subType = FormatDescriptor.SubType.SignedDecimal;
             } else if (FormatBinary) {
                 subType = FormatDescriptor.SubType.Binary;
             } else if (FormatAscii) {

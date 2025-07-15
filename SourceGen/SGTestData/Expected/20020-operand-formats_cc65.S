@@ -82,5 +82,33 @@ more_ascii: .byte 'h'
          .byte   '}' | $80
          .byte   ',' | $80
 
-L10A4:   rts
+;Signed-decimal tests.  All of these must be formatted as signed decimal; this
+;may require hand-editing or modifications to the instruction operand editor.
+L10A4:   nop
+         lda     #0
+         lda     #1
+         lda     #127
+         lda     #128
+         lda     #255
+         lda     1
+         lda     254
+         lda     a:1
+         lda     65534
+         jmp     4311
+
+         .byte   0
+         .byte   1
+         .byte   127
+         .byte   128
+         .byte   255
+         .word   1
+         .word   65534
+         .dbyt   2
+         .dbyt   65533
+         .faraddr 66051
+         .faraddr 16776957
+         .dword  16909060
+         .dword  4294901244
+
+         rts
 

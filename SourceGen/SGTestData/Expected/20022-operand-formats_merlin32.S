@@ -21,5 +21,12 @@
          lda   #$6868
          ldal  'h'
          ldal  "H"
+         nop
+         lda   #0
+         lda   #1
+         lda   #32767
+         lda   #-32768
+         lda   #-1
+         ldal  16776957
          rts
 

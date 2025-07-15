@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":3,
-"FileDataLength":62,
-"FileDataCrc32":946946401,
+"_ContentVersion":6,
+"FileDataLength":82,
+"FileDataCrc32":1142036862,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -14,7 +14,9 @@
 "DefaultTextScanMode":"LowHighAscii",
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
-"SmartPlpHandling":true},
+"UseRelocData":false,
+"SmartPlpHandling":true,
+"SmartPlbHandling":true},
 
 "PlatformSymbolFileIdentifiers":[],
 "ExtensionScriptFileIdentifiers":[],
@@ -23,7 +25,12 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":4096}],
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
@@ -37,6 +44,7 @@
 "LongComments":{
 "-2147483647":{
 "Text":"Project file was edited to force ASCII formatting for some operands.",
+"IsFancy":false,
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0}},
@@ -52,85 +60,141 @@
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "10":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "13":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "19":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "22":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "25":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "32":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "36":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "40":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "44":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "47":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "50":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "53":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "57":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null}},
+"SymbolRef":null,
+"Extra":null},
+
+"62":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"65":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"68":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"71":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"74":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"77":{
+"Length":4,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null}},
 
 "LvTables":{
 },
@@ -138,4 +202,10 @@
 "Visualizations":[],
 "VisualizationAnimations":[],
 "VisualizationSets":{
+},
+
+"RelocList":{
+},
+
+"DbrValues":{
 }}

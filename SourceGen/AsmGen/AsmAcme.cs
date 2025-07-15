@@ -427,6 +427,10 @@ namespace SourceGen.AsmGen {
             int length = dfd.Length;
             Debug.Assert(length > 0);
 
+            PseudoOp.FormatNumericOpFlags flags =
+                PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix |
+                PseudoOp.FormatNumericOpFlags.AllowSignedDecimal;
+
             bool multiLine = false;
             switch (dfd.FormatType) {
                 case FormatDescriptor.Type.Default:
@@ -442,8 +446,7 @@ namespace SourceGen.AsmGen {
                     opcodeStr = sDataOpNames.GetDefineData(length);
                     operand = RawData.GetWord(data, offset, length, false);
                     operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                        mLocalizer.LabelMap, dfd, operand, length,
-                        PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
+                        mLocalizer.LabelMap, dfd, operand, length, flags);
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
@@ -453,8 +456,7 @@ namespace SourceGen.AsmGen {
                     } else {
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
-                            mLocalizer.LabelMap, dfd, operand, length,
-                            PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
+                            mLocalizer.LabelMap, dfd, operand, length, flags);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:

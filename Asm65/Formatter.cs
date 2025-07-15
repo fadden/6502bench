@@ -731,6 +731,28 @@ namespace Asm65 {
         }
 
         /// <summary>
+        /// Formats a 32-bit integer value as signed decimal.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns>Formatted string.</returns>
+        public string FormatSignedDecimalValue(int value, int operandLen) {
+            switch (operandLen) {
+                case 1:
+                    return ((sbyte)value).ToString();
+                case 2:
+                    return ((short)value).ToString();
+                case 3:
+                    value <<= 8;        // shift to cause sign-extension
+                    return ((value) >> 8).ToString();
+                case 4:
+                    return value.ToString();
+                default:
+                    Debug.Assert(false, "bad operand length " + operandLen);
+                    return "?" + operandLen + "?";
+            }
+        }
+
+        /// <summary>
         /// Formats a value in binary, padding with zeroes so the length is a multiple of 8.
         /// </summary>
         /// <param name="value">Value to convert.</param>

@@ -93,7 +93,10 @@ limitations under the License.
                     <RadioButton Name="radioSimpleDataDecimal" Grid.Column="0" Grid.Row="1"
                                  GroupName="Display" Content="_Decimal" Margin="0,4,18,0"
                                  Checked="SimpleDisplay_CheckedChanged"/>
-                    <RadioButton Name="radioSimpleDataBinary" Grid.Column="0" Grid.Row="2"
+                    <RadioButton Name="radioSimpleDataSignedDecimal" Grid.Column="0" Grid.Row="2"
+                                 GroupName="Display" Content="Signed decimal" Margin="0,4,18,0"
+                                 Checked="SimpleDisplay_CheckedChanged"/>
+                    <RadioButton Name="radioSimpleDataBinary" Grid.Column="1" Grid.Row="3"
                                  GroupName="Display" Content="_Binary" Margin="0,4,0,0"
                                  Checked="SimpleDisplay_CheckedChanged"/>
 

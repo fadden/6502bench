@@ -1,8 +1,8 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":3,
-"FileDataLength":165,
-"FileDataCrc32":-689690654,
+"_ContentVersion":6,
+"FileDataLength":216,
+"FileDataCrc32":766666952,
 "ProjectProps":{
 "CpuName":"6502",
 "IncludeUndocumentedInstr":false,
@@ -14,7 +14,9 @@
 "DefaultTextScanMode":"LowHighAscii",
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
-"SmartPlpHandling":true},
+"UseRelocData":false,
+"SmartPlpHandling":true,
+"SmartPlbHandling":true},
 
 "PlatformSymbolFileIdentifiers":[],
 "ExtensionScriptFileIdentifiers":[],
@@ -23,7 +25,12 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":4096}],
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
@@ -37,6 +44,14 @@
 "LongComments":{
 "-2147483647":{
 "Text":"Project file was edited to force ASCII formatting for some operands.",
+"IsFancy":false,
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"164":{
+"Text":"Signed-decimal tests.  All of these must be formatted as signed decimal; this may require hand-editing or modifications to the instruction operand editor.",
+"IsFancy":true,
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0}},
@@ -64,319 +79,372 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "12":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "15":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "17":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "20":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "22":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "25":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "27":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "30":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "32":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "35":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "37":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "43":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "44":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "46":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "49":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "53":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "54":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "56":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "59":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "63":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "64":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "66":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "69":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "73":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "74":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "76":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "79":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Binary",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "83":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "84":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "86":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "89":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "93":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "95":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "97":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "100":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "102":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "104":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "106":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "108":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "110":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "112":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "114":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "116":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "118":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "120":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "122":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "124":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "129":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "131":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "134":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "136":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "139":{
 "Length":2,
 "Format":"NumericBE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "141":{
 "Length":1,
@@ -384,7 +452,9 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"more_ascii",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "142":{
 "Length":1,
@@ -392,91 +462,268 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"more_ascii",
-"Part":"High"}},
+"Part":"High"},
+
+"Extra":null},
 
 "143":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "145":{
 "Length":3,
 "Format":"NumericLE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "148":{
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "152":{
 "Length":2,
 "Format":"NumericBE",
 "SubFormat":"Address",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "154":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "155":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "156":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "157":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "158":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "159":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "160":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "161":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "162":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "163":{
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"HighAscii",
-"SymbolRef":null}},
+"SymbolRef":null,
+"Extra":null},
+
+"165":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"167":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"169":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"171":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"173":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"175":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"177":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"179":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"182":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"185":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"188":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"189":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"190":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"191":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"192":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"193":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"195":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"197":{
+"Length":2,
+"Format":"NumericBE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"199":{
+"Length":2,
+"Format":"NumericBE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"201":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"204":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"207":{
+"Length":4,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null},
+
+"211":{
+"Length":4,
+"Format":"NumericLE",
+"SubFormat":"SignedDecimal",
+"SymbolRef":null,
+"Extra":null}},
 
 "LvTables":{
 },
@@ -484,4 +731,10 @@
 "Visualizations":[],
 "VisualizationAnimations":[],
 "VisualizationSets":{
+},
+
+"RelocList":{
+},
+
+"DbrValues":{
 }}
