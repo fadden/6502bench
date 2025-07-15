@@ -935,7 +935,7 @@ namespace SourceGen {
         }
 
         /// <summary>
-        /// Parses a [url]...[/url] tag, which could also be [url=xyzzy].
+        /// Parses a [url]...[/url] tag, which could also be [url=plugh].
         /// </summary>
         private static bool HandleUrl(string tagStr, DataSource source,
                 out int skipLen, out string showText) {
