@@ -45,6 +45,13 @@ namespace SourceGen.WpfGui {
         public List<int> AllTargetOffsets { get; private set; }
 
         /// <summary>
+        /// True if the addresses are 24-bit or 32-bit, and thus include the bank byte.
+        /// </summary>
+        public bool IsBankEnabled {
+            get { return width24Radio.IsChecked == true || width32Radio.IsChecked == true; }
+        }
+
+        /// <summary>
         /// If set, targets are offset by one for RTS/RTL.
         /// </summary>
         public bool IsAdjustedForReturn {
@@ -194,6 +201,7 @@ namespace SourceGen.WpfGui {
             if (mProject.CpuDef.HasAddr16) {
                 // Disable the 24-bit option.  Having 16-bit selected will disable the rest.
                 width24Radio.IsEnabled = false;
+                width32Radio.IsEnabled = false;
             }
 
             mUpdating = false;
@@ -210,16 +218,11 @@ namespace SourceGen.WpfGui {
             }
             mUpdating = true;   // no re-entry
 
-            // handled with XAML bindings
-            //lowThirdPartRadio.Enabled = width24Radio.Checked;
-            //highThirdPartRadio.Enabled = width24Radio.Checked;
-            //bankByteGroupBox.Enabled = width24Radio.Checked;
-
             lowSecondPartRadio.IsEnabled = true;
 
             // If the user selects "constant" for high byte or bank byte, then there is no
             // 3rd part available for low/high, so we need to turn those back off.
-            if (width24Radio.IsChecked == true) {
+            if (width24Radio.IsChecked == true || width32Radio.IsChecked == true) {
                 bool haveThree = !(highConstantRadio.IsChecked == true ||
                                    bankConstantRadio.IsChecked == true);
                 lowThirdPartRadio.IsEnabled = haveThree;
@@ -268,6 +271,7 @@ namespace SourceGen.WpfGui {
         }
 
         private void WidthRadio_CheckedChanged(object sender, RoutedEventArgs e) {
+            OnPropertyChanged(nameof(IsBankEnabled));
             UpdateControls();
         }
 
@@ -320,7 +324,7 @@ namespace SourceGen.WpfGui {
                 } else {
                     minDiv = 2;
                 }
-            } else {
+            } else /*24 or 32*/ {
                 if (highConstantRadio.IsChecked == true) {
                     if (bankConstantRadio.IsChecked == true) {
                         minDiv = 1;
@@ -333,6 +337,9 @@ namespace SourceGen.WpfGui {
                     } else {
                         minDiv = 3;
                     }
+                }
+                if (width32Radio.IsChecked == true) {
+                    minDiv++;
                 }
             }
 
@@ -404,7 +411,7 @@ namespace SourceGen.WpfGui {
             } else {
                 highOff = -1;   // use constant
             }
-            if (width24Radio.IsChecked == true) {
+            if (width24Radio.IsChecked == true || width32Radio.IsChecked == true) {
                 if (bankNthPartRadio.IsChecked == true) {
                     // Use whichever part isn't being used by the other two.
                     if (lowOff != 0 && highOff != 0) {
@@ -435,6 +442,8 @@ namespace SourceGen.WpfGui {
 
             if (IsSplitTable) {
                 // Split table, so stride is 1 and each section start is determined by the span.
+                // We don't change anything for the 32-bit width, because we would be ignoring
+                // those bytes anyway.
                 stride = 1;
                 lowOff *= span;
                 highOff *= span;
@@ -446,6 +455,9 @@ namespace SourceGen.WpfGui {
                     stride++;
                 }
                 if (bankOff >= 0) {
+                    stride++;
+                }
+                if (width32Radio.IsChecked == true) {
                     stride++;
                 }
             }
@@ -481,7 +493,8 @@ namespace SourceGen.WpfGui {
                     bank = (byte) bankConst;
                 }
 
-                // This is the target address.
+                // This is the target address.  We're currently ignoring the extra byte in 32-bit
+                // addresses.
                 int addr = ((bank << 16) | (high << 8) | low) + adj;
 
                 // Map it to a target label.  Start by looking for an offset inside file bounds.
@@ -546,7 +559,7 @@ namespace SourceGen.WpfGui {
                         //   24-bit table, i.e. low then bank then high.  This is not really
                         //   a thing, but we should either prevent it or punt to single-byte
                         //   like we do for split tables.
-                        Debug.Assert(stride >= 1 && stride <= 3);
+                        Debug.Assert(stride >= 1 && stride <= 4);
                         newDfds.Add(offsets[0 + i * stride], FormatDescriptor.Create(stride,
                             new WeakSymbolRef(targetLabel, WeakSymbolRef.Part.Low), isBigEndian));
                     }

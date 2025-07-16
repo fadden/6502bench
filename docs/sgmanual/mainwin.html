@@ -588,9 +588,11 @@ complicated dialog is split into sections.</p>
 <ul>
   <li>Address Characteristics: select whether the table has 16-bit
   addresses or 24-bit addresses.  (24-bit addresses are disabled if you
-  don't have the CPU set to 65816.)  If the table is split into individual
-  sub-tables for low bytes and high bytes, check the <samp>Parts are split
-  across sub-tables</samp> box.  If the address parts are being pushed
+  don't have the CPU set to 65816.)  If each 24-bit address is stored as
+  a 32-bit value, use the "24-bit + pad byte" option.
+  If the table is split into individual sub-tables for low bytes and high
+  bytes, check the <samp>Parts are split across sub-tables</samp> box.
+  If the address parts are being pushed
   on the stack for an <code>RTS</code>/<code>RTL</code>,
   check the <samp>Adjusted for RTS/RTL</samp> box to adjust them by 1.</li>
   <li>Low Byte Source: indicate which part of the table or word holds the

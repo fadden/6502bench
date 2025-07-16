@@ -55,6 +55,8 @@ limitations under the License.
                                  Content="16-bit" Checked="WidthRadio_CheckedChanged"/>
                     <RadioButton Name="width24Radio" GroupName="Addr" Margin="0,4,0,0"
                                  Content="24-bit" Checked="WidthRadio_CheckedChanged"/>
+                    <RadioButton Name="width32Radio" GroupName="Addr" Margin="0,4,0,0"
+                                 Content="24-bit + pad byte" Checked="WidthRadio_CheckedChanged"/>
                     <CheckBox Margin="0,4,0,0" Content="Parts are split across sub-tables"
                               IsChecked="{Binding IsSplitTable}"/>
                     <CheckBox Margin="0,4,0,0" Content="Adjusted for RTS/RTL (target - 1)"
@@ -72,7 +74,7 @@ limitations under the License.
                                  Checked="LowByte_CheckedChanged"/>
                     <RadioButton Name="lowThirdPartRadio" GroupName="Low" Margin="0,4,0,0"
                                  Content="Third part of selection"
-                                 IsEnabled="{Binding ElementName=width24Radio, Path=IsChecked}"
+                                 IsEnabled="{Binding IsBankEnabled}"
                                  Checked="LowByte_CheckedChanged"/>
                 </StackPanel>
             </GroupBox>
@@ -87,7 +89,7 @@ limitations under the License.
                                  Checked="HighByte_CheckedChanged"/>
                     <RadioButton Name="highThirdPartRadio" GroupName="High" Margin="0,4,0,0"
                                  Content="Third part of selection"
-                                 IsEnabled="{Binding ElementName=width24Radio, Path=IsChecked}"
+                                 IsEnabled="{Binding IsBankEnabled}"
                                  Checked="HighByte_CheckedChanged"/>
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Name="highConstantRadio" GroupName="High" Margin="0,4,0,0"
@@ -99,7 +101,7 @@ limitations under the License.
             </GroupBox>
 
             <GroupBox Header="Bank Byte Source">
-                <StackPanel IsEnabled="{Binding ElementName=width24Radio, Path=IsChecked}">
+                <StackPanel IsEnabled="{Binding IsBankEnabled}">
                     <RadioButton Name="bankNthPartRadio" GroupName="Bank" Margin="0,4,0,0"
                                  Content="Nth part of selection"
                                  Checked="BankByte_CheckedChanged"/>
@@ -134,9 +136,10 @@ limitations under the License.
                     <!-- We're currently auto-sizing everything outside this, so the width of
                     the columns determines the width of the window.  Resizing the columns resizes
                     the window, even though the window isn't resizeable.  "It's a feature." -->
+                    <!-- We set a fixed height so long lists don't make the window absurdly tall. -->
                     <DataGrid Name="outputPreviewList"
                               Margin="0,2,0,0"
-                              Height="318"
+                              Height="345"
                               IsReadOnly="True"
                               ItemsSource="{Binding OutputPreviewList}"
                               FontFamily="{StaticResource GeneralMonoFont}"
