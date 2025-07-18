@@ -29,7 +29,7 @@ start    clc
          lda   #>start
          lda   #^start
          pea   $feed
-         pea   start
+         pea   $2345
          pea   $0001
          pea   $3456
          pea   $0012
@@ -214,5 +214,18 @@ after    ldx   <after+8&$ff,y
          ldy   <after+9&$ff,x
          dfb   $d4,$c4
          nop
+         jml   :L21000
+
+         org   $021000
+:L21000  nop
+ptest    pea   $1001
+         pea   $1001
+         pea   ptest
+         pea   $3456
+         pea   $0012
+         pea   $3456
+         pea   $0012
+         pea   biggie
+         pea   ^biggie
          rts
 

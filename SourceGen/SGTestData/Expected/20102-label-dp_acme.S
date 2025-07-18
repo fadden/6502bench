@@ -273,7 +273,7 @@ L11FC   cmp+2   L0086,x
 @L122A  sbc     (L0080),y
         sbc     (L0080)
         sbc     ($80,S),y
-        pea     L0086
+        pea     $0086
         sbc+1   L0080,x
         inc+1   L0080,x
         sbc     [L0080],y

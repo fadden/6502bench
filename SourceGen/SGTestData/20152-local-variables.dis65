@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":4,
+"_ContentVersion":6,
 "FileDataLength":237,
 "FileDataCrc32":1833028653,
 "ProjectProps":{
@@ -26,7 +26,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":false,
@@ -43,7 +44,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"project const",
 "HasWidth":false,
@@ -60,7 +62,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"project const",
 "HasWidth":false,
@@ -77,7 +80,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"project addr",
 "HasWidth":false,
@@ -94,7 +98,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"project addr",
 "HasWidth":false,
@@ -111,7 +116,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"project addr, should clash",
 "HasWidth":false,
@@ -125,11 +131,21 @@
 
 "AddressMap":[{
 "Offset":0,
-"Addr":4096},
+"Addr":4096,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false},
 
 {
 "Offset":126,
-"Addr":128}],
+"Addr":128,
+"Length":-1024,
+"PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
+"IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
@@ -143,12 +159,14 @@
 "LongComments":{
 "-2147483647":{
 "Text":"Edited to have duplicate labels (PROJ_ZERO, DPCODE).",
+"IsFancy":false,
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
 "81":{
 "Text":"Test name redefinition.  This is mostly of interest for assemblers without redefinable variables, but also of interest to the cross-reference window.",
+"IsFancy":false,
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0}},
@@ -206,31 +224,37 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"CONST_ZERO",
-"Part":"Low"}},
+"Part":"Low"},
+
+"Extra":null},
 
 "24":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "26":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "136":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "143":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Ascii",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "155":{
 "Length":3,
@@ -238,7 +262,19 @@
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"STRING",
-"Part":"Bank"}}},
+"Part":"Bank"},
+
+"Extra":null},
+
+"158":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"STRING",
+"Part":"Low"},
+
+"Extra":null}},
 
 "LvTables":{
 "12":{
@@ -247,7 +283,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -264,7 +301,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -281,7 +319,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -298,7 +337,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -317,7 +357,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"clash with project symbol",
 "HasWidth":true,
@@ -334,7 +375,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"clash with user label",
 "HasWidth":true,
@@ -361,7 +403,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"hidden table",
 "HasWidth":true,
@@ -378,7 +421,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"hidden table",
 "HasWidth":true,
@@ -397,7 +441,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"not hidden",
 "HasWidth":true,
@@ -414,7 +459,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"not hidden",
 "HasWidth":true,
@@ -433,7 +479,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -450,7 +497,8 @@
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -469,7 +517,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"#1",
 "HasWidth":true,
@@ -488,7 +537,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"#2",
 "HasWidth":true,
@@ -507,7 +557,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"#3",
 "HasWidth":true,
@@ -526,7 +577,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -545,7 +597,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -564,7 +617,8 @@
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -583,7 +637,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -602,7 +657,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -619,7 +675,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -636,7 +693,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -653,7 +711,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -670,7 +729,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -687,7 +747,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -706,7 +767,8 @@
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -725,7 +787,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"same as org",
 "HasWidth":true,
@@ -744,7 +807,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -763,7 +827,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -786,7 +851,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -803,7 +869,8 @@
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,
@@ -820,7 +887,8 @@
 "Length":4,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":true,

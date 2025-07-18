@@ -570,6 +570,7 @@ namespace SourceGen {
             } else if (op == OpDef.OpPEA_StackAbs || op == OpDef.OpPER_StackPCRelLong) {
                 // They might be pushing address-1 to set up an RTS.  If the target address isn't
                 // an instruction start, check to see if the following byte is.
+                // (We now treat PEA as immediate, so we won't be here for that.)
                 if (!mAnattribs[targetOffset].IsInstructionStart &&
                         targetOffset + 1 < mAnattribs.Length &&
                         mAnattribs[targetOffset + 1].IsInstructionStart) {

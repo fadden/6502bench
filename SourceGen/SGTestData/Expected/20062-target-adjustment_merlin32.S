@@ -1,7 +1,7 @@
          org   $1000
          nop
 L1001    bit   L1001
-caddr    pea   caddr-1
+caddr    pea   $1003
          per   caddr-1
          lda   L1001+2
          lda   caddr

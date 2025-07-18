@@ -962,7 +962,7 @@ namespace SourceGen {
                     // Merge the PBR even if we eventually want the DBR; less to fix later.
                     mAnattribs[offset].OperandAddress = operand | bank;
                     break;
-                case OpDef.AddressMode.StackAbs:            // assume PBR
+                //case OpDef.AddressMode.StackAbs:            // treat as imm; else assume PBR
                 case OpDef.AddressMode.AbsIndexXInd:        // JMP (addr,X); uses program bank
                     mAnattribs[offset].OperandAddress = operand | bank;
                     break;

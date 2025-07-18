@@ -81,7 +81,7 @@ namespace Asm65 {
             Implied,            // OP               1
             PCRel,              // OP label         2 (BCC, BNE, ...)
             PCRelLong,          // OP label         3 (BRL)
-            StackAbs,           // OP addr          3 (PEA)
+            StackAbs,           // OP addr          3 (PEA), treat as imm const16
             StackDPInd,         // OP (dp)          2 (PEI)
             StackInt,           // OP               2 (BRK, COP)
             StackPCRelLong,     // OP label         3 (PER)

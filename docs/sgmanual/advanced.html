@@ -416,18 +416,19 @@ rsrcmsg    pea   rsrcmsg2|-16
            sta   pArcRead+$06
 </pre>
 <p>In both cases we're referencing a 24-bit address as two 16-bit values.
-Without context, the disassembler will treat the PEA instruction as two
-independent 16-bit addresses, and the immediate values as constants:</p>
+Without context, the disassembler will treat the PEA instruction operands
+and the immediate values as constants:</p>
 <pre>
                                .dbank  $02
-02/317c: f4 02 00     L2317C   pea     L20002 &amp; $ffff
-02/317f: f4 54 32              pea     L23254 &amp; $ffff
-02/3182: a2 0c 20              ldx     #WriteCString
-02/3185: 22 00 00 e1           jsl     Toolbox
-02/3189: a9 00 00     L23189   lda     #$0000
-02/318c: 8d 78 3f              sta     L23F78 &amp; $ffff
-02/318f: a9 03 00              lda     #$0003
-02/3192: 8d 7a 3f              sta     L23F78 &amp; $ffff +2
+02/327c: f4 02 00     L2327C   pea     $0002
+02/327f: f4 54 33              pea     $3354
+02/3282: a2 0c 20              ldx     #WriteCString
+02/3285: 22 00 00 e1           jsl     Toolbox
+02/3289: a9 00 01     L23289   lda     #$0100
+02/328c: 8d 78 40              sta     L24078 & $ffff
+02/328f: a9 03 00              lda     #$0003
+02/3292: 8d 7a 40              sta     L24078 & $ffff +2
+
 </pre>
 <p>Worse yet, those <code>STA</code> instruction operands would have been
 shown as hex values or incorrect labels if the DBR had been set incorrectly.
@@ -436,20 +437,20 @@ address from which the addresses were formed, and we can tell when
 immediate values are addresses rather than constants.  And we can do this
 even without setting the DBR.</p>
 <pre>
-02/317c: f4 02 00     L2317C   pea     L23254 &gt;&gt; 16
-02/317f: f4 54 32              pea     L23254 &amp; $ffff
-02/3182: a2 0c 20              ldx     #WriteCString
-02/3185: 22 00 00 e1           jsl     Toolbox
-02/3189: a9 00 00     L23189   lda     #L30000 &amp; $ffff
-02/318c: 8d 78 3f              sta     L23F78 &amp; $ffff
-02/318f: a9 03 00              lda     #L30000 &gt;&gt; 16
-02/3192: 8d 7a 3f              sta     L23F78 &amp; $ffff +2
+02/327c: f4 02 00     L2327C   pea     L23354 &gt;&gt; 16
+02/327f: f4 54 33              pea     L23354 & $ffff
+02/3282: a2 0c 20              ldx     #WriteCString
+02/3285: 22 00 00 e1           jsl     Toolbox
+02/3289: a9 00 01     L23289   lda     #L30100 & $ffff
+02/328c: 8d 78 40              sta     L24078 & $ffff
+02/328f: a9 03 00              lda     #L30100 &gt;&gt; 16
+02/3292: 8d 7a 40              sta     L24078 & $ffff +2
 </pre>
 <p>The absence of relocation data can be a useful signal as well.  For
 example, when pushing arguments for a toolbox call, the disassembler
 can tell the difference between addresses and constants without needing
 emulation or pattern-matching, because only the addresses get
-relocated.  Consider this bit of source code:</p>
+relocated.  Another example:</p>
 <pre>
            lda   &lt;total_records
            pha
@@ -461,25 +462,25 @@ relocated.  Consider this bit of source code:</p>
 </pre>
 <p>Without relocation data, it becomes:</p>
 <pre>
-02/0aa8: a5 42                 lda     $42
-02/0aaa: 48                    pha
-02/0aab: f4 02 00              pea     L20002 &amp; $ffff
-02/0aae: f4 03 31              pea     L23103 &amp; $ffff
-02/0ab1: f4 05 00              pea     L20005 &amp; $ffff
-02/0ab4: f4 00 00              pea     L20000 &amp; $ffff
-02/0ab7: a2 0b 26              ldx     #Int2Dec
-02/0aba: 22 00 00 e1           jsl     Toolbox
+02/0ba8: a5 42                 lda     $42
+02/0baa: 48                    pha
+02/0bab: f4 02 00              pea     $0002
+02/0bae: f4 03 32              pea     $3203
+02/0bb1: f4 05 00              pea     $0005
+02/0bb4: f4 00 00              pea     $0000
+02/0bb7: a2 0b 26              ldx     #Int2Dec
+02/0bba: 22 00 00 e1           jsl     Toolbox
 </pre>
-<p>If we treat the non-relocated operands as constants:</p>
+<p>With reloc, we update the pointer but not the constants:</p>
 <pre>
-02/0aa8: a5 42                 lda     $42
-02/0aaa: 48                    pha
-02/0aab: f4 02 00              pea     L230C2 &gt;&gt; 16
-02/0aae: f4 03 31              pea     L23103 &amp; $ffff
-02/0ab1: f4 05 00              pea     $0005
-02/0ab4: f4 00 00              pea     $0000
-02/0ab7: a2 0b 26              ldx     #Int2Dec
-02/0aba: 22 00 00 e1           jsl     Toolbox
+02/0ba8: a5 42                 lda     $42
+02/0baa: 48                    pha
+02/0bab: f4 02 00              pea     L231C2 >> 16
+02/0bae: f4 03 32              pea     L23203 & $ffff
+02/0bb1: f4 05 00              pea     $0005
+02/0bb4: f4 00 00              pea     $0000
+02/0bb7: a2 0b 26              ldx     #Int2Dec
+02/0bba: 22 00 00 e1           jsl     Toolbox
 </pre>
 
 

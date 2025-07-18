@@ -248,8 +248,22 @@ before  nop
         ldx     <after+2&$ff,y
         ldy     <after+3&$ff,x
         dfb     $d4,$c4             ;pei     (<zip+4&$ff)
-
 after   nop
+        jml     checkpea
+
+; Dig into PEA, using both internal and external addresses.  We want to do
+; this outside bank 0 to see if the bank byte creeps in.
+        org     $021000
+checkpea nop
+ptest   pea     ptest               ;don't format
+        pea     ptest               ;explicitly format as hex
+        pea     ptest               ;format as symbol
+
+        pea     biggie              ;don't format
+        pea     ^biggie
+        pea     biggie              ;explicitly format as hex
+        pea     ^biggie
+        pea     biggie              ;format as symbol (low+bank)
+        pea     ^biggie
 
         rts
-
