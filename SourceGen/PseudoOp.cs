@@ -636,25 +636,21 @@ namespace SourceGen {
                 case FormatDescriptor.SubType.None:
                 case FormatDescriptor.SubType.Hex:
                 case FormatDescriptor.SubType.Address:
-                    if ((formatter.ExpressionMode == Formatter.FormatConfig.ExpressionMode.Cc65 ||
-                                formatter.ExpressionMode == Formatter.FormatConfig.ExpressionMode.Merlin) &&
-                            (flags & FormatNumericOpFlags.IsAbsolutePBR) != 0) {
-                        // cc65 really doesn't like 24-bit values for JMP/JSR.  If it sees a
-                        // 24-bit hex constant it emits JML/JSL.  Merlin works either way, and
-                        // I think it looks better as a 16-bit value.
-                        operandValue &= 0xffff;
-                    }
-                    return formatter.FormatHexValue(operandValue, hexMinLen);
+                    return formatter.FormatHexValue(
+                        StripBank(operandValue, operandLen, flags), hexMinLen);
                 case FormatDescriptor.SubType.Decimal:
-                    return formatter.FormatDecimalValue(operandValue);
+                    return formatter.FormatDecimalValue(StripBank(operandValue, operandLen, flags));
                 case FormatDescriptor.SubType.SignedDecimal:
                     if ((flags & FormatNumericOpFlags.AllowSignedDecimal) != 0) {
-                        return formatter.FormatSignedDecimalValue(operandValue, operandLen);
+                        return formatter.FormatSignedDecimalValue(
+                            StripBank(operandValue, operandLen, flags), operandLen);
                     } else {
-                        return formatter.FormatDecimalValue(operandValue);
+                        return formatter.FormatDecimalValue(
+                            StripBank(operandValue, operandLen, flags));
                     }
                 case FormatDescriptor.SubType.Binary:
-                    return formatter.FormatBinaryValue(operandValue, hexMinLen * 4);
+                    return formatter.FormatBinaryValue(
+                        StripBank(operandValue, operandLen, flags), hexMinLen * 4);
                 case FormatDescriptor.SubType.Ascii:
                 case FormatDescriptor.SubType.HighAscii:
                 case FormatDescriptor.SubType.C64Petscii:
@@ -709,6 +705,26 @@ namespace SourceGen {
                     Debug.Assert(false);
                     return "???";
             }
+        }
+
+        /// <summary>
+        /// Trims the bank byte off of 16-bit instruction operands.  The bank byte wasn't part of
+        /// the original instruction; it was added by combining with B or K.  Before displaying the
+        /// operand as hex/decimal/binary we want to shed the bank byte... usually.  While cc65
+        /// requires a 16-bit value (it turns JSR to JSL otherwise), 64tass requires a 24-bit value
+        /// to confirm that you're calling code in the correct bank.
+        /// </summary>
+        private static int StripBank(int operandValue, int operandLen, FormatNumericOpFlags flags) {
+            if (operandLen != 2) {
+                // Not a 16-bit operand, don't mess with it.
+                return operandValue;
+            }
+            if ((flags & FormatNumericOpFlags.IsAbsolutePBR) != 0 &&
+                    (flags & FormatNumericOpFlags.Is64Tass) != 0) {
+                // Generating code for 64tass JMP/JSR.  Leave it alone.
+                return operandValue;
+            }
+            return operandValue & 0xffff;
         }
 
         /// <summary>

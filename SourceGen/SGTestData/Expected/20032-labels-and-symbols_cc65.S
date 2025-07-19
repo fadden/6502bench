@@ -227,6 +227,8 @@ after:   ldx     <after+8,y
 
          .org    $021000
 @L21000: nop
+         .a8
+         .i8
 ptest:   pea     $1001
          pea     $1001
          pea     ptest & $ffff
@@ -236,5 +238,55 @@ ptest:   pea     $1001
          pea     $0012
          pea     biggie & $ffff
          pea     biggie >> 16
+         jmp     L22000 & $ffff
+
+         .org    $020010
+testlow: .byte   $02
+         .org    $0010
+testzp:  .byte   $00
+
+         .org    $022000
+L22000:  nop
+         phk
+         plb
+         lda     $123456,x
+         jsl     $123456
+         jsr     $3456
+         lda     ptest & $ffff,x
+         jsr     ptest & $ffff
+         lda     a:testlow & $ffff,x
+         jsr     testlow & $ffff
+         lda     testzp,x
+         nop
+         lda     biggie,x
+         jsl     biggie
+         jsr     biggie & $ffff
+         lda     ptest & $ffff,x
+         jsr     ptest & $ffff
+         lda     a:testlow & $ffff,x
+         jsr     testlow & $ffff
+         lda     testzp,x
+         nop
+         lda     $123456,x
+         jsl     $123456
+         jsr     $3456
+         lda     $1001,x
+         jsr     $1001
+         lda     a:$0010,x
+         jsr     $0010
+         lda     $10,x
+         nop
+         sep     #$30
+         lda     #$e0
+         pha
+         plb
+         lda     1193046,x
+         jsl     1193046
+         jsr     13398
+         lda     4097,x
+         jsr     4097
+         lda     a:16,x
+         jsr     16
+         lda     16,x
          rts
 

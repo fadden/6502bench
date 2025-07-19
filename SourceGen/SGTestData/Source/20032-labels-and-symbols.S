@@ -265,5 +265,59 @@ ptest   pea     ptest               ;don't format
         pea     ^biggie
         pea     biggie              ;format as symbol (low+bank)
         pea     ^biggie
+        jmp     btest
+
+; Check some in-bank and cross-bank internal/external operands.
+        org     $020010
+testlow dfb     $02
+
+        org     $0010
+testzp  dfb     $00
+
+        org     $022000
+btest   nop
+        phk
+        plb
+
+        ldal    biggie,x            ;don't format
+        jsl     biggie
+        jsr     biggie
+        lda     ptest,x
+        jsr     ptest
+        lda:    testlow,x
+        jsr     testlow
+        lda     testzp,x
+        nop
+        ldal    biggie,x            ;format as symbol
+        jsl     biggie
+        jsr     biggie
+        lda     ptest,x
+        jsr     ptest
+        lda:    testlow,x
+        jsr     testlow
+        lda     testzp,x
+        nop
+        ldal    biggie,x            ;explicitly format as hex
+        jsl     biggie
+        jsr     biggie
+        lda     ptest,x
+        jsr     ptest
+        lda:    testlow,x
+        jsr     testlow
+        lda     testzp,x
+        nop
+        sep     #$30
+        mx      %11
+        lda     #$e0
+        pha
+        plb
+        ldal    biggie,x            ;explicitly format as decimal
+        jsl     biggie
+        jsr     biggie
+        lda     ptest,x
+        jsr     ptest
+        lda:    testlow,x
+        jsr     testlow
+        lda     testzp,x
 
         rts

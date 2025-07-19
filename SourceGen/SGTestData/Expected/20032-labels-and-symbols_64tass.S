@@ -231,6 +231,8 @@ after   ldx     <after+8,y
         .here
         .logical $021000
 _L21000 nop
+        .as
+        .xs
 ptest   pea     $1001
         pea     $1001
         pea     ptest & $ffff
@@ -240,6 +242,59 @@ ptest   pea     $1001
         pea     $0012
         pea     biggie & $ffff
         pea     biggie >> 16
+        jmp     L22000
+
+        .here
+        .logical $020010
+testlow .byte   $02
+        .here
+        .logical $0010
+testzp  .byte   $00
+        .here
+
+        .logical $022000
+L22000  nop
+        phk
+        plb
+        lda     $123456,x
+        jsl     $123456
+        jsr     $023456
+        lda     ptest & $ffff,x
+        jsr     ptest
+        lda     @wtestlow & $ffff,x
+        jsr     testlow
+        lda     testzp,x
+        nop
+        lda     biggie,x
+        jsl     biggie
+        jsr     biggie & $ffff,k
+        lda     ptest & $ffff,x
+        jsr     ptest
+        lda     @wtestlow & $ffff,x
+        jsr     testlow
+        lda     testzp,x
+        nop
+        lda     $123456,x
+        jsl     $123456
+        jsr     $023456
+        lda     $1001,x
+        jsr     $021001
+        lda     @w$0010,x
+        jsr     $020010
+        lda     $10,x
+        nop
+        sep     #$30
+        lda     #$e0
+        pha
+        plb
+        lda     1193046,x
+        jsl     1193046
+        jsr     144470
+        lda     4097,x
+        jsr     135169
+        lda     @w16,x
+        jsr     131088
+        lda     16,x
         rts
 
         .here
