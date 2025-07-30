@@ -53,7 +53,7 @@ Steps:
  5. Do a full clean build.
  6. Hit F5 to start MakeDist.  Click "Build" to generate a release build.  The
 	files will be copied into `DIST_Release`.
- 7. Create an empty ZIP file (e.g. `6502bench123d1.zip`).
+ 7. Create an empty ZIP file (e.g. `6502bench1_10_0-alpha1.zip`).
  8. Copy all files from `DIST_Release` into it.
  9. Submit all changes to git, push them to the server.
  10. Create a new release on github.  Drag the ZIP file into it.
