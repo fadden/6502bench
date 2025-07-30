@@ -104,6 +104,9 @@ namespace SourceGen {
             // Changes the note.
             SetNote,
 
+            // Sets one or more flags.
+            SetMiscFlags,
+
             // Updates project properties.
             SetProjectProperties,
 
@@ -495,6 +498,31 @@ namespace SourceGen {
             uc.OldValue = oldNote;
             uc.NewValue = newNote;
             uc.ReanalysisRequired = ReanalysisScope.None;
+            return uc;
+        }
+
+        /// <summary>
+        /// Creates an UndoableChange for a note update.
+        /// </summary>
+        /// <param name="offset">Affected offset.</param>
+        /// <param name="oldFlags">Current flags.</param>
+        /// <param name="newFlags">New flags.</param>
+        /// <returns>Change record.</returns>
+        public static UndoableChange CreateMiscFlagsChange(int offset,
+                DisasmProject.MiscFlag oldFlags, DisasmProject.MiscFlag newFlags) {
+            if (oldFlags == newFlags) {
+                Debug.WriteLine("No-op flags change at +" + offset.ToString("x6") +
+                    ": " + oldFlags);
+            }
+
+            UndoableChange uc = new UndoableChange();
+            uc.Type = ChangeType.SetMiscFlags;
+            uc.Offset = offset;
+            uc.OldValue = oldFlags;
+            uc.NewValue = newFlags;
+            // Actual requirement could vary based on flag.  These should be rare, so for now
+            // just do the full analysis.
+            uc.ReanalysisRequired = ReanalysisScope.CodeAndData;
             return uc;
         }
 

@@ -397,6 +397,7 @@ namespace SourceGen.AsmGen {
                     offset += len;
                 } else {
                     // data items
+                    Debug.Assert(attr.Length > 0);
                     offset += attr.Length;
                 }
             }

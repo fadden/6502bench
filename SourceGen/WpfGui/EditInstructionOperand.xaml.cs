@@ -62,6 +62,16 @@ namespace SourceGen.WpfGui {
         /// </summary>
         public DefSymbol ProjectSymbolResult { get; private set; }
 
+        /// <summary>
+        /// If true, the operand should not be treated as an address during analysis.
+        /// </summary>
+        public bool DisregardOperandAddress {
+            get { return mDisregardOperandAddress; }
+            set { mDisregardOperandAddress = value; OnPropertyChanged(); }
+        }
+        private bool mDisregardOperandAddress;
+
+        public bool IsDisregardEnabled { get; private set; }
 
         /// <summary>
         /// Updated label.
@@ -184,6 +194,13 @@ namespace SourceGen.WpfGui {
                 // For BlockMove this will have both parts.
                 mOperandValue = mOpDef.GetOperand(project.FileData, offset, attr.StatusFlags);
             }
+
+            // Disable the "disregard" checkbox for immediate operands, unless it's already set
+            // (so they can disable it if it got set some weird way).
+            IsDisregardEnabled = DisregardOperandAddress || !(mOpDef.IsImmediate ||
+                mOpDef.AddrMode == OpDef.AddressMode.BlockMove);
+            DisregardOperandAddress =
+                (mProject.MiscFlags[offset] & DisasmProject.MiscFlag.DisregardOperandAddress) != 0;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

@@ -33,15 +33,14 @@ namespace SourceGen {
         // Arbitrary 1MB limit.  Could be increased to 16MB if performance is acceptable.
         public const int MAX_DATA_FILE_SIZE = 1 << 20;
 
-        // File magic.
-        private const long MAGIC = 6982516645493599905;
+        public static readonly long FILE_MAGIC = 6982516645493599905;
 
 
         #region Data that is saved to the project file
         // All data held by structures in this section are persistent, and will be
         // written to the project file.  Anything not in this section may be discarded
         // at any time.  Smaller items are kept in arrays, with one entry per byte
-        // of file data.
+        // of file data, for fast access during code analysis.
 
         /// <summary>
         /// Length of input data.  (This is redundant with FileData.Length while in memory,
@@ -68,6 +67,20 @@ namespace SourceGen {
         /// Status flag overrides.  Default value is "all unspecified".
         /// </summary>
         public StatusFlags[] StatusFlagOverrides { get; private set; }
+
+        /// <summary>
+        /// Miscellaneous flags.
+        /// </summary>
+        /// <remarks>
+        /// These are expected to be set rarely.  They are serialized integers,
+        /// so the flag enumeration can be renamed, but DO NOT re-use flag values.
+        /// </remarks>
+        public MiscFlag[] MiscFlags { get; private set; }
+        [Flags]
+        public enum MiscFlag : byte {
+            None = 0,
+            DisregardOperandAddress = 1 << 0,
+        }
 
         /// <summary>
         /// End-of-line comments.  Empty string means "no comment".
@@ -278,6 +291,9 @@ namespace SourceGen {
 
             // Default value is "unspecified" for all bits.
             StatusFlagOverrides = new StatusFlags[fileDataLen];
+
+            // Default value is 0 (all flags clear).
+            MiscFlags = new MiscFlag[fileDataLen];
 
             Comments = new string[fileDataLen];
 
@@ -853,7 +869,7 @@ namespace SourceGen {
                 reanalysisTimer.StartTask("CodeAnalysis.Analyze");
 
                 CodeAnalysis ca = new CodeAnalysis(mFileData, CpuDef, mAnattribs, AddrMap,
-                    AnalyzerTags, StatusFlagOverrides, ProjectProps.EntryFlags,
+                    AnalyzerTags, StatusFlagOverrides, MiscFlags, ProjectProps.EntryFlags,
                     ProjectProps.AnalysisParams, mScriptManager, debugLog);
 
                 ca.Analyze();
@@ -1451,10 +1467,16 @@ namespace SourceGen {
                     // symbol with the same name from being visible.  Using the full symbol
                     // table is potentially a tad less efficient than looking for a match
                     // exclusively in project/platform symbols, but it's the correct thing to do.
-                    OpDef op = CpuDef.GetOpDef(FileData[offset]);
-                    accType = op.MemEffect;
-                    address = attr.OperandAddress;
-                    sym = SymbolTable.FindNonVariableByAddress(address, accType);
+                    bool disregard = (MiscFlags[offset] & MiscFlag.DisregardOperandAddress) != 0;
+                    if (disregard) {
+                        address = -1;
+                        sym = null;
+                    } else {
+                        OpDef op = CpuDef.GetOpDef(FileData[offset]);
+                        accType = op.MemEffect;
+                        address = attr.OperandAddress;
+                        sym = SymbolTable.FindNonVariableByAddress(address, accType);
+                    }
                 } else if ((attr.IsDataStart || attr.IsInlineDataStart) &&
                         attr.DataDescriptor != null && attr.DataDescriptor.IsNumeric &&
                         attr.DataDescriptor.FormatSubType == FormatDescriptor.SubType.Address) {
@@ -2502,6 +2524,17 @@ namespace SourceGen {
                             AddAffectedLine(affectedOffsets, offset);
                         }
                         break;
+                    case UndoableChange.ChangeType.SetMiscFlags: {
+                            MiscFlag curFlags = MiscFlags[offset];
+                            if ((MiscFlag)curFlags != (MiscFlag)oldValue) {
+                                Debug.WriteLine("GLITCH: old misc flags value mismatch ($" +
+                                    curFlags.ToString("x") + " vs " +
+                                    ((MiscFlag)oldValue).ToString("x") + ")");
+                            }
+                            MiscFlags[offset] = (MiscFlag)newValue;
+                            // Scope of effects could be large.
+                        }
+                        break;
                     case UndoableChange.ChangeType.SetProjectProperties: {
                             bool needPlatformSymReload = !CommonUtil.Container.StringListEquals(
                                 ((ProjectProperties)oldValue).PlatformSymbolFileIdentifiers,
@@ -2577,6 +2610,7 @@ namespace SourceGen {
                         }
                         break;
                     default:
+                        Debug.Assert(false, "unhandled case " + uc.Type);
                         break;
                 }
                 if (needReanalysis < uc.ReanalysisRequired) {

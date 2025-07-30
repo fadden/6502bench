@@ -170,6 +170,7 @@ limitations under the License.
     <system:String x:Key="str_ProjectFieldDbrValue">DBR value</system:String>
     <system:String x:Key="str_ProjectFieldLongComment">long comment</system:String>
     <system:String x:Key="str_ProjectFieldLvTable">local variable table</system:String>
+    <system:String x:Key="str_ProjectFieldMiscFlags">misc flag</system:String>
     <system:String x:Key="str_ProjectFieldNote">note</system:String>
     <system:String x:Key="str_ProjectFieldOperandFormat">operand format</system:String>
     <system:String x:Key="str_ProjectFieldRelocData">reloc data</system:String>

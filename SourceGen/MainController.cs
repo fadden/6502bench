@@ -2943,6 +2943,23 @@ namespace SourceGen {
                 Debug.WriteLine("No change to project symbol");
             }
 
+            if (mProject.MiscFlags[offset] != 0 || dlg.DisregardOperandAddress) {
+                // Flags are defined, or the "disregard" checkbox is checked.  See if
+                // something has changed.
+                DisasmProject.MiscFlag curFlags = mProject.MiscFlags[offset];
+                bool curVal = (curFlags & DisasmProject.MiscFlag.DisregardOperandAddress) != 0;
+                bool newVal = dlg.DisregardOperandAddress;
+                if (curVal != newVal) {
+                    DisasmProject.MiscFlag newFlags =
+                        (curFlags & ~DisasmProject.MiscFlag.DisregardOperandAddress) |
+                        (newVal ? DisasmProject.MiscFlag.DisregardOperandAddress : 0);
+                    Debug.Assert(curFlags != newFlags);
+                    UndoableChange uc = UndoableChange.CreateMiscFlagsChange(offset, curFlags,
+                        newFlags);
+                    cs.Add(uc);
+                }
+            }
+
             Debug.WriteLine("EditInstructionOperand: " + cs.Count + " changes");
             if (cs.Count != 0) {
                 ApplyUndoableChanges(cs);
@@ -5233,6 +5250,13 @@ namespace SourceGen {
 
             if (attr.NoContinueScript) {
                 sb.AppendLine("\"No-continue\" flag set by script");
+            }
+            if (attr.DoesNotBranch) {
+                sb.AppendLine("Conditional branch is never taken");
+            }
+            if ((mProject.MiscFlags[line.FileOffset] &
+                    DisasmProject.MiscFlag.DisregardOperandAddress) != 0) {
+                sb.AppendLine("Operand address is being disregarded");
             }
             if (attr.HasAnalyzerTag) {
                 sb.Append("\u2022 Analyzer Tags: ");

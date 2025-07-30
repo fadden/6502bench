@@ -193,8 +193,12 @@ namespace SourceGen {
                                 //Debug.WriteLine("REL +" + offset.ToString("x6") + " " +
                                 //    reloc.Value.ToString("x6") + " vs. " +
                                 //    attr.OperandAddress.ToString("x6"));
-                                WeakSymbolRef.Part part = ShiftToPart(reloc.Shift);
-                                SetDataTarget(offset, attr.Length, relOperandOffset, part);
+                                bool disregard = (mProject.MiscFlags[offset] &
+                                    DisasmProject.MiscFlag.DisregardOperandAddress) != 0;
+                                if (!disregard) {
+                                    WeakSymbolRef.Part part = ShiftToPart(reloc.Shift);
+                                    SetDataTarget(offset, attr.Length, relOperandOffset, part);
+                                }
                                 continue;
                             }
                         }

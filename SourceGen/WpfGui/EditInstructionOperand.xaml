@@ -103,6 +103,7 @@ limitations under the License.
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <RadioButton Name="formatSymbolButton" Grid.Column="0" Grid.Row="0" GroupName="Main"
@@ -142,6 +143,10 @@ limitations under the License.
                         <TextBlock Grid.Column="1" Grid.Row="1"
                                    Text="{Binding SymbolValueDecimal, FallbackValue=16777215}"/>
                     </Grid>
+
+                    <CheckBox Grid.Column="0" Grid.Row="4" Content="Disregard operand address"
+                              IsChecked="{Binding DisregardOperandAddress}"
+                              IsEnabled="{Binding IsDisregardEnabled}"/>
                 </Grid>
             </Grid>
         </GroupBox>

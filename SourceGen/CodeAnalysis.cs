@@ -160,6 +160,11 @@ namespace SourceGen {
         private StatusFlags[] mStatusFlagOverrides;
 
         /// <summary>
+        /// Miscellaneous flags, one entry per byte.
+        /// </summary>
+        private DisasmProject.MiscFlag[] mMiscFlags;
+
+        /// <summary>
         /// Initial status flags to use at entry points.
         /// </summary>
         private StatusFlags mEntryFlags;
@@ -178,6 +183,10 @@ namespace SourceGen {
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <remarks>
+        /// This takes individual arrays as arguments, rather than the project file, to
+        /// ensure that we're restricting our analysis to a specific set of data tables.
+        /// </remarks>
         /// <param name="data">65xx code stream.</param>
         /// <param name="cpuDef">CPU definition to use when interpreting code.</param>
         /// <param name="anattribs">Anattrib array.  Expected to be newly allocated, all
@@ -186,20 +195,23 @@ namespace SourceGen {
         /// <param name="atags">Analyzer tags, one per byte.</param>
         /// <param name="statusFlagOverrides">Status flag overrides for instruction-start
         ///    bytes.</param>
+        /// <param name="miscFlags">Miscellaneous flags, one per byte.</param>
         /// <param name="entryFlags">Status flags to use at code entry points.</param>
         /// <param name="scriptMan">Extension script manager.</param>
         /// <param name="parms">Analysis parameters.</param>
         /// <param name="debugLog">Object that receives debug log messages.</param>
         public CodeAnalysis(byte[] data, CpuDef cpuDef, Anattrib[] anattribs,
                 AddressMap addrMap, AnalyzerTag[] atags, StatusFlags[] statusFlagOverrides,
-                StatusFlags entryFlags, ProjectProperties.AnalysisParameters parms,
-                ScriptManager scriptMan, DebugLog debugLog) {
+                DisasmProject.MiscFlag[] miscFlags, StatusFlags entryFlags,
+                ProjectProperties.AnalysisParameters parms,ScriptManager scriptMan,
+                DebugLog debugLog) {
             mFileData = data;
             mCpuDef = cpuDef;
             mAnattribs = anattribs;
             mAddrMap = addrMap;
             mAnalyzerTags = atags;
             mStatusFlagOverrides = statusFlagOverrides;
+            mMiscFlags = miscFlags;
             mEntryFlags = entryFlags;
             mScriptManager = scriptMan;
             mAnalysisParameters = parms;
@@ -1015,7 +1027,15 @@ namespace SourceGen {
                 int operandOffset = mAddrMap.AddressToOffset(offset,
                     mAnattribs[offset].OperandAddress);
                 if (operandOffset >= 0) {
-                    mAnattribs[offset].OperandOffset = operandOffset;
+                    bool disregard =
+                        (mMiscFlags[offset] & DisasmProject.MiscFlag.DisregardOperandAddress) != 0;
+                    if (!disregard) {
+                        mAnattribs[offset].OperandOffset = operandOffset;
+                    } else {
+                        //Debug.WriteLine("Disregarding operand address at +" +
+                        //    offset.ToString("x6"));
+                        mAnattribs[offset].OperandOffset = -1;
+                    }
 
                     // Set a flag if this is a direct offset.  This is used when tracing
                     // through jump instructions, as we can't necessarily decode an indirect
@@ -1399,7 +1419,8 @@ namespace SourceGen {
         /// </summary>
         /// <remarks>
         /// This is of questionable value when we have reliable relocation data.  OTOH it's
-        /// pretty quick even on very large files.
+        /// pretty quick even on very large files.  This is executed as a follow-up pass after
+        /// code analysis completes.
         /// </remarks>
         public void ApplyDataBankRegister(Dictionary<int, DbrValue> userValues,
                 Dictionary<int, DbrValue> dbrChanges) {
@@ -1427,6 +1448,9 @@ namespace SourceGen {
             short curVal = DbrValue.UNKNOWN;
             for (int offset = 0; offset < mAnattribs.Length; offset++) {
                 if (mAnattribs[offset].IsNonAddressable) {
+                    continue;
+                }
+                if ((mMiscFlags[offset] & DisasmProject.MiscFlag.DisregardOperandAddress) != 0) {
                     continue;
                 }
                 if (curVal == DbrValue.UNKNOWN) {

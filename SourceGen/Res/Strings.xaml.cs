@@ -321,6 +321,8 @@ namespace SourceGen.Res {
             (string)Application.Current.FindResource("str_ProjectFieldLongComment");
         public static string PROJECT_FIELD_LV_TABLE =
             (string)Application.Current.FindResource("str_ProjectFieldLvTable");
+        public static string PROJECT_FIELD_MISC_FLAGS =
+            (string)Application.Current.FindResource("str_ProjectFieldMiscFlags");
         public static string PROJECT_FIELD_NOTE =
             (string)Application.Current.FindResource("str_ProjectFieldNote");
         public static string PROJECT_FIELD_OPERAND_FORMAT =

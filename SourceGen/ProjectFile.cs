@@ -56,7 +56,7 @@ namespace SourceGen {
         // ignore stuff that's in one side but not the other.  However, if we're opening a
         // newer file in an older program, it's worth letting the user know that some stuff
         // may get lost as soon as they save the file.
-        public const int CONTENT_VERSION = 6;
+        public const int CONTENT_VERSION = 7;
 
         // Max JSON file length.
         internal const int MAX_JSON_LENGTH = 64 * 1024 * 1024;
@@ -470,6 +470,7 @@ namespace SourceGen {
         public List<SerAddressMapEntry> AddressMap { get; set; }
         public List<SerTypeHintRange> TypeHints { get; set; }
         public Dictionary<string, int> StatusFlagOverrides { get; set; }
+        public Dictionary<string, int> MiscFlags { get; set; }
         public Dictionary<string, string> Comments { get; set; }
         public Dictionary<string, SerMultiLineComment> LongComments { get; set; }
         public Dictionary<string, SerMultiLineComment> Notes { get; set; }
@@ -531,6 +532,16 @@ namespace SourceGen {
                     continue;
                 }
                 spf.StatusFlagOverrides.Add(i.ToString(), proj.StatusFlagOverrides[i].AsInt);
+            }
+
+            // Write flags as an integer.  A string of enumerations would have some advantages,
+            // but simplicity is not among them.
+            spf.MiscFlags = new Dictionary<string, int>();
+            for (int i = 0; i < proj.MiscFlags.Length; i++) {
+                if (proj.MiscFlags[i] == DisasmProject.MiscFlag.None) {
+                    continue;
+                }
+                spf.MiscFlags.Add(i.ToString(), (int)proj.MiscFlags[i]);
             }
 
             // Convert Comments to serializable form.
@@ -761,7 +772,7 @@ namespace SourceGen {
             }
 
             // Deserialize status flag overrides.
-            foreach (KeyValuePair<string,int> kvp in spf.StatusFlagOverrides) {
+            foreach (KeyValuePair<string, int> kvp in spf.StatusFlagOverrides) {
                 if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
                         Res.Strings.PROJECT_FIELD_STATUS_FLAGS, report, out int intKey)) {
                     continue;
@@ -961,6 +972,16 @@ namespace SourceGen {
                 }
             }
 
+            // Deserialize misc flags.  These were added in 1.10.
+            if (spf.MiscFlags != null) {
+                foreach (KeyValuePair<string, int> kvp in spf.MiscFlags) {
+                    if (!ParseValidateKey(kvp.Key, spf.FileDataLength,
+                            Res.Strings.PROJECT_FIELD_MISC_FLAGS, report, out int intKey)) {
+                        continue;
+                    }
+                    proj.MiscFlags[intKey] = (DisasmProject.MiscFlag)kvp.Value;
+                }
+            }
 
             return true;
         }

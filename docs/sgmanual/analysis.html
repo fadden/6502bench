@@ -49,12 +49,13 @@ method in <code>DisasmProject.cs</code>):</p>
     doing a partial re-analysis, this step will just clone a copy of the
     Anattrib array that was made at this point in a previous run.  (The
     code analysis pass is described in more detail below.)</li>
+  <li>For 65816 code, factor in data bank register changes.</li>
   <li>Apply user-specified labels to Anattribs.</li>
   <li>Apply user-specified format descriptors.  These are the instruction
     and data operand formats.</li>
   <li>Run the data analyzer.  This looks for patterns in uncategorized
     data, and connects instruction and data operands to target offsets.
-    The "nearby label" stuff is handled here.  Auto-labels are generated
+    The "nearby targets" stuff is handled here.  Auto-labels are generated
     for references to internal addresses.  All of the results are
     stored in the Anattribs array.  (The data analysis pass is described in
     more detail below.)</li>
@@ -76,13 +77,14 @@ method in <code>DisasmProject.cs</code>):</p>
     referenced.</li>
   <li>If annotated auto-labels are enabled, the simple labels are
     replaced with the annotated versions here.  (This can't be done earlier
-    because the annotations are generated from the cross-reference data.)</li>
+    because the fancier annotations are generated from the cross-reference
+    usage data.)</li>
   <li>In a debug build, some validity checks are performed.</li>
 </ul>
 
 <p>Once analysis is complete, a line-by-line display list is generated
 by walking through the annotated file data.  Most of the actual text
-isn't rendered until they're needed.  For complicated multi-line items
+isn't rendered until it's first needed.  For complicated multi-line items
 like string operands, the formatted text must be generated to know how
 many lines it will occupy, so it's done immediately and cached for re-use
 on subsequent runs.</p>
@@ -280,15 +282,18 @@ and then the target locations tagged as code entry points.</p>
 operands with the Data Bank Register ("B") to form a 24-bit address.
 SourceGen can't automatically determine what the register holds, so it
 assumes that it's equal to the program bank register ("K"), and provides
-a way to override the value.</p>
+a way to override the value.  With "Smart PLB Handling" enabled, common
+patterns like <code>LDA #$E0 / PHA / PLB</code> are recognized
+automatically.</p>
 
 
 <h3 id="extension-scripts">Extension Scripts</h3>
 
 <p>Extension scripts can mark data that follows a JSR, JSL, or BRK as inline
 data, or change the format of nearby data or instructions.  The first
-time a JSR/JSL/BRK instruction is encountered, all loaded extension scripts
-that implement the appropriate interface are offered a chance to act.</p>
+time a JSR/JSL/BRK instruction is encountered in the current analysis pass,
+all loaded extension scripts that implement the appropriate interface are
+offered a chance to act.</p>
 
 <p>The first script that applies a format wins.  Attempts to re-format
 instructions or data that have already been formatted will fail.  This rule
@@ -305,8 +310,8 @@ before code analysis starts.)</p>
 
 
 <h2 id="data-analysis">Data Analysis</h2>
-<p>The data analyzer performs two tasks.  It matches operands with
-offsets, and it analyzes uncategorized data.  This behavior can be
+<p>The data analyzer performs two main tasks.  It links operands to
+file offsets, and it analyzes uncategorized data.  This behavior can be
 modified in the
 <a href="settings.html#project-properties">project properties</a>.</p>
 
