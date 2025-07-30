@@ -124,6 +124,7 @@ be imported by other projects (see
 
 
 <h2 id="instruction-operand">Edit Operand (Instruction)</h2>
+
 <p>Operands can be formatted explicitly, or you can let the disassembler
 select the format for you.  By default, immediate constants and
 addresses with no matching symbol are formatted as hex.  Symbols
@@ -164,6 +165,11 @@ in a future release.)</p>
 also have two operands: a direct page address, and a relative branch.
 In general the direct page address is ignored, so these are treated as
 branch instructions.</p>
+<p>The <samp>Disregard Operand Address</samp> checkbox tells the code
+analyzer to ignore the operand when scanning the code and creating labels.
+This is useful in a few very specific situations, such as when instructions
+embedded inside other instructions cause "dummy" address references, or when
+inter-bank references in multi-bank ROM images don't resolve correctly.</p>
 
 <p>The bottom part of the window has some shortcuts for working with
 address references and local variables.  These are primarily used to

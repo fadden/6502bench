@@ -3561,6 +3561,9 @@ namespace SourceGen {
         }
 
         public void RemoveFormatting() {
+            const DisasmProject.MiscFlag clearMask =
+                (DisasmProject.MiscFlag.DisregardOperandAddress);
+
             RangeSet sel = OffsetSetFromSelected();
             ChangeSet cs = new ChangeSet(16);
             foreach (int offset in sel) {
@@ -3572,8 +3575,8 @@ namespace SourceGen {
                 // Formatted?
                 if (mProject.OperandFormats.TryGetValue(offset, out FormatDescriptor oldFd)) {
                     Debug.WriteLine("Remove format from +" + offset.ToString("x6"));
-                    UndoableChange uc = UndoableChange.CreateOperandFormatChange(offset,
-                        oldFd, null);
+                    UndoableChange uc =
+                        UndoableChange.CreateOperandFormatChange(offset, oldFd, null);
                     cs.Add(uc);
                 }
 
@@ -3585,6 +3588,14 @@ namespace SourceGen {
                 if (attr.Symbol != null && !attr.IsStart) {
                     Debug.WriteLine("Remove label from +" + offset.ToString("x6"));
                     UndoableChange uc = UndoableChange.CreateLabelChange(offset, attr.Symbol, null);
+                    cs.Add(uc);
+                }
+
+                DisasmProject.MiscFlag curFlags = mProject.MiscFlags[offset];
+                if ((curFlags & clearMask) != 0) {
+                    DisasmProject.MiscFlag newFlags = mProject.MiscFlags[offset] & ~clearMask;
+                    UndoableChange uc =
+                        UndoableChange.CreateMiscFlagsChange(offset, curFlags, newFlags);
                     cs.Add(uc);
                 }
             }
