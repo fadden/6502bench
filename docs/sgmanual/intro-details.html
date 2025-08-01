@@ -852,7 +852,9 @@ embedded instructions.  $EF and $12 aren't valid 6502 opcodes, so
 they're being ignored, but $10 is <code>BPL</code> and $30 is
 <code>BMI</code>.
 Because tagging multiple consecutive bytes is rarely useful, SourceGen
-only applies code start tags to the first byte in a selected line.</p>
+only applies code start tags to the first byte in a selected line.
+As a special case, if it detects a series of <code>JMP</code> instructions,
+it will offer to format the full set.</p>
 
 <p><b>Code stop point</b> tags tell the analyzer when it should stop.  For
 example, suppose address $ff00 is known to always be nonzero, and the code
@@ -881,8 +883,8 @@ instruction stream, but not instructions.  A simple example of this
 is the ProDOS 8 call interface on the Apple II, which looks like this:</p>
 <pre>
          JSR     $bf00
-         .DD1    $function
-         .DD2    $address
+         .DD1    function
+         .DD2    address
          BCS     BAD
 </pre>
 
@@ -937,26 +939,27 @@ ENTRY2   CLC
 [ ... ]
 </pre>
 
-<p>Calling ENTRY1 sets the carry and skips the CLC, which is embedded
-in the BCC instruction.  Calling ENTRY2 clears the carry.</p>
-<p>When this is disassembled, all paths are shown, but the BCC line has
-a downward triangle, and the "bytes" column is partially filled.</p>
+<p>Calling ENTRY1 sets the carry and skips the <code>CLC</code>, which
+is embedded in the <code>BCC</code> instruction.  Calling ENTRY2 clears
+the carry.</p>
+<p>When this is disassembled, all paths are shown, but the <code>BCC</code>
+line has a downward triangle, and the "bytes" column is partially filled.</p>
 <pre>
 c305: 38           ENTRY1          sec
 c306: 90                           bcc &#x25bc; LC320
 c307: 18           ENTRY2          clc
 </pre>
 
-<p>The BCC appears to branch to $C320.  Even though the branch is never
-taken when the code is executed, the disassembler will create a label at
-the target address, and generate an entry in the cross-reference table.
-(The disassembler knows that the branch is never taken and doesn't try to
-follow it to execute code there, but for various reasons it's often useful
-to treat it as a valid address reference anyway.)  When the target address
-is in an awkward place, such as the middle of a data item or instruction,
-this can be disruptive.</p>
+<p>The <code>BCC</code> appears to branch to <code>$C320</code>.  Even
+though the branch is never taken when the code is executed, the disassembler
+will create a label at the target address, and generate an entry in the
+cross-reference table.  (The disassembler knows that the branch is never
+taken and doesn't try to follow it to execute code there, but for various
+reasons it's often useful to treat it as a valid address reference anyway.)
+When the target address is in an awkward place, such as the middle of a
+data item or instruction, this can be disruptive.</p>
 
-<p>This problem can be remedied by editing the operand of the BCC
+<p>This problem can be remedied by editing the operand of the <code>BCC</code>
 instruction and checking the "disregard operand address" box.  The
 operand will be formatted as a plain hex value instead.</p>
 
@@ -975,15 +978,26 @@ ENTRY2   LDA     #$FF
 2c10: a9 ff        L2C10           lda   #$ff
 </pre>
 
-<p>In this case, the BIT instruction performs an operation whose result
-is ignored.  So long as accesses to address $FFA9 don't have any side-effects,
-this works fine.  We don't want the disassembly to generate a label or look
-for a matching project symbol, though, so the BIT instruction should also
-have the "disregard operand address" box checked.</p>
+<p>In this case, the <code>BIT</code> instruction performs an operation
+whose result is ignored.  So long as accesses to address <code>$FFA9</code>
+don't have any side-effects, this works fine.  We don't want the disassembly
+to generate a label or look for a matching project symbol, though, so the
+<code>BIT</code> instruction should also have the "disregard operand address"
+box checked.</p>
 
 <p>It should be noted that disregarding the operand does not prevent you
 from formatting it.  You can even format it as a symbol by specifying one
-in the operand editor.</p>
+in the operand editor, in which case a cross-reference to that symbol
+will be generated.</p>
+
+<p>An alternative approach is to <a href="#atags">tag</a> the opcode
+byte of the branch or <code>BIT</code> instruction as inline data.  This
+will prevent the code analyzer from seeing it as an instruction at all.  The
+down side of doing this is that the code analyzer will no longer be able to
+see all possible paths through the code, and might not see flag changes.  For
+example, if you tagged the <code>BCC</code> instruction in the first example
+as inline data, the analyzer would think that the carry flag was always
+clear in the subsequent code.</p>
 
 
 <h2 id="pseudo-ops">Data and Directive Pseudo-Opcodes</h2>

@@ -131,7 +131,7 @@
         the project ("<i>project symbols</i>"), or in a symbol file that can be
         included in multiple projects ("<i>platform symbols</i>").  The SourceGen
         distribution includes platform symbol files with ROM addresses for
-        several common systems.</p>
+        several common systems, and you can create your own.</p>
     </div>
 </div>
 
@@ -348,8 +348,9 @@
         <img src="images/t1-local-loop1.png" alt="t1-local-loop1"/>
     </div>
     <div class="grid-item-text">
-		<p>The label at line $1002 (and the operand on line $100B) should now
-		be "<samp>@LOOP</samp>".  By default, '@' is used to indicate non-unique labels,
+		<p>The label at line $1002 (and the <code>BPL</code> operand on line
+        $1009) should now be "<samp>@LOOP</samp>".
+        By default, '@' is used to indicate non-unique labels,
 		though you can change it to a different character in the application
 		settings.</p>
     </div>
@@ -364,8 +365,8 @@
 		you type "<kbd>MAIN</kbd>" or "<kbd>IS_OK</kbd>" with Global selected you'll
         get an error, but if you type "<kbd>@LOOP</kbd>" it will be accepted.  Note
         the "non-unique local" radio
-		button is selected automatically if you start a label with '@' (or
-		whatever character you have configured).  Click <samp>OK</samp>.</p>
+		button is selected automatically if you start typing a label with '@' (or
+		whichever character you have configured).  Click <samp>OK</samp>.</p>
 		<p>You now have two lines with the same label.  In some cases the
         assembly source generator may need to "promote" them to globals, or
         rename them to make them unique, depending on what your preferred assembler

@@ -161,7 +161,7 @@
         <samp>Height</samp>
         field to 8.  As soon as you do, the preview window shows a big blue 'X'.
         (The 'X' is 7x7; the last row/column of pixels are transparent so adjacent
-        images don't bump into each other.)</p>
+        images are visually separated in the game.)</p>
     </div>
 </div>
 
@@ -210,7 +210,7 @@
         set, create a new visualization.  The height will default to 8 because
         that's what you used last time, so you shouldn't have to
         make any changes to the initial values.
-        Click <samp>OK</samp> in both dialogs to close them.</p>
+        Click <samp>OK</samp> in both dialogs to accept the change.</p>
     </div>
 </div>
 
@@ -220,8 +220,8 @@
     </div>
     <div class="grid-item-text">
         <p>Repeat the process at line $101A, but this time the image is 40x40
-        rather than 8x8.  Set the width to 5, and the height to 40.  This makes
-        a mess.</p>
+        pixels rather than 8x8.  Set the width to 5, and the height to 40.
+        This makes a mess.</p>
     </div>
 </div>
 
@@ -236,7 +236,8 @@
         <samp>Row stride (bytes)</samp> field to 8.
         Now we have a proper Tic-Tac-Toe grid.
         Note that it fills the preview window just as the 'X' and 'O' did, even
-        though it's 5x as large.  The preview window scales everything up.  Hit
+        though it's 5x as large.  The preview display scales everything to fit
+        the current window size (try resizing it).  Hit
         <samp>OK</samp> twice to create the visualization.</p>
     </div>
 </div>

@@ -191,7 +191,8 @@
     </div>
     <div class="grid-item-text">
         <p>While we're here, the code at $2092 looks a bit strange.
-        <code>LDX</code>, then a <code>BIT</code> with a weird symbol, then
+        <code>LDX</code>, then a <code>BIT</code> instruction with a weird
+        '&#x25bc;' symbol, then
         another <code>LDX</code>.  If you look at the "Bytes" column, you'll
         notice that the three-byte <code>BIT</code> instruction has only one
         byte on its line.</p>
@@ -202,7 +203,8 @@
     <div class="grid-item-text">
         <p>The trick here is that the <code>LDX #$01</code> is embedded inside the
         <code>BIT</code> instruction.  When the code runs through here, X is set
-        to $00, then the <code>BIT</code> instruction sets some flags, then the
+        to $00, then the <code>BIT</code> instruction sets some flags (which
+        are ignored), then the
         following <code>STA</code> runs.  Several lines down at $20A4 there's a
         <code>BNE</code> to $2095, which is in the middle of the <code>BIT</code>
         instruction.  It loads X with $01, then also continues to the <code>STA</code>.</p>
