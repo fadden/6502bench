@@ -421,13 +421,15 @@ namespace Asm65 {
                 "Moves a block of memory, starting from a low address and incrementing.  " +
                 "The source and destination addresses are in the X and Y registers, " +
                 "respectively.  The accumulator holds the number of bytes to move minus 1, " +
-                "and the source and destination banks are specified by the operands."
+                "and the operands specify source and destination banks (in that order).  " +
+                "On completion, the data bank register holds the destination bank value."
             },
             { OpName.MVP,
                 "Moves a block of memory, starting from a high address and decrementing.  " +
                 "The source and destination addresses are in the X and Y registers, " +
                 "respectively.  The accumulator holds the number of bytes to move minus 1, " +
-                "and the source and destination banks are specified by the operands."
+                "and the operands specify source and destination banks (in that order).  " +
+                "On completion, the data bank register holds the destination bank value."
             },
             { OpName.NOP,
                 "No operation."
