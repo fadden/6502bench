@@ -4,6 +4,9 @@
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
+bigendian .macro
+        .byte   (\1)>>8,(\1)&$ff
+        .endmacro
 *       =       $1000
         lda     #'A'
         lda     #'A' | $80
@@ -42,10 +45,13 @@
         .word   'd'
         .enc    "screen"
         .word   'd'
-        .byte   $00,$45
-        .byte   $00,$c5
-        .byte   $00,$c5
-        .byte   $00,$45
+        .enc    "sg_ascii"
+        bigendian 'E'
+        bigendian 'E' | $80
+        .enc    "none"
+        bigendian 'E'
+        .enc    "screen"
+        bigendian 'E'
         .byte   $80
         .enc    "sg_ascii"
         .text   "low ASCII str"

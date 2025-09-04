@@ -119,6 +119,12 @@ namespace SourceGen.AsmGen {
         private CharEncoding.Encoding mCurrentEncoding;
 
         /// <summary>
+        /// True if we defined macros for big-endian numeric values.
+        /// </summary>
+        private bool mBigEndianMacrosDefined;
+        private const string BIG_ENDIAN_16_MACRO = "bigendian";
+
+        /// <summary>
         /// Output mode; determines how ORG is handled.
         /// </summary>
         private enum OutputMode {
@@ -172,6 +178,8 @@ namespace SourceGen.AsmGen {
                 //StrLen16
                 { "StrDci", ".shift" }
         });
+
+        private const string MACRO_DIRECTIVE = ".macro";
 
 
         // IGenerator
@@ -355,7 +363,7 @@ namespace SourceGen.AsmGen {
             // need that.
             mCurrentEncoding = CharEncoding.Encoding.C64Petscii;
 
-            CheckAsciiFormats(out bool hasAscii, out bool hasHighAscii);
+            ScanFormats(out bool hasAscii, out bool hasHighAscii, out bool hasBigEndian);
             if (hasHighAscii) {
                 OutputLine(string.Empty, ".enc", '"' + HIGH_ASCII_ENC_NAME + '"', string.Empty);
                 OutputLine(string.Empty, ".cdef", "$20,$7e,$a0", string.Empty);
@@ -366,11 +374,17 @@ namespace SourceGen.AsmGen {
                 OutputLine(string.Empty, ".cdef", "$20,$7e,$20", string.Empty);
                 mCurrentEncoding = CharEncoding.Encoding.Ascii;
             }
+            if (hasBigEndian) {
+                OutputLine(BIG_ENDIAN_16_MACRO, MACRO_DIRECTIVE, string.Empty, string.Empty);
+                OutputLine(string.Empty, ".byte", "(\\1)>>8,(\\1)&$ff", string.Empty);
+                OutputLine(string.Empty, ".endmacro", string.Empty, string.Empty);
+                mBigEndianMacrosDefined = true;
+            }
         }
 
-        private void CheckAsciiFormats(out bool hasAscii, out bool hasHighAscii) {
+        private void ScanFormats(out bool hasAscii, out bool hasHighAscii, out bool hasBigEndian) {
             int offset = 0;
-            hasAscii = hasHighAscii = false;
+            hasAscii = hasHighAscii = hasBigEndian = false;
             while (offset < Project.FileData.Length) {
                 Anattrib attr = Project.GetAnattrib(offset);
                 FormatDescriptor dfd = attr.DataDescriptor;
@@ -380,9 +394,11 @@ namespace SourceGen.AsmGen {
                         hasAscii = true;
                     } else if (dfd.FormatSubType == FormatDescriptor.SubType.HighAscii) {
                         hasHighAscii = true;
+                    } else if (dfd.FormatType == FormatDescriptor.Type.NumericBE) {
+                        hasBigEndian = true;
                     }
                 }
-                if (hasAscii && hasHighAscii) {
+                if (hasAscii && hasHighAscii && hasBigEndian) {
                     return;
                 }
 
@@ -541,15 +557,20 @@ namespace SourceGen.AsmGen {
                     break;
                 case FormatDescriptor.Type.NumericBE:
                     opcodeStr = sDataOpNames.GetDefineBigData(length);
-                    if ((string.IsNullOrEmpty(opcodeStr))) {
-                        // Nothing defined, output as comma-separated single-byte values.
-                        GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
-                    } else {
+                    if (string.IsNullOrEmpty(opcodeStr) && length == 2) {
+                        // Special handling for 16-bit big-endian operands.
+                        Debug.Assert(mBigEndianMacrosDefined);
+                        opcodeStr = BIG_ENDIAN_16_MACRO;
+                    }
+                    if (!(string.IsNullOrEmpty(opcodeStr))) {
                         UpdateCharacterEncoding(dfd);
                         operand = RawData.GetWord(data, offset, length, true);
                         operandStr = PseudoOp.FormatNumericOperand(formatter, Project.SymbolTable,
                             Localizer.LabelMap, dfd, operand, length,
                             PseudoOp.FormatNumericOpFlags.OmitLabelPrefixSuffix);
+                    } else {
+                        // Nothing defined, output as comma-separated single-byte values.
+                        GenerateShortSequence(offset, length, out opcodeStr, out operandStr);
                     }
                     break;
                 case FormatDescriptor.Type.Fill:
@@ -784,11 +805,13 @@ namespace SourceGen.AsmGen {
 
         // IGenerator
         public void OutputLine(string label, string opcode, string operand, string comment) {
-            // Break the line if the label is long and it's not a .EQ/.VAR directive.
+            // Break the line if the label is long and it's not a .EQ/.VAR/.MACRO directive.
             if (!string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(opcode) &&
                     !string.Equals(opcode, sDataOpNames.EquDirective,
                         StringComparison.InvariantCultureIgnoreCase) &&
                     !string.Equals(opcode, sDataOpNames.VarDirective,
+                        StringComparison.InvariantCultureIgnoreCase) &&
+                    !string.Equals(opcode, MACRO_DIRECTIVE,
                         StringComparison.InvariantCultureIgnoreCase)) {
 
                 if (mLabelNewLine == GenCommon.LabelPlacement.PreferSeparateLine ||
