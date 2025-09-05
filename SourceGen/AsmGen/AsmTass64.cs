@@ -122,7 +122,6 @@ namespace SourceGen.AsmGen {
         /// True if we defined macros for big-endian numeric values.
         /// </summary>
         private bool mBigEndianMacrosDefined;
-        private const string BIG_ENDIAN_16_MACRO = "bigendian";
 
         /// <summary>
         /// Output mode; determines how ORG is handled.
@@ -180,6 +179,7 @@ namespace SourceGen.AsmGen {
         });
 
         private const string MACRO_DIRECTIVE = ".macro";
+        private const string BIG_ENDIAN_16_MACRO = "bword";
 
 
         // IGenerator

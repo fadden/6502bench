@@ -3,7 +3,7 @@
         .cpu    "65816"
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
-bigendian .macro
+bword   .macro
         .byte   (\1)>>8,(\1)&$ff
         .endmacro
 BMI1    =       $30        ;opcode mnemonic
@@ -106,7 +106,7 @@ start   clc
         .word   0+(start & $ffff)+1
         .word   start >> 8
         .word   start >> 16
-        bigendian absh
+        bword   absh
         .long   zip
         .long   absh
         .long   absh >> 8

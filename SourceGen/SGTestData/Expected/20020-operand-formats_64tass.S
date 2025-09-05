@@ -4,7 +4,7 @@
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
-bigendian .macro
+bword   .macro
         .byte   (\1)>>8,(\1)&$ff
         .endmacro
 *       =       $1000
@@ -71,13 +71,13 @@ more_ascii .byte 'h'
         .byte   $80
         .word   skipdata
         .long   skipdata
-        bigendian skipdata
+        bword   skipdata
         .byte   <more_ascii
         .byte   >more_ascii
         .word   more_ascii
         .long   more_ascii
         .dword  more_ascii
-        bigendian more_ascii
+        bword   more_ascii
         .byte   '['
         .byte   '{'
         .byte   '|'
@@ -110,8 +110,8 @@ L10A4   nop
         .byte   255
         .word   1
         .word   65534
-        bigendian 2
-        bigendian 65533
+        bword   2
+        bword   65533
         .long   66051
         .long   16776957
         .dword  16909060

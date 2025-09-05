@@ -3,7 +3,7 @@
         .cpu    "6502"
         .enc    "sg_hiascii"
         .cdef   $20,$7e,$a0
-bigendian .macro
+bword   .macro
         .byte   (\1)>>8,(\1)&$ff
         .endmacro
 *       =       $1000
@@ -32,7 +32,7 @@ bigendian .macro
         .long   $112233
         .dword  $11223344
         .byte   $11
-        bigendian $1122
+        bword   $1122
         .byte   $11,$22,$33
         .byte   $11,$22,$33,$44
         .fill   2,$00

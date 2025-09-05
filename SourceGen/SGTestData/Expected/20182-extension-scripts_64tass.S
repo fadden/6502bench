@@ -3,7 +3,7 @@
         .cdef   $20,$7e,$a0
         .enc    "sg_ascii"
         .cdef   $20,$7e,$20
-bigendian .macro
+bword   .macro
         .byte   (\1)>>8,(\1)&$ff
         .endmacro
 PrintInlineL1String = $011000
@@ -51,7 +51,7 @@ PrintInlineRev8String rts
 PrintInlineNullString rts
 
 data01  .word   4386
-        bigendian $3344
+        bword   $3344
         .dword  $88776655
         .byte   $99,$88,$77,$66
         .byte   'f'
