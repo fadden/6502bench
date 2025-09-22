@@ -1005,6 +1005,34 @@ namespace SourceGen.WpfGui {
 
         #region Display Format
 
+        public const int MIN_HEX_ADJ_THRESH = 0;
+        public const int MAX_HEX_ADJ_THRESH = 65535;
+
+        //
+        // Hex adjustment threshold.  This is managed with a validation rule; see the notes in
+        // the Asm Config section.
+        //
+        private int mHexAdjustmentThreshold;
+        public int HexAdjustmentThreshold {
+            get { return mHexAdjustmentThreshold; }
+            set {
+                if (mHexAdjustmentThreshold != value) {
+                    mHexAdjustmentThreshold = value;
+                    OnPropertyChanged();
+                    // Only accept the value if it's in the valid range.  If not, use the default.
+                    int threshold;
+                    if (!Validation.GetHasError(hexAdjThreshTextBox)) {
+                        threshold = value;
+                    } else {
+                        threshold = Formatter.DEFAULT_HEX_ADJ_THRESH;
+                    }
+
+                    mSettings.SetInt(AppSettings.FMT_HEX_ADJUSTMENT_THRESHOLD, threshold);
+                    IsDirty = true;
+                }
+            }
+        }
+
         public string mOpcodeSuffixAbs;
         public string OpcodeSuffixAbs {
             get { return mOpcodeSuffixAbs; }
@@ -1290,6 +1318,9 @@ namespace SourceGen.WpfGui {
 
             int wrapLen = mSettings.GetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 0);
             SelectOperandWrapLen(wrapLen);
+
+            HexAdjustmentThreshold = mSettings.GetInt(AppSettings.FMT_HEX_ADJUSTMENT_THRESHOLD,
+                Formatter.DEFAULT_HEX_ADJ_THRESH);
 
             // No need to set this to anything specific.
             UpdateDisplayFormatQuickCombo();
@@ -1609,6 +1640,28 @@ namespace SourceGen.WpfGui {
             //Debug.WriteLine("VVV not valid integer: '" + strValue + "'");
             return new ValidationResult(false, "Invalid integer value: '" + strValue + "'");
         }
+    }
+
+    public class HexAdjThreshRule : ValidationRule {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+            string strValue = Convert.ToString(value);
+            if (string.IsNullOrEmpty(strValue)) {
+                return new ValidationResult(false, "Could not convert to string");
+            }
+
+            if (int.TryParse(strValue, out int result)) {
+                if (result >= EditAppSettings.MIN_HEX_ADJ_THRESH &&
+                        result <= EditAppSettings.MAX_HEX_ADJ_THRESH) {
+                    return ValidationResult.ValidResult;
+                }
+                //Debug.WriteLine("VVV out of range: '" + strValue + "' (" + result + ")");
+                return new ValidationResult(false, "Hex adjust thresh out of range");
+            }
+
+            //Debug.WriteLine("VVV not valid integer: '" + strValue + "'");
+            return new ValidationResult(false, "Invalid integer value: '" + strValue + "'");
+        }
+
     }
 
 #if false

@@ -557,6 +557,22 @@ limitations under the License.
                                       SelectionChanged="OperandWrapLenComboBox_SelectionChanged"/>
                             <TextBlock Text="characters" Margin="4,3,0,0"/>
                         </StackPanel>
+
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,8,0,0">
+                            <TextBlock Text="Use hex for adjustments larger than"/>
+                            <TextBox Name="hexAdjThreshTextBox" Width="50" MaxLength="8" Margin="4,1,0,0"
+                                     FontFamily="{StaticResource GeneralMonoFont}">
+                                <TextBox.Text>
+                                    <Binding Path="HexAdjustmentThreshold" UpdateSourceTrigger="PropertyChanged"
+                                             FallbackValue="255">
+                                        <Binding.ValidationRules>
+                                            <local:HexAdjThreshRule ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
+                            <TextBlock Text=" (0-65535)" Margin="2,0,0,0"/>
+                        </StackPanel>
                     </DockPanel>
                 </Grid>
             </TabItem>

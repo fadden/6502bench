@@ -48,6 +48,9 @@ namespace Asm65 {
         // display and source code generation.
         private const int DEFAULT_OPERAND_WRAP_LEN = 64;
 
+        // Threshold at which operand adjustments are expressed as hex rather than decimal.
+        public const int DEFAULT_HEX_ADJ_THRESH = 8;
+
         /// <summary>
         /// Various format configuration options.  Fill one of these out and pass it to
         /// the Formatter constructor.
@@ -123,6 +126,8 @@ namespace Asm65 {
             /// <summary>Character position at which operands wrap; 0 == default.</summary>
             public int OperandWrapLen { get; set; } = DEFAULT_OPERAND_WRAP_LEN;
 
+            public int HexAdjustmentThreshold { get; set; } = DEFAULT_HEX_ADJ_THRESH;
+
             /// <summary>Add spaces between bytes in the Bytes column?</summary>
             public bool SpacesBetweenBytes { get; set; } = false;   // "20edfd" vs. "20 ed fd"
             /// <summary>Use comma-separated hex values for dense hex format?</summary>
@@ -191,6 +196,7 @@ namespace Asm65 {
                 StringDelimiters = new DelimiterSet(src.StringDelimiters);
 
                 OperandWrapLen = src.OperandWrapLen;
+                HexAdjustmentThreshold = src.HexAdjustmentThreshold;
 
                 SpacesBetweenBytes = src.SpacesBetweenBytes;
                 CommaSeparatedDense = src.CommaSeparatedDense;
@@ -859,7 +865,7 @@ namespace Asm65 {
         public string FormatAdjustment(int adjValue) {
             if (adjValue == 0) {
                 return string.Empty;
-            } else if (Math.Abs(adjValue) >= 256) {
+            } else if (Math.Abs(adjValue) > mFormatConfig.HexAdjustmentThreshold) {
                 // not using mHexPrefix here, since dec vs. hex matters
                 if (adjValue < 0) {
                     return "-$" + (-adjValue).ToString(mHexValueFormats[0]);

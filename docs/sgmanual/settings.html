@@ -167,10 +167,16 @@ of the hex data in the code list "bytes" column from dense
 affects the format of clipboard copies and exports.</p>
 
 <p>Long operands, such as strings and bulk data, are wrapped to a new
-line after a certain number of characters.  Use the pop-up to configure
-the value.  Larger values can make the code display more compact, but smaller
-values allow you to shrink the width of the operand column in the
-on-screen listing, moving the comment field closer in.</p>
+line after a certain number of characters.  Use the <samp>wrap operands</samp>
+pop-up to configure the value.  Larger values can make the code display more
+compact, but smaller values allow you to shrink the width of the operand
+column in the on-screen listing, moving the comment field closer in.</p>
+
+<p>The adjustments that are generated for operands, such as <code>FOO-1</code>
+or <code>FOO+$1000</code>, can be output as hex or decimal depending
+on the magnitude of the adjustment.  The
+<samp>use hex for adjustments larger than</samp>
+setting determines the threshold.</p>
 
 
 <h3 id="appset-pseudoop">Pseudo-Op</h3>

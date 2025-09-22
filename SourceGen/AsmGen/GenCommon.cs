@@ -528,6 +528,9 @@ namespace SourceGen.AsmGen {
                 settings.GetBool(AppSettings.FMT_ADD_SPACE_FULL_COMMENT, true);
             config.OperandWrapLen =
                 settings.GetInt(AppSettings.FMT_OPERAND_WRAP_LEN, 0);
+            config.HexAdjustmentThreshold =
+                settings.GetInt(AppSettings.FMT_HEX_ADJUSTMENT_THRESHOLD,
+                Formatter.DEFAULT_HEX_ADJ_THRESH);
             config.SuppressImpliedAcc =
                 settings.GetBool(AppSettings.SRCGEN_OMIT_IMPLIED_ACC_OPERAND, false);
 
