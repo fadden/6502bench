@@ -135,13 +135,12 @@ There is currently no installer -- just unzip the archive and run the
 "SourceGen.exe" executable.  The data files used by the program are found
 automatically in the directory where the .EXE lives.
 
-You need to have Microsoft .NET Framework v4.6.2 or later installed.  Most
+You need to have Microsoft .NET Framework v4.8.1 installed.  Most
 people will already have this.  If SourceGen doesn't seem to want to start,
-download the latest version (currently v4.8)
-[directly from Microsoft](https://dotnet.microsoft.com/download/dotnet-framework/net48).
+download the latest version
+[directly from Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet-framework).
 The framework requires Win7 SP1, Win8.1, Win10 updated through at least the
-Anniversary Update (1607), or Win11.  (One user who had trouble with the
-4.7.2 installer was able to get the 4.6.2 installer to work.)
+Anniversary Update (1607), or Win11.
 
 SourceGen does not run natively on Linux or Mac OS.  It is reported
 to work with recent versions (v9+) of the [Wine emulation layer](https://winehq.org/).
