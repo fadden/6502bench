@@ -559,7 +559,8 @@ namespace SourceGen.WpfGui {
         }
 
         /// <summary>
-        /// Applies column widths from the global AppSettings to the various grids.
+        /// Applies column widths from the global AppSettings to the various grids.  This
+        /// overrides the default settings in the XAML.
         /// </summary>
         public void RestoreColumnWidths() {
             RestoreColumnWidths((GridView)codeListView.View,
@@ -572,8 +573,11 @@ namespace SourceGen.WpfGui {
             RestoreColumnWidths(symbolsGrid,
                 AppSettings.Global.GetString(AppSettings.SYMWIN_COL_WIDTHS, null));
 
-            // Force the Notes text column width to be '*', i.e. fill the panel.
+            // Force the last column widths to be '*', i.e. fill the panel.  This causes a
+            // horizontal scrollbar to briefly flicker into existence.
+            referencesGrid.Columns[2].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
             notesGrid.Columns[1].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
+            symbolsGrid.Columns[2].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
         }
         private void RestoreColumnWidths(GridView gv, string str) {
             int[] widths = null;

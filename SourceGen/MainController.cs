@@ -5349,11 +5349,12 @@ namespace SourceGen {
                         sb.Append(nowSb);
                         sb.Append(")");
                     }
-                    if (otherSb.Length != 0) {
-                        sb.Append(" [");
-                        sb.Append(otherSb);
-                        sb.Append("]");
-                    }
+                    // Show all possible cycle mods.  This creates a bit of noise for non-65816.
+                    //if (otherSb.Length != 0) {
+                    //    sb.Append(" [");
+                    //    sb.Append(otherSb);
+                    //    sb.Append("]");
+                    //}
                 }
                 sb.Append("\r\n");
 
