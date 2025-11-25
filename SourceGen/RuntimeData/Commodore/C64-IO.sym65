@@ -13,8 +13,8 @@
 
 D6510           @ $0000      ;6510 I/O Data Direction Register
 R6510           @ $0001      ;ROM/IO Banking and Cassette I/O
-SPOX            @ $D000      ;Sprite 0 X Pos
-SPOY            @ $D001      ;Sprite 0 Y Pos
+SP0X            @ $D000      ;Sprite 0 X Pos
+SP0Y            @ $D001      ;Sprite 0 Y Pos
 SP1X            @ $D002      ;Sprite 1 X Pos
 SP1Y            @ $D003      ;Sprite 1 Y Pos
 SP2X            @ $D004      ;Sprite 2 X Pos
