@@ -10,7 +10,7 @@
 
 ; check basics
         jsr     PrintInline8String
-        asc     '01234567'
+        asc     '01234567'              ;hard-coded to 8 bytes long
         jsr     PrintInlineRev8String
         asc     '76543210'
         jsr     PrintInlineNullString

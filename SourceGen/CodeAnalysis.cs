@@ -126,7 +126,14 @@ namespace SourceGen {
         private IPlugin[] mScriptArray;
 
         [Flags]
-        private enum PluginCap { NONE = 0, JSR = 1 << 0, JSL = 1 << 1, BRK = 1 << 2 };
+        private enum PluginCap {
+            NONE = 0,
+            JSR = 1 << 0,
+            JSL = 1 << 1,
+            BRK = 1 << 2,
+            COP = 1 << 3,
+            WDM = 1 << 4,
+        };
         private PluginCap[] mPluginCaps;
 
         /// <summary>
@@ -355,6 +362,12 @@ namespace SourceGen {
                 }
                 if (mScriptArray[i] is IPlugin_InlineBrk) {
                     cap |= PluginCap.BRK;
+                }
+                if (mScriptArray[i] is IPlugin_InlineCop) {
+                    cap |= PluginCap.COP;
+                }
+                if (mScriptArray[i] is IPlugin_InlineWdm) {
+                    cap |= PluginCap.WDM;
                 }
                 mPluginCaps[i] = cap;
             }
@@ -788,11 +801,17 @@ namespace SourceGen {
 
                 // On first visit, check for JSR/JSL inline call.  If it's "no-continue",
                 // set a flag and halt here.
+                // Also check COP/WDM, since we assume they continue.
                 if (firstVisit) {
                     // Currently ignoring OpDef.OpJSR_AbsIndexXInd
-                    if (op == OpDef.OpJSR_Abs || op == OpDef.OpJSR_AbsLong) {
+                    if (op == OpDef.OpJSR_Abs || op == OpDef.OpJSR_AbsLong ||
+                            op == OpDef.OpCOP_StackInt || op == OpDef.OpWDM_WDM) {
                         bool noContinue = CheckForInlineCall(op, offset, false);
                         if (noContinue) {
+                            // The "NoContinue" attribute can be updated if the code gets
+                            // revisited, so we use a separate flag to ensure the script's
+                            // decision doesn't get lost.  See 20180-extension-scripts
+                            // for a test case.
                             LogD(offset, "Script declared inline call no-continue");
                             mAnattribs[offset].NoContinueScript = true;
                             break;
@@ -1085,6 +1104,12 @@ namespace SourceGen {
                         noContinue |= noCont;
                     } else if (op == OpDef.OpJSR_AbsLong && (mPluginCaps[i] & PluginCap.JSL) != 0) {
                         ((IPlugin_InlineJsl)script).CheckJsl(offset, operand, out bool noCont);
+                        noContinue |= noCont;
+                    } else if (op == OpDef.OpCOP_StackInt && (mPluginCaps[i] & PluginCap.COP) != 0){
+                        ((IPlugin_InlineCop)script).CheckCop(offset, out bool noCont);
+                        noContinue |= noCont;
+                    } else if (op == OpDef.OpWDM_WDM && (mPluginCaps[i] & PluginCap.WDM) != 0) {
+                        ((IPlugin_InlineWdm)script).CheckWdm(offset, out bool noCont);
                         noContinue |= noCont;
                     } else if ((op == OpDef.OpBRK_Implied || op == OpDef.OpBRK_StackInt) &&
                             (mPluginCaps[i] & PluginCap.BRK) != 0) {

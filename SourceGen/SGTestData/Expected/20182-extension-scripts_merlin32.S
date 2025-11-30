@@ -63,9 +63,13 @@ Next     clc
          dfb   $00
          dfb   $80
 
-:L10B8   rts
+:L10B8   cop   $03
+         str   'COP!'
+         wdm   $04
+         str   'WDM!'
+         rts
 
-         ds    327
+         ds    313
 
          org   $1800
 L1800    jsr   PrintInlineNullString

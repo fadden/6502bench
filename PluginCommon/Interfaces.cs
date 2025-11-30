@@ -135,6 +135,34 @@ namespace PluginCommon {
     }
 
     /// <summary>
+    /// Extension scripts that want to handle inline COPs must implement this interface.
+    /// </summary>
+    public interface IPlugin_InlineCop {
+        /// <summary>
+        /// Checks to see if code/data near a COP instruction should be formatted.
+        ///
+        /// The file data is only guaranteed to hold the COP opcode byte.
+        /// </summary>
+        /// <param name="offset">Offset of the COP instruction.</param>
+        /// <param name="noContinue">Set to true if the COP doesn't actually return.</param>
+        void CheckCop(int offset, out bool noContinue);
+    }
+
+    /// <summary>
+    /// Extension scripts that want to handle inline WDMs must implement this interface.
+    /// </summary>
+    public interface IPlugin_InlineWdm {
+        /// <summary>
+        /// Checks to see if code/data near a WDM instruction should be formatted.
+        ///
+        /// The file data is only guaranteed to hold the WDM opcode byte.
+        /// </summary>
+        /// <param name="offset">Offset of the WDM instruction.</param>
+        /// <param name="noContinue">Set to true if the WDM doesn't actually return.</param>
+        void CheckWdm(int offset, out bool noContinue);
+    }
+
+    /// <summary>
     /// Extension scripts that want to generate visualizations must implement this interface.
     /// </summary>
     public interface IPlugin_Visualizer {

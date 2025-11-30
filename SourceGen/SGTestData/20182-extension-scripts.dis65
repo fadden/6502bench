@@ -2,7 +2,7 @@
 {
 "_ContentVersion":7,
 "FileDataLength":544,
-"FileDataCrc32":1948144462,
+"FileDataCrc32":371480162,
 "ProjectProps":{
 "CpuName":"65816",
 "IncludeUndocumentedInstr":false,
@@ -20,7 +20,8 @@
 
 "PlatformSymbolFileIdentifiers":["PROJ:20182-extension-scripts.sym65"],
 "ExtensionScriptFileIdentifiers":["PROJ:20180-extension-scripts-a.cs",
-"PROJ:20180-extension-scripts-b.cs"],
+"PROJ:20180-extension-scripts-b.cs",
+"PROJ:20180-extension-scripts-c.cs"],
 "ProjectSyms":{
 "PrintInlineDciString":{
 "DataDescriptor":{

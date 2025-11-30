@@ -68,9 +68,13 @@ Next    clc
         !byte   $00
         !byte   $80
 
-@L10B8  rts
+@L10B8  cop     $03
+        !text   $04,"COP!"
+        !byte   $42,$04
+        !text   $04,"WDM!"
+        rts
 
-        !fill   327,$00
+        !fill   313,$00
 
         !pseudopc $1800 {
 L1800   jsr     PrintInlineNullString

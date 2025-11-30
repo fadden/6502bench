@@ -71,9 +71,13 @@ Next:    clc
          .byte   $00
          .byte   $80
 
-@L10B8:  rts
+@L10B8:  cop     $03
+         .byte   $04,"COP!"
+         wdm     $04
+         .byte   $04,"WDM!"
+         rts
 
-         .res    327,$00
+         .res    313,$00
 
          .org    $1800
 L1800:   jsr     PrintInlineNullString

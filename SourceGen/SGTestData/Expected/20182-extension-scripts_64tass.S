@@ -74,9 +74,14 @@ Next    clc
         .byte   $00
         .byte   $80
 
-_L10B8  rts
+_L10B8  cop     #$03
+        .enc    "sg_ascii"
+        .ptext  "COP!"
+        .byte   $42,$04
+        .ptext  "WDM!"
+        rts
 
-        .fill   327,$00
+        .fill   313,$00
 
         .logical $1800
 L1800   jsr     PrintInlineNullString
@@ -89,7 +94,6 @@ L1800   jsr     PrintInlineNullString
         .byte   $01
         .here
         .logical $1840
-        .enc    "sg_ascii"
         .text   "string"
         .byte   $00
         .byte   $60
