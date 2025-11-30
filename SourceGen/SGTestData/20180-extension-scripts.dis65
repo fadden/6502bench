@@ -1,11 +1,11 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
 "_ContentVersion":7,
-"FileDataLength":544,
-"FileDataCrc32":1948144462,
+"FileDataLength":543,
+"FileDataCrc32":321667593,
 "ProjectProps":{
-"CpuName":"65816",
-"IncludeUndocumentedInstr":false,
+"CpuName":"6502",
+"IncludeUndocumentedInstr":true,
 "TwoByteBrk":true,
 "EntryFlags":32702671,
 "AutoLabelStyle":"Simple",
@@ -18,27 +18,11 @@
 "SmartPlpHandling":false,
 "SmartPlbHandling":true},
 
-"PlatformSymbolFileIdentifiers":["PROJ:20182-extension-scripts.sym65"],
+"PlatformSymbolFileIdentifiers":[],
 "ExtensionScriptFileIdentifiers":["PROJ:20180-extension-scripts-a.cs",
 "PROJ:20180-extension-scripts-b.cs"],
 "ProjectSyms":{
-"PrintInlineDciString":{
-"DataDescriptor":{
-"Length":1,
-"Format":"NumericLE",
-"SubFormat":"Hex",
-"SymbolRef":null,
-"Extra":null},
-
-"Comment":"",
-"HasWidth":false,
-"Direction":"ReadWrite",
-"MultiMask":null,
-"Label":"PrintInlineDciString",
-"Value":77824,
-"Source":"Project",
-"Type":"ExternalAddr",
-"LabelAnno":"None"}}},
+}},
 
 "AddressMap":[{
 "Offset":0,
@@ -61,7 +45,7 @@
 {
 "Offset":523,
 "Addr":6208,
-"Length":21,
+"Length":20,
 "PreLabel":"",
 "DisallowInward":false,
 "DisallowOutward":false,
@@ -86,57 +70,69 @@
 },
 
 "UserLabels":{
-"131":{
+"72":{
 "Label":"PrintInline8String",
-"Value":4227,
+"Value":4168,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"132":{
+"73":{
 "Label":"PrintInlineRev8String",
-"Value":4228,
+"Value":4169,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"133":{
+"74":{
 "Label":"PrintInlineNullString",
-"Value":4229,
+"Value":4170,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
-"134":{
+"75":{
 "Label":"data01",
-"Value":4230,
+"Value":4171,
 "Source":"User",
 "Type":"LocalOrGlobalAddr",
 "LabelAnno":"None"},
 
-"162":{
+"127":{
+"Label":"Next1",
+"Value":4223,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"103":{
 "Label":"data02",
-"Value":4258,
+"Value":4199,
 "Source":"User",
 "Type":"LocalOrGlobalAddr",
 "LabelAnno":"None"},
 
-"165":{
+"106":{
 "Label":"data03",
-"Value":4261,
+"Value":4202,
 "Source":"User",
 "Type":"LocalOrGlobalAddr",
 "LabelAnno":"None"},
 
-"173":{
-"Label":"Next",
-"Value":4269,
+"114":{
+"Label":"NoCont",
+"Value":4210,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
-},
+"100":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Address",
+"SymbolRef":null,
+"Extra":null}},
 
 "LvTables":{
 },

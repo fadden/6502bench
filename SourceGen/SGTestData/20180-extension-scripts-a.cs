@@ -6,8 +6,9 @@ using System.Collections.Generic;
 
 using PluginCommon;
 
-namespace RuntimeData.Test2022 {
-    public class Test2022A : MarshalByRefObject, IPlugin, IPlugin_SymbolList,
+// JSR/JSL handler
+namespace RuntimeData.Test20180 {
+    public class Test20180A : MarshalByRefObject, IPlugin, IPlugin_SymbolList,
             IPlugin_InlineJsr, IPlugin_InlineJsl {
         private IApplication mAppRef;
         private byte[] mFileData;
@@ -23,7 +24,7 @@ namespace RuntimeData.Test2022 {
 
         public string Identifier {
             get {
-                return "Test 2022-extension-scripts A";
+                return "Test 20180-extension-scripts A";
             }
         }
 
@@ -31,7 +32,7 @@ namespace RuntimeData.Test2022 {
             mAppRef = appRef;
             mFileData = fileData;
 
-            mAppRef.DebugLog("Test2022-A(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
+            mAppRef.DebugLog("Test20180-A(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
         public void Unprepare() {

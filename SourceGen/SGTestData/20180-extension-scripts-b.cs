@@ -6,15 +6,16 @@ using System.Collections.Generic;
 
 using PluginCommon;
 
-namespace RuntimeData.Test2022 {
-    public class Test2022B : MarshalByRefObject, IPlugin, IPlugin_InlineBrk {
+// BRK handler
+namespace RuntimeData.Test20180 {
+    public class Test20180B : MarshalByRefObject, IPlugin, IPlugin_InlineBrk {
         private IApplication mAppRef;
         private byte[] mFileData;
         private AddressTranslate mAddrTrans;
 
         public string Identifier {
             get {
-                return "Test 2022-extension-scripts B";
+                return "Test 20180-extension-scripts B";
             }
         }
 
@@ -23,7 +24,7 @@ namespace RuntimeData.Test2022 {
             mFileData = fileData;
             mAddrTrans = addrTrans;
 
-            mAppRef.DebugLog("Test2022-B(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
+            mAppRef.DebugLog("Test20180-B(id=" + AppDomain.CurrentDomain.Id + "): prepare()");
         }
 
         public void Unprepare() {

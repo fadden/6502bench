@@ -3,18 +3,10 @@
 ;
 ; Assembler: Merlin 32
 
-; EDIT: the project must include the platform symbol file and extension scripts
-
-PrintInlineL1String  equ $011000
-PrintInlineL2String  equ $012000
-PrintInlineDciString equ $013000        ;EDIT: add to project symbols
+; EDIT: the project must include the extension scripts
+; EDIT: set "treat BRK as two-byte instruction"
 
         org     $1000
-
-        clc
-        xce
-        sep     #$30
-        mx      %11
 
 ; check basics
         jsr     PrintInline8String
@@ -23,13 +15,6 @@ PrintInlineDciString equ $013000        ;EDIT: add to project symbols
         asc     '76543210'
         jsr     PrintInlineNullString
         asc     'null-term string',00
-
-        jsl     PrintInlineL1String
-        str     'string with length/1'
-        jsl     PrintInlineL2String
-        strl    'string with length/2'
-        jsl     PrintInlineDciString
-        dci     'DCI string'
 
 ; check errors
         jsr     broken
@@ -43,7 +28,30 @@ PrintInlineDciString equ $013000        ;EDIT: add to project symbols
         brk     $02
         dw      data02
 
-        jmp     Next
+; Handle an edge case where the inline formatting gets thrown out.
+; Two paths: BIT $A9 / BRK $85 / inline $FF/EA goes first, then
+; LDA $00 / STA $FF / NOP goes.  When we get to the STA we notice
+; that it's marked as inline data, so we remove it from $85 $ff
+; but not from $ea.
+;
+; If we try to walk through the file, advancing offset by the anattrib
+; length, we will traverse the first path, which (with 2-byte BRKs)
+; runs into the $FF, which is marked as an instruction but not an
+; instruction start.
+;
+; Switching to 1-byte BRKs makes the $85 an inline data item rather
+; than an instruction.  When we come back through, we LDA $00 and
+; then skip over the next 3 bytes.  No conflict.
+        nop
+        jsr     edge1                   ;alt path, evaluated later
+        dfb     $24                     ;1: BIT dp
+edge1   dfb     $a9                     ;2: LDA imm
+        brk                             ;1: BRK <op>
+        dfb     $85                     ;2: STA imm
+        dfb     $ff                     ;1: address $eaff
+        nop                             ;2:
+
+        jmp     Next1
 
 PrintInline8String    rts               ;EDIT: set label
 PrintInlineRev8String rts               ;EDIT: set label
@@ -69,7 +77,36 @@ data02                                  ;EDIT: set label, must be "data02" (uniq
 data03                                  ;EDIT: set label (unique local)
         asc     "AllEight"
 
-Next
+
+;
+; The analyzer is trying to avoid calling the inline JSR check on code it
+; has previously visited.  There was a bug that caused us to lose the
+; no-continue value if code was revisited.
+;
+; To ensure we revisit the function, we need to call it, then call
+; something else that calls it, changing up the flags.
+;
+
+NoCont  pla
+        pla
+        rts
+
+TestNC1 jsr     NoCont
+        dfb     $00,$80
+TestNC2 jsr     NoCont
+        dfb     $00,$80
+
+Next1   jsr     TestNC1
+
+        jsr     PushThing
+        clc
+        jsr     TestNC2
+        rts
+
+PushThing
+        sec
+        jsr     TestNC2
+
 
 ; Make sure flags get marked as indeterminate across inline BRK.
 ; Also exercises formatting the same block twice.
@@ -100,7 +137,7 @@ broken  jsr     PrintInlineNullString
         asc     'string',00
         rts
 
-too_long jsl    PrintInlineL2String
+too_long jsr    PrintInlineNullString
         dw      END-*+1                 ;should be 1 byte over; want it to be rejected by
         rts                             ; function in .cs (otherwise code overlap race)
 

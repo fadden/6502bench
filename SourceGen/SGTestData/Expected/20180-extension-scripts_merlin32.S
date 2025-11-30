@@ -1,31 +1,25 @@
-PrintInlineL1String equ $011000
-PrintInlineL2String equ $012000
-PrintInlineDciString equ $013000
-
          org   $1000
-         clc
-         xce
-         sep   #$30
          jsr   PrintInline8String
          asc   '01234567'
          jsr   PrintInlineRev8String
          rev   '01234567'
          jsr   PrintInlineNullString
          asc   'null-term string',00
-         jsl   PrintInlineL1String
-         str   'string with length/1'
-         jsl   PrintInlineL2String
-         strl  'string with length/2'
-         jsl   PrintInlineDciString
-         dci   'DCI string'
          jsr   L1800
-         jsr   L184F
+         jsr   L184E
          jsr   L1848
          brk   $01
          dw    data01
          brk   $02
          dw    data02
-         jmp   Next
+         nop
+         jsr   L1040
+         dfb   $24
+L1040    dfb   $a9
+         dfb   $00
+         sta   $ff
+         dfb   $ea
+         jmp   Next1
 
 PrintInline8String rts
 
@@ -47,44 +41,63 @@ data01   dw    4386
          dfb   $c5
          dfb   $46
          dfb   $c7
-         adr   PrintInlineL2String
+         adr   $012000
          dw    data02
          dfb   $80
 data02   dw    :data03
          dfb   $80
 :data03  asc   "AllEight"
 
-Next     clc
-         brk   $02
-         dw    data02
-         bcc   :L10B8
-         bcs   :L10B8
+NoCont   pla
+         pla
+         rts
+
+L1075    jsr   NoCont
 
          dfb   $00
          dfb   $80
 
-:L10B8   rts
+L107A    jsr   NoCont
 
-         ds    327
+         dfb   $00
+         dfb   $80
+
+Next1    jsr   L1075
+         jsr   :L108A
+         clc
+         jsr   L107A
+         rts
+
+:L108A   sec
+         jsr   L107A
+         clc
+         brk   $02
+         dw    data02
+         bcc   :L1099
+         bcs   :L1099
+
+         dfb   $00
+         dfb   $80
+
+:L1099   rts
+
+         ds    358
 
          org   $1800
 L1800    jsr   PrintInlineNullString
-         per   $8778
-         rtl
+         dfb   $62
 
-         dfb   $65
-         dfb   $6e
-         dfb   $20
+         asc   'roken '
          dfb   $01
          org   $1840
          asc   'string'
          dfb   $00
          dfb   $60
 
-L1848    jsl   PrintInlineL2String
-         asl   A
-         brk   $60
+L1848    jsr   PrintInlineNullString
+         asc   0a00
+         rts
 
-L184F    jsr   PrintInlineNullString
+L184E    jsr   PrintInlineNullString
          adc   $6e
          dfb   $64

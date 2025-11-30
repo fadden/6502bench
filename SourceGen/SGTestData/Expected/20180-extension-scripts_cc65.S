@@ -1,34 +1,26 @@
-         .setcpu "65816"
-PrintInlineL1String = $011000
-PrintInlineL2String = $012000
-PrintInlineDciString = $013000
-
+         .setcpu "6502X"
          .org    $1000
-         .a8
-         .i8
-         clc
-         xce
-         sep     #$30
          jsr     PrintInline8String
          .byte   "01234567"
          jsr     PrintInlineRev8String
          .byte   "76543210"
          jsr     PrintInlineNullString
          .asciiz "null-term string"
-         jsl     PrintInlineL1String
-         .byte   $14,"string with length/1"
-         jsl     PrintInlineL2String
-         .byte   $14,$00,"string with length/2"
-         jsl     PrintInlineDciString
-         .byte   "DCI strin",$e7
          jsr     L1800
-         jsr     L184F
+         jsr     L184E
          jsr     L1848
-         brk     $01
+         .byte   $00,$01
          .word   data01
-         brk     $02
+         .byte   $00,$02
          .word   data02
-         jmp     Next
+         nop
+         jsr     L1040
+         .byte   $24
+L1040:   .byte   $a9
+         .byte   $00
+         sta     $ff
+         .byte   $ea
+         jmp     Next1
 
 PrintInline8String: rts
 
@@ -50,7 +42,7 @@ data01:  .word   4386
          .byte   $c5
          .byte   $46
          .byte   $c7
-         .faraddr PrintInlineL2String
+         .faraddr $012000
          .word   data02
          .byte   $80
 data02:  .word   @data03
@@ -62,37 +54,56 @@ data02:  .word   @data03
 .endmacro
 @data03: HiAscii "AllEight"
 
-Next:    clc
-         brk     $02
-         .word   data02
-         bcc     @L10B8
-         bcs     @L10B8
+NoCont:  pla
+         pla
+         rts
+
+L1075:   jsr     NoCont
 
          .byte   $00
          .byte   $80
 
-@L10B8:  rts
+L107A:   jsr     NoCont
 
-         .res    327,$00
+         .byte   $00
+         .byte   $80
+
+Next1:   jsr     L1075
+         jsr     @L108A
+         clc
+         jsr     L107A
+         rts
+
+@L108A:  sec
+         jsr     L107A
+         clc
+         .byte   $00,$02
+         .word   data02
+         bcc     @L1099
+         bcs     @L1099
+
+         .byte   $00
+         .byte   $80
+
+@L1099:  rts
+
+         .res    358,$00
 
          .org    $1800
 L1800:   jsr     PrintInlineNullString
-         per     $8778
-         rtl
+         .byte   $62
 
-         .byte   $65
-         .byte   $6e
-         .byte   $20
+         .byte   "roken "
          .byte   $01
          .org    $1840
          .byte   "string"
          .byte   $00
          .byte   $60
 
-L1848:   jsl     PrintInlineL2String
-         asl     A
-         brk     $60
+L1848:   jsr     PrintInlineNullString
+         .byte   $0a,$00
+         rts
 
-L184F:   jsr     PrintInlineNullString
+L184E:   jsr     PrintInlineNullString
          adc     $6e
          .byte   $64
