@@ -25,6 +25,6 @@ namespace SourceGen {
         /// SourceGen version number.
         /// </summary>
         public static readonly CommonUtil.Version ProgramVersion =
-            new CommonUtil.Version(1, 10, 1, CommonUtil.Version.PreRelType.Dev, 3);
+            new CommonUtil.Version(1, 10, 1, CommonUtil.Version.PreRelType.Dev, 4);
     }
 }
