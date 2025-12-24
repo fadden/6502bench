@@ -461,6 +461,7 @@ namespace SourceGen {
         private const string HTML_EXPORT_TEMPLATE = "ExportTemplate.html";
         private const string HTML_EXPORT_CSS_FILE = "SGStyle.css";
         private const string LABEL_LINK_PREFIX = "Sym";
+        private const char NU_LINK_CHAR = '!';       // replaces Symbol.UNIQUE_TAG_CHAR
 
         private class ExportWorker : WorkProgress.IWorker {
             private Exporter mExporter;
@@ -674,18 +675,20 @@ namespace SourceGen {
                         line.LineType == LineListGen.Line.Type.Data ||
                         line.LineType == LineListGen.Line.Type.EquDirective) &&
                     !string.IsNullOrEmpty(parts.Label)) {
+                string labelText;
                 if (parts.Label.StartsWith(mFormatter.NonUniqueLabelPrefix)) {
-                    // TODO(someday): handle non-unique labels.  ':' is valid in HTML anchors,
-                    // so we can use that to distinguish them from other labels, but we still
-                    // need to ensure that the label is unique and all references point to the
-                    // correct instance.  We can't get that from the Parts list.
+                    // We need the symbol with the uniquification tag.  The UNIQUE_TAG_CHAR
+                    // is only found in non-labels, so there's no risk of collision, but it
+                    // can cause uglification.
+                    Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+                    labelText = attr.Symbol.Label.Replace(Symbol.UNIQUE_TAG_CHAR, NU_LINK_CHAR);
                 } else {
-                    string trimLabel = Symbol.TrimAndValidateLabel(parts.Label,
+                    labelText = Symbol.TrimAndValidateLabel(parts.Label,
                         mFormatter.NonUniqueLabelPrefix, out bool isValid, out bool unused1,
                         out bool unused2, out bool unused3, out Symbol.LabelAnnotation unusedAnno);
-                    anchorLabel = "<span id=\"" + LABEL_LINK_PREFIX + trimLabel +
-                        "\">" + parts.Label + "</span>";
                 }
+                anchorLabel = "<span id=\"" + LABEL_LINK_PREFIX + labelText +
+                    "\">" + parts.Label + "</span>";
             }
 
             // If needed, create an HTML link for the operand field.
@@ -1044,14 +1047,18 @@ namespace SourceGen {
         /// doesn't have a linkable symbol, this return null.
         /// </summary>
         /// <remarks>
-        /// We're playing games with string substitution that feel a little flimsy, but this
-        /// is much simpler than reformatting the operand from scratch.
+        /// We want to replace only the label part of operands that have formulas, e.g. just the
+        /// word "foo" in "foo+1".  The string substitution feels a little flimsy, but this is
+        /// much simpler than reformatting the operand from scratch.  (We don't want to linkify
+        /// the entire operand text, but that would be misleading because clicking on the link
+        /// jumps to the label "foo", not the address "foo+1".)
         /// </remarks>
         /// <param name="index">Display line index.</param>
+        /// <param name="operand">Full text of formatted operand.</param>
         private string GetLinkOperand(int index, string operand) {
             LineListGen.Line line = mCodeLineList[index];
             if (line.FileOffset < 0) {
-                // EQU directive - shouldn't be here
+                // EQU directive - we shouldn't be here.
                 Debug.Assert(false);
                 return null;
             }
@@ -1064,22 +1071,38 @@ namespace SourceGen {
                 return null;
             }
 
-            // Symbol refs are weak.  If the symbol doesn't exist, the value will be
-            // formatted in hex.  We can't simply check to see if the formatted operand
+            // Symbol refs are weak.  If the symbol doesn't exist, the value will have been
+            // formatted as hex.  We can't simply check to see if the formatted operand
             // contains the symbol, because we could false-positive on the use of symbols
             // whose label is a valid hex value, e.g. "ABCD = $ABCD".
             //
-            // We also want to exclude references to local variables, since those aren't
-            // unique.  To handle local refs we could just create anchors by line number or
-            // some other means of unique identification.
+            // We currently exclude references to local variables, since those require special
+            // handling.
             if (!mProject.SymbolTable.TryGetNonVariableValue(attr.DataDescriptor.SymbolRef.Label,
                     out Symbol sym)) {
                 return null;
             }
-
-            string linkified = "<a href=\"#" + LABEL_LINK_PREFIX + sym.Label + "\">" +
-                sym.Label + "</a>";
-            return TextUtil.EscapeHTML(operand).Replace(sym.Label, linkified);
+            string htmlId = sym.Label;              // HTML id, usually just the label itself
+            string dispText = sym.Label;            // displayed text we're substituting
+            if (sym.IsNonUnique) {
+                // Normally we just substitute an HTML blob for a label string like "foo", but
+                // now we're replacing "@foo" (since we want '@' to be included in the anchor)
+                // with a link to the uniquified label (which looks like "Symbol§000175").
+                //
+                // HTML 5 allows just about any character in an anchor, though avoiding characters
+                // used in CSS selectors is recommended.  The '§' char turns into "%C2%A7" when
+                // you copy the link (UTF-8 encoding), which is not ideal.  We don't want to use
+                // a valid label char like '_', since that would require using a different
+                // LABEL_LINK_PREFIX to ensure uniqueness, and we want to avoid characters that
+                // have a special meaning to CSS or in URLs.
+                htmlId = sym.Label.Replace(Symbol.UNIQUE_TAG_CHAR, NU_LINK_CHAR);
+                dispText = sym.GenerateDisplayLabel(mFormatter);
+            }
+            string linkified =
+                "<a href=\"#" + LABEL_LINK_PREFIX + htmlId + "\">" + dispText + "</a>";
+            // If our attempt to recreate the display text went wrong, the Replace() operation
+            // will just leave the original string intact.
+            return TextUtil.EscapeHTML(operand).Replace(dispText, linkified);
         }
 
         /// <summary>
