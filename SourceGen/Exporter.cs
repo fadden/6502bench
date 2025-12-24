@@ -691,6 +691,43 @@ namespace SourceGen {
                     "\">" + parts.Label + "</span>";
             }
 
+            // Add an HTML anchor if some specific criteria are met:
+            //  1. this line is a long comment
+            //  2. the previous line was *not* a long comment (so we're the topmost)
+            //  3. this or the comment on the following line are non-trivial (> 2 chars)
+            //  3. the next code/data line we see has a label
+            string anchorId = null;
+            if (line.LineType == LineListGen.Line.Type.LongComment && index > 0 &&
+                    index < mCodeLineList.Count - 1 &&
+                    mCodeLineList[index - 1].LineType != LineListGen.Line.Type.LongComment &&
+                    (parts.Comment.Length > 2 ||
+                        (mCodeLineList[index + 1].LineType == LineListGen.Line.Type.LongComment &&
+                            mCodeLineList.GetFormattedParts(index + 1).Comment.Length > 2))) {
+                // Scan forward.
+                for (int i = index + 1; i < mCodeLineList.Count; i++) {
+                    LineListGen.Line checkLine = mCodeLineList[i];
+                    if (checkLine.LineType == LineListGen.Line.Type.Code ||
+                            checkLine.LineType == LineListGen.Line.Type.Code) {
+                        DisplayList.FormattedParts checkParts = mCodeLineList.GetFormattedParts(i);
+                        if (!string.IsNullOrEmpty(checkParts.Label)) {
+                            string labelText;
+                            if (checkParts.Label.StartsWith(mFormatter.NonUniqueLabelPrefix)) {
+                                Anattrib attr = mProject.GetAnattrib(line.FileOffset);
+                                labelText =
+                                    attr.Symbol.Label.Replace(Symbol.UNIQUE_TAG_CHAR, NU_LINK_CHAR);
+                            } else {
+                                labelText = Symbol.TrimAndValidateLabel(checkParts.Label,
+                                    mFormatter.NonUniqueLabelPrefix, out bool isValid,
+                                    out bool unused1, out bool unused2, out bool unused3,
+                                    out Symbol.LabelAnnotation unusedAnno);
+                            }
+                            anchorId = "C" + LABEL_LINK_PREFIX + labelText;
+                        }
+                        break;      // stop on first code/data line found
+                    }
+                }
+            }
+
             // If needed, create an HTML link for the operand field.
             string linkOperand = null;
             if ((line.LineType == LineListGen.Line.Type.Code ||
@@ -817,9 +854,19 @@ namespace SourceGen {
                         }
                     }
                     string cstr;
-                    if (rgb != 0) {
-                        cstr = string.Format("<span style=\"background-color: #{0:x6}\">{1}</span>",
-                            rgb, TextUtil.EscapeHTML(parts.Comment));
+                    if (rgb != 0 || anchorId != null) {
+                        StringBuilder lsb = new StringBuilder(32);
+                        lsb.Append("<span");
+                        if (rgb != 0) {
+                            lsb.AppendFormat(" style=\"background-color: #{0:x6}\"", rgb);
+                        }
+                        if (anchorId != null) {
+                            lsb.AppendFormat(" id=\"{0}\"", anchorId);
+                        }
+                        lsb.Append('>');
+                        lsb.Append(TextUtil.EscapeHTML(parts.Comment));
+                        lsb.Append("</span>");
+                        cstr = lsb.ToString();
                     } else {
                         cstr = TextUtil.EscapeHTML(parts.Comment);
                     }
