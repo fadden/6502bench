@@ -707,7 +707,7 @@ namespace SourceGen {
                 for (int i = index + 1; i < mCodeLineList.Count; i++) {
                     LineListGen.Line checkLine = mCodeLineList[i];
                     if (checkLine.LineType == LineListGen.Line.Type.Code ||
-                            checkLine.LineType == LineListGen.Line.Type.Code) {
+                            checkLine.LineType == LineListGen.Line.Type.Data) {
                         DisplayList.FormattedParts checkParts = mCodeLineList.GetFormattedParts(i);
                         if (!string.IsNullOrEmpty(checkParts.Label)) {
                             string labelText;
