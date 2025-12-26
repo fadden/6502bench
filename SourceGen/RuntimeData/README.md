@@ -29,18 +29,23 @@ The following fields are mandatory:
 
 The currently-supported parameters are:
 
- * `load-address=<addr>` - Specify the initial load address.  The default
-   is 0x1000.
+ * `default-text-encoding=<mode>` - Specify default character encoding.
+   Use `c64-petscii` for PETSCII.  The default is low/high ASCII.
  * `entry-flags=<flag-set>` - Specify the processor status flag values to
    use at entry points.  This is intended for use on the 65802/65816, and
    may be one of `emulation`, `native-short`, and `native-long`.  The
    default is `emulation`.
- * `undocumented-opcodes={true|false}` - Enable or disable undocumented
-   opcodes.  They are disabled by default.
+ * `file-format=<format>` - Indicates that the input file is expected
+   to be in a format that requires additional processing.  Currently,
+   this may be `vice-crt`.
  * `first-word-is-load-addr={true|false}` - If true, the first two bytes of
    the file contain the load address.
- * `default-text-encoding=<mode>` - Specify default character encoding.
-   Use `c64-petscii` for PETSCII.  The default is low/high ASCII.
+ * `load-address=<addr>` - Specify the initial load address.  The default
+   is 0x1000.
+ * `two-byte-brk={true|false}` - If true, treat the BRK instruction as
+   two bytes instead of one.
+ * `undocumented-opcodes={true|false}` - Enable or disable undocumented
+   opcodes.  They are disabled by default.
 
 All of these things can be changed after the project has begun, but it's
 nice to have them configured in advance.

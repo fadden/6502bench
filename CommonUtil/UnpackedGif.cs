@@ -105,7 +105,7 @@ namespace CommonUtil {
                 gce.DisposalMethod = (byte)((pak >> 2) & 0x07);
                 gce.UserInputFlag = (pak & 0x02) != 0;
                 gce.TransparencyFlag = (pak & 0x01) != 0;
-                gce.DelayTime = RawData.FetchLittleUshort(data, ref offset);
+                gce.DelayTime = RawData.ReadU16LE(data, ref offset);
                 gce.TransparentColorIndex = data[offset++];
                 if (data[offset++] != 0) {
                     Debug.WriteLine("Missing termination in GCE data");
@@ -166,10 +166,10 @@ namespace CommonUtil {
                 //
                 Debug.Assert(data[offset] == IMAGE_SEPARATOR);
                 offset++;
-                grb.ImageLeftPosition = RawData.FetchLittleUshort(data, ref offset);
-                grb.ImageTopPosition = RawData.FetchLittleUshort(data, ref offset);
-                grb.ImageWidth = RawData.FetchLittleUshort(data, ref offset);
-                grb.ImageHeight = RawData.FetchLittleUshort(data, ref offset);
+                grb.ImageLeftPosition = RawData.ReadU16LE(data, ref offset);
+                grb.ImageTopPosition = RawData.ReadU16LE(data, ref offset);
+                grb.ImageWidth = RawData.ReadU16LE(data, ref offset);
+                grb.ImageHeight = RawData.ReadU16LE(data, ref offset);
                 byte pak = data[offset++];
                 grb.LocalColorTableFlag = (pak & 0x80) != 0;
                 grb.InterlaceFlag = (pak & 0x40) != 0;
@@ -240,9 +240,9 @@ namespace CommonUtil {
             //
             // Header.  Signature ("GIF") + version ("87a" or "89a").
             //
-            if (RawData.CompareArrays(gifData, 0, GIF87A, 0, GIF87A.Length)) {
+            if (RawData.CompareBytes(gifData, 0, GIF87A, 0, GIF87A.Length)) {
                 FileVer = FileVersion.Gif87a;
-            } else if (RawData.CompareArrays(gifData, 0, GIF89A, 0, GIF87A.Length)) {
+            } else if (RawData.CompareBytes(gifData, 0, GIF89A, 0, GIF87A.Length)) {
                 FileVer = FileVersion.Gif89a;
             } else {
                 Debug.WriteLine("GIF signature not found");
@@ -256,8 +256,8 @@ namespace CommonUtil {
             // Logical screen descriptor.
             //
             int offset = GIF87A.Length;
-            LogicalScreenWidth = RawData.FetchLittleUshort(gifData, ref offset);
-            LogicalScreenHeight = RawData.FetchLittleUshort(gifData, ref offset);
+            LogicalScreenWidth = RawData.ReadU16LE(gifData, ref offset);
+            LogicalScreenHeight = RawData.ReadU16LE(gifData, ref offset);
             pak = gifData[offset++];
             GlobalColorTableFlag = (pak & 0x80) != 0;
             ColorResolution = (byte)((pak >> 4) & 0x07);

@@ -212,6 +212,23 @@
       }
     },
     {
+      "Name" : "Commodore 64 (CRT)",
+      "GroupName" : "Commodore",
+      "Cpu" : "6510",
+      "Speed" : "1.023",
+      "Description" : "Commodore 64 home computer.  The file is in VICE CRT (cartridge) format.",
+      "SymbolFiles" : [
+        "RT:Commodore/C64-Kernal.sym65"
+      ],
+      "ExtensionScripts" : [
+        "RT:Commodore/VisC64.cs"
+      ],
+      "Parameters" : {
+        "file-format":"vice-crt",
+        "default-text-encoding":"c64-petscii"
+      }
+    },
+    {
       "Name" : "Commodore 128",
       "GroupName" : "Commodore",
       "Cpu" : "8502",

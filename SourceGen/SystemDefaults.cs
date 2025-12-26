@@ -22,21 +22,26 @@ using TextScanMode = SourceGen.ProjectProperties.AnalysisParameters.TextScanMode
 
 namespace SourceGen {
     /// <summary>
-    /// Helper functions for extracting values from a SystemDef instance.
+    /// Helper functions for extracting values from the "parameters" section of a SystemDef object.
     /// </summary>
     public static class SystemDefaults {
-        private const string LOAD_ADDRESS = "load-address";
-        private const string ENTRY_FLAGS = "entry-flags";
-        private const string UNDOCUMENTED_OPCODES = "undocumented-opcodes";
-        private const string TWO_BYTE_BRK = "two-byte-brk";
-        private const string FIRST_WORD_IS_LOAD_ADDR = "first-word-is-load-addr";
+        // Parameter names.
         private const string DEFAULT_TEXT_ENCODING = "default-text-encoding";
+        private const string ENTRY_FLAGS = "entry-flags";
+        private const string FILE_FORMAT = "file-format";
+        private const string FIRST_WORD_IS_LOAD_ADDR = "first-word-is-load-addr";
+        private const string LOAD_ADDRESS = "load-address";
+        private const string TWO_BYTE_BRK = "two-byte-brk";
+        private const string UNDOCUMENTED_OPCODES = "undocumented-opcodes";
 
+        // Recognized values for specific parameters.
         private const string ENTRY_FLAG_EMULATION = "emulation";
         private const string ENTRY_FLAG_NATIVE_LONG = "native-long";
         private const string ENTRY_FLAG_NATIVE_SHORT = "native-short";
 
         private const string TEXT_ENCODING_C64_PETSCII = "c64-petscii";
+
+        public const string FILE_FMT_VICE_CRT = "vice-crt";
 
 
         /// <summary>
@@ -147,6 +152,15 @@ namespace SourceGen {
         }
 
         /// <summary>
+        /// Gets the value of the file format parameter.
+        /// </summary>
+        /// <param name="sysDef"></param>
+        /// <returns>File format string, or empty string if not defined.</returns>
+        public static string GetFileFormat(SystemDef sysDef) {
+            return GetStringParam(sysDef, FILE_FORMAT, string.Empty);
+        }
+
+        /// <summary>
         /// Looks for a parameter with a matching name and a boolean value.
         /// </summary>
         /// <param name="sysDef">SystemDef reference.</param>
@@ -164,6 +178,23 @@ namespace SourceGen {
                 } else {
                     Debug.WriteLine("WARNING: bad value for " + paramName + ": " + valueStr);
                 }
+            }
+            return retVal;
+        }
+
+        /// <summary>
+        /// Looks for a parameter with a matching name and a string value.
+        /// </summary>
+        /// <param name="sysDef">SystemDef reference.</param>
+        /// <param name="paramName">Name of parameter to look for.</param>
+        /// <param name="defVal">Default value.</param>
+        /// <returns>Parsed value, or defVal if the parameter doesn't exist.</returns>
+        private static string GetStringParam(SystemDef sysDef, string paramName, string defVal) {
+            Dictionary<string, string> parms = sysDef.Parameters;
+            string retVal = defVal;
+
+            if (parms.TryGetValue(paramName, out string valueStr)) {
+                retVal = valueStr;
             }
             return retVal;
         }

@@ -125,6 +125,7 @@
     </Compile>
     <Compile Include="LocalVariableTable.cs" />
     <Compile Include="RenderAddressMap.cs" />
+    <Compile Include="ViceCrt.cs" />
     <Compile Include="Visualization.cs" />
     <Compile Include="VisBitmapAnimation.cs" />
     <Compile Include="VisualizationSet.cs" />
@@ -235,7 +236,7 @@
     <Compile Include="Symbol.cs" />
     <Compile Include="SymbolTable.cs" />
     <Compile Include="SystemDefaults.cs" />
-    <Compile Include="SystemDefs.cs" />
+    <Compile Include="SystemDef.cs" />
     <Compile Include="UndoableChange.cs" />
     <Compile Include="DisplayListSelection.cs" />
     <Compile Include="WeakSymbolRef.cs" />

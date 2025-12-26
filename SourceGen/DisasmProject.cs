@@ -410,8 +410,17 @@ namespace SourceGen {
 
             // Configure the load address.
             AddrMap.Clear();
-            if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && FileDataLength > 2 &&
+            if (SystemDefaults.GetFileFormat(sysDef) == SystemDefaults.FILE_FMT_VICE_CRT) {
+                string failMsg = ViceCrt.ConfigureProject(this);
+                if (!string.IsNullOrEmpty(failMsg)) {
+                    string cmt = "Unable to process as VICE CRT: " + failMsg;
+                    LongComments[LineListGen.Line.HEADER_COMMENT_OFFSET] =
+                        new MultiLineComment(cmt);
+                }
+            } else if (SystemDefaults.GetFirstWordIsLoadAddr(sysDef) && FileDataLength > 2 &&
                     mFileData != null) {
+                // Used for C64 .PRG files.
+                //
                 // First two bytes are the load address, with the actual file data starting
                 // at +000002.  The first two bytes are non-addressable, so we leave them
                 // out of the map.
