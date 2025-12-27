@@ -21,7 +21,7 @@ limitations under the License.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
-        Title="Export Source"
+        Title="Export Listing"
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">

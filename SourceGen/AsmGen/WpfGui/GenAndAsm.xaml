@@ -21,7 +21,7 @@ limitations under the License.
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SourceGen.AsmGen.WpfGui"
         mc:Ignorable="d"
-        Title="Generate and Assemble"
+        Title="Generate Source Code"
         Width="800" Height="700" MinWidth="600" MinHeight="600" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded">

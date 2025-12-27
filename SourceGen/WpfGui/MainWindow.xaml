@@ -120,7 +120,7 @@ limitations under the License.
                 </RoutedUICommand.InputGestures>
             </RoutedUICommand>
             <RoutedUICommand x:Key="ExitCmd" Text="Exit"/>
-            <RoutedUICommand x:Key="ExportCmd" Text="Export...">
+            <RoutedUICommand x:Key="ExportCmd" Text="Export Listing...">
                 <RoutedUICommand.InputGestures>
                     <KeyGesture>Ctrl+Shift+E</KeyGesture>
                 </RoutedUICommand.InputGestures>

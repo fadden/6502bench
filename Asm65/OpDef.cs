@@ -2985,8 +2985,9 @@ namespace Asm65 {
         //
         // There is no universally agreed-upon set of mnemonics for these instructions.  The
         // mnemonics "XAS" and "AXS" sometimes mean one thing and sometimes another.  The
-        // reference I've chosen to use as primary is "NMOS 6510 Unintended Opcodes":
-        //   https://csdb.dk/release/?id=161035
+        // reference I've chosen to use as primary is "No More Secrets" / "NMOS 6510 Unintended
+        // Opcodes":
+        //   https://csdb.dk/release/?id=258111
         //
         // Other references:
         //   http://nesdev.com/undocumented_opcodes.txt
