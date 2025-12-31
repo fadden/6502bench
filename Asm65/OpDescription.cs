@@ -113,10 +113,11 @@ namespace Asm65 {
         /// <summary>
         /// Short descriptions, USA English.
         /// 
-        /// Text is adapted from instruction summaries in Eyes & Lichty, which are slightly
+        /// Text is adapted from instruction summaries in Eyes &amp; Lichty, which are slightly
         /// shorter than those in the CPU data sheet.
         /// </summary>
-        private static Dictionary<string, string> sShort_enUS = new Dictionary<string, string>() {
+        private static readonly Dictionary<string, string> sShort_enUS =
+                new Dictionary<string, string>() {
             // 65816 instructions.
             { OpName.ADC, "Add With Carry" },
             { OpName.AND, "AND Accumulator With Memory" },
@@ -276,7 +277,8 @@ namespace Asm65 {
         /// <summary>
         /// Long descriptions, USA English.
         /// </summary>
-        private static Dictionary<string, string> sLong_enUS = new Dictionary<string, string>() {
+        private static readonly Dictionary<string, string> sLong_enUS =
+                new Dictionary<string, string>() {
             { OpName.ADC,
                 "Adds the accumulator and a value in memory, storing the result in the " +
                 "accumulator.  Adds one if the carry is set."
@@ -765,7 +767,7 @@ namespace Asm65 {
         /// <summary>
         /// Address mode short descriptions, USA English.
         /// </summary>
-        private static Dictionary<OpDef.AddressMode, string> sAddrMode_enUS =
+        private static readonly Dictionary<OpDef.AddressMode, string> sAddrMode_enUS =
                 new Dictionary<OpDef.AddressMode, string>() {
             { OpDef.AddressMode.Abs, "Absolute" },
             { OpDef.AddressMode.AbsInd, "Absolute Indirect" },
@@ -809,7 +811,7 @@ namespace Asm65 {
         /// <summary>
         /// Cycle modifier descriptions.  These are intended to be very terse.
         /// </summary>
-        private static Dictionary<OpDef.CycleMod, string> sCycleMod_enUS =
+        private static readonly Dictionary<OpDef.CycleMod, string> sCycleMod_enUS =
                 new Dictionary<OpDef.CycleMod, string>() {
             { OpDef.CycleMod.OneIfM0, "+1 if M=0" },
             { OpDef.CycleMod.TwoIfM0, "+2 if M=0" },
@@ -824,5 +826,5 @@ namespace Asm65 {
             { OpDef.CycleMod.MinusOneIfNoPage, "-1 if 65C02 and not across page" },
             { OpDef.CycleMod.BlockMove, "+7 per byte" },
         };
-   }
+    }
 }

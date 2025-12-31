@@ -47,7 +47,7 @@ namespace Asm65 {
         }
 
         /// <summary>
-        /// Addressing mode.  This uses the same distinctions as Eyes & Lichty, which for
+        /// Addressing mode.  This uses the same distinctions as Eyes &amp; Lichty, which for
         /// most purposes has some redundancy (e.g. StackRTI is only ever used with RTI, so
         /// in most cases it could be considered Implied).
         /// 
@@ -282,7 +282,7 @@ namespace Asm65 {
         /// the Program Bank Register.
         /// </summary>
         /// <remarks>
-        /// As noted in Eyes & Lichty, the Absolute addressing mode uses the Data Bank Register
+        /// As noted in Eyes &amp; Lichty, the Absolute addressing mode uses the Data Bank Register
         /// if locating data, or the Program Bank Register if transferring control.  When
         /// we "LDA symbol" we can only care about the 16-bit value because we can't know what B
         /// will hold at run time.  When we "JMP symbol" we can either (1) complain if it's in

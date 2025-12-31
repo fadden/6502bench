@@ -24,8 +24,38 @@ namespace SourceGen {
     /// <summary>
     /// Special handling for VICE .CRT cartridge files.
     /// </summary>
+    /// <remarks>
+    /// <para>This is based on the format described in section 17.14 of the VICE documentation,
+    /// <see href="https://vice-emu.sourceforge.io/vice_17.html#SEC442">"The CRT cartridge image format"</see>.
+    /// </para>
+    /// </remarks>
     public static class ViceCrt {
         private static readonly byte[] CBM80 = new byte[] { 0xc3, 0xc2, 0xcd, 0x38, 0x30 };
+
+        // End-of-line comments for the file header fields.
+        private static readonly Dictionary<int, string> sHeaderComments =
+                new Dictionary<int, string>() {
+            { 0x00, "signature" },
+            { 0x10, "header length"},
+            { 0x14, "cartridge version" },
+            { 0x16, "hardware type" },
+            { 0x18, "EXROM line status" },
+            { 0x19, "GAME line status" },
+            { 0x1a, "hardware revision/subtype" },
+            { 0x1b, "reserved" },
+            { 0x20, "name" },
+        };
+
+        // End-of-line comments for CHIP fields.
+        private static readonly Dictionary<int, string> sChipComments =
+                new Dictionary<int, string>() {
+            { 0x00, "signature" },
+            { 0x04, "packet length" },
+            { 0x08, "chip type" },
+            { 0x0a, "bank number" },
+            { 0x0c, "load address" },
+            { 0x0e, "image size" },
+        };
 
         /// <summary>
         /// Cartridge file header.
@@ -273,6 +303,10 @@ namespace SourceGen {
                         FormatDescriptor.Type.Fill, FormatDescriptor.SubType.None);
             }
 
+            foreach (KeyValuePair<int, string> kvp in sHeaderComments) {
+                project.Comments[kvp.Key] = kvp.Value;
+            }
+
             // Format data items in CHIP headers.
             for (int i = 0; i < chips.Count; i++) {
                 Chip chip = chips[i];
@@ -292,6 +326,10 @@ namespace SourceGen {
                     FormatDescriptor.Type.NumericBE, FormatDescriptor.SubType.None);
                 project.OperandFormats[offset + 0x0e] = FormatDescriptor.Create(2,
                     FormatDescriptor.Type.NumericBE, FormatDescriptor.SubType.None);
+
+                foreach (KeyValuePair<int, string> kvp in sChipComments) {
+                    project.Comments[offset + kvp.Key] = kvp.Value;
+                }
 
                 sb.AppendFormat(" #{0:D2}: addr=${1:X4} len=${2:X4}",
                     i, chip.mLoadAddr, chip.mImageSize);
