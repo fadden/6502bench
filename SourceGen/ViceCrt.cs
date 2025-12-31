@@ -312,7 +312,8 @@ namespace SourceGen {
                 Chip chip = chips[i];
                 offset = chip.mHdrOffset;
 
-                project.Notes[offset] = new MultiLineComment("CHIP #" + i);
+                project.Notes[offset] =
+                    new MultiLineComment("CHIP #" + i + " $" + chip.mLoadAddr.ToString("X4"));
 
                 project.OperandFormats[offset + 0x00] = FormatDescriptor.Create(4,
                     FormatDescriptor.Type.StringGeneric, FormatDescriptor.SubType.Ascii);
@@ -333,30 +334,35 @@ namespace SourceGen {
 
                 sb.AppendFormat(" #{0:D2}: addr=${1:X4} len=${2:X4}",
                     i, chip.mLoadAddr, chip.mImageSize);
+
+                // Look for CBM80 at +0x04.  If found, do additional formatting.  This is
+                // often present in the first chunk, and occasionally present in later chunks
+                // (see e.g. Action Replay 5 NTSC).
+                offset = chip.mDataOffset;
+                if (RawData.CompareBytes(CBM80, 0, dataBuf, offset + 4, CBM80.Length)) {
+                    // First two words are the addresses of the hard-reset and soft-reset handlers.
+                    project.OperandFormats[offset + 0x00] = FormatDescriptor.Create(2,
+                        FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.Address);
+                    project.OperandFormats[offset + 0x02] = FormatDescriptor.Create(2,
+                        FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.Address);
+                    project.OperandFormats[offset + 0x04] = FormatDescriptor.Create(5,
+                        FormatDescriptor.Type.StringGeneric, FormatDescriptor.SubType.C64Petscii);
+
+                    // If the handler addresses fall within this chunk, tag them as code starts.
+                    TryTagChunkAddr(project, chip, RawData.GetU16LE(dataBuf, offset + 0x00));
+                    TryTagChunkAddr(project, chip, RawData.GetU16LE(dataBuf, offset + 0x02));
+
+                    // The first byte past "CBM80" is sometimes code and sometimes not.
+                    //project.AnalyzerTags[offset + 0x09] = CodeAnalysis.AnalyzerTag.Code;
+
+                    sb.Append(" CBM80");
+                }
+
                 sb.AppendLine();
             }
 
             // Remove the code start tag added by the new-project code.
             project.AnalyzerTags[0] = CodeAnalysis.AnalyzerTag.None;
-
-            // Look for CBM80 in the first chunk.  If found, do additional formatting.
-            offset = chips[0].mDataOffset;
-            if (RawData.CompareBytes(CBM80, 0, dataBuf, offset + 4, CBM80.Length)) {
-                // First two words are the addresses of the hard-reset and soft-reset handlers.
-                project.OperandFormats[offset + 0x00] = FormatDescriptor.Create(2,
-                    FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.Address);
-                project.OperandFormats[offset + 0x02] = FormatDescriptor.Create(2,
-                    FormatDescriptor.Type.NumericLE, FormatDescriptor.SubType.Address);
-                project.OperandFormats[offset + 0x04] = FormatDescriptor.Create(5,
-                    FormatDescriptor.Type.StringGeneric, FormatDescriptor.SubType.C64Petscii);
-
-                // If the handler addresses fall within this chunk, tag them as code starts.
-                TryTagChunkAddr(project, chips[0], RawData.GetU16LE(dataBuf, offset + 0x00));
-                TryTagChunkAddr(project, chips[0], RawData.GetU16LE(dataBuf, offset + 0x02));
-
-                // The first byte past "CBM80" is sometimes code and sometimes not.
-                //project.AnalyzerTags[offset + 0x09] = CodeAnalysis.AnalyzerTag.Code;
-            }
 
             // Replace the project-header comment.
             sb.AppendLine();
