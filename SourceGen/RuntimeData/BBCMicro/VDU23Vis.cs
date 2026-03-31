@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2019 faddenSoft
+ * Based on VisTutorial5.cs by faddenSoft. Copyright 2026 Dermot
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ using System.Collections.ObjectModel;
 
 using PluginCommon;
 
-namespace Tutorial {
+namespace RuntimeData.BBCMicro {
     public class VDU23 : MarshalByRefObject, IPlugin, IPlugin_Visualizer {
         // IPlugin
         public string Identifier {
