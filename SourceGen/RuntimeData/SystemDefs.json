@@ -4,6 +4,22 @@
   "Contents" : "6502bench SourceGen sysdef v1",
   "Defs" : [
     {
+      "Name" : "BBC Micro Machine Operating System 1.20",
+      "GroupName" : "Acorn",
+      "Cpu" : "6502",
+      "Speed" : "2",
+      "Description" : "BBC Micro OS 1.20",
+      "SymbolFiles" : [
+        "RT:BBCMicro/BBC_Micro.sym65"
+      ],
+      "ExtensionScripts" : [
+        "RT:BBCMicro/VDU23Vis.cs"
+      ],
+      "Parameters" : {
+        "load-address":"0x0E00"
+      }
+    },
+    {
       "Name" : "Apple //e",
       "GroupName" : "Apple",
       "Cpu" : "65C02",
@@ -303,7 +319,7 @@
       "Parameters" : {
         "load-address":"0x500"
       }
-    }, 
+    },
     {
       "Name" : "Generic 6502",
       "GroupName" : "Generic",
