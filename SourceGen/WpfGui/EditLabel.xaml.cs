@@ -249,6 +249,7 @@ namespace SourceGen.WpfGui {
             if (isBlank || isValid) {
                 // TODO(maybe): if the problem is that the label starts with a number, we
                 //   shouldn't light up this (which is the "valid chars are" label) as well.
+                // TODO(maybe): it also lights up if the label is too long
                 validCharsLabel.Foreground = mDefaultLabelColor;
             } else {
                 validCharsLabel.Foreground = Brushes.Red;

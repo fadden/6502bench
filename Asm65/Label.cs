@@ -26,7 +26,9 @@ namespace Asm65 {
     /// </summary>
     public static class Label {
         // Arbitrary choice for SourceGen. Different assemblers have different limits.
-        public const int MAX_LABEL_LEN = 32;
+        // The limit is currently hard-coded in the text for the EditLabel and EditDefSymbol
+        // dialogs, and is mentioned in the label definition in intro-details.html.
+        public const int MAX_LABEL_LEN = 64;
 
         public const bool LABELS_CASE_SENSITIVE = true;
 

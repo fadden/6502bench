@@ -1,6 +1,6 @@
 ﻿### 6502bench SourceGen dis65 v1.0 ###
 {
-"_ContentVersion":5,
+"_ContentVersion":7,
 "FileDataLength":25,
 "FileDataCrc32":646072439,
 "ProjectProps":{
@@ -26,7 +26,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Decimal",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"",
 "HasWidth":false,
@@ -43,7 +44,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"short label",
 "HasWidth":false,
@@ -60,7 +62,8 @@
 "Length":1,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"somewhat longer label",
 "HasWidth":false,
@@ -77,12 +80,17 @@
 "Addr":4096,
 "Length":25,
 "PreLabel":"",
+"DisallowInward":false,
+"DisallowOutward":false,
 "IsRelative":false}],
 "TypeHints":[{
 "Low":0,
 "High":0,
 "Hint":"Code"}],
 "StatusFlagOverrides":{
+},
+
+"MiscFlags":{
 },
 
 "Comments":{
@@ -121,6 +129,13 @@
 "Value":4120,
 "Source":"User",
 "Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"6":{
+"Label":"L123456789012345678901234567890123456789012345678901234567890123",
+"Value":4102,
+"Source":"User",
+"Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
@@ -133,7 +148,8 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"local var with short name",
 "HasWidth":true,
@@ -150,13 +166,14 @@
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
-"SymbolRef":null},
+"SymbolRef":null,
+"Extra":null},
 
 "Comment":"local var with longer name",
 "HasWidth":true,
 "Direction":"ReadWrite",
 "MultiMask":null,
-"Label":"PointerWithLongName",
+"Label":"VariableWithExtremelyLongName01234567890123456789012345678901234",
 "Value":2,
 "Source":"Variable",
 "Type":"ExternalAddr",

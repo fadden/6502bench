@@ -23,7 +23,7 @@ limitations under the License.
         xmlns:local="clr-namespace:SourceGen.WpfGui"
         mc:Ignorable="d"
         Title="Edit Label"
-        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        SizeToContent="Height" Width="380" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Loaded="Window_Loaded"
         ContentRendered="Window_ContentRendered">
@@ -47,7 +47,7 @@ limitations under the License.
             <TextBlock Text="{Binding EnterLabelText, FallbackValue=Enter label for $1234:}"/>
             <TextBox Name="labelTextBox" Margin="0,2,0,0" FontFamily="{StaticResource GeneralMonoFont}"
                      Text="{Binding LabelText, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Name="maxLengthLabel" Text="• Must be 2-32 characters long (or blank to remove)"
+            <TextBlock Name="maxLengthLabel" Text="• Must be 2-64 characters long (or blank to remove)"
                        Margin="0,7,0,0"/>
             <TextBlock Name="firstLetterLabel" Text="• Must start with a letter or underscore"/>
             <TextBlock Name="validCharsLabel" Text="• Valid characters are ASCII letters, numbers, and underscore"/>
